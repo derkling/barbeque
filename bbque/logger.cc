@@ -1,5 +1,5 @@
 /**
- *       @file  barbeque.h
+ *       @file  logger.cpp
  *      @brief  
  *
  * Detailed description starts here.
@@ -7,7 +7,7 @@
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
  *   @internal
- *     Created  01/11/2011
+ *     Created  01/14/2011
  *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
  *    Compiler  gcc/g++
  *     Company  Politecnico di Milano
@@ -18,14 +18,33 @@
  * =====================================================================================
  */
 
-#ifndef BBQUE_BARBEQUE_H_
-#define BBQUE_BARBEQUE_H_
+#include "bbque/logger.h"
 
-#include <cstdlib>
-#include <iostream>
+#include <memory>
 
-#include "bbque/config.h"
-#include "bbque/version.h"
+#include "bbque/logger_log4cpp.h"
 
-#endif // BBQUE_BARBEQUE_H_
+
+namespace bbque {
+
+Logger::Logger(std::string const & name) :
+	log_name(name)
+{
+
+}
+
+std::unique_ptr<Logger> Logger::GetInstance(std::string const & name)
+{
+
+#ifdef BBQUE_HAVE_LOG4CPP
+	std::unique_ptr<Logger> l(new Log4CppLogger(name));
+#else
+#error TODO: Missing ConsoleLogger implementation
+	std::unique_ptr<Logger> l(new ConsoleLogger(name));
+#endif
+
+	return l;
+}
+
+} // namespace bbque
 

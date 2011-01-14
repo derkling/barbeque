@@ -18,8 +18,8 @@
  * =====================================================================================
  */
 
-#ifndef BBQUE_VERSION_H
-#define BBQUE_VERSION_H
+#ifndef BBQUE_VERSION_H_
+#define BBQUE_VERSION_H_
 
 extern "C" {
 
@@ -27,5 +27,5 @@ extern const char *g_git_version;
 
 }
 
-#endif
+#endif // BBQUE_VERSION_H_
 

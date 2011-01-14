@@ -1,13 +1,14 @@
 /**
- *       @file  version.cpp
- *      @brief  Source version token
+ *       @file  object.cpp
+ *      @brief  The basic class for all Barbeque RTRM components
  *
- * This provides the source code version token useful for release versioning.
+ * This implements the basic class providing common supports for all Barbeque
+ * components. The object class defines loging and modules name.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
  *   @internal
- *     Created  01/13/2011
+ *     Created  01/11/2011
  *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
  *    Compiler  gcc/g++
  *     Company  Politecnico di Milano
@@ -18,6 +19,20 @@
  * =====================================================================================
  */
 
-#define GIT_SHA1 "@GIT_SHA1@"
-const char *g_git_version = GIT_SHA1;
+#include "bbque/object.h"
+
+namespace bbque {
+
+Object::Object(std::string const & name_) :
+	name("bq."+name_)
+{
+	logger = move(Logger::GetInstance(name));
+}
+
+Object::~Object()
+{
+
+}
+
+} // namespace bbque
 
