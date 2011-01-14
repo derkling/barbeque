@@ -48,7 +48,7 @@ private:
 	/**
 	 * 
 	 */
-	mutable std::unique_ptr<std::stringstream> str_stream;
+	mutable std::shared_ptr<std::stringstream> str_stream;
 
 	/**
 	 * 
@@ -66,10 +66,9 @@ public:
 		std::runtime_error(""),
 		file_name(file),
 		line_number(line),
-		str_stream(std::unique_ptr<std::stringstream> (
+		str_stream(std::shared_ptr<std::stringstream> (
 			new std::stringstream()))
 	{
-
 	}
 
 	/**

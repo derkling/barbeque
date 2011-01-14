@@ -27,17 +27,31 @@
 #include "bbque/logger.h"
 #include "bbque/exception.h"
 
-#define THROW throw bbque::exception(__FILE__, __LINE__)
+#define THROW throw bbque::Exception(__FILE__, __LINE__)
 
 #define CHECK(condition) if (!(condition)) \
-	THROW << "CHECK FAILED: '" << #condition << "'"
+	THROW << "CHECK FAILED in " << __func__ << " @ " \
+		<< __FILE__ << ":" << __LINE__ << "\n" \
+		<< "  cond():  " << #condition << "\n"
 
 #ifdef BBQUE_DEBUG
-
 # define ASSERT(condition) if (!(condition)) \
-	THROW << "ASSERT FAILED: '" << #condition << "'"
+	THROW << "ASSERT FAILED in " << __func__ << " @ " \
+		<< __FILE__ << ":" << __LINE__ << "\n" \
+		<< "  cond():  " << #condition << "\n"
 #else
 # define ASSERT(condition) {}
+#endif // BBQUE_DEBUG
+
+#ifdef BBQUE_DEBUG
+/**
+ * Debugging support
+ */
+# define DEBUG(fmt, ...) \
+	logger->Debug("%s@%s:%d - " fmt, \
+			__func__, __FILE__, __LINE__, ## __VA_ARGS__)
+#else
+# define DEBUG(fmt, ...) do {} while (0)
 #endif // BBQUE_DEBUG
 
 namespace bbque {

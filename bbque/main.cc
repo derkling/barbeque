@@ -32,8 +32,10 @@ class Test : public Object {
 public:
 	Test() : Object("Test") {}
 	void sayHello() {
+		//int i=0;
 		std::cout << "Hello" << std::endl;
-		logger->Debug("Hello Object class");
+		ASSERT(logger!=0);
+		DEBUG("Hello Object class");
 		logger->Info("This is an info note: %s", "OK");
 	}
 };

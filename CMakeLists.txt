@@ -18,16 +18,27 @@ include_directories (
 	${PROJECT_SOURCE_DIR}/include
 )
 
+# Select default release version
+if (NOT CMAKE_BUILD_TYPE)
+	set (CMAKE_BUILD_TYPE Release CACHE STRING
+		"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
+		FORCE)
+endif (NOT CMAKE_BUILD_TYPE)
+
 # Configure the building options for each release
 # Common
 set (CMAKE_CXX_FLAGS "-Wall")
 # DEBUGGING
 set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic")
-set (BBQUE_DEBUG ON)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (BBQUE_DEBUG ON)
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 # DESKTOP RELEASE
 set (CMAKE_CXX_FLAGS_RELEASE "-O3")
 # EMBEDDED RELEASE
 set (CMAKE_CXX_FLAGS_MINSIZEREL "-Os")
+
+
 
 # Defines documentation files
 set (DOC_FILES
