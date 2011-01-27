@@ -40,7 +40,7 @@
 		<< __FILE__ << ":" << __LINE__ << "\n" \
 		<< "  cond():  " << #condition << "\n"
 #else
-# define ASSERT(condition) {}
+# define ASSERT(condition) do {} while(0)
 #endif // BBQUE_DEBUG
 
 #ifdef BBQUE_DEBUG

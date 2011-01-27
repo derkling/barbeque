@@ -10,7 +10,7 @@ configure_file (
 
 
 
-find_package(Boost 1.40.0 REQUIRED program_options)
+find_package(Boost 1.40.0 REQUIRED system program_options filesystem)
 find_package(Log4CPP)
 
 # Remove Log4CPP dependencies (if not available)
@@ -38,7 +38,7 @@ link_directories(
 )
 
 # Add "barbeque" specific flags
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x -ldl")
 
 # Generate configuration file
 configure_file (
@@ -48,6 +48,7 @@ configure_file (
 
 # Add "barbeque" target binary
 set (BARBEQUE_SRC main version object logger ${LOGGER_INSTANCE})
+set (BARBEQUE_SRC dynamic_library plugin_manager ${BARBEQUE_SRC})
 add_executable (barbeque ${BARBEQUE_SRC})
 
 # Linking dependencies

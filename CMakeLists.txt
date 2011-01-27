@@ -32,6 +32,7 @@ set (CMAKE_CXX_FLAGS "-Wall")
 set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (BBQUE_DEBUG ON)
+	message ("-- Build type: DEBUG")
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 # DESKTOP RELEASE
 set (CMAKE_CXX_FLAGS_RELEASE "-O3")

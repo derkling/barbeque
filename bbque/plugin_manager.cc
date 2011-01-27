@@ -1,0 +1,309 @@
+/**
+ *       @file  plugin_manager.cc
+ *      @brief  The Barbeque RTRM Plugin Manager
+ *
+ * This provides the definition of the Puligin Manager for the Barbeque RTRM.
+ *
+ *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *
+ *   @internal
+ *     Created  01/27/2011
+ *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
+ *    Compiler  gcc/g++
+ *     Company  Politecnico di Milano
+ *   Copyright  Copyright (c) 2011, Patrick Bellasi
+ *
+ * This source code is released for free distribution under the terms of the
+ * GNU General Public License as published by the Free Software Foundation.
+ * =====================================================================================
+ */
+
+#include "bbque/plugin_manager.h"
+
+#include <boost/filesystem.hpp>
+#include <memory>
+#include <string>
+
+#include "bbque/dynamic_library.h"
+#include "bbque/plugins/object_adapter.h"
+
+namespace fs = boost::filesystem;
+
+namespace bbque { namespace plugins {
+
+static std::string dl_ext("so");
+
+PluginManager::PluginManager() :
+	in_initialize_plugin(false) {
+
+	// Setup platform services data
+	platform_services.version.major = 1;
+	platform_services.version.minor = 0;
+
+	// can be populated during loadAll()
+	platform_services.invoke_service = NULL;
+	platform_services.register_object = RegisterObject;
+
+}
+
+PluginManager::~PluginManager() {
+	// Just in case it wasn't called earlier, here we ensure that all plugins
+	// release methods have been called thus properly releasing all resources.
+	Shutdown();
+}
+
+PluginManager & PluginManager::GetInstance() {
+  static PluginManager instance;
+
+  return instance;
+}
+
+/**
+ * @brief   Check plugins data initialization
+ *
+ * The registration params may be received from an external plugin so it is
+ * crucial to validate it, because it was never subjected to our tests.
+ *
+ * @param   objectType the pointer to the plugins object type string
+ * @param	params the plugins data
+ * @return  true if data is correctly initialized, false otherwise
+ */
+static bool isValid(const char * objectType, const PF_RegisterParams * params) {
+	if (!objectType || !(*objectType))
+		return false;
+	if (!params ||!params->create_func || !params->destroy_func)
+		return false;
+
+	return true;
+}
+
+int32_t PluginManager::RegisterObject(const char * objectType, const PF_RegisterParams * params) {
+
+	// Check parameters
+	if (!isValid(objectType, params))
+		return -1;
+
+	PluginManager & pm = PluginManager::GetInstance();
+
+	// Verify that versions match
+	PF_PluginAPIVersion v = pm.platform_services.version;
+	if (v.major != params->version.major)
+		return -1;
+
+	std::string key((const char *)objectType);
+	if (key == std::string("*")) {
+		// If it's a wild card registration just add it
+		pm.wild_card_vec.push_back(*params);
+		return 0;
+	}
+
+	if (pm.exact_match_map.find(key) != pm.exact_match_map.end()) {
+		// item already exists in exact_match_map fail (only one can handle)
+		return -1;
+	}
+
+	pm.exact_match_map[key] = *params;
+	return 0;
+}
+
+int32_t PluginManager::LoadAll(const std::string & pluginDir, PF_InvokeServiceFunc func) {
+	fs::path plugins_dir(pluginDir);
+
+	if (pluginDir.empty()) {
+		// The path is empty
+		return -1;
+	}
+
+	platform_services.invoke_service = func;
+
+
+	if (!fs::exists(plugins_dir) || !fs::is_directory(plugins_dir))
+		return -1;
+
+	fs::directory_iterator it(plugins_dir);
+	fs::directory_iterator end; // default construction yields past-the-end
+	for ( ; it != end; ++it ) {
+
+		if ( is_directory(it->status()) ) {
+			// Skip sub-directories
+			continue;
+		}
+
+		std::string ext = fs::extension(it->path());
+		if ( ext != dl_ext ) {
+			// Skip files with the wrong extension
+			continue;
+		}
+
+		// Ignore return value (int32_t res)
+		LoadByPath(it->path().string());
+	}
+
+	return 0;
+}
+
+int32_t PluginManager::InitializePlugin(PF_InitFunc initFunc) {
+	PluginManager & pm = PluginManager::GetInstance();
+
+	PF_ExitFunc exitFunc = initFunc(&pm.platform_services);
+	if (!exitFunc)
+		return -1;
+
+	// Store the exit func so it can be called when unloading this plugin
+	pm.exit_func_vec.push_back(exitFunc);
+	return 0;
+}
+
+int32_t PluginManager::Shutdown() {
+	int32_t result = 0;
+
+	for (ExitFuncVec::iterator func = exit_func_vec.begin();
+			func != exit_func_vec.end(); ++func) {
+		try {
+			result = (*func)();
+		} catch (...) {
+			// TODO: check error, we should go on with the remaining plugins!?!
+			result = -1;
+		}
+	}
+
+	dl_map.clear();
+	exact_match_map.clear();
+	wild_card_vec.clear();
+	exit_func_vec.clear();
+
+	return result;
+}
+
+int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
+	fs::path path(pluginPath);
+
+	// Resolve symbolic links
+	if (fs::is_symlink(path)) {
+
+		// loop 'til buffer large enough
+		for (long path_max = 64; ; path_max*=2) {
+			ssize_t result;
+			std::unique_ptr<char> buf(new char[static_cast<std::size_t>(path_max)]);
+
+			result = ::readlink(path.string().c_str(), buf.get(),
+					static_cast<std::size_t>(path_max));
+			if (result == -1 ) {
+				return errno;
+			}
+			if(result == path_max)
+				continue;
+
+			path = fs::path(buf.get());
+			break;
+		}
+	}
+
+	// Don't load the same dynamic library twice
+	if (dl_map.find(path.string()) != dl_map.end())
+		return -1;
+
+	std::string errorString;
+	DynamicLibrary * dl = LoadLibrary(fs::system_complete(path).string(),
+					errorString);
+	if (!dl) {
+		// not a dynamic library
+		return -1;
+	}
+
+	// Get the NTA_initPlugin() function
+	PF_InitFunc initFunc = (PF_InitFunc)(dl->GetSymbol("PF_initPlugin"));
+	if (!initFunc) {
+		// missing dynamic library entry point
+		return -1;
+	}
+
+	int32_t res = InitializePlugin(initFunc);
+	if (res < 0) {
+		// initialization failed
+		return res;
+	}
+
+	return 0;
+}
+
+void * PluginManager::CreateObject(const std::string & object_type, ObjectAdapterIF & adapter) {
+	// "*" is not a valid object type
+	if (object_type == std::string("*"))
+		return NULL;
+
+	// Prepare object params
+	PF_ObjectParams op;
+	op.object_type = (const char *)object_type.c_str();
+	op.platform_services = &platform_services;
+
+	if (exact_match_map.find(object_type) != exact_match_map.end()) {
+
+		// Exact match found
+		PF_RegisterParams & rp = exact_match_map[object_type];
+		void * object = rp.create_func(&op);
+		if (object) {
+			// Great, there is an exact match
+			// Adapt if necessary (wrap C objects using an adapter)
+			if (rp.programming_language == PF_LANG_C)
+				object = adapter.adapt(object, rp.destroy_func);
+
+			return object;
+		}
+	}
+
+	// Try to find a wild card match
+	for (size_t i = 0; i < wild_card_vec.size(); ++i) {
+
+		PF_RegisterParams & rp = wild_card_vec[i];
+		void * object = rp.create_func(&op);
+		if (!object)
+			continue;
+
+		// Great, match found!
+
+		// Adapt if necessary (wrap C objects using an adapter)
+		if (rp.programming_language == PF_LANG_C) {
+			object = adapter.adapt(object, rp.destroy_func);
+
+			// promote registration to exact_matc
+			// (but keep also the wild card registration for other object types)
+			int32_t res = RegisterObject(op.object_type, &rp);
+			if (res < 0) {
+				// TODO: we should report or log it
+				rp.destroy_func(object);
+				return NULL;
+			}
+
+			return object;
+		}
+	}
+
+	// Too bad no one can create this object_type
+	return NULL;
+}
+
+DynamicLibrary * PluginManager::LoadLibrary(const std::string & path, std::string & errorString) {
+	DynamicLibrary * dl = DynamicLibrary::Load(path, errorString);
+	if (!dl) {
+		// not a dynamic library?
+		return NULL;
+	}
+
+	// Add library to map, so it can be unloaded
+	dl_map[path] = std::shared_ptr<DynamicLibrary>(dl);
+	return dl;
+}
+
+const PluginManager::RegistrationMap & PluginManager::GetRegistrationMap() {
+	return exact_match_map;
+}
+
+PF_PlatformServices & PluginManager::GetPlatformServices() {
+	return platform_services;
+}
+
+} // namespace plugins
+
+} // namespace bbque
+
