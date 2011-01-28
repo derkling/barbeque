@@ -1,0 +1,13 @@
+# Source this file to start building
+
+[ -d build/Debug && -d build/Release ] || mkdir -p build/{Debug,Release}
+
+cd build/Debug && CXX=g++-4.5 cmake -DCMAKE_BUILD_TYPE=Debug ../..
+cd -
+
+cd build/Release && CXX=g++-4.5 cmake  -DCMAKE_BUILD_TYPE=Release ../..
+cd -
+
+cd build/Debug
+echo -e "\n\n\033[1;33mUse '\033[32mmake VERBOSE=1\033[1;33m' to see detailed compilation log\033[0m\n\n"
+
