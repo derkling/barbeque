@@ -23,15 +23,17 @@
 
 #include "static_test_plugin.h"
 #include "static_test_object.h"
-#include <bbque/plugins/static_plugin.h>
+#include "bbque/plugins/static_plugin.h"
 
 namespace bp = bbque::plugins;
 
-extern "C" int32_t StaticPlugin_TestingObject_ExitFunc() {
+//extern "C"
+int32_t StaticPlugin_TestingObject_ExitFunc() {
   return 0;
 }
 
-extern "C" PF_ExitFunc StaticPlugin_TestingObject_InitPlugin(const PF_PlatformServices * params) {
+//extern "C"
+PF_ExitFunc StaticPlugin_TestingObject_InitPlugin(const PF_PlatformServices * params) {
   int res = 0;
 
   PF_RegisterParams rp;
@@ -49,5 +51,5 @@ extern "C" PF_ExitFunc StaticPlugin_TestingObject_InitPlugin(const PF_PlatformSe
   return StaticPlugin_TestingObject_ExitFunc;
 }
 
-bp::StaticPlugin StaticPlugin_TestingObject(StaticPlugin_TestingObject_InitPlugin);
+static bp::StaticPlugin StaticPlugin_TestingObject(StaticPlugin_TestingObject_InitPlugin);
 

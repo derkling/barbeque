@@ -23,6 +23,7 @@
 #include <log4cpp/Category.hh>
 #include <log4cpp/PropertyConfigurator.hh>
 
+#include "bbque/plugin_manager.h"
 
 // Testing Object Class
 #include "bbque/object.h"
@@ -64,7 +65,8 @@ int main(int argc, char *argv[])
 	bbque::Test t;
 	t.sayHello();
 
-
+	// Initialize the plugin manager
+	bbque::plugins::PluginManager & pm = bbque::plugins::PluginManager::GetInstance();
 
 	return EXIT_SUCCESS;
 }

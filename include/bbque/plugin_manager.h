@@ -27,6 +27,7 @@
 #include <vector>
 #include <map>
 
+#include "bbque/object.h"
 #include "bbque/plugins/plugin.h"
 
 namespace bbque { namespace plugins {
@@ -34,7 +35,7 @@ namespace bbque { namespace plugins {
 class DynamicLibrary;
 struct ObjectAdapterIF;
 
-class PluginManager {
+class PluginManager : public ::bbque::Object {
 
 	typedef std::map<std::string, std::shared_ptr<DynamicLibrary>> DynamicLibraryMap;
 

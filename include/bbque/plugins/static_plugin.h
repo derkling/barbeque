@@ -37,6 +37,7 @@ class StaticPlugin {
 public:
   StaticPlugin(PF_InitFunc initFunc) {
     PluginManager::InitializePlugin(initFunc);
+std::cout << "Built new static plugin" << std::endl;
   }
 };
 
