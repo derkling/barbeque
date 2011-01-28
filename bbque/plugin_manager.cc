@@ -41,8 +41,8 @@ PluginManager::PluginManager() :
 	platform_services.version.minor = 0;
 
 	// can be populated during loadAll()
-	platform_services.invoke_service = NULL;
-	platform_services.register_object = RegisterObject;
+	platform_services.InvokeService = NULL;
+	platform_services.RegisterObject = RegisterObject;
 
 }
 
@@ -71,7 +71,7 @@ PluginManager & PluginManager::GetInstance() {
 static bool isValid(const char * objectType, const PF_RegisterParams * params) {
 	if (!objectType || !(*objectType))
 		return false;
-	if (!params ||!params->create_func || !params->destroy_func)
+	if (!params ||!params->CreateFunc || !params->DestroyFunc)
 		return false;
 
 	return true;
@@ -114,7 +114,7 @@ int32_t PluginManager::LoadAll(const std::string & pluginDir, PF_InvokeServiceFu
 		return -1;
 	}
 
-	platform_services.invoke_service = func;
+	platform_services.InvokeService = func;
 
 
 	if (!fs::exists(plugins_dir) || !fs::is_directory(plugins_dir))
@@ -241,12 +241,12 @@ void * PluginManager::CreateObject(const std::string & object_type, ObjectAdapte
 
 		// Exact match found
 		PF_RegisterParams & rp = exact_match_map[object_type];
-		void * object = rp.create_func(&op);
+		void * object = rp.CreateFunc(&op);
 		if (object) {
 			// Great, there is an exact match
 			// Adapt if necessary (wrap C objects using an adapter)
 			if (rp.programming_language == PF_LANG_C)
-				object = adapter.adapt(object, rp.destroy_func);
+				object = adapter.adapt(object, rp.DestroyFunc);
 
 			return object;
 		}
@@ -256,7 +256,7 @@ void * PluginManager::CreateObject(const std::string & object_type, ObjectAdapte
 	for (size_t i = 0; i < wild_card_vec.size(); ++i) {
 
 		PF_RegisterParams & rp = wild_card_vec[i];
-		void * object = rp.create_func(&op);
+		void * object = rp.CreateFunc(&op);
 		if (!object)
 			continue;
 
@@ -264,14 +264,14 @@ void * PluginManager::CreateObject(const std::string & object_type, ObjectAdapte
 
 		// Adapt if necessary (wrap C objects using an adapter)
 		if (rp.programming_language == PF_LANG_C) {
-			object = adapter.adapt(object, rp.destroy_func);
+			object = adapter.adapt(object, rp.DestroyFunc);
 
 			// promote registration to exact_matc
 			// (but keep also the wild card registration for other object types)
 			int32_t res = RegisterObject(op.object_type, &rp);
 			if (res < 0) {
 				// TODO: we should report or log it
-				rp.destroy_func(object);
+				rp.DestroyFunc(object);
 				return NULL;
 			}
 

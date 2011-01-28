@@ -48,9 +48,9 @@ typedef int32_t (*PF_DestroyFunc)(void *);
 
 typedef struct PF_RegisterParams {
 	PF_PluginAPIVersion version;
-	PF_CreateFunc create_func;
-	PF_DestroyFunc destroy_func;
 	PF_ProgrammingLanguage programming_language;
+	PF_CreateFunc CreateFunc;
+	PF_DestroyFunc DestroyFunc;
 } PF_RegisterParams;
 
 typedef int32_t (*PF_RegisterFunc)(const char * node_type,
@@ -61,8 +61,8 @@ typedef int32_t (*PF_InvokeServiceFunc)(const char * service_name,
 
 typedef struct PF_PlatformServices {
 	PF_PluginAPIVersion version;
-	PF_RegisterFunc register_object;
-	PF_InvokeServiceFunc invoke_service;
+	PF_RegisterFunc RegisterObject;
+	PF_InvokeServiceFunc InvokeService;
 } PF_PlatformServices;
 
 typedef int32_t (*PF_ExitFunc)();
