@@ -58,3 +58,9 @@ target_link_libraries(
 	${Boost_LIBRARIES}
 )
 
+# Linking static plugins
+target_link_libraries(
+	barbeque
+	plugin_testingobject
+)
+
