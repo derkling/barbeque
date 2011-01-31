@@ -65,9 +65,6 @@ int main(int argc, char *argv[])
 	bbque::Test t;
 	t.sayHello();
 
-	// Initialize the plugin manager
-	bbque::plugins::PluginManager & pm = bbque::plugins::PluginManager::GetInstance();
-
 	return EXIT_SUCCESS;
 }
 

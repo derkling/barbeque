@@ -61,6 +61,6 @@ target_link_libraries(
 # Linking static plugins
 target_link_libraries(
 	barbeque
-	plugin_testingobject
+	-Wl,-whole-archive plugin_testingobject -Wl,-no-whole-archive
 )
 

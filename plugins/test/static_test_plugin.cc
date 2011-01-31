@@ -49,7 +49,9 @@ PF_ExitFunc StaticPlugin_TestingObject_InitPlugin(const PF_PlatformServices * pa
     return NULL;
 
   return StaticPlugin_TestingObject_ExitFunc;
+
 }
 
-static bp::StaticPlugin StaticPlugin_TestingObject(StaticPlugin_TestingObject_InitPlugin);
+bp::StaticPlugin
+StaticPlugin_TestingObject(StaticPlugin_TestingObject_InitPlugin);
 
