@@ -23,7 +23,7 @@
 #define BBQUE_PLUGINS_TESTING_H_
 
 // The object model to implement
-#include "bbque/plugins/testing.h"
+#include "bbque/modules.h"
 
 #include <cstdint>
 
@@ -33,10 +33,10 @@ struct PF_ObjectParams;
 namespace bbque { namespace plugins {
 
 /**
- * @class TestingObject
+ * @class DummyModule
  * @brief A simple object registered as a static C++ plugin.
  */
-class TestingObject : public TestingObjectIF {
+class DummyModule : public TestModuleIF {
 
 public:
 
@@ -56,9 +56,9 @@ public:
 	 */
 	static int32_t Destroy(void *);
 
-	~TestingObject();
+	~DummyModule();
 
-//----- testing plugin interface
+//----- dummy module interface
 
 	virtual void Test();
 
@@ -66,11 +66,12 @@ private:
 
 	/**
 	 * @brief   The plugins constructor
-	 * Plugins objects could be build only by using the "create" method. Usually the PluginManager acts as object
+	 * Plugins objects could be build only by using the "create" method.
+	 * Usually the PluginManager acts as object
 	 * @param   
 	 * @return  
 	 */
-	TestingObject();
+	DummyModule();
 
 };
 

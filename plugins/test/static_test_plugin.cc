@@ -27,13 +27,13 @@
 
 namespace bp = bbque::plugins;
 
-//extern "C"
-int32_t StaticPlugin_TestingObject_ExitFunc() {
+extern "C"
+int32_t StaticPlugin_DummyModule_ExitFunc() {
   return 0;
 }
 
-//extern "C"
-PF_ExitFunc StaticPlugin_TestingObject_InitPlugin(const PF_PlatformServices * params) {
+extern "C"
+PF_ExitFunc StaticPlugin_DummyModule_InitPlugin(const PF_PlatformServices * params) {
   int res = 0;
 
   PF_RegisterParams rp;
@@ -41,17 +41,17 @@ PF_ExitFunc StaticPlugin_TestingObject_InitPlugin(const PF_PlatformServices * pa
   rp.version.minor = 0;
   rp.programming_language = PF_LANG_CPP;
 
-  // Regiater TestingObject
-  rp.CreateFunc = bp::TestingObject::Create;
-  rp.DestroyFunc = bp::TestingObject::Destroy;
-  res = params->RegisterObject((const char *)"TestingObject", &rp);
+  // Registering DummyModule
+  rp.CreateFunc = bp::DummyModule::Create;
+  rp.DestroyFunc = bp::DummyModule::Destroy;
+  res = params->RegisterObject((const char *)"DummyModule", &rp);
   if (res < 0)
     return NULL;
 
-  return StaticPlugin_TestingObject_ExitFunc;
+  return StaticPlugin_DummyModule_ExitFunc;
 
 }
 
 bp::StaticPlugin
-StaticPlugin_TestingObject(StaticPlugin_TestingObject_InitPlugin);
+StaticPlugin_DummyModule(StaticPlugin_DummyModule_InitPlugin);
 

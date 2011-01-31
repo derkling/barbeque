@@ -23,37 +23,36 @@
 
 #include "static_test_object.h"
 
+#include <iostream>
+
 namespace bbque { namespace plugins {
 
-TestingObject::TestingObject() {
+DummyModule::DummyModule() {
 
 }
 
-TestingObject::~TestingObject() {
+DummyModule::~DummyModule() {
 
 }
 
-//----- testing plugin interface
+//----- dummy module interface
 
-void TestingObject::Test(void) {
-
+void DummyModule::Test(void) {
+	std::cout << "This is just a (working) Dummy Module" << std::endl;
 }
 
 //----- static plugin interface
 
-void * TestingObject::Create(PF_ObjectParams *) {
-  return new TestingObject();
+void * DummyModule::Create(PF_ObjectParams *) {
+  return new DummyModule();
 }
 
-int32_t TestingObject::Destroy(void * plugin) {
+int32_t DummyModule::Destroy(void * plugin) {
   if (!plugin)
     return -1;
-  delete (TestingObject *)plugin;
+  delete (DummyModule *)plugin;
   return 0;
 }
-
-
-
 
 } // namesapce plugins
 

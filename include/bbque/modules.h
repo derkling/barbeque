@@ -1,8 +1,10 @@
 /**
- *       @file  testing.h
- *      @brief  
+ *       @file  modules.h
+ *      @brief  The object model for each barbque plugin.
  *
- * Detailed description starts here.
+ * This defines the interface of all barbque plugin, which identify the object
+ * model of the tool. Each such defined module could be defined as a plugin,
+ * either statically linked or dynamically loaded.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
@@ -18,18 +20,22 @@
  * =====================================================================================
  */
 
-#ifndef BBQUE_TESTING_OBJECT_H_
-#define BBQUE_TESTING_OBJECT_H_
+#ifndef BBQUE_MODULES_H_
+#define BBQUE_MODULES_H_
 
-namespace bbque { namespace plugins {
+namespace bbque {
 
-class TestingObjectIF {
+/**
+ * @class TestModuleIF
+ * @brief A module to support testing of other components implementation.
+ */
+class TestModuleIF {
 	virtual void Test() = 0;
 };
 
-} // namespace plugins
+
 
 } // namespace bbque
 
-#endif // BBQUE_TESTING_OBJECT_H_
+#endif // BBQUE_MODULES_H_
 
