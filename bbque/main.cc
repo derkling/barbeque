@@ -24,36 +24,38 @@
 #include <log4cpp/PropertyConfigurator.hh>
 
 #include "bbque/plugin_manager.h"
+namespace bp = bbque::plugins;
 
-// Testing Object Class
-#include "bbque/object.h"
+#include "bbque/platform_services.h"
+namespace bs = bbque;
 
-namespace bbque {
-class Test : public Object {
-public:
-	Test() : Object("Test") {}
-	void sayHello() {
-		//int i=0;
-		std::cout << "Hello" << std::endl;
-		DEBUG("Hello Object class");
-		logger->Info("This is an info note: %s", "OK");
-	}
-};
-}
+#include "bbque/resource_manager.h"
+namespace bb = bbque;
 
 // Logger configuration
 bool g_log_colored = true;
 log4cpp::Category & logger = log4cpp::Category::getInstance("bq");
 std::string g_log_configuration = "/tmp/bbque.conf";
 
-int main(int argc, char *argv[])
-{
-	std::cout << "\t\t.:: Barbeque RTRM (ver. " << g_git_version << ") ::." << std::endl;
+int main(int argc, char *argv[]) {
+
+	// Command line parsing
+
+
+	// Welcome screen
+	std::cout << "\t\t.:: Barbeque RTRM (ver. " << g_git_version << ") ::."
+				<< std::endl;
 	std::cout << "Built: " << __DATE__ << " " << __TIME__ << std::endl;
 
-	// Logger initialization
+
+	// Initialization
+	bp::PluginManager & pm = bp::PluginManager::GetInstance();
+	pm.GetPlatformServices().InvokeService =
+		bs::PlatformServices::ServiceDispatcher;
+
 	try {
-		std::cout << "Using logger configuration: " << g_log_configuration << std::endl;
+		std::cout << "Using logger configuration: " << g_log_configuration
+					<< std::endl;
 		log4cpp::PropertyConfigurator::configure(g_log_configuration);
 	} catch(log4cpp::ConfigureFailure& f) {
 		std::cout << "Logger configuration failed: " << f.what() << std::endl;
@@ -62,9 +64,18 @@ int main(int argc, char *argv[])
 	logger.debug("Logger correctly initialized");
 	logger.setPriority(log4cpp::Priority::INFO);
 
-	bbque::Test t;
-	t.sayHello();
+
+	// Plugins loading
+
+
+	// Let's start baking applications...
+	bb::ResourceManager::GetInstance().Go();
+
+
+	// Cleaning-up the grill
+
 
 	return EXIT_SUCCESS;
+
 }
 
