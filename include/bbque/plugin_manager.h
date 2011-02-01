@@ -35,7 +35,7 @@ namespace bbque { namespace plugins {
 class DynamicLibrary;
 struct ObjectAdapterIF;
 
-class PluginManager : public ::bbque::Object {
+class PluginManager : public Object {
 
 	typedef std::map<std::string, std::shared_ptr<DynamicLibrary>> DynamicLibraryMap;
 

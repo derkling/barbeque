@@ -22,6 +22,7 @@
 #include "bbque/resource_manager.h"
 
 #include "bbque/plugin_manager.h"
+#include "bbque/modules_factory.h"
 
 namespace bp = bbque::plugins;
 
@@ -54,6 +55,13 @@ void ResourceManager::Go() {
 //		std::string m = *i;
 //		std::cout << m.c_str() << std::endl;
 //	}
+
+
+
+	//---------- JustForTest
+	// Build a TestModule
+	TestModuleIF * tm = ModulesFactory::GetTestModule("DummyModule");
+	tm->Test();
 
 	while (!done) {
 		ControlLoop();

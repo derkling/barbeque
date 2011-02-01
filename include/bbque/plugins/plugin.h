@@ -21,6 +21,8 @@
 #ifndef BBQUE_PLUGIN_H_
 #define BBQUE_PLUGIN_H_
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

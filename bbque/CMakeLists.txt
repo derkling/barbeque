@@ -49,7 +49,7 @@ configure_file (
 # Add "barbeque" target binary
 set (BARBEQUE_SRC main version object logger ${LOGGER_INSTANCE})
 set (BARBEQUE_SRC resource_manager platform_services ${BARBEQUE_SRC})
-set (BARBEQUE_SRC dynamic_library plugin_manager ${BARBEQUE_SRC})
+set (BARBEQUE_SRC dynamic_library plugin_manager modules_factory ${BARBEQUE_SRC})
 add_executable (barbeque ${BARBEQUE_SRC})
 
 # Linking dependencies

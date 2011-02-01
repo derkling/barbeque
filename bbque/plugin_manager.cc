@@ -34,7 +34,7 @@ namespace bbque { namespace plugins {
 static std::string dl_ext("so");
 
 PluginManager::PluginManager() :
-	Object("PluginManager"),
+	Object("pm"),
 	in_initialize_plugin(false) {
 
 	// Setup platform services data
@@ -231,7 +231,8 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	return 0;
 }
 
-void * PluginManager::CreateObject(const std::string & object_type, ObjectAdapterIF & adapter) {
+void * PluginManager::CreateObject(const std::string & object_type,
+		ObjectAdapterIF & adapter) {
 	// "*" is not a valid object type
 	if (object_type == std::string("*"))
 		return NULL;
