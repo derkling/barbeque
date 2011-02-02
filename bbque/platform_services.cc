@@ -24,7 +24,7 @@
 namespace bbque {
 
 int32_t PlatformServices::ServiceDispatcher(const char * service_name,
-		  							void * service_params) {
+		void * service_params) {
 	return 0;
 }
 
