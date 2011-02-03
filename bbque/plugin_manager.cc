@@ -34,7 +34,6 @@ namespace bbque { namespace plugins {
 static std::string dl_ext("so");
 
 PluginManager::PluginManager() :
-	Object("pm"),
 	in_initialize_plugin(false) {
 
 	// Setup platform services data
@@ -45,8 +44,7 @@ PluginManager::PluginManager() :
 	platform_services.InvokeService = NULL;
 	platform_services.RegisterObject = RegisterObject;
 
-	logger->Info("Started");
-std::cout << "Build new instance of PluginManager" << std::endl;
+	std::cout << "Build new instance of PluginManager" << std::endl;
 
 }
 

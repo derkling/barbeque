@@ -32,11 +32,6 @@ namespace bs = bbque;
 #include "bbque/resource_manager.h"
 namespace bb = bbque;
 
-// Logger configuration
-bool g_log_colored = true;
-log4cpp::Category & logger = log4cpp::Category::getInstance("bq");
-std::string g_log_configuration = "/tmp/bbque.conf";
-
 int main(int argc, char *argv[]) {
 
 	// Command line parsing
@@ -52,18 +47,6 @@ int main(int argc, char *argv[]) {
 	bp::PluginManager & pm = bp::PluginManager::GetInstance();
 	pm.GetPlatformServices().InvokeService =
 		bs::PlatformServices::ServiceDispatcher;
-
-	try {
-		std::cout << "Using logger configuration: " << g_log_configuration
-					<< std::endl;
-		log4cpp::PropertyConfigurator::configure(g_log_configuration);
-	} catch(log4cpp::ConfigureFailure& f) {
-		std::cout << "Logger configuration failed: " << f.what() << std::endl;
-		return EXIT_FAILURE;
-	}
-	logger.debug("Logger correctly initialized");
-	logger.setPriority(log4cpp::Priority::INFO);
-
 
 	// Plugins loading
 

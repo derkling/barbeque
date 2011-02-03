@@ -18,35 +18,36 @@
  * ============================================================================
  */
 
-#ifndef BBQUE_TEST_MODULE_ADAPTER_H_
-#define BBQUE_TEST_MODULE_ADAPTER_H_
+#ifndef BBQUE_TEST_ADAPTER_H_
+#define BBQUE_TEST_ADAPTER_H_
 
-#include "bbque/modules.h"
+#include "bbque/plugins/test.h"
+#include "bbque/plugins/test_c.h"
 #include "bbque/plugins/plugin.h"
 
 namespace bbque { namespace plugins {
 
-class TestModuleAdapter : public TestModuleIF {
+class TestAdapter : public TestIF {
 
 public:
 
-	TestModuleAdapter(C_TestModule * _tm, PF_DestroyFunc _df) :
-		tm(_tm),
+	TestAdapter(C_Test * _test, PF_DestroyFunc _df) :
+		test(_test),
 		df(_df) {
 	}
 
-	~TestModuleAdapter() {
+	~TestAdapter() {
 		if (df)
-			df(tm);
+			df(test);
 	}
 
 	void Test() {
-		tm->Test();
+		test->Test();
 	}
 
 private:
 
-	C_TestModule * tm;
+	C_Test * test;
 	PF_DestroyFunc df;
 
 };
@@ -55,5 +56,5 @@ private:
 
 } // namespace bbque
 
-#endif // BBQUE_TEST_MODULE_ADAPTER_H_
+#endif // BBQUE_TEST_ADAPTER_H_
 

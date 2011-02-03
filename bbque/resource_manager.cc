@@ -42,10 +42,11 @@ ResourceManager::~ResourceManager() {
 
 void ResourceManager::Go() {
 
-	// Get all modules types
+	// Load a logger module
 	bp::PluginManager & pm = bp::PluginManager::GetInstance();
 	const bp::PluginManager::RegistrationMap & rm = pm.GetRegistrationMap();
 
+#if 0
 	for (bp::PluginManager::RegistrationMap::const_iterator i = rm.begin(); i != rm.end(); ++i) {
 	//	monsterTypes_.push_back(i->first);
 	}
@@ -55,13 +56,17 @@ void ResourceManager::Go() {
 //		std::string m = *i;
 //		std::cout << m.c_str() << std::endl;
 //	}
-
+#endif
 
 
 	//---------- JustForTest
 	// Build a TestModule
-	TestModuleIF * tm = ModulesFactory::GetTestModule("DummyModule");
-	tm->Test();
+	plugins::TestIF * tm = ModulesFactory::GetTestModule("DummyModule");
+	if (tm) {
+		tm->Test();
+	} else {
+		std::cerr << "Unable to find a \"DummyObject\" module" << std::endl;
+	}
 
 	while (!done) {
 		ControlLoop();

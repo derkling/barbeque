@@ -1,14 +1,14 @@
 /**
- *       @file  object.cpp
- *      @brief  The basic class for all Barbeque RTRM components
+ *       @file  static_test_plugin.h
+ *      @brief  A static plugin example
  *
- * This implements the basic class providing common supports for all Barbeque
- * components. The object class defines loging and modules name.
+ * This defines an example of static C++ plugin which instantiate an object
+ * implementing the TestingObjectIF interface.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
  *   @internal
- *     Created  01/11/2011
+ *     Created  01/28/2011
  *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
  *    Compiler  gcc/g++
  *     Company  Politecnico di Milano
@@ -19,20 +19,15 @@
  * =====================================================================================
  */
 
-#include "bbque/object.h"
+#ifndef BBQUE_DUMMY_PLUGIN_H_
+#define BBQUE_DUMMY_PLUGIN_H_
 
-namespace bbque {
+#include <cstdint>
 
-Object::Object(std::string const & name_) :
-	name("bq."+name_)
-{
-	//logger = move(Logger::GetInstance(name));
-}
+#include "bbque/plugins/plugin.h"
 
-Object::~Object()
-{
+extern "C" int32_t StaticPlugin_ExitFunc();
+extern "C" PF_ExitFunc StaticPlugin_DummyTest_InitPlugin(const PF_PlatformServices * params);
 
-}
-
-} // namespace bbque
+#endif // BBQUE_DUMMY_PLUGIN_H_
 

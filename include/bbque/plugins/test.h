@@ -1,10 +1,9 @@
 /**
- *       @file  modules.h
- *      @brief  The C++ object model for each barbque plugin.
+ *       @file  test.h
+ *      @brief  The interface for Barbeque Testing sub-syste
  *
- * This defines the interface of all barbque C++ based plugin, which identify
- * the object model of the tool. Each such defined module could be defined as
- * a plugin, either statically linked or dynamically loaded.
+ * This defines the common interface for each testing module which can be
+ * developed for the Barbeque framework.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
@@ -20,23 +19,26 @@
  * =====================================================================================
  */
 
-#ifndef BBQUE_MODULES_H_
-#define BBQUE_MODULES_H_
+#ifndef BBQUE_TEST_H_
+#define BBQUE_TEST_H_
 
-#include "bbque/c_modules.h"
-
-namespace bbque {
+namespace bbque { namespace plugins {
 
 /**
  * @class TestModuleIF
  * @brief A module to support testing of other components implementation.
  */
-class TestModuleIF {
+class TestIF {
+
 public:
+
 	virtual void Test() = 0;
+
 };
+
+} // namespace plugins
 
 } // namespace bbque
 
-#endif // BBQUE_MODULES_H_
+#endif // BBQUE_TEST_H_
 

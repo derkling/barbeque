@@ -24,7 +24,7 @@
 
 #include <memory>
 
-#include "bbque/logger.h"
+#include "bbque/plugins/logger.h"
 #include "bbque/exception.h"
 
 #define THROW throw bbque::Exception(__FILE__, __LINE__)
@@ -81,7 +81,7 @@ protected:
 	/**
 	 * 
 	 */
-	std::unique_ptr<Logger> logger;
+	std::unique_ptr<plugins::LoggerIF> logger;
 
 	/**
 	 * @brief   

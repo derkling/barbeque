@@ -1,8 +1,8 @@
 
 
 #----- Add "testing" target static library
-set(PLUGIN_TESTING_SRC  static_test_object static_test_plugin)
-add_library(plugin_testingobject STATIC ${PLUGIN_TESTING_SRC})
+set(PLUGIN_DUMMY_SRC  dummy_test dummy_plugin)
+add_library(plugin_test_dummy STATIC ${PLUGIN_DUMMY_SRC})
 
 
 #----- Add "testing" specific flags

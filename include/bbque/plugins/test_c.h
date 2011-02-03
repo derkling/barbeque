@@ -1,10 +1,9 @@
 /**
- *       @file  c_modules.h
- *      @brief  The C object model for each barbque plugin.
+ *       @file  test_c.h
+ *      @brief  The C object model for barbeque Testing plugins
  *
- * This defines the interface of all barbque C based plugin, which identify the object
- * model of the tool. Each such defined module could be defined as a plugin,
- * either statically linked or dynamically loaded.
+ * This defines the interface for Test barbque C based plugin. This file
+ * provided the C based object model for Test plugins.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
@@ -20,15 +19,15 @@
  * =====================================================================================
  */
 
-#ifndef BBQUE_C_MODULES_H_
-#define BBQUE_C_MODULES_H_
+#ifndef BBQUE_TEST_C_H_
+#define BBQUE_TEST_C_H_
 
 //----- TestModule C interface
-typedef struct C_TestModuleHandle__ { char c; } * C_TestModuleHandle;
-typedef struct C_TestModule_ {
-	  void (*Test)();
-	  C_TestModuleHandle handle;
-} C_TestModule;
+typedef struct C_TestHandle_ { char c; } * C_TestHandle;
+typedef struct C_Test_ {
+	void (*Test)();
+	C_TestHandle handle;
+} C_Test;
 
-#endif // BBQUE_C_MODULES_H_
+#endif // BBQUE_TEST_C_H_
 

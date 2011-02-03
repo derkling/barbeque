@@ -21,36 +21,36 @@
  * =====================================================================================
  */
 
-#include "static_test_object.h"
+#include "dummy_test.h"
 
 #include <iostream>
 
 namespace bbque { namespace plugins {
 
-DummyModule::DummyModule() {
+DummyTest::DummyTest() {
 
 }
 
-DummyModule::~DummyModule() {
+DummyTest::~DummyTest() {
 
 }
 
 //----- dummy module interface
 
-void DummyModule::Test(void) {
+void DummyTest::Test(void) {
 	std::cout << "This is just a (working) Dummy Module" << std::endl;
 }
 
 //----- static plugin interface
 
-void * DummyModule::Create(PF_ObjectParams *) {
-  return new DummyModule();
+void * DummyTest::Create(PF_ObjectParams *) {
+  return new DummyTest();
 }
 
-int32_t DummyModule::Destroy(void * plugin) {
+int32_t DummyTest::Destroy(void * plugin) {
   if (!plugin)
     return -1;
-  delete (DummyModule *)plugin;
+  delete (DummyTest *)plugin;
   return 0;
 }
 

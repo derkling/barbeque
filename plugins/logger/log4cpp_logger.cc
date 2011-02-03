@@ -1,5 +1,5 @@
 /**
- *       @file  log4cppLogger.cpp
+ *       @file  log4cpp.cpp
  *      @brief  A logger plugin based on Log4Cpp library
  *
  * Detailed description here.
@@ -18,7 +18,25 @@
  * =====================================================================================
  */
 
-#include "bbque/logger_log4cpp.h"
+#include "log4cpp_logger.h"
+
+#if 0
+// Log4Cpp Logging Utilities
+#include <log4cpp/Portability.hh>
+#ifdef LOG4CPP_HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+#include <log4cpp/Appender.hh>
+#include <log4cpp/FileAppender.hh>
+#include <log4cpp/OstreamAppender.hh>
+#ifdef LOG4CPP_HAVE_SYSLOG
+# include <log4cpp/SyslogAppender.hh>
+#endif
+#include <log4cpp/Layout.hh>
+#include <log4cpp/BasicLayout.hh>
+#include <log4cpp/Priority.hh>
+#include <log4cpp/NDC.hh>
+#endif
 
 #define LOG_MAX_SENTENCE 128
 
@@ -47,31 +65,61 @@
 #define COLOR_ALERT	COLOR_LRED
 #define COLOR_FATAL	COLOR_RED
 
-extern bool g_log_colored;
-
-namespace bbque {
+namespace bbque { namespace plugins {
 
 Log4CppLogger::Log4CppLogger(std::string const & name) :
-	Logger(name),
-	l4cpp(log4cpp::Category::getInstance(log_name))
-{
+	use_colors(false),
+	logger(log4cpp::Category::getInstance(name)) {
+
+#if 0
+		// Logger configuration
+	bool use_colors = true;
+	log4cpp::Category & logger = log4cpp::Category::getInstance("bq");
+	std::string g_log_configuration = "/tmp/bbque.conf";
+
+	try {
+		std::cout << "Using logger configuration: " << g_log_configuration
+					<< std::endl;
+		log4cpp::PropertyConfigurator::configure(g_log_configuration);
+	} catch(log4cpp::ConfigureFailure& f) {
+		std::cout << "Logger configuration failed: " << f.what() << std::endl;
+		return EXIT_FAILURE;
+	}
+	logger.debug("Logger correctly initialized");
+	logger.setPriority(log4cpp::Priority::INFO);
+#endif
 
 }
 
-Log4CppLogger::~Log4CppLogger()
-{
-	log4cpp::Category::shutdown();
+Log4CppLogger::~Log4CppLogger() {
+	// This should not be required
+	//log4cpp::Category::shutdown();
 }
+
+//----- static plugin interface
+
+void * Log4CppLogger::Create(PF_ObjectParams * params) {
+	return new Log4CppLogger(params->object_type);
+}
+
+int32_t Log4CppLogger::Destroy(void * plugin) {
+	if (!plugin)
+		return -1;
+	delete (Log4CppLogger *)plugin;
+	return 0;
+}
+
+//----- Logger plugin interface
 
 void Log4CppLogger::Debug(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isDebugEnabled()) {
+	if (logger.isDebugEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		l4cpp.log(::log4cpp::Priority::DEBUG, str);
+		logger.log(::log4cpp::Priority::DEBUG, str);
 	}
 }
 
@@ -79,15 +127,15 @@ void Log4CppLogger::Info(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isInfoEnabled()) {
+	if (logger.isInfoEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::INFO,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::INFO,
 					COLOR_INFO, str);
 		else
-			l4cpp.log(::log4cpp::Priority::INFO, str);
+			logger.log(::log4cpp::Priority::INFO, str);
 	}
 
 }
@@ -96,15 +144,15 @@ void Log4CppLogger::Notice(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isNoticeEnabled()) {
+	if (logger.isNoticeEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::NOTICE,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::NOTICE,
 					COLOR_NOTICE, str);
 		else
-			l4cpp.log(::log4cpp::Priority::NOTICE, str);
+			logger.log(::log4cpp::Priority::NOTICE, str);
 	}
 }
 
@@ -112,15 +160,15 @@ void Log4CppLogger::Warn(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isWarnEnabled()) {
+	if (logger.isWarnEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::WARN,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::WARN,
 					COLOR_WARN, str);
 		else
-			l4cpp.log(::log4cpp::Priority::WARN, str);
+			logger.log(::log4cpp::Priority::WARN, str);
 	}
 }
 
@@ -128,15 +176,15 @@ void Log4CppLogger::Error(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isErrorEnabled()) {
+	if (logger.isErrorEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::ERROR,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::ERROR,
 					COLOR_ERROR, str);
 		else
-			l4cpp.log(::log4cpp::Priority::ERROR, str);
+			logger.log(::log4cpp::Priority::ERROR, str);
 	}
 }
 
@@ -144,15 +192,15 @@ void Log4CppLogger::Crit(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isCritEnabled()) {
+	if (logger.isCritEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::CRIT,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::CRIT,
 					COLOR_CRIT, str);
 		else
-			l4cpp.log(::log4cpp::Priority::CRIT, str);
+			logger.log(::log4cpp::Priority::CRIT, str);
 	}
 }
 
@@ -160,15 +208,15 @@ void Log4CppLogger::Alert(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isAlertEnabled()) {
+	if (logger.isAlertEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::ALERT,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::ALERT,
 					COLOR_ALERT, str);
 		else
-			l4cpp.log(::log4cpp::Priority::ALERT, str);
+			logger.log(::log4cpp::Priority::ALERT, str);
 	}
 }
 
@@ -176,16 +224,19 @@ void Log4CppLogger::Fatal(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
 
-	if (l4cpp.isFatalEnabled()) {
+	if (logger.isFatalEnabled()) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		if (g_log_colored)
-			l4cpp.log(::log4cpp::Priority::FATAL,
+		if (use_colors)
+			logger.log(::log4cpp::Priority::FATAL,
 					COLOR_FATAL, str);
 		else
-			l4cpp.log(::log4cpp::Priority::FATAL, str);
+			logger.log(::log4cpp::Priority::FATAL, str);
 	}
 }
 
-}
+} // namespace plugins
+
+} // namespace bbque
+

@@ -5,8 +5,6 @@
  * This defines an example of static C++ plugin which instantiate an object
  * implementing the TestingObjectIF interface.
  *
- * Detailed description starts here.
- *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
  *   @internal
@@ -21,19 +19,19 @@
  * =====================================================================================
  */
 
-#include "static_test_plugin.h"
-#include "static_test_object.h"
+#include "dummy_plugin.h"
+#include "dummy_test.h"
 #include "bbque/plugins/static_plugin.h"
 
 namespace bp = bbque::plugins;
 
 extern "C"
-int32_t StaticPlugin_DummyModule_ExitFunc() {
+int32_t StaticPlugin_DummyTest_ExitFunc() {
   return 0;
 }
 
 extern "C"
-PF_ExitFunc StaticPlugin_DummyModule_InitPlugin(const PF_PlatformServices * params) {
+PF_ExitFunc StaticPlugin_DummyTest_InitPlugin(const PF_PlatformServices * params) {
   int res = 0;
 
   PF_RegisterParams rp;
@@ -42,16 +40,16 @@ PF_ExitFunc StaticPlugin_DummyModule_InitPlugin(const PF_PlatformServices * para
   rp.programming_language = PF_LANG_CPP;
 
   // Registering DummyModule
-  rp.CreateFunc = bp::DummyModule::Create;
-  rp.DestroyFunc = bp::DummyModule::Destroy;
-  res = params->RegisterObject((const char *)"DummyModule", &rp);
+  rp.CreateFunc = bp::DummyTest::Create;
+  rp.DestroyFunc = bp::DummyTest::Destroy;
+  res = params->RegisterObject((const char *)"test.dummy", &rp);
   if (res < 0)
     return NULL;
 
-  return StaticPlugin_DummyModule_ExitFunc;
+  return StaticPlugin_DummyTest_ExitFunc;
 
 }
 
 bp::StaticPlugin
-StaticPlugin_DummyModule(StaticPlugin_DummyModule_InitPlugin);
+StaticPlugin_DummyTest(StaticPlugin_DummyTest_InitPlugin);
 

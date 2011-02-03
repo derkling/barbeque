@@ -22,8 +22,8 @@
 #ifndef BBQUE_PLUGINS_TESTING_H_
 #define BBQUE_PLUGINS_TESTING_H_
 
-// The object model to implement
-#include "bbque/modules.h"
+#include "bbque/plugins/test.h"
+#include "bbque/plugins/plugin.h"
 
 #include <cstdint>
 
@@ -33,10 +33,10 @@ struct PF_ObjectParams;
 namespace bbque { namespace plugins {
 
 /**
- * @class DummyModule
+ * @class DummyTest
  * @brief A simple object registered as a static C++ plugin.
  */
-class DummyModule : public TestModuleIF {
+class DummyTest : public TestIF {
 
 public:
 
@@ -56,7 +56,7 @@ public:
 	 */
 	static int32_t Destroy(void *);
 
-	~DummyModule();
+	~DummyTest();
 
 //----- dummy module interface
 
@@ -71,7 +71,7 @@ private:
 	 * @param   
 	 * @return  
 	 */
-	DummyModule();
+	DummyTest();
 
 };
 

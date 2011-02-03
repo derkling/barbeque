@@ -29,10 +29,7 @@ namespace bp = bbque::plugins;
 
 namespace bbque {
 
-ModulesFactory::ModulesFactory() :
-	Object("mf") {
-
-	logger->Info("ModulesFactory initialized");
+ModulesFactory::ModulesFactory() {
 }
 
 ModulesFactory & ModulesFactory::GetInstance() {
@@ -42,20 +39,37 @@ ModulesFactory & ModulesFactory::GetInstance() {
 
 
 /**
- * Specialize the ObjectAdapter template for TestModule plugins
+ * Specialize the ObjectAdapter template for Test plugins
  */
-typedef bp::ObjectAdapter<bp::TestModuleAdapter, C_TestModule> TestObject_ModuleAdapter;
+typedef bp::ObjectAdapter<bp::TestAdapter, C_Test> Test_ObjectAdapter;
 
-TestModuleIF * ModulesFactory::GetTestModule(const std::string & objectType) {
+plugins::TestIF * ModulesFactory::GetTestModule(const std::string & objectType) {
 	// Ensure ModulesFactory initialization
-	ModulesFactory & mf = ModulesFactory::GetInstance();
+	ModulesFactory::GetInstance();
 	// Build a object adapter for the TestModule
-	TestObject_ModuleAdapter tm_oa;
+	Test_ObjectAdapter toa;
 
 	void * module = bp::PluginManager::GetInstance().
-						CreateObject(objectType, tm_oa);
+						CreateObject(objectType, toa);
 
-	return (TestModuleIF *) module;
+	return (plugins::TestIF *) module;
+}
+
+/**
+ * Specialize the ObjectAdapter template for Logger plugins
+ */
+typedef bp::ObjectAdapter<bp::LoggerAdapter, C_Logger> Logger_ObjectAdapter;
+
+plugins::LoggerIF * ModulesFactory::GetLoggerModule(const std::string & objectType) {
+	// Ensure ModulesFactory initialization
+	ModulesFactory::GetInstance();
+	// Build a object adapter for the Logger
+	Logger_ObjectAdapter loa;
+
+	void * module = bp::PluginManager::GetInstance().
+						CreateObject(objectType, loa);
+
+	return (plugins::LoggerIF *) module;
 }
 
 } // namespace bbque

@@ -23,20 +23,23 @@
 #ifndef BBQUE_MODULES_FACTORY_H_
 #define BBQUE_MODULES_FACTORY_H_
 
-#include "bbque/object.h"
-#include "bbque/test_module_adapter.h"
+//----- Supported plugin interfaces
+#include "bbque/plugins/test_adapter.h"
+#include "bbque/plugins/logger_adapter.h"
 
 #include <string>
 
 namespace bbque {
 
-class ModulesFactory : private Object {
+class ModulesFactory {
 
 public:
 
 	static ModulesFactory & GetInstance();
 
-	static TestModuleIF * GetTestModule(const std::string & objectType);
+	static plugins::TestIF * GetTestModule(const std::string & objectType);
+
+	static plugins::LoggerIF * GetLoggerModule(const std::string & objectType);
 
 private:
 
@@ -49,5 +52,5 @@ private:
 
 } // namespace bbque
 
-#endif // ACTOR_FACTORY_H
+#endif // BBQUE_MODULES_FACTORY_H_
 
