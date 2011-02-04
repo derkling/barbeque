@@ -99,7 +99,7 @@ Log4CppLogger::~Log4CppLogger() {
 //----- static plugin interface
 
 void * Log4CppLogger::Create(PF_ObjectParams * params) {
-	return new Log4CppLogger(params->object_type);
+	return new Log4CppLogger(params->id);
 }
 
 int32_t Log4CppLogger::Destroy(void * plugin) {

@@ -61,11 +61,12 @@ void ResourceManager::Go() {
 
 	//---------- JustForTest
 	// Build a TestModule
-	plugins::TestIF * tm = ModulesFactory::GetTestModule("DummyModule");
+	plugins::TestIF * tm = ModulesFactory::GetTestModule();
 	if (tm) {
+		std::cerr << "Found a Logger module" << std::endl;
 		tm->Test();
 	} else {
-		std::cerr << "Unable to find a \"DummyObject\" module" << std::endl;
+		std::cerr << "Unable to find a \"logger\" module" << std::endl;
 	}
 
 	while (!done) {

@@ -43,14 +43,14 @@ ModulesFactory & ModulesFactory::GetInstance() {
  */
 typedef bp::ObjectAdapter<bp::TestAdapter, C_Test> Test_ObjectAdapter;
 
-plugins::TestIF * ModulesFactory::GetTestModule(const std::string & objectType) {
+plugins::TestIF * ModulesFactory::GetTestModule(const std::string & id) {
 	// Ensure ModulesFactory initialization
 	ModulesFactory::GetInstance();
 	// Build a object adapter for the TestModule
 	Test_ObjectAdapter toa;
 
 	void * module = bp::PluginManager::GetInstance().
-						CreateObject(objectType, toa);
+						CreateObject(id, toa);
 
 	return (plugins::TestIF *) module;
 }
@@ -60,14 +60,14 @@ plugins::TestIF * ModulesFactory::GetTestModule(const std::string & objectType) 
  */
 typedef bp::ObjectAdapter<bp::LoggerAdapter, C_Logger> Logger_ObjectAdapter;
 
-plugins::LoggerIF * ModulesFactory::GetLoggerModule(const std::string & objectType) {
+plugins::LoggerIF * ModulesFactory::GetLoggerModule(const std::string & id) {
 	// Ensure ModulesFactory initialization
 	ModulesFactory::GetInstance();
 	// Build a object adapter for the Logger
 	Logger_ObjectAdapter loa;
 
 	void * module = bp::PluginManager::GetInstance().
-						CreateObject(objectType, loa);
+						CreateObject(id, loa);
 
 	return (plugins::LoggerIF *) module;
 }

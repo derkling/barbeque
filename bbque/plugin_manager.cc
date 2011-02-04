@@ -229,21 +229,24 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	return 0;
 }
 
-void * PluginManager::CreateObject(const std::string & object_type,
+void * PluginManager::CreateObject(const std::string & id,
 		ObjectAdapterIF & adapter) {
 	// "*" is not a valid object type
-	if (object_type == std::string("*"))
+	if (id == std::string("*"))
 		return NULL;
 
 	// Prepare object params
 	PF_ObjectParams op;
-	op.object_type = (const char *)object_type.c_str();
+	op.id = (const char *)id.c_str();
 	op.platform_services = &platform_services;
 
-	if (exact_match_map.find(object_type) != exact_match_map.end()) {
+	// Try to find a lower bound match (i.e. an object within the specified
+	// namespace), e.g. "logger." will match "logger.console"
+	RegistrationMap::iterator near_match = exact_match_map.lower_bound(id);
+	if ( ((*near_match).first.compare(0,id.size(),id)) == 0 ) {
 
-		// Exact match found
-		PF_RegisterParams & rp = exact_match_map[object_type];
+		// Class (or full) match found
+		PF_RegisterParams & rp = (*near_match).second;
 		void * object = rp.CreateFunc(&op);
 		if (object) {
 			// Great, there is an exact match
@@ -253,6 +256,7 @@ void * PluginManager::CreateObject(const std::string & object_type,
 
 			return object;
 		}
+
 	}
 
 	// Try to find a wild card match
@@ -271,7 +275,7 @@ void * PluginManager::CreateObject(const std::string & object_type,
 
 			// promote registration to exact_matc
 			// (but keep also the wild card registration for other object types)
-			int32_t res = RegisterObject(op.object_type, &rp);
+			int32_t res = RegisterObject(op.id, &rp);
 			if (res < 0) {
 				// TODO: we should report or log it
 				rp.DestroyFunc(object);
@@ -282,7 +286,7 @@ void * PluginManager::CreateObject(const std::string & object_type,
 		}
 	}
 
-	// Too bad no one can create this object_type
+	// Too bad no one can create this id
 	return NULL;
 }
 

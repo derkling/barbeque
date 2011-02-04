@@ -57,7 +57,7 @@ public:
 	}
 
 	template <typename T>
-	void registerObject(const char * object_type,
+	void registerObject(const char * id,
 		PF_ProgrammingLanguage pl = PF_LANG_CPP) {
 		PF_PluginAPIVersion v = {1, 0};
 
@@ -68,7 +68,7 @@ public:
 				<< "at least " << v.major << "." << v.minor;
 
 			RegisterParams rp(v, T::create, T::destroy, pl);
-			int32_t rc = params->registerObject(object_type, &rp);
+			int32_t rc = params->registerObject(id, &rp);
 
 			CHECK (rc >= 0)
 				<< "Registration of object type "

@@ -56,13 +56,15 @@ public:
 
 	int32_t LoadByPath(const std::string & path);
 
-	void * CreateObject(const std::string & object_type,
+	void * CreateObject(const std::string & id,
 					ObjectAdapterIF & adapter);
 
 	int32_t Shutdown();
 
 	static int32_t RegisterObject(const char * node_type,
 					const PF_RegisterParams * params);
+
+	PF_ProgrammingLanguage GetModuleLanguage(const std::string & id);
 
 	const RegistrationMap & GetRegistrationMap();
 

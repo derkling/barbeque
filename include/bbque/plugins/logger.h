@@ -22,6 +22,8 @@
 #ifndef BBQUE_LOGGER_H_
 #define BBQUE_LOGGER_H_
 
+#define LOGGER_NAMESPACE "logger."
+
 /**
  * Prepend file and line number to the logMessage
  */

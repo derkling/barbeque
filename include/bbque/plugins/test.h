@@ -22,6 +22,8 @@
 #ifndef BBQUE_TEST_H_
 #define BBQUE_TEST_H_
 
+#define TEST_NAMESPACE "test."
+
 namespace bbque { namespace plugins {
 
 /**

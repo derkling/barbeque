@@ -37,9 +37,11 @@ public:
 
 	static ModulesFactory & GetInstance();
 
-	static plugins::TestIF * GetTestModule(const std::string & objectType);
+	static plugins::TestIF * GetTestModule(
+			const std::string & id = TEST_NAMESPACE);
 
-	static plugins::LoggerIF * GetLoggerModule(const std::string & objectType);
+	static plugins::LoggerIF * GetLoggerModule(
+			const std::string & id = LOGGER_NAMESPACE);
 
 private:
 

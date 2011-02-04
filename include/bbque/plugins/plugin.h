@@ -35,7 +35,7 @@ typedef enum PF_ProgrammingLanguage {
 struct PF_PlatformServices;
 
 typedef struct PF_ObjectParams {
-	const char * object_type;
+	const char * id;
 	const struct PF_PlatformServices * platform_services;
 } PF_ObjectParams;
 

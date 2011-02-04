@@ -42,7 +42,7 @@ PF_ExitFunc StaticPlugin_Log4CppLogger_InitPlugin(const PF_PlatformServices * pa
 	// Registering Log4CPP
 	rp.CreateFunc = bp::Log4CppLogger::Create;
 	rp.DestroyFunc = bp::Log4CppLogger::Destroy;
-	res = params->RegisterObject((const char *)"logger.log4cpp", &rp);
+	res = params->RegisterObject((const char *)LOGGER_NAMESPACE"log4cpp", &rp);
 	if (res < 0)
 		return NULL;
 

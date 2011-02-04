@@ -42,7 +42,7 @@ PF_ExitFunc StaticPlugin_DummyTest_InitPlugin(const PF_PlatformServices * params
   // Registering DummyModule
   rp.CreateFunc = bp::DummyTest::Create;
   rp.DestroyFunc = bp::DummyTest::Destroy;
-  res = params->RegisterObject((const char *)"test.dummy", &rp);
+  res = params->RegisterObject((const char *)TEST_NAMESPACE"dummy", &rp);
   if (res < 0)
     return NULL;
 
