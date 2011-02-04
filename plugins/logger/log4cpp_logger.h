@@ -122,6 +122,12 @@ private:
 	bool use_colors;
 
 	/**
+	 * Set true when the logger has been configured.
+	 * This is done by parsing a configuration file the first time a Logger is created.
+	 */
+	static bool configured;
+
+	/**
 	 * @brief The logger reference
 	 * Use this logger reference, related to the 'log' category, to log your messages
 	 */
@@ -135,6 +141,14 @@ private:
 	 * 	class namespace "bbque."
 	 */
 	Log4CppLogger(char const * category);
+
+
+	/**
+	 * @brief   Load Logger configuration
+	 * @return  true if the configuration has been properly loaded and object
+	 * could be built, false otherwise
+	 */
+	static bool Configure(PF_ObjectParams * params);
 
 };
 

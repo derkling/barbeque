@@ -20,12 +20,11 @@
  */
 
 #include "log4cpp_plugin.h"
+
 #include "log4cpp_logger.h"
+#include "bbque/platform_services.h"
 #include "bbque/plugins/static_plugin.h"
 
-#include <log4cpp/Category.hh>
-#include <log4cpp/Configurator.hh>
-#include <log4cpp/PropertyConfigurator.hh>
 
 namespace bp = bbque::plugins;
 
@@ -43,14 +42,6 @@ PF_ExitFunc StaticPlugin_Log4CppLogger_InitPlugin(const PF_PlatformServices * pa
 	rp.version.major = 1;
 	rp.version.minor = 0;
 	rp.programming_language = PF_LANG_CPP;
-
-	// Setting up Appender, layout and Category
-	try {
-		log4cpp::PropertyConfigurator::configure("/tmp/bbque.conf");
-	} catch (log4cpp::ConfigureFailure e) {
-		std::cerr << "Log4CPP configuration error: " << e.what() << std::endl;
-		return NULL;
-	}
 
 	// Registering Log4CPP
 	rp.CreateFunc = bp::Log4CppLogger::Create;

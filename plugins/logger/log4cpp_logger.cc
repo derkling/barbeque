@@ -57,6 +57,8 @@ using log4cpp::PropertyConfigurator;
 
 namespace bbque { namespace plugins {
 
+bool Log4CppLogger::configured = false;
+
 Log4CppLogger::Log4CppLogger(char const * category) :
 	use_colors(true),
 	logger(Category::getInstance(category)) {
@@ -69,6 +71,10 @@ Log4CppLogger::~Log4CppLogger() {
 
 void * Log4CppLogger::Create(PF_ObjectParams * params) {
 	LoggerIF::Configuration * conf = (LoggerIF::Configuration*) params->data;
+
+	if (!Configure(params))
+		return NULL;
+
 	return new Log4CppLogger(conf->category);
 }
 
@@ -77,6 +83,24 @@ int32_t Log4CppLogger::Destroy(void * plugin) {
 		return -1;
 	delete (Log4CppLogger *)plugin;
 	return 0;
+}
+
+bool Log4CppLogger::Configure(PF_ObjectParams * params) {
+
+	if (configured)
+		return true;
+
+	// Setting up Appender, layout and Category
+	try {
+		log4cpp::PropertyConfigurator::configure("/tmp/bbque.conf");
+		configured = true;
+	} catch (log4cpp::ConfigureFailure e) {
+		std::cerr << "Log4CPP configuration error: " << e.what() << std::endl;
+		return NULL;
+	}
+
+	return true;
+
 }
 
 //----- Logger plugin interface
