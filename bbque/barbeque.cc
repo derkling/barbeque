@@ -20,22 +20,19 @@
 
 #include "bbque/barbeque.h"
 
-#include <log4cpp/Category.hh>
-#include <log4cpp/PropertyConfigurator.hh>
-
-#include "bbque/plugin_manager.h"
-namespace bp = bbque::plugins;
-
+#include "bbque/configuration_manager.h"
 #include "bbque/platform_services.h"
-namespace bs = bbque;
-
+#include "bbque/plugin_manager.h"
 #include "bbque/resource_manager.h"
+
 namespace bb = bbque;
+namespace bp = bbque::plugins;
 
 int main(int argc, char *argv[]) {
 
 	// Command line parsing
-
+	bb::ConfigurationManager & cm = bb::ConfigurationManager::GetInstance();
+	cm.ParseCommandLine(argc, argv);
 
 	// Welcome screen
 	std::cout << "\t\t.:: Barbeque RTRM (ver. " << g_git_version << ") ::."
@@ -46,7 +43,7 @@ int main(int argc, char *argv[]) {
 	// Initialization
 	bp::PluginManager & pm = bp::PluginManager::GetInstance();
 	pm.GetPlatformServices().InvokeService =
-		bs::PlatformServices::ServiceDispatcher;
+		bb::PlatformServices::ServiceDispatcher;
 
 	// Plugins loading
 

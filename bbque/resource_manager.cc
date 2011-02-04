@@ -21,6 +21,7 @@
 
 #include "bbque/resource_manager.h"
 
+#include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/modules_factory.h"
 
@@ -76,8 +77,15 @@ void ResourceManager::Go() {
 }
 
 void ResourceManager::ControlLoop() {
+#ifdef BBQUE_DEBUG
+	ConfigurationManager & cm = ConfigurationManager::GetInstance();
+	uint16_t test_run = cm.GetOptions()["debug.test_time"].as<uint16_t>();
+
 	// Fake control loop implementation
-	::sleep(3);
+	std::cerr << "Exiting in " << test_run << "s..." << std::endl;
+	::sleep(test_run);
+#endif
+
 	done = true;
 }
 

@@ -44,8 +44,6 @@ PluginManager::PluginManager() :
 	platform_services.InvokeService = NULL;
 	platform_services.RegisterObject = RegisterObject;
 
-	std::cout << "Build new instance of PluginManager" << std::endl;
-
 }
 
 PluginManager::~PluginManager() {

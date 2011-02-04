@@ -24,8 +24,5 @@
 /** Enable debugging (if defined) */
 #cmakedefine BBQUE_DEBUG
 
-/** Use Log4CPP (if defined) */
-#cmakedefine BBQUE_HAVE_LOG4CPP
-
 #endif // BBQUE_CONFIG_H_
 
