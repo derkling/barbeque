@@ -57,7 +57,7 @@ public:
 	int32_t LoadByPath(const std::string & path);
 
 	void * CreateObject(const std::string & id,
-					ObjectAdapterIF & adapter);
+					ObjectAdapterIF & adapter, void * data = NULL);
 
 	int32_t Shutdown();
 

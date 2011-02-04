@@ -60,14 +60,17 @@ plugins::TestIF * ModulesFactory::GetTestModule(const std::string & id) {
  */
 typedef bp::ObjectAdapter<bp::LoggerAdapter, C_Logger> Logger_ObjectAdapter;
 
-plugins::LoggerIF * ModulesFactory::GetLoggerModule(const std::string & id) {
+plugins::LoggerIF * ModulesFactory::GetLoggerModule(
+		plugins::LoggerIF::Configuration const & data,
+		std::string const & id) {
+
 	// Ensure ModulesFactory initialization
 	ModulesFactory::GetInstance();
 	// Build a object adapter for the Logger
 	Logger_ObjectAdapter loa;
 
 	void * module = bp::PluginManager::GetInstance().
-						CreateObject(id, loa);
+						CreateObject(id, loa, (void*)&data);
 
 	return (plugins::LoggerIF *) module;
 }

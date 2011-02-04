@@ -20,25 +20,15 @@
 
 #include "log4cpp_logger.h"
 
-#if 0
-// Log4Cpp Logging Utilities
-#include <log4cpp/Portability.hh>
-#ifdef LOG4CPP_HAVE_UNISTD_H
-# include <unistd.h>
-#endif
-#include <log4cpp/Appender.hh>
-#include <log4cpp/FileAppender.hh>
-#include <log4cpp/OstreamAppender.hh>
-#ifdef LOG4CPP_HAVE_SYSLOG
-# include <log4cpp/SyslogAppender.hh>
-#endif
-#include <log4cpp/Layout.hh>
-#include <log4cpp/BasicLayout.hh>
+#include <log4cpp/Category.hh>
 #include <log4cpp/Priority.hh>
-#include <log4cpp/NDC.hh>
-#endif
+#include <log4cpp/PropertyConfigurator.hh>
 
-#define LOG_MAX_SENTENCE 128
+using log4cpp::Category;
+using log4cpp::Priority;
+using log4cpp::PropertyConfigurator;
+
+#define LOG_MAX_SENTENCE 256
 
 #define COLOR_WHITE  "\033[1;37m%s\033[0m"
 #define COLOR_LGRAY  "\033[37m%s\033[0m"
@@ -57,49 +47,29 @@
 #define COLOR_CYAN   "\033[36m%s\033[0m"
 #define COLOR_LCYAN  "\033[1;36m%s\033[0m"
 
-#define COLOR_INFO	COLOR_LGREEN
+#define COLOR_INFO		COLOR_LGREEN
 #define COLOR_NOTICE	COLOR_GREEN
-#define COLOR_WARN	COLOR_YELLOW
-#define COLOR_ERROR	COLOR_PURPLE
-#define COLOR_CRIT	COLOR_PURPLE
-#define COLOR_ALERT	COLOR_LRED
-#define COLOR_FATAL	COLOR_RED
+#define COLOR_WARN		COLOR_YELLOW
+#define COLOR_ERROR		COLOR_PURPLE
+#define COLOR_CRIT		COLOR_PURPLE
+#define COLOR_ALERT		COLOR_LRED
+#define COLOR_FATAL		COLOR_RED
 
 namespace bbque { namespace plugins {
 
-Log4CppLogger::Log4CppLogger(std::string const & name) :
-	use_colors(false),
-	logger(log4cpp::Category::getInstance(name)) {
-
-#if 0
-		// Logger configuration
-	bool use_colors = true;
-	log4cpp::Category & logger = log4cpp::Category::getInstance("bq");
-	std::string g_log_configuration = "/tmp/bbque.conf";
-
-	try {
-		std::cout << "Using logger configuration: " << g_log_configuration
-					<< std::endl;
-		log4cpp::PropertyConfigurator::configure(g_log_configuration);
-	} catch(log4cpp::ConfigureFailure& f) {
-		std::cout << "Logger configuration failed: " << f.what() << std::endl;
-		return EXIT_FAILURE;
-	}
-	logger.debug("Logger correctly initialized");
-	logger.setPriority(log4cpp::Priority::INFO);
-#endif
-
+Log4CppLogger::Log4CppLogger(char const * category) :
+	use_colors(true),
+	logger(Category::getInstance(category)) {
 }
 
 Log4CppLogger::~Log4CppLogger() {
-	// This should not be required
-	//log4cpp::Category::shutdown();
 }
 
 //----- static plugin interface
 
 void * Log4CppLogger::Create(PF_ObjectParams * params) {
-	return new Log4CppLogger(params->id);
+	LoggerIF::Configuration * conf = (LoggerIF::Configuration*) params->data;
+	return new Log4CppLogger(conf->category);
 }
 
 int32_t Log4CppLogger::Destroy(void * plugin) {
@@ -119,7 +89,7 @@ void Log4CppLogger::Debug(const char *fmt, ...) {
 		va_start(args, fmt);
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
-		logger.log(::log4cpp::Priority::DEBUG, str);
+		logger.log(log4cpp::Priority::DEBUG, str);
 	}
 }
 
@@ -132,10 +102,10 @@ void Log4CppLogger::Info(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::INFO,
+			logger.log(log4cpp::Priority::INFO,
 					COLOR_INFO, str);
 		else
-			logger.log(::log4cpp::Priority::INFO, str);
+			logger.log(log4cpp::Priority::INFO, str);
 	}
 
 }
@@ -149,10 +119,10 @@ void Log4CppLogger::Notice(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::NOTICE,
+			logger.log(log4cpp::Priority::NOTICE,
 					COLOR_NOTICE, str);
 		else
-			logger.log(::log4cpp::Priority::NOTICE, str);
+			logger.log(log4cpp::Priority::NOTICE, str);
 	}
 }
 
@@ -165,10 +135,10 @@ void Log4CppLogger::Warn(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::WARN,
+			logger.log(log4cpp::Priority::WARN,
 					COLOR_WARN, str);
 		else
-			logger.log(::log4cpp::Priority::WARN, str);
+			logger.log(log4cpp::Priority::WARN, str);
 	}
 }
 
@@ -181,10 +151,10 @@ void Log4CppLogger::Error(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::ERROR,
+			logger.log(log4cpp::Priority::ERROR,
 					COLOR_ERROR, str);
 		else
-			logger.log(::log4cpp::Priority::ERROR, str);
+			logger.log(log4cpp::Priority::ERROR, str);
 	}
 }
 
@@ -197,10 +167,10 @@ void Log4CppLogger::Crit(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::CRIT,
+			logger.log(log4cpp::Priority::CRIT,
 					COLOR_CRIT, str);
 		else
-			logger.log(::log4cpp::Priority::CRIT, str);
+			logger.log(log4cpp::Priority::CRIT, str);
 	}
 }
 
@@ -213,10 +183,10 @@ void Log4CppLogger::Alert(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::ALERT,
+			logger.log(log4cpp::Priority::ALERT,
 					COLOR_ALERT, str);
 		else
-			logger.log(::log4cpp::Priority::ALERT, str);
+			logger.log(log4cpp::Priority::ALERT, str);
 	}
 }
 
@@ -229,10 +199,10 @@ void Log4CppLogger::Fatal(const char *fmt, ...) {
 		vsnprintf(str, LOG_MAX_SENTENCE, fmt, args);
 		va_end(args);
 		if (use_colors)
-			logger.log(::log4cpp::Priority::FATAL,
+			logger.log(log4cpp::Priority::FATAL,
 					COLOR_FATAL, str);
 		else
-			logger.log(::log4cpp::Priority::FATAL, str);
+			logger.log(log4cpp::Priority::FATAL, str);
 	}
 }
 

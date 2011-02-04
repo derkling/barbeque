@@ -24,6 +24,8 @@
 
 #define LOGGER_NAMESPACE "logger."
 
+#include <string>
+
 /**
  * Prepend file and line number to the logMessage
  */
@@ -38,6 +40,32 @@ namespace bbque { namespace plugins {
 class LoggerIF {
 
 public:
+
+//----- Objects initialization data
+
+	typedef enum Priority {
+		DEBUG,
+		INFO,
+		NOTICE,
+		WARN,
+		ERROR,
+		CRIT,
+		ALERT,
+		FATAL
+	} Priority;
+
+	class Configuration {
+	public:
+		Configuration(const char * cat, Priority prio = WARN) :
+			category(cat),
+			default_prio(prio) {};
+
+		char const * category;
+		Priority default_prio;
+
+	};
+
+//----- Objects interface
 
 	/**
 	 * \brief Send a log message with the priority DEBUG
@@ -82,9 +110,8 @@ public:
 	virtual void Alert(const char *fmt, ...) = 0;
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 * \brief Send a log message with the priority FATAL
+	 * \param message the message to log
 	 */
 	virtual void Fatal(const char *fmt, ...) = 0;
 

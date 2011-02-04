@@ -37,6 +37,7 @@ struct PF_PlatformServices;
 typedef struct PF_ObjectParams {
 	const char * id;
 	const struct PF_PlatformServices * platform_services;
+	void * data;
 } PF_ObjectParams;
 
 typedef struct PF_PluginAPIVersion {

@@ -41,7 +41,8 @@ public:
 			const std::string & id = TEST_NAMESPACE);
 
 	static plugins::LoggerIF * GetLoggerModule(
-			const std::string & id = LOGGER_NAMESPACE);
+			plugins::LoggerIF::Configuration const & data,
+			std::string const & id = LOGGER_NAMESPACE);
 
 private:
 

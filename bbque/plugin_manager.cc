@@ -230,7 +230,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 }
 
 void * PluginManager::CreateObject(const std::string & id,
-		ObjectAdapterIF & adapter) {
+		ObjectAdapterIF & adapter, void * data) {
 	// "*" is not a valid object type
 	if (id == std::string("*"))
 		return NULL;
@@ -238,6 +238,7 @@ void * PluginManager::CreateObject(const std::string & id,
 	// Prepare object params
 	PF_ObjectParams op;
 	op.id = (const char *)id.c_str();
+	op.data = data;
 	op.platform_services = &platform_services;
 
 	// Try to find a lower bound match (i.e. an object within the specified

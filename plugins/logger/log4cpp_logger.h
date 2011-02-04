@@ -134,7 +134,7 @@ private:
 	 * @param logName the log category, this name is (forcely) prepended by the
 	 * 	class namespace "bbque."
 	 */
-	Log4CppLogger(std::string const & name = "undef");
+	Log4CppLogger(char const * category);
 
 };
 
