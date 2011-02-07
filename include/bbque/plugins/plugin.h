@@ -23,11 +23,14 @@
 
 #include <stdint.h>
 
+#include "bbque/platform_services.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum PF_ProgrammingLanguage {
+	PF_LANG_UNDEF = 0,
 	PF_LANG_C,
 	PF_LANG_CPP
 } PF_ProgrammingLanguage;
@@ -59,8 +62,8 @@ typedef struct PF_RegisterParams {
 typedef int32_t (*PF_RegisterFunc)(const char * node_type,
 					const PF_RegisterParams * params);
 
-typedef int32_t (*PF_InvokeServiceFunc)(const char * service_name,
-					void * service_params);
+typedef int32_t (*PF_InvokeServiceFunc)(PF_PlatformServiceID id,
+					PF_ServiceData & data);
 
 typedef struct PF_PlatformServices {
 	PF_PluginAPIVersion version;

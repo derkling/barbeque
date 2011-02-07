@@ -21,12 +21,72 @@
 
 #include "bbque/platform_services.h"
 
+#include "bbque/configuration_manager.h"
+#include "bbque/plugin_manager.h"
+
+namespace bp = bbque::plugins;
+
 namespace bbque {
 
-int32_t PlatformServices::ServiceDispatcher(const char * service_name,
-		void * service_params) {
-	return 0;
+PlatformServices::PlatformServices() {
 }
+
+PlatformServices::~PlatformServices() {
+}
+
+PlatformServices & PlatformServices::GetInstance() {
+	static PlatformServices instance;
+	return instance;
+}
+
+bool PlatformServices::CheckRequest(PF_PlatformServiceID id,
+		PF_ServiceData & data) {
+	bp::PluginManager & pm = bp::PluginManager::GetInstance();
+
+	PF_ProgrammingLanguage request_lang =
+		pm.GetModuleLanguage(std::string(data.id));
+
+	if (request_lang == PF_LANG_CPP)
+		return true;
+
+	// Allow only pure C based services to C coded plugins
+	if (id<PF_SERVICE_C_BASED_COUNT)
+		return true;
+
+	return false;
+}
+
+int32_t PlatformServices::ServiceDispatcher(PF_PlatformServiceID id,
+		PF_ServiceData & data) {
+	PlatformServices ps = PlatformServices::GetInstance();
+
+	if (!ps.CheckRequest(id, data))
+		return PF_SERVICE_WRONG;
+
+	switch (id) {
+	case PF_SERVICE_CONF_DATA:
+		return ps.ServiceConfData(data);
+	default:
+		return PF_SERVICE_UNDEF;
+	}
+
+	return PF_SERVICE_UNDEF;
+}
+
+int32_t PlatformServices::ServiceConfData(PF_ServiceData & data) {
+	ConfigurationManager & cm = ConfigurationManager::GetInstance();
+	po::options_description const & opts_desc =
+		 std::cref(*(((PF_Service_ConfDataIn*)data.request)->opts_desc));
+	po::variables_map & opts =
+		 std::ref(*(((PF_Service_ConfDataOut*)data.response)->opts_value));
+
+	std::cout << "Processing ServiceConfData from '" << data.id << "'..." << std::endl;
+	cm.ParseConfigurationFile(opts_desc, opts);
+
+
+	return PF_SERVICE_DONE;
+}
+
 
 } // namespace bbque
 

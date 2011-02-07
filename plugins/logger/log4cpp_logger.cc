@@ -90,13 +90,41 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	if (configured)
 		return true;
 
+	// Declare the supported options
+	static std::string conf_file_path;
+	po::options_description log4cpp_opts_desc("Log4CPP Options");
+	log4cpp_opts_desc.add_options()
+		(LOGGER_NAMESPACE"log4cpp.conf_file", po::value<std::string>
+		 (&conf_file_path)->default_value("/etc/bbque.conf"),
+		 "configuration file path")
+		;
+	static po::variables_map log4cpp_opts_value;
+
+
+	// Get configuration params
+	PF_Service_ConfDataIn data_in;
+	data_in.opts_desc = &log4cpp_opts_desc;
+	PF_Service_ConfDataOut data_out;
+	data_out.opts_value = &log4cpp_opts_value;
+	PF_ServiceData sd;
+	sd.id = LOGGER_NAMESPACE"log4cpp";
+	sd.request = &data_in;
+	sd.response = &data_out;
+
+	int32_t response = params->platform_services->InvokeService(PF_SERVICE_CONF_DATA, sd);
+	if (response!=PF_SERVICE_DONE)
+		return NULL;
+
+	std::cout << "Using Log4CPP configuration file: " <<
+		conf_file_path << std::endl;
+
 	// Setting up Appender, layout and Category
 	try {
-		log4cpp::PropertyConfigurator::configure("/tmp/bbque.conf");
+		log4cpp::PropertyConfigurator::configure(conf_file_path);
 		configured = true;
 	} catch (log4cpp::ConfigureFailure e) {
 		std::cerr << "Log4CPP configuration error: " << e.what() << std::endl;
-		return NULL;
+		return false;
 	}
 
 	return true;

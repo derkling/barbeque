@@ -301,6 +301,22 @@ DynamicLibrary * PluginManager::LoadLibrary(const std::string & path, std::strin
 	return dl;
 }
 
+PF_ProgrammingLanguage PluginManager::GetModuleLanguage(
+		const std::string & id) {
+
+	// "*" is not a valid object type
+	if (id == std::string("*"))
+		return PF_LANG_UNDEF;
+
+	if (exact_match_map.find(id) != exact_match_map.end()) {
+		// Exact match found
+		PF_RegisterParams & rp = exact_match_map[id];
+		return rp.programming_language;
+	}
+
+	return PF_LANG_UNDEF;
+}
+
 const PluginManager::RegistrationMap & PluginManager::GetRegistrationMap() {
 	return exact_match_map;
 }

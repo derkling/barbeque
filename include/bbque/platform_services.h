@@ -3,7 +3,7 @@
  *      @brief  The services provide to plugins by the barbeque core
  *
  * This class provides a set of services to barbeuqe modules throughout the
- * single InvokceServices method.
+ * single InvokeServices method.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
  *
@@ -20,21 +20,110 @@
  */
 
 
-#ifndef BBQUE_PLATFORM_SERVICE_H_
+#ifndef BBQUE_PLATFORM_SERVICES_H_
 #define BBQUE_PLATFORM_SERVICES_H_
 
+/**
+ * Defines the set of supported platform services.
+ * Each platform service could be associated to a corresponding service params
+ * data structure defined thereafter.
+ */
+typedef enum PF_PlatformServiceID {
+	PF_SERVICE_NONE = 0,
+
+//----- Services for both C and CPP coded plugins
+	PF_SERVICE_CONF_PARAM,		//> Return the string of a configuration param
+
+
+	PF_SERVICE_C_BASED_COUNT,	//> This must always be the last entry of
+								//> 	services for both C and CPP plugins
+
+//----- Services only for CPP coded plugins
+	PF_SERVICE_CONF_DATA, 		//> Return the values_map of the required
+								//>  configuration patams
+
+	PF_SERVICE_COUNT			//> This must always be the last entry
+} PF_PlatformServiceID;
+
+/**
+ * Defines the data exchange protocol between modules and service dispatcher.
+ * Modules could request services defined by the PF_PlatformServiceID enum and
+ * must provide a reference to a PF_ServiceData structure. This last allows to
+ * define a set of service specific input data and expected return results.
+ */
+typedef struct PF_ServiceData {
+	const char * id;	//> Requesting object identified
+	void * request;		//> Specific service request data
+	void * response;	//> Specific service responce data
+} PF_ServiceData;
+
+typedef enum PF_ServiceResponse {
+	PF_SERVICE_DONE 	=  0,
+	PF_SERVICE_UNDEF	= -1,
+	PF_SERVICE_WRONG	= -2
+} PF_ServiceResponse;
+
+
+//----- START - PF_SERVICE_CONF_DATA -----
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+namespace po = boost::program_options;
+
+typedef struct PF_Service_ConfDataIn {
+	po::options_description const * opts_desc;
+} PF_Service_ConfDataIn;
+
+typedef struct PF_Service_ConfDataOut {
+	po::variables_map * opts_value;
+} PF_Service_ConfDataOut;
+//----- END - PF_SERVICE_CONF_DATA -----
+
+
+
+#ifdef __cplusplus
+
 #include <cstdint>
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 
 namespace bbque {
+
+
 
 class PlatformServices {
 
 public:
-  static int32_t ServiceDispatcher(const char * service_name,
-		  							void * service_params);
+
+	~PlatformServices();
+
+	static PlatformServices & GetInstance();
+
+	static int32_t ServiceDispatcher(PF_PlatformServiceID id,
+										PF_ServiceData & data);
+
+private:
+
+	PlatformServices();
+
+	/**
+	 * @brief   Verify if the specified request is authorized
+	 * This method could implement an ACL policy to allows some services only
+	 * to some modules. For instance, there are some requests that should be
+	 * asserted only by CPP coded modules.
+	 * @param   id		service identifyed
+	 * @return  data 	service data
+	 */
+	bool CheckRequest(PF_PlatformServiceID id,
+		PF_ServiceData & data);
+
+	int32_t ServiceConfData(PF_ServiceData & data);
+
 };
 
 } // namespace bbque
+
+#endif // __cplusplus
 
 #endif // BBQUE_PLATFORM_SERVICE_H_
 
