@@ -46,10 +46,17 @@ public:
 			po::options_description const & opts_desc,
 			po::variables_map & opts);
 
-	po::variables_map const & GetOptions() {
+	inline po::variables_map const & GetOptions() const {
 		return std::cref(opts_vm);
-	};
+	}
 
+	inline bool LoadPlugins() const {
+		return opts_vm.count("plugins");
+	}
+
+	inline std::string GetPluginsDir() const {
+		return plugins_dir;
+	}
 
 
 private:
@@ -70,6 +77,8 @@ private:
 	po::variables_map opts_vm;
 
 	std::string conf_file_path;
+
+	std::string plugins_dir;
 
 };
 

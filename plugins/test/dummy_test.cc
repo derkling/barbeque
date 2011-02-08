@@ -28,7 +28,8 @@
 namespace bbque { namespace plugins {
 
 DummyTest::DummyTest() {
-
+	std::cout << "DummyTest: Build new " PLUGIN_TYPE " object ["
+		<< this << "]" << std::endl;
 }
 
 DummyTest::~DummyTest() {
@@ -38,13 +39,14 @@ DummyTest::~DummyTest() {
 //----- dummy module interface
 
 void DummyTest::Test(void) {
-	std::cout << "This is just a (working) Dummy Module" << std::endl;
+	std::cout << "DummyTest: This is just a (working) " PLUGIN_TYPE " Module ["
+		<< this << "]" << std::endl;
 }
 
 //----- static plugin interface
 
 void * DummyTest::Create(PF_ObjectParams *) {
-  return new DummyTest();
+	return new DummyTest();
 }
 
 int32_t DummyTest::Destroy(void * plugin) {

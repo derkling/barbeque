@@ -31,7 +31,7 @@ namespace fs = boost::filesystem;
 
 namespace bbque { namespace plugins {
 
-static std::string dl_ext("so");
+static std::string dl_ext(".so");
 
 PluginManager::PluginManager() :
 	in_initialize_plugin(false) {
@@ -87,8 +87,10 @@ int32_t PluginManager::RegisterObject(const char * objectType, const PF_Register
 
 	// Verify that versions match
 	PF_PluginAPIVersion v = pm.platform_services.version;
-	if (v.major != params->version.major)
+	if (v.major != params->version.major) {
+		fprintf(stderr, "PM: Module [%s] version mismatching\n", objectType);
 		return -1;
+	}
 
 	std::string key((const char *)objectType);
 	if (key == std::string("*")) {
@@ -99,10 +101,13 @@ int32_t PluginManager::RegisterObject(const char * objectType, const PF_Register
 
 	if (pm.exact_match_map.find(key) != pm.exact_match_map.end()) {
 		// item already exists in exact_match_map fail (only one can handle)
+		fprintf(stderr, "PM: Module [%s] already registered\n", objectType);
 		return -1;
 	}
 
 	pm.exact_match_map[key] = *params;
+	//fprintf(stdout, "PM: New module [%s:%p] registered\n",
+	//	key.c_str(), (void*)params->CreateFunc);
 	return 0;
 }
 
@@ -111,11 +116,12 @@ int32_t PluginManager::LoadAll(const std::string & pluginDir, PF_InvokeServiceFu
 
 	if (pluginDir.empty()) {
 		// The path is empty
+		fprintf(stderr, "PM: Empty plugins dir [%s]\n", pluginDir.c_str());
 		return -1;
 	}
 
-	platform_services.InvokeService = func;
-
+	if (func!=NULL)
+		platform_services.InvokeService = func;
 
 	if (!fs::exists(plugins_dir) || !fs::is_directory(plugins_dir))
 		return -1;
@@ -203,6 +209,8 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	if (dl_map.find(path.string()) != dl_map.end())
 		return -1;
 
+	fprintf(stdout, "PM: Loading plugin [%s]\n", pluginPath.c_str());
+
 	std::string errorString;
 	DynamicLibrary * dl = LoadLibrary(fs::system_complete(path).string(),
 					errorString);
@@ -215,12 +223,14 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	PF_InitFunc initFunc = (PF_InitFunc)(dl->GetSymbol("PF_initPlugin"));
 	if (!initFunc) {
 		// missing dynamic library entry point
+		fprintf(stderr, "PM: Missing [PF_initPlugin] plugin entry point");
 		return -1;
 	}
 
 	int32_t res = InitializePlugin(initFunc);
 	if (res < 0) {
 		// initialization failed
+		fprintf(stderr, "PM: Initialization failed");
 		return res;
 	}
 
@@ -242,7 +252,12 @@ void * PluginManager::CreateObject(const std::string & id,
 	// Try to find a lower bound match (i.e. an object within the specified
 	// namespace), e.g. "logger." will match "logger.console"
 	RegistrationMap::iterator near_match = exact_match_map.lower_bound(id);
-	if ( ((*near_match).first.compare(0,id.size(),id)) == 0 ) {
+	if ( near_match != exact_match_map.end() &&
+			((*near_match).first.compare(0,id.size(),id)) == 0 ) {
+
+		fprintf(stdout, "PM: Found matching module [%s@%p]\n",
+			(*near_match).first.c_str(),
+			(void*)(*near_match).second.CreateFunc);
 
 		// Class (or full) match found
 		PF_RegisterParams & rp = (*near_match).second;

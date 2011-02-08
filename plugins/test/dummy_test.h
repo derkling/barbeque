@@ -27,6 +27,14 @@
 
 #include <cstdint>
 
+#ifndef BBQUE_DYNAMIC_PLUGIN
+# define DummyTest DummyTestS
+# define	PLUGIN_TYPE "STATIC"
+#else
+# define DummyTest DummyTestD
+# define	PLUGIN_TYPE "DYNAMIC"
+#endif
+
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
 

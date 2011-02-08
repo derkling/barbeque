@@ -25,13 +25,19 @@
 
 namespace bp = bbque::plugins;
 
+#ifndef BBQUE_DYNAMIC_PLUGIN
+# define	PLUGIN_NAME "dummy"
+#else
+# define	PLUGIN_NAME "dummy_dyn"
+#endif
+
 extern "C"
-int32_t StaticPlugin_DummyTest_ExitFunc() {
+int32_t PF_exitFunc() {
   return 0;
 }
 
 extern "C"
-PF_ExitFunc StaticPlugin_DummyTest_InitPlugin(const PF_PlatformServices * params) {
+PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params) {
   int res = 0;
 
   PF_RegisterParams rp;
@@ -42,14 +48,16 @@ PF_ExitFunc StaticPlugin_DummyTest_InitPlugin(const PF_PlatformServices * params
   // Registering DummyModule
   rp.CreateFunc = bp::DummyTest::Create;
   rp.DestroyFunc = bp::DummyTest::Destroy;
-  res = params->RegisterObject((const char *)TEST_NAMESPACE"dummy", &rp);
+  res = params->RegisterObject((const char *)TEST_NAMESPACE PLUGIN_NAME, &rp);
   if (res < 0)
     return NULL;
 
-  return StaticPlugin_DummyTest_ExitFunc;
+  return PF_exitFunc;
 
 }
 
+#ifndef BBQUE_DYNAMIC_PLUGIN
 bp::StaticPlugin
-StaticPlugin_DummyTest(StaticPlugin_DummyTest_InitPlugin);
+StaticPlugin_DummyTest(PF_initPlugin);
+#endif
 

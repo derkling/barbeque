@@ -26,8 +26,8 @@
 
 #include "bbque/plugins/plugin.h"
 
-extern "C" int32_t StaticPlugin_ExitFunc();
-extern "C" PF_ExitFunc StaticPlugin_DummyTest_InitPlugin(const PF_PlatformServices * params);
+extern "C" int32_t PF_exitFunc();
+extern "C" PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params);
 
 #endif // BBQUE_DUMMY_PLUGIN_H_
 
