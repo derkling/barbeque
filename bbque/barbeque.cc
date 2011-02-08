@@ -35,10 +35,8 @@ int main(int argc, char *argv[]) {
 	cm.ParseCommandLine(argc, argv);
 
 	// Welcome screen
-	std::cout << "\t\t.:: Barbeque RTRM (ver. " << g_git_version << ") ::."
-				<< std::endl;
-	std::cout << "Built: " << __DATE__ << " " << __TIME__ << std::endl;
-
+	fprintf(stdout, "\n\t\t.:: Barbeque RTRM (ver. %s) ::.\n", g_git_version);
+	fprintf(stdout, "Built: " __DATE__  " " __TIME__ "\n\n");
 
 	// Initialization
 	bp::PluginManager & pm = bp::PluginManager::GetInstance();
@@ -46,7 +44,11 @@ int main(int argc, char *argv[]) {
 		bb::PlatformServices::ServiceDispatcher;
 
 	// Plugins loading
-
+	if (cm.LoadPlugins()) {
+		fprintf(stdout, "RM: Loading plugins, dir [%s]\n",
+				cm.GetPluginsDir().c_str());
+		pm.LoadAll(cm.GetPluginsDir());
+	}
 
 	// Let's start baking applications...
 	bb::ResourceManager::GetInstance().Go();

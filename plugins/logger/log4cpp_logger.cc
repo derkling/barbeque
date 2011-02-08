@@ -115,15 +115,15 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	if (response!=PF_SERVICE_DONE)
 		return NULL;
 
-	std::cout << "Using Log4CPP configuration file: " <<
-		conf_file_path << std::endl;
+	fprintf(stdout, "Log4CppLogger: Using configuration file [%s]\n",
+			conf_file_path.c_str());
 
 	// Setting up Appender, layout and Category
 	try {
 		log4cpp::PropertyConfigurator::configure(conf_file_path);
 		configured = true;
 	} catch (log4cpp::ConfigureFailure e) {
-		std::cerr << "Log4CPP configuration error: " << e.what() << std::endl;
+		fprintf(stdout, "Log4CppLogger: configuration error [%s]\n", e.what());
 		return false;
 	}
 

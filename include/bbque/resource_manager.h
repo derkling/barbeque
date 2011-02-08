@@ -19,26 +19,37 @@
  * ============================================================================
  */
 
-
 #ifndef BBQUE_RESOURCE_MANAGER_H_
 #define BBQUE_RESOURCE_MANAGER_H_
+
+#include "bbque/platform_services.h"
+#include "bbque/plugin_manager.h"
 
 namespace bbque {
 
 class ResourceManager {
 
 public:
-  static ResourceManager & GetInstance();
-  void Go();
-  
-private:
-  ResourceManager();
-  ~ResourceManager();
 
-  void ControlLoop();
+	static ResourceManager & GetInstance();
+
+	void Go();
 
 private:
-  bool done;
+
+	ResourceManager();
+
+	~ResourceManager();
+
+	void ControlLoop();
+
+private:
+
+	bool done;
+
+	PlatformServices & ps;
+
+	plugins::PluginManager & pm;
 
 };
 

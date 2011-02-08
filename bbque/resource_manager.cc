@@ -25,6 +25,8 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/modules_factory.h"
 
+#include "bbque/plugins/logger.h"
+
 namespace bp = bbque::plugins;
 
 namespace bbque {
@@ -35,7 +37,10 @@ ResourceManager & ResourceManager::GetInstance() {
 	return rtrm;
 }
 
-ResourceManager::ResourceManager() {
+ResourceManager::ResourceManager() :
+	ps(PlatformServices::GetInstance()),
+	pm(plugins::PluginManager::GetInstance()) {
+
 }
 
 ResourceManager::~ResourceManager() {
@@ -43,32 +48,60 @@ ResourceManager::~ResourceManager() {
 
 void ResourceManager::Go() {
 
-	// Load a logger module
-	bp::PluginManager & pm = bp::PluginManager::GetInstance();
+
+	// Dump a list of registered plugins
 	const bp::PluginManager::RegistrationMap & rm = pm.GetRegistrationMap();
-
-#if 0
+	fprintf(stdout, "RM: Registered plugins:\n");
 	for (bp::PluginManager::RegistrationMap::const_iterator i = rm.begin(); i != rm.end(); ++i) {
-	//	monsterTypes_.push_back(i->first);
+	// Dump all the loaded modules
+		fprintf(stdout, "    * %s\n", (*i).first.c_str());
 	}
 
-//	// Dump all the loaded modules
-//	for (MonsterTypeVec::iterator i = monsterTypes_.begin(); i != monsterTypes_.end(); ++i) {
-//		std::string m = *i;
-//		std::cout << m.c_str() << std::endl;
-//	}
-#endif
-
-
-	//---------- JustForTest
-	// Build a TestModule
-	plugins::TestIF * tm = ModulesFactory::GetTestModule();
-	if (tm) {
-		std::cerr << "Found a Logger module" << std::endl;
-		tm->Test();
+	//---------- JustForTest: Static Module
+	fprintf(stdout, "\nRM: Looking for nearest matching module [test.]\n");
+	// Build a Test object
+	plugins::TestIF * tms = ModulesFactory::GetTestModule();
+	if (tms) {
+		fprintf(stdout, "RM: Found a module within namespace '"
+				TEST_NAMESPACE "'\n");
+		tms->Test();
 	} else {
-		std::cerr << "Unable to find a \"logger\" module" << std::endl;
+		fprintf(stdout, "RM: Unable to find a module within namespace '"
+				TEST_NAMESPACE "'\n");
 	}
+
+	//---------- JustForTest: Dynamic Module
+	fprintf(stdout, "\nRM: Looking for (nearest matching) module"
+			"[test.dummy_dyn]\n");
+	// Build a Test object
+	plugins::TestIF * tmd = ModulesFactory::GetTestModule("test.dummy_dyn");
+	if (tmd) {
+		fprintf(stdout, "RM: Found a module within namespace '"
+				TEST_NAMESPACE "'\n");
+		tmd->Test();
+	} else {
+		fprintf(stdout, "RM: Unable to find a module within namespace '"
+				TEST_NAMESPACE "'\n");
+	}
+
+	//---------- Get a logger module
+	fprintf(stdout, "\nRM: Looking for nearest matching module [logger.]\n");
+	// Build a Logger object
+	std::string logger_name("bq.rm");
+	plugins::LoggerIF::Configuration conf(logger_name.c_str());
+	plugins::LoggerIF * logger =
+		ModulesFactory::GetLoggerModule(std::cref(conf));
+	if (logger) {
+		fprintf(stdout, "RM: Found a module within namespace '"
+				TEST_NAMESPACE "'\n");
+		logger->Debug("Test DEBUG message");
+		logger->Info("Test INFO message");
+		logger->Warn("Test WARN message");
+	} else {
+		fprintf(stdout, "RM: Unable to find a module within namespace '"
+				LOGGER_NAMESPACE "'\n");
+	}
+	std::cout << "\n" << std::endl;
 
 	while (!done) {
 		ControlLoop();

@@ -80,9 +80,8 @@ int32_t PlatformServices::ServiceConfData(PF_ServiceData & data) {
 	po::variables_map & opts =
 		 std::ref(*(((PF_Service_ConfDataOut*)data.response)->opts_value));
 
-	std::cout << "Processing ServiceConfData from '" << data.id << "'..." << std::endl;
+	fprintf(stdout, "PS: ServiceConfData ===> '%s'\n", data.id);
 	cm.ParseConfigurationFile(opts_desc, opts);
-
 
 	return PF_SERVICE_DONE;
 }
