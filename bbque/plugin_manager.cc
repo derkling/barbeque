@@ -64,12 +64,12 @@ PluginManager & PluginManager::GetInstance() {
  * The registration params may be received from an external plugin so it is
  * crucial to validate it, because it was never subjected to our tests.
  *
- * @param   objectType the pointer to the plugins object type string
+ * @param   id the pointer to the plugins object type string
  * @param	params the plugins data
  * @return  true if data is correctly initialized, false otherwise
  */
-static bool isValid(const char * objectType, const PF_RegisterParams * params) {
-	if (!objectType || !(*objectType))
+static bool isValid(const char * id, const PF_RegisterParams * params) {
+	if (!id || !(*id))
 		return false;
 	if (!params ||!params->CreateFunc || !params->DestroyFunc)
 		return false;
@@ -77,10 +77,10 @@ static bool isValid(const char * objectType, const PF_RegisterParams * params) {
 	return true;
 }
 
-int32_t PluginManager::RegisterObject(const char * objectType, const PF_RegisterParams * params) {
+int32_t PluginManager::RegisterObject(const char * id, const PF_RegisterParams * params) {
 
 	// Check parameters
-	if (!isValid(objectType, params))
+	if (!isValid(id, params))
 		return -1;
 
 	PluginManager & pm = PluginManager::GetInstance();
@@ -88,11 +88,11 @@ int32_t PluginManager::RegisterObject(const char * objectType, const PF_Register
 	// Verify that versions match
 	PF_PluginAPIVersion v = pm.platform_services.version;
 	if (v.major != params->version.major) {
-		fprintf(stderr, "PM: Module [%s] version mismatching\n", objectType);
-		return -1;
+		fprintf(stderr, "PM: Module [%s] version mismatching\n", id);
+		return -2;
 	}
 
-	std::string key((const char *)objectType);
+	std::string key((const char *)id);
 	if (key == std::string("*")) {
 		// If it's a wild card registration just add it
 		pm.wild_card_vec.push_back(*params);
@@ -101,8 +101,8 @@ int32_t PluginManager::RegisterObject(const char * objectType, const PF_Register
 
 	if (pm.exact_match_map.find(key) != pm.exact_match_map.end()) {
 		// item already exists in exact_match_map fail (only one can handle)
-		fprintf(stderr, "PM: Module [%s] already registered\n", objectType);
-		return -1;
+		fprintf(stderr, "PM: Module [%s] already registered\n", id);
+		return -3;
 	}
 
 	pm.exact_match_map[key] = *params;
@@ -124,7 +124,7 @@ int32_t PluginManager::LoadAll(const std::string & pluginDir, PF_InvokeServiceFu
 		platform_services.InvokeService = func;
 
 	if (!fs::exists(plugins_dir) || !fs::is_directory(plugins_dir))
-		return -1;
+		return -2;
 
 	fs::directory_iterator it(plugins_dir);
 	fs::directory_iterator end; // default construction yields past-the-end

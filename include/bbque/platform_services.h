@@ -1,6 +1,6 @@
 /**
  *       @file  platform_services.h
- *      @brief  The services provide to plugins by the barbeque core
+ *      @brief  The services provided to plugins by the Barbeque framework
  *
  * This class provides a set of services to barbeuqe modules throughout the
  * single InvokeServices method.
@@ -26,23 +26,31 @@
 /**
  * Defines the set of supported platform services.
  * Each platform service could be associated to a corresponding service params
- * data structure defined thereafter.
+ * data structure defined thereafter. Some values are for internal use only
+ * and do not correspond to an actual offered service.
  */
 typedef enum PF_PlatformServiceID {
+	/** <i>(internal)</i> Used to represent the "no service" */
 	PF_SERVICE_NONE = 0,
 
 //----- Services for both C and CPP coded plugins
-	PF_SERVICE_CONF_PARAM,		//> Return the string of a configuration param
 
+	/** Return the string of a configuration param */
+	PF_SERVICE_CONF_PARAM,
 
-	PF_SERVICE_C_BASED_COUNT,	//> This must always be the last entry of
-								//> 	services for both C and CPP plugins
+	/** <i>(internal)</i> This must always be the
+	  last entry of services for both C and CPP
+	  coded plugins*/
+	PF_SERVICE_C_BASED_COUNT,
 
 //----- Services only for CPP coded plugins
-	PF_SERVICE_CONF_DATA, 		//> Return the values_map of the required
-								//>  configuration patams
 
-	PF_SERVICE_COUNT			//> This must always be the last entry
+	/** Return the values_map of the required configuration params */
+	PF_SERVICE_CONF_DATA,
+
+	/** <i>(internal)</i> This must always be the last entry */
+	PF_SERVICE_COUNT
+
 } PF_PlatformServiceID;
 
 /**
@@ -52,14 +60,23 @@ typedef enum PF_PlatformServiceID {
  * define a set of service specific input data and expected return results.
  */
 typedef struct PF_ServiceData {
-	const char * id;	//> Requesting object identified
-	void * request;		//> Specific service request data
-	void * response;	//> Specific service responce data
+	/** Identifier of the requesting object */
+	const char * id;
+	/** Specific service request data */
+	void * request;
+	/** Specific service responce data */
+	void * response;
 } PF_ServiceData;
 
+/**
+ * Exit codes for a service request
+ */
 typedef enum PF_ServiceResponse {
+	/** Request satisfied, response data returned */
 	PF_SERVICE_DONE 	=  0,
+	/** Undefined service request */
 	PF_SERVICE_UNDEF	= -1,
+	/** Wrong request data for the required service */
 	PF_SERVICE_WRONG	= -2
 } PF_ServiceResponse;
 
@@ -69,11 +86,19 @@ typedef enum PF_ServiceResponse {
 #include <boost/program_options/variables_map.hpp>
 namespace po = boost::program_options;
 
+/**
+ * Request data for a PF_SERVICE_CONF_DATA service request
+ */
 typedef struct PF_Service_ConfDataIn {
+	/** Pointer to a set of options descriptors required */
 	po::options_description const * opts_desc;
 } PF_Service_ConfDataIn;
 
+/**
+ * Response data for a PF_SERVICE_CONF_DATA service request
+ */
 typedef struct PF_Service_ConfDataOut {
+	/** Pointer to a map to store the values of required options */
 	po::variables_map * opts_value;
 } PF_Service_ConfDataOut;
 //----- END - PF_SERVICE_CONF_DATA -----
@@ -86,24 +111,49 @@ typedef struct PF_Service_ConfDataOut {
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
-
 namespace bbque {
 
 
-
+/**
+ * @class PlatformServices
+ * @brief Module implemeting supported for offered platform services
+ * This class defines the interface to access all the services that the
+ * platform provides to plugin. Offered services have a unique identifyer
+ * defined by PF_PlatformServiceID and requires a corresponding set of input
+ * and output parameters to be passed using the PF_ServiceData structure.
+ * Each service defines the structure of input and output parameters to be
+ * passed at service invocation time. However, each service request return a
+ * standardized return code as defined by PF_ServiceResponse.
+ */
 class PlatformServices {
 
 public:
 
+	/**
+	 * @brief Release the platform service module
+	 */
 	~PlatformServices();
 
+	/**
+	 * @brief Get an instance to the (singleton) service module
+	 */
 	static PlatformServices & GetInstance();
 
+	/**
+	 * @brief Entry point for platform service requests
+	 * This method could be passed to plugins as a valid instance of
+	 * PF_InvokeServiceFunc. After some safety checking on the service source
+	 * and type, this method dispatch the request to the proper service
+	 * provider.
+	 */
 	static int32_t ServiceDispatcher(PF_PlatformServiceID id,
-										PF_ServiceData & data);
+			PF_ServiceData & data);
 
 private:
 
+	/**
+	 * @ brief Build a new platform service module.
+	 */
 	PlatformServices();
 
 	/**
@@ -117,6 +167,12 @@ private:
 	bool CheckRequest(PF_PlatformServiceID id,
 		PF_ServiceData & data);
 
+	/**
+	 * @brief The PF_SERVICE_CONF_DATA service provide
+	 * This method process service data requests by quering the
+	 * ConfigurationManager module about the required options and than returns
+	 * their values to the calling plugin.
+	 */
 	int32_t ServiceConfData(PF_ServiceData & data);
 
 };

@@ -31,15 +31,35 @@
 
 namespace bbque {
 
+/**
+ * @class ModulesFactory
+ * @brief A singleton class to build other Barbeque modules.
+ * This class provides a set of factory methods to build other Barbeque
+ * modules. By design, within Barbeque each component (except core components
+ * such this one)  is represented by one or more module which could be either
+ * statically linked or dynamically loaded. Each such module should implement
+ * a predefined interface, thus making them interchangable.
+ * This class provides a set of factory methods to get a reference to each
+ * kind of supported interfaces.
+ */
 class ModulesFactory {
 
 public:
 
+	/**
+	 * Get a reference to the (singleton) module factory
+	 */
 	static ModulesFactory & GetInstance();
 
+	/**
+	 * Get a reference to a module implementing the TestIF interface
+	 */
 	static plugins::TestIF * GetTestModule(
 			const std::string & id = TEST_NAMESPACE);
 
+	/**
+	 * Get a reference to a module implementing the LoggerIF interface
+	 */
 	static plugins::LoggerIF * GetLoggerModule(
 			plugins::LoggerIF::Configuration const & data,
 			std::string const & id = LOGGER_NAMESPACE);

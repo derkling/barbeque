@@ -56,21 +56,22 @@
 
 namespace bbque {
 
+/**
+ * @class Object
+ * @brief The basic class from witch all Barbeque modules should derive
+ */
 class Object {
 
 public:
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 * @brief  Release this object
 	 */
 	~Object();
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 * @brief  Get the name of this object
+	 * @return this object name
 	 */
 	const std::string & GetName() const {
 		return name;
@@ -79,21 +80,20 @@ public:
 protected:
 
 	/**
-	 * 
+	 * The pointer to logger of this object
 	 */
 	std::unique_ptr<plugins::LoggerIF> logger;
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 * @brief   Build a new object
+	 * @param   name a name identitying this object
 	 */
 	Object(std::string const & name);
 
 private:
 
 	/**
-	 * 
+	 * This object name
 	 */
 	const std::string name;
 

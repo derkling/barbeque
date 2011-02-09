@@ -29,48 +29,119 @@
 extern "C" {
 #endif
 
+/**
+ * The plugin programming language
+ */
 typedef enum PF_ProgrammingLanguage {
+	/** Undefined plugin language */
 	PF_LANG_UNDEF = 0,
+	/** Plugin coded in C language */
 	PF_LANG_C,
+	/** Plugin coded in CPP language */
 	PF_LANG_CPP
 } PF_ProgrammingLanguage;
 
 struct PF_PlatformServices;
 
+/**
+ * The information passed to a plugin to support the construction of a new
+ * registered object
+ */
 typedef struct PF_ObjectParams {
+	/** The name of the object to built */
 	const char * id;
+	/** The set of platform supported services */
 	const struct PF_PlatformServices * platform_services;
+	/** A pointer to module specific data */
 	void * data;
 } PF_ObjectParams;
 
+/**
+ * The API version number
+ */
 typedef struct PF_PluginAPIVersion {
+	/** Major API version number */
 	int32_t major;
+	/** Minor API version number */
 	int32_t minor;
 } PF_PluginAPIVersion;
 
+/**
+ * @brief A plugin provided function to build a new object
+ * This function allow the plugin manager to create a new plugin object. Each
+ * plugin is required to registers such a functions with the plugin manager at
+ * initialization time.
+ */
 typedef void * (*PF_CreateFunc)(PF_ObjectParams *);
 
+/**
+ * @brief A plugin provided function to destroy a previously created object
+ * This function allow the plugin manager to destroy a specified plugin object. Each
+ * plugin is required to registers such a functions with the plugin manager at
+ * initialization time.
+ */
 typedef int32_t (*PF_DestroyFunc)(void *);
 
+/**
+ * Contains all the information that a plugin must provide to the plugin
+ * manager upon initialization (e.g. version, create/destroy functions, and
+ * programming language).
+ */
 typedef struct PF_RegisterParams {
+	/** The plugins implemented API version */
 	PF_PluginAPIVersion version;
+	/** The plugin code language */
 	PF_ProgrammingLanguage programming_language;
+	/** The plugins object creation function */
 	PF_CreateFunc CreateFunc;
+	/** The plugins object destruction function */
 	PF_DestroyFunc DestroyFunc;
 } PF_RegisterParams;
 
+/**
+ * @brief A pointer to an object registration function.
+ * A function implemented by the plugin manager which allows each plugin
+ * to register a PF_RegisterParams struct for each object type it supports.
+ * @note This scheme allows a plugin to register different versions of an
+ * object and multiple object types.
+ */
 typedef int32_t (*PF_RegisterFunc)(const char * node_type,
 					const PF_RegisterParams * params);
 
+/**
+ * @brief A pointer to a service invocation function.
+ * A pointer to a generic function that plugins can use to invoke services of
+ * the Barbeque core (e.g. configuration parameters, logging, event
+ * notification and error reporting) The signature includes the service name
+ * and an opaque pointer to a parameters struct. The plugins should know about
+ * available services and how to invoke them.
+ */
 typedef int32_t (*PF_InvokeServiceFunc)(PF_PlatformServiceID id,
 					PF_ServiceData & data);
-
+/**
+ * @brief Information passed to plugins at initialization time
+ * This struct aggregate all the services that the platform provides to plugin
+ * (e.g., version, registering objects and the invoke service function). This
+ * struct is passed to each plugin at initialization time.
+ */
 typedef struct PF_PlatformServices {
+	/** Current version of the plugins API */
 	PF_PluginAPIVersion version;
+	/** Plugins objects registration function
+	  Plugins could use this function at initialization time to register each
+	  object they want. */
 	PF_RegisterFunc RegisterObject;
+	/** Plugins service invocation function
+	  Plugins could access platform offered services by calls to this function
+	  */
 	PF_InvokeServiceFunc InvokeService;
 } PF_PlatformServices;
 
+
+/**
+ * @brief A pointer to a plugin exit function
+ * Defines a pointer to a plugin define exit function.
+ */
 typedef int32_t (*PF_ExitFunc)();
 
 

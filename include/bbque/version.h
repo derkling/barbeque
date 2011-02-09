@@ -23,6 +23,9 @@
 
 extern "C" {
 
+/**
+ * A string representing the GIT version of the compiled binary
+ */
 extern const char *g_git_version;
 
 }
