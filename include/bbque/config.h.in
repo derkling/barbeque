@@ -1,0 +1,28 @@
+/**
+ *       @file  config.h
+ *      @brief  The target system configuration
+ *
+ * This collects target specific configurations
+ *
+ *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *
+ *   @internal
+ *     Created  01/14/2011
+ *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
+ *    Compiler  gcc/g++
+ *     Company  Politecnico di Milano
+ *   Copyright  Copyright (c) 2011, Patrick Bellasi
+ *
+ * This source code is released for free distribution under the terms of the
+ * GNU General Public License as published by the Free Software Foundation.
+ * =====================================================================================
+ */
+
+#ifndef BBQUE_CONFIG_H_
+#define BBQUE_CONFIG_H_
+
+/** Enable debugging (if defined) */
+#cmakedefine BBQUE_DEBUG
+
+#endif // BBQUE_CONFIG_H_
+
