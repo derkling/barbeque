@@ -3,9 +3,11 @@
 [ -d build/Debug && -d build/Release ] || mkdir -p build/{Debug,Release}
 
 cd build/Debug && CXX=g++-4.5 cmake -DCMAKE_BUILD_TYPE=Debug ../..
+[ $? -eq 1 ] && cd - >/dev/null 2>&1 && return 1
 cd -
 
 cd build/Release && CXX=g++-4.5 cmake  -DCMAKE_BUILD_TYPE=Release ../..
+[ $? -eq 1 ] && cd - >/dev/null 2>&1 && return 1
 cd -
 
 cd build/Debug
