@@ -32,6 +32,9 @@ struct PF_ObjectParams;
 
 namespace bbque { namespace plugins {
 
+// Forward declaration
+class LoggerIF;
+
 /**
  * @class YamcaSchedPol
  * @brief The YaMCA resource scheduler heuristic registered as a dynamic C++ plugin.
@@ -63,6 +66,11 @@ public:
 	virtual SchedulerResult_t schedule(bbque::SystemView const & system);
 
 private:
+
+	/**
+	 * @brief System logger instance
+	 */
+	LoggerIF *logger;
 
 	/**
 	 * @brief   The plugins constructor

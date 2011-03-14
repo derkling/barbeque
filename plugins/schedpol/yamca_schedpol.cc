@@ -21,15 +21,26 @@
 
 #include "yamca_schedpol.h"
 
+#include <bbque/modules_factory.h>
 #include <bbque/system_view.h>
+#include <bbque/plugins/logger.h>
 
 #include <iostream>
 
 namespace bbque { namespace plugins {
 
 YamcaSchedPol::YamcaSchedPol() {
-	std::cout << "YaMCA: Build new dynamic object ["
-		<< this << "]" << std::endl;
+
+	// Get a logger
+	plugins::LoggerIF::Configuration conf(SCHEDULER_POLICY_NAMESPACE"yamca");
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+
+	if (logger)
+		logger->Info("YaMCA: Built a new dynamic object[%p]\n", this);
+	else
+		std::cout << "YaMCA: Build new dynamic object ["
+			<< this << "]" << std::endl;
+
 }
 
 YamcaSchedPol::~YamcaSchedPol() {
