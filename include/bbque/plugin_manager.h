@@ -125,10 +125,11 @@ public:
 	 * objects are registered the first matching in alphabetical order is
 	 * built end returned.
 	 * @param   id the string name of the required object
+	 * @data    the initialization data defined by the plugin interface
 	 * @return  a reference to the required object, NULL on error.
 	 */
 	void * CreateObject(const std::string & id,
-					ObjectAdapterIF & adapter, void * data = NULL);
+				 void * data = NULL, ObjectAdapterIF * adapter = NULL);
 
 	/**
 	 * @brief   Release all plugins management resources.

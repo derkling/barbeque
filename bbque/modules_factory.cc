@@ -50,7 +50,7 @@ plugins::TestIF * ModulesFactory::GetTestModule(const std::string & id) {
 	Test_ObjectAdapter toa;
 
 	void * module = bp::PluginManager::GetInstance().
-						CreateObject(id, toa);
+						CreateObject(id, NULL, &toa);
 
 	return (plugins::TestIF *) module;
 }
@@ -70,7 +70,7 @@ plugins::LoggerIF * ModulesFactory::GetLoggerModule(
 	Logger_ObjectAdapter loa;
 
 	void * module = bp::PluginManager::GetInstance().
-						CreateObject(id, loa, (void*)&data);
+						CreateObject(id, (void*)&data, &loa);
 
 	return (plugins::LoggerIF *) module;
 }

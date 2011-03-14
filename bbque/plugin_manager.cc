@@ -238,7 +238,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 }
 
 void * PluginManager::CreateObject(const std::string & id,
-		ObjectAdapterIF & adapter, void * data) {
+		void * data, ObjectAdapterIF * adapter) {
 	// "*" is not a valid object type
 	if (id == std::string("*"))
 		return NULL;
@@ -261,12 +261,15 @@ void * PluginManager::CreateObject(const std::string & id,
 
 		// Class (or full) match found
 		PF_RegisterParams & rp = (*near_match).second;
+		// Return if the plugin is C coded but we don't have an adapter
+		if (!adapter && rp.programming_language == PF_LANG_C)
+			return NULL;
 		void * object = rp.CreateFunc(&op);
 		if (object) {
 			// Great, there is an exact match
 			// Adapt if necessary (wrap C objects using an adapter)
 			if (rp.programming_language == PF_LANG_C)
-				object = adapter.adapt(object, rp.DestroyFunc);
+				object = adapter->adapt(object, rp.DestroyFunc);
 
 			return object;
 		}
@@ -277,6 +280,9 @@ void * PluginManager::CreateObject(const std::string & id,
 	for (size_t i = 0; i < wild_card_vec.size(); ++i) {
 
 		PF_RegisterParams & rp = wild_card_vec[i];
+		// Disregard C coded plugins if we don't have an adapter
+		if (!adapter && rp.programming_language == PF_LANG_C)
+			continue;
 		void * object = rp.CreateFunc(&op);
 		if (!object)
 			continue;
@@ -285,7 +291,7 @@ void * PluginManager::CreateObject(const std::string & id,
 
 		// Adapt if necessary (wrap C objects using an adapter)
 		if (rp.programming_language == PF_LANG_C) {
-			object = adapter.adapt(object, rp.DestroyFunc);
+			object = adapter->adapt(object, rp.DestroyFunc);
 
 			// promote registration to exact_matc
 			// (but keep also the wild card registration for other object types)
