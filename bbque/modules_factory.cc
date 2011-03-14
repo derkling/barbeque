@@ -102,5 +102,19 @@ plugins::RecipeLoaderIF * ModulesFactory::GetRecipeLoaderModule(
 	return (plugins::RecipeLoaderIF *) module;
 }
 
+plugins::SchedulerPolicyIF * ModulesFactory::GetSchedulerPolicyModule(
+		std::string const & id) {
+
+	// Ensure ModulesFactory initialization
+	ModulesFactory::GetInstance();
+
+	// SchedulerPolicy is just implemented in C++ thus it doesn't
+	// require a real ObjectAdapter
+	void * module = bp::PluginManager::GetInstance().
+						CreateObject(id);
+
+	return (plugins::SchedulerPolicyIF *) module;
+}
 
 } // namespace bbque
+

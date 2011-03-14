@@ -27,6 +27,8 @@
 #include "bbque/plugins/test_adapter.h"
 #include "bbque/plugins/logger_adapter.h"
 #include "bbque/plugins/recipe_loader.h"
+//----- Supported C++ only plugin interfaces
+#include "bbque/plugins/scheduler_policy.h"
 
 #include <string>
 
@@ -70,6 +72,12 @@ public:
 	 */
 	static plugins::RecipeLoaderIF * GetRecipeLoaderModule(
 			std::string const & id = RECIPE_LOADER_NAMESPACE);
+
+	/**
+	 * Get a reference to a module implementing the SchedulerPolicyIF interface
+	 */
+	static plugins::SchedulerPolicyIF * GetSchedulerPolicyModule(
+		std::string const & id = SCHEDULER_POLICY_NAMESPACE);
 
 private:
 
