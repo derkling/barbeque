@@ -3,3 +3,5 @@
 add_subdirectory(test)
 add_subdirectory(logger)
 add_subdirectory(rloader)
+add_subdirectory(schedpol)
+
