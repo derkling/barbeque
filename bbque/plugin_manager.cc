@@ -27,7 +27,11 @@
 #include "bbque/dynamic_library.h"
 #include "bbque/plugins/object_adapter.h"
 
+#include "bbque/utils/utility.h"
+
 namespace fs = boost::filesystem;
+
+#define FMT(fmt) BBQUE_FMT(COLOR_LGREEN, "PM", fmt)
 
 namespace bbque { namespace plugins {
 
@@ -88,7 +92,7 @@ int32_t PluginManager::RegisterObject(const char * id, const PF_RegisterParams *
 	// Verify that versions match
 	PF_PluginAPIVersion v = pm.platform_services.version;
 	if (v.major != params->version.major) {
-		fprintf(stderr, "PM: Module [%s] version mismatching\n", id);
+		fprintf(stderr, FMT("Module [%s] version mismatching\n"), id);
 		return -2;
 	}
 
@@ -101,12 +105,12 @@ int32_t PluginManager::RegisterObject(const char * id, const PF_RegisterParams *
 
 	if (pm.exact_match_map.find(key) != pm.exact_match_map.end()) {
 		// item already exists in exact_match_map fail (only one can handle)
-		fprintf(stderr, "PM: Module [%s] already registered\n", id);
+		fprintf(stderr, FMT("Module [%s] already registered\n"), id);
 		return -3;
 	}
 
 	pm.exact_match_map[key] = *params;
-	//fprintf(stdout, "PM: New module [%s:%p] registered\n",
+	//fprintf(stdout, FMT("New module [%s:%p] registered\n"),
 	//	key.c_str(), (void*)params->CreateFunc);
 	return 0;
 }
@@ -116,7 +120,7 @@ int32_t PluginManager::LoadAll(const std::string & pluginDir, PF_InvokeServiceFu
 
 	if (pluginDir.empty()) {
 		// The path is empty
-		fprintf(stderr, "PM: Empty plugins dir [%s]\n", pluginDir.c_str());
+		fprintf(stderr, FMT("Empty plugins dir [%s]\n"), pluginDir.c_str());
 		return -1;
 	}
 
@@ -210,7 +214,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	if (dl_map.find(path.string()) != dl_map.end())
 		return -1;
 
-	fprintf(stdout, "PM: Loading plugin [%s]\n", pluginPath.c_str());
+	fprintf(stdout, FMT("Loading plugin [%s]\n"), pluginPath.c_str());
 
 	std::string errorString;
 	DynamicLibrary * dl = LoadLibrary(fs::system_complete(path).string(),
@@ -225,14 +229,14 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	PF_InitFunc initFunc = pft->init;
 	if (!initFunc) {
 		// missing dynamic library entry point
-		fprintf(stderr, "PM: Missing [PF_initPlugin] plugin entry point\n");
+		fprintf(stderr, FMT("Missing [PF_initPlugin] plugin entry point\n"));
 		return -1;
 	}
 
 	int32_t res = InitializePlugin(initFunc);
 	if (res < 0) {
 		// initialization failed
-		fprintf(stderr, "PM: Initialization failed\n");
+		fprintf(stderr, FMT("Initialization failed\n"));
 		return res;
 	}
 
@@ -257,7 +261,7 @@ void * PluginManager::CreateObject(const std::string & id,
 	if ( near_match != exact_match_map.end() &&
 			((*near_match).first.compare(0,id.size(),id)) == 0 ) {
 
-		fprintf(stdout, "PM: Found matching module [%s]\n",
+		fprintf(stdout, FMT("PM: Found matching module [%s]\n"),
 			(*near_match).first.c_str());
 
 		// Class (or full) match found

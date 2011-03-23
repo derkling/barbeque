@@ -25,8 +25,17 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/resource_manager.h"
 
+#include "bbque/utils/timer.h"
+#include "bbque/utils/utility.h"
+
 namespace bb = bbque;
 namespace bp = bbque::plugins;
+namespace bu = bbque::utils;
+
+#define FMT(fmt) BBQUE_FMT(COLOR_GREEN, "BQ", fmt)
+
+/* The global timer, this can be used to get the time since Barbeque start */
+bu::Timer bbque_tmr(true);
 
 int main(int argc, char *argv[]) {
 
@@ -35,8 +44,8 @@ int main(int argc, char *argv[]) {
 	cm.ParseCommandLine(argc, argv);
 
 	// Welcome screen
-	fprintf(stdout, "\n\t\t.:: Barbeque RTRM (ver. %s) ::.\n", g_git_version);
-	fprintf(stdout, "Built: " __DATE__  " " __TIME__ "\n\n");
+	fprintf(stdout, FMT(".:: Barbeque RTRM (ver. %s) ::.\n"), g_git_version);
+	fprintf(stdout, FMT("Built: " __DATE__  " " __TIME__ "\n\n"));
 
 	// Initialization
 	bp::PluginManager & pm = bp::PluginManager::GetInstance();
@@ -45,7 +54,7 @@ int main(int argc, char *argv[]) {
 
 	// Plugins loading
 	if (cm.LoadPlugins()) {
-		fprintf(stdout, "RM: Loading plugins, dir [%s]\n",
+		fprintf(stdout, FMT("Loading plugins, dir [%s]\n"),
 				cm.GetPluginsDir().c_str());
 		pm.LoadAll(cm.GetPluginsDir());
 	}
