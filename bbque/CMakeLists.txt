@@ -19,7 +19,7 @@ link_directories(
 )
 
 # Add "barbeque" specific flags
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x -ldl")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x -lrt -ldl")
 
 # Generate configuration file
 configure_file (
@@ -30,6 +30,7 @@ configure_file (
 # Add "barbeque" target binary
 set (BARBEQUE_SRC barbeque version object resource_manager configuration_manager)
 set (BARBEQUE_SRC platform_services dynamic_library plugin_manager modules_factory ${BARBEQUE_SRC})
+set (BARBEQUE_SRC utils/timer ${BARBEQUE_SRC})
 add_executable (barbeque ${BARBEQUE_SRC})
 
 # Linking dependencies
