@@ -42,7 +42,7 @@ target_link_libraries(
 # Linking static plugins
 target_link_libraries(
 	barbeque
-	-Wl,-whole-archive plugin_test_dummy -Wl,-no-whole-archive
+#	-Wl,-whole-archive plugin_test_dummy -Wl,-no-whole-archive
 	-Wl,-whole-archive plugin_logger_log4cpp -Wl,-no-whole-archive
 )
 

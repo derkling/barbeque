@@ -2,7 +2,7 @@
 
 #----- Add "testing" target static library
 set(PLUGIN_DUMMY_SRC  dummy_test dummy_plugin)
-add_library(plugin_test_dummy STATIC ${PLUGIN_DUMMY_SRC})
+#add_library(plugin_test_dummy STATIC ${PLUGIN_DUMMY_SRC})
 
 #----- Add "testing" target dynamic library
 add_library(plugin_test_dummy_so MODULE ${PLUGIN_DUMMY_SRC})
