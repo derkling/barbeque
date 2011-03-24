@@ -90,6 +90,6 @@ else (DOXYGEN_FOUND STREQUAL "NO")
 endif (DOXYGEN_FOUND STREQUAL "NO")
 
 # Recurse into project subfolders
+add_subdirectory (rtlib)
 add_subdirectory (plugins)
 add_subdirectory (bbque)
-
