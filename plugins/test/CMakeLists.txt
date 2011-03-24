@@ -13,5 +13,7 @@ set_target_properties(plugin_test_dummy_so PROPERTIES COMPILE_FLAGS "-DBBQUE_DYN
 
 #----- Add "testing" specific flags
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--gc-sections")
 
 #add_subdirectory(coreint)

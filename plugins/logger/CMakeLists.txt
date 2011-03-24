@@ -14,6 +14,8 @@ add_library(plugin_logger_log4cpp STATIC ${PLUGIN_LOG4CPP_SRC})
 
 #----- Add library specific flags
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--gc-sections")
 
 # Linking dependencies
 target_link_libraries(plugin_logger_log4cpp ${LOG4CPP_LIBRARIES})
