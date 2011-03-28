@@ -53,7 +53,7 @@ struct Constraint {
 	};
 
 	/** Resource to constraint (shared pointer) */
-	ResoucePtr_t resource;
+	ResourcePtr_t resource;
 
 	/** Resource usage upper bound   */
 	uint64_t upper;

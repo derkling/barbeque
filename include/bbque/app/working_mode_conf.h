@@ -43,8 +43,8 @@ public:
 
 	/**
 	 * @brief Create a new object TransitionOverheads managing the overhead
-	 * information in switching to 'dest_wm' working mode
-	 * @param dest_wm Destination working mode
+	 * information in switching to 'dest_awm' working mode
+	 * @param dest_awm Destination working mode
 	 * @param time Time spent in switching to destination working mode
 	 * @return A reference to the TransitionOverheads just created
 	 */

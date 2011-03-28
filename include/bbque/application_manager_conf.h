@@ -41,8 +41,13 @@ public:
 	 * @brief The entry point for the applications requiring Barbeque.
 	 * @param name The application name
 	 * @param user Who's the user ?
+	 * @param prio Static priority
 	 * @param pid PID of the application (assigned from the OS)
 	 * @param rpath Recipe location
+	 * @param weak_load If true, the recipe accept a "weak load".
+	 * It means that if a resource is missing, Barbeque can look for a
+	 * substituting resource taken from a higher level in the resource tree.
+	 *
 	 * @return An error code
 	 */
 	virtual plugins::RecipeLoaderIF::ExitCode_t StartApplication(

@@ -32,12 +32,10 @@
 
 #include "object.h"
 #include "bbque/application_manager_conf.h"
+#include "bbque/app/application.h"
 
 
 namespace bbque {
-
-/** Shared pointer to Recipe object */
-typedef std::shared_ptr<Recipe> RecipePtr_t;
 
 
 /**

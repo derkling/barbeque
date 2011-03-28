@@ -3,7 +3,7 @@
  *      @brief  Application Working Mode for supporting application execution
  *      in Barbeque RTRM
  *
- * The class defines the set of resource requirements  of an application
+ * The class defines the set of resource requirements of an application
  * execution profile (labeled "Application Working Mode") and a value of
  * Quality of Service.
  *
@@ -34,8 +34,7 @@ typedef std::shared_ptr<Application> AppPtr_t;
 
 /**
  * @class WorkingMode
- * @brief An execution profile defined by the application as a set of resource
- * usage requests.
+ * @brief Profile for supporting the application execution.
  *
  * Each Application object should be filled with a list of WorkingMode.
  * A "working mode" is characterized by a set of resource usage request and a
@@ -125,7 +124,7 @@ public:
 	/**
 	 * @brief Remove overhead informations about switching to 'dest_wm'
 	 * working mode
-	 * @param dest_wm The destination working mode
+	 * @param dest_awm The destination working mode
 	 */
 	inline void RemoveOverheadInfo(std::string const & dest_awm) {
 		overheads.erase(dest_awm);

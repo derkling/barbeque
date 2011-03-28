@@ -32,7 +32,7 @@
 namespace bbque { namespace res {
 
 struct ResourceNode;
-typename std::list<ResourceNode *> ResourceNodeList_t;
+typedef std::list<ResourceNode *> ResourceNodeList_t;
 
 /**
  * @struct ResourceNode

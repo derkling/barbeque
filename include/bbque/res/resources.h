@@ -39,14 +39,25 @@ struct Resource;
 struct ResourceUsage;
 struct ResourceState;
 
+
+/** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
+
+/** Shared pointer to ResourceState object */
 typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
+
+/** Shared pointer to ResourceUsage object */
 typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
+
+/** Map of ResourceUsage objects. Key: resource path */
 typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
+
+/** Map of Application descriptor pointers. Key: application name */
 typedef std::map<std::string, app::Application const *> AppMap_t;
 
+
 /**
- * enum Exit codes for Resource and ResourceState methods
+ * @enum Exit codes for Resource and ResourceState methods
  */
 enum ExitCode_t {
 	/** Success */
@@ -117,7 +128,7 @@ public:
 
 	/**
 	 * @brief Set the total amount of resource
-	 * @param _tot The amount to set
+	 * @param tot The amount to set
 	 */
 	inline void SetTotal(uint64_t tot) { total = tot; }
 
@@ -224,7 +235,7 @@ private:
 	std::string type;
 
 	/** Applications holding the resource     */
-	AppMap apps;
+	AppMap_t apps;
 
 };
 

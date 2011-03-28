@@ -4,6 +4,7 @@
  *
  * This defines the interface for loading recipe files describing applications
  * information such as AWM, priorities, etc.
+ * @see Recipe for more details.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -31,14 +32,24 @@
 
 namespace bbque { namespace plugins {
 
+
 /**
  * @class RecipeLoaderIF
- * @brief Defines the basic interface for plugins implementing the loading of
- * applications recipes.
+ *
+ * @brief Basic interface for application recipe loading plugins.
+ *
+ * This is a required plugin.
+ * Barbeque RTRM needs at least one RecipeLoader plugin to be registered in
+ * order to work properly.
+ * Indeed such plugin allows the retrieving of application resources usages
+ * defined in the recipes, optional constraints, working modes values, and so
+ * on...
+ * @see Recipe for more details.
  */
 class RecipeLoaderIF {
 
 public:
+
 	/**
 	 * @enum Recipe load exit codes
 	 */

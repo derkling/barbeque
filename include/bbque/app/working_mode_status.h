@@ -38,7 +38,7 @@ typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 
 class TransitionOverheads;
 typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
-typedef std::map<std::string, OverheadPtr_t> OverheadsMap_t
+typedef std::map<std::string, OverheadPtr_t> OverheadsMap_t;
 
 /**
  * @class WorkingModeStatusIF

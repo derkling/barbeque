@@ -29,6 +29,8 @@
 namespace bbque { namespace res {
 
 struct Resource;
+
+/** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 
 /**
@@ -43,23 +45,22 @@ class ResourceAccounterStatusIF {
 public:
 
 	/**
-	 * @brief The amount of resource available given an identifying resource
-	 * path
+	 * @brief Amount of resource available given an identifying resource path
 	 * @param path Resource path
 	 * @return The amount of resource available
 	 */
 	virtual uint64_t Available(std::string const & path) const = 0;
 
 	/**
-	 * @brief The total amount of resource given an identifying resource path
-	 * @param Resource path
+	 * @brief Total amount of resource given an identifying resource path
+	 * @param path Resource path
 	 * @return The total amount of resource available
 	 */
 	virtual uint64_t Total(std::string const & path) const = 0;
 
 	/**
-	 * @brief The used amount of resource given an identifying resource name
-	 * @param Resource path
+	 * @brief Amount of resource used given an identifying resource path
+	 * @param path Resource path
 	 * @return The used amount of resource available
 	 */
 	virtual uint64_t Used(std::string const & path) const = 0;

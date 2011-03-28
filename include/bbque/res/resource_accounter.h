@@ -91,7 +91,7 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline ResourcePtr GetResource(std::string const & path) {
+	inline ResourcePtr_t GetResource(std::string const & path) {
 		return resources.find(path);
 	}
 

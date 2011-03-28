@@ -81,6 +81,7 @@ public:
 	 * @brief Constructor with parameters name and priority class
 	 * @param name Application name
 	 * @param user The user who has launched the application
+	 * @param pid Process ID
 	 */
 	explicit Application(std::string const & name, std::string const & user,
 			uint32_t pid);
@@ -132,7 +133,7 @@ public:
 
 	/**
 	 * @brief Set the process ID of the application
-	 * @param pid PID value
+	 * @param app_pid PID value
 	 */
 	void SetPid(uint32_t app_pid) {
 		pid = app_pid;
@@ -166,7 +167,7 @@ public:
 	 * @param app_recipe Recipe object shared pointer
 	 */
 	inline void SetRecipe(RecipePtr_t app_recipe) {
-		assert(_recipe.get() != NULL);
+		assert(recipe.get() != NULL);
 		recipe = app_recipe;
 	}
 
