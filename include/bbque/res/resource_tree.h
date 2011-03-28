@@ -46,6 +46,12 @@ struct ResourceNode {
 
 	/** Children nodes */
 	ResourceNodeList_t children;
+
+	/** Parent node */
+	ResourceNode * parent;
+
+	/** Depth in the tree */
+	uint16_t depth;
 };
 
 
@@ -103,11 +109,16 @@ public:
 		return false;
 	}
 
+	inline uint16_t depth() {
+		return max_depth;
+	}
+
 	/**
 	 * @brief Print the tree content
 	 */
 	inline void print_tree() {
 		_print_children(root, 0);
+		std::cout << std::endl << "Max depth: " << max_depth << std::endl;
 	}
 
 	/**
@@ -121,6 +132,9 @@ private:
 
 	/** Pointer to the root of the tree*/
 	ResourceNode *root;
+
+	/** Maximum depth of the tree */
+	uint16_t max_depth;
 
 	/**
 	 * @brief Find a resource by its pathname or template path

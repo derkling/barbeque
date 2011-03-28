@@ -3,9 +3,9 @@
  *      @brief  Application Working Mode for supporting application execution
  *      in Barbeque RTRM (implementation)
  *
- * The class defines the set of resource requirements (labeled "Application
- * Working Mode") of an application execution profile and a value of Quality
- * of Service.
+ * The class implement the class for grouping the set of resource requirements
+ * (labeled "Application Working Mode") of an application execution profile
+ * and a value of Quality of Service.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -26,10 +26,11 @@
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 
+#include "bbque/app/application.h"
+#include "bbque/app/overheads.h"
 #include "bbque/app/recipe.h"
 #include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter.h"
-#include "bbque/app/overheads.h"
 
 namespace bbque { namespace app {
 
@@ -37,13 +38,14 @@ class Application;
 
 
 WorkingMode::WorkingMode():
-	bbque::Object("bq.awm") {
+	bbque::Object(APPLICATION_NAMESPACE WORKING_MODE_NAMESPACE) {
 }
 
 
 WorkingMode::WorkingMode(AppPtr_t _app,	std::string const & _name,
 		uint8_t _value):
-	bbque::Object("bq.app." +_app->Name() + "." +_name),
+	bbque::Object(APPLICATION_NAMESPACE + _app->Name() + "." +
+			WORKING_MODE_NAMESPACE + _name),
 	name(_name),
 	value(_value) {
 
@@ -51,9 +53,12 @@ WorkingMode::WorkingMode(AppPtr_t _app,	std::string const & _name,
 	application = _app;
 
 	// Get a logger
-	std::string logger_name("bq.app." +_app->Name() + "." +_name);
+	std::string logger_name(APPLICATION_NAMESPACE +_app->Name()
+			+ "." + WORKING_MODE_NAMESPACE + _name);
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());
-	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	logger =
+		std::unique_ptr<plugins::LoggerIF>
+		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 }
 
 
@@ -67,7 +72,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		std::string const & _res_path, uint64_t _value) {
 
 	res::ResourceAccounter *ra = res::ResourceAccounter::GetInstance();
-	res::ResourcePtr resource_to_use = ra->GetResource(_res_path);
+	res::ResourcePtr_t resource_to_use = ra->GetResource(_res_path);
 
 	// Check if the resource exists
 	if (resource_to_use.get() == 0) {

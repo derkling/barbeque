@@ -33,7 +33,7 @@ namespace bbque { namespace app {
 
 Application::Application(std::string const & _name, std::string const & _user,
 		uint32_t _pid):
-	Object("bq.app." + _name),
+	Object(APPLICATION_NAMESPACE + _name),
 	pid(_pid) {
 
 	name = _name;
@@ -41,9 +41,11 @@ Application::Application(std::string const & _name, std::string const & _user,
 	curr_sched.state = next_sched.state = READY;
 
 	// Get a logger
-	std::string logger_name("bq.app." + _name);
+	std::string logger_name(APPLICATION_NAMESPACE + _name);
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());
-	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	logger =
+		std::unique_ptr<plugins::LoggerIF>
+		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
 		logger->Info("Application: %s ", _name.c_str());
@@ -76,7 +78,7 @@ void Application::SetPriority(uint16_t _prio) {
 }
 
 
-std::list<AwmStatusPtr> const & Application::WorkingModes() {
+AwmStatusPtrList_t const & Application::WorkingModes() {
 
 	// After Recipe loading we have to init the list of working modes enabled.
 	// Its should contain all the working modes, if there aren't any
@@ -97,7 +99,7 @@ std::list<AwmStatusPtr> const & Application::WorkingModes() {
 
 
 Application::ExitCode_t Application::SetNextSchedule(
-		std::string const & _awm_name, ScheduleFlag _state) {
+		std::string const & _awm_name, ScheduleFlag_t _state) {
 
 	// Get the working mode pointer
 	AwmPtr_t awm = recipe->WorkingMode(_awm_name);
@@ -204,7 +206,7 @@ Application::ExitCode_t Application::SetConstraint(
 }
 
 
-Application::ExitCode Application::RemoveConstraint(
+Application::ExitCode_t Application::RemoveConstraint(
 		std::string const & _res_name, Constraint::BoundType _type) {
 
 	// Lookup the resource by name
@@ -246,7 +248,7 @@ Application::ExitCode Application::RemoveConstraint(
 }
 
 
-void Application::_WorkingModesEnabling(std::string const & _res_name,
+void Application::workingModesEnabling(std::string const & _res_name,
 		Constraint::BoundType _type, uint64_t _value) {
 
 	// Enabled working modes iterators

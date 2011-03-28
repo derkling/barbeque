@@ -27,10 +27,17 @@
 #include "bbque/object.h"
 #include "bbque/app/working_mode_conf.h"
 
+#define WORKING_MODE_NAMESPACE "awms."
+
 namespace bbque { namespace app {
 
+// Forward declaration
 class Application;
+
+
+/** Shared pointer to Application descriptor */
 typedef std::shared_ptr<Application> AppPtr_t;
+
 
 /**
  * @class WorkingMode
@@ -131,9 +138,6 @@ public:
 	}
 
 private:
-
-	/** System logger instance */
-	plugins::LoggerIF * logger;
 
 	/**
 	 * A pointer to the Application descriptor containing the

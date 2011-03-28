@@ -121,6 +121,16 @@ private:
 #endif
 
 	/**
+	 * The description of application parameters
+	 */
+	po::options_description app_opts_desc;
+
+	/**
+	 * Greatest integer value for the lowest application priority
+	 */
+	uint16_t lowest_prio;
+
+	/**
 	 * The description of command line available parameters
 	 */
 	po::options_description cmd_opts_desc;

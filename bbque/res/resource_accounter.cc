@@ -2,14 +2,11 @@
  *       @file  resource_accounter.cc
  *      @brief  Implementation of the Resource Accounter component
  *
- * This implements the "update" status interface for ResourceAccounter.
- * This interface allows the update of resource states information. For
- * instance, when the Application Manager receive a notify upon an Application
- * working mode switch. In such case an update about the resource usages is
- * needed.
- * Moreover when Barbeque check for the platform resources, we need a method
- * for register the resources, filling a descriptor with the information
- * exposed by the platform.
+ * Each resource of system/platform should be properly registered in the
+ * Resource accounter. It keeps track of the information upon availability,
+ * total amount and used resources.
+ * The information above are updated through proper methods which must be
+ * called when an application working mode has triggered.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -39,7 +36,6 @@
 
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
-#include "bbque/res/resources.h"
 
 
 namespace bbque { namespace res {
@@ -60,7 +56,9 @@ ResourceAccounter::ResourceAccounter():
 	// Get a logger
 	std::string logger_name(RESOURCE_ACCOUNTER_NAMESPACE);
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());
-	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	logger =
+		std::unique_ptr<plugins::LoggerIF>
+		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
 		logger->Debug("ResourceAccounter instance.");
@@ -81,7 +79,7 @@ void ResourceAccounter::RegisterResource(std::string const & _path,
 	assert(!_type.empty());
 
 	// Create a new resource path
-	ResourcePtr res_ptr;
+	ResourcePtr_t res_ptr;
 	res_ptr = resources.insert(_path);
 
 	if (res_ptr.get() != NULL) {
@@ -207,6 +205,28 @@ void ResourceAccounter::changeUsages(app::Application const * _app,
 }
 
 
+std::string popNamespaceTemplate(std::string & _next_path) {
+
+	// String to return (head of the path)
+	std::string _curr_ns;
+
+	// Find the position of the ID
+	int id_pos = _next_path.find_first_of("0123456789");
+
+	if (id_pos == -1) {
+		// No ID found
+		_curr_ns = _next_path;
+		_next_path.clear();
+	}
+	else {
+		// Split
+		_curr_ns = _next_path.substr(0, id_pos);
+		_next_path = _next_path.substr(id_pos + 1);
+	}
+	return _curr_ns;
+}
+
+
 std::string const ResourceAccounter::pathTemplate(std::string const & _path) {
 
 	// Resulting template path string
@@ -235,27 +255,6 @@ std::string const ResourceAccounter::pathTemplate(std::string const & _path) {
 	return str_templ;
 }
 
-
-std::string popNamespaceTemplate(std::string & _next_path) {
-
-	// String to return (head of the path)
-	std::string _curr_ns;
-
-	// Find the position of the ID
-	int id_pos = _next_path.find_first_of("0123456789");
-
-	if (id_pos == -1) {
-		// No ID found
-		_curr_ns = _next_path;
-		_next_path.clear();
-	}
-	else {
-		// Split
-		_curr_ns = _next_path.substr(0, id_pos);
-		_next_path = _next_path.substr(id_pos + 1);
-	}
-	return _curr_ns;
-}
 
 }   // namespace res
 

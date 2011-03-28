@@ -18,11 +18,13 @@
  * ============================================================================
  */
 
+#include "coreint_test.h"
+
+#include <iomanip>
 #include <map>
 #include <vector>
-#include <stdint.h>
+#include <cstdint>
 
-#include "coreint_test.h"
 #include "bbque/modules_factory.h"
 #include "bbque/system_view.h"
 #include "bbque/app/recipe.h"
@@ -36,7 +38,7 @@ namespace bp = bbque::plugins;
 namespace bbque { namespace plugins {
 
 /** Map of application descriptor shared pointers */
-typedef std::map<uint32_t, app::AppPtr> AppsMap_t;
+typedef std::map<uint32_t, app::AppPtr_t> AppsMap_t;
 
 // Test set
 std::vector<std::string> res_names = {
@@ -156,9 +158,18 @@ std::vector<uint64_t> res_totals = {
 };
 
 
-CoreInteractionsTest::CoreInteractionsTest() {
-	std::cout << "CoreInteractionsTest: Build new " PLUGIN_TYPE " object ["
-		<< this << "]" << std::endl;
+CoreInteractionsTest::CoreInteractionsTest():
+	bbque::Object(COREINT_NAMESPACE) {
+
+	// Get a logger
+	std::string logger_name(COREINT_NAMESPACE);
+	bp::LoggerIF::Configuration conf(logger_name.c_str());
+	logger =
+		std::unique_ptr<plugins::LoggerIF>
+		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+
+	if (logger)
+		logger->Debug("CoreInteractionsTest: %s", logger_name.c_str());
 }
 
 
@@ -166,8 +177,7 @@ CoreInteractionsTest::~CoreInteractionsTest() {
 
 }
 
-
-/* Static plugin interfaces */
+// ===================[ Plugin interfaces ]====================================
 
 void * CoreInteractionsTest::Create(PF_ObjectParams *) {
 	return new CoreInteractionsTest();
@@ -181,7 +191,7 @@ int32_t CoreInteractionsTest::Destroy(void * plugin) {
 }
 
 
-/* Plugin test intefaces */
+// ===================[ Test functions ]=======================================
 
 void CoreInteractionsTest::RegisterSomeResources() {
 
@@ -217,14 +227,21 @@ void CoreInteractionsTest::PrintResourceAvailabilities() {
 		return;
 	}
 
-	fprintf(stderr, "\n __________| Resource availabilities |__________\n\n");
+	std::cout
+		<<
+		"\n______________________| Resource availabilities |___________________\n"
+		<< std::endl;
 
 	// Print resource availabilities info
-	for (uint16_t i=0; i < res_names.size(); ++i) {
-		std::cout << res_names[i].c_str() << "\t\t"	<<
-			RA->Available(res_names[i]) << std::endl;
+	for (uint16_t i = 0; i < res_names.size(); ++i) {
+		std::cout << std::setw(50) << std::left << res_names[i].c_str() << "| "
+			<< std::setw(15) << std::right << RA->Available(res_names[i])
+			<< " |" << std::endl;
 	}
-	fprintf(stderr, "___________________________________________________\n\n");
+	std::cout
+		<<
+		"____________________________________________________________________\n"
+		<< std::endl;
 }
 
 
@@ -250,7 +267,7 @@ int CoreInteractionsTest::WorkingModesDetails(
 	std::list<ba::AwmStatusPtr_t>::iterator it2 =  awms.begin();
 	std::list<ba::AwmStatusPtr_t>::iterator endm = awms.end();
 	for (; it2 != endm; ++it2) {
-		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages *** :\n",
+		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages ***\n",
 				(*it2)->Name().c_str(), (*it2)->Value(),
 				(*it2)->ResourceUsages().size());
 
@@ -259,16 +276,18 @@ int CoreInteractionsTest::WorkingModesDetails(
 		std::vector<std::string>::iterator res_it = resources.begin();
 		std::vector<std::string>::iterator res_end = resources.end();
 
-		std::cout <<
-			"\n-------------------- [ "<< awm_get->Name() << " ] -------------------"
-			<< std::endl;
+		std::cout
+			<< "\n--------------------------------[ " << awm_get->Name()
+			<< " ]----------------------------" << std::endl;
 
 		for ( ; res_it < res_end; ++res_it) {
-			std::cout << "|\t " << (*res_it).c_str() << " : " <<
-					awm_get->ResourceUsage(*res_it) << std::endl;
+			std::cout << std::setw(50) << std::left << (*res_it).c_str() << ":"
+				<< std::setw(15) << std::right
+				<< awm_get->ResourceUsage(*res_it) << " |" << std::endl;
 		}
-		std::cout <<
-			"--------------------------------------------------" <<	std::endl;
+		std::cout
+			<< "-------------------------------------------------------------"
+			<< "-----" << std::endl;
 	}
 	return 0;
 }
@@ -305,7 +324,8 @@ void CoreInteractionsTest::PrintScheduleInfo(
 			<< test_app->NextState() << std::endl;
 	}
 
-	std::cout << "**************************************************"
+	std::cout
+		<< "**************************************************"
 		<< std::endl << std::endl;
 }
 
@@ -316,8 +336,8 @@ void CoreInteractionsTest::DoScheduleSwitch(
 
 	// Get working mode wm1
 	if (test_app.get() == NULL) {
-		std::cout << "Null application descriptor pointer passed" <<
-			std::endl;
+		std::cout << "Null application descriptor pointer passed"
+			<< std::endl;
 		return;
 	}
 	// Get working mode descriptor related to "wm"
@@ -335,17 +355,12 @@ void CoreInteractionsTest::DoScheduleSwitch(
 	PrintScheduleInfo(test_app);
 }
 
-/*
- * Start the test
- */
+
+// =======================================[ Start the test ]==================
+
 void CoreInteractionsTest::Test() {
 
-	//pdc.AddPluginData("plugin", "type", false);
-
-	// Get a logger
-	std::string logger_name("bq.test");
-	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	bp::LoggerIF *logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	logger->Debug("....: CoreInteractions Test starting :.....\n");
 
 	// Resources
 	RegisterSomeResources();
@@ -370,17 +385,17 @@ void CoreInteractionsTest::Test() {
 	}
 	// SystemView
 	SystemView *sv = SystemView::GetInstance();
-	std::cout << "Applications loaded = " << sv->ApplicationsReady().size() <<
-		std::endl;
+	logger->Debug("Applications loaded = %d", sv->ApplicationsReady().size());
 
 	// Plugin specific data
 	app::PluginsDataContainer pdc;
 	app::PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
 
 	if (pdata.get() != NULL)
-		std::cout << "Plugin YaMCa - Author :" << pdata->Get("author") <<std::endl;
+		std::cout << "Plugin YaMCa - Author :" << pdata->Get("author")
+			<< std::endl;
 	else
-		std::cout << "Unable to get plugin info" << std::endl;
+		logger->Warn("Unable to get plugin info");
 
 	// Print out working modes details
 	WorkingModesDetails(test_app, res_names);
@@ -408,6 +423,8 @@ void CoreInteractionsTest::Test() {
 	PrintResourceAvailabilities();
 
 	delete appman;
+
+	logger->Debug(".....: CoreInteractions Test finished :.....");
 }
 
 }   // namespae test

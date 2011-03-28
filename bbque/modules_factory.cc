@@ -21,7 +21,6 @@
  */
 
 #include "bbque/modules_factory.h"
-
 #include "bbque/plugin_manager.h"
 #include "bbque/plugins/object_adapter.h"
 
@@ -61,8 +60,8 @@ plugins::TestIF * ModulesFactory::GetTestModule(const std::string & id) {
 typedef bp::ObjectAdapter<bp::LoggerAdapter, C_Logger> Logger_ObjectAdapter;
 
 plugins::LoggerIF * ModulesFactory::GetLoggerModule(
-		plugins::LoggerIF::Configuration const & data,
-		std::string const & id) {
+    plugins::LoggerIF::Configuration const & data,
+    std::string const & id) {
 
 	// Ensure ModulesFactory initialization
 	ModulesFactory::GetInstance();
@@ -75,5 +74,20 @@ plugins::LoggerIF * ModulesFactory::GetLoggerModule(
 	return (plugins::LoggerIF *) module;
 }
 
-} // namespace bbque
 
+plugins::RecipeLoaderIF * ModulesFactory::GetRecipeLoaderModule(
+    std::string const & id) {
+
+	// Ensure ModulesFactory initialization
+	ModulesFactory::GetInstance();
+
+	// RecipeLoader is just implemented in C++ thus it doesn't
+	// require a real ObjectAdapter
+	void * module = bp::PluginManager::GetInstance().
+	                CreateObject(id);
+
+	return (plugins::RecipeLoaderIF *) module;
+}
+
+
+} // namespace bbque

@@ -87,7 +87,8 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 
 }
 
-// ___________ Static plugin interface
+
+// =======================[ Static plugin interface ]=========================
 
 void * XMLRecipeLoader::Create(PF_ObjectParams *params) {
 
@@ -104,7 +105,8 @@ int32_t XMLRecipeLoader::Destroy(void *plugin) {
 	return 0;
 }
 
-// ___________ Module interface
+
+// =======================[ MODULE INTERFACE ]================================
 
 RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		std::shared_ptr<app::Application> _app,	std::string const & _rname,
@@ -113,10 +115,10 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	RecipeLoaderIF::ExitCode_t ret_awms;
 
 	// The current application descriptor
-	app_ptr = app::AppPtr(_app);
+	app_ptr = app::AppPtr_t(_app);
 
 	// The recipe object
-	recipe_ptr = app::RecipePtr(_recipe);
+	recipe_ptr = app::RecipePtr_t(_recipe);
 
 	// Plugin needs a logger
 	if (!logger) {
@@ -149,7 +151,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			loadConstraints(app_elem);
 
 			// Load plugins data
-			loadPluginsData<app::AppPtr>(app_ptr, app_elem);
+			loadPluginsData<app::AppPtr_t>(app_ptr, app_elem);
 		}
 
 	} catch(ticpp::Exception &ex) {
@@ -168,7 +170,7 @@ std::time_t XMLRecipeLoader::LastModifiedTime(std::string const & _name) {
 }
 
 
-// ______________________ Working modes _____________________
+//========================[ Working modes ]===================================
 
 RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 		ticpp::Element *_xml_elem) {
@@ -211,9 +213,9 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 				return RL_FORMAT_ERROR;
 
 			// Plugin specific data (of the AWM)
-			app::AwmPtr this_awm(recipe_ptr->WorkingMode(wm_name));
+			app::AwmPtr_t this_awm(recipe_ptr->WorkingMode(wm_name));
 			if (this_awm.get() != NULL)
-				loadPluginsData<app::AwmPtr>(this_awm, awm_elem);
+				loadPluginsData<app::AwmPtr_t>(this_awm, awm_elem);
 
 			// Next working mode
 			awm_elem = awm_elem->NextSiblingElement("awm", false);
@@ -231,11 +233,11 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 }
 
 
-// _____________________ Resources ______________________
+// =======================[ Resources ]=======================================
 
 // Return the correct value, based on the units specified.
 // (i.e value=4 units="Kb" returns 4096)
-ulong valueOnUnits(ulong _value, std::string const & _units);
+uint64_t valueOnUnits(ulong _value, std::string const & _units);
 
 
 uint8_t XMLRecipeLoader::loadResources(ticpp::Element *_xml_elem,
@@ -277,7 +279,7 @@ uint8_t XMLRecipeLoader::loadResources(ticpp::Element *_xml_elem,
 }
 
 
-inline ulong valueOnUnits(ulong _value, std::string const & _units) {
+inline uint64_t valueOnUnits(ulong _value, std::string const & _units) {
 
 	if (!_units.empty()) {
 	switch(toupper(_units.at(0))) {
@@ -304,7 +306,7 @@ inline uint8_t XMLRecipeLoader::appendToWorkingMode(
 		std::string const & _res_path, ulong _res_usage) {
 
 	// Add the resource usage to the working mode
-	app::WorkingMode::ExitCode wm_err_code;
+	app::WorkingMode::ExitCode_t wm_err_code;
 	wm_err_code = wm->AddResourceUsage(_res_path, _res_usage);
 
 	// Check error code returned
@@ -332,7 +334,7 @@ inline uint8_t XMLRecipeLoader::appendToWorkingMode(
 	}
 
 	return __RSRC_SUCCESS;
-};
+}
 
 
 inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element *_res_elem,
@@ -374,7 +376,7 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element *_res_elem,
 }
 
 
-// ________________ Plugins specific data _____________
+// =======================[ Plugins specific data ]===========================
 
 template<class T>
 void XMLRecipeLoader::loadPluginsData(T _container, ticpp::Element *_xml_elem) {
@@ -477,7 +479,7 @@ inline void XMLRecipeLoader::parsePluginData(
 }
 
 
-// ______________________ Constraints _________________________
+// =======================[ Constraints ]=====================================
 
 void XMLRecipeLoader::loadConstraints(ticpp::Element *_xml_elem) {
 

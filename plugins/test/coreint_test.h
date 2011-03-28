@@ -28,6 +28,7 @@
 
 #include <memory>
 #include <vector>
+#include "bbque/object.h"
 #include "bbque/app/application.h"
 #include "bbque/plugins/plugin.h"
 #include "bbque/plugins/test.h"
@@ -39,6 +40,8 @@
 # define CoreInteractionsTest CoreInteractionsTestD
 # define	PLUGIN_TYPE "DYNAMIC"
 #endif
+
+#define COREINT_NAMESPACE "coreint"
 
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
@@ -52,7 +55,7 @@ namespace bbque { namespace plugins {
  * lifecycle inside Barbeque RTRM. The class is the core of a plugin is used
  * for testing purpose.
  */
-class CoreInteractionsTest: public TestIF {
+class CoreInteractionsTest: public TestIF, public Object {
 
 public:
 

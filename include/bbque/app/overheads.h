@@ -23,19 +23,25 @@
 #define BBQUE_OVERHEADS_H_
 
 #include <cstdint>
-#include <bbque/object.h>
 
 namespace bbque { namespace app {
 
 /**
  * @class TransitionOverheads
  *
- * @brief Keep trace of the overheads occourring when switching from a working
- * mode to a destination one. This object should be stored in a map container
- * in an application working mode descriptor, where the map key is the name of
- * the destination working mode.
+ * @brief Overheads occourring when switching from a working
+ * mode to a destination one.
+ *
+ * When an application switches its working mode (due to Optimizer decision),
+ * Barbeque RTRM keep track of the overheads occourred to make the transition.
+ * Get this information is worthwhile. Indeed every transition decision should
+ * weight the benefits of the choice against the costs of making it.
+ *
+ * This object should be stored in a map container in an application working
+ * mode descriptor, where the map key is the name of the destination working
+ * mode.
  */
-class TransitionOverheads : public Object {
+class TransitionOverheads {
 
 public:
 
@@ -44,7 +50,6 @@ public:
 	 * @param time The reconfiguration time measured
 	 */
 	TransitionOverheads(double time):
-		bbque::Object("TOverhead"),
 		switch_count(1) {
 
 		last_switch_time = time;
@@ -53,14 +58,32 @@ public:
 	}
 
 	/**
-	 * @brief Set the time estimated / measured during the application
+	 * @brief
+	 *
+	 * Set the time estimated / measured during the application
 	 * reconfiguration from its current working mode to the new one scheduled
-	 * @param time The reconfiguration time measured
+	 *
+	 * @param _time The reconfiguration time measured
 	 */
-	void SetSwitchTime(double time);
+	inline void SetSwitchTime(double time) {
+		// Set last switch time
+		last_switch_time = time;
+
+		// Update max and min values
+		if ((min_switch_time == 0) && (max_switch_time == 0)) {
+			min_switch_time = max_switch_time = time;
+		}
+		else if (min_switch_time > time) {
+			min_switch_time = time;
+		}
+		else if (max_switch_time < time) {
+			max_switch_time = time;
+		}
+	}
 
 	/**
 	 * @brief Get the transition count value
+	 * @return Number of transitions
 	 */
 	inline uint16_t Count() const {
 		return switch_count;
@@ -81,23 +104,26 @@ public:
 	}
 
 	/**
-	 * @brief The transition time measured in the last reconfiguration process
+	 * @brief Transition time measured in the last reconfiguration process
+	 * @return Switch time of the last transition
 	 */
 	inline double LastTime() const {
 		return last_switch_time;
 	}
 
 	/**
-	 * @brief The minimum time measured for this transition over all the
-	 * 	reconfigurations
+	 * @brief Minimum time measured for this transition over all the
+	 * reconfigurations
+	 * @return Minimum time registered
 	 */
 	inline double MinTime() const {
 		return min_switch_time;
 	}
 
 	/**
-	 * @brief The maximum time measured for this transition over all the
-	 * 	reconfigurations
+	 * @brief Maximum time measured for this transition over all the
+	 * reconfigurations
+	 * @return Maximum time registered
 	 */
 	inline double MaxTime() const {
 		return max_switch_time;

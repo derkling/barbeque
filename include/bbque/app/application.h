@@ -39,8 +39,9 @@
 #include "bbque/app/recipe.h"
 #include "bbque/app/plugin_data.h"
 
-namespace bbque { namespace app {
+#define APPLICATION_NAMESPACE "bq.apps."
 
+namespace bbque { namespace app {
 
 // Forward declarations
 class WorkingMode;
@@ -167,7 +168,7 @@ public:
 	 * @param app_recipe Recipe object shared pointer
 	 */
 	inline void SetRecipe(RecipePtr_t app_recipe) {
-		assert(recipe.get() != NULL);
+		assert(app_recipe.get() != NULL);
 		recipe = app_recipe;
 	}
 
@@ -250,9 +251,6 @@ public:
 			Constraint::BoundType type);
 
 private:
-
-	/** System logger */
-	plugins::LoggerIF * logger;
 
 	/** The application name */
 	std::string name;

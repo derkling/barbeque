@@ -27,6 +27,7 @@
 #include "bbque/app/application.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/constraints.h"
+#include "bbque/plugins/recipe_loader.h"
 #include "bbque/res/resources.h"
 
 
@@ -42,12 +43,15 @@ ApplicationManager *ApplicationManager::GetInstance() {
 
 
 ApplicationManager::ApplicationManager():
-	Object("bq.appman") {
+	Object(APPLICATION_MANAGER_NAMESPACE) {
 
 	// Get a logger
-	std::string logger_name("bq.appman");
+	std::string logger_name(APPLICATION_MANAGER_NAMESPACE);
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());
-	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	logger =
+		std::unique_ptr<plugins::LoggerIF>
+		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+
 
 	// Set the lowest application priority
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
@@ -140,7 +144,7 @@ plugins::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 	else {
 		//  Recipe never loaded before...
 		//  Get the recipe loader instance
-		std::string rloader_name("rloader.xml");
+		std::string rloader_name(RECIPE_LOADER_NAMESPACE);
 		plugins::RecipeLoaderIF * rloader =
 			ModulesFactory::GetRecipeLoaderModule(rloader_name);
 
@@ -161,7 +165,7 @@ plugins::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 		}
 		// Place the new recipe object in the map
 		recipes[_rname] = recp_ptr;
-
+	}
 	// Set the recipe of the application
 	app_ptr->SetRecipe(recp_ptr);
 	// Application descriptors map
@@ -218,7 +222,7 @@ AppPtr_t const ApplicationManager::GetApplication(uint32_t _pid) {
 	// Find the application by name
 	AppsMap_t::iterator app_it = apps.find(_pid);
 	if (app_it != apps.end())
-		app_ptr = AppPtr(app_it->second);
+		app_ptr = AppPtr_t(app_it->second);
 
 	return app_ptr;
 }

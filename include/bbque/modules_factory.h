@@ -26,6 +26,7 @@
 //----- Supported plugin interfaces
 #include "bbque/plugins/test_adapter.h"
 #include "bbque/plugins/logger_adapter.h"
+#include "bbque/plugins/recipe_loader.h"
 
 #include <string>
 
@@ -63,6 +64,12 @@ public:
 	static plugins::LoggerIF * GetLoggerModule(
 			plugins::LoggerIF::Configuration const & data,
 			std::string const & id = LOGGER_NAMESPACE);
+
+	/**
+	 * Get a reference to a module implementing the RecipeLoaderIF interface
+	 */
+	static plugins::RecipeLoaderIF * GetRecipeLoaderModule(
+			std::string const & id = RECIPE_LOADER_NAMESPACE);
 
 private:
 

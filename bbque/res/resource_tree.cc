@@ -27,9 +27,13 @@
 namespace bbque { namespace res {
 
 
-ResourceTree::ResourceTree() {
+ResourceTree::ResourceTree():
+	max_depth(0) {
+
 	root = new ResourceNode;
 	root->data = ResourcePtr_t(new Resource("root"));
+	root->parent = NULL;
+	root->depth = 0;
 }
 
 
@@ -42,6 +46,12 @@ ResourceNode * insertChild(ResourceNode * curr_node,
 	// Create the new resource node
 	_node = new ResourceNode;
 	_node->data = ResourcePtr_t(new Resource(curr_ns));
+
+	// Set the parent
+	_node->parent = curr_node;
+
+	// Set the depth
+	_node->depth = curr_node->depth + 1;
 
 	// Append it as child of the current node
 	curr_node->children.push_back(_node);
@@ -81,7 +91,7 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 
 	// Extract the first "node" in the resource path
 	std::string ns_path	= _rsrc_path;
-	std::string curr_ns = popNamespaceLevel(ns_path);
+	std::string curr_ns = popNamespace(ns_path);
 
 	// For each namespace in the path...
 	while (!curr_ns.empty()) {
@@ -90,21 +100,22 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 		if (curr_node->children.size() == 0) {
 			// Insert the resource as a child node
 			curr_node = insertChild(curr_node, curr_ns);
+			// Update tree depth
+			if (curr_node->depth > max_depth)
+				max_depth = curr_node->depth;
 		}
 		else {
 			// Can we insert it as a children sibling ?
 			std::list<ResourceNode *>::iterator it =
 				curr_node->children.begin();
-
 			std::list<ResourceNode *>::iterator end =
 				curr_node->children.end();
 
 			// Check if the current resource exists yet between the current
 			// node children
 			for (; it != end; ++it) {
-
-				// If yes descends one level (continue from the child node
-				// found)
+				// If yes, descends one level, continuing from the current
+				// child node
 				if ((*it)->data->Name().compare(curr_ns) == 0) {
 					curr_node = *it;
 					break;
@@ -130,7 +141,7 @@ ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
 
 	// Root is null
 	if (root == NULL) {
-		std::cout << "Root is null" << std::endl;
+		std::cout << "ResourceTree: root is null" << std::endl;
 		return null_ptr;
 	}
 	// Start from root
@@ -152,10 +163,8 @@ ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
 
 		std::list<ResourceNode *>::iterator it =
 			curr_node->children.begin();
-
 		std::list<ResourceNode *>::iterator end =
 			curr_node->children.end();
-
 		node_found = false;
 
 		// Check if the current namespace node exists looking for in the list
@@ -191,7 +200,7 @@ ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
 }
 
 
-void ResourceTree::_print_children(ResourceNode * node, int depth) {
+void ResourceTree::_print_children(ResourceNode * _node, int _depth) {
 
 	std::list<ResourceNode *>::iterator it = _node->children.begin();
 	std::list<ResourceNode *>::iterator end = _node->children.end();

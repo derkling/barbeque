@@ -34,8 +34,19 @@
 #include "bbque/application_manager_conf.h"
 #include "bbque/app/application.h"
 
+#define APPLICATION_MANAGER_NAMESPACE "bq.appman"
 
 namespace bbque {
+
+namespace app {
+	// Forward declaration
+	class Recipe;
+}
+
+namespace ba = bbque::app;
+
+/** Shared pointer to Recipe object */
+typedef std::shared_ptr<ba::Recipe> RecipePtr_t;
 
 
 /**
@@ -124,9 +135,6 @@ public:
 	void ChangedSchedule(uint32_t pid, double time);
 
 private:
-
-	/** System logger */
-	plugins::LoggerIF * logger;
 
 	/** The constructor */
 	ApplicationManager();

@@ -30,17 +30,14 @@
 
 #include "bbque/res/resource_accounter_status.h"
 
-namespace ba = bbque::app;
+namespace bbque { namespace app {
 
-namespace bbque {
-
-namespace app {
-// Forward declarations
-class Application;
+	// Forward declarations
+	class Application;
 } // namespace app
 
+namespace ba = bbque::app;
 namespace res {
-
 
 /**
  * @class ResourceAccounterConfIF
@@ -72,7 +69,7 @@ public:
 	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)
 	 * @param amount The total amount available
 	 */
-	virtual void RegisterResource(std::string const & path,
+	virtual void RegisterResource(std::string const & name,
 			std::string const & type, std::string const & units,
 			uint32_t amount) = 0;
 

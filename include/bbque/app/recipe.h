@@ -34,11 +34,11 @@ namespace bbque { namespace app {
 class Application;
 class WorkingMode;
 
-/** Type definition of a shared pointer to a Application descriptor object */
-typedef std::shared_ptr<Application> AppPtr;
+/** Shared pointer to Application descriptor  */
+typedef std::shared_ptr<Application> AppPtr_t;
 
-/** Type definition of a shared pointer to a Working Mode descriptor object */
-typedef std::shared_ptr<WorkingMode> AwmPtr;
+/** Shared pointer to Working Mode descriptor */
+typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 
 /**
  * @class Recipe
@@ -80,7 +80,7 @@ public:
 	 * @param name Working mode name
 	 * @param value The QoS value
 	 */
-	void AddWorkingMode(AppPtr app, std::string const & name, uint8_t value);
+	void AddWorkingMode(AppPtr_t app, std::string const & name, uint8_t value);
 
 	/**
 	 * @brief Remove an application working mode inserted
@@ -94,13 +94,13 @@ public:
 	 * @param name Working mode name
 	 * @return A shared pointer to the application working mode searched
 	 */
-	AwmPtr WorkingMode(std::string const & name);
+	AwmPtr_t WorkingMode(std::string const & name);
 
 	/**
 	 * @brief All the working modes defined into the recipe
 	 * @return A vector containing all the working modes
 	 */
-	inline std::vector<AwmPtr> const & WorkingModesAll() {
+	inline std::vector<AwmPtr_t> const & WorkingModesAll() {
 		return working_modes;
 	}
 
@@ -116,14 +116,14 @@ private:
 	std::string pathname;
 
 	/** The complete set of working modes descriptors defined in the recipe */
-	std::vector<AwmPtr> working_modes;
+	std::vector<AwmPtr_t> working_modes;
 
 	/**
 	 * @brief Internal method used for working mode searches.
 	 * @return An iterator pointing to the working mode object found in
 	 * the <tt>working_modes</tt> vector
 	 */
-	std::vector<AwmPtr>::const_iterator _GetWorkingModeIterator(
+	std::vector<AwmPtr_t>::const_iterator wmIterator(
 			std::string	const & name);
 
 };

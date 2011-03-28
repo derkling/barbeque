@@ -36,6 +36,7 @@ ConfigurationManager::ConfigurationManager() :
 #ifdef BBQUE_DEBUG
 	dbg_opts_desc("Debugging Options"),
 #endif
+	app_opts_desc("Application Manager Options"),
 	cmd_opts_desc("") {
 
 	core_opts_desc.add_options()
@@ -50,6 +51,13 @@ ConfigurationManager::ConfigurationManager() :
 		;
 	all_opts_desc.add(core_opts_desc);
 	cmd_opts_desc.add(core_opts_desc);
+
+	app_opts_desc.add_options()
+		("application.lowest_prio", po::value<uint16_t>(&lowest_prio)->
+		 default_value(9),
+		 "Greatest integer value for the lowest application priority")
+		;
+	all_opts_desc.add(app_opts_desc);
 
 #ifdef BBQUE_DEBUG
 	dbg_opts_desc.add_options()

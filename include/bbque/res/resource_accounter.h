@@ -28,22 +28,14 @@
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
 #include "bbque/object.h"
+#include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter_conf.h"
 #include "bbque/res/resource_tree.h"
 
-#define RESOURCE_ACCOUNTER_NAMESPACE "res_acc."
+#define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
 
 namespace bbque { namespace res {
 
-// Forward declarations
-struct Resource;
-struct ResourceUsage;
-struct ResourceState;
-
-typedef std::shared_ptr<Resource> ResourcePtr_t;
-typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
-typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
-typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 
 /**
  * @class ResourceAccounter
@@ -197,9 +189,6 @@ private:
 	 *  @param action What kind of change? (@see UsageAction_t)
 	 */
 	void changeUsages(app::Application const * app, UsageAction_t action);
-
-	/** System logger instance */
-	plugins::LoggerIF * logger;
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;
