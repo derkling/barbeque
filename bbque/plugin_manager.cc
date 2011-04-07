@@ -183,6 +183,7 @@ int32_t PluginManager::Shutdown() {
 
 int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	fs::path path(pluginPath);
+	PF_ExportedSymbols_t *pft;
 
 	// Resolve symbolic links
 	if (fs::is_symlink(path)) {
@@ -220,17 +221,18 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	}
 
 	// Get the NTA_initPlugin() function
-	PF_InitFunc initFunc = (PF_InitFunc)(dl->GetSymbol("PF_initPlugin"));
+	pft = (PF_ExportedSymbols_t*)(dl->GetSymbol(PLUGIN_SYMBOL_TABLE));
+	PF_InitFunc initFunc = pft->init;
 	if (!initFunc) {
 		// missing dynamic library entry point
-		fprintf(stderr, "PM: Missing [PF_initPlugin] plugin entry point");
+		fprintf(stderr, "PM: Missing [PF_initPlugin] plugin entry point\n");
 		return -1;
 	}
 
 	int32_t res = InitializePlugin(initFunc);
 	if (res < 0) {
 		// initialization failed
-		fprintf(stderr, "PM: Initialization failed");
+		fprintf(stderr, "PM: Initialization failed\n");
 		return res;
 	}
 
@@ -255,9 +257,8 @@ void * PluginManager::CreateObject(const std::string & id,
 	if ( near_match != exact_match_map.end() &&
 			((*near_match).first.compare(0,id.size(),id)) == 0 ) {
 
-		fprintf(stdout, "PM: Found matching module [%s@%p]\n",
-			(*near_match).first.c_str(),
-			(void*)(*near_match).second.CreateFunc);
+		fprintf(stdout, "PM: Found matching module [%s]\n",
+			(*near_match).first.c_str());
 
 		// Class (or full) match found
 		PF_RegisterParams & rp = (*near_match).second;

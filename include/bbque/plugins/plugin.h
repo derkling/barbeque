@@ -163,13 +163,13 @@ typedef int32_t (*PF_ExitFunc)();
  */
 typedef PF_ExitFunc (*PF_InitFunc)(const PF_PlatformServices *);
 
+
 /**
- * @brief
+ * @brief Named exported entry point into the plugin
  *
- * Named exported entry point into the plugin This definition is required
- * eventhough the function is loaded from a dynamic library by name and casted
- * to PF_InitFunc. If this declaration is commented out
- * DynamicLibrary::getSymbol() fails
+ * This definition is required eventhough the function is loaded from a
+ * dynamic library by name and casted to PF_InitFunc. If this declaration is
+ * commented out DynamicLibrary::getSymbol() fails
  *
  * The plugin's initialization function MUST be called "PF_initPlugin" (and
  * conform to the signature of course).
@@ -182,6 +182,26 @@ extern "C" PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params);
 #else
 extern PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params);
 #endif
+
+
+/**
+ * @brief The data structure collecting exported plugins methods.
+ *
+ * Basically this data structure is used to export in a "compiler friendly"
+ * way the plugins entry point. Indeed, due to a weakness of the ISO C standard,
+ * there is no valid cast between pointer to function and pointer to objects,
+ * thus a dlsym cast to a punction pointer will result (at least) on a
+ * compiler warning.<br>
+ * For more details, see the rationale section of the dlsym manpages.
+ */
+typedef struct PF_ExportedSymbols {
+	/** The plugin entry point */
+	PF_InitFunc init;
+} PF_ExportedSymbols_t;
+
+#define PLUGIN_SYMBOL_TABLE "PF_exportedSymbols"
+#define PLUGIN_INIT(FUNC)\
+	PF_ExportedSymbols_t PF_exportedSymbols = {FUNC}
 
 #ifdef  __cplusplus
 }

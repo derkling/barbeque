@@ -54,6 +54,10 @@ PF_ExitFunc StaticPlugin_Log4CppLogger_InitPlugin(const PF_PlatformServices * pa
 
 }
 
+#ifdef BBQUE_DYNAMIC_PLUGIN
+PLUGIN_INIT(PF_initPlugin);
+#else
 bp::StaticPlugin
 StaticPlugin_Log4CppLogger(StaticPlugin_Log4CppLogger_InitPlugin);
+#endif
 

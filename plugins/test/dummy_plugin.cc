@@ -40,6 +40,7 @@ extern "C"
 PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params) {
   int res = 0;
 
+
   PF_RegisterParams rp;
   rp.version.major = 1;
   rp.version.minor = 0;
@@ -56,7 +57,9 @@ PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params) {
 
 }
 
-#ifndef BBQUE_DYNAMIC_PLUGIN
+#ifdef BBQUE_DYNAMIC_PLUGIN
+PLUGIN_INIT(PF_initPlugin);
+#else
 bp::StaticPlugin
 StaticPlugin_DummyTest(PF_initPlugin);
 #endif
