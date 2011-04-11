@@ -32,17 +32,42 @@
 
 namespace bbque { namespace app {
 
-typedef std::map<std::string, std::string> PluginDataMap_t;
+
+/** Map of string type data */
+typedef std::map<std::string, std::string> PluginStringDataMap_t;
+
+/** Map of 32-bit integer type data */
+typedef std::map<std::string, uint32_t> PluginIntegerDataMap_t;
+
+/** Map of custom (void pointer) data */
+typedef std::map<std::string, void *> PluginCustomDataMap_t;
+
 
 /**
  * @class PluginData
  *
  * This is used for managing pairs key-value used as specific plugin data.
- * The class assorts data froma a single plugind.
+ * We allow the plugin to get and set three type of values: string, integer
+ * (32 bit) and custom (void *).
+ *
+ * The class assorts data from a single plugin.
  */
 class PluginData {
 
 public:
+
+	/**
+	 *@enum ExitCode_t
+	 *
+	 * Exit code returned when try to get a value related to a given key
+	 */
+	typedef enum ExitCode_t {
+		/** Success. The value return is valid */
+		PDATA_SUCCESS = 0,
+		/** Error. Unable to find value with the given key */
+		PDATA_ERR_MISS_VALUE
+
+	} ExitCode_t;
 
 	/**
 	 * @brief The constructor
@@ -55,40 +80,81 @@ public:
 
 	/**
 	 * @brief Get plugin name
+	 * @return The name of the plugin
 	 */
 	inline std::string const & Name() { return plugin_name; }
 
 	/**
 	 * @brief Get plugin type
+	 * @return The type of plugin
 	 */
 	inline std::string const & Type() { return type; }
 
 	/**
-	 * @brief Returns true if the plugin is required, false otherwise
+	 * @brief Check if the plugin is required
+	 * @return True for yes, false otherwise
 	 */
 	inline bool Required() { return required; }
 
 	/**
-	 * @brief Insert a new data as a pair key-value
+	 * @brief Insert a data in string format
+	 *
+	 * Insert a new data as a pair key (string) - value (string)
+	 *
 	 * @param key Data key
 	 * @param value Data value (string)
 	 */
-	void Set(std::string const & key, std::string const & value) {
-		data[key] = value;
+	inline void Set(std::string const & key, std::string const & value) {
+		str_data[key] = value;
 	}
-	/**
-	 * @brief Return the value of the given key
-	 * @param key Data key
-	 * @return Data value (string)
-	 */
-	std::string const Get(std::string const & key);
 
 	/**
-	 * @brief Return an iterator for the entire map of plugin specific data
+	 * @brief Insert a data as a 32-bit integer value
+	 *
+	 * Insert a new data as a pair key (string) - value (integer)
+	 *
+	 * @param key Data key
+	 * @param value Data value (integer)
 	 */
-	inline std::map<std::string, std::string>::iterator IteratorBegin() {
-		return data.begin();
+	inline void Set(std::string const & key, int32_t value) {
+		int_data[key] = value;
 	}
+
+	/**
+	 * @brief Insert a data as a custom data structure (void pointer)
+	 *
+	 * Insert a new data as a pair key (string) - data (void *)
+	 * @param key Data key
+	 * @param value Data value (void *)
+	 */
+	inline void Set(std::string const & key, void * data) {
+		cust_data[key] = data;
+	}
+
+	/**
+	 * @brief The string value associated to the given key
+	 * @param key Data key
+	 * @param value Data value returned (string)
+	 * @return An exit code about the status of the request (@see ExitCode_t)
+	 */
+	PluginData::ExitCode_t Get(std::string const & key, std::string & value);
+
+	/**
+	 * @brief The 32-bit integer value associated to the given key
+	 * @param key Data key
+	 * @param value Data value returned (integer)
+	 * @return An exit code about the status of the request (@see ExitCode_t)
+	 */
+	PluginData::ExitCode_t Get(std::string const & key, uint32_t & value);
+
+	/**
+	 * @brief The customized data structure associated to the given key
+	 * @param key Data key
+	 * @param data Void pointer returned (custom data)
+	 * @return An exit code about the status of the request (@see ExitCode_t)
+	 */
+	PluginData::ExitCode_t Get(std::string const & key, void * data);
+
 
 protected:
 
@@ -101,40 +167,21 @@ protected:
 	/** True if required */
 	bool required;
 
-	/** Set of plugin specific data */
-	PluginDataMap_t data;
+	/** Set of plugin specific string data */
+	PluginStringDataMap_t str_data;
+
+	/** Set of plugin specific integer data */
+	PluginIntegerDataMap_t int_data;
+
+	/** Set of plugin specific custom data (void *) */
+	PluginCustomDataMap_t cust_data;
 
 };
 
 
+/** Shared pointer to @ref PluginData */
 typedef std::shared_ptr<PluginData> PluginDataPtr_t;
 
-/**
- * class PluginDataContainerIF
- *
- * @brief Interface for add and get a plugin specific data container.
- */
-class PluginsDataContainerIF {
-
-public:
-
-	/**
-	 * @brief Create a PluginData object of a specific plugin in order to
-	 * collect data useful for (or required by) that plugin
-	 * @param plugin Plugin name
-	 * @param type Type of plugin
-	 * @param req Specify if the plugin is required
-	 */
-    virtual PluginDataPtr_t AddPluginData(std::string const & plugin,
-			std::string const & type, bool req) = 0;
-
-	/**
-	 * @brief Get the PluginData object of a specific plugin
-	 * @param plugin The name of the plugin
-	 * @return A shared pointer to the PluginData object
-	 */
-    virtual PluginDataPtr_t GetPluginData(std::string const & plugin) = 0;
-};
 
 /**
  * @class PluginsDataContainer
@@ -156,17 +203,38 @@ public:
 	/** PluginsDataContainer constructor  */
 	PluginsDataContainer();
 
-	/** @see PluginsDataContainerIF */
+	/**
+	 * @brief Add a plugin data set
+	 *
+	 * Create a PluginData object of a specific plugin in order to
+	 * collect data useful for (or required by) that plugin
+	 *
+	 * @param plugin Plugin name
+	 * @param type Type of plugin
+	 * @param req Specify if the plugin is required
+	 */
 	PluginDataPtr_t AddPluginData(std::string const & plugin,
 			std::string const & type, bool req);
 
-	/** @see PluginsDataContainerIF */
-    PluginDataPtr_t GetPluginData(std::string const & plugin);
+	/**
+	 * @brief Get a plugin data set
+	 *
+	 * Get the PluginData object of a specific plugin
+	 *
+	 * @param plugin The name of the plugin
+	 * @return A shared pointer to the PluginData object
+	 */
+	PluginDataPtr_t GetPluginData(std::string const & plugin);
 
 protected:
 
 	/**
-	 * @brief Specific plugin data
+	 * @brief Specific plugin data map
+	 *
+	 * The key is the name of the plugin. The value is a @ref PluginData
+	 * object storing data about a single plugin.
+	 * Thus each element in the map is a collection of data related to a
+	 * specific plugin.
 	 */
 	std::map<std::string, PluginDataPtr_t> plugins;
 

@@ -40,21 +40,52 @@ PluginData::PluginData(std::string const &_plugin, std::string const &_type,
 }
 
 
-std::string const PluginData::Get(std::string const &_key) {
+PluginData::ExitCode_t PluginData::Get(std::string const & _key,
+		std::string & value) {
 
-	std::map<std::string, std::string>::const_iterator it = data.find(_key);
+	std::map<std::string, std::string>::const_iterator it =
+		str_data.find(_key);
 
-	if (it == data.end())
-		return "";
-	return it->second;
+	if (it == str_data.end())
+		return PDATA_ERR_MISS_VALUE;
+
+	value = it->second;
+	return PDATA_SUCCESS;
+}
+
+
+PluginData::ExitCode_t PluginData::Get(std::string const & _key,
+		uint32_t & value) {
+
+	std::map<std::string, uint32_t>::const_iterator it =
+		int_data.find(_key);
+
+	if (it == int_data.end())
+		return PDATA_ERR_MISS_VALUE;
+
+	value = it->second;
+	return PDATA_SUCCESS;
+}
+
+
+PluginData::ExitCode_t PluginData::Get(std::string const & _key, void * data) {
+
+	std::map<std::string, void *>::const_iterator it =
+		cust_data.find(_key);
+
+	if (it == cust_data.end())
+		return PDATA_ERR_MISS_VALUE;
+
+	data = it->second;
+	return PDATA_SUCCESS;
 }
 
 
 // =====[ PluginsDataContainer ]===============================================
 
 PluginsDataContainer::PluginsDataContainer() {
-
 }
+
 
 PluginDataPtr_t PluginsDataContainer::AddPluginData(std::string const &_plugin,
 		std::string const &_type, bool _req) {
