@@ -37,7 +37,7 @@ add_subdirectory(res)
 # Add "barbeque" target binary
 set (BARBEQUE_SRC barbeque version object resource_manager configuration_manager)
 set (BARBEQUE_SRC platform_services dynamic_library plugin_manager modules_factory ${BARBEQUE_SRC})
-set (BARBEQUE_SRC application_manager utils/timer ${BARBEQUE_SRC})
+set (BARBEQUE_SRC application_manager utils/timer console_logger ${BARBEQUE_SRC})
 
 add_executable (barbeque ${BARBEQUE_SRC})
 
