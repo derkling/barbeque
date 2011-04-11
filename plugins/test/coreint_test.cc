@@ -38,7 +38,7 @@ namespace bp = bbque::plugins;
 namespace bbque { namespace plugins {
 
 /** Map of application descriptor shared pointers */
-typedef std::map<uint32_t, app::AppPtr_t> AppsMap_t;
+typedef std::map<uint32_t, ba::AppPtr_t> AppsMap_t;
 
 // Test set
 std::vector<std::string> res_names = {
@@ -246,7 +246,7 @@ void CoreInteractionsTest::PrintResourceAvailabilities() {
 
 
 int CoreInteractionsTest::WorkingModesDetails(
-		std::shared_ptr<app::ApplicationStatusIF> test_app,
+		std::shared_ptr<ba::ApplicationStatusIF> test_app,
 		std::vector<std::string> resources) {
 
 	// Application descriptor pointer is valid?
@@ -294,7 +294,7 @@ int CoreInteractionsTest::WorkingModesDetails(
 
 
 void CoreInteractionsTest::PrintScheduleInfo(
-		std::shared_ptr<app::Application> test_app) {
+		std::shared_ptr<ba::Application> test_app) {
 
 	if (test_app.get() == NULL) {
 		std::cout << "Null application descriptor pointer passed" <<
@@ -331,7 +331,7 @@ void CoreInteractionsTest::PrintScheduleInfo(
 
 
 void CoreInteractionsTest::DoScheduleSwitch(
-		std::shared_ptr<app::Application> test_app,
+		std::shared_ptr<ba::Application> test_app,
 		std::string const & wm, double ov_time) {
 
 	// Get working mode wm1
@@ -341,7 +341,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 		return;
 	}
 	// Get working mode descriptor related to "wm"
-	app::AwmPtr_t d_wm = test_app->GetRecipe()->WorkingMode(wm);
+	ba::AwmPtr_t d_wm = test_app->GetRecipe()->WorkingMode(wm);
 	if (d_wm.get() == NULL)
 		return;
 
@@ -376,7 +376,7 @@ void CoreInteractionsTest::Test() {
 	// Start an application
 	appman->StartApplication("mp3player", "giuseppe", 3, 3324, "r1_platA", true);
 
-	std::shared_ptr<app::ApplicationStatusIF>
+	std::shared_ptr<ba::ApplicationStatusIF>
 		test_app(appman->GetApplication(3324));
 
 	if (!test_app) {
@@ -388,8 +388,8 @@ void CoreInteractionsTest::Test() {
 	logger->Debug("Applications loaded = %d", sv->ApplicationsReady().size());
 
 	// Plugin specific data
-	app::PluginsDataContainer pdc;
-	app::PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
+	ba::PluginsDataContainer pdc;
+	ba::PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
 
 	if (pdata.get() != NULL)
 		std::cout << "Plugin YaMCa - Author :" << pdata->Get("author")
@@ -403,7 +403,7 @@ void CoreInteractionsTest::Test() {
 	//
 	// Get Application descriptor
 	//
-	std::shared_ptr<app::Application> app_conf(appman->GetApplication(3324));
+	std::shared_ptr<ba::Application> app_conf(appman->GetApplication(3324));
 
 	// Do a schedule switch, then remove a constraint and do another
 
