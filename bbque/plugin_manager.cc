@@ -81,7 +81,8 @@ static bool isValid(const char * id, const PF_RegisterParams * params) {
 	return true;
 }
 
-int32_t PluginManager::RegisterObject(const char * id, const PF_RegisterParams * params) {
+int32_t PluginManager::RegisterObject(const char * id,
+		const PF_RegisterParams * params) {
 
 	// Check parameters
 	if (!isValid(id, params))
@@ -115,7 +116,8 @@ int32_t PluginManager::RegisterObject(const char * id, const PF_RegisterParams *
 	return 0;
 }
 
-int32_t PluginManager::LoadAll(const std::string & pluginDir, PF_InvokeServiceFunc func) {
+int32_t PluginManager::LoadAll(const std::string & pluginDir,
+		PF_InvokeServiceFunc func) {
 	fs::path plugins_dir(pluginDir);
 
 	if (pluginDir.empty()) {
@@ -195,7 +197,8 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 		// loop 'til buffer large enough
 		for (long path_max = 64; ; path_max*=2) {
 			ssize_t result;
-			std::unique_ptr<char> buf(new char[static_cast<std::size_t>(path_max)]);
+			std::unique_ptr<char> buf(
+					new char[static_cast<std::size_t>(path_max)]);
 
 			result = ::readlink(path.string().c_str(), buf.get(),
 					static_cast<std::size_t>(path_max));
@@ -221,6 +224,8 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 					errorString);
 	if (!dl) {
 		// not a dynamic library
+		fprintf(stderr, FMT("[%s] is not a valid .so plugin\n"),
+				path.filename().c_str());
 		return -1;
 	}
 
@@ -315,10 +320,15 @@ void * PluginManager::CreateObject(const std::string & id,
 	return NULL;
 }
 
-DynamicLibrary * PluginManager::LoadLibrary(const std::string & path, std::string & errorString) {
+DynamicLibrary * PluginManager::LoadLibrary(const std::string & path,
+		std::string & errorString) {
 	DynamicLibrary * dl = DynamicLibrary::Load(path, errorString);
+
 	if (!dl) {
 		// not a dynamic library?
+		fs::path _path(path);
+		fprintf(stderr, FMT("[%s] library load ERROR:\n\n%s\n\n"),
+				_path.filename().c_str(), errorString.c_str());
 		return NULL;
 	}
 
