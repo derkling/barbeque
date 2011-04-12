@@ -166,7 +166,7 @@ void Application::SwitchToNextScheduled(double _time) {
 
 
 Application::ExitCode_t Application::SetConstraint(
-		std::string const &	_res_name, Constraint::BoundType _type,
+		std::string const & _res_name, Constraint::BoundType_t _type,
 		uint32_t _value) {
 
 	// Lookup the resource by name
@@ -207,7 +207,7 @@ Application::ExitCode_t Application::SetConstraint(
 
 
 Application::ExitCode_t Application::RemoveConstraint(
-		std::string const & _res_name, Constraint::BoundType _type) {
+		std::string const & _res_name, Constraint::BoundType_t _type) {
 
 	// Lookup the resource by name
 	std::map<std::string, ConstrPtr_t>::iterator it_con =
@@ -247,7 +247,7 @@ Application::ExitCode_t Application::RemoveConstraint(
 
 
 void Application::workingModesEnabling(std::string const & _res_name,
-		Constraint::BoundType _type, uint64_t _value) {
+		Constraint::BoundType_t _type, uint64_t _value) {
 
 	// Enabled working modes iterators
 	std::list<AwmStatusPtr_t>::iterator it_enabl = enabled_awms.begin();

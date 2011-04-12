@@ -508,7 +508,7 @@ void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 
 				uint32_t value;
 				con_elem->GetText(&value, true);
-				ba::Constraint::BoundType type;
+				ba::Constraint::BoundType_t type;
 
 				// A lower bound constraint
 				if (constraint_type.compare("L") == 0) {

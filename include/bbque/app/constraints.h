@@ -45,7 +45,7 @@ struct Constraint {
 	/**
 	 * @enum Type of constraint bounds
 	 */
-	enum BoundType {
+	enum BoundType_t {
 		/** Lower bound constraint */
 		LOWER_BOUND = 0,
 		/** Upper bound constraint */

@@ -236,7 +236,7 @@ public:
 	 * @return An error code (@see ExitCode_t)
 	 */
 	Application::ExitCode_t SetConstraint(std::string const & res_path,
-			Constraint::BoundType type, uint32_t value);
+			Constraint::BoundType_t type, uint32_t value);
 
 	/**
 	 * @brief Remove a constraint upon a specific resource.
@@ -247,7 +247,7 @@ public:
 	 * @return An error code (@see ExitCode)
 	 */
 	Application::ExitCode_t RemoveConstraint(std::string const & res_path,
-			Constraint::BoundType type);
+			Constraint::BoundType_t type);
 
 private:
 
@@ -295,7 +295,7 @@ private:
 	 * @param value The value of the constraint
 	 */
 	void workingModesEnabling(std::string const & res_path,
-			Constraint::BoundType type, uint64_t value);
+			Constraint::BoundType_t type, uint64_t value);
 
 };
 
