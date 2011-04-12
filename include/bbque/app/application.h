@@ -66,8 +66,7 @@ typedef std::map<std::string, ConstrPtr_t> ConstrPtrMap_t;
 
 /**
  * @class Application
- * @brief The class keep track of static and dynamic information about
- * application
+ * @brief Application descriptor object
  *
  * When an application enter the RTRM it should specify sets of informations
  * as name, pid, priority,... working modes (resources requirements),
@@ -175,28 +174,28 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	ScheduleFlag_t CurrentState() const {
+	inline ScheduleFlag_t CurrentState() const {
 		return curr_sched.state;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	AwmStatusPtr_t const CurrentAWM() const {
+	inline AwmStatusPtr_t const CurrentAWM() const {
 		return curr_sched.awm;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	ScheduleFlag_t NextState() const {
+	inline ScheduleFlag_t NextState() const {
 		return next_sched.state;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	AwmStatusPtr_t const NextAWM() const {
+	inline AwmStatusPtr_t const NextAWM() const {
 		return next_sched.awm;
 	}
 
@@ -255,7 +254,7 @@ private:
 	/** The application name */
 	std::string name;
 
-	/**The user who has launched the application */
+	/** The user who has launched the application */
 	std::string user;
 
 	/** The PID assigned from the OS */

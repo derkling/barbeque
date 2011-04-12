@@ -2,7 +2,11 @@
  *       @file  application.cc
  *      @brief  Application descriptor implementation
  *
- * This implements the Application descriptor class.
+ * This implements the application descriptor.
+ * Such descriptor includes static and dynamic information upon application
+ * execution. It embeds usual information about name, priority, user, PID
+ * (could be different from the one given by OS) plus a reference to the
+ * recipe object, the list of enabled working modes and resource constraints.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -34,10 +38,11 @@ namespace bbque { namespace app {
 Application::Application(std::string const & _name, std::string const & _user,
 		uint32_t _pid):
 	Object(APPLICATION_NAMESPACE + _name),
+	name(_name),
+	user(_user),
 	pid(_pid) {
 
-	name = _name;
-	user = _user;
+	// Scheduling state
 	curr_sched.state = next_sched.state = READY;
 
 	// Get a logger
@@ -48,7 +53,7 @@ Application::Application(std::string const & _name, std::string const & _user,
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
-		logger->Info("Application: %s ", _name.c_str());
+		logger->Info("Starting...");
 
 	enabled_awms.resize(0);
 }
@@ -123,7 +128,6 @@ void Application::SwitchToNextScheduled(double _time) {
 	if (curr_sched.awm != next_sched.awm) {
 
 		// Update transition overheads info
-		//AwmStatusPtr_t curr_awm(curr_sched.awm);
 		AwmStatusPtr_t curr_awm(curr_sched.awm);
 		if (curr_awm) {
 			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_awm->Name()));
@@ -135,7 +139,6 @@ void Application::SwitchToNextScheduled(double _time) {
 		// Update the current set of usages
 		res::ResourceAccounter *res_acc =
 			res::ResourceAccounter::GetInstance();
-		//AppPtr_t this_app = AppPtr_t(this);
 
 		switch (next_sched.state) {
 		case RUNNING:
@@ -150,16 +153,13 @@ void Application::SwitchToNextScheduled(double _time) {
 		default:
 			break;
 		}
-		logger->Info("%s: set working mode [%s]", name.c_str(),
-		             next_sched.awm->Name().c_str());
+		logger->Info("Set working mode [%s]", next_sched.awm->Name().c_str());
 	}
 	// Switch scheduled state
 	curr_sched.state = next_sched.state;
 	switch_mark = false;
-	logger->Info("%s: set schedule state [%d]", name.c_str(),
-			next_sched.state);
+	logger->Info("Set schedule state {%d}",	next_sched.state);
 }
-
 
 
 Application::ExitCode_t Application::SetConstraint(
@@ -200,8 +200,6 @@ Application::ExitCode_t Application::SetConstraint(
 	// Check if there are some awms to disable
 	workingModesEnabling(_res_name, _type, _value);
 
-	logger->Debug("%d working modes enabled for %s", enabled_awms.size(),
-	              name.c_str());
 	return APP_SUCCESS;
 }
 
@@ -242,8 +240,6 @@ Application::ExitCode_t Application::RemoveConstraint(
 		break;
 	}
 
-	logger->Debug("%d working modes enabled for %s", enabled_awms.size(),
-	              name.c_str());
 	return APP_SUCCESS;
 }
 
@@ -288,8 +284,7 @@ void Application::workingModesEnabling(std::string const & _res_name,
 			}
 		}
 	}
-
-	logger->Debug("%s working modes enabled",  enabled_awms.size());
+	logger->Debug("%d working modes enabled", enabled_awms.size());
 }
 
 } // namespace app
