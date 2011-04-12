@@ -38,13 +38,6 @@
 
 namespace bbque {
 
-// Forward declaration of Resource descriptor
-struct Resource;
-
-/** Shared pointer to Resource descriptor */
-typedef std::shared_ptr<Resource> ResourcePtr;
-
-
 /**
  * @class SystemView
  *
