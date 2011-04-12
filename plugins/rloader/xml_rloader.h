@@ -50,7 +50,9 @@ namespace bbque { namespace plugins {
 /**
  * @class XMLRecipeLoader
  *
- * @brief The class providing methods for loading and parsing informations of
+ * @brief Loader for recipes based on XML files
+ *
+ * The class provides methods for loading and parsing informations of
  * the applications from its recipe. This class manages recipes structured in
  * XML files.
  *
@@ -83,9 +85,9 @@ public:
 	/**
 	 * @see RecipeLoaderIF
 	 */
-	ExitCode_t LoadRecipe(std::shared_ptr<app::Application> app,
+	ExitCode_t LoadRecipe(std::shared_ptr<ba::Application> app,
 			std::string const & recipe_path,
-			std::shared_ptr<app::Recipe> recipe);
+			std::shared_ptr<ba::Recipe> recipe);
 
 	/**
 	 * @see RecipeLoaderIF
@@ -97,7 +99,7 @@ private:
 	/**
 	 * @brief System logger instance
 	 */
-	plugins::LoggerIF *logger;
+	LoggerIF *logger;
 
 	/**
 	 * Set true when the recipe loader has been configured.
@@ -115,12 +117,12 @@ private:
 	/**
 	 * Shared pointer to the recipe object
 	 */
-	std::shared_ptr<app::Recipe> recipe_ptr;
+	std::shared_ptr<ba::Recipe> recipe_ptr;
 
 	/**
-	 * Shared pointer to the application for which loading the recipe
+	 * Shared pointer to the application requiring the recipe
 	 */
-	std::shared_ptr<app::Application> app_ptr;
+	std::shared_ptr<ba::Application> app_ptr;
 
 	/**
 	 * The constructor
@@ -129,6 +131,7 @@ private:
 
 	/**
 	 * @brief Load RecipeLoader configuration
+	 * @param params @see PF_ObjectParams
 	 * @return True if the configuration has been properly loaded and object
 	 * could be built, false otherwise
 	 */
@@ -150,7 +153,7 @@ private:
 	 * expected section tag
 	 */
 	uint8_t loadResources(ticpp::Element * xml_elem,
-			std::shared_ptr<app::WorkingMode> & wm,
+			std::shared_ptr<ba::WorkingMode> & wm,
 			std::string const & res_path);
 
 	/**
@@ -161,7 +164,7 @@ private:
 	 * @param res_usage Resource usage value
 	 * @return An internal error code
 	 */
-	uint8_t appendToWorkingMode(std::shared_ptr<app::WorkingMode> & wm,
+	uint8_t appendToWorkingMode(std::shared_ptr<ba::WorkingMode> & wm,
 		std::string const & res_path, ulong res_usage);
 
 	/**
@@ -172,7 +175,7 @@ private:
 	 * @param res_path Resource path
 	 */
 	uint8_t parseResourceData(ticpp::Element * res_elem,
-		std::shared_ptr<app::WorkingMode> & wm, std::string & res_path);
+		std::shared_ptr<ba::WorkingMode> & wm, std::string & res_path);
 
 	/**
 	 * @brief Parse the section containing plugins specific data for the
@@ -199,7 +202,7 @@ private:
 	 * @param pdata PluginData object to fill
 	 * @param plugdata_node The XML Node to check for data
 	 */
-	void parsePluginData(std::shared_ptr<app::PluginData> & pdata,
+	void parsePluginData(std::shared_ptr<ba::PluginData> & pdata,
 		ticpp::Node * plugdata_node);
 
 	/**

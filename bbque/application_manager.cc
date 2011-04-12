@@ -47,9 +47,9 @@ ApplicationManager::ApplicationManager():
 
 	// Get a logger
 	std::string logger_name(APPLICATION_MANAGER_NAMESPACE);
-	plugins::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger =
-		std::unique_ptr<plugins::LoggerIF>
+		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 
@@ -59,7 +59,7 @@ ApplicationManager::ApplicationManager():
 
 	// Pre-allocate priority and status vectors
 	priority_vec = std::vector<AppsMap_t>(lowest_priority + 1);
-	status_vec = std::vector<AppsMap_t>(app::Application::FINISHED);
+	status_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_priority);
@@ -104,12 +104,12 @@ AppsMap_t const & ApplicationManager::Applications(uint16_t _prio) {
 
 
 AppsMap_t const & ApplicationManager::Applications(
-		app::Application::ScheduleFlag_t sched_state) {
+		ba::Application::ScheduleFlag_t sched_state) {
 
 	// Return a map of application descriptor (pointers) with
 	// the same priority
-	if (sched_state >= app::Application::READY   &&
-	        sched_state <= app::Application::FINISHED) {
+	if (sched_state >= ba::Application::READY   &&
+	        sched_state <= ba::Application::FINISHED) {
 		return status_vec[sched_state];
 	}
 	// Return an empty map if the state value is not valid
@@ -117,7 +117,7 @@ AppsMap_t const & ApplicationManager::Applications(
 }
 
 
-plugins::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
+bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
     std::string const & _name, std::string const & _user, uint16_t _prio,
     uint32_t _pid, std::string const & _rname, bool weak_load = false) {
 
@@ -126,11 +126,11 @@ plugins::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 	RecipePtr_t recp_ptr;
 
 	// The method return value
-	plugins::RecipeLoaderIF::ExitCode_t retcode =
-	    plugins::RecipeLoaderIF::RL_SUCCESS;
+	bp::RecipeLoaderIF::ExitCode_t retcode =
+	    bp::RecipeLoaderIF::RL_SUCCESS;
 
 	// Create a new descriptor
-	app_ptr = AppPtr_t(new app::Application(_name, _user, _pid));
+	app_ptr = AppPtr_t(new ba::Application(_name, _user, _pid));
 	app_ptr->SetPriority(_prio);
 
 	// The recipe has been loaded in the past ?
@@ -145,22 +145,22 @@ plugins::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 		//  Recipe never loaded before...
 		//  Get the recipe loader instance
 		std::string rloader_name(RECIPE_LOADER_NAMESPACE);
-		plugins::RecipeLoaderIF * rloader =
+		bp::RecipeLoaderIF * rloader =
 			ModulesFactory::GetRecipeLoaderModule(rloader_name);
 
 		if (!rloader) {
 			// Cannot load recipes without the plugin!
 			logger->Error("Missing RecipeLoader plugin");
-			return plugins::RecipeLoaderIF::RL_ABORTED;
+			return bp::RecipeLoaderIF::RL_ABORTED;
 		}
 		// Load the "recipe" of the application
-		recp_ptr = RecipePtr_t(new app::Recipe(_rname));
+		recp_ptr = RecipePtr_t(new ba::Recipe(_rname));
 		retcode = rloader->LoadRecipe(app_ptr, _rname, recp_ptr);
 
 		// If a weak load has done, but the we didn't want it
 		// abort the application descriptor creation
-		if ((retcode == plugins::RecipeLoaderIF::RL_WEAK_LOAD && !weak_load)
-				|| (retcode == plugins::RecipeLoaderIF::RL_FORMAT_ERROR)) {
+		if ((retcode == bp::RecipeLoaderIF::RL_WEAK_LOAD && !weak_load)
+				|| (retcode == bp::RecipeLoaderIF::RL_FORMAT_ERROR)) {
 			return retcode;
 		}
 		// Place the new recipe object in the map

@@ -32,6 +32,9 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resource_accounter.h"
 
+namespace br = bbque::res;
+namespace bp = bbque::plugins;
+
 namespace bbque { namespace app {
 
 
@@ -47,9 +50,9 @@ Application::Application(std::string const & _name, std::string const & _user,
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
-	plugins::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger =
-		std::unique_ptr<plugins::LoggerIF>
+		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
@@ -62,7 +65,7 @@ Application::Application(std::string const & _name, std::string const & _user,
 Application::~Application() {
 
 	// Release the resources (if any)
-	res::ResourceAccounter * ra = bbque::res::ResourceAccounter::GetInstance();
+	br::ResourceAccounter * ra = br::ResourceAccounter::GetInstance();
 	assert(ra != NULL);
 	ra->Release(this);
 
@@ -137,8 +140,8 @@ void Application::SwitchToNextScheduled(double _time) {
 		curr_sched.awm = next_sched.awm;
 
 		// Update the current set of usages
-		res::ResourceAccounter *res_acc =
-			res::ResourceAccounter::GetInstance();
+		br::ResourceAccounter *res_acc =
+			br::ResourceAccounter::GetInstance();
 
 		switch (next_sched.state) {
 		case RUNNING:
@@ -172,9 +175,8 @@ Application::ExitCode_t Application::SetConstraint(
 
 	if (it_con == constraints.end()) {
 		// Check for resource existance
-		res::ResourceAccounter *ra =
-		    bbque::res::ResourceAccounter::GetInstance();
-		res::ResourcePtr_t rsrc_ptr(ra->GetResource(_res_name));
+		br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
+		br::ResourcePtr_t rsrc_ptr(ra->GetResource(_res_name));
 
 		if (rsrc_ptr.get() == NULL) {
 			// If the resource doesn't exist abort

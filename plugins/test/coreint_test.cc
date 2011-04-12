@@ -165,7 +165,7 @@ CoreInteractionsTest::CoreInteractionsTest():
 	std::string logger_name(COREINT_NAMESPACE);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger =
-		std::unique_ptr<plugins::LoggerIF>
+		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)

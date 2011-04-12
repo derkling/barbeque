@@ -36,14 +36,15 @@
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.appman"
 
-namespace bbque {
+namespace ba = bbque::app;
+namespace bp = bbque::plugins;
 
-namespace app {
+namespace bbque { namespace app {
 	// Forward declaration
 	class Recipe;
-}
+}}
 
-namespace ba = bbque::app;
+namespace bbque {
 
 /** Shared pointer to Recipe object */
 typedef std::shared_ptr<ba::Recipe> RecipePtr_t;
@@ -78,7 +79,7 @@ public:
 	 * It is when some resource requests doesn't match perfectly.
 	 * @return An error code
 	 */
-	plugins::RecipeLoaderIF::ExitCode_t StartApplication(
+	bp::RecipeLoaderIF::ExitCode_t StartApplication(
 			std::string const & name, std::string const & user, uint16_t prio,
 			uint32_t pid, std::string const & rpath, bool weak_load);
 
@@ -104,7 +105,7 @@ public:
 	 * @return The map of applications in the given scheduled state
 	 */
 	AppsMap_t const & Applications(
-			app::Application::ScheduleFlag_t sched_state);
+			ba::Application::ScheduleFlag_t sched_state);
 
 	/**
 	 * @brief Retrieve an application descriptor (shared pointer) by PID
@@ -157,7 +158,7 @@ private:
 	 * 	2) A single instance is shared between more than one instance
 	 * We assume the possibility of manage both cases.
 	 */
-	std::map<std::string, app::RecipePtr_t> recipes;
+	std::map<std::string, ba::RecipePtr_t> recipes;
 
 	/**
 	 * Priority vector of currently scheduled applications (actives).

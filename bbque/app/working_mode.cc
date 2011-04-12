@@ -32,9 +32,10 @@
 #include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter.h"
 
-namespace bbque { namespace app {
+namespace br = bbque::res;
+namespace bp = bbque::plugins;
 
-class Application;
+namespace bbque { namespace app {
 
 
 WorkingMode::WorkingMode():
@@ -55,9 +56,9 @@ WorkingMode::WorkingMode(AppPtr_t _app,	std::string const & _name,
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE +_app->Name()
 			+ "." + WORKING_MODE_NAMESPACE + _name);
-	plugins::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger =
-		std::unique_ptr<plugins::LoggerIF>
+		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 }
 
@@ -71,8 +72,8 @@ WorkingMode::~WorkingMode() {
 WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		std::string const & _res_path, uint64_t _value) {
 
-	res::ResourceAccounter *ra = res::ResourceAccounter::GetInstance();
-	res::ResourcePtr_t resource_to_use = ra->GetResource(_res_path);
+	br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
+	br::ResourcePtr_t resource_to_use = ra->GetResource(_res_path);
 
 	// Check if the resource exists
 	if (resource_to_use.get() == 0) {
@@ -88,7 +89,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	}
 
 	// Create a new resource usage object and insert it into the map
-	resources[_res_path] = UsagePtr_t(new res::ResourceUsage);
+	resources[_res_path] = UsagePtr_t(new br::ResourceUsage);
 	resources[_res_path]->resource = resource_to_use;
 	resources[_res_path]->value = _value;
 	return WM_SUCCESS;
