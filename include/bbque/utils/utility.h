@@ -61,7 +61,6 @@ extern bbque::utils::Timer bbque_tmr;
 #define POW_2_10 0x400
 #define POW_2_20 0x100000
 #define POW_2_30 0x40000000
-#define POW_2_40 0x10000000000
 
 /**
  * @brief Convert to unity

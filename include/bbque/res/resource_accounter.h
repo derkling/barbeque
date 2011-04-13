@@ -2,7 +2,7 @@
  *       @file  resource_accounter.h
  *      @brief  Resource accounter component for Barbeque RTRM
  *
- * This defines the component for managing the resource accounting.
+ * This defines the component for making resource accounting.
  *
  * Each resource of system/platform should be properly registered in the
  * Resource accounter. It keeps track of the information upon availability,
@@ -41,11 +41,13 @@ namespace bbque { namespace res {
 
 /**
  * @class ResourceAccounter
- * @brief This component is used by the RTRM to keep track of the resources in
- * the system, their availability and usages information.
  *
- * It manages their status updating and information about which applications
- * are using a given resource.
+ * @brief Resource accounter component
+ *
+ * This component is used by the RTRM to keep track of the resources in
+ * the system, their availability and usages information. It manages their
+ * status update and information about which applications are using a given
+ * resource.
  */
 class ResourceAccounter: public ResourceAccounterConfIF, public Object {
 
@@ -65,21 +67,21 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Available(std::string const & path) const {
-		return stateInformation(path, RA_AVAILAB);
+		return queryState(path, RA_AVAILAB);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Total(std::string const & path) const {
-		return stateInformation(path, RA_TOTAL);
+		return queryState(path, RA_TOTAL);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Used(std::string const & path) const {
-		return stateInformation(path, RA_USED);
+		return queryState(path, RA_USED);
 	}
 
 	/**
@@ -128,7 +130,7 @@ private:
 
 	/**
 	 * @enum This is used for selecting the state attribute to return from
-	 * <tt>stateInformation()</tt>
+	 * <tt>queryState()</tt>
 	 */
 	enum AttributeSelector_t {
 		/** Amount of resource available */
@@ -164,8 +166,8 @@ private:
 	 * @param sel Resource attribute request (@see AttributeSelector_t)
 	 * @return The value of the attribute request
 	 */
-	uint64_t stateInformation(std::string const & path,
-			AttributeSelector_t	sel) const;
+	uint64_t queryState(std::string const & path, AttributeSelector_t sel)
+		const;
 
 	/**
 	 *  @brief Change the set of resources usages of the given application.

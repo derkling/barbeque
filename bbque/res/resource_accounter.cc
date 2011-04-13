@@ -2,6 +2,8 @@
  *       @file  resource_accounter.cc
  *      @brief  Implementation of the Resource Accounter component
  *
+ * This implements the componter for making resource accounting.
+ *
  * Each resource of system/platform should be properly registered in the
  * Resource accounter. It keeps track of the information upon availability,
  * total amount and used resources.
@@ -90,7 +92,7 @@ void ResourceAccounter::RegisterResource(std::string const & _path,
 }
 
 
-uint64_t ResourceAccounter::stateInformation(std::string const & _path,
+uint64_t ResourceAccounter::queryState(std::string const & _path,
 		AttributeSelector_t _att) const {
 
 	// Lookup the resource descriptor by path

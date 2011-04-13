@@ -109,6 +109,10 @@ public:
 		return false;
 	}
 
+	/**
+	 * @brief Maximum depth of the tree
+	 * @return The maxim depth value
+	 */
 	inline uint16_t depth() {
 		return max_depth;
 	}
