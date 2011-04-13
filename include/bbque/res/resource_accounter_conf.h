@@ -64,9 +64,9 @@ public:
 	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)
 	 * @param amount The total amount available
 	 */
-	virtual void RegisterResource(std::string const & name,
+	virtual void RegisterResource(std::string const & path,
 			std::string const & type, std::string const & units,
-			uint32_t amount) = 0;
+			uint64_t amount) = 0;
 
 };
 

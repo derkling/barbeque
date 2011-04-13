@@ -23,6 +23,7 @@
 
 #include <iostream>
 #include "bbque/res/resources.h"
+#include "bbque/utils/utility.h"
 
 namespace bbque { namespace res {
 
@@ -37,53 +38,6 @@ ResourceTree::ResourceTree():
 }
 
 
-// Create a new resoure node and append it into the tree as a child of
-// "curr_node"
-ResourceNode * insertChild(ResourceNode * curr_node,
-		std::string const & curr_ns) {
-
-	ResourceNode * _node;
-	// Create the new resource node
-	_node = new ResourceNode;
-	_node->data = ResourcePtr_t(new Resource(curr_ns));
-
-	// Set the parent
-	_node->parent = curr_node;
-
-	// Set the depth
-	_node->depth = curr_node->depth + 1;
-
-	// Append it as child of the current node
-	curr_node->children.push_back(_node);
-	return _node;
-}
-
-
-// Pop the first namespace in a resource path string, and set the remaining
-// trail in "_next_path".
-//
-// For instance, if we have "arch.clusters.mem0", the function returns "arch"
-// and set _next_path to "clusters.mem0".
-std::string popNamespace(std::string & _next_path) {
-
-	std::string _curr_ns;
-	// Find the position of "."
-	int dot_pos = _next_path.find(".");
-
-	if (dot_pos == -1) {
-		// No "." found
-		_curr_ns = _next_path;
-		_next_path.clear();
-	}
-	else {
-		// Split
-		_curr_ns = _next_path.substr(0, dot_pos);
-		_next_path = _next_path.substr(dot_pos + 1);
-	}
-	return _curr_ns;
-}
-
-
 ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 
 	// Current node pointer
@@ -91,7 +45,7 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 
 	// Extract the first "node" in the resource path
 	std::string ns_path	= _rsrc_path;
-	std::string curr_ns = popNamespace(ns_path);
+	std::string curr_ns = PopPathLevel(ns_path);
 
 	// For each namespace in the path...
 	while (!curr_ns.empty()) {
@@ -99,7 +53,7 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 		// Current node children list is empty
 		if (curr_node->children.size() == 0) {
 			// Insert the resource as a child node
-			curr_node = insertChild(curr_node, curr_ns);
+			curr_node = _insert_child(curr_node, curr_ns);
 			// Update tree depth
 			if (curr_node->depth > max_depth)
 				max_depth = curr_node->depth;
@@ -123,10 +77,10 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 			}
 			// If not, add the resource as a children sibling
 			if (it == end)
-				curr_node = insertChild(curr_node, curr_ns);
+				curr_node = _insert_child(curr_node, curr_ns);
 		}
 		// Next node
-		curr_ns = popNamespace(ns_path);
+		curr_ns = PopPathLevel(ns_path);
 	}
 	// Return the object created for finalizing purpose
 	return curr_node->data;
@@ -149,7 +103,7 @@ ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
 
 	// Extract the first node in the path
 	std::string ns_path	= _rsrc_path;
-	std::string curr_ns = popNamespace(ns_path);
+	std::string curr_ns = PopPathLevel(ns_path);
 
 	// True if the namespace in the path matches a level in the resource tree
 	bool node_found;
@@ -167,10 +121,9 @@ ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
 			curr_node->children.end();
 		node_found = false;
 
-		// Check if the current namespace node exists looking for in the list
-		// of children
+		// Check if the current namespace node exists looking for it in the
+		// list of children
 		for (; it != end; ++it) {
-
 			// Current node name (child)
 			std::string res_name = (*it)->data->Name();
 
@@ -193,10 +146,30 @@ ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
 			return null_ptr;
 
 		// Next node
-		curr_ns = popNamespace(ns_path);
+		curr_ns = PopPathLevel(ns_path);
 	}
 	// Return the resource descriptor successfully
 	return curr_node->data;
+}
+
+
+ResourceNode * ResourceTree::_insert_child(ResourceNode * curr_node,
+		std::string const & curr_ns) {
+
+	ResourceNode * _node;
+	// Create the new resource node
+	_node = new ResourceNode;
+	_node->data = ResourcePtr_t(new Resource(curr_ns));
+
+	// Set the parent
+	_node->parent = curr_node;
+
+	// Set the depth
+	_node->depth = curr_node->depth + 1;
+
+	// Append it as child of the current node
+	curr_node->children.push_back(_node);
+	return _node;
 }
 
 

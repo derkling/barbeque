@@ -35,6 +35,14 @@ using bbque::app::Recipe;
 
 namespace bbque { namespace plugins {
 
+
+/** Shared pointer to @ref Application */
+typedef std::shared_ptr<ba::Application> AppPtr_t;
+
+/** Shared pointer to @ref Recipe */
+typedef std::shared_ptr<ba::Recipe> RecipePtr_t;
+
+
 /**
  * @class RecipeLoaderIF
  *
@@ -78,8 +86,8 @@ public:
 	/**
 	 * @brief Load the recipe of the application
 	 * @param app Pointer to the application using the recipe
-	 * @param rname The recipe name. We expect to find the recipe in the
-	 * path:<br><default-dir>/<i>rname</i>.recipe.
+	 * @param recipe_name The recipe name. We expect to find the recipe in the
+	 * path:<br><default-dir>/<i>recipe_name</i>.recipe.
 	 * @param recipe The recipe object to fill with the data to parse
 	 * @return An exit code indicating the loading status
 	 */
@@ -94,10 +102,10 @@ public:
 
 	/**
 	 * @brief The last modified time of the recipe
-	 * @param path The relative path of the XML file containing the recipe
+	 * @param recipe_name The recipe name
 	 * @return A time_t object for timestamp comparison
 	 */
-	virtual std::time_t LastModifiedTime(std::string const & path) = 0;
+	virtual std::time_t LastModifiedTime(std::string const & recipe_name) = 0;
 };
 
 } // namespace plugins

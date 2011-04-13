@@ -289,6 +289,10 @@ int CoreInteractionsTest::WorkingModesDetails(
 			<< "-------------------------------------------------------------"
 			<< "-----" << std::endl;
 	}
+
+	std::cout << "Press a key..." << std::endl;
+	getchar();
+
 	return 0;
 }
 
@@ -327,6 +331,9 @@ void CoreInteractionsTest::PrintScheduleInfo(
 	std::cout
 		<< "**************************************************"
 		<< std::endl << std::endl;
+
+	std::cout << "Press a key..." << std::endl;
+	getchar();
 }
 
 
@@ -355,6 +362,51 @@ void CoreInteractionsTest::DoScheduleSwitch(
 	PrintScheduleInfo(test_app);
 }
 
+
+void SearchResources(SystemView *sv) {
+
+	std::cout << ".........: Test resource template search :......\n"
+		<< std::endl;
+
+	std::cout << "arch.clusters.mem : ";
+	if (sv->ExistResource("arch.clusters.mem"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "arch.clusters.cluster : ";
+	if (sv->ExistResource("arch.clusters.cluster"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "arch.clusters.cluster.pe : ";
+	if (sv->ExistResource("arch.clusters.cluster.pe"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "arch.clusters.pe : ";
+	if (sv->ExistResource("arch.clusters.pe"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "dma : ";
+	if (sv->ExistResource("dma"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "pci : ";
+	if (sv->ExistResource("pci"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "Press a key..." << std::endl;
+	getchar();
+}
 
 // =======================================[ Start the test ]==================
 
@@ -403,12 +455,8 @@ void CoreInteractionsTest::Test() {
 	// Print out working modes details
 	WorkingModesDetails(test_app, res_names);
 
-	//
-	// Get Application descriptor
-	//
+	// Get the application descriptor
 	std::shared_ptr<ba::Application> app_conf(appman->GetApplication(3324));
-
-	// Do a schedule switch, then remove a constraint and do another
 
 	// Simulate a schedulation 1
 	DoScheduleSwitch(app_conf, "wm1", 0.381);
@@ -429,9 +477,10 @@ void CoreInteractionsTest::Test() {
 	appman->StopApplication(3324);
 	PrintResourceAvailabilities();
 
-	delete appman;
+	// Some resource search test
+	SearchResources(sv);
 
-	logger->Debug(".....: CoreInteractions Test finished :.....");
+	delete appman;
 }
 
 }   // namespae test

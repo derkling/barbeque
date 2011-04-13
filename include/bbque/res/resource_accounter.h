@@ -31,6 +31,7 @@
 #include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter_conf.h"
 #include "bbque/res/resource_tree.h"
+#include "bbque/utils/utility.h"
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
 
@@ -92,7 +93,7 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline bool ExistResource(std::string const & path) {
-		std::string templ_path = pathTemplate(path);
+		std::string templ_path = PathTemplate(path);
 		return resources.match_path(templ_path);
 	}
 
@@ -114,7 +115,7 @@ public:
 	 * @see ResourceAccounterConfIF
 	 */
 	void RegisterResource(std::string const & path, std::string const & type,
-			std::string const & units, uint32_t amount);
+			std::string const & units, uint64_t amount);
 
 	/**
 	 * @brief Print the resource hierarchy in a tree-like form
@@ -155,19 +156,6 @@ private:
 	 * Default constructor
 	 */
 	ResourceAccounter();
-
-	/**
-	 * @brief Given a specific resource path (i.e.
-	 * "arch.clusters.cluster2.pe1") return the template format:
-	 * "arch.clusters.cluster.pe".
-	 *
-	 * This is useful for checking resource existance without refer to a
-	 * specific resource object (with its id-based path). This way let us to
-	 *
-	 * @param path Resource complete path (ID-based)
-	 * @return A template path (without resource IDs)
-	 */
-	std::string const pathTemplate(std::string const & path);
 
 	/**
 	 * @brief Return a state parameter (availability, resources used, total

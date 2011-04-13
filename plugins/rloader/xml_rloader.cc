@@ -30,17 +30,23 @@
 #include "bbque/app/recipe.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
+#include "bbque/utils/utility.h"
 
 namespace ba = bbque::app;
 namespace po = boost::program_options;
 
 namespace bbque { namespace plugins {
 
+
+/** Set true it means the plugin has read its options in the config file*/
 bool XMLRecipeLoader::configured = false;
 
+/** Recipes directory */
 std::string XMLRecipeLoader::recipe_dir = "";
 
+/** Map of options (in the Barbeque config file) for the plugin */
 po::variables_map xmlrloader_opts_value;
+
 
 XMLRecipeLoader::XMLRecipeLoader() {
 	// Get a logger
@@ -110,8 +116,7 @@ int32_t XMLRecipeLoader::Destroy(void *plugin) {
 // =======================[ MODULE INTERFACE ]================================
 
 RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
-		std::shared_ptr<ba::Application> _app,	std::string const & _rname,
-		std::shared_ptr<ba::Recipe> _recipe) {
+		AppPtr_t _app, std::string const & _recipe_name, RecipePtr_t _recipe) {
 
 	RecipeLoaderIF::ExitCode_t ret_awms;
 
@@ -131,7 +136,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	ticpp::Document doc;
 	try {
 		// Load the recipe parsing an XML file
-		std::string path(recipe_dir + "/" + _rname + ".recipe");
+		std::string path(recipe_dir + "/" + _recipe_name + ".recipe");
 		doc.LoadFile(path.c_str());
 
 		// <BarbequeRTRM> - Recipe root tag
@@ -200,7 +205,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 					static_cast<uint8_t> (wm_value));
 
 			// Get the descriptor of the working mode just created
-			std::shared_ptr<ba::WorkingMode> awm;
+			AwmPtr_t awm;
 			awm = recipe_ptr->WorkingMode(wm_name);
 
 			// Load resource usages of the working mode
@@ -236,14 +241,8 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 
 // =======================[ Resources ]=======================================
 
-// Return the correct value, based on the units specified.
-// (i.e value=4 units="Kb" returns 4096)
-uint64_t valueOnUnits(ulong _value, std::string const & _units);
-
-
 uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
-		std::shared_ptr<ba::WorkingMode> & _wm,
-		std::string const &	_curr_path = "") {
+		AwmPtr_t & _wm,	std::string const &	_curr_path = "") {
 
 	uint8_t ret_code = __RSRC_SUCCESS;
 
@@ -280,31 +279,8 @@ uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
 }
 
 
-inline uint64_t valueOnUnits(ulong _value, std::string const & _units) {
-
-	if (!_units.empty()) {
-	switch(toupper(_units.at(0))) {
-		case 'K':
-			_value *= pow(2, 10);
-			break;
-		case 'M':
-			_value *= pow(2, 20);
-			break;
-		case 'G':
-			_value *= pow(2, 30);
-			break;
-		case 'T':
-			_value *= pow(2, 40);
-			break;
-		}
-	}
-	return _value;
-}
-
-
 inline uint8_t XMLRecipeLoader::appendToWorkingMode(
-		std::shared_ptr<ba::WorkingMode> & wm,
-		std::string const & _res_path, ulong _res_usage) {
+		AwmPtr_t & wm, std::string const & _res_path, uint64_t _res_usage) {
 
 	// Add the resource usage to the working mode
 	ba::WorkingMode::ExitCode_t wm_err_code;
@@ -339,7 +315,7 @@ inline uint8_t XMLRecipeLoader::appendToWorkingMode(
 
 
 inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
-		std::shared_ptr<ba::WorkingMode> & _wm, std::string & _res_path) {
+		AwmPtr_t & _wm, std::string & _res_path) {
 
 	// Resource ID
 	std::string res_id;
@@ -355,7 +331,7 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
 	_res_elem->GetAttribute("type", &res_type, false);
 
 	// Resource amount
-	ulong res_usage = 0;
+	uint64_t res_usage = 0;
 	_res_elem->GetAttribute("amount", &res_usage, false);
 
 	// Units
@@ -364,7 +340,7 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
 
 	// Parse the units string and update correctly the resource amount
 	// value
-	res_usage = valueOnUnits(res_usage, res_units);
+	res_usage = ConvertValue(res_usage, res_units);
 
 	// A true resource MUST have the "id" attribute.
 	// Otherwise the xml tag is considered"resource container" (ie.
@@ -433,7 +409,7 @@ inline void XMLRecipeLoader::parsePluginTag(ticpp::Element * _plug_elem,
 		// TODO: Insert the plugin existance control
 
 		// Create the PluginData object
-		std::shared_ptr<ba::PluginData> pdata =
+		PluginDataPtr_t pdata =
 			_container->AddPluginData(name, type, req_flag);
 
 		// Plugin data nodes under <plugin>
@@ -454,8 +430,7 @@ inline void XMLRecipeLoader::parsePluginTag(ticpp::Element * _plug_elem,
 
 
 inline void XMLRecipeLoader::parsePluginData(
-		std::shared_ptr<ba::PluginData> & pdata,
-		ticpp::Node * plugdata_node){
+		PluginDataPtr_t & pdata, ticpp::Node * plugdata_node){
 
 	try {
 		// Is the node an element ?
@@ -513,16 +488,16 @@ void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 				con_elem->GetText(&value, true);
 				ba::Constraint::BoundType_t type;
 
-				// A lower bound constraint
 				if (constraint_type.compare("L") == 0) {
+					// A lower bound constraint
 					type = ba::Constraint::LOWER_BOUND;
 				}
-				// An upper bound constraint
 				else if (constraint_type.compare("U") == 0) {
+					// An upper bound constraint
 					type = ba::Constraint::UPPER_BOUND;
 				}
-				// Uncorrected type specified
 				else {
+					// Uncorrected type specified
 					logger->Warn("Unknown bound type");
 					continue;
 				}
@@ -532,7 +507,6 @@ void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 				// Next constraint tag
 				con_elem = con_elem->NextSiblingElement("constraint", false);
 			}
-
 		} catch (ticpp::Exception &ex) {
 			logger->Error(ex.what());
 		}

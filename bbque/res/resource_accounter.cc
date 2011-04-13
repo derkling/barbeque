@@ -33,7 +33,6 @@
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/platform_services.h"
-
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 
@@ -61,7 +60,7 @@ ResourceAccounter::ResourceAccounter():
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
-		logger->Debug("ResourceAccounter instance.");
+		logger->Debug("Resource accounter instanced.");
 }
 
 
@@ -73,7 +72,7 @@ ResourceAccounter::~ResourceAccounter() {
 
 void ResourceAccounter::RegisterResource(std::string const & _path,
 		std::string	const & _type, std::string const & _units,
-		uint32_t _amount) {
+		uint64_t _amount) {
 
 	assert(!_path.empty());
 	assert(!_type.empty());
@@ -83,24 +82,8 @@ void ResourceAccounter::RegisterResource(std::string const & _path,
 	res_ptr = resources.insert(_path);
 
 	if (res_ptr.get() != NULL) {
-
 		// Set the amount of resource on the units base
-		switch(toupper(_units.at(0))) {
-		case 'K':
-			res_ptr->SetTotal(_amount * pow(2, 10));
-			break;
-		case 'M':
-			res_ptr->SetTotal(_amount * pow(2, 20));
-			break;
-		case 'G':
-			res_ptr->SetTotal(_amount * pow(2, 30));
-			break;
-		case 'T':
-			res_ptr->SetTotal(_amount * pow(2, 40));
-			break;
-		default:
-			res_ptr->SetTotal(_amount);
-		}
+		res_ptr->SetTotal(ConvertValue(_amount, _units));
 		// Resource type
 		res_ptr->SetType(_type);
 	}
@@ -203,58 +186,6 @@ void ResourceAccounter::changeUsages(ba::Application const * _app,
 		// Remove the application from the map of usages
 		usages.erase(_app->Name());
 }
-
-
-std::string popNamespaceTemplate(std::string & _next_path) {
-
-	// String to return (head of the path)
-	std::string _curr_ns;
-
-	// Find the position of the ID
-	int id_pos = _next_path.find_first_of("0123456789");
-
-	if (id_pos == -1) {
-		// No ID found
-		_curr_ns = _next_path;
-		_next_path.clear();
-	}
-	else {
-		// Split
-		_curr_ns = _next_path.substr(0, id_pos);
-		_next_path = _next_path.substr(id_pos + 1);
-	}
-	return _curr_ns;
-}
-
-
-std::string const ResourceAccounter::pathTemplate(std::string const & _path) {
-
-	// Resulting template path string
-	std::string str_templ;
-
-	// Extract the first node in the resource path
-	std::string ns_path	= _path;
-	std::string curr_ns = popNamespaceTemplate(ns_path);
-
-	// Iterate over each node in the path
-	while (true) {
-
-		if (curr_ns.empty())
-			break;
-		// Append the current node name
-		str_templ += curr_ns;
-
-		// Next node
-		curr_ns = popNamespaceTemplate(ns_path);
-
-		// If this is not the last namespace in the path append a "."
-		if (!curr_ns.empty())
-			str_templ += ".";
-	}
-	// The template path built
-	return str_templ;
-}
-
 
 }   // namespace res
 

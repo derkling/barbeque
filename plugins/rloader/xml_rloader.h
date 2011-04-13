@@ -47,10 +47,18 @@ struct PF_ObjectParams;
 
 namespace bbque { namespace plugins {
 
+/** Shared pointer to @ref WorkingMode*/
+typedef std::shared_ptr<ba::WorkingMode> AwmPtr_t;
+
+/** Shared pointer to @ref PluginData */
+typedef std::shared_ptr<ba::PluginData> PluginDataPtr_t;
+
+
 // Return code for internal purpose
 #define __RSRC_SUCCESS 		0x0
 #define __RSRC_WEAK_LOAD 	0x1
 #define __RSRC_FORMAT_ERR 	0x2
+
 
 /**
  * @class XMLRecipeLoader
@@ -90,14 +98,13 @@ public:
 	/**
 	 * @see RecipeLoaderIF
 	 */
-	ExitCode_t LoadRecipe(std::shared_ptr<Application> app,
-			std::string const & recipe_path,
-			std::shared_ptr<Recipe> recipe);
+	ExitCode_t LoadRecipe(AppPtr_t app,	std::string const &	recipe_name,
+			RecipePtr_t recipe);
 
 	/**
 	 * @see RecipeLoaderIF
 	 */
-	std::time_t LastModifiedTime(std::string const & path);
+	std::time_t LastModifiedTime(std::string const & recipe_name);
 
 private:
 
@@ -122,12 +129,13 @@ private:
 	/**
 	 * Shared pointer to the recipe object
 	 */
-	std::shared_ptr<Recipe> recipe_ptr;
+	RecipePtr_t recipe_ptr;
 
 	/**
 	 * Shared pointer to the application requiring the recipe
 	 */
-	std::shared_ptr<Application> app_ptr;
+
+	AppPtr_t app_ptr;
 
 	/**
 	 * The constructor
@@ -157,8 +165,7 @@ private:
 	 * @param res_path Resource path (i.e. "arch.clusters.mem0")
 	 * expected section tag
 	 */
-	uint8_t loadResources(ticpp::Element * xml_elem,
-			std::shared_ptr<WorkingMode> & wm,
+	uint8_t loadResources(ticpp::Element * xml_elem, AwmPtr_t & wm,
 			std::string const & res_path);
 
 	/**
@@ -169,8 +176,8 @@ private:
 	 * @param res_usage Resource usage value
 	 * @return An internal error code
 	 */
-	uint8_t appendToWorkingMode(std::shared_ptr<WorkingMode> & wm,
-		std::string const & res_path, ulong res_usage);
+	uint8_t appendToWorkingMode(AwmPtr_t & wm, std::string const & res_path,
+			uint64_t res_usage);
 
 	/**
 	 * @brief Parse the resource data from the xml element and add the
@@ -179,8 +186,8 @@ private:
 	 * @param wm The working mode to which add the resource usage
 	 * @param res_path Resource path
 	 */
-	uint8_t parseResourceData(ticpp::Element * res_elem,
-		std::shared_ptr<WorkingMode> & wm, std::string & res_path);
+	uint8_t parseResourceData(ticpp::Element * res_elem, AwmPtr_t & wm,
+			std::string & res_path);
 
 	/**
 	 * @brief Parse the section containing plugins specific data for the
@@ -207,8 +214,8 @@ private:
 	 * @param pdata PluginData object to fill
 	 * @param plugdata_node The XML Node to check for data
 	 */
-	void parsePluginData(std::shared_ptr<PluginData> & pdata,
-		ticpp::Node * plugdata_node);
+	void parsePluginData(PluginDataPtr_t & pdata,
+			ticpp::Node * plugdata_node);
 
 	/**
 	 * @brief Parse the section containing constraints assertions

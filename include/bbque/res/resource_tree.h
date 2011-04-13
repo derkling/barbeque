@@ -146,6 +146,15 @@ private:
 	ResourcePtr_t _find(std::string const & rsrc_path, bool exact_match) const;
 
 	/**
+	 * @brief Append a child to the current node
+	 * @param curr_node Current resource node
+	 * @param curr_ns Current pathlevel (namespace) name
+	 * @return The child node just created
+	 */
+	ResourceNode * _insert_child(ResourceNode * curr_node,
+			std::string const & curr_ns);
+
+	/**
 	 * @brief Recursive method for printing nodes content in a tree-like form
 	 * @param node Pointer to the starting tree node
 	 * @param depth Node depth
