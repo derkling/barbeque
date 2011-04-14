@@ -38,6 +38,11 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace app {
 
+// Compare two working mode values.
+// This is used to sort the list of enabled working modes.
+bool CompareAWMsByValue(const AwmStatusPtr_t & wm1, const AwmStatusPtr_t & wm2) {
+		return wm1->Value() < wm2->Value();
+}
 
 Application::Application(std::string const & _name,
 		AppPid_t _pid,
@@ -104,6 +109,7 @@ void Application::StopExecution() {
 
 void Application::SetPriority(AppPrio_t _prio) {
 
+	// Application Manager instance
 	bbque::ApplicationManager * appman =
 		bbque::ApplicationManager::GetInstance();
 
@@ -113,23 +119,24 @@ void Application::SetPriority(AppPrio_t _prio) {
 }
 
 
-AwmStatusPtrList_t const & Application::WorkingModes() {
+void Application::SetRecipe(RecipePtr_t app_recipe) {
+	assert(app_recipe.get() != NULL);
+	recipe = app_recipe;
 
 	// After Recipe loading we have to init the list of working modes enabled.
 	// Its should contain all the working modes, if there aren't any
 	// constraints asserted
-	if ((enabled_awms.size() & constraints.size()) == 0) {
-
-		// This branch is executed just the first time the application is
-		// started.
+	if (enabled_awms.empty() && constraints.empty()) {
+		// Constraints list is empty. Get all the working modes.
 		std::vector<AwmPtr_t> wms = recipe->WorkingModesAll();
 		std::vector<AwmPtr_t>::iterator it = wms.begin();
 		std::vector<AwmPtr_t>::iterator end = wms.end();
 
-		for ( ; it < end; ++it)
+		for (; it < end; ++it)
 			enabled_awms.push_back(*it);
+
+		enabled_awms.sort(CompareAWMsByValue);
 	}
-	return enabled_awms;
 }
 
 
@@ -254,13 +261,13 @@ Application::ExitCode_t Application::RemoveConstraint(
 		// Check if there are some awms to re-enable now
 		workingModesEnabling(_res_name, _type, it_con->second->lower);
 		// Constraint object complete removal ?
-		if (it_con->second->upper == std::numeric_limits<uint32_t>::max())
+		if (it_con->second->upper == std::numeric_limits<uint64_t>::max())
 			constraints.erase(it_con);
 		break;
 
 	case Constraint::UPPER_BOUND :
 		// Remove the upper bound constraint
-		it_con->second->upper = std::numeric_limits<uint32_t>::max();
+		it_con->second->upper = std::numeric_limits<uint64_t>::max();
 		// Check if there are some awms to re-enable
 		workingModesEnabling(_res_name, _type, it_con->second->upper);
 		// Constraint object complete removal ?
@@ -268,7 +275,6 @@ Application::ExitCode_t Application::RemoveConstraint(
 			constraints.erase(it_con);
 		break;
 	}
-
 	return APP_SUCCESS;
 }
 
@@ -300,12 +306,14 @@ void Application::workingModesEnabling(std::string const & _res_name,
 			// disable the working mode
 			enabled_awms.remove(*it_awm);
 			logger->Debug("Disabled : %s", (*it_awm)->Name().c_str());
-		} else {
+		}
+		else {
 			// The working mode is enabled yet ?
-			for( ; it_enabl != enabl_end; ++it_awm) {
+			for (; it_enabl != enabl_end; ++it_awm) {
 				if ((*it_enabl)->Name().compare((*it_awm)->Name()) == 0)
 					break;
 			}
+			// Check the search result
 			if (it_enabl == enabl_end) {
 				// No. Enable it
 				enabled_awms.push_back(*it_awm);
@@ -313,6 +321,9 @@ void Application::workingModesEnabling(std::string const & _res_name,
 			}
 		}
 	}
+
+	// Sort by "value"
+	enabled_awms.sort(CompareAWMsByValue);
 	logger->Debug("%d working modes enabled", enabled_awms.size());
 }
 

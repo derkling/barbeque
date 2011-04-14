@@ -31,9 +31,11 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/app/plugin_data.h"
 #include "bbque/res/resources.h"
+#include "bbque/utils/timer.h"
 
 namespace ba = bbque::app;
 namespace bp = bbque::plugins;
+namespace bu = bbque::utils;
 
 namespace bbque { namespace plugins {
 
@@ -204,12 +206,18 @@ void CoreInteractionsTest::RegisterSomeResources() {
 		return;
 	}
 
+	bu::Timer _t(true);
 	// Start register resources
 	for (uint16_t i=0; i < res_names.size(); ++i) {
 		printf(" >>> Registering... :%s\n", res_names[i].c_str());
 		RA->RegisterResource(res_names[i], res_types[i], res_units[i],
 				res_totals[i]);
 	}
+
+	_t.stop();
+	std::cout << "\nResources registered in " << _t.getElapsedTimeUs() << " us"
+		<< std::endl;
+
 	// Print a tree-like view of the resources
 	RA->TreeView();
 	std::cout << "Press a key..." << std::endl;
@@ -256,7 +264,7 @@ int CoreInteractionsTest::WorkingModesDetails(
 	}
 
 	// Get all the enabled working modes
-	std::list<ba::AwmStatusPtr_t> awms = test_app->WorkingModes();
+	ba::AwmStatusPtrList_t awms = test_app->WorkingModes();
 
 	if (awms.size() == 0) {
 		std::cout << "Cannot find any working modes" << std::endl;
@@ -289,6 +297,10 @@ int CoreInteractionsTest::WorkingModesDetails(
 			<< "-------------------------------------------------------------"
 			<< "-----" << std::endl;
 	}
+
+	ba::AwmStatusPtr_t l_awm = test_app->LowValueAWM();
+	std::cout << l_awm->Name() << " is the working mode with the lowest "
+		"value [" << l_awm->Value() << "]" << std::endl;
 
 	std::cout << "Press a key..." << std::endl;
 	getchar();
@@ -365,6 +377,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 
 void SearchResources(SystemView *sv) {
 
+	bu::Timer _t(true);
 	std::cout << ".........: Test resource template search :......\n"
 		<< std::endl;
 
@@ -403,6 +416,10 @@ void SearchResources(SystemView *sv) {
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
+
+	_t.stop();
+	std::cout << "\nSearch finished in " << _t.getElapsedTimeUs() << " us"
+		<< std::endl;
 
 	std::cout << "Press a key..." << std::endl;
 	getchar();

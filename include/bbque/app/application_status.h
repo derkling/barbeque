@@ -148,7 +148,7 @@ public:
 	 * @brief Get the current working mode
 	 * @return A shared pointer to the current application working mode
 	 */
-	virtual AwmStatusPtr_t const CurrentAWM() const = 0;
+	virtual AwmStatusPtr_t const & CurrentAWM() const = 0;
 
 	/**
 	 * @brief Get next schedule state
@@ -162,13 +162,27 @@ public:
 	 * @return A shared pointer to working mode descriptor (optimizer
 	 * interface)
 	 */
-	virtual AwmStatusPtr_t const NextAWM() const = 0;
+	virtual AwmStatusPtr_t const & NextAWM() const = 0;
 
 	/**
-	 * @brief The Optimizer retrieves just the subset of enabled working modes
+	 * @brief The enabled working modes
 	 * @return All the schedulable working modes of the application
 	 */
 	virtual AwmStatusPtrList_t const & WorkingModes() = 0;
+
+	/**
+	 * @brief The working mode with the lowest value
+	 * @return A pointer to the working mode descriptor having the lowest
+	 * value
+	 */
+	virtual AwmStatusPtr_t const & LowValueAWM() = 0;
+
+	/**
+	 * @brief The working mode with the highest value
+	 * @return A pointer to the working mode descriptor having the highest
+	 * value
+	 */
+	virtual AwmStatusPtr_t const & HighValueAWM() = 0;
 
 	/**
 	 * @brief Check if the optimizer has set a new schedule state for the

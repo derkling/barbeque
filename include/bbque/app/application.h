@@ -26,10 +26,10 @@
 #define BBQUE_APPLICATION_H
 
 #include <cassert>
+#include <cstdint>
 #include <list>
 #include <map>
 #include <memory>
-#include <stdint.h>
 #include <string>
 #include <vector>
 
@@ -156,10 +156,7 @@ public:
 	 * should be loaded by the application manager using a specific plugin.
 	 * @param app_recipe Recipe object shared pointer
 	 */
-	inline void SetRecipe(RecipePtr_t app_recipe) {
-		assert(app_recipe.get() != NULL);
-		recipe = app_recipe;
-	}
+	void SetRecipe(RecipePtr_t app_recipe);
 
 	/**
 	 * @see ApplicationStatusIF
@@ -171,7 +168,7 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtr_t const CurrentAWM() const {
+	inline AwmStatusPtr_t const & CurrentAWM() const {
 		return curr_sched.awm;
 	}
 
@@ -185,14 +182,30 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtr_t const NextAWM() const {
+	inline AwmStatusPtr_t const & NextAWM() const {
 		return next_sched.awm;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	AwmStatusPtrList_t const & WorkingModes();
+	inline AwmStatusPtrList_t const & WorkingModes() {
+		return enabled_awms;
+	}
+
+	/**
+	 * @see ApplicationStatusIF
+	 */
+	inline AwmStatusPtr_t const & LowValueAWM() {
+		return enabled_awms.front();
+	}
+
+	/**
+	 * @see ApplicationStatusIF
+	 */
+	inline AwmStatusPtr_t const & HighValueAWM() {
+		return enabled_awms.back();
+	}
 
 	/**
 	 * @see ApplicationStatusIF

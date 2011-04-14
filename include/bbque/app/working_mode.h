@@ -63,7 +63,7 @@ public:
 	 * @param value The user QoS value of the working mode
 	 */
 	explicit WorkingMode(AppPtr_t app, std::string const & name,
-			uint8_t value);
+			uint16_t value);
 
 	/**
 	 * @brief Default destructor
@@ -88,14 +88,14 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline uint8_t Value() const {
+	inline uint16_t Value() const {
 		return value;
 	}
 
 	/**
 	 * @see WorkingModeConfIF
 	 */
-	inline void SetValue(uint8_t qos_value) {
+	inline void SetValue(uint16_t qos_value) {
 		value = qos_value;
 	}
 
@@ -149,7 +149,7 @@ private:
 	std::string name;
 
 	/** The QoS value associated to the working mode */
-	uint8_t value;
+	uint16_t value;
 
 	/** The set of resources required (usages) */
 	UsagesMap_t resources;

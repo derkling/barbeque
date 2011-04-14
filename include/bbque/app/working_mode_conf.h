@@ -39,7 +39,7 @@ public:
 	 * @brief Set the QoS value associated to the working mode
 	 * @param value The QoS value of the working mode
 	 */
-	virtual void SetValue(uint8_t value) = 0;
+	virtual void SetValue(uint16_t value) = 0;
 
 	/**
 	 * @brief Create a new object TransitionOverheads managing the overhead

@@ -44,7 +44,7 @@ WorkingMode::WorkingMode():
 
 
 WorkingMode::WorkingMode(AppPtr_t _app,	std::string const & _name,
-		uint8_t _value):
+		uint16_t _value):
 	bbque::Object(APPLICATION_NAMESPACE + _app->Name() + "." +
 			WORKING_MODE_NAMESPACE + _name),
 	name(_name),

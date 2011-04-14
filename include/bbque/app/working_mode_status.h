@@ -25,20 +25,30 @@
 #include <map>
 #include "bbque/app/plugin_data.h"
 
-namespace bbque {
-
-namespace res {
+namespace bbque { namespace res {
 	struct ResourceUsage;
-}
+}}
 
-namespace app {
+namespace br = bbque::res;
 
-typedef std::shared_ptr<res::ResourceUsage> UsagePtr_t;
+namespace bbque { namespace app {
+
+
+/** Shared pointer to ResourceUsage */
+typedef std::shared_ptr<br::ResourceUsage> UsagePtr_t;
+
+/** Map of UsagePtr_t. Key: Resource path */
 typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 
+// Forward declaration
 class TransitionOverheads;
+
+/**  Shared pointer to TransitionOverheads */
 typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
+
+/** Map of OverheadPtr_t. Key: destination working mode name */
 typedef std::map<std::string, OverheadPtr_t> OverheadsMap_t;
+
 
 /**
  * @class WorkingModeStatusIF
@@ -72,7 +82,7 @@ public:
 	/**
 	 * @brief Get the QoS value associated to the working mode
 	 */
-	virtual uint8_t Value() const = 0;
+	virtual uint16_t Value() const = 0;
 
 	/**
 	 * @brief Get the usage value of a resource
