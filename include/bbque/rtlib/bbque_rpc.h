@@ -66,10 +66,10 @@ public:
 	RTLIB_ExitCode Stop(
 			const RTLIB_ExecutionContextHandler ech);
 
-	void Sync(
+	bool Sync(
 			const RTLIB_ExecutionContextHandler ech,
 			const char *name,
-			const char *type);
+			RTLIB_SyncType type);
 
 	RTLIB_ExitCode Set(
 			const RTLIB_ExecutionContextHandler ech,
@@ -78,6 +78,10 @@ public:
 
 	RTLIB_ExitCode Clear(
 			const RTLIB_ExecutionContextHandler ech);
+
+	RTLIB_ExitCode GetWorkingMode(
+			RTLIB_ExecutionContextHandler ech,
+			RTLIB_WorkingModeParams *wm);
 
 protected:
 
@@ -109,11 +113,23 @@ protected:
 	virtual RTLIB_ExitCode _Clear(
 			const RTLIB_ExecutionContextHandler ech) = 0;
 
+	virtual RTLIB_ExitCode _GetWorkingMode(
+			RTLIB_ExecutionContextHandler ech,
+			RTLIB_WorkingModeParams *wm) = 0;
 	/**
 	 * @brief Build a new RTLib
 	 */
 	BbqueRPC(void);
 
+private:
+
+/******************************************************************************
+ * Application Callbacks Proxies
+ ******************************************************************************/
+
+	RTLIB_ExitCode StopExecution(
+			RTLIB_ExecutionContextHandler ech,
+			struct timespec timeout);
 
 };
 

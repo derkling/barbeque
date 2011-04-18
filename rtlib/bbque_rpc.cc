@@ -28,6 +28,15 @@
 
 #include "bbque/rtlib/rpc_fifo_client.h"
 
+#include <cstdio>
+
+#define DB(x) x
+
+#define FMT_DBG(fmt) "RTLIB [DBG] - "fmt
+#define FMT_INF(fmt) "RTLIB [INF] - "fmt
+#define FMT_WRN(fmt) "RTLIB [WRN] - "fmt
+#define FMT_ERR(fmt) "RTLIB [ERR] - "fmt
+
 namespace bbque { namespace rtlib {
 
 BbqueRPC * BbqueRPC::GetInstance() {
@@ -49,10 +58,21 @@ BbqueRPC::BbqueRPC(void) {
 
 
 RTLIB_ExitCode BbqueRPC::Init(const char *name) {
+	RTLIB_ExitCode e;
+
 	//Silence "args not used" warning.
 	(void)name;
 
-	return RTLIB_OK;
+	DB(fprintf(stderr, FMT_DBG("Initializing app [%s]\n"), name));
+
+	e = _Init(name);
+	if ( e == RTLIB_OK) {
+		DB(fprintf(stderr, FMT_DBG("Initialation DONE\n")));
+		return RTLIB_OK;
+	}
+
+	fprintf(stderr, FMT_ERR("Initialization FAILED\n"));
+	return e;
 }
 
 RTLIB_ExecutionContextHandler BbqueRPC::Register(
@@ -88,15 +108,17 @@ RTLIB_ExitCode BbqueRPC::Stop(
 	return RTLIB_OK;
 }
 
-void BbqueRPC::Sync(
+bool BbqueRPC::Sync(
 		const RTLIB_ExecutionContextHandler ech,
 		const char *name,
-		const char *type) {
+		RTLIB_SyncType type) {
 	//Silence "args not used" warning.
 	(void)ech;
 	(void)name;
 	(void)type;
 
+	// Go on with the current working mode
+	return true;
 }
 
 RTLIB_ExitCode BbqueRPC::Set(
@@ -115,6 +137,27 @@ RTLIB_ExitCode BbqueRPC::Clear(
 		const RTLIB_ExecutionContextHandler ech) {
 	//Silence "args not used" warning.
 	(void)ech;
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode BbqueRPC::GetWorkingMode(
+			RTLIB_ExecutionContextHandler ech,
+			RTLIB_WorkingModeParams *wm) {
+	//Silence "args not used" warning.
+	(void)ech;
+	(void)wm;
+
+
+	return RTLIB_NO_WORKING_MODE;
+}
+
+RTLIB_ExitCode BbqueRPC::StopExecution(
+		RTLIB_ExecutionContextHandler ech,
+		struct timespec timeout) {
+	//Silence "args not used" warning.
+	(void)ech;
+	(void)timeout;
 
 	return RTLIB_OK;
 }

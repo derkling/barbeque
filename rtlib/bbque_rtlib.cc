@@ -70,9 +70,9 @@ RTLIB_ExitCode rtlib_stop(
 }
 
 
-void rtlib_sync(const RTLIB_ExecutionContextHandler ech,
-		const char *name, const char *type) {
-	rpc->Sync(ech, name, type);
+bool rtlib_sync(const RTLIB_ExecutionContextHandler ech,
+		const char *name, RTLIB_SyncType type) {
+	return rpc->Sync(ech, name, type);
 }
 
 RTLIB_ExitCode rtlib_set(

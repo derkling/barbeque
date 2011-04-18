@@ -60,7 +60,7 @@ extern "C" {
 typedef char* RTLIB_Recipe;
 
 // Forward declaration
-struct RTLIB_Services;
+typedef struct RTLIB_Services RTLIB_Services;
 
 /**
  * @brief The library entry point.
@@ -104,8 +104,18 @@ typedef struct RTLIB_APIVersion {
 typedef enum RTLIB_ExitCode {
 	/** Success (no errors) */
 	RTLIB_OK = 0,
+	/** No new working mode error */
+	RTLIB_NO_WORKING_MODE,
 	/** Uspecified (generic) error */
 	RTLIB_ERROR,
+	/** Failed to setup the channel to connect the Barbeque RTRM */
+	RTLIB_BBQUE_CHANNEL_SETUP_FAILED,
+	/** Failed to write to the Barbeque RTRM communication channel */
+	RTLIB_BBQUE_CHANNEL_WRITE_FAILED,
+	/** Failed to read form the Barbeque RTRM communication channel */
+	RTLIB_BBQUE_CHANNEL_READ_FAILED,
+	/** The bbque and application RPC protocol versions does not match */
+	RTLIB_BBQUE_CHANNEL_PROTOCOL_MISMATCH,
 	/** The Barbeque RTRM is not available */
 	RTLIB_BBQUE_UNREACHABLE
 } RTLIB_ExitCode;
@@ -140,18 +150,7 @@ struct RTLIB_ExecutionContextParams;
 typedef struct RTLIB_ExecutionContextParams* RTLIB_ExecutionContextHandler;
 
 /**
- * @brief An application provided function to set a new operating point.
- *
- * This function allow the Barbeque RTRM to assigne an Operating Point to the
- * application.  Each application is required to registers such a functions
- * with the RTLib at library initialization time.
- */
-typedef RTLIB_ExitCode (*RTLIB_SetWorkingMode)(
-		RTLIB_ExecutionContextHandler ech,
-		RTLIB_WorkingModeParams *wm);
-
-/**
- * @brief An application provided function to stop execution.
+ * @brief An application provided function to stop the execution of an EC.
  *
  * This function allow the run-time manager to (gracefully) stop an
  * application thus releasing resources it is using.  Each application is
@@ -184,8 +183,6 @@ typedef struct RTLIB_ExecutionContextParams {
         RTLIB_ProgrammingLanguage language;
 		/** The identifier of the "execution context" recipe */
 		RTLIB_Recipe recipe;
-        /** The function to set the assigned working mode */
-        RTLIB_SetWorkingMode SetWorkingMode;
         /** The execution object destruction function */
         RTLIB_StopExecution StopExecution;
 } RTLIB_ExecutionContextParams;
@@ -196,8 +193,10 @@ typedef struct RTLIB_ExecutionContextParams {
  * A function implemented by the RTLib which allows an application to register
  * an "execution context" (EC) to the Barbeque run-time manager, by provinding
  * all the parameters required by the RTLIB_RegisterParams struct.
+ *
  * @param name the EC name
  * @param params the EC registration parameters
+ *
  * @return an handler to the registered execution context, or NULL on errors.
  *
  * @note This schema allows a single application to register different
@@ -212,11 +211,12 @@ typedef RTLIB_ExecutionContextHandler (*RTLIB_Register)(
 /**
  * @brief A pointer to an "execution context" start function.
  *
- * A function implemented by the RTLib which allows an application to start an
+ * A function implemented by the RTLib which allows an application to mark an
  * "execution context" (EC), which has been previouslty registered to the
- * Barbeque run-time manager, by provinding an handler to such EC.
- * @param handler the handler of the EC to start, or NULL to start all
- * the (previously) registered ECs.
+ * Barbeque run-time manager, to start executing
+ *
+ * @param ech the handlers if the EC to start.
+ *
  * @return RTLIB_OK on requrest success, an error exit code otherwise.
  *
  * @note This call ask the Barbeque RTRM to schedule resources for this EC as
@@ -234,8 +234,9 @@ typedef RTLIB_ExitCode (*RTLIB_Start)(
  * A function implemented by the RTLib which allows an application to stop an
  * "execution context" (EC), which has been previouslty started, by provinding
  * an handler to such EC.
- * @param handler the handler of the EC to stop, or NULL to stop all the
- * (previously) started ECs.
+ *
+ * @param ech a vector of handlers representing the EC to stop.
+ *
  * @return RTLIB_OK on requrest success, an error exit code otherwise.
  *
  * @note This call ask the Barbeque RTRM to release schedule resources for
@@ -252,11 +253,24 @@ typedef RTLIB_ExitCode (*RTLIB_Stop)(
  * run-time manager.  This call will release all the resources currently
  * allocated to the specified EC.
  *
- * @param handler the handler of the EC to undergister, or NULL to unregister
- * all the previously registered ECs.
+ * @param ech a vector of handlers representing the ECs to undergister.
+ * @param count the number of ECs to unregister.
  */
 typedef void (*RTLIB_Unregister)(
 		const RTLIB_ExecutionContextHandler ech);
+
+typedef enum RTLIB_SyncType {
+	/** @brief A stateless synchronization point.
+	 * When an application is on a STATELESS synchronization point,
+	 * the current working mode could be switched without saving any current
+	 * status, thus this is usually associated to a lower switching overhead */
+	RTLIB_SYNC_STATELESS = 0,
+	/** @brief A statefull synchronization point.
+	 * When an application is on a STATEFULL synchronization point, switching
+	 * the current working mode requires to save some status. This could
+	 * incurr on an higer switching overhead */
+	RTLIB_SYNC_STATEFULL
+} RTLIB_SyncType;
 
 /**
  * @brief A pointer to a "synchronization point" notification function.
@@ -272,23 +286,31 @@ typedef void (*RTLIB_Unregister)(
  * The execution context should notify these events to the RTLib which in
  * turns could exploit them to better arrange working modes reconfiguration
  * among all the active applicatons.
+ *
+ * @param ech the handler of the EC which is at the sync point
+ * @param name the id of the notified syncpoint
+ * @type the type of the reached syncpoint.
+ *
+ * @return true if the application could continue its execution, false
+ * otherwise (i.e. the applications should suspend waiting for a
+ * working mode reconfiguration)
  */
-typedef void (*RTLIB_Sync)(
+typedef bool (*RTLIB_Sync)(
 		const RTLIB_ExecutionContextHandler ech,
 		const char *name,
-		const char *type);
+		RTLIB_SyncType type);
 
 /**
  * @brief The possible boundary asserted by a resource constraint.
  */
-typedef enum RTLIB_ConstraintBound {
-	/** Refers to AWM higer of equal to the specified one */
+typedef enum RTLIB_ConstraintType {
+	/** Targets AWMs lower or equal to the specified one */
 	LOW_BOUND = 0,
-	/** Refers to AWM lower of equal to the specified one */
+	/** Targets AWMs higer or equal to the specified one */
 	UPPER_BOUND,
-	/** Refers only to the specified AWM */
+	/** Targets the specified AWM */
 	EXACT_VALUE
-} RTLIB_ConstraintBound;
+} RTLIB_ConstraintType;
 
 /**
  * @brief A constraint asserted on recipe specified working modes
@@ -300,8 +322,11 @@ typedef enum RTLIB_ConstraintBound {
 typedef struct RTLIB_Constraint {
 	/** The identified of an Application Working Mode (AWM */
 	uint8_t awm;
+	/** The required operation: true to add the specified constraint, false to
+	 * remove it */
+	bool add;
 	/** The constraint boundary */
-	RTLIB_ConstraintBound bound;
+	RTLIB_ConstraintType type;
 } RTLIB_Constraint;
 
 /**
@@ -326,7 +351,7 @@ typedef struct RTLIB_Constraint {
  */
 typedef RTLIB_ExitCode (*RTLIB_SetConstraints)(
 		RTLIB_ExecutionContextHandler ech,
-		RTLIB_Constraint* constraints,
+		RTLIB_Constraint *constraints,
 		uint8_t count);
 
 /**
@@ -334,6 +359,26 @@ typedef RTLIB_ExitCode (*RTLIB_SetConstraints)(
  */
 typedef RTLIB_ExitCode (*RTLIB_ClearConstraints)(
 		RTLIB_ExecutionContextHandler ech);
+
+/**
+ * @brief Get the authorized working moded.
+ *
+ * This function allow the Barbeque RTRM to assigne an Operating Point to the
+ * application. Each application should call this method when an Operating
+ * Point change is expected, e.g. after a sync which returned false, or when a
+ * working mode should be initially assigned.
+ *
+ * @param ech the handler of the EC to configure
+ * @param wm a pointer to the selected working mode
+ *
+ * @return true if a working mode has been assigned, false otherwise
+ *
+ * @note this method is blocking, the application could be "suspended" on this
+ * call till a new working mode has been assigned to it.
+ */
+typedef RTLIB_ExitCode (*RTLIB_GetWorkingMode)(
+		RTLIB_ExecutionContextHandler ech,
+		RTLIB_WorkingModeParams *wm);
 
 /**
  * @brief Information passed to the application at RTLib initialization time.
@@ -358,6 +403,11 @@ typedef struct RTLIB_Services {
 		 * An execution context must use this function to notify the RTLib each
 		 * time they reach a synchronization point */
 		RTLIB_Sync NotifySync;
+		/** Return the assigned Working Mode.
+		 * Applications call this method, during the initialization or after a
+		 * false returning sync, to get a reference to the new assigned
+		 * working mode. */
+		RTLIB_GetWorkingMode GetWorkingMode;
 		/** Constraints assertion on a recipe working modes An execution
 		 * context could set a boundary on a set of working modes to consider
 		 * at run-time for resource scheduling. The Barbeque RTRM resource
