@@ -33,6 +33,10 @@ struct Resource;
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 
+/** List of shared pointer to Resource*/
+typedef std::list<ResourcePtr_t> ResourcePtrList_t;
+
+
 /**
  * @class ResourceAccounterStatusIF
  *
@@ -71,6 +75,19 @@ public:
 	 * @return A shared pointer to the resource descriptor
 	 */
 	virtual ResourcePtr_t GetResource(std::string const & path) = 0;
+
+	/**
+	 * @brief Get a list of resource descriptors
+	 *
+	 * Given a "template path" the method return all the resource descriptors
+	 * matching such template.
+	 * For instance "arch.clusters.cluster.mem" will return all the
+	 * descriptors having path "arch.clusters.cluster<N>.mem<M>".
+	 *
+	 * @param temp_path Template path to match
+	 * @return The list of resource descriptors matching the template path
+	 */
+	virtual ResourcePtrList_t GetResources(std::string const & temp_path) = 0;
 
 	/**
 	 * @brief Check the existence of a resource

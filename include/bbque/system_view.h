@@ -125,9 +125,20 @@ public:
 	/**
 	 * @brief Retrieve a pointer to the resource descriptor
 	 * @param path Resource path
+	 * @return A shared pointer to the resource desciptor found
 	 */
 	inline res::ResourcePtr_t GetResource(std::string const & path) const {
 		return res_acc->GetResource(path);
+	}
+
+	/**
+	 * @brief List of resource descriptors matching a template path
+	 * @param path Resource template path
+	 * @return A list of resource descriptors
+	 */
+	inline res::ResourcePtrList_t GetResources(std::string const & temp_path)
+		const {
+			return res_acc->GetResources(temp_path);
 	}
 
 	/**

@@ -425,6 +425,66 @@ void SearchResources(SystemView *sv) {
 	getchar();
 }
 
+
+void SearchResourceGroups(SystemView * sv) {
+
+	bu::Timer _t(true);
+	std::cout << "_________| Test resource groups search |_______\n"
+		<< std::endl;
+
+
+	// List of matches
+	std::list<br::ResourcePtr_t> res_match;
+
+	// Search... cluster
+	res_match = sv->GetResources("arch.clusters.cluster");
+	std::cout << "[arch.clusters.cluster] matchings : "
+		<< res_match.size() << std::endl;
+
+	br::ResourcePtrList_t::iterator it = res_match.begin();
+	br::ResourcePtrList_t::iterator end = res_match.end();
+	for(; it != end; ++it)
+		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
+
+	// Search... cluster.pe
+	res_match = sv->GetResources("arch.clusters.cluster.pe");
+	std::cout << "[arch.clusters.cluster.pe] matchings : "
+		<< res_match.size() << std::endl;
+
+	it = res_match.begin();
+	end = res_match.end();
+	for(; it != end; ++it)
+		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
+
+	// Search... pci
+	res_match = sv->GetResources("arch.clusters.pci");
+	std::cout << "[arch.clusters.pci] matchings : "
+		<< res_match.size() << std::endl;
+
+	it = res_match.begin();
+	end = res_match.end();
+	for(; it != end; ++it)
+		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
+
+	// Search... mem
+	res_match = sv->GetResources("mem");
+	std::cout << "[mem] matchings : "
+		<< res_match.size() << std::endl;
+
+	it = res_match.begin();
+	end = res_match.end();
+	for(; it != end; ++it)
+		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
+
+	_t.stop();
+	std::cout << "\nSearch finished in " << _t.getElapsedTimeUs() << " us"
+		<< std::endl;
+
+	std::cout << "Press a key..." << std::endl;
+	getchar();
+}
+
+
 // =======================================[ Start the test ]==================
 
 void CoreInteractionsTest::Test() {
@@ -496,6 +556,7 @@ void CoreInteractionsTest::Test() {
 
 	// Some resource search test
 	SearchResources(sv);
+	SearchResourceGroups(sv);
 
 	delete appman;
 }

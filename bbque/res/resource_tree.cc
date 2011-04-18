@@ -1,9 +1,10 @@
 /**
  *       @file  resource_tree.cc
- *      @brief  Implementation of the ResourceTree class
+ *      @brief  Resource Tree for resource descriptors
  *
- * This provides the implementation of the class managing the storage of
- * resource descriptors.
+ * This implements a class for storing Resource descriptors in a tree based
+ * structure. Such class allow the lookup of descriptors using a
+ * namespace-like approach (i.e.  "arch.clusters.mem0").
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -38,7 +39,7 @@ ResourceTree::ResourceTree():
 }
 
 
-ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
+ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 
 	// Current node pointer
 	ResourceNode * curr_node = root;
@@ -51,9 +52,9 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 	while (!curr_ns.empty()) {
 
 		// Current node children list is empty
-		if (curr_node->children.size() == 0) {
+		if (curr_node->children.empty()) {
 			// Insert the resource as a child node
-			curr_node = _insert_child(curr_node, curr_ns);
+			curr_node = insert_child(curr_node, curr_ns);
 			// Update tree depth
 			if (curr_node->depth > max_depth)
 				max_depth = curr_node->depth;
@@ -77,7 +78,7 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 			}
 			// If not, add the resource as a children sibling
 			if (it == end)
-				curr_node = _insert_child(curr_node, curr_ns);
+				curr_node = insert_child(curr_node, curr_ns);
 		}
 		// Next node
 		curr_ns = PopPathLevel(ns_path);
@@ -87,84 +88,72 @@ ResourcePtr_t ResourceTree::insert(std::string const & _rsrc_path) {
 }
 
 
-ResourcePtr_t ResourceTree::_find(std::string const & _rsrc_path,
-		bool exact_match) const {
+bool ResourceTree::find_node(ResourceNode * curr_node,
+		std::string const & rsrc_path, SearchOption_t opt,
+		std::list<ResourcePtr_t> & matches) const {
 
-	ResourcePtr_t null_ptr;
-	null_ptr.reset();
+	if (curr_node == NULL)
+		return false;
 
-	// Root is null
-	if (root == NULL) {
-		std::cout << "ResourceTree: root is null" << std::endl;
-		return null_ptr;
-	}
-	// Start from root
-	ResourceNode * curr_node = root;
-
-	// Extract the first node in the path
-	std::string ns_path	= _rsrc_path;
-	std::string curr_ns = PopPathLevel(ns_path);
-
-	// True if the namespace in the path matches a level in the resource tree
-	bool node_found;
+	// Extract the first node in the path, and save the remaining path string
+	std::string next_path = rsrc_path;
+	std::string curr_ns = PopPathLevel(next_path);
 
 	// Parse the path
-	while (!curr_ns.empty()) {
+	if (!curr_ns.empty()) {
 
 		// Current node children list is empty
-		if (curr_node->children.size() == 0)
-			return null_ptr;
+		if (curr_node->children.empty())
+			return 0;
 
-		std::list<ResourceNode *>::iterator it =
+		std::list<ResourceNode *>::iterator it_child =
 			curr_node->children.begin();
-		std::list<ResourceNode *>::iterator end =
+		std::list<ResourceNode *>::iterator end_child =
 			curr_node->children.end();
-		node_found = false;
 
 		// Check if the current namespace node exists looking for it in the
 		// list of children
-		for (; it != end; ++it) {
-			// Current node name (child)
-			std::string res_name = (*it)->data->Name();
+		for (; it_child != end_child; ++it_child) {
+			// Current namespace to find
+			std::string res_name = (*it_child)->data->Name();
 
-			if (!exact_match) {
-				// Remove the ID from the name
-				int id = res_name.find_first_of("0123456789");
+			// Remove the ID from the current namespace to find, if the search
+			// is template-based
+			if (opt != RT_EXACT_MATCH) {
+				int16_t id = res_name.find_first_of("0123456789");
 				res_name = res_name.substr(0, id);
 			}
-
-			// Compare to the searching name
+			// Compare the current tree node to the namespace to find
 			if (curr_ns.compare(res_name) == 0) {
-				curr_node = *it;
-				node_found = true;
-				break;
+
+				// If we are at the end of the resource path to find...
+				if (next_path.empty())
+					// Add the resource descriptor to the list
+					matches.push_back((*it_child)->data);
+				else
+					// Continue recursively
+					find_node(*it_child, next_path, opt, matches);
+
+				// If the search doesn't require all the matches we can stop it
+				if (opt != RT_ALL_MATCHES)
+					break;
 			}
 		}
-		// node_found = false means we didn't found any matches at the current
-		// level, thus we can nterrupt the search and return
-		if (!node_found)
-			return null_ptr;
-
-		// Next node
-		curr_ns = PopPathLevel(ns_path);
 	}
-	// Return the resource descriptor successfully
-	return curr_node->data;
+	// Return true if the list is not empty
+	return !matches.empty();
 }
 
 
-ResourceNode * ResourceTree::_insert_child(ResourceNode * curr_node,
+ResourceNode * ResourceTree::insert_child(ResourceNode * curr_node,
 		std::string const & curr_ns) {
 
-	ResourceNode * _node;
 	// Create the new resource node
-	_node = new ResourceNode;
+	ResourceNode * _node = new ResourceNode;
 	_node->data = ResourcePtr_t(new Resource(curr_ns));
 
-	// Set the parent
+	// Set the parent and the depth
 	_node->parent = curr_node;
-
-	// Set the depth
 	_node->depth = curr_node->depth + 1;
 
 	// Append it as child of the current node
@@ -173,39 +162,38 @@ ResourceNode * ResourceTree::_insert_child(ResourceNode * curr_node,
 }
 
 
-void ResourceTree::_print_children(ResourceNode * _node, int _depth) {
-
-	std::list<ResourceNode *>::iterator it = _node->children.begin();
-	std::list<ResourceNode *>::iterator end = _node->children.end();
+void ResourceTree::print_children(ResourceNode * _node, int _depth) {
 
 	// Increase the level of depth
 	++_depth;
 
 	// Print all the children
-	for (; it != end; ++it) {
+	std::list<ResourceNode *>::iterator it = _node->children.begin();
+	std::list<ResourceNode *>::iterator end = _node->children.end();
 
+	for (; it != end; ++it) {
+		// Print the child name
 		for (int i= 0; i < _depth-1; ++i)
 			std::cout << "\t";
 		std::cout << "|-------" << (*it)->data->Name() << std::endl;
 
-		// Recursive call if there are children
+		// Recursive call if there are some children
 		if (!(*it)->children.empty())
-			_print_children(*it, _depth);
+			print_children(*it, _depth);
 	}
 }
 
 
-void ResourceTree::_clear_node(ResourceNode * _node) {
+void ResourceTree::clear_node(ResourceNode * _node) {
 
 	std::list<ResourceNode *>::iterator it = _node->children.begin();
 	std::list<ResourceNode *>::iterator end = _node->children.end();
 
-	// Clear all the children
 	for (; it != end; ++it) {
-
 		// Recursive call if there are children
 		if (!(*it)->children.empty())
-			_clear_node(*it);
+			clear_node(*it);
+		// Clear the children list
 		(*it)->children.clear();
 	}
 }

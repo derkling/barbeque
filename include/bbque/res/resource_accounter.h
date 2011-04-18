@@ -94,9 +94,17 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	inline ResourcePtrList_t GetResources(std::string const & path) {
+		std::string _temp_path = PathTemplate(path);
+		return resources.findAll(_temp_path);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	inline bool ExistResource(std::string const & path) {
-		std::string templ_path = PathTemplate(path);
-		return resources.match_path(templ_path);
+		std::string _temp_path = PathTemplate(path);
+		return resources.existPath(_temp_path);
 	}
 
 	/**
@@ -123,7 +131,7 @@ public:
 	 * @brief Print the resource hierarchy in a tree-like form
 	 */
 	inline void TreeView() {
-		resources.print_tree();
+		resources.printTree();
 	}
 
 private:

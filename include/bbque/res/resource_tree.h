@@ -1,9 +1,10 @@
 /**
  *       @file  resource_tree.h
- *      @brief  Class for storing resource descriptors in a tree-like way
+ *      @brief  Resource Tree for resource descriptors
  *
- * This define a class for storing Resource descriptor in tree structure and
- * allow the lookup by a namespace-like approach (i.e. "arch.clusters.mem0").
+ * This defines a class for storing Resource descriptors in a tree based
+ * structure. Such class allow the lookup of descriptors using a
+ * namespace-like approach (i.e.  "arch.clusters.mem0").
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -31,8 +32,12 @@
 
 namespace bbque { namespace res {
 
+// Forward declaration
 struct ResourceNode;
+
+/** Shared pointer to ResourceNode */
 typedef std::list<ResourceNode *> ResourceNodeList_t;
+
 
 /**
  * @struct ResourceNode
@@ -67,6 +72,30 @@ class ResourceTree {
 public:
 
 	/**
+	 * @enum SearchOptions_t
+	 *
+	 * Enumerate all the possible search options for the resource descriptors
+	 * in the tree
+	 */
+	enum SearchOption_t {
+		/**
+		 * Lookup exactly the descriptor of the resource specified in the
+		 * path
+		 */
+		RT_EXACT_MATCH = 0,
+		/**
+		 * Lookup the first resource descriptor having a path compatible
+		 * with the template specified
+		 */
+		RT_FIRST_MATCH,
+		/**
+		 * Return (in a list) all the descriptors matching the template path
+		 * to search
+		 */
+		RT_ALL_MATCHES
+	};
+
+	/**
 	 * @brief Constructor
 	 */
 	ResourceTree();
@@ -75,38 +104,71 @@ public:
 	 * @brief Destructor
 	 */
 	~ResourceTree() {
-		_clear_node(root);
+		clear_node(root);
 	}
 
 	/**
 	 * @brief Insert a new resource
 	 * @param rsrc_path Resource path
+	 * @return A shared pointer to the resource descriptor just created
 	 */
-	ResourcePtr_t insert(std::string const & rsrc_path);
+	ResourcePtr_t & insert(std::string const & rsrc_path);
 
 	/**
 	 * @brief Find a resource by its pathname
+	 *
+	 * This returns a descriptor (field 'data' in the ResourceNode)
+	 * of the of the resource specified in the path.
+	 *
 	 * @param rsrc_path Resource path
-	 * @return Resource descriptor shared pointer
+	 * @return A shared pointer to the resource descriptor found
 	 */
 	inline ResourcePtr_t find(std::string const & rsrc_path) const {
-		return _find(rsrc_path, true);
+		// Null shared pointer
+		ResourcePtr_t null_ptr;
+		null_ptr.reset();
+
+		// List of matches to be filled
+		std::list<ResourcePtr_t> matches;
+		if (find_node(root, rsrc_path, RT_EXACT_MATCH, matches))
+			return (*(matches.begin()));
+		return null_ptr;
 	}
 
 	/**
-	 * @brief Find a resource by its template pathname.
+	 * @brief Find all the resources matching a template path
+	 *
+	 * It fills a list with all the resource descriptors matching the template
+	 * path.
+	 *
+	 * @param temp_path Template path to match
+	 * @return The list of the resource descriptors
+	 */
+	inline std::list<ResourcePtr_t> findAll(std::string const & temp_path)
+		const {
+		// List of matches to return
+		std::list<ResourcePtr_t> matches;
+
+		// Start the recursive search
+		find_node(root, temp_path, RT_ALL_MATCHES, matches);
+		return matches;
+	}
+
+	/**
+	 * @brief Check resource existance by its template pathname.
 	 *
 	 * A template pathname is a path without the resource IDs.
 	 * It is used to look for compatible resources.
 	 *
-	 * @param rsrc_path Resource path
+	 * @param temp_path Resource path
 	 * @return True if the path match a resource, false otherwise
 	 */
-	inline bool match_path(std::string const & rsrc_path) const {
-		ResourcePtr_t res = _find(rsrc_path, false);
-		if (res.get() != NULL)
-			return true;
-		return false;
+	inline bool existPath(std::string const & temp_path) const {
+		// List of matches to be filled
+		std::list<ResourcePtr_t> matches;
+
+		// Start the recursive search
+		return find_node(root, temp_path, RT_FIRST_MATCH, matches);
 	}
 
 	/**
@@ -120,8 +182,8 @@ public:
 	/**
 	 * @brief Print the tree content
 	 */
-	inline void print_tree() {
-		_print_children(root, 0);
+	inline void printTree() {
+		print_children(root, 0);
 		std::cout << std::endl << "Max depth: " << max_depth << std::endl;
 	}
 
@@ -129,25 +191,36 @@ public:
 	 * @brief Clear the tree
 	 */
 	inline void clear() {
-		_clear_node(root);
+		clear_node(root);
 	}
 
 private:
 
 	/** Pointer to the root of the tree*/
-	ResourceNode *root;
+	ResourceNode * root;
 
 	/** Maximum depth of the tree */
 	uint16_t max_depth;
 
 	/**
-	 * @brief Find a resource by its pathname or template path
-	 * @param rsrc_path Resource path
-	 * @param exact_match If true try to lookup a specific resource, otherwise
-	 * look for a compatible match
-	 * @return A shared pointer to the resource descriptor found.
+	 * @brief Find a node by its pathname or template path
+	 *
+	 * This manages three types of search (@see SearchOption_t):
+	 * 1) An exact matching for looking up a well defined resource descriptor.
+	 * 2) A template matching for checking the existance of a resource
+	 * compatible with the template path specified
+	 * 3) A matching of all the resource descriptors matching the template
+	 * path
+	 *
+	 * @param curr_node The root node from which start
+	 * @param rsrc_path Resource path (or template path)
+	 * @param opt Specify the type of search (@see SearchOption_t)
+	 * @param matches A list to fill with the descriptors matching the path.
+	 *
+	 * @return True if the search have found some matchings.
 	 */
-	ResourcePtr_t _find(std::string const & rsrc_path, bool exact_match) const;
+	bool find_node(ResourceNode * curr_node, std::string const & rsrc_path,
+			SearchOption_t opt, std::list<ResourcePtr_t> & matches) const;
 
 	/**
 	 * @brief Append a child to the current node
@@ -155,7 +228,7 @@ private:
 	 * @param curr_ns Current pathlevel (namespace) name
 	 * @return The child node just created
 	 */
-	ResourceNode * _insert_child(ResourceNode * curr_node,
+	ResourceNode * insert_child(ResourceNode * curr_node,
 			std::string const & curr_ns);
 
 	/**
@@ -163,17 +236,17 @@ private:
 	 * @param node Pointer to the starting tree node
 	 * @param depth Node depth
 	 */
-	void _print_children(ResourceNode * node, int depth);
+	void print_children(ResourceNode * node, int depth);
 
 	/**
 	 * @brief Clear a node of the tree
 	 * @param node Pointer to the node to clear
 	 */
-	void _clear_node(ResourceNode * node);
+	void clear_node(ResourceNode * node);
 
 };
 
-}   // namespae test
+}   // namespace res
 
 }   // namespace bbque
 
