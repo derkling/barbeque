@@ -117,13 +117,13 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 			// Current namespace to find
 			std::string res_name = (*it_child)->data->Name();
 
-			// Remove the ID from the current namespace to find, if the search
-			// is template-based
+			// Remove the ID from the current node if the search is
+			// template-based
 			if (opt != RT_EXACT_MATCH) {
 				int16_t id = res_name.find_first_of("0123456789");
 				res_name = res_name.substr(0, id);
 			}
-			// Compare the current tree node to the namespace to find
+			// Compare the current namespace to find to the current node
 			if (curr_ns.compare(res_name) == 0) {
 
 				// If we are at the end of the resource path to find...

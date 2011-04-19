@@ -450,6 +450,12 @@ void SearchResourceGroups(SystemView * sv) {
 	res_match = sv->GetResources("arch.clusters.cluster.pe");
 	std::cout << "[arch.clusters.cluster.pe] matchings : "
 		<< res_match.size() << std::endl;
+	std::cout << "\tavailability = "
+		<< sv->ResourceAvailability("arch.clusters.cluster.pe") << std::endl;
+	std::cout << "\tused = "
+		<< sv->ResourceUsed("arch.clusters.cluster.pe") << std::endl;
+	std::cout << "\ttotal = "
+		<< sv->ResourceTotal("arch.clusters.cluster.pe") << std::endl;
 
 	it = res_match.begin();
 	end = res_match.end();

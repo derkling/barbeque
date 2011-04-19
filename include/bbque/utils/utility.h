@@ -73,24 +73,21 @@ extern bbque::utils::Timer bbque_tmr;
  * @param units Units string
  * @return The value converted
  */
-inline uint64_t ConvertValue(ulong value, std::string const & units) {
+inline uint64_t ConvertValue(uint64_t value, std::string const & units) {
 
-	if (!units.empty()) {
-		switch(toupper(units.at(0))) {
-		case 'K':
-			value *= POW_2_10;
-			break;
-		case 'M':
-			value *= POW_2_20;
-			break;
-		case 'G':
-			value *= POW_2_30;
-			break;
-		default:
-			value *= 1;
-		}
+	if (units.empty())
+		return value;
+
+	switch(toupper(units.at(0))) {
+	case 'K':
+		return value *= POW_2_10;
+	case 'M':
+		return value *= POW_2_20;
+	case 'G':
+		return value *= POW_2_30;
+	default:
+		return value;
 	}
-	return value;
 }
 
 
@@ -160,7 +157,6 @@ inline std::string const PathTemplate(std::string const & path) {
 			break;
 		// Append the current node name
 		_str_templ += _curr_ns;
-
 		// Next node
 		_curr_ns = PopPathLevel(_ns_path, "0123456789");
 
@@ -170,6 +166,17 @@ inline std::string const PathTemplate(std::string const & path) {
 	}
 	// The template path built
 	return _str_templ;
+}
+
+
+/**
+ * @brief Check if a path string is a template
+ * @param path The path to check
+ * @return True if it is, false otherwise
+ */
+inline bool IsPathTemplate(std::string const & path) {
+	int16_t pos = path.find_first_of("0123456789");
+	return pos < 0;
 }
 
 #endif // BBQUE_UTILITY_H_

@@ -72,46 +72,68 @@ ResourceAccounter::~ResourceAccounter() {
 }
 
 
-void ResourceAccounter::RegisterResource(std::string const & _path,
-		std::string	const & _type, std::string const & _units,
-		uint64_t _amount) {
+ResourceAccounter::RegExitCode_t ResourceAccounter::RegisterResource(
+		std::string const & _path, std::string	const & _type,
+		std::string	const & _units,	uint64_t _amount) {
 
-	assert(!_path.empty());
-	assert(!_type.empty());
+	// Check arguments
+	if(_path.empty() || _type.empty())
+		return RA_ERR_MISS_ARGS;
 
-	// Create a new resource path
+	// Insert a new resource in the tree
 	ResourcePtr_t res_ptr;
 	res_ptr = resources.insert(_path);
+	if (res_ptr.get() == NULL)
+		return RA_ERR_MEM;
 
-	if (res_ptr.get() != NULL) {
-		// Set the amount of resource on the units base
-		res_ptr->SetTotal(ConvertValue(_amount, _units));
-		// Resource type
-		res_ptr->SetType(_type);
-	}
+	// Set the amount of resource on the units base
+	res_ptr->SetTotal(ConvertValue(_amount, _units));
+	// Resource type
+	res_ptr->SetType(_type);
+	return RA_SUCCESS;
 }
 
 
 uint64_t ResourceAccounter::queryState(std::string const & _path,
 		AttributeSelector_t _att) const {
 
-	// Lookup the resource descriptor by path
-	ResourcePtr_t res_desc = resources.find(_path);
-	if (res_desc.get() != NULL) {
+	// List of resource descriptors matched
+	ResourcePtrList_t matches;
 
+	if (IsPathTemplate(_path))
+		// Find all the resources related to the path template
+		matches = resources.findAll(_path);
+	else {
+		// Lookup the resource descriptor by path
+		ResourcePtr_t res_ptr = resources.find(_path);
+		if (res_ptr.get() == NULL)
+			return 0;
+		matches.push_back(res_ptr);
+	}
+
+	// For all the descriptors matched (and thus stored in the list) add the
+	// amount of resource in the specified state (available, used, total)
+	ResourcePtrList_t::iterator res_it = matches.begin();
+	ResourcePtrList_t::iterator res_end = matches.end();
+	uint64_t val = 0;
+
+	for (; res_it != res_end; ++res_it) {
 		switch(_att) {
-			// Resource availability
+		// Resource availability
 		case RA_AVAILAB:
-			return res_desc->Availability();
-			// Resource used
+			val += (*res_it)->Availability();
+			break;
+		// Resource used
 		case RA_USED:
-			return res_desc->Used();
-			// Resource total
+			val += (*res_it)->Used();
+			break;
+		// Resource total
 		case RA_TOTAL:
-			return res_desc->Total();
+			val += (*res_it)->Total();
+			break;
 		}
 	}
-	return 0;
+	return val;
 }
 
 
@@ -144,7 +166,7 @@ void ResourceAccounter::changeUsages(ba::Application const * _app,
 			return;
 		// Retrieve the current application map of usages
 		app_usages = usemap_it->second;
-		if (app_usages->size() == 0)
+		if (app_usages->empty())
 			return;
 	}
 
@@ -158,28 +180,28 @@ void ResourceAccounter::changeUsages(ba::Application const * _app,
 	for (; usages_it != usages_end; ++usages_it) {
 
 		// Lookup the resource descriptor
-		ResourcePtr_t res_desc(usages_it->second->resource);
-		if (res_desc.get() == NULL)
+		ResourcePtr_t res_ptr(usages_it->second->resource);
+		if (res_ptr.get() == NULL)
 			continue;
 
 		switch (_sel) {
 		case RA_SWITCH:
 			// Add the amount of resource used by the application
-			res_desc->AddUsed(usages_it->second->value);
+			res_ptr->AddUsed(usages_it->second->value);
 
 			// Append the pointer to the current application descriptor
 			// in the map of the applications using the resource
-			res_desc->UsedBy(_app);
+			res_ptr->UsedBy(_app);
 			break;
 
 		case RA_RELEASE:
 			// Subtract the amount of resource once used by the
 			// application
-			res_desc->SubUsed(usages_it->second->value);
+			res_ptr->SubUsed(usages_it->second->value);
 
 			// Remove the pointer to the current application descriptor
 			// in the map of the applications using the resource
-			res_desc->NoMoreUsedBy(_app);
+			res_ptr->NoMoreUsedBy(_app);
 			break;
 		}
 	}
