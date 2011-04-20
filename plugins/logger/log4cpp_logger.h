@@ -24,6 +24,8 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/plugin.h"
 
+#include "bbque/config.h"
+
 #include <cstdint>
 #include <log4cpp/Category.hh>
 
@@ -65,11 +67,13 @@ public:
 
 //----- Logger module interface
 
+#ifdef BBQUE_DEBUG
 	/**
 	 * \brief Send a log message with the priority DEBUG
 	 * \param message the message to log
 	 */
 	void Debug(const char *fmt, ...);
+#endif
 
 	/**
 	 * \brief Send a log message with the priority INFO

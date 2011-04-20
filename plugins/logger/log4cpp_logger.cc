@@ -110,7 +110,8 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	sd.request = &data_in;
 	sd.response = &data_out;
 
-	int32_t response = params->platform_services->InvokeService(PF_SERVICE_CONF_DATA, sd);
+	int32_t response = params->platform_services->InvokeService(
+			PF_SERVICE_CONF_DATA, sd);
 	if (response!=PF_SERVICE_DONE)
 		return NULL;
 
@@ -122,7 +123,8 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 		l4::PropertyConfigurator::configure(conf_file_path);
 		configured = true;
 	} catch (log4cpp::ConfigureFailure e) {
-		fprintf(stdout, "Log4CppLogger: configuration error [%s]\n", e.what());
+		fprintf(stdout, "Log4CppLogger: configuration error [%s]\n",
+				e.what());
 		return false;
 	}
 
@@ -132,6 +134,7 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 
 //----- Logger plugin interface
 
+#ifdef BBQUE_DEBUG
 void Log4CppLogger::Debug(const char *fmt, ...) {
 	va_list args;
 	char str[LOG_MAX_SENTENCE];
@@ -143,6 +146,7 @@ void Log4CppLogger::Debug(const char *fmt, ...) {
 		logger.log(l4::Priority::DEBUG, str);
 	}
 }
+#endif
 
 void Log4CppLogger::Info(const char *fmt, ...) {
 	va_list args;

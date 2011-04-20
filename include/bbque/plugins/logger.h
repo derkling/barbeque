@@ -22,6 +22,8 @@
 #ifndef BBQUE_LOGGER_H_
 #define BBQUE_LOGGER_H_
 
+#include "bbque/config.h"
+
 #define LOGGER_NAMESPACE "logger."
 
 #include <string>
@@ -67,12 +69,15 @@ public:
 
 //----- Objects interface
 
+#ifdef BBQUE_DEBUG
 	/**
 	 * \brief Send a log message with the priority DEBUG
 	 * \param message the message to log
 	 */
 	virtual void Debug(const char *fmt, ...) = 0;
-
+#else
+	void Debug(const char *fmt, ...) {(void)fmt;};
+#endif
 	/**
 	 * \brief Send a log message with the priority INFO
 	 * \param message the message to log
