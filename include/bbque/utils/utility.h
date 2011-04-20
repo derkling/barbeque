@@ -22,6 +22,8 @@
 #ifndef BBQUE_UTILITY_H_
 #define BBQUE_UTILITY_H_
 
+#include "bbque/config.h"
+
 #include <stdio.h>
 #include "bbque/utils/timer.h"
 
@@ -47,6 +49,12 @@ extern bbque::utils::Timer bbque_tmr;
 # define BBQUE_FMT(color, module, fmt) \
 	        color "[%11.6f] " module ": " fmt "\033[0m", \
 			bbque_tmr.getElapsedTime()
+
+#ifdef BBQUE_DEBUG
+# define DB(x) x
+#else
+# define DB(x)
+#endif
 
 #endif // BBQUE_UTILITY_H_
 
