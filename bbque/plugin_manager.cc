@@ -20,6 +20,7 @@
 
 #include "bbque/plugin_manager.h"
 
+#include "bbque/config.h"
 #include <boost/filesystem.hpp>
 #include <memory>
 #include <string>
@@ -305,7 +306,8 @@ void * PluginManager::CreateObject(const std::string & id,
 			object = adapter->adapt(object, rp.DestroyFunc);
 
 			// promote registration to exact_matc
-			// (but keep also the wild card registration for other object types)
+			// (but keep also the wild card registration for
+			//   other object types)
 			int32_t res = RegisterObject(op.id, &rp);
 			if (res < 0) {
 				// TODO: we should report or log it
