@@ -35,6 +35,9 @@
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
 
+// Path template for querying clusters state info
+#define CLUSTERS_PATH "arch.clusters.cluster"
+
 using bbque::app::Application;
 
 namespace bbque { namespace res {
@@ -105,6 +108,29 @@ public:
 	inline bool ExistResource(std::string const & path) {
 		std::string _temp_path = PathTemplate(path);
 		return resources.existPath(_temp_path);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	inline uint16_t ClusteringFactor(std::string const & path) {
+		// Check if the resource exists
+		if (GetResource(path).get() == 0)
+			return 0;
+		// Check if the resource is clustered
+		int16_t clust_patt_pos = path.find(CLUSTERS_PATH);
+		if (clust_patt_pos < 0)
+			return 1;
+		// Check if the clustering factor has been computed yet
+		if (clustering_factor == 0) {
+			// Compute the factor
+			clustering_factor = queryState(CLUSTERS_PATH, RA_TOTAL);
+			// If the query returns 0 the plaform is not cluster-based.
+			// Thus we must set clustering factor to 1.
+			if (clustering_factor == 0)
+				clustering_factor = 1;
+		}
+		return clustering_factor;
 	}
 
 	/**
@@ -199,6 +225,12 @@ private:
 	 * list of current usages (relative to the current working mode)
 	 */
 	std::map<std::string, UsagesMap_t const *> usages;
+
+	/**
+	 * Clustering factor.
+	 * This is equal to the number of clusters in the platform.
+	 */
+	uint16_t clustering_factor;
 
 };
 

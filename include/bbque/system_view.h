@@ -151,6 +151,14 @@ public:
 		return res_acc->ExistResource(path);
 	}
 
+	/**
+	 * @brief Resource clustering factor
+	 * @see ClusteringFactor
+	 */
+	inline uint16_t ResourceClusterFactor(std::string const & path) {
+		return res_acc->ClusteringFactor(path);
+	}
+
 private:
 
 	/** ApplicationManager instance */

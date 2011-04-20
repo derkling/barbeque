@@ -167,8 +167,8 @@ public:
 	 * @param _name Resource name
 	 */
 	Resource(std::string const & _name):
-		ResourceState(0) {
-		name = _name;
+		ResourceState(0),
+		name(_name) {
 	}
 
 	/**
@@ -182,9 +182,6 @@ public:
 			uint64_t res_amount):
 		ResourceState(res_amount),
 		type(res_type) {
-
-		// Init used value
-		used = 0;
 
 		// Extract the name from the path
 		size_t pos = res_path.find_last_of(".");

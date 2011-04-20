@@ -375,7 +375,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 }
 
 
-void SearchResources(SystemView *sv) {
+void SearchResources(SystemView * sv) {
 
 	bu::Timer _t(true);
 	std::cout << ".........: Test resource template search :......\n"
@@ -383,6 +383,13 @@ void SearchResources(SystemView *sv) {
 
 	std::cout << "arch.clusters.mem : ";
 	if (sv->ExistResource("arch.clusters.mem"))
+		std::cout << "FOUND" << std::endl;
+	else
+		std::cout << "NOT FOUND" << std::endl;
+
+	std::cout << "arch.clusters.cluster1 : ";
+	br::ResourcePtr_t res_ptr = sv->GetResource("arch.clusters.cluster1");
+	if (res_ptr.get() == 0)
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
@@ -423,6 +430,28 @@ void SearchResources(SystemView *sv) {
 
 	std::cout << "Press a key..." << std::endl;
 	getchar();
+}
+
+
+void GetClusteredInfo(SystemView * sv) {
+
+	std::cout
+		<< "-----------------| Resource clustering factor |----------------"
+		<< std::endl;
+
+	std::cout << "dma  c.f. = "
+		<< sv->ResourceClusterFactor("dma") << std::endl;
+	std::cout << "arch.clusters.mem0 	c.f. = "
+		<< sv->ResourceClusterFactor("arch.clusters.mem0") << std::endl;
+	std::cout << "arch.clusters.cluster1 c.f. = "
+		<< sv->ResourceClusterFactor("arch.clusters.cluster1") << std::endl;
+	std::cout << "arch.mem0 c.f. = "
+		<< sv->ResourceClusterFactor("arch.mem0") << std::endl;
+	std::cout << "arch.clusters.cluster0.pe0  c.f. = "
+		<< sv->ResourceClusterFactor("arch.clusters.cluster0.pe0") << std::endl;
+	std::cout << "arch.spi  c.f. = "
+		<< sv->ResourceClusterFactor("arch.spi") << std::endl;
+	std::cout << std::endl;
 }
 
 
@@ -563,6 +592,7 @@ void CoreInteractionsTest::Test() {
 	// Some resource search test
 	SearchResources(sv);
 	SearchResourceGroups(sv);
+	GetClusteredInfo(sv);
 
 	delete appman;
 }

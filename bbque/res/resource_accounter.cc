@@ -52,7 +52,8 @@ ResourceAccounter *ResourceAccounter::GetInstance() {
 
 
 ResourceAccounter::ResourceAccounter():
-	bbque::Object(RESOURCE_ACCOUNTER_NAMESPACE) {
+	bbque::Object(RESOURCE_ACCOUNTER_NAMESPACE),
+	clustering_factor(0) {
 
 	// Get a logger
 	std::string logger_name(RESOURCE_ACCOUNTER_NAMESPACE);
