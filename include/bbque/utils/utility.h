@@ -98,7 +98,6 @@ inline uint64_t ConvertValue(uint64_t value, std::string const & units) {
 	}
 }
 
-
 /**
  * @brief Extract the head of a resource path.
  *
@@ -140,7 +139,6 @@ inline std::string SplitAndPop(std::string & tail,
 	return _head;
 }
 
-
 /**
  * @brief Template of a resource path.
  *
@@ -170,7 +168,6 @@ inline std::string const PathTemplate(std::string const & path) {
 	// The template path built
 	return _templ_path;
 }
-
 
 /**
  * @brief Check if a path string is a template
