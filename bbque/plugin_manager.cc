@@ -217,7 +217,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	if (dl_map.find(path.string()) != dl_map.end())
 		return -1;
 
-	fprintf(stdout, FMT("Loading plugin [%s]\n"), pluginPath.c_str());
+	DB(fprintf(stdout, FMT("Loading plugin [%s]\n"), pluginPath.c_str()));
 
 	std::string errorString;
 	DynamicLibrary * dl = LoadLibrary(fs::system_complete(path).string(),
@@ -266,8 +266,8 @@ void * PluginManager::CreateObject(const std::string & id,
 	if ( near_match != exact_match_map.end() &&
 			((*near_match).first.compare(0,id.size(),id)) == 0 ) {
 
-		fprintf(stdout, FMT("PM: Found matching module [%s]\n"),
-			(*near_match).first.c_str());
+		DB(fprintf(stdout, FMT("Found matching module [%s]\n"),
+			(*near_match).first.c_str()));
 
 		// Class (or full) match found
 		PF_RegisterParams & rp = (*near_match).second;
