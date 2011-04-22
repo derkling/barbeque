@@ -22,7 +22,7 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * =============================================================================
  */
 
 #ifndef BBQUE_RPC_MESSAGES_H_
@@ -34,26 +34,46 @@ namespace bbque { namespace rtlib {
 
 /**
  * @brief The RPC message identifier
+ *
+ * The value of the message identifier is used to give priority to messages.
+ * The higer the message id the higer the message priority.
  */
-typedef enum rpc_command {
+typedef enum rpc_msg_type {
 	//--- Execution Context Originated Messages
-	RPC_FIFO_EXC_REGISTER = 0,
-	RPC_FIFO_EXC_SET_CONSTRAINT,
-	RPC_FIFO_EXC_COMMANDS, ///< The number of EXC originated messages
+	RPC_EXC_PAIR = 0,
+	RPC_EXC_REGISTER,
+	RPC_EXC_UNREGISTER,
+	RPC_EXC_SET,
+	RPC_EXC_CLEAR,
+	RPC_EXC_START,
+	RPC_EXC_STOP,
+	RPC_EXC_COMMANDS, ///< The number of EXC originated messages
 	//--- Barbeque Originated Messages
-	RPC_FIFO_BBQ_SET_WORKING_MODE,
-	RPC_FIFO_BBQ_STOP_EXECUTION,
-} rpc_fifo_command_t;
+	RPC_BBQ_SET_WORKING_MODE,
+	RPC_BBQ_STOP_EXECUTION
+} rpc_msg_type_t;
 
 /**
  * @brief The RPC message header
  */
 typedef struct rpc_msg_header {
+	/** The command to execute (defines the message "payload" type) */
+	rpc_msg_type_t msg_typ;
 	/** The execution context ID (thread ID) */
 	pid_t exc_id;
-	/** The command to execute (defines the message "payload" type) */
-	rpc_command_t cmd_id;
-} rpc_fifo_header_t;
+} rpc_msg_header_t;
+
+/**
+ * @brief Command to register a new execution context.
+ */
+typedef struct rpc_msg_exc_pair {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+	/** The RPC protocol major version */
+	uint8_t mjr_version;
+	/** The RPC protocol minor version */
+	uint8_t mnr_version;
+} rpc_msg_exc_pair_t;
 
 /**
  * @brief Command to register a new execution context.
@@ -61,26 +81,11 @@ typedef struct rpc_msg_header {
 typedef struct rpc_msg_exc_register {
 	/** The RPC fifo command header */
 	rpc_msg_header_t header;
-	/** The name of the execution context private fifo */
-	char rpc_fifo[BBQUE_FIFO_NAME_LENGTH];
 	/** The name of the registered execution context */
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
 	/** The name of the required recipe */
 	char recipe[RTLIB_RECIPE_NAME_LENGTH];
 } rpc_fifo_exc_register_t;
-
-/**
- * @brief Command to set a working mode for an execution context.
- */
-typedef struct rpc_msg_set_working_mode {
-	/** The RPC fifo command header */
-	rpc_msg_header_t header;
-	/** The name of the registered execution context */
-	char exc_name[RTLIB_EXC_NAME_LENGTH];
-	/** The name of the required recipe */
-	char wm_id[RTLIB_WM_ID_MAXLEN];
-} rpc_fifo_bbq_set_working_mode_t;
-
 
 } // namespace rtlib
 
