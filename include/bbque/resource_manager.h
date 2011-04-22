@@ -22,8 +22,11 @@
 #ifndef BBQUE_RESOURCE_MANAGER_H_
 #define BBQUE_RESOURCE_MANAGER_H_
 
+#include "bbque/config.h"
 #include "bbque/platform_services.h"
 #include "bbque/plugin_manager.h"
+
+#include "bbque/plugins/logger.h"
 
 namespace bbque {
 
@@ -71,6 +74,22 @@ private:
 	 */
 	~ResourceManager();
 
+#ifdef BBQUE_DEBUG
+	/**
+	 * @brief 	A set of tests to run just un debugging mode
+	 *
+	 * This is a set of tests to be run only when Barbeque is compiled in
+	 * debugging mode.
+	 */
+	void Tests();
+#endif
+
+	/**
+	 * @brief   The run-time resource manager setup routine
+	 * This provides all the required playground setup to run the Barbeque RTRM.
+	 */
+	void Setup();
+
 	/**
 	 * @brief   The run-time resource manager control loop
 	 * This provides the Barbeuqe applications and resources control logic.
@@ -100,6 +119,11 @@ private:
 	 * starting to grill.
 	 */
 	plugins::PluginManager & pm;
+
+	/**
+	 * @brief The logger used by the resource manager.
+	 */
+	plugins::LoggerIF *logger;
 
 };
 
