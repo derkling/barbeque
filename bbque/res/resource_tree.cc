@@ -50,7 +50,6 @@ ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 
 	// For each namespace in the path...
 	while (!curr_ns.empty()) {
-
 		// Current node children list is empty
 		if (curr_node->children.empty()) {
 			// Insert the resource as a child node
@@ -80,10 +79,10 @@ ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 			if (it == end)
 				curr_node = insert_child(curr_node, curr_ns);
 		}
-		// Next node
+		// Next namespace in the path
 		curr_ns = PopPathLevel(ns_path);
 	}
-	// Return the object created for finalizing purpose
+	// Return the new object just created
 	return curr_node->data;
 }
 
@@ -95,8 +94,11 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 	if (curr_node == NULL)
 		return false;
 
-	// Extract the first node in the path, and save the remaining path string
+	// Save the input path
 	std::string next_path = rsrc_path;
+
+	// Current namespace to match:
+	// Extract the first node in the path, and save the remaining path string
 	std::string curr_ns = PopPathLevel(next_path);
 
 	// Parse the path
@@ -106,27 +108,36 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 		if (curr_node->children.empty())
 			return 0;
 
+		// Check if the current namespace node exists looking for it in the
+		// list of children
 		std::list<ResourceNode *>::iterator it_child =
 			curr_node->children.begin();
 		std::list<ResourceNode *>::iterator end_child =
 			curr_node->children.end();
 
-		// Check if the current namespace node exists looking for it in the
-		// list of children
 		for (; it_child != end_child; ++it_child) {
-			// Current namespace to find
+			// Current resource namespace
 			std::string res_name = (*it_child)->data->Name();
 
-			// Remove the ID from the current node if the search is
-			// template-based
-			if (opt != RT_EXACT_MATCH) {
-				int16_t id = res_name.find_first_of("0123456789");
-				res_name = res_name.substr(0, id);
-			}
-			// Compare the current namespace to find to the current node
-			if (curr_ns.compare(res_name) == 0) {
+			// RT_SET_MATCHES:
+			// Check if the current namespace to find is ID-based
+			int16_t id_pos;
+			if (opt == RT_SET_MATCHES)
+				// If curr_id_pos == -1 => not ID-based
+				id_pos = curr_ns.find_first_of("0123456789");
 
-				// If we are at the end of the resource path to find...
+			// If the search is not ID based (path template search)
+			if ((opt == RT_FIRST_MATCH) || (opt == RT_ALL_MATCHES)
+				|| ((opt == RT_SET_MATCHES) && (id_pos == -1))) {
+				// Remove the ID from the current resource namespace
+				id_pos = res_name.find_first_of("0123456789");
+				res_name = res_name.substr(0, id_pos);
+			}
+
+			// Compare the current namespace to find to the current resource
+			// node namespace
+			if (curr_ns.compare(res_name) == 0) {
+				// If we are at the end of the resource path to lookup...
 				if (next_path.empty())
 					// Add the resource descriptor to the list
 					matches.push_back((*it_child)->data);
@@ -135,7 +146,7 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 					find_node(*it_child, next_path, opt, matches);
 
 				// If the search doesn't require all the matches we can stop it
-				if (opt != RT_ALL_MATCHES)
+				if ((opt == RT_EXACT_MATCH) || (opt == RT_FIRST_MATCH))
 					break;
 			}
 		}

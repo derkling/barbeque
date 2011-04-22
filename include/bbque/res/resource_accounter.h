@@ -98,8 +98,13 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline ResourcePtrList_t GetResources(std::string const & path) {
-		std::string _temp_path = PathTemplate(path);
-		return resources.findAll(_temp_path);
+		// Check if the path is template or ID-based (specific resource)
+		if (IsPathTemplate(path))
+			// Find all the resources related to the path template
+			return resources.findAll(path);
+		else
+			// Lookup the resource descriptor by path
+			return resources.findSet(path);
 	}
 
 	/**

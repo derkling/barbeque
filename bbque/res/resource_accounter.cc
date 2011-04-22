@@ -105,11 +105,8 @@ uint64_t ResourceAccounter::queryState(std::string const & _path,
 		// Find all the resources related to the path template
 		matches = resources.findAll(_path);
 	else {
-		// Lookup the resource descriptor by path
-		ResourcePtr_t res_ptr = resources.find(_path);
-		if (res_ptr.get() == NULL)
-			return 0;
-		matches.push_back(res_ptr);
+		// Find all the resources matching the ID-based (or hybrid) path
+		matches = resources.findSet(_path);
 	}
 
 	// For all the descriptors matched (and thus stored in the list) add the

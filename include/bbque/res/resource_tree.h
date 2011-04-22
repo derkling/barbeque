@@ -89,7 +89,13 @@ public:
 		 */
 		RT_FIRST_MATCH,
 		/**
-		 * Return (in a list) all the descriptors matching the template path
+		 * Find all the resource descriptors matching the "hybrid path".
+		 * Such hybrid path is a resource path part template and part
+		 * ID-based.
+		 */
+		RT_SET_MATCHES,
+		/**
+		 * Return in a list all the descriptors matching the template path
 		 * to search
 		 */
 		RT_ALL_MATCHES
@@ -142,7 +148,7 @@ public:
 	 * path.
 	 *
 	 * @param temp_path Template path to match
-	 * @return The list of the resource descriptors
+	 * @return A list of resource descriptors (pointers)
 	 */
 	inline std::list<ResourcePtr_t> findAll(std::string const & temp_path)
 		const {
@@ -151,6 +157,30 @@ public:
 
 		// Start the recursive search
 		find_node(root, temp_path, RT_ALL_MATCHES, matches);
+		return matches;
+	}
+
+	/**
+	 * @brief Find a set of resources matching an hybrid path
+	 * @see RT_SET_MATCHES
+	 *
+	 * This is needed for instance when we are interested in getting all
+	 * the descriptors of the "processing elements" (template part)
+	 * contained in a specific cluster (ID-based part), with a single
+	 * call.
+	 * Without this, we should make "N" find() calls passing the ID-based
+	 * resource path for each processing element.
+	 *
+	 * @param hyb_path The resource path in hybrid form
+	 * @return A list of resource descriptors (pointers)
+	 */
+	inline std::list<ResourcePtr_t> findSet(std::string const & hyb_path)
+		const {
+		// List of matches to return
+		std::list<ResourcePtr_t> matches;
+
+		// Start the recursive search
+		find_node(root, hyb_path, RT_SET_MATCHES, matches);
 		return matches;
 	}
 

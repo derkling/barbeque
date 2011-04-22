@@ -184,7 +184,7 @@ public:
 		type(res_type) {
 
 		// Extract the name from the path
-		size_t pos = res_path.find_last_of(".");
+		uint16_t pos = res_path.find_last_of(".");
 		if (pos > 0)
 			name = res_path.substr(pos + 1);
 		else

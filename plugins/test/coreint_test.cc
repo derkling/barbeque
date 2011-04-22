@@ -20,10 +20,11 @@
 
 #include "coreint_test.h"
 
+#include <cstdint>
 #include <iomanip>
 #include <map>
 #include <vector>
-#include <cstdint>
+#include <sstream>
 
 #include "bbque/modules_factory.h"
 #include "bbque/system_view.h"
@@ -387,13 +388,6 @@ void SearchResources(SystemView * sv) {
 	else
 		std::cout << "NOT FOUND" << std::endl;
 
-	std::cout << "arch.clusters.cluster1 : ";
-	br::ResourcePtr_t res_ptr = sv->GetResource("arch.clusters.cluster1");
-	if (res_ptr.get() == 0)
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
-
 	std::cout << "arch.clusters.cluster : ";
 	if (sv->ExistResource("arch.clusters.cluster"))
 		std::cout << "FOUND" << std::endl;
@@ -418,8 +412,8 @@ void SearchResources(SystemView * sv) {
 	else
 		std::cout << "NOT FOUND" << std::endl;
 
-	std::cout << "pci : ";
-	if (sv->ExistResource("pci"))
+	std::cout << "spi : ";
+	if (sv->ExistResource("spi"))
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
@@ -461,7 +455,6 @@ void SearchResourceGroups(SystemView * sv) {
 	std::cout << "_________| Test resource groups search |_______\n"
 		<< std::endl;
 
-
 	// List of matches
 	std::list<br::ResourcePtr_t> res_match;
 
@@ -475,10 +468,42 @@ void SearchResourceGroups(SystemView * sv) {
 	for(; it != end; ++it)
 		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 
+	std::string base_clust = "arch.clusters.cluster";
+	std::string curr_clust;
+	for(int i = 0; i < 4; ++i) {
+		// Build the "hybrid" resource path
+		curr_clust = base_clust;
+		std::stringstream ss;
+		ss << i;
+		curr_clust.append(ss.str());
+		curr_clust.append(".pe");
+		// Get the list of matchings
+		res_match = sv->GetResources(curr_clust);
+		// Print the results
+		std::cout << "[" << curr_clust.c_str() << "] matchings : "
+			<< res_match.size() << std::endl;
+		it = res_match.begin();
+		end = res_match.end();
+		for(; it != end; ++it)
+			std::cout << "\t" << (*it)->Name().c_str() << std::endl;
+
+		std::cout << "\tavailability = "
+			<< sv->ResourceAvailability(curr_clust) << std::endl;
+		std::cout << "\tused = "
+			<< sv->ResourceUsed(curr_clust) << std::endl;
+		std::cout << "\ttotal = "
+			<< sv->ResourceTotal(curr_clust) << std::endl;
+	}
+
 	// Search... cluster.pe
 	res_match = sv->GetResources("arch.clusters.cluster.pe");
 	std::cout << "[arch.clusters.cluster.pe] matchings : "
 		<< res_match.size() << std::endl;
+
+	it = res_match.begin();
+	end = res_match.end();
+	for(; it != end; ++it)
+		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 	std::cout << "\tavailability = "
 		<< sv->ResourceAvailability("arch.clusters.cluster.pe") << std::endl;
 	std::cout << "\tused = "
@@ -486,15 +511,9 @@ void SearchResourceGroups(SystemView * sv) {
 	std::cout << "\ttotal = "
 		<< sv->ResourceTotal("arch.clusters.cluster.pe") << std::endl;
 
-	it = res_match.begin();
-	end = res_match.end();
-	for(; it != end; ++it)
-		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
-
-	// Search... pci
-	res_match = sv->GetResources("arch.clusters.pci");
-	std::cout << "[arch.clusters.pci] matchings : "
-		<< res_match.size() << std::endl;
+	// Search... spi
+	res_match = sv->GetResources("arch.spi");
+	std::cout << "[arch.spi] matchings : " << res_match.size() << std::endl;
 
 	it = res_match.begin();
 	end = res_match.end();
