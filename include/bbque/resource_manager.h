@@ -27,6 +27,7 @@
 #include "bbque/plugin_manager.h"
 
 #include "bbque/plugins/logger.h"
+#include "bbque/plugins/rpc_channel.h"
 
 namespace bbque {
 
@@ -124,6 +125,11 @@ private:
 	 * @brief The logger used by the resource manager.
 	 */
 	plugins::LoggerIF *logger;
+
+	/**
+	 * @brief The RPC communication channel module
+	 */
+	plugins::RPCChannelIF *rpc;
 
 };
 

@@ -26,9 +26,11 @@
 //----- Supported plugin interfaces
 #include "bbque/plugins/test_adapter.h"
 #include "bbque/plugins/logger_adapter.h"
+//#include "bbque/plugins/rpc_channel_adapter.h"
 #include "bbque/plugins/recipe_loader.h"
 //----- Supported C++ only plugin interfaces
 #include "bbque/plugins/scheduler_policy.h"
+#include "bbque/rpc_proxy.h"
 
 #include <string>
 
@@ -66,6 +68,12 @@ public:
 	static plugins::LoggerIF * GetLoggerModule(
 			plugins::LoggerIF::Configuration const & data,
 			std::string const & id = LOGGER_NAMESPACE);
+
+	/**
+	 * Get a reference to a module implementing the RPCChannelIF interface
+	 */
+	static plugins::RPCChannelIF * GetRPCChannelModule(
+			std::string const & id = RPC_CHANNEL_NAMESPACE);
 
 	/**
 	 * Get a reference to a module implementing the RecipeLoaderIF interface

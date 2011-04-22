@@ -117,6 +117,20 @@ void ResourceManager::Setup() {
 	for (i = rm.begin(); i != rm.end(); ++i)
 		logger->Info(" * %s", (*i).first.c_str());
 
+	//---------- Initialize the RPC channel module
+	// TODO look the configuration file for the required channel
+	// Build an RPCChannelIF object
+	rpc = ModulesFactory::GetRPCChannelModule();
+	if (!rpc) {
+		logger->Fatal("RM: RPC Channel module creation FAILED");
+		abort();
+	}
+	// RPC channel initialization
+	if (rpc->Init()) {
+		logger->Fatal("RM: RPC Channel module setup FAILED");
+		abort();
+	}
+
 }
 
 void ResourceManager::ControlLoop() {

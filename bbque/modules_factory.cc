@@ -87,6 +87,10 @@ plugins::LoggerIF * ModulesFactory::GetLoggerModule(
 	return (plugins::LoggerIF *) module;
 }
 
+plugins::RPCChannelIF * ModulesFactory::GetRPCChannelModule(
+    std::string const & id) {
+	return RPCProxy::GetInstance(id);
+}
 
 plugins::RecipeLoaderIF * ModulesFactory::GetRecipeLoaderModule(
     std::string const & id) {
