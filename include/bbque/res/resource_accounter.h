@@ -156,8 +156,7 @@ public:
 	 * @see ResourceAccounterConfIF
 	 */
 	RegExitCode_t RegisterResource(std::string const & path,
-			std::string const & type, std::string const & units,
-			uint64_t amount);
+			std::string const & units, uint64_t amount);
 
 	/**
 	 * @brief Print the resource hierarchy in a tree-like form

@@ -100,12 +100,10 @@ private:
 	 * @brief Print working modes details of an application
 	 *
 	 * @param test_app A shared pointer to the application descriptor
-	 * @param resources The vector containing the resources path
 	 * @return 0 for succes, or other values for errors
 	 */
 	int WorkingModesDetails(
-			std::shared_ptr<app::ApplicationStatusIF> test_app,
-			std::vector<std::string> resources);
+			std::shared_ptr<app::ApplicationStatusIF> test_app);
 
 	/**
 	 * @brief Print scheduling information of a given application

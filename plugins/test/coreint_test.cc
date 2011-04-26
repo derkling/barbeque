@@ -45,119 +45,114 @@ typedef std::map<uint32_t, ba::AppPtr_t> AppsMap_t;
 
 // Test set
 std::vector<std::string> res_names = {
+	// System-wide resources
 	"mem0",
 	"dma0",
+	// Platform resources
 	"arch.mem0",
 	"arch.clusters.mem0",
-	"arch.clusters.cluster0",
+	// Cluster level memories
 	"arch.clusters.cluster0.mem0",
+	"arch.clusters.cluster1.mem0",
+	"arch.clusters.cluster2.mem0",
+	"arch.clusters.cluster3.mem0",
+	// Cluster level DMAs
 	"arch.clusters.cluster0.dma0",
+	"arch.clusters.cluster1.dma0",
+	"arch.clusters.cluster2.dma0",
+	"arch.clusters.cluster3.dma0",
+	// Processing elements
 	"arch.clusters.cluster0.pe0",
+	"arch.clusters.cluster0.pe1",
+	"arch.clusters.cluster0.pe2",
+	"arch.clusters.cluster0.pe3",
 	"arch.clusters.cluster1.pe0",
-	"arch.clusters.cluster2.pe0",
-	"arch.clusters.cluster3.pe0",
-	"arch.clusters.cluster0.pe0.mem0",
-	"arch.clusters.cluster0.pe0.mem1",
-	"arch.clusters.cluster0.pe0.mem2",
 	"arch.clusters.cluster1.pe1",
 	"arch.clusters.cluster1.pe2",
-	"arch.clusters.cluster1.pe0",
-	"arch.clusters.cluster1.pe0.mem0",
-	"arch.clusters.cluster1.mem0",
-	"arch.clusters.cluster0.pe1",
-	"arch.clusters.cluster2.mem0",
-	"arch.clusters.cluster1.mem0",
-	"arch.clusters.cluster2.pe0.mem0",
+	"arch.clusters.cluster1.pe3",
+	"arch.clusters.cluster2.pe0",
+	"arch.clusters.cluster2.pe1",
+	"arch.clusters.cluster2.pe2",
+	"arch.clusters.cluster2.pe3",
+	"arch.clusters.cluster3.pe0",
+	"arch.clusters.cluster3.pe1",
+	"arch.clusters.cluster3.pe2",
+	"arch.clusters.cluster3.pe3",
+/*	"arch.clusters.cluster2.pe0.mem0",
 	"arch.clusters.cluster0.pe1.mem1",
 	"arch.clusters.cluster0.pe1.mem0",
 	"arch.clusters.cluster1.pe2.mem0"
-};
-
-std::vector<std::string> res_types = {
-	"SDRAM memory",
-	"bus",
-	"SDRAM memory",
-	"SDRAM memory",
-	"cluster",
-	"SDRAM memory",
-	"bus",
-	"cpu",
-	"cpu",
-	"cpu",
-	"cpu",
-	"memory",
-	"memory",
-	"memory",
-	"cpu",
-	"cpu",
-	"cpu",
-	"memory",
-	"memory",
-	"cpu",
-	"memory",
-	"memory",
-	"memory",
-	"memory",
-	"memory",
-	"memory"
+ */
 };
 
 std::vector<std::string> res_units = {
 	"Mb",
 	"Mbps",
+
 	"Mb",
 	"Mb",
-	"1",
-	"Mb",
+
+	"Kb",
+	"Kb",
+	"Kb",
+	"Kb",
+
 	"Mbps",
+	"Mbps",
+	"Mbps",
+	"Mbps",
+
 	"1",
 	"1",
 	"1",
 	"1",
-	"kb",
-	"kb",
-	"kb",
 	"1",
 	"1",
 	"1",
-	"kb",
-	"Mb",
 	"1",
-	"Mb",
-	"Mb",
-	"kb",
-	"kb",
-	"kb",
-	"kb"
+	"1",
+	"1",
+	"1",
+	"1",
+	"1",
+	"1",
+	"1",
+	"1"
 };
 
 std::vector<uint64_t> res_totals = {
-	256, // System RAM
-	200,  // DMA system bus
-	32,   // Memory architecture level
-	16,   // Memory inter-cluster level
-	4,    // Number of pe in cluster 0
-	8,    // Memory in cluster 0
-	50,   // DMA for cluster 0
-	1,    // Num of pe0 in cluster0
-	1,    // Num of pe1 in cluster1
-	1,    // Num of pe2 in cluster2
-	1,    // Num of pe3 in cluster3
-	512,  // cluster1.pe0.mem0
-	512,  // cluster
-	512,
+	32, 	// System RAM
+	200,  	// DMA system bandwidth
+
+	4,   	// Memory architecture level
+	2,   	// Memory inter-cluster level
+
+	256, 	// Memory intra-cluster level
+	256,
+	256,
+	256,
+
+	50, 	// DMA intra-cluster bandwidht
+	50,
+	50,
+	50,
+
+	1, 	// Number of processing elements
 	1,
 	1,
 	1,
-	512,
-	4,
 	1,
-	8,
-	8,
-	512,
-	512,
-	512,
-	512
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1,
+	1
 };
 
 
@@ -207,11 +202,16 @@ void CoreInteractionsTest::RegisterSomeResources() {
 		return;
 	}
 
+	std::cout << "names=" << res_names.size()
+		<< " units=" << res_units.size()
+		<< " totals=" << res_totals.size()
+		<< std::endl;
+
 	bu::Timer _t(true);
 	// Start register resources
 	for (uint16_t i=0; i < res_names.size(); ++i) {
 		printf(" >>> Registering... :%s\n", res_names[i].c_str());
-		RA->RegisterResource(res_names[i], res_types[i], res_units[i],
+		RA->RegisterResource(res_names[i], res_units[i],
 				res_totals[i]);
 	}
 
@@ -255,8 +255,7 @@ void CoreInteractionsTest::PrintResourceAvailabilities() {
 
 
 int CoreInteractionsTest::WorkingModesDetails(
-		std::shared_ptr<ba::ApplicationStatusIF> test_app,
-		std::vector<std::string> resources) {
+		std::shared_ptr<ba::ApplicationStatusIF> test_app) {
 
 	// Application descriptor pointer is valid?
 	if (!test_app) {
@@ -282,17 +281,19 @@ int CoreInteractionsTest::WorkingModesDetails(
 
 		ba::AwmStatusPtr_t awm_get(*it2);
 
-		std::vector<std::string>::iterator res_it = resources.begin();
-		std::vector<std::string>::iterator res_end = resources.end();
+		ba::UsagesMap_t::const_iterator res_it =
+			awm_get->ResourceUsages().begin();
+		ba::UsagesMap_t::const_iterator res_end =
+			awm_get->ResourceUsages().end();
 
 		std::cout
 			<< "\n--------------------------------[ " << awm_get->Name()
 			<< " ]----------------------------" << std::endl;
 
-		for ( ; res_it < res_end; ++res_it) {
-			std::cout << std::setw(50) << std::left << (*res_it).c_str() << ":"
+		for ( ; res_it != res_end; ++res_it) {
+			std::cout << std::setw(50) << std::left << (res_it->first).c_str() << ":"
 				<< std::setw(15) << std::right
-				<< awm_get->ResourceUsage(*res_it) << " |" << std::endl;
+				<< awm_get->ResourceUsage(res_it->first) << " |" << std::endl;
 		}
 		std::cout
 			<< "-------------------------------------------------------------"
@@ -530,6 +531,16 @@ void SearchResourceGroups(SystemView * sv) {
 	for(; it != end; ++it)
 		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 
+	// ...cluster.pe3
+	res_match = sv->GetResources("arch.clusters.cluster.pe3");
+	std::cout << "[arch.clusters.cluster.pe3] matchings : "
+		<< res_match.size() << std::endl;
+
+	it = res_match.begin();
+	end = res_match.end();
+	for(; it != end; ++it)
+		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
+
 	_t.stop();
 	std::cout << "\nSearch finished in " << _t.getElapsedTimeUs() << " us"
 		<< std::endl;
@@ -549,6 +560,14 @@ void CoreInteractionsTest::Test() {
 	RegisterSomeResources();
 	PrintResourceAvailabilities();
 
+	// SystemView
+	SystemView *sv = SystemView::GetInstance();
+
+	// Some resource search test
+	SearchResources(sv);
+	SearchResourceGroups(sv);
+	GetClusteredInfo(sv);
+
 	// ApplicationManager instance
 	ApplicationManager *appman = ApplicationManager::GetInstance();
 
@@ -566,9 +585,8 @@ void CoreInteractionsTest::Test() {
 		logger->Error("Application not started.");
 		return;
 	}
-	// SystemView
-	SystemView *sv = SystemView::GetInstance();
-	logger->Debug("Applications loaded = %d", sv->ApplicationsReady()->size());
+
+	logger->Debug("Applications loaded = %d", sv->ApplicationsReady().size());
 
 	// Plugin specific data
 	ba::PluginsDataContainer pdc;
@@ -584,7 +602,7 @@ void CoreInteractionsTest::Test() {
 	}
 
 	// Print out working modes details
-	WorkingModesDetails(test_app, res_names);
+	WorkingModesDetails(test_app);
 
 	// Get the application descriptor
 	std::shared_ptr<ba::Application> app_conf(appman->GetApplication(3324));
@@ -607,11 +625,6 @@ void CoreInteractionsTest::Test() {
 	// Stop application
 	appman->StopApplication(3324);
 	PrintResourceAvailabilities();
-
-	// Some resource search test
-	SearchResources(sv);
-	SearchResourceGroups(sv);
-	GetClusteredInfo(sv);
 
 	delete appman;
 }

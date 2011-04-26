@@ -152,10 +152,8 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 
 		// Are there any 'static' constraints in the recipe ?
 		if (ret_awms != RL_FORMAT_ERROR) {
-
 			// Load constraints
 			loadConstraints(app_elem);
-
 			// Load plugins data
 			loadPluginsData<ba::AppPtr_t>(app_ptr, app_elem);
 		}
@@ -251,7 +249,6 @@ uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
 		ticpp::Element * res_elem = _xml_elem->FirstChildElement(true);
 
 		while (res_elem) {
-
 			// The current resource path
 			// (updated when parseResourceData returns)
 			std::string res_path = _curr_path;
@@ -264,6 +261,7 @@ uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
 			if (!res_elem->NoChildren())
 				ret_code |= loadResources(res_elem, _wm, res_path);
 
+			// Return if a format error has found
 			if (ret_code == __RSRC_FORMAT_ERR)
 				return ret_code;
 
@@ -292,7 +290,6 @@ inline uint8_t XMLRecipeLoader::appendToWorkingMode(
 
 	// Resource not found
 	case (int) ba::WorkingMode::WM_RSRC_NOT_FOUND:
-
 		// If the resource is not available in the system signal a
 		// weak load, meaning that the working mode has a partial
 		// definition.
@@ -302,7 +299,6 @@ inline uint8_t XMLRecipeLoader::appendToWorkingMode(
 
 	// Usage value exceeds availability
 	case (int) ba::WorkingMode::WM_RSRC_USAGE_EXCEEDS:
-
 		// If the usage value requests is greater than the total
 		// availability of the resource, signal a format error.
 		logger->Error("'%s' recipe:\n\tResource '%s' usage exceeds.",
@@ -326,28 +322,22 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
 		_res_path += ".";
 	_res_path += _res_elem->Value() + res_id;
 
-	// Resource type
-	std::string res_type;
-	_res_elem->GetAttribute("type", &res_type, false);
-
-	// Resource amount
+	// Resource quantity request
 	uint64_t res_usage = 0;
-	_res_elem->GetAttribute("amount", &res_usage, false);
+	_res_elem->GetAttribute("qty", &res_usage, false);
 
 	// Units
 	std::string res_units;
 	_res_elem->GetAttribute("units", &res_units, false);
 
-	// Parse the units string and update correctly the resource amount
-	// value
-	res_usage = ConvertValue(res_usage, res_units);
-
-	// A true resource MUST have the "id" attribute.
-	// Otherwise the xml tag is considered"resource container" (ie.
-	// "arch", "clusters", ...").
-	// This case is obviously skipped in loading resource usages...
-	if (!res_id.empty() && (res_usage > 0))
+	if (res_usage > 0) {
+		// Parse the units string and update correctly the resource amount
+		// value
+		res_usage = ConvertValue(res_usage, res_units);
+		// Append the resource usage request to the current working mode
+		// descriptor
 		return appendToWorkingMode(_wm, _res_path, res_usage);
+	}
 
 	return __RSRC_SUCCESS;
 }
@@ -375,10 +365,8 @@ void XMLRecipeLoader::loadPluginsData(T _container, ticpp::Element * _xml_elem) 
 
 	try {
 		while (plug_elem) {
-
 			// Parse the <plugin> tag
 			parsePluginTag<T>(plug_elem, _container);
-
 			// Next plugin
 			plug_elem = plug_elem->NextSiblingElement("plugin", false);
 		}
@@ -415,10 +403,8 @@ inline void XMLRecipeLoader::parsePluginTag(ticpp::Element * _plug_elem,
 		// Plugin data nodes under <plugin>
 		ticpp::Node * plugdata_node = _plug_elem->FirstChild(false);
 		while (plugdata_node) {
-
 			// Parse the data
 			parsePluginData(pdata, plugdata_node);
-
 			// Next data
 			plugdata_node = plugdata_node->NextSibling(false);
 		}
@@ -437,9 +423,11 @@ inline void XMLRecipeLoader::parsePluginData(
 		if (plugdata_node->Type() != TiXmlNode::ELEMENT)
 			return;
 
-		// Get the pair key-value
+		// Get the pair key -
 		std::string key;
 		plugdata_node->GetValue(&key);
+
+		// - value
 		std::string value;
 		plugdata_node->ToElement()->GetText(&value, false);
 

@@ -72,41 +72,45 @@ WorkingMode::~WorkingMode() {
 WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		std::string const & _res_path, uint64_t _value) {
 
+	// Check the total amount of resource
 	br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
-	br::ResourcePtr_t resource_to_use = ra->GetResource(_res_path);
+	uint64_t rsrc_total_qty = ra->Total(_res_path);
 
-	// Check if the resource exists
-	if (resource_to_use.get() == 0) {
-		// Resource requested doesn't exist
+	// Does the resource exist ?
+	if (rsrc_total_qty == 0) {
 		logger->Warn("Resource '%s' not found.", _res_path.c_str());
 		return WM_RSRC_NOT_FOUND;
 	}
-
-	// Is the usage value correct ? (below the total availability)
-	if (_value > resource_to_use->Total()) {
-		logger->Warn("Resource '%s' usage value exceeds", _res_path.c_str());
+	// Is the usage value acceptable ? (below the total availability)
+	if (rsrc_total_qty < _value) {
+		logger->Warn("Resource '%s' usage value exceeds \n"
+				"(total = %d)", _res_path.c_str(), rsrc_total_qty);
 		return WM_RSRC_USAGE_EXCEEDS;
 	}
+	// Create a new resource usage object
+	br::UsagePtr_t res_usage = br::UsagePtr_t(new br::ResourceUsage);
 
-	// Create a new resource usage object and insert it into the map
-	resources[_res_path] = UsagePtr_t(new br::ResourceUsage);
-	resources[_res_path]->resource = resource_to_use;
-	resources[_res_path]->value = _value;
+	// Set the attributes
+	res_usage->bind_path = "";
+	res_usage->value = _value;
+
+	// Insert it into the resource usages map
+	resources[_res_path] = res_usage;
 	return WM_SUCCESS;
 }
 
 
 uint64_t WorkingMode::ResourceUsage(std::string const & _res_path) const {
 
-	// Check if the resource exists
+	// Check if the resource is really requested
 	std::map<std::string, UsagePtr_t>::const_iterator it =
 		resources.find(_res_path);
 
-	// If the resource has been found return the usage value
+	// If yes return the usage value
 	if (it != resources.end())
 		return it->second->value;
 
-	// The resource specified is not in use in this working mode
+	// No, the resource is not used by this working mode
 	return 0;
 }
 
@@ -135,6 +139,7 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(
 		it->second->SetSwitchTime(_time);
 	}
 
+	// Some debug messages
 	logger->Debug("%s -> %s  overhead [t] :\n", name.c_str(),
 			_dest_awm.c_str());
 	logger->Debug("\tlast : %.4f", OverheadInfo(_dest_awm)->LastTime());
@@ -151,15 +156,17 @@ OverheadPtr_t WorkingMode::OverheadInfo(std::string const & _dest_awm) const {
 	OverheadPtr_t over_ptr;
 	over_ptr.reset();
 
+	// Retrieve the overhead descriptor referring to the given destination
+	// working mode
 	std::map<std::string, OverheadPtr_t>::const_iterator it =
 	    overheads.find(_dest_awm);
 
-	// Check if some switch from the current working mode
-	// to "_dest_awm" occurred
+	// Check if some switches from the current working mode to "_dest_awm"
+	// occurred
 	if (it != overheads.end())
 		over_ptr = it->second;
 
-	// Null pointer
+	// Otherwise... null pointer return
 	return over_ptr;
 }
 

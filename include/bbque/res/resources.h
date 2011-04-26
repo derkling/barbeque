@@ -71,8 +71,10 @@ enum ExitCode_t {
 /**
  * @class ResourceState
  *
- * The usage state of a system resource. We just keep track of the total
- * amount of a given resource, and its usage level.
+ * The usage state of a system resource.
+ * This are the basic information we need to track upon resources. More
+ * specifically, up to now, we keep track of the total amount, the number of
+ * used and available resources.
  */
 class ResourceState {
 
@@ -154,9 +156,8 @@ protected:
  * @class Resource
  *
  * The class managing the concept of "resource" in the RTRM keeping track of
- * the runtime status (availability, used, total) and other information such
- * as the type of resource (i.e. "memory", "cpu, "bus"...) and the
- * applications that are using the resource.
+ * the runtime status (availability, used, total), the resource name ("pe1",
+ * "cluster2", "mem0" and the applications that are using the resource.
  */
 class Resource: public ResourceState {
 
@@ -178,10 +179,8 @@ public:
 	 * @param res_type Resource type
 	 * @param res_amount The total amount of resource
 	 */
-	Resource(std::string const & res_path, std::string const & res_type,
-			uint64_t res_amount):
-		ResourceState(res_amount),
-		type(res_type) {
+	Resource(std::string const & res_path, uint64_t res_amount):
+		ResourceState(res_amount) {
 
 		// Extract the name from the path
 		uint16_t pos = res_path.find_last_of(".");
@@ -193,21 +192,9 @@ public:
 
 	/**
 	 * @brief Resource name
+	 * @return The resource name string
 	 */
 	inline std::string const & Name() { return name; }
-
-	/**
-	 * @brief Resource Type(i.e. "cpu", "memory","IO", ...)
-	 */
-	inline std::string const & Type() { return type; }
-
-	/**
-	 * @brief Set the resource type
-	 * @param res_type Resource type (i.e "processor", "memory", ...)
-	 */
-	inline void SetType(std::string const & res_type) {
-		type = res_type;
-	}
 
 	/**
 	 * @brief Set the resource as used by a given application
@@ -230,9 +217,6 @@ private:
 	/** Resource name (i.e. "mem0", "pe1", "dma1", ...)        */
 	std::string name;
 
-	/** Resource type (i.e. "processor", "memory", "bandwidth",...)  */
-	std::string type;
-
 	/** Applications holding the resource     */
 	AppMap_t apps;
 
@@ -242,14 +226,25 @@ private:
  * @struct ResourceUsage
  *
  * An application working modes defines a set of this resource requests
- * (usages)
+ * (usages).
+ *
+ * A resource usage embeds a couple of information:
+ * The first is the resource bind path. It means that a working mode can
+ * specify a generic resource path (path template or hybrid path), then is up
+ * to the Optimizer module to solve the binding during its scheduling
+ * procedure.
+ *
+ * The second is obviously the value of the usage, the amount of resource
+ * requested.
  */
 struct ResourceUsage {
+	/**
+	 * Path of the resource descriptor to which the resource request has been
+	 * bound
+	 */
+	std::string bind_path;
 
-	/** Pointer to the resource in use    */
-	ResourcePtr_t resource;
-
-	/** Usage value */
+	/** Usage value request */
 	uint64_t value;
 
 };

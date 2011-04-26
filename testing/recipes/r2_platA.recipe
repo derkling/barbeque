@@ -2,17 +2,19 @@
 <BarbequeRTRM version="0.1">
 	<application priority="4">
 		<awms>
-			<awm name="wm0" value="3">
+			<awm name="wm0" value="8">
 				<resources>
 					<mem qty="1" units="Mb"/>
 					<dma qty="50" units="Mbps"/>
 					<arch name="P2012">
-						<mem qty="64" units="Kb"/>
-						<clusters>
-							<mem qty="16" units="Kb"/>
+						<mem qty="32" units="Kb"/>
+						<clusters label "Set of clusters">
+							<mem qty="32" units="Kb"/>
 							<cluster id="0">
-								<pe qty="4"/>
-								<mem qty="3" units="Kb"/>
+								<pe qty="2">
+									<mem id="0" qty="2" units="Kb"/>
+								</pe>
+								<mem qty="8" units="Kb"/>
 								<dma qty="30" units="Mbps"/>
 							</cluster>
 						</clusters>
@@ -24,33 +26,38 @@
 					</plugin>
 				</plugins>
 			</awm>
-			<awm name="wm1" value="2">
+			<awm name="wm1" value="4">
 				<resources>
 					<mem qty="512" units="Kb"/>
 					<dma qty="20" units="Mbps"/>
 					<arch name="P2012">
-						<mem qty="32" units="Kb"/>
+						<mem qty="16" units="Kb"/>
 						<clusters>
-							<mem qty="16" units="Kb"/>
+							<mem qty="16" units="Kb">
 							<cluster id="0">
-								<pe qty="2"/>
-								<mem qty="4" units="Kb"/>
-								<dma qty="30" units="Mbps"/>
+								<pe qty="3">
+									<mem qty="2" units="Kb"/>
+									<mem qty="1" units="Kb"/>
+								</pe>
+								<mem qty="2" units="Kb"/>
+								<dma qty="10" units="Mbps"/>
 							</cluster>
 						</clusters>
 					</arch>
 				</resources>
 			</awm>
-			<awm name="wm2" value="1">
+			<awm name="wm2" value="2">
 				<resources>
-					<mem qty="256" units="Kb"/>
+					<mem qty="256" units="Kb" label="System Memory"/>
 					<arch name="P2012">
 						<mem qty="16" units="Kb"/>
 						<clusters>
 							<mem qty="8" units="Kb"/>
 							<cluster id="0">
-								<pe qty="2"/>
-								<mem qty="2" units="Kb"/>
+								<pe qty="1">
+									<mem qty="1" units="Kb"/>
+								</pe>
+								<mem qty="4" units="Kb"/>
 							</cluster>
 						</clusters>
 					</arch>
@@ -68,7 +75,7 @@
 				<author>"Davide Zoni"</author>
 				<bbque-min-ver>0.1</bbque-min-ver>
 			</plugin>
-			<plugin name="synch3" type="synch_protocol" required="y">
+			<plugin name="sync3" type="synch_protocol" required="y">
 				<bbque-min-ver>0.1</bbque-min-ver>
 			</plugin>
 		</plugins>

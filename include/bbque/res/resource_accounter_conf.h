@@ -49,8 +49,8 @@ public:
 	enum RegExitCode_t {
 		/** Resource registered successfully */
 		RA_SUCCESS = 0,
-		/** Some arguments are missing */
-		RA_ERR_MISS_ARGS,
+		/** Argument "path" missing */
+		RA_ERR_MISS_PATH,
 		/** Unable to allocate a new resource descriptor */
 		RA_ERR_MEM
 	};
@@ -93,13 +93,11 @@ public:
 	 * "arch.clusters.cluster0.pe1 	: processing element 1 in cluster 0
 	 *
 	 * @param path Resource path
-	 * @param type Resource type (i.e "cpu", "memory", ...)
 	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)
 	 * @param amount The total amount available
 	 */
 	virtual RegExitCode_t RegisterResource(std::string const & path,
-			std::string const & type, std::string const & units,
-			uint64_t amount) = 0;
+			std::string const & units, uint64_t amount) = 0;
 
 };
 

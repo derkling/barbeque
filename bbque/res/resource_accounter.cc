@@ -74,12 +74,12 @@ ResourceAccounter::~ResourceAccounter() {
 
 
 ResourceAccounter::RegExitCode_t ResourceAccounter::RegisterResource(
-		std::string const & _path, std::string	const & _type,
-		std::string	const & _units,	uint64_t _amount) {
+		std::string const & _path, std::string const & _units,
+		uint64_t _amount) {
 
 	// Check arguments
-	if(_path.empty() || _type.empty())
-		return RA_ERR_MISS_ARGS;
+	if(_path.empty())
+		return RA_ERR_MISS_PATH;
 
 	// Insert a new resource in the tree
 	ResourcePtr_t res_ptr;
@@ -89,8 +89,6 @@ ResourceAccounter::RegExitCode_t ResourceAccounter::RegisterResource(
 
 	// Set the amount of resource on the units base
 	res_ptr->SetTotal(ConvertValue(_amount, _units));
-	// Resource type
-	res_ptr->SetType(_type);
 	return RA_SUCCESS;
 }
 
@@ -178,7 +176,7 @@ void ResourceAccounter::changeUsages(ba::Application const * _app,
 	for (; usages_it != usages_end; ++usages_it) {
 
 		// Lookup the resource descriptor
-		ResourcePtr_t res_ptr(usages_it->second->resource);
+		ResourcePtr_t res_ptr(GetResource(usages_it->second->bind_path));
 		if (res_ptr.get() == NULL)
 			continue;
 
