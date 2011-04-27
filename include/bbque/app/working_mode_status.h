@@ -33,6 +33,12 @@ namespace br = bbque::res;
 
 namespace bbque { namespace app {
 
+// Forward declaration
+class Application;
+
+
+/** Shared pointer to Application  */
+typedef std::shared_ptr<Application> AppPtr_t;
 
 /** Shared pointer to ResourceUsage */
 typedef std::shared_ptr<br::ResourceUsage> UsagePtr_t;
@@ -78,6 +84,12 @@ public:
 	 * @brief Return the identifying name of the AWM
 	 */
 	virtual std::string const & Name() const = 0;
+
+	/**
+	 * @brief Get the application owning the working mode
+	 * @return A shared pointer to the application descriptor
+	 */
+	virtual AppPtr_t const & OwnerApplication() const = 0;
 
 	/**
 	 * @brief Get the QoS value associated to the working mode

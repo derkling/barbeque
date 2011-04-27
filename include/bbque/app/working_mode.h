@@ -31,14 +31,6 @@
 
 namespace bbque { namespace app {
 
-// Forward declaration
-class Application;
-
-
-/** Shared pointer to Application descriptor */
-typedef std::shared_ptr<Application> AppPtr_t;
-
-
 /**
  * @class WorkingMode
  * @brief Profile for supporting the application execution.
@@ -83,6 +75,13 @@ public:
 	 */
 	inline void SetName(std::string const & wm_name) {
 		name = wm_name;
+	}
+
+	/**
+	 * @brief see WorkingModeStatusIF
+	 */
+	inline AppPtr_t const & OwnerApplication() const {
+		return owner;
 	}
 
 	/**
@@ -143,7 +142,7 @@ private:
 	 * A pointer to the Application descriptor containing the
 	 * current working mode
 	 */
-	AppPtr_t application;
+	AppPtr_t owner;
 
 	/** The identifier name */
 	std::string name;

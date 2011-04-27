@@ -47,11 +47,9 @@ WorkingMode::WorkingMode(AppPtr_t _app,	std::string const & _name,
 		uint16_t _value):
 	bbque::Object(APPLICATION_NAMESPACE + _app->Name() + "." +
 			WORKING_MODE_NAMESPACE + _name),
+	owner(_app),
 	name(_name),
 	value(_value) {
-
-	// Application "owner"
-	application = _app;
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE +_app->Name()
@@ -91,7 +89,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	br::UsagePtr_t res_usage = br::UsagePtr_t(new br::ResourceUsage);
 
 	// Set the attributes
-	res_usage->bind_path = "";
+	res_usage->bind_path = _res_path;
 	res_usage->value = _value;
 
 	// Insert it into the resource usages map
@@ -119,9 +117,9 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(
 		std::string const & _dest_awm, double _time) {
 
 	// Check the existance of the destination working mode
-	if (application->GetRecipe()->WorkingMode(_dest_awm).get() == NULL) {
+	if (owner->GetRecipe()->WorkingMode(_dest_awm).get() == NULL) {
 		logger->Warn("Working mode %s not found in %s",
-		             _dest_awm.c_str(), application->Name().c_str());
+		             _dest_awm.c_str(), owner->Name().c_str());
 		return WM_NOT_FOUND;
 	}
 
@@ -152,7 +150,7 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(
 
 
 OverheadPtr_t WorkingMode::OverheadInfo(std::string const & _dest_awm) const {
-
+	// Overhead descriptor
 	OverheadPtr_t over_ptr;
 	over_ptr.reset();
 
