@@ -296,7 +296,7 @@ void Application::workingModesEnabling(std::string const & _res_name,
 
 	// Iterate over all the working modes
 	for (; it_awm < awms_end; ++it_awm) {
-		usage_value = (*it_awm)->ResourceUsage(_res_name);
+		usage_value = (*it_awm)->ResourceUsageValue(_res_name);
 
 		// If a resource usage is below an upper bound constraint or
 		// above a lower bound one...

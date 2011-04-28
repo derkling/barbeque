@@ -108,7 +108,7 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	uint64_t ResourceUsage(std::string const & res_path) const;
+	uint64_t ResourceUsageValue(std::string const & res_path) const;
 
 	/**
 	 * @see WorkingModeStatusIF

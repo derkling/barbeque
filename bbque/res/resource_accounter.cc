@@ -176,30 +176,58 @@ void ResourceAccounter::changeUsages(ba::Application const * _app,
 	for (; usages_it != usages_end; ++usages_it) {
 
 		// Lookup the resource descriptor
-		ResourcePtr_t res_ptr(GetResource(usages_it->second->bind_path));
-		if (res_ptr.get() == NULL)
+		//ResourcePtrList_t res_binds(GetResources(usages_it->second->bind_path));
+		ResourcePtrList_t & res_binds = usages_it->second->binds;
+		if (res_binds.empty())
 			continue;
 
-		switch (_sel) {
-		case RA_SWITCH:
-			// Add the amount of resource used by the application
-			res_ptr->AddUsed(usages_it->second->value);
+		ResourcePtrList_t::iterator it_bind = res_binds.begin();
+		ResourcePtrList_t::iterator end_it = res_binds.end();
 
-			// Append the pointer to the current application descriptor
-			// in the map of the applications using the resource
-			res_ptr->UsedBy(_app);
-			break;
+		uint64_t usage_value = usages_it->second->value;
+/*
+		while (usage_value > 0) {
 
-		case RA_RELEASE:
-			// Subtract the amount of resource once used by the
-			// application
-			res_ptr->SubUsed(usages_it->second->value);
+			for (; it_bind != end_it; ++it_bind) {
+				//
+				switch (_sel) {
+				case RA_SWITCH:
+					if ((*it_bind)->Availability() > usage_value) {
+						// Add the amount of resource used by the application
+						(*it_bind)->AddUsed(usage_value);
 
-			// Remove the pointer to the current application descriptor
-			// in the map of the applications using the resource
-			res_ptr->NoMoreUsedBy(_app);
-			break;
+						// Append the pointer to the current application
+						// descriptor in the map of the applications using the
+						// resource
+						(*it_bind)->UsedBy(_app);
+
+						//
+
+
+						//
+						usage_value = 0;
+					}
+					else {
+						//
+						(*it_bind)->AddUsed((*it_bind)->Availability());
+						usage_value -= (*it_bind)->Availability();
+					}
+					break;
+
+				case RA_RELEASE:
+					// Subtract the amount of resource once used by the
+					// application
+					(*it_bind)->SubUsed();
+
+					// Remove the pointer to the current application
+					// descriptor in the map of the applications using the
+					// resource
+					(*it_bind)->NoMoreUsedBy(_app);
+					break;
+				}
+			}
 		}
+		*/
 	}
 	// If this is a resource release...
 	if (_sel == RA_RELEASE)

@@ -86,11 +86,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		return WM_RSRC_USAGE_EXCEEDS;
 	}
 	// Create a new resource usage object
-	br::UsagePtr_t res_usage = br::UsagePtr_t(new br::ResourceUsage);
-
-	// Set the attributes
-	res_usage->bind_path = _res_path;
-	res_usage->value = _value;
+	br::UsagePtr_t res_usage = br::UsagePtr_t(new br::ResourceUsage(_value));
 
 	// Insert it into the resource usages map
 	resources[_res_path] = res_usage;
@@ -98,8 +94,8 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 }
 
 
-uint64_t WorkingMode::ResourceUsage(std::string const & _res_path) const {
-
+uint64_t WorkingMode::ResourceUsageValue(std::string const & _res_path)
+	const {
 	// Check if the resource is really requested
 	std::map<std::string, UsagePtr_t>::const_iterator it =
 		resources.find(_res_path);

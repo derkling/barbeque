@@ -51,11 +51,20 @@ typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
 /** Shared pointer to ResourceUsage object */
 typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
 
+/** List of Resource objects */
+typedef std::list<ResourcePtr_t> ResourcePtrList_t;
+
 /** Map of ResourceUsage objects. Key: resource path */
 typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 
 /** Map of Application descriptor pointers. Key: application name */
 typedef std::map<std::string, Application const *> AppMap_t;
+
+/**
+ * Map of amounts of resource used by applications
+ * Key: Application PID
+ */
+typedef std::map<uint32_t, uint64_t> AppUseMap_t;
 
 
 /**
@@ -105,23 +114,6 @@ public:
 			return RSRC_SUCCESS;
 		}
 		return RSRC_USAGE_OVERFLOW;
-	}
-
-	/**
-	 * @brief Increment the amount of resource used by adding an integer value
-	 * @param add The addend value
-	 */
-	inline ExitCode_t AddUsed(uint64_t add) {
-		return SetUsed(used + add);
-	}
-
-	/**
-	 * @brief Decrement the amount of resource used by subtracting an integer
-	 * value
-	 * @param sub The subtracting value
-	 */
-	inline ExitCode_t SubUsed(uint64_t sub) {
-		return SetUsed(used - sub);
 	}
 
 	/**
@@ -197,19 +189,33 @@ public:
 	inline std::string const & Name() { return name; }
 
 	/**
-	 * @brief Set the resource as used by a given application
-	 * @param app_ptr The pointer to the application using the resource
+	 * @brief Acquire a given amount of resource
+	 * @param amount How much resource is required
+	 * @param app_ptr The application requiring the resource
+	 * @return An exit code (@see ExitCode_t)
 	 */
-	inline void UsedBy(Application const * app_ptr) {
-		apps[app_ptr->Name()] = app_ptr;
+	inline ExitCode_t Acquire(uint64_t amount, ba::Application const * app_ptr) {
+		// Set the new "used" value
+		ExitCode_t ret = SetUsed(used + amount);
+		// Keep track of the amount of resource used by this application
+		if (ret == RSRC_SUCCESS)
+			apps[app_ptr->Pid()] = amount;
+		return ret;
 	}
 
 	/**
-	 * @brief Unset the the application from the use of the resource
-	 * @param app_ptr The pointer to the application pastly using the resource
+	 * @brief Release the resource
+	 *
+	 * Release the specific amount of resource used by an application
+	 *
+	 * @param app_ptr The application releasing the resource
 	 */
-	inline void NoMoreUsedBy(Application const * app_ptr) {
-		apps.erase(app_ptr->Name());
+	inline void Release(ba::Application const * app_ptr) {
+		// Lookup the application amount
+		AppUseMap_t::iterator lkp = apps.find(app_ptr->Pid());
+		// Subtract the amount used
+		if (lkp != apps.end())
+			used -= lkp->second;
 	}
 
 private:
@@ -217,8 +223,11 @@ private:
 	/** Resource name (i.e. "mem0", "pe1", "dma1", ...)        */
 	std::string name;
 
-	/** Applications holding the resource     */
-	AppMap_t apps;
+	/**
+	 * Amounts of resource used by each of the applications holding the
+	 * resource
+	 */
+	AppUseMap_t apps;
 
 };
 
@@ -228,24 +237,29 @@ private:
  * An application working modes defines a set of this resource requests
  * (usages).
  *
- * A resource usage embeds a couple of information:
- * The first is the resource bind path. It means that a working mode can
- * specify a generic resource path (path template or hybrid path), then is up
- * to the Optimizer module to solve the binding during its scheduling
- * procedure.
- *
- * The second is obviously the value of the usage, the amount of resource
+ * A resource usage descriptor embeds a couple of information:
+ * The first is obviously the value of the usage, the amount of resource
  * requested.
+ * The second is a list containing all the descriptors (shared pointer) of the
+ * resources which to this usage refers.
+ *
+ * We expect that such list is filled by a method of ResourceAccounter, after
+ * that the Scheduler/Optimizer has solved the resource binding.
  */
 struct ResourceUsage {
+
 	/**
-	 * Path of the resource descriptor to which the resource request has been
-	 * bound
+	 * Constructor
 	 */
-	std::string bind_path;
+	ResourceUsage(uint64_t usage_value):
+		value(usage_value) {
+	}
 
 	/** Usage value request */
 	uint64_t value;
+
+	/** List of resource descriptors which to the resource usage is bind*/
+	ResourcePtrList_t binds;
 
 };
 

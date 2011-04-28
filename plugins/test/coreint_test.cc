@@ -293,7 +293,7 @@ int CoreInteractionsTest::WorkingModesDetails(
 		for ( ; res_it != res_end; ++res_it) {
 			std::cout << std::setw(50) << std::left << (res_it->first).c_str() << ":"
 				<< std::setw(15) << std::right
-				<< awm_get->ResourceUsage(res_it->first) << " |" << std::endl;
+				<< awm_get->ResourceUsageValue(res_it->first) << " |" << std::endl;
 		}
 		std::cout
 			<< "-------------------------------------------------------------"
