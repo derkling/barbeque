@@ -36,7 +36,7 @@
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
 
 // Path template for querying clusters state info
-#define CLUSTERS_PATH "arch.clusters.cluster"
+#define CLUSTERS_PATH_TEMP "arch.tile.cluster"
 
 using bbque::app::Application;
 
@@ -126,13 +126,13 @@ public:
 		if (GetResource(path).get() == 0)
 			return 0;
 		// Check if the resource is clustered
-		int16_t clust_patt_pos = path.find(CLUSTERS_PATH);
+		int16_t clust_patt_pos = path.find(CLUSTERS_PATH_TEMP);
 		if (clust_patt_pos < 0)
 			return 1;
 		// Check if the clustering factor has been computed yet
 		if (clustering_factor == 0) {
 			// Compute the factor
-			clustering_factor = Total(CLUSTERS_PATH);
+			clustering_factor = Total(CLUSTERS_PATH_TEMP);
 			// If the query returns 0 the plaform is not cluster-based.
 			// Thus we must set clustering factor to 1.
 			if (clustering_factor == 0)

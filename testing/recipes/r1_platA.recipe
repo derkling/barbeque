@@ -8,14 +8,14 @@
 					<dma qty="50" units="Mbps"/>
 					<arch name="P2012">
 						<mem qty="64" units="Kb"/>
-						<clusters>
+						<tile id="0">
 							<mem qty="16" units="Kb"/>
 							<cluster id="0">
 								<pe qty="4"/>
 								<mem qty="3" units="Kb"/>
 								<dma qty="30" units="Mbps"/>
 							</cluster>
-						</clusters>
+						</tile>
 					</arch>
 				</resources>
 				<plugins>
@@ -30,14 +30,14 @@
 					<dma qty="20" units="Mbps"/>
 					<arch name="P2012">
 						<mem qty="32" units="Kb"/>
-						<clusters>
+						<tile id="0">
 							<mem qty="16" units="Kb"/>
 							<cluster id="0">
 								<pe qty="2"/>
 								<mem qty="4" units="Kb"/>
 								<dma qty="30" units="Mbps"/>
 							</cluster>
-						</clusters>
+						</tile>
 					</arch>
 				</resources>
 			</awm>
@@ -46,22 +46,22 @@
 					<mem qty="256" units="Kb"/>
 					<arch name="P2012">
 						<mem qty="16" units="Kb"/>
-						<clusters>
+						<tile id="0">
 							<mem qty="8" units="Kb"/>
 							<cluster id="0">
 								<pe qty="2"/>
 								<mem qty="2" units="Kb"/>
 							</cluster>
-						</clusters>
+						</tile>
 					</arch>
 				</resources>
 			</awm>
 		</awms>
 		<constraints>
 			<constraint resource="dma" type="L" bound="10"/>
-			<constraint resource="arch.clusters.cluster.pe" type="L" bound="1"/>
+			<constraint resource="arch.tile.cluster.pe" type="L" bound="1"/>
 			<constraint resource="arch.mem" type="L" bound="32"/>
-			<constraint resource="arch.clusters.mem" type="U" bound="64"/>
+			<constraint resource="arch.tile.mem" type="U" bound="64"/>
 		</constraints>
 		<plugins>
 			<plugin name="YaMCa" type="optimizer" required="y">

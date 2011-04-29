@@ -50,38 +50,38 @@ std::vector<std::string> res_names = {
 	"dma0",
 	// Platform resources
 	"arch.mem0",
-	"arch.clusters.mem0",
+	"arch.tile0.mem0",
 	// Cluster level memories
-	"arch.clusters.cluster0.mem0",
-	"arch.clusters.cluster1.mem0",
-	"arch.clusters.cluster2.mem0",
-	"arch.clusters.cluster3.mem0",
+	"arch.tile0.cluster0.mem0",
+	"arch.tile0.cluster1.mem0",
+	"arch.tile0.cluster2.mem0",
+	"arch.tile0.cluster3.mem0",
 	// Cluster level DMAs
-	"arch.clusters.cluster0.dma0",
-	"arch.clusters.cluster1.dma0",
-	"arch.clusters.cluster2.dma0",
-	"arch.clusters.cluster3.dma0",
+	"arch.tile0.cluster0.dma0",
+	"arch.tile0.cluster1.dma0",
+	"arch.tile0.cluster2.dma0",
+	"arch.tile0.cluster3.dma0",
 	// Processing elements
-	"arch.clusters.cluster0.pe0",
-	"arch.clusters.cluster0.pe1",
-	"arch.clusters.cluster0.pe2",
-	"arch.clusters.cluster0.pe3",
-	"arch.clusters.cluster1.pe0",
-	"arch.clusters.cluster1.pe1",
-	"arch.clusters.cluster1.pe2",
-	"arch.clusters.cluster1.pe3",
-	"arch.clusters.cluster2.pe0",
-	"arch.clusters.cluster2.pe1",
-	"arch.clusters.cluster2.pe2",
-	"arch.clusters.cluster2.pe3",
-	"arch.clusters.cluster3.pe0",
-	"arch.clusters.cluster3.pe1",
-	"arch.clusters.cluster3.pe2",
-	"arch.clusters.cluster3.pe3",
-/*	"arch.clusters.cluster2.pe0.mem0",
-	"arch.clusters.cluster0.pe1.mem1",
-	"arch.clusters.cluster0.pe1.mem0",
-	"arch.clusters.cluster1.pe2.mem0"
+	"arch.tile0.cluster0.pe0",
+	"arch.tile0.cluster0.pe1",
+	"arch.tile0.cluster0.pe2",
+	"arch.tile0.cluster0.pe3",
+	"arch.tile0.cluster1.pe0",
+	"arch.tile0.cluster1.pe1",
+	"arch.tile0.cluster1.pe2",
+	"arch.tile0.cluster1.pe3",
+	"arch.tile0.cluster2.pe0",
+	"arch.tile0.cluster2.pe1",
+	"arch.tile0.cluster2.pe2",
+	"arch.tile0.cluster2.pe3",
+	"arch.tile0.cluster3.pe0",
+	"arch.tile0.cluster3.pe1",
+	"arch.tile0.cluster3.pe2",
+	"arch.tile0.cluster3.pe3",
+/*	"arch.tile0.cluster2.pe0.mem0",
+	"arch.tile0.cluster0.pe1.mem1",
+	"arch.tile0.cluster0.pe1.mem0",
+	"arch.tile0.cluster1.pe2.mem0"
  */
 };
 
@@ -383,26 +383,26 @@ void SearchResources(SystemView * sv) {
 	std::cout << ".........: Test resource template search :......\n"
 		<< std::endl;
 
-	std::cout << "arch.clusters.mem : ";
-	if (sv->ExistResource("arch.clusters.mem"))
+	std::cout << "arch.tile0.mem : ";
+	if (sv->ExistResource("arch.tile0.mem"))
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
 
-	std::cout << "arch.clusters.cluster : ";
-	if (sv->ExistResource("arch.clusters.cluster"))
+	std::cout << "arch.tile0.cluster : ";
+	if (sv->ExistResource("arch.tile0.cluster"))
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
 
-	std::cout << "arch.clusters.cluster.pe : ";
-	if (sv->ExistResource("arch.clusters.cluster.pe"))
+	std::cout << "arch.tile0.cluster.pe : ";
+	if (sv->ExistResource("arch.tile0.cluster.pe"))
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
 
-	std::cout << "arch.clusters.pe : ";
-	if (sv->ExistResource("arch.clusters.pe"))
+	std::cout << "arch.tile0.pe : ";
+	if (sv->ExistResource("arch.tile0.pe"))
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;
@@ -436,14 +436,14 @@ void GetClusteredInfo(SystemView * sv) {
 
 	std::cout << "dma  c.f. = "
 		<< sv->ResourceClusterFactor("dma") << std::endl;
-	std::cout << "arch.clusters.mem0 	c.f. = "
-		<< sv->ResourceClusterFactor("arch.clusters.mem0") << std::endl;
-	std::cout << "arch.clusters.cluster1 c.f. = "
-		<< sv->ResourceClusterFactor("arch.clusters.cluster1") << std::endl;
+	std::cout << "arch.tile0.mem0 	c.f. = "
+		<< sv->ResourceClusterFactor("arch.tile0.mem0") << std::endl;
+	std::cout << "arch.tile0.cluster1 c.f. = "
+		<< sv->ResourceClusterFactor("arch.tile0.cluster1") << std::endl;
 	std::cout << "arch.mem0 c.f. = "
 		<< sv->ResourceClusterFactor("arch.mem0") << std::endl;
-	std::cout << "arch.clusters.cluster0.pe0  c.f. = "
-		<< sv->ResourceClusterFactor("arch.clusters.cluster0.pe0") << std::endl;
+	std::cout << "arch.tile0.cluster0.pe0  c.f. = "
+		<< sv->ResourceClusterFactor("arch.tile0.cluster0.pe0") << std::endl;
 	std::cout << "arch.spi  c.f. = "
 		<< sv->ResourceClusterFactor("arch.spi") << std::endl;
 	std::cout << std::endl;
@@ -460,8 +460,8 @@ void SearchResourceGroups(SystemView * sv) {
 	std::list<br::ResourcePtr_t> res_match;
 
 	// Search... cluster
-	res_match = sv->GetResources("arch.clusters.cluster");
-	std::cout << "[arch.clusters.cluster] matchings : "
+	res_match = sv->GetResources("arch.tile0.cluster");
+	std::cout << "[arch.tile0.cluster] matchings : "
 		<< res_match.size() << std::endl;
 
 	br::ResourcePtrList_t::iterator it = res_match.begin();
@@ -469,7 +469,7 @@ void SearchResourceGroups(SystemView * sv) {
 	for(; it != end; ++it)
 		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 
-	std::string base_clust = "arch.clusters.cluster";
+	std::string base_clust = "arch.tile0.cluster";
 	std::string curr_clust;
 	for(int i = 0; i < 4; ++i) {
 		// Build the "hybrid" resource path
@@ -497,8 +497,8 @@ void SearchResourceGroups(SystemView * sv) {
 	}
 
 	// Search... cluster.pe
-	res_match = sv->GetResources("arch.clusters.cluster.pe");
-	std::cout << "[arch.clusters.cluster.pe] matchings : "
+	res_match = sv->GetResources("arch.tile0.cluster.pe");
+	std::cout << "[arch.tile0.cluster.pe] matchings : "
 		<< res_match.size() << std::endl;
 
 	it = res_match.begin();
@@ -506,11 +506,11 @@ void SearchResourceGroups(SystemView * sv) {
 	for(; it != end; ++it)
 		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 	std::cout << "\tavailability = "
-		<< sv->ResourceAvailability("arch.clusters.cluster.pe") << std::endl;
+		<< sv->ResourceAvailability("arch.tile0.cluster.pe") << std::endl;
 	std::cout << "\tused = "
-		<< sv->ResourceUsed("arch.clusters.cluster.pe") << std::endl;
+		<< sv->ResourceUsed("arch.tile0.cluster.pe") << std::endl;
 	std::cout << "\ttotal = "
-		<< sv->ResourceTotal("arch.clusters.cluster.pe") << std::endl;
+		<< sv->ResourceTotal("arch.tile0.cluster.pe") << std::endl;
 
 	// Search... spi
 	res_match = sv->GetResources("arch.spi");
@@ -532,8 +532,8 @@ void SearchResourceGroups(SystemView * sv) {
 		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 
 	// ...cluster.pe3
-	res_match = sv->GetResources("arch.clusters.cluster.pe3");
-	std::cout << "[arch.clusters.cluster.pe3] matchings : "
+	res_match = sv->GetResources("arch.tile0.cluster.pe3");
+	std::cout << "[arch.tile0.cluster.pe3] matchings : "
 		<< res_match.size() << std::endl;
 
 	it = res_match.begin();
