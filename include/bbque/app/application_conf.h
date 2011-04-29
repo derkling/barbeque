@@ -54,11 +54,11 @@ public:
 	 * Let the Optimizer (or other components) to set both next
 	 * schedule state and the new working mode of the application.
 	 *
-	 * @param awm Next working mode (name) scheduled for the application
+	 * @param awm Next working mode scheduled for the application
 	 * @param state The new scheduled state
 	 */
-	virtual ExitCode_t SetNextSchedule(std::string const & awm,
-			ScheduleFlag_t state) = 0;
+	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t state)
+		= 0;
 
 };
 

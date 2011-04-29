@@ -90,7 +90,7 @@ class ResourceState {
 public:
 
 	/**
-	 * @brief Construct
+	 * @brief Constructor
 	 */
 	ResourceState(uint64_t tot_amount):
 		used(0),
@@ -100,7 +100,9 @@ public:
 	/**
 	 * @brief Amount of resource used
 	 */
-	inline uint64_t Used() { return used; }
+	inline uint64_t Used() {
+		return used;
+	}
 
 	/**
 	 * @brief Set the amount of resource used. The value must be lesser than
@@ -120,19 +122,25 @@ public:
 	 * @brief The total amount of resource
 	 * @return The total amount
 	 */
-	inline uint64_t Total() { return total; }
+	inline uint64_t Total() {
+		return total;
+	}
 
 	/**
 	 * @brief Set the total amount of resource
 	 * @param tot The amount to set
 	 */
-	inline void SetTotal(uint64_t tot) { total = tot; }
+	inline void SetTotal(uint64_t tot) {
+		total = tot;
+	}
 
 	/**
 	 * @brief How much resource is still available.
 	 * @return The available amount
 	 */
-	inline uint64_t Availability() { return (total - used); }
+	inline uint64_t Availability() {
+		return (total - used);
+	}
 
 protected:
 
@@ -186,21 +194,25 @@ public:
 	 * @brief Resource name
 	 * @return The resource name string
 	 */
-	inline std::string const & Name() { return name; }
+	inline std::string const & Name() {
+		return name;
+	}
 
 	/**
 	 * @brief Acquire a given amount of resource
 	 * @param amount How much resource is required
 	 * @param app_ptr The application requiring the resource
-	 * @return An exit code (@see ExitCode_t)
+	 * @return The amount of resource acquired if success, 0 otherwise.
 	 */
-	inline ExitCode_t Acquire(uint64_t amount, ba::Application const * app_ptr) {
+	inline uint64_t Acquire(uint64_t amount, ba::Application const * app_ptr) {
 		// Set the new "used" value
 		ExitCode_t ret = SetUsed(used + amount);
+		// Request failed ?
+		if (ret != RSRC_SUCCESS)
+			return 0;
 		// Keep track of the amount of resource used by this application
-		if (ret == RSRC_SUCCESS)
-			apps[app_ptr->Pid()] = amount;
-		return ret;
+		apps[app_ptr->Pid()] = amount;
+		return amount;
 	}
 
 	/**
@@ -209,13 +221,16 @@ public:
 	 * Release the specific amount of resource used by an application
 	 *
 	 * @param app_ptr The application releasing the resource
+	 * @return The amount of resource released
 	 */
-	inline void Release(ba::Application const * app_ptr) {
+	inline uint64_t Release(ba::Application const * app_ptr) {
 		// Lookup the application amount
 		AppUseMap_t::iterator lkp = apps.find(app_ptr->Pid());
 		// Subtract the amount used
 		if (lkp != apps.end())
 			used -= lkp->second;
+		// Return the amount of resource freed
+		return lkp->second;
 	}
 
 private:
@@ -245,6 +260,13 @@ private:
  *
  * We expect that such list is filled by a method of ResourceAccounter, after
  * that the Scheduler/Optimizer has solved the resource binding.
+ *
+ * In other words, if a working mode specifies a request as
+ * "arch.clusters.cluster2.pe = 4 ", the scheduler/optimizer must define a
+ * bind between that "cluster2" and the "real" cluster where to allocate the
+ * request of 4 processing elements.
+ * The list "binds", after such binding, will contain the descriptors of the
+ * resources "pe" in the cluster assigned by the scheduler/optimizer module.
  */
 struct ResourceUsage {
 

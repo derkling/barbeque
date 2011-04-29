@@ -367,7 +367,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 		return;
 
 	// Let's set next schedule for the application above
-	test_app->SetNextSchedule(d_wm->Name(),	ba::Application::RUNNING);
+	test_app->SetNextSchedule(d_wm,	ba::Application::RUNNING);
 	PrintScheduleInfo(test_app);
 
 	// Now switch!

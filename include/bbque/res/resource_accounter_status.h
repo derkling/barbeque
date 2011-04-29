@@ -58,14 +58,14 @@ public:
 	/**
 	 * @brief Total amount of resource given an identifying resource path
 	 * @param path Resource path
-	 * @return The total amount of resource available
+	 * @return The total amount of resource
 	 */
 	virtual uint64_t Total(std::string const & path) const = 0;
 
 	/**
 	 * @brief Amount of resource used given an identifying resource path
 	 * @param path Resource path
-	 * @return The used amount of resource available
+	 * @return The used amount of resource
 	 */
 	virtual uint64_t Used(std::string const & path) const = 0;
 
@@ -74,7 +74,7 @@ public:
 	 * @param path Resource path
 	 * @return A shared pointer to the resource descriptor
 	 */
-	virtual ResourcePtr_t GetResource(std::string const & path) = 0;
+	virtual ResourcePtr_t GetResource(std::string const & path) const = 0;
 
 	/**
 	 * @brief Get a list of resource descriptors
@@ -87,14 +87,15 @@ public:
 	 * @param temp_path Template path to match
 	 * @return The list of resource descriptors matching the template path
 	 */
-	virtual ResourcePtrList_t GetResources(std::string const & temp_path) = 0;
+	virtual ResourcePtrList_t GetResources(std::string const & temp_path)
+		const = 0;
 
 	/**
 	 * @brief Check the existence of a resource
 	 * @param path Resource path
 	 * @return True if the resource exists, false otherwise.
 	 */
-	virtual bool ExistResource(std::string const & path) = 0;
+	virtual bool ExistResource(std::string const & path) const = 0;
 
 	/**
 	 * @brief Clustering factor

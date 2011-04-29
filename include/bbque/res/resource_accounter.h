@@ -70,34 +70,37 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Available(std::string const & path) const {
-		return queryState(path, RA_AVAILAB);
+		ResourcePtrList_t matches = GetResources(path);
+		return queryStatus(matches, RA_AVAIL);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Total(std::string const & path) const {
-		return queryState(path, RA_TOTAL);
+		ResourcePtrList_t matches = GetResources(path);
+		return queryStatus(matches, RA_TOTAL);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Used(std::string const & path) const {
-		return queryState(path, RA_USED);
+		ResourcePtrList_t matches = GetResources(path);
+		return queryStatus(matches, RA_USED);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline ResourcePtr_t GetResource(std::string const & path) {
+	inline ResourcePtr_t GetResource(std::string const & path) const {
 		return resources.find(path);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline ResourcePtrList_t GetResources(std::string const & path) {
+	inline ResourcePtrList_t GetResources(std::string const & path) const {
 		// Check if the path is template or ID-based (specific resource)
 		if (IsPathTemplate(path))
 			// Find all the resources related to the path template
@@ -110,7 +113,7 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline bool ExistResource(std::string const & path) {
+	inline bool ExistResource(std::string const & path) const {
 		std::string _temp_path = PathTemplate(path);
 		return resources.existPath(_temp_path);
 	}
@@ -129,7 +132,7 @@ public:
 		// Check if the clustering factor has been computed yet
 		if (clustering_factor == 0) {
 			// Compute the factor
-			clustering_factor = queryState(CLUSTERS_PATH, RA_TOTAL);
+			clustering_factor = Total(CLUSTERS_PATH);
 			// If the query returns 0 the plaform is not cluster-based.
 			// Thus we must set clustering factor to 1.
 			if (clustering_factor == 0)
@@ -141,21 +144,17 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	inline void SwitchUsage(Application const * app) {
-		changeUsages(app, RA_SWITCH);
-	}
+	ResourceAccounter::ExitCode_t AcquireUsageSet(ba::Application const * app);
 
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	inline void Release(Application const * app) {
-		changeUsages(app, RA_RELEASE);
-	}
+	void ReleaseUsageSet(ba::Application const * app);
 
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	RegExitCode_t RegisterResource(std::string const & path,
+	ResourceAccounter::ExitCode_t RegisterResource(std::string const & path,
 			std::string const & units, uint64_t amount);
 
 	/**
@@ -171,26 +170,13 @@ private:
 	 * @enum This is used for selecting the state attribute to return from
 	 * <tt>queryState()</tt>
 	 */
-	enum AttributeSelector_t {
+	enum QueryOption_t {
 		/** Amount of resource available */
-		RA_AVAILAB = 0,
+		RA_AVAIL = 0,
 		/** Amount of resource used */
 		RA_USED,
 		/** Total amount of resource */
 		RA_TOTAL
-	};
-
-	/**
-	 * @enum This is used for action selection in <tt>_ChangeUsages()</tt>
-	 */
-	enum UsageAction_t {
-		/**
-		 * Switch resource usages of the application to the one of the next
-		 * working mode
-		 */
-		RA_SWITCH,
-		/** Release all the resource used by the application */
-		RA_RELEASE
 	};
 
 	/**
@@ -201,24 +187,38 @@ private:
 	/**
 	 * @brief Return a state parameter (availability, resources used, total
 	 * amount) for the resource.
-	 * @param path Resource path
-	 * @param sel Resource attribute request (@see AttributeSelector_t)
+	 *
+	 * @param rsrc_set A list of resource descriptors
+	 * @param q_opt Resource state attribute requested (@see QueryOption_t)
 	 * @return The value of the attribute request
 	 */
-	uint64_t queryState(std::string const & path, AttributeSelector_t sel)
-		const;
+	uint64_t queryStatus(ResourcePtrList_t const & rsrc_set,
+				QueryOption_t q_opt) const;
 
 	/**
-	 *  @brief Change the set of resources usages of the given application.
+	 * @brief Increment the resource usages counts
 	 *
-	 *  This occours whenever an application has switched schedule status
-	 *  and/or working mode.
+	 * Each time an application acquires a set of resources (specified in the
+	 * working mode scheduled), the counts of resources used must be increased
 	 *
-	 *  @param app The descriptor pointer to the application changing the
-	 *  resource usages
-	 *  @param action What kind of change? (@see UsageAction_t)
+	 * @param app_usages Map of next resource usages
+	 * @param app The application acquiring the resources
+	 * @return An exit code (@see ExitCode_t)
 	 */
-	void changeUsages(Application const * app, UsageAction_t action);
+	ResourceAccounter::ExitCode_t incUsageCounts(UsagesMap_t const * app_usages,
+			ba::Application const * app);
+
+	/**
+	 * @brief Decrement the resource usages counts
+	 *
+	 * Each time an application releases a set of resources the counts of
+	 * resources used must be decreased.
+	 *
+	 * @param app_usages Map of current resource usages
+	 * @param app The application releasing the resources
+	 */
+	void decUsageCounts(UsagesMap_t const * app_usages,
+			ba::Application const * app);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;
@@ -228,7 +228,7 @@ private:
 	 * application. The key is the application name through which lookup the
 	 * list of current usages (relative to the current working mode)
 	 */
-	std::map<std::string, UsagesMap_t const *> usages;
+	std::map<uint32_t, UsagesMap_t const *> usages;
 
 	/**
 	 * Clustering factor.

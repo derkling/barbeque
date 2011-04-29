@@ -90,7 +90,7 @@ void Application::StopExecution() {
 				"(Error: ResourceAccounter unavailable)");
 		return;
 	}
-	ra->Release(this);
+	ra->ReleaseUsageSet(this);
 
 	// Release the recipe used
 	recipe.reset();
@@ -141,25 +141,50 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 
 
 Application::ExitCode_t Application::SetNextSchedule(
-		std::string const & _awm_name, ScheduleFlag_t _state) {
+		AwmPtr_t & awm, ScheduleFlag_t _state) {
 
 	// Get the working mode pointer
-	AwmPtr_t awm = recipe->WorkingMode(_awm_name);
-
-	if (awm.get() == NULL) {
+	if (!awm) {
 		// AWM name mismatch
 		logger->Error("Trying to switch to an unknown working mode");
 		return APP_WM_NOT_FOUND;
 	}
-	// Set next schedule info
+
+	// Set next working mode
 	next_sched.awm = awm;
+
+	// Update resource usages
+	br::ResourceAccounter *res_acc =
+			br::ResourceAccounter::GetInstance();
+
+	switch (next_sched.state) {
+	case RUNNING:
+		// Set new resource usages
+		if (res_acc->AcquireUsageSet(this) !=
+				br::ResourceAccounter::RA_SUCCESS) {
+			// Set next awm null
+			next_sched.awm = curr_sched.awm;
+			return APP_WM_REJECTED;
+		}
+		logger->Info("Set working mode [%s]", awm->Name().c_str());
+		break;
+
+	case KILLED:
+	case FINISHED:
+		// Release resources
+		res_acc->ReleaseUsageSet(this);
+		logger->Info("Resources released");
+	default:
+		break;
+	}
+
 	next_sched.state = _state;
 	switch_mark = true;
 	return APP_SUCCESS;
 }
 
 
-void Application::SwitchToNextScheduled(double _time) {
+void Application::UpdateScheduledStatus(double _time) {
 
 	// Check next working mode != current one
 	if (curr_sched.awm != next_sched.awm) {
@@ -172,26 +197,8 @@ void Application::SwitchToNextScheduled(double _time) {
 		}
 		// Switch to next working mode in scheduling info
 		curr_sched.awm = next_sched.awm;
-
-		// Update the current set of usages
-		br::ResourceAccounter *res_acc =
-			br::ResourceAccounter::GetInstance();
-
-		switch (next_sched.state) {
-		case RUNNING:
-			// Set new resource usages
-			res_acc->SwitchUsage(this);
-			break;
-
-		case KILLED:
-		case FINISHED:
-			// Release resources
-			res_acc->Release(this);
-		default:
-			break;
-		}
-		logger->Info("Set working mode [%s]", next_sched.awm->Name().c_str());
 	}
+
 	// Switch scheduled state
 	curr_sched.state = next_sched.state;
 	switch_mark = false;

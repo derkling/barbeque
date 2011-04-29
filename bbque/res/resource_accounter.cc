@@ -73,7 +73,7 @@ ResourceAccounter::~ResourceAccounter() {
 }
 
 
-ResourceAccounter::RegExitCode_t ResourceAccounter::RegisterResource(
+ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 		std::string const & _path, std::string const & _units,
 		uint64_t _amount) {
 
@@ -93,30 +93,19 @@ ResourceAccounter::RegExitCode_t ResourceAccounter::RegisterResource(
 }
 
 
-uint64_t ResourceAccounter::queryState(std::string const & _path,
-		AttributeSelector_t _att) const {
+uint64_t ResourceAccounter::queryStatus(ResourcePtrList_t const & rsrc_set,
+		QueryOption_t _att) const {
 
-	// List of resource descriptors matched
-	ResourcePtrList_t matches;
-
-	if (IsPathTemplate(_path))
-		// Find all the resources related to the path template
-		matches = resources.findAll(_path);
-	else {
-		// Find all the resources matching the ID-based (or hybrid) path
-		matches = resources.findSet(_path);
-	}
-
-	// For all the descriptors matched (and thus stored in the list) add the
-	// amount of resource in the specified state (available, used, total)
-	ResourcePtrList_t::iterator res_it = matches.begin();
-	ResourcePtrList_t::iterator res_end = matches.end();
+	// For all the descriptors the list) add the amount of resource in the
+	// specified state (available, used, total)
+	ResourcePtrList_t::const_iterator res_it = rsrc_set.begin();
+	ResourcePtrList_t::const_iterator res_end = rsrc_set.end();
 	uint64_t val = 0;
 
 	for (; res_it != res_end; ++res_it) {
 		switch(_att) {
 		// Resource availability
-		case RA_AVAILAB:
+		case RA_AVAIL:
 			val += (*res_it)->Availability();
 			break;
 		// Resource used
@@ -133,38 +122,120 @@ uint64_t ResourceAccounter::queryState(std::string const & _path,
 }
 
 
-void ResourceAccounter::changeUsages(ba::Application const * _app,
-		UsageAction_t _sel) {
+ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(
+		ba::Application const * _app) {
 
-	// Map of resource usages of the application
-	UsagesMap_t const * app_usages;
+	// Check to avoid null pointer seg-fault
+	if (!_app)
+		return RA_ERR_MISS_APP;
 
-	switch (_sel) {
-	case RA_SWITCH:
-		// Check the next working mode is set
-		if(_app->NextAWM().get() == NULL)
-			return;
+	// Check that the next working mode has been set
+	if (!_app->NextAWM())
+		return RA_ERR_MISS_USAGES;
+
+	// Does the application hold a resource usages set yet?
+	std::map<uint32_t, UsagesMap_t const *>::iterator usemap_it;
+	usemap_it = usages.find(_app->Pid());
+	// Each application can hold just one resource usages set
+	if (usemap_it != usages.end())
 		// Release current resources
-		changeUsages(_app, RA_RELEASE);
+		ReleaseUsageSet(_app);
 
-		// Set resources usages from the next working mode
-		usages[_app->Name()] = &(_app->NextAWM()->ResourceUsages());
-		app_usages = usages[_app->Name()];
-		break;
+	// Set resource usages from the next working mode
+	usages[_app->Pid()] = &(_app->NextAWM()->ResourceUsages());
 
-	case RA_RELEASE:
-		// Get the map of resource usages of the application
-		std::map<std::string, UsagesMap_t const *>::iterator usemap_it;
-		usemap_it = usages.find(_app->Name());
+	// Increment resources counts
+	ExitCode_t ret = incUsageCounts(usages[_app->Pid()], _app);
 
-		// If there isn't any map return
-		if (usemap_it == usages.end())
-			return;
-		// Retrieve the current application map of usages
-		app_usages = usemap_it->second;
-		if (app_usages->empty())
-			return;
+	// If the resource allocation
+	if (ret != RA_SUCCESS)
+		usages.erase(_app->Pid());
+
+	return ret;
+}
+
+
+void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app) {
+
+	// Check to avoid null pointer seg-fault
+	if (!_app)
+		return;
+
+	// Get the map of resource usages of the application
+	std::map<uint32_t, UsagesMap_t const *>::iterator usemap_it;
+	usemap_it = usages.find(_app->Pid());
+	// If there isn't any map return
+	if (usemap_it == usages.end())
+		return;
+
+	// Decrement resources counts
+	decUsageCounts(usemap_it->second, _app);
+
+	// Remove the application from the map of usages
+	usages.erase(_app->Pid());
+}
+
+
+inline ResourceAccounter::ExitCode_t ResourceAccounter::incUsageCounts(
+		UsagesMap_t const * app_usages, ba::Application const * _app) {
+
+	// ResourceUsages iterators
+	std::map<std::string, UsagePtr_t>::const_iterator usages_it =
+		app_usages->begin();
+	std::map<std::string, UsagePtr_t>::const_iterator usages_end =
+		app_usages->end();
+
+	// Resource usage descriptor
+	UsagePtr_t curr_usage;
+
+	// For each resource in the usages map make a couple of checks
+	for (; usages_it != usages_end; ++usages_it) {
+		// Current resource usage descriptor
+		curr_usage = usages_it->second;
+
+		// Is there a resource binding ?
+		if (curr_usage->binds.empty())
+			return RA_ERR_MISS_BIND;
+
+		// Is the request satisfable ?
+		if (curr_usage->value > queryStatus(curr_usage->binds, RA_AVAIL))
+			return RA_ERR_USAGE_EXC;
 	}
+
+	// Checks passed, go with resources reservation
+	for (usages_it = app_usages->begin(); usages_it != usages_end;
+			++usages_it) {
+		// Current resource usage descriptor
+		curr_usage = usages_it->second;
+
+		// Current resource binds iterators
+		ResourcePtrList_t::iterator it_bind = curr_usage->binds.begin();
+		ResourcePtrList_t::iterator end_it = curr_usage->binds.end();
+
+		// Usage value to be acquired/reserved to the application
+		uint64_t usage_value = curr_usage->value;
+
+		// Allocate the request to the resources binds
+		while ((usage_value > 0) && (it_bind != end_it)) {
+			// Check the availability of the current resource bind
+			if (usage_value < (*it_bind)->Availability())
+				// Allocate the quantity into the current resource bind
+				usage_value -= (*it_bind)->Acquire(usage_value, _app);
+			else
+				// Acquire the whole available quantity of the current
+				// resource bind
+				usage_value -=
+					(*it_bind)->Acquire((*it_bind)->Availability(), _app);
+			// Next bind
+			++it_bind;
+		}
+	}
+	return RA_SUCCESS;
+}
+
+
+inline void ResourceAccounter::decUsageCounts(UsagesMap_t const * app_usages,
+		ba::Application const * _app) {
 
 	// ResourceUsages iterators
 	std::map<std::string, UsagePtr_t>::const_iterator usages_it =
@@ -174,66 +245,25 @@ void ResourceAccounter::changeUsages(ba::Application const * _app,
 
 	// For each resource in the usages map...
 	for (; usages_it != usages_end; ++usages_it) {
+		// Resource usage descriptor
+		UsagePtr_t curr_usage = usages_it->second;
 
-		// Lookup the resource descriptor
-		//ResourcePtrList_t res_binds(GetResources(usages_it->second->bind_path));
-		ResourcePtrList_t & res_binds = usages_it->second->binds;
-		if (res_binds.empty())
-			continue;
+		// Count of the amount of resource freed
+		uint64_t usage_freed = 0;
 
-		ResourcePtrList_t::iterator it_bind = res_binds.begin();
-		ResourcePtrList_t::iterator end_it = res_binds.end();
+		ResourcePtrList_t::iterator it_bind = curr_usage->binds.begin();
+		ResourcePtrList_t::iterator end_it = curr_usage->binds.end();
 
-		uint64_t usage_value = usages_it->second->value;
-/*
-		while (usage_value > 0) {
-
-			for (; it_bind != end_it; ++it_bind) {
-				//
-				switch (_sel) {
-				case RA_SWITCH:
-					if ((*it_bind)->Availability() > usage_value) {
-						// Add the amount of resource used by the application
-						(*it_bind)->AddUsed(usage_value);
-
-						// Append the pointer to the current application
-						// descriptor in the map of the applications using the
-						// resource
-						(*it_bind)->UsedBy(_app);
-
-						//
-
-
-						//
-						usage_value = 0;
-					}
-					else {
-						//
-						(*it_bind)->AddUsed((*it_bind)->Availability());
-						usage_value -= (*it_bind)->Availability();
-					}
-					break;
-
-				case RA_RELEASE:
-					// Subtract the amount of resource once used by the
-					// application
-					(*it_bind)->SubUsed();
-
-					// Remove the pointer to the current application
-					// descriptor in the map of the applications using the
-					// resource
-					(*it_bind)->NoMoreUsedBy(_app);
-					break;
-				}
-			}
+		// Release the resources held
+		while (usage_freed < curr_usage->value) {
+			// Release the quantity allocated in the current resource bind
+			usage_freed += (*it_bind)->Release(_app);
+			// Next bind
+			++it_bind;
 		}
-		*/
 	}
-	// If this is a resource release...
-	if (_sel == RA_RELEASE)
-		// Remove the application from the map of usages
-		usages.erase(_app->Name());
 }
+
 
 }   // namespace res
 

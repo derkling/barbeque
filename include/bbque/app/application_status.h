@@ -63,6 +63,8 @@ public:
 		APP_SUCCESS = 0,
 		/** Application working mode not found */
 		APP_WM_NOT_FOUND,
+		/** The working mode is not schedulable */
+		APP_WM_REJECTED,
 		/** Resource not found */
 		APP_RSRC_NOT_FOUND,
 		/** Constraint not found */

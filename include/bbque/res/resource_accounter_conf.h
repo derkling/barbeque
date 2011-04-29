@@ -36,44 +36,58 @@ namespace bbque { namespace res {
 
 /**
  * @class ResourceAccounterConfIF
- * @brief This interface allow the update of runtime resource information by
- * the Resource Accounter.
+ *
+ * This interface allow the update of runtime resource information into the
+ * Resource Accounter component.
  */
 class ResourceAccounterConfIF: public ResourceAccounterStatusIF {
 
 public:
 
 	/**
-	 * @enum Exit codes for the registration method
+	 * @enum Exit codes
 	 */
-	enum RegExitCode_t {
+	enum ExitCode_t {
 		/** Resource registered successfully */
 		RA_SUCCESS = 0,
 		/** Argument "path" missing */
 		RA_ERR_MISS_PATH,
 		/** Unable to allocate a new resource descriptor */
-		RA_ERR_MEM
+		RA_ERR_MEM,
+		/** Application reference missing */
+		RA_ERR_MISS_APP,
+		/** Resource usages map missing	 */
+		RA_ERR_MISS_USAGES,
+		/** Resource usage required miss the binding */
+		RA_ERR_MISS_BIND,
+		/** Resource usage required exceeds the availabilities */
+		RA_ERR_USAGE_EXC
 	};
+
+	/**
+	 * @brief Acquire the next set of resources
+	 *
+	 * The method first check that the application doesn't hold another
+	 * resource set. If so such resources are released. Then it reserves, for
+	 * each resource in the usages map of the next working mode, the required
+	 * quantity.
+	 *
+	 * @param app The application requiring resource usages
+	 * @return An exit code (@see ExitCode_t)
+	 */
+	virtual ExitCode_t AcquireUsageSet(ba::Application const * app) = 0;
 
 	/**
 	 * @brief Release the resources
 	 *
 	 * The method is typically called when an application stops running
 	 * (exit or is killed) and releases all the resource usages.
+	 * It lookups the current set of resource usages of the application and
+	 * release it all.
 	 *
 	 * @param app The application holding the resources
 	 */
-	virtual void Release(Application const * app) = 0;
-
-	/**
-	 * @brief Release the resources and acquire the new set
-	 *
-	 * This releases the current resources used and get the
-	 * next set (defined in the new working mode scheduled).
-	 *
-	 * @param app The application holding the usage of resources
-	 */
-	virtual void SwitchUsage(Application const * app) = 0;
+	virtual void ReleaseUsageSet(ba::Application const * app) = 0;
 
 	/**
 	 * @brief Register a resource
@@ -95,8 +109,9 @@ public:
 	 * @param path Resource path
 	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)
 	 * @param amount The total amount available
+	 * @return An exit code (@see ExitCode_t)
 	 */
-	virtual RegExitCode_t RegisterResource(std::string const & path,
+	virtual ExitCode_t RegisterResource(std::string const & path,
 			std::string const & units, uint64_t amount) = 0;
 
 };

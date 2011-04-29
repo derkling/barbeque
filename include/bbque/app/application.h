@@ -43,15 +43,11 @@
 
 namespace bbque { namespace app {
 
-// Forward declarations
-class WorkingMode;
+// Forward declaration
 class Application;
 
 /** Shared pointer to Application object */
 typedef std::shared_ptr<Application> AppPtr_t;
-
-/** Shared pointer to WorkingMode object */
-typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 
 /** Shared pointer to Recipe object */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
@@ -210,7 +206,7 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	Application::ExitCode_t SetNextSchedule(std::string const & awm_name,
+	Application::ExitCode_t SetNextSchedule(AwmPtr_t & awm,
 			ScheduleFlag_t state);
 
 	/**
@@ -219,7 +215,7 @@ public:
 	 *
 	 * @param time The time measured/estimated.
 	 */
-	void SwitchToNextScheduled(double time);
+	void UpdateScheduledStatus(double time);
 
 	/**
 	 * @brief Check if the optimizer has set a new scheduling to switch in
