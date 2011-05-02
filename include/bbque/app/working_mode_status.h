@@ -33,25 +33,18 @@ namespace br = bbque::res;
 
 namespace bbque { namespace app {
 
-// Forward declaration
+// Forward declarations
 class Application;
-
+class TransitionOverheads;
 
 /** Shared pointer to Application  */
 typedef std::shared_ptr<Application> AppPtr_t;
-
 /** Shared pointer to ResourceUsage */
 typedef std::shared_ptr<br::ResourceUsage> UsagePtr_t;
-
 /** Map of UsagePtr_t. Key: Resource path */
 typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
-
-// Forward declaration
-class TransitionOverheads;
-
 /**  Shared pointer to TransitionOverheads */
 typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
-
 /** Map of OverheadPtr_t. Key: destination working mode name */
 typedef std::map<std::string, OverheadPtr_t> OverheadsMap_t;
 
@@ -75,9 +68,12 @@ public:
 		WM_NOT_FOUND,
 		/** Resource not found */
 		WM_RSRC_NOT_FOUND,
-		/** Resource usage request exceeds the total availability
-		 * of the resource specified */
-		WM_RSRC_USAGE_EXCEEDS
+		/** Resource usage request exceeds the total availability */
+		WM_RSRC_USAGE_EXCEEDS,
+		/** Resource name error */
+		WM_RSRC_ERR_NAME,
+		/** Missing some resource bindings */
+		WM_RSRC_MISS_BIND
 	};
 
 	/**
@@ -111,7 +107,13 @@ public:
 	virtual UsagesMap_t const & ResourceUsages() const = 0;
 
 	/**
-	 * @brief Retrieve overhead informations about switching to <tt>awm_name</tt>
+	 * @brief How many resources the working mode uses
+	 * @return The number of resource usages
+	 */
+	virtual size_t NumberOfResourceUsages() const = 0;
+
+	/**
+	 * @brief Retrieve overhead information about switching to <tt>awm_name</tt>
 	 * working mode
 	 * @param awm_name The destination working mode
 	 * @return A pointer to the TransitionOverheads object

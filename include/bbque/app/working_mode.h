@@ -114,13 +114,15 @@ public:
 	 * @see WorkingModeStatusIF
 	 */
 	inline UsagesMap_t const & ResourceUsages() const {
-		return resources;
+		return rsrc_usages;
 	}
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	OverheadPtr_t OverheadInfo(std::string const & dest_awm) const;
+	inline size_t NumberOfResourceUsages() const {
+		return rsrc_usages.size();
+	}
 
 	/**
 	 * @see WorkingModeConfIF
@@ -128,14 +130,24 @@ public:
 	ExitCode_t AddOverheadInfo(std::string const & dest_awm, double time);
 
 	/**
-	 * @brief Remove overhead informations about switching to 'dest_wm'
-	 * working mode
+	 * @see WorkingModeStatusIF
+	 */
+	OverheadPtr_t OverheadInfo(std::string const & dest_awm) const;
+
+	/**
+	 * @brief Remove switching overhead information
 	 * @param dest_awm The destination working mode
 	 */
 	inline void RemoveOverheadInfo(std::string const & dest_awm) {
 		overheads.erase(dest_awm);
 	}
 
+	/**
+	 * @see WorkingModeConfIF
+	 */
+	ExitCode_t BindResources(std::string const & rsrc_name,
+			int32_t dst_id, int32_t src_id = -1,
+			const char * rsrc_path_unbound = NULL);
 private:
 
 	/**
@@ -151,7 +163,7 @@ private:
 	uint16_t value;
 
 	/** The set of resources required (usages) */
-	UsagesMap_t resources;
+	UsagesMap_t rsrc_usages;
 
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;

@@ -366,6 +366,10 @@ void CoreInteractionsTest::DoScheduleSwitch(
 	if (d_wm.get() == NULL)
 		return;
 
+	char path_err[30];
+	// Do a binding!
+	d_wm->BindResources("cluster", 1, -1, path_err);
+
 	// Let's set next schedule for the application above
 	test_app->SetNextSchedule(d_wm,	ba::Application::RUNNING);
 	PrintScheduleInfo(test_app);
