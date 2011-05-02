@@ -23,11 +23,11 @@
 #define BBQUE_RESOURCE_MANAGER_H_
 
 #include "bbque/config.h"
+#include "bbque/application_proxy.h"
 #include "bbque/platform_services.h"
 #include "bbque/plugin_manager.h"
 
 #include "bbque/plugins/logger.h"
-#include "bbque/plugins/rpc_channel.h"
 
 namespace bbque {
 
@@ -127,9 +127,9 @@ private:
 	plugins::LoggerIF *logger;
 
 	/**
-	 * @brief The RPC communication channel module
+	 * @brief The Application Proxy
 	 */
-	plugins::RPCChannelIF *rpc;
+	ApplicationProxy & ap;
 
 };
 
