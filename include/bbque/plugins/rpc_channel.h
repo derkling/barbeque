@@ -74,7 +74,7 @@ public:
 	 * opaque to the Barbeque RTRM, but they will be passed to the plugin each
 	 * time a message should be sent.
 	 *
-	 * This method is called only after the reception of a RPC_EXC_PAIR
+	 * This method is called only after the reception of a RPC_APP_PAIR
 	 * message, which is passed to the communication channel module as a
 	 * reference to map the new communication channel. A communication channel
 	 * module could use these information (or its own specific information
@@ -107,7 +107,7 @@ public:
 	 * This method blocks the caller until the specified message buffer could
 	 * be accepted for delivery to the specified application.
 	 */
-	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t & msg,
+	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 								size_t count) = 0;
 
 	/**

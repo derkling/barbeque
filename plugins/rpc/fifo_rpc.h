@@ -22,6 +22,8 @@
 #ifndef BBQUE_PLUGINS_FIFO_RPC_H_
 #define BBQUE_PLUGINS_FIFO_RPC_H_
 
+#include "bbque/rtlib/rpc_fifo_server.h"
+
 #include "bbque/plugins/rpc_channel.h"
 #include "bbque/plugins/plugin.h"
 #include "bbque/plugins/logger.h"
@@ -49,6 +51,8 @@ class FifoRPC : public RPCChannelIF {
 typedef struct fifo_data {
 	/** The handler to the application FIFO */
 	int app_fifo_fd;
+	/** The application FIFO filename */
+	char app_fifo_filename[BBQUE_FIFO_NAME_LENGTH];
 } fifo_data_t;
 
 
@@ -74,13 +78,14 @@ public:
 
 //----- RPCChannelIF module interface
 
+
 	virtual size_t RecvMessage(rpc_msg_ptr_t & msg);
 
 	virtual plugin_data_t GetPluginData(rpc_msg_ptr_t & msg);
 
 	virtual void ReleasePluginData(plugin_data_t & pd);
 
-	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t & msg,
+	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 								size_t count);
 
 	virtual void FreeMessage(rpc_msg_ptr_t & msg);
@@ -110,11 +115,6 @@ private:
 	int rpc_fifo_fd;
 
 	/**
-	 * @brief The RPC server (write) FIFO descriptor
-	 */
-	int rpc_wfifo_fd;
-
-	/**
 	 * @brief   The plugins constructor
 	 * Plugins objects could be build only by using the "create" method.
 	 * Usually the PluginManager acts as object
@@ -124,6 +124,7 @@ private:
 	FifoRPC(std::string const & fifo_dir);
 
 	int Init();
+
 };
 
 } // namespace plugins

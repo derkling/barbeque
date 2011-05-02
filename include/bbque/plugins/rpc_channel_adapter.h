@@ -57,7 +57,7 @@ public:
 		rc->ReleasePluginData(pd.get());
 	}
 
-	size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t & msg,
+	size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 			size_t count) {
 		return rc->SendMessage(pd.get(), msg, count);
 	}

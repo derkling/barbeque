@@ -80,7 +80,7 @@ public:
 	 * opaque to the Barbeque RTRM, but they will be passed to the plugin each
 	 * time a message should be sent.
 	 *
-	 * This method is called only after the reception of a RPC_EXC_PAIR
+	 * This method is called only after the reception of a RPC_APP_PAIR
 	 * message, which is passed to the communication channel module as a
 	 * reference to map the new communication channel. A communication channel
 	 * module could use these information (or its own specific information
@@ -119,7 +119,7 @@ public:
 	 *
 	 * @note this call is forwarded directly to the low-level channel module.
 	 */
-	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t & msg,
+	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 								size_t count);
 
 	/**
@@ -144,7 +144,7 @@ private:
 	/**
 	 * 
 	 */
-	typedef std::pair<rpc_msg_ptr_t,size_t> channel_msg_t;
+	typedef std::pair<rpc_msg_ptr_t, size_t> channel_msg_t;
 
 	/**
 	 * 
@@ -154,6 +154,22 @@ private:
 		bool operator() (const channel_msg_t & lhs,
 				const channel_msg_t & rhs) const;
 	};
+
+	/**
+	 * 
+	 */
+	pid_t emTrdPid;
+
+	/**
+	 * 
+	 */
+	std::mutex trdStatus_mtx;
+
+	/**
+	 * 
+	 */
+	std::condition_variable trdStarted_cv;
+
 
 	/**
 	 * 

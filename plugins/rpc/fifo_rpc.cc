@@ -22,7 +22,6 @@
 #include "fifo_rpc.h"
 
 #include "bbque/modules_factory.h"
-#include "bbque/rtlib/rpc_fifo_server.h"
 
 #include "bbque/config.h"
 #include <boost/filesystem.hpp>
@@ -39,7 +38,8 @@ namespace bbque { namespace plugins {
 
 FifoRPC::FifoRPC(std::string const & fifo_dir) :
 	initialized(false),
-	conf_fifo_dir(fifo_dir) {
+	conf_fifo_dir(fifo_dir),
+	rpc_fifo_fd(0) {
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
@@ -93,16 +93,19 @@ int FifoRPC::Init() {
 	}
 
 	// Opening the server side pipe (R/W to keep it opened)
-	logger->Debug("FIFO RPC: opening (for read)...");
+	logger->Debug("FIFO RPC: opening R/W...");
 	rpc_fifo_fd = ::open(fifo_path.string().c_str(),
 			O_RDWR);
-			//O_RDONLY);
 	if (rpc_fifo_fd < 0) {
 		logger->Error("FAILED opening RPC FIFO [%s]",
 					fifo_path.string().c_str());
+		rpc_fifo_fd = 0;
 		::unlink(fifo_path.string().c_str());
 		return -3;
 	}
+
+	// Marking channel al already initialized
+	initialized = true;
 
 	logger->Info("FIFO RPC: channel initialization DONE\n");
 	return 0;
@@ -117,14 +120,17 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 
 	// Wait for the next message being available
 	// ... which always starts with the FIFO header
-	bytes = ::read(rpc_fifo_fd, (void*)&hdr, sizeof(br::rpc_fifo_header_t));
+	bytes = ::read(rpc_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
 	if (bytes<=0) {
-		logger->Error("FIFO RPC: fifo read error");
+		if (bytes==EINTR)
+			logger->Debug("FIFO RPC: exiting FIFO read...");
+		else
+			logger->Error("FIFO RPC: fifo read error");
 		return bytes;
 	}
 
-	logger->Debug("FIFO RPC: RX[typ: %hhd, size: %hd, off: %hhd]",
-			hdr.rpc_msg_type, hdr.fifo_msg_size, hdr.rpc_msg_offset);
+	logger->Debug("FIFO RPC: RX HDR [sze: %hd, off: %hhd, typ: %hhd]",
+			hdr.fifo_msg_size, hdr.rpc_msg_offset, hdr.rpc_msg_type);
 
 	// Allocate a new message buffer
 	fifo_buff_ptr = (int8_t*)::malloc(hdr.fifo_msg_size);
@@ -139,12 +145,12 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	}
 
 	// Save header into new buffer
-	memcpy((void*)fifo_buff_ptr, &hdr, sizeof(br::rpc_fifo_header_t));
+	::memcpy((void*)fifo_buff_ptr, &hdr, FIFO_PKT_SIZE(header));
 
 	// Copy the remaining RPC message on the FIFO message buffer
 	::read(rpc_fifo_fd,
-			((fifo_buff_ptr)+sizeof(br::rpc_fifo_header_t)),
-			hdr.fifo_msg_size-sizeof(br::rpc_fifo_header_t));
+			((fifo_buff_ptr)+FIFO_PKT_SIZE(header)),
+			hdr.fifo_msg_size-FIFO_PKT_SIZE(header));
 
 	// Return a pointer to the new message
 	msg = (rpc_msg_ptr_t)(fifo_buff_ptr+hdr.rpc_msg_offset);
@@ -156,32 +162,135 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 
 RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 		rpc_msg_ptr_t & msg) {
-	(void)msg;
-	return std::shared_ptr<void>();
+	fifo_data_t * pd;
+	fs::path fifo_path(conf_fifo_dir);
+	boost::system::error_code ec;
+	br::rpc_fifo_app_pair_t * hdr;
+
+
+	// We should have the FIFO dir already on place
+	assert(initialized);
+	// We should also have a valid RPC message
+	assert(msg->typ==br::RPC_APP_PAIR);
+	hdr = (br::rpc_fifo_app_pair_t*)((int8_t*)msg-FIFO_PKT_SIZE(app_pair));
+
+	logger->Debug("FIFO RPC: plugin data initialization...");
+
+	// Build a new set of plugins data
+	pd = (fifo_data_t*)::malloc(sizeof(fifo_data_t));
+	if (!pd) {
+		logger->Error("FIFO RPC: get plugin data (malloc) FAILED");
+		goto err_malloc;
+	}
+
+	// Build fifo path
+	fifo_path /= "/";
+	fifo_path /= hdr->rpc_fifo;
+
+	// The application should build the channel, this could be used as
+	// an additional handshaking protocol and API versioning verification
+	logger->Debug("FIFO RPC: checking for application FIFO [%s]...",
+			fifo_path.string().c_str());
+	if (!fs::exists(fifo_path, ec)) {
+		logger->Error("FIFO RPC: apps FIFO NOT FOUND [%s]...",
+				fifo_path.string().c_str());
+		goto err_use;
+	}
+
+	// Ensuring we have a pipe
+	if (fs::status(fifo_path, ec).type() != fs::fifo_file) {
+		logger->Error("FIFO RPC: apps FIFO not valid [%s]",
+				fifo_path.string().c_str());
+		goto err_use;
+	}
+
+	// Opening the application side pipe WRITE only
+	logger->Debug("FIFO RPC: opening (WR only)...");
+	pd->app_fifo_fd = ::open(fifo_path.string().c_str(), O_WRONLY);
+	if (pd->app_fifo_fd < 0) {
+		logger->Error("FAILED opening application RPC FIFO [%s]",
+					fifo_path.string().c_str());
+		pd->app_fifo_fd = 0;
+		goto err_use;
+	}
+	::memcpy(pd->app_fifo_filename, hdr->rpc_fifo, BBQUE_FIFO_NAME_LENGTH);
+
+	// Setting the application as initialized
+	logger->Info("FIFO RPC: app channel [%d:%s] initialization DONE",
+			pd->app_fifo_fd, hdr->rpc_fifo);
+
+	return plugin_data_t(pd);
+
+err_use:
+	::free(pd);
+err_malloc:
+	return plugin_data_t();
+
 }
 
 void FifoRPC::ReleasePluginData(plugin_data_t & pd) {
-	(void)pd;
+	fifo_data_t * ppd = (fifo_data_t*)pd.get();
+
+	assert(initialized==true);
+	assert(ppd && ppd->app_fifo_fd);
+
+	logger->Info("FIFO RPC: releasing app channel [%d:%s]",
+			ppd->app_fifo_fd, ppd->app_fifo_filename);
+
+	// Close the FIFO and cleanup plugin data
+	::close(ppd->app_fifo_fd);
+
 }
 
-size_t FifoRPC::SendMessage(plugin_data_t & pd, rpc_msg_ptr_t & msg,
+size_t FifoRPC::SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 		size_t count) {
-	(void)pd;
-	(void)msg;
-	(void)count;
-	return 0;
+	fifo_data_t * ppd = (fifo_data_t*)pd.get();
+	br::rpc_fifo_header_t hdr;
+	ssize_t error;
+
+	assert(rpc_fifo_fd);
+	assert(ppd && ppd->app_fifo_fd);
+
+	logger->Debug("FIFO RPC: message send [typ: %d, sze: %d] "
+			"using app channel [%d:%s]...",
+			msg->typ, count,
+			ppd->app_fifo_fd,
+			ppd->app_fifo_filename);
+
+	// Send the RPC FIFO header
+	hdr.fifo_msg_size = count + FIFO_PKT_SIZE(header);
+	hdr.rpc_msg_offset = count;
+	hdr.rpc_msg_type = msg->typ;
+	error = ::write(ppd->app_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
+	if (error==-1) {
+		logger->Error("FIFO RPC: send massage (header) FAILED (Error %d: %s)",
+				errno, strerror(errno));
+		return -1;
+	}
+
+	// FIXME rollback or handle partially send (only header) messages
+
+	// Send the RPC FIFO message payload
+	error = ::write(ppd->app_fifo_fd, (void*)msg, count);
+	if (error==-1) {
+		logger->Error("FIFO RPC: send massage (payload) FAILED (Error %d: %s)",
+				errno, strerror(errno));
+		return -2;
+	}
+
+	return hdr.fifo_msg_size;
 }
 
 void FifoRPC::FreeMessage(rpc_msg_ptr_t & msg) {
 	size_t hdr_size;
 
 	// Recover the beginning of the FIFO message
-	switch (msg->msg_typ) {
-	case br::RPC_EXC_PAIR:
-		hdr_size = sizeof(br::rpc_fifo_exc_pair_t)-1;
+	switch (msg->typ) {
+	case br::RPC_APP_PAIR:
+		hdr_size = FIFO_PKT_SIZE(app_pair);
 		break;
 	default:
-		hdr_size = sizeof(br::rpc_fifo_undef_t)-1;
+		hdr_size = FIFO_PKT_SIZE(undef);
 		break;
 	}
 	msg -= hdr_size;
