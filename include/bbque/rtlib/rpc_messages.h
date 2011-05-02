@@ -30,6 +30,8 @@
 
 #include "bbque/rtlib.h"
 
+#define RPC_PKT_SIZE(type) sizeof(bbque::rtlib::rpc_msg_##type##_t)
+
 namespace bbque { namespace rtlib {
 
 /**
@@ -40,17 +42,23 @@ namespace bbque { namespace rtlib {
  */
 typedef enum rpc_msg_type {
 	//--- Execution Context Originated Messages
-	RPC_EXC_PAIR = 0,
 	RPC_EXC_REGISTER,
 	RPC_EXC_UNREGISTER,
 	RPC_EXC_SET,
 	RPC_EXC_CLEAR,
 	RPC_EXC_START,
 	RPC_EXC_STOP,
-	RPC_EXC_COMMANDS, ///< The number of EXC originated messages
+	RPC_EXC_RESP,
+	RPC_EXC_MSGS_COUNT, ///< The number of EXC originated messages
+	RPC_APP_PAIR,
+	RPC_APP_EXIT,
+	RPC_APP_RESP,
+	RPC_APP_MSGS_COUNT, ///< The number of APP originated messages
 	//--- Barbeque Originated Messages
+	RPC_BBQ_RESP,
 	RPC_BBQ_SET_WORKING_MODE,
-	RPC_BBQ_STOP_EXECUTION
+	RPC_BBQ_STOP_EXECUTION,
+	RPC_BBQ_MSGS_COUNT ///< The number of EXC originated messages
 } rpc_msg_type_t;
 
 /**
@@ -58,10 +66,29 @@ typedef enum rpc_msg_type {
  */
 typedef struct rpc_msg_header {
 	/** The command to execute (defines the message "payload" type) */
-	rpc_msg_type_t msg_typ;
-	/** The execution context ID (thread ID) */
-	pid_t exc_id;
+	rpc_msg_type_t typ;
+
+//FIXME These is maybe superflous... it is required just for the pairing
+// Than it is better to exchange a communication token ;-)
+	/** The application ID (thread ID) */
+	pid_t app_pid;
+
+// FIXME This is required just by EXC related messages: better to move there
+	/** The execution context ID */
+	uint8_t exc_id;
+
 } rpc_msg_header_t;
+
+/**
+ * @brief The responce to a command
+ */
+typedef struct rpc_msg_resp {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+	/** The RPC protocol major version */
+	int8_t result;
+} rpc_msg_resp_t;
+
 
 /**
  * @brief Command to register a new execution context.
@@ -85,7 +112,14 @@ typedef struct rpc_msg_exc_register {
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
 	/** The name of the required recipe */
 	char recipe[RTLIB_RECIPE_NAME_LENGTH];
-} rpc_fifo_exc_register_t;
+} rpc_msg_exc_register_t;
+
+
+/**
+ * @brief Command to notify an application is exiting.
+ */
+typedef rpc_msg_header_t rpc_msg_app_exit_t;
+
 
 } // namespace rtlib
 

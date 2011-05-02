@@ -37,7 +37,7 @@ namespace br = bbque::rtlib;
 /**
  * The global timer, this can be used to get the time since the RTLib has been
  * initialized */
-bu::Timer bbque_rtlib_tmr(true);
+bu::Timer bbque_tmr(true);
 
 /**
  * A pointer to the Barbeque RPC communication channel
@@ -49,46 +49,50 @@ static br::BbqueRPC *rpc = NULL;
  */
 static RTLIB_Services rtlib_services;
 
-RTLIB_ExecutionContextHandler rtlib_register(const char *name,
+static RTLIB_ExecutionContextHandler rtlib_register(const char *name,
 		const RTLIB_ExecutionContextParams *params) {
 	return rpc->Register(name, params);
 }
 
-void rtlib_unregister(
+static void rtlib_unregister(
 		const RTLIB_ExecutionContextHandler ech) {
 	return rpc->Unregister(ech);
 }
 
-RTLIB_ExitCode rtlib_start(
+static RTLIB_ExitCode rtlib_start(
 		const RTLIB_ExecutionContextHandler ech) {
 	return rpc->Start(ech);
 }
 
-RTLIB_ExitCode rtlib_stop(
+static RTLIB_ExitCode rtlib_stop(
 		const RTLIB_ExecutionContextHandler ech) {
 	return rpc->Stop(ech);
 }
 
 
-bool rtlib_sync(const RTLIB_ExecutionContextHandler ech,
+static bool rtlib_sync(const RTLIB_ExecutionContextHandler ech,
 		const char *name, RTLIB_SyncType type) {
 	return rpc->Sync(ech, name, type);
 }
 
-RTLIB_ExitCode rtlib_set(
+static RTLIB_ExitCode rtlib_set(
 		RTLIB_ExecutionContextHandler ech,
 		RTLIB_Constraint *constraints, uint8_t count) {
 	return rpc->Set(ech, constraints, count);
 }
 
-RTLIB_ExitCode rtlib_clear(
+static RTLIB_ExitCode rtlib_clear(
 		RTLIB_ExecutionContextHandler ech) {
 	return rpc->Clear(ech);
 }
 
+static const char *rtlib_app_name;
+static uint8_t rtlib_initialized = 0;
 
 RTLIB_Services *RTLIB_Init(const char *name) {
 	RTLIB_ExitCode result;
+
+	assert(rtlib_initialized==0);
 
 	// Welcome screen
 	fprintf(stderr, FMT(".:: Barbeque RTLIB (ver. %s) ::.\n"), g_git_version);
@@ -108,16 +112,36 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	// Building a communication channel
 	rpc = br::BbqueRPC::GetInstance();
 	if (!rpc) {
+		fprintf(stderr, FMT("RPC communication channel build FAILED\n"));
 		return NULL;
 	}
 
 	// Initializing the RPC communication channel
 	result = rpc->Init(name);
 	if (result!=RTLIB_OK) {
+		fprintf(stderr, FMT("RPC communication channel initialization FAILED\n"));
 		return NULL;
 	}
+
+	// Marking library as intialized
+	rtlib_initialized = 1;
+	rtlib_app_name = name;
 
 	return &rtlib_services;
 }
 
+__attribute__((destructor))
+static void RTLIB_Exit(void) {
+
+	fprintf(stderr, FMT(".:: Barbeque RTLIB Destructor ::.\n"));
+
+	if (!rtlib_initialized)
+		return;
+
+	// Close th[M#;e RPC FIFO channel thus releasin all BBQUE resource used by
+	// this application
+	assert(rpc);
+	delete rpc;
+
+}
 

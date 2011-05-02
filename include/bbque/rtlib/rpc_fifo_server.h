@@ -38,7 +38,11 @@
 #include <cstdlib>
 #include <cstring>
 
-#define BBQUE_PUBLIC_FIFO_PATH "/var/bbque"
+#ifdef BBQUE_DEBUG
+# define BBQUE_PUBLIC_FIFO_PATH "/tmp/bbque"
+#else
+# define BBQUE_PUBLIC_FIFO_PATH "/var/bbque"
+#endif
 #define BBQUE_PUBLIC_FIFO "rpc_fifo"
 
 #define BBQUE_FIFO_NAME_LENGTH 32
@@ -63,7 +67,7 @@ typedef struct rpc_fifo_header {
 } rpc_fifo_header_t;
 
 /**
- * @brief An RPC_EXC_PAIR FIFO command.
+ * @brief An RPC_APP_PAIR FIFO command.
  *
  * This command is used by the FIFO communication channel to send the
  * application endpoit required to setup the communication channel.
@@ -74,14 +78,12 @@ typedef struct rpc_fifo_header {
  * inforamtion is the RPC_EXC_PARI. All other commands maps on the
  * rpc_fifo_undef_t type.
  */
-typedef struct rpc_fifo_exc_pair {
+typedef struct rpc_fifo_app_pair {
 	/** The RPC fifo command header */
 	rpc_fifo_header_t header;
 	/** The name of the application private fifo */
 	char rpc_fifo[BBQUE_FIFO_NAME_LENGTH];
-	/** The payload start */
-	int8_t payload_start;
-} rpc_fifo_exc_pair_t;
+} rpc_fifo_app_pair_t;
 
 /**
  * @brief An undefined FIFO message.
@@ -92,8 +94,6 @@ typedef struct rpc_fifo_exc_pair {
 typedef struct rpc_fifo_undef {
 	/** The RPC fifo command header */
 	rpc_fifo_header_t header;
-	/** The payload start */
-	int8_t payload_start;
 } rpc_fifo_undef_t;
 
 

@@ -22,17 +22,20 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * =============================================================================
  */
 
-#ifndef BBQUE_RPC_FIFO_H_
-#define BBQUE_RPC_FIFO_H_
+#ifndef BBQUE_RPC_FIFO_CLIENT_H_
+#define BBQUE_RPC_FIFO_CLIENT_H_
 
 #include "bbque/rtlib.h"
 
 #include "bbque/rtlib/bbque_rpc.h"
-#include "bbque/rtlib/rpc_fifo_client.h"
+#include "bbque/rtlib/rpc_messages.h"
 #include "bbque/rtlib/rpc_fifo_server.h"
+#include "bbque/utils/utility.h"
+
+#include <thread>
 
 namespace bbque { namespace rtlib {
 
@@ -41,6 +44,10 @@ class BbqueRPC_FIFO_Client : public BbqueRPC {
 public:
 
 	BbqueRPC_FIFO_Client();
+
+	~BbqueRPC_FIFO_Client();
+
+protected:
 
 	RTLIB_ExitCode _Init(
 			const char *name);
@@ -66,6 +73,43 @@ public:
 	RTLIB_ExitCode _Clear(
 			const RTLIB_ExecutionContextHandler ech);
 
+	RTLIB_ExitCode _GetWorkingMode(
+			RTLIB_ExecutionContextHandler ech,
+			RTLIB_WorkingModeParams *wm);
+
+	void _Exit();
+
+private:
+
+	char app_fifo_filename[BBQUE_FIFO_NAME_LENGTH];
+
+	std::string app_fifo_path;
+
+	std::string bbque_fifo_path;
+
+	int client_fifo_fd;
+
+	int server_fifo_fd;
+
+	pid_t chTrdPid;
+
+	std::thread ChTrd;
+
+	std::mutex trdStatus_mtx;
+
+	std::condition_variable trdStarted_cv;
+
+	std::mutex chSetup_mtx;
+
+	std::condition_variable chSetup_cv;
+
+	RTLIB_ExitCode ChannelRelease();
+
+	RTLIB_ExitCode ChannelPair();
+
+	RTLIB_ExitCode ChannelSetup();
+
+	void ChannelTrd();
 
 };
 
@@ -73,5 +117,5 @@ public:
 
 } // namespace bbque
 
-#endif // BBQUE_RPC_FIFO_H_
+#endif // BBQUE_RPC_FIFO_CLIENT_H_
 

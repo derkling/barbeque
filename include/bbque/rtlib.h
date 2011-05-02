@@ -110,6 +110,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_ERROR,
 	/** Failed to setup the channel to connect the Barbeque RTRM */
 	RTLIB_BBQUE_CHANNEL_SETUP_FAILED,
+	/** Failed to release the channel to connect the Barbeque RTRM */
+	RTLIB_BBQUE_CHANNEL_TEARDOWN_FAILED,
 	/** Failed to write to the Barbeque RTRM communication channel */
 	RTLIB_BBQUE_CHANNEL_WRITE_FAILED,
 	/** Failed to read form the Barbeque RTRM communication channel */

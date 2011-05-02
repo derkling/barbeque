@@ -47,6 +47,11 @@ public:
 	 */
 	static BbqueRPC * GetInstance();
 
+	/**
+	 * @brief Release the RPC channel
+	 */
+	virtual ~BbqueRPC(void);
+
 /******************************************************************************
  * Channel Independant interface
  ******************************************************************************/
@@ -85,6 +90,11 @@ public:
 
 protected:
 
+	/**
+	 * @brief Build a new RTLib
+	 */
+	BbqueRPC(void);
+
 /******************************************************************************
  * Channel Dependant interface
  ******************************************************************************/
@@ -116,12 +126,11 @@ protected:
 	virtual RTLIB_ExitCode _GetWorkingMode(
 			RTLIB_ExecutionContextHandler ech,
 			RTLIB_WorkingModeParams *wm) = 0;
-	/**
-	 * @brief Build a new RTLib
-	 */
-	BbqueRPC(void);
+
+	virtual void _Exit() = 0;
 
 private:
+
 
 /******************************************************************************
  * Application Callbacks Proxies

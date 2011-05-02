@@ -36,6 +36,7 @@ add_library(bbque_rtlib SHARED ${RTLIB_SRC})
 # Linking dependencies
 target_link_libraries(
 	bbque_rtlib
+	bbque_utils
 	${Boost_LIBRARIES}
 )
 

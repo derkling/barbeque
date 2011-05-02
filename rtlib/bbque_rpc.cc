@@ -27,10 +27,9 @@
 #include "bbque/rtlib/bbque_rpc.h"
 
 #include "bbque/rtlib/rpc_fifo_client.h"
+#include "bbque/utils/utility.h"
 
 #include <cstdio>
-
-#define DB(x) x
 
 #define FMT_DBG(fmt) "RTLIB [DBG] - "fmt
 #define FMT_INF(fmt) "RTLIB [INF] - "fmt
@@ -45,8 +44,11 @@ BbqueRPC * BbqueRPC::GetInstance() {
 	if (instance)
 		return instance;
 
-#ifdef BBQUE_RTLIB_FIFO
+#ifdef BBQUE_RPC_FIFO
+	DB(fprintf(stderr, FMT_DBG("Using FIFO RPC channel\n")));
 	instance = new BbqueRPC_FIFO_Client();
+#else
+#error RPC Channel NOT defined
 #endif
 
 	return instance;
@@ -56,23 +58,24 @@ BbqueRPC::BbqueRPC(void) {
 
 }
 
+BbqueRPC::~BbqueRPC(void) {
+	DB(fprintf(stderr, FMT_DBG("Releaseing the RPC channel...\n")));
+}
 
 RTLIB_ExitCode BbqueRPC::Init(const char *name) {
-	RTLIB_ExitCode e;
-
-	//Silence "args not used" warning.
-	(void)name;
+	RTLIB_ExitCode exitCode;
 
 	DB(fprintf(stderr, FMT_DBG("Initializing app [%s]\n"), name));
 
-	e = _Init(name);
-	if ( e == RTLIB_OK) {
-		DB(fprintf(stderr, FMT_DBG("Initialation DONE\n")));
-		return RTLIB_OK;
+	exitCode = _Init(name);
+	if (exitCode != RTLIB_OK) {
+		fprintf(stderr, FMT_ERR("Initialization FAILED\n"));
+		return exitCode;
 	}
 
-	fprintf(stderr, FMT_ERR("Initialization FAILED\n"));
-	return e;
+	DB(fprintf(stderr, FMT_DBG("Initialation DONE\n")));
+	return RTLIB_OK;
+
 }
 
 RTLIB_ExecutionContextHandler BbqueRPC::Register(
