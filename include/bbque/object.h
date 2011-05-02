@@ -35,15 +35,6 @@
 		<< "  cond():  " << #condition << "\n"
 
 #ifdef BBQUE_DEBUG
-# define ASSERT(condition) if (!(condition)) \
-	THROW << "ASSERT FAILED in " << __func__ << " @ " \
-		<< __FILE__ << ":" << __LINE__ << "\n" \
-		<< "  cond():  " << #condition << "\n"
-#else
-# define ASSERT(condition) do {} while(0)
-#endif // BBQUE_DEBUG
-
-#ifdef BBQUE_DEBUG
 /**
  * Debugging support
  */

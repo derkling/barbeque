@@ -25,10 +25,15 @@
 #include "bbque/config.h"
 
 #include <cstdio>
+#include <sys/syscall.h>
+
+#include <assert.h>
 #include <cstdint>
 #include <cstdlib>
 #include <sstream>
 #include <string>
+#include <unistd.h>
+
 #include "bbque/utils/timer.h"
 #include "bbque/res/resources.h"
 
@@ -57,6 +62,7 @@ extern bbque::utils::Timer bbque_tmr;
 
 #ifdef BBQUE_DEBUG
 # define DB(x) x
+
 #else
 # define DB(x)
 #endif
@@ -69,6 +75,10 @@ extern bbque::utils::Timer bbque_tmr;
 /** Type for ID used in resource path */
 typedef int16_t ResID_t;
 
+/** Return the PID of the calling process/thread */
+inline pid_t gettid() {
+	return syscall(SYS_gettid);
+}
 
 /**
  * @brief Convert to unity

@@ -31,6 +31,7 @@ configure_file (
 )
 
 # Build subdirs
+add_subdirectory(utils)
 add_subdirectory(app)
 add_subdirectory(res)
 
@@ -50,6 +51,7 @@ add_executable (barbeque ${BARBEQUE_SRC})
 # Linking dependencies
 target_link_libraries(
 	barbeque
+	bbque_utils
 	application_objs
 	resource_accounting
 	${Boost_LIBRARIES}
