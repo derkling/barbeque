@@ -78,7 +78,7 @@ inline uint64_t ConvertValue(uint64_t value, std::string const & units) {
 	if (units.empty())
 		return value;
 
-	switch(toupper(units.at(0))) {
+	switch(toupper(units[0])) {
 	case 'K':
 		return value *= POW_2_10;
 	case 'M':
@@ -94,36 +94,42 @@ inline uint64_t ConvertValue(uint64_t value, std::string const & units) {
 /**
  * @brief Extract the head of a resource path.
  *
- * Pop the first namespace in a resource path string, and set the remaining
- * trail in "_next_path".  For instance, if the resource path is
+ * Split the resource path string in a "head" and a "tail", considering a
+ * pattern wherein the separator char should be found. The head is returned,
+ * while the tail is saved in the string object argument.
+ *
+ * The function is especially used to get the head of a path (the first
+ * level/namespace).For instance, if the resource path is
  * "arch.clusters.mem0", the function returns "arch" and set <i>next_path</i>
  * to "clusters.mem0".
  *
- * @param next_path The resource path
+ * Moreover it is used for path template construction too.
+ *
+ * @param tail The resource path to split
  * @param pattern The pattern of the separator char
  * @return The head of the path, and set <i>next_path</> with the tail path
  * left.
  */
-inline std::string PopPathLevel(std::string & next_path,
+inline std::string SplitAndPop(std::string & tail,
 		const char * pattern = ".") {
+	// Head of the path to return
+	std::string _head;
 
-	// Path level string to return
-	std::string _curr_ns;
+	// Find the position of a  "_pattern" char in "tail"
+	size_t dot_pos = tail.find_first_of(pattern);
 
-	// Find the position of a char in "_pattern"
-	int dot_pos = next_path.find_first_of(pattern);
-
-	if (dot_pos == -1) {
-		// No separator char found
-		_curr_ns = next_path;
-		next_path.clear();
+	if (dot_pos != std::string::npos) {
+		// Split head and tail of the path
+		_head = tail.substr(0, dot_pos);
+		tail = tail.substr(dot_pos + 1);
 	}
 	else {
-		// Split head and tail
-		_curr_ns = next_path.substr(0, dot_pos);
-		next_path = next_path.substr(dot_pos + 1);
+		// Head == path (i.e "mem0", "dma0", ...)
+		_head = tail;
+		tail.clear();
 	}
-	return _curr_ns;
+	// The head
+	return _head;
 }
 
 
@@ -144,28 +150,17 @@ inline std::string PopPathLevel(std::string & next_path,
 inline std::string const PathTemplate(std::string const & path) {
 
 	// Template path to return
-	std::string _str_templ;
+	std::string _templ_path;
+	std::string _tail = path;
 
-	// Extract the first node in the resource path
-	std::string _ns_path = path;
-	std::string _curr_ns = PopPathLevel(_ns_path, "0123456789");
+	// Split the path using numbers as separator pattern and append the head
+	// into the the path template
+	do {
+		_templ_path += SplitAndPop(_tail, "0123456789");
+	} while (!_tail.empty());
 
-	// Iterate over each node in the path
-	while (true) {
-
-		if (_curr_ns.empty())
-			break;
-		// Append the current node name
-		_str_templ += _curr_ns;
-		// Next node
-		_curr_ns = PopPathLevel(_ns_path, "0123456789");
-
-		// If this is not the last namespace in the path append a "."
-		if (!_curr_ns.empty())
-			_str_templ += ".";
-	}
 	// The template path built
-	return _str_templ;
+	return _templ_path;
 }
 
 
@@ -175,8 +170,7 @@ inline std::string const PathTemplate(std::string const & path) {
  * @return True if it is, false otherwise
  */
 inline bool IsPathTemplate(std::string const & path) {
-	int16_t pos = path.find_first_of("0123456789");
-	return pos < 0;
+	return (path.find_first_of("0123456789") == std::string::npos);
 }
 
 #endif // BBQUE_UTILITY_H_

@@ -399,8 +399,8 @@ void SearchResources(SystemView * sv) {
 	else
 		std::cout << "NOT FOUND" << std::endl;
 
-	std::cout << "arch.tile0.cluster.pe : ";
-	if (sv->ExistResource("arch.tile0.cluster.pe"))
+	std::cout << "arch.tile.cluster.pe : ";
+	if (sv->ExistResource("arch.tile.cluster.pe"))
 		std::cout << "FOUND" << std::endl;
 	else
 		std::cout << "NOT FOUND" << std::endl;

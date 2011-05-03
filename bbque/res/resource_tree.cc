@@ -46,7 +46,7 @@ ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 
 	// Extract the first "node" in the resource path
 	std::string ns_path	= _rsrc_path;
-	std::string curr_ns = PopPathLevel(ns_path);
+	std::string curr_ns = SplitAndPop(ns_path);
 
 	// For each namespace in the path...
 	while (!curr_ns.empty()) {
@@ -80,7 +80,7 @@ ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 				curr_node = insert_child(curr_node, curr_ns);
 		}
 		// Next namespace in the path
-		curr_ns = PopPathLevel(ns_path);
+		curr_ns = SplitAndPop(ns_path);
 	}
 	// Return the new object just created
 	return curr_node->data;
@@ -99,7 +99,7 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 
 	// Current namespace to match:
 	// Extract the first node in the path, and save the remaining path string
-	std::string curr_ns = PopPathLevel(next_path);
+	std::string curr_ns = SplitAndPop(next_path);
 
 	// Parse the path
 	if (!curr_ns.empty()) {
