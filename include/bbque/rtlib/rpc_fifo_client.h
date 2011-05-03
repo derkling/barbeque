@@ -35,6 +35,7 @@
 #include "bbque/rtlib/rpc_fifo_server.h"
 #include "bbque/utils/utility.h"
 
+#include <sys/epoll.h>
 #include <thread>
 
 namespace bbque { namespace rtlib {
@@ -90,6 +91,13 @@ private:
 	int client_fifo_fd;
 
 	int server_fifo_fd;
+
+	int epoll_fd;
+
+	struct epoll_event epoll_ev;
+
+	#define MAX_EPOLL_EVENTS 1
+	struct epoll_event epoll_evts[MAX_EPOLL_EVENTS];
 
 	pid_t chTrdPid;
 

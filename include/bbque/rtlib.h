@@ -116,6 +116,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_BBQUE_CHANNEL_WRITE_FAILED,
 	/** Failed to read form the Barbeque RTRM communication channel */
 	RTLIB_BBQUE_CHANNEL_READ_FAILED,
+	/** Timeout on read form the Barbeque RTRM communication channel */
+	RTLIB_BBQUE_CHANNEL_READ_TIMEOUT,
 	/** The bbque and application RPC protocol versions does not match */
 	RTLIB_BBQUE_CHANNEL_PROTOCOL_MISMATCH,
 	/** The Barbeque RTRM is not available */

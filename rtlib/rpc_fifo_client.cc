@@ -130,6 +130,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 	rpc_fifo_header_t hdr;
 	rpc_msg_resp_t resp;
 	size_t bytes;
+	int nfds;
 
 	DB(fprintf(stderr, FMT_DBG("Pairing FIFO channels...\n")));
 
@@ -167,8 +168,27 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
 	}
 
-	// Receive BBQUE response
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
+
+	// Waiting for BBQUE response (up to a 500ms timeout)
+	nfds = epoll_wait(epoll_fd, epoll_evts, MAX_EPOLL_EVENTS, 500);
+	if (nfds < 0) {
+		fprintf(stderr, FMT_ERR("FAILED epoll_wait (Error %d: %s)\n"),
+			errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+	if (!nfds) {
+		fprintf(stderr, FMT_DBG("TIMEOUT epoll_wait\n"));
+		// TODO instead of returing an error, maybe better to try again a
+		// connection by re-sending the PAIR message without wasting time on
+		// destrying-reconstructing the client channel.
+		// But this should be somehow controller by the application...
+		return RTLIB_BBQUE_CHANNEL_READ_TIMEOUT;
+	}
+
+	// NOTE we use epoll just to monitor the client_fifo_fs, thus if we get
+	// here there sould be some data ready to read
+	assert(epoll_evts[0].data.fd == client_fifo_fd);
 
 	// Read response FIFO header
 	bytes = ::read(client_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
@@ -242,7 +262,24 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
 		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
 		goto err_open;
 	}
-	//in.assign(client_fifo_fd);
+
+	// Create epoll events used for asynchronous I/O
+	epoll_fd = epoll_create(1);
+	if (epoll_fd == -1) {
+		fprintf(stderr, FMT_ERR("FAILED epoll creation\n"));
+		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
+		goto err_epoll;
+	}
+
+	// Configuring epoll
+	epoll_ev.events = EPOLLIN|EPOLLPRI;
+	epoll_ev.data.fd = client_fifo_fd;
+	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fifo_fd, &epoll_ev) == -1) {
+		fprintf(stderr, FMT_ERR("FAILED epoll configuration (Error %d: %s)\n"),
+				errno, strerror(errno));
+		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
+		goto err_epoll;
+	}
 
 	// Pairing channel with server
 	result = ChannelPair();
@@ -252,7 +289,11 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
 	return RTLIB_OK;
 
 err_use:
-	::close(client_fifo_fd);
+err_epoll:
+	if (epoll_fd>=0)
+		::close(epoll_fd);
+	if (client_fifo_fd>=0)
+		::close(client_fifo_fd);
 err_open:
 	::unlink(app_fifo_path.c_str());
 err_create:

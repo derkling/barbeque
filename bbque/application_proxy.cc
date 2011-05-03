@@ -99,11 +99,20 @@ void ApplicationProxy::RpcAppPair(pexeCtx_t pexe) {
 	assert(conCtxMap.find(pmsg->app_pid) == conCtxMap.end());
 
 	// Build a new communication context
-	logger->Debug("APPs PRX: Setup RPC channel with [app_pid: %d]",
+	logger->Debug("APPs PRX: Setting-up RPC channel [app_pid: %d]...",
 			pmsg->app_pid);
 	pcon = pconCtx_t(new conCtx_t);
 	pcon->app_pid = pmsg->app_pid;
 	pcon->pd = rpc->GetPluginData(pmsg);
+
+	if (!pcon->pd) {
+		logger->Error("APPs PRX: Setup RPC channel [app_pid: %d] FAILED",
+			pmsg->app_pid);
+		// TODO If an application do not get a responce withih a timeout
+		// should try again to register. This support should be provided by
+		// the RTLib
+		return;
+	}
 
 	// Backup communication context for further messages
 	conCtxMap_ul.lock();
@@ -254,7 +263,6 @@ void ApplicationProxy::CommandExecutor(pexeCtx_t pexe) {
 		}
 	}
 	exeCtxMap_ul.unlock();
-	assert(it!=exeCtxMap.end());
 
 	logger->Debug("APPs PRX: CommandExecutor END [pid: %d, typ: %d]",
 			pexe->pid, pexe->pmsg->typ);

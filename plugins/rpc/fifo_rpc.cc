@@ -166,22 +166,18 @@ RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 	fs::path fifo_path(conf_fifo_dir);
 	boost::system::error_code ec;
 	br::rpc_fifo_app_pair_t * hdr;
+	int fd;
 
 
 	// We should have the FIFO dir already on place
 	assert(initialized);
+
 	// We should also have a valid RPC message
 	assert(msg->typ==br::RPC_APP_PAIR);
+
+	// Get a reference to FIFO header
 	hdr = (br::rpc_fifo_app_pair_t*)((int8_t*)msg-FIFO_PKT_SIZE(app_pair));
-
 	logger->Debug("FIFO RPC: plugin data initialization...");
-
-	// Build a new set of plugins data
-	pd = (fifo_data_t*)::malloc(sizeof(fifo_data_t));
-	if (!pd) {
-		logger->Error("FIFO RPC: get plugin data (malloc) FAILED");
-		goto err_malloc;
-	}
 
 	// Build fifo path
 	fifo_path /= "/";
@@ -194,36 +190,46 @@ RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 	if (!fs::exists(fifo_path, ec)) {
 		logger->Error("FIFO RPC: apps FIFO NOT FOUND [%s]...",
 				fifo_path.string().c_str());
-		goto err_use;
+		goto err_open;
 	}
 
 	// Ensuring we have a pipe
 	if (fs::status(fifo_path, ec).type() != fs::fifo_file) {
 		logger->Error("FIFO RPC: apps FIFO not valid [%s]",
 				fifo_path.string().c_str());
-		goto err_use;
+		goto err_open;
 	}
 
 	// Opening the application side pipe WRITE only
 	logger->Debug("FIFO RPC: opening (WR only)...");
-	pd->app_fifo_fd = ::open(fifo_path.string().c_str(), O_WRONLY);
-	if (pd->app_fifo_fd < 0) {
-		logger->Error("FAILED opening application RPC FIFO [%s]",
-					fifo_path.string().c_str());
-		pd->app_fifo_fd = 0;
-		goto err_use;
+	fd = ::open(fifo_path.string().c_str(), O_WRONLY);
+	if (fd < 0) {
+		logger->Error("FAILED opening application RPC FIFO [%s] (Error %d: %s)",
+					fifo_path.string().c_str(), errno, strerror(errno));
+		fd = 0;
+		// Debugging: abort on too many files open
+		assert(errno!=EMFILE);
+		goto err_open;
 	}
-	::memcpy(pd->app_fifo_filename, hdr->rpc_fifo, BBQUE_FIFO_NAME_LENGTH);
 
-	// Setting the application as initialized
+	// Build a new set of plugins data
+	pd = (fifo_data_t*)::malloc(sizeof(fifo_data_t));
+	if (!pd) {
+		logger->Error("FIFO RPC: get plugin data (malloc) FAILED");
+		goto err_malloc;
+	}
+
+	::strncpy(pd->app_fifo_filename, hdr->rpc_fifo, BBQUE_FIFO_NAME_LENGTH);
+	pd->app_fifo_fd = fd;
+
 	logger->Info("FIFO RPC: app channel [%d:%s] initialization DONE",
 			pd->app_fifo_fd, hdr->rpc_fifo);
 
 	return plugin_data_t(pd);
 
-err_use:
-	::free(pd);
 err_malloc:
+	::close(fd);
+err_open:
 	return plugin_data_t();
 
 }
