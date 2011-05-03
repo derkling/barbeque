@@ -88,9 +88,9 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
 }
 
 #ifdef DETACHED_THREAD
-void ApplicationProxy::RpcAppPair(pexeCtx_t pexe) {
+void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
-	pchMsg_t pmsg = pexe->pmsg;
+	pchMsg_t pmsg = prqs->pmsg;
 	rpc_msg_resp_t resp;
 	pconCtx_t pcon;
 
@@ -162,9 +162,9 @@ void ApplicationProxy::RpcAppPair(pchMsg_t pmsg) {
 }
 #endif
 
-void ApplicationProxy::RpcAppExit(pexeCtx_t pexe) {
+void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx);
-	pchMsg_t pmsg = pexe->pmsg;
+	pchMsg_t pmsg = prqs->pmsg;
 	conCtxMap_t::iterator conCtxIt;
 	pconCtx_t pconCtx;
 
@@ -191,27 +191,27 @@ void ApplicationProxy::RpcAppExit(pexeCtx_t pexe) {
 
 }
 
-void ApplicationProxy::CommandExecutor(pexeCtx_t pexe) {
-	std::unique_lock<std::mutex> exeCtxMap_ul(exeCtxMap_mtx);
-	exeCtxMap_t::iterator it;
-	pexeCtx_t pec;
+void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
+	std::unique_lock<std::mutex> snCtxMap_ul(snCtxMap_mtx);
+	snCtxMap_t::iterator it;
+	psnCtx_t psc;
 
 	// Set the thread PID
-	pexe->pid = gettid();
+	prqs->pid = gettid();
 
 	// This look could be acquiren only when the ProcessCommand has returned
 	// Thus we use this lock to synchronize the CommandExecutr starting with
 	// the completion of the ProcessCommand, which also setup thread tracking
 	// data structures.
-	exeCtxMap_ul.unlock();
+	snCtxMap_ul.unlock();
 
 	logger->Debug("APPs PRX: CommandExecutor START [pid: %d, typ: %d]",
-			pexe->pid, pexe->pmsg->typ);
+			prqs->pid, prqs->pmsg->typ);
 
-	assert(pexe->pmsg->typ<RPC_APP_MSGS_COUNT);
+	assert(prqs->pmsg->typ<RPC_APP_MSGS_COUNT);
 
 	// TODO put here command execution code
-	switch(pexe->pmsg->typ) {
+	switch(prqs->pmsg->typ) {
 	case RPC_EXC_REGISTER:
 		logger->Debug("EXC_REGISTER");
 		break;
@@ -238,12 +238,12 @@ void ApplicationProxy::CommandExecutor(pexeCtx_t pexe) {
 #ifdef DETACHED_THREAD
 	case RPC_APP_PAIR:
 		logger->Debug("APP_PAIR");
-		RpcAppPair(pexe);
+		RpcAppPair(prqs);
 		break;
 #endif
 	case RPC_APP_EXIT:
 		logger->Debug("APP_EXIT");
-		RpcAppExit(pexe);
+		RpcAppExit(prqs);
 		break;
 
 	default:
@@ -253,39 +253,39 @@ void ApplicationProxy::CommandExecutor(pexeCtx_t pexe) {
 	}
 
 	// Releasing the thread tracking data before exiting
-	exeCtxMap_ul.lock();
-	it = exeCtxMap.lower_bound(pexe->pmsg->typ);
-	for ( ; it != exeCtxMap.end() ; it++) {
-		pec = it->second;
-		if (pec==pexe) {
-			exeCtxMap.erase(it);
+	snCtxMap_ul.lock();
+	it = snCtxMap.lower_bound(prqs->pmsg->typ);
+	for ( ; it != snCtxMap.end() ; it++) {
+		psc = it->second;
+		if (psc->pid == prqs->pid) {
+			snCtxMap.erase(it);
 			break;
 		}
 	}
-	exeCtxMap_ul.unlock();
+	snCtxMap_ul.unlock();
 
 	logger->Debug("APPs PRX: CommandExecutor END [pid: %d, typ: %d]",
-			pexe->pid, pexe->pmsg->typ);
+			prqs->pid, prqs->pmsg->typ);
 
 }
 
 void ApplicationProxy::ProcessCommand(pchMsg_t & pmsg) {
-	std::unique_lock<std::mutex> exeCtxMap_ul(exeCtxMap_mtx);
-	pexeCtx_t pexeCtx = pexeCtx_t(new exeCtx_t);
-	pexeCtx->pmsg = pmsg;
+	std::unique_lock<std::mutex> snCtxMap_ul(snCtxMap_mtx);
+	prqsSn_t prqsSn = prqsSn_t(new rqsSn_t);
+	prqsSn->pmsg = pmsg;
 	// Create a new executor thread, this will start locked since it needs the
 	// execMap_mtx we already hold. This is used to ensure that the executor
 	// thread start only alfter the playground has been properly prepared
-	pexeCtx->exe = std::thread(
+	prqsSn->exe = std::thread(
 				&ApplicationProxy::CommandExecutor,
-				this, pexeCtx);
-	pexeCtx->exe.detach();
+				this, prqsSn);
+	prqsSn->exe.detach();
 
 	logger->Info("Processing new command...");
 
 	// Add a new threaded command executor
-	exeCtxMap.insert(std::pair<rpc_msg_type_t, pexeCtx_t>(
-				pmsg->typ, pexeCtx));
+	snCtxMap.insert(std::pair<rpc_msg_type_t, psnCtx_t>(
+				pmsg->typ, prqsSn));
 
 }
 

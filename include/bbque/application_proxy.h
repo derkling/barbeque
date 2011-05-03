@@ -60,27 +60,23 @@ private:
 
 	typedef RPCChannelIF::rpc_msg_ptr_t pchMsg_t;
 
-	//typedef std::shared_ptr<pchMsg_t> pmsg_t;
-
-	typedef struct exeCtx {
+	typedef struct snCtx {
 		std::thread exe;
-		pchMsg_t pmsg;
 		pid_t pid;
-	} exeCtx_t;
+	} snCtx_t;
 
-	typedef std::shared_ptr<exeCtx_t> pexeCtx_t;
+	typedef std::shared_ptr<snCtx_t> psnCtx_t;
 
-	typedef std::map<rpc_msg_type_t, pexeCtx_t> exeCtxMap_t;
+	typedef std::map<rpc_msg_type_t, psnCtx_t> snCtxMap_t;
 
-	exeCtxMap_t exeCtxMap;
+	snCtxMap_t snCtxMap;
 
-	std::mutex exeCtxMap_mtx;
+	std::mutex snCtxMap_mtx;
 
 
 	std::mutex trdStatus_mtx;
 
 	std::condition_variable trdStatus_cv;
-
 
 	typedef struct conCtx {
 		pid_t app_pid;
@@ -95,6 +91,16 @@ private:
 
 	std::mutex conCtxMap_mtx;
 
+	typedef struct rqsSn : public snCtx_t {
+		pchMsg_t pmsg;
+	} rqsSn_t;
+
+	typedef std::shared_ptr<rqsSn_t> prqsSn_t;
+
+
+	typedef struct cmdRsp {
+		RTLIB_ExitCode result;
+	} cmdRsp_t;
 
 	ApplicationProxy();
 
@@ -105,14 +111,14 @@ private:
 #define DETACHED_THREAD
 #ifdef DETACHED_THREAD
 #warning using DETACHED_THREADS
-	void RpcAppPair(pexeCtx_t pexe);
+	void RpcAppPair(prqsSn_t prqs);
 #else
 	void RpcAppPair(pchMsg_t pmsg);
 #endif
 
-	void RpcAppExit(pexeCtx_t pexe);
+	void RpcAppExit(prqsSn_t prqs);
 
-	void CommandExecutor(pexeCtx_t pexe);
+	void CommandExecutor(prqsSn_t prqs);
 
 	void ProcessCommand(pchMsg_t & pmsg);
 
