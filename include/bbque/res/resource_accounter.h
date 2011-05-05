@@ -34,8 +34,9 @@
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
 
-namespace bbque { namespace res {
+namespace ba = bbque::app;
 
+namespace bbque { namespace res {
 
 /**
  * @class ResourceAccounter
@@ -70,7 +71,7 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Total(std::string const & path) const {
-		return stateInformation( path, RA_TOTAL);
+		return stateInformation(path, RA_TOTAL);
 	}
 
 	/**
@@ -98,15 +99,15 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	inline void SwitchUsage(app::Application const * app) {
+	inline void SwitchUsage(ba::Application const * app) {
 		changeUsages(app, RA_SWITCH);
 	}
 
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	inline void Release(app::Application const * _app) {
-		changeUsages(_app, RA_RELEASE);
+	inline void Release(ba::Application const * app) {
+		changeUsages(app, RA_RELEASE);
 	}
 
 	/**
@@ -188,7 +189,7 @@ private:
 	 *  resource usages
 	 *  @param action What kind of change? (@see UsageAction_t)
 	 */
-	void changeUsages(app::Application const * app, UsageAction_t action);
+	void changeUsages(ba::Application const * app, UsageAction_t action);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;

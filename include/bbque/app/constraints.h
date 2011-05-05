@@ -23,14 +23,14 @@
 #ifndef BBQUE_CONSTRAINTS_H_
 #define BBQUE_CONSTRAINTS_H_
 
-namespace bbque {
-
-namespace res {
+namespace bbque { namespace res {
+	// Forward declaration
 	class Resource;
-}
+}}
 
-namespace app {
+namespace bbque { namespace app {
 
+/** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<res::Resource> ResourcePtr_t;
 
 /**
@@ -43,9 +43,9 @@ typedef std::shared_ptr<res::Resource> ResourcePtr_t;
 struct Constraint {
 
 	/**
-	 * @enum Type of constraint bounds:0
+	 * @enum Type of constraint bounds
 	 */
-	enum BoundType {
+	enum BoundType_t {
 		/** Lower bound constraint */
 		LOWER_BOUND = 0,
 		/** Upper bound constraint */

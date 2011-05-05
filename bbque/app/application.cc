@@ -2,7 +2,11 @@
  *       @file  application.cc
  *      @brief  Application descriptor implementation
  *
- * This implements the Application descriptor class.
+ * This implements the application descriptor.
+ * Such descriptor includes static and dynamic information upon application
+ * execution. It embeds usual information about name, priority, user, PID
+ * (could be different from the one given by OS) plus a reference to the
+ * recipe object, the list of enabled working modes and resource constraints.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -28,27 +32,31 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resource_accounter.h"
 
+namespace br = bbque::res;
+namespace bp = bbque::plugins;
+
 namespace bbque { namespace app {
 
 
 Application::Application(std::string const & _name, std::string const & _user,
 		uint32_t _pid):
 	Object(APPLICATION_NAMESPACE + _name),
+	name(_name),
+	user(_user),
 	pid(_pid) {
 
-	name = _name;
-	user = _user;
+	// Scheduling state
 	curr_sched.state = next_sched.state = READY;
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
-	plugins::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger =
-		std::unique_ptr<plugins::LoggerIF>
+		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
-		logger->Info("Application: %s ", _name.c_str());
+		logger->Info("Starting...");
 
 	enabled_awms.resize(0);
 }
@@ -57,7 +65,7 @@ Application::Application(std::string const & _name, std::string const & _user,
 Application::~Application() {
 
 	// Release the resources (if any)
-	res::ResourceAccounter * ra = bbque::res::ResourceAccounter::GetInstance();
+	br::ResourceAccounter * ra = br::ResourceAccounter::GetInstance();
 	assert(ra != NULL);
 	ra->Release(this);
 
@@ -123,7 +131,6 @@ void Application::SwitchToNextScheduled(double _time) {
 	if (curr_sched.awm != next_sched.awm) {
 
 		// Update transition overheads info
-		//AwmStatusPtr_t curr_awm(curr_sched.awm);
 		AwmStatusPtr_t curr_awm(curr_sched.awm);
 		if (curr_awm) {
 			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_awm->Name()));
@@ -133,9 +140,8 @@ void Application::SwitchToNextScheduled(double _time) {
 		curr_sched.awm = next_sched.awm;
 
 		// Update the current set of usages
-		res::ResourceAccounter *res_acc =
-			res::ResourceAccounter::GetInstance();
-		//AppPtr_t this_app = AppPtr_t(this);
+		br::ResourceAccounter *res_acc =
+			br::ResourceAccounter::GetInstance();
 
 		switch (next_sched.state) {
 		case RUNNING:
@@ -150,20 +156,17 @@ void Application::SwitchToNextScheduled(double _time) {
 		default:
 			break;
 		}
-		logger->Info("%s: set working mode [%s]", name.c_str(),
-		             next_sched.awm->Name().c_str());
+		logger->Info("Set working mode [%s]", next_sched.awm->Name().c_str());
 	}
 	// Switch scheduled state
 	curr_sched.state = next_sched.state;
 	switch_mark = false;
-	logger->Info("%s: set schedule state [%d]", name.c_str(),
-			next_sched.state);
+	logger->Info("Set schedule state {%d}",	next_sched.state);
 }
 
 
-
 Application::ExitCode_t Application::SetConstraint(
-		std::string const &	_res_name, Constraint::BoundType _type,
+		std::string const & _res_name, Constraint::BoundType_t _type,
 		uint32_t _value) {
 
 	// Lookup the resource by name
@@ -172,9 +175,8 @@ Application::ExitCode_t Application::SetConstraint(
 
 	if (it_con == constraints.end()) {
 		// Check for resource existance
-		res::ResourceAccounter *ra =
-		    bbque::res::ResourceAccounter::GetInstance();
-		res::ResourcePtr_t rsrc_ptr(ra->GetResource(_res_name));
+		br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
+		br::ResourcePtr_t rsrc_ptr(ra->GetResource(_res_name));
 
 		if (rsrc_ptr.get() == NULL) {
 			// If the resource doesn't exist abort
@@ -200,14 +202,12 @@ Application::ExitCode_t Application::SetConstraint(
 	// Check if there are some awms to disable
 	workingModesEnabling(_res_name, _type, _value);
 
-	logger->Debug("%d working modes enabled for %s", enabled_awms.size(),
-	              name.c_str());
 	return APP_SUCCESS;
 }
 
 
 Application::ExitCode_t Application::RemoveConstraint(
-		std::string const & _res_name, Constraint::BoundType _type) {
+		std::string const & _res_name, Constraint::BoundType_t _type) {
 
 	// Lookup the resource by name
 	std::map<std::string, ConstrPtr_t>::iterator it_con =
@@ -242,14 +242,12 @@ Application::ExitCode_t Application::RemoveConstraint(
 		break;
 	}
 
-	logger->Debug("%d working modes enabled for %s", enabled_awms.size(),
-	              name.c_str());
 	return APP_SUCCESS;
 }
 
 
 void Application::workingModesEnabling(std::string const & _res_name,
-		Constraint::BoundType _type, uint64_t _value) {
+		Constraint::BoundType_t _type, uint64_t _value) {
 
 	// Enabled working modes iterators
 	std::list<AwmStatusPtr_t>::iterator it_enabl = enabled_awms.begin();
@@ -288,8 +286,7 @@ void Application::workingModesEnabling(std::string const & _res_name,
 			}
 		}
 	}
-
-	logger->Debug("%s working modes enabled",  enabled_awms.size());
+	logger->Debug("%d working modes enabled", enabled_awms.size());
 }
 
 } // namespace app

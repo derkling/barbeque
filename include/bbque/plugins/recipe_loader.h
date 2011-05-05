@@ -30,8 +30,9 @@
 
 #define RECIPE_LOADER_NAMESPACE "rloader."
 
-namespace bbque { namespace plugins {
+namespace ba = bbque::app;
 
+namespace bbque { namespace plugins {
 
 /**
  * @class RecipeLoaderIF
@@ -70,13 +71,13 @@ public:
 	 * @brief Load the recipe of the application
 	 * @param app Pointer to the application using the recipe
 	 * @param rname The recipe name. We expect to find the recipe in the
-	 * path:<br><default-dir>/rname.recipe.
+	 * path:<br><default-dir>/<i>rname</i>.recipe.
 	 * @param recipe The recipe object to fill with the data to parse
 	 * @return An exit code indicating the loading status
 	 */
-	virtual	ExitCode_t LoadRecipe(std::shared_ptr<app::Application> app,
+	virtual	ExitCode_t LoadRecipe(std::shared_ptr<ba::Application> app,
 				std::string const & rname,
-				std::shared_ptr<app::Recipe> recipe)
+				std::shared_ptr<ba::Recipe> recipe)
 		= 0;
 
 	/**

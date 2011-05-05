@@ -66,8 +66,7 @@ typedef std::map<std::string, ConstrPtr_t> ConstrPtrMap_t;
 
 /**
  * @class Application
- * @brief The class keep track of static and dynamic information about
- * application
+ * @brief Application descriptor object
  *
  * When an application enter the RTRM it should specify sets of informations
  * as name, pid, priority,... working modes (resources requirements),
@@ -175,28 +174,28 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	ScheduleFlag_t CurrentState() const {
+	inline ScheduleFlag_t CurrentState() const {
 		return curr_sched.state;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	AwmStatusPtr_t const CurrentAWM() const {
+	inline AwmStatusPtr_t const CurrentAWM() const {
 		return curr_sched.awm;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	ScheduleFlag_t NextState() const {
+	inline ScheduleFlag_t NextState() const {
 		return next_sched.state;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	AwmStatusPtr_t const NextAWM() const {
+	inline AwmStatusPtr_t const NextAWM() const {
 		return next_sched.awm;
 	}
 
@@ -237,7 +236,7 @@ public:
 	 * @return An error code (@see ExitCode_t)
 	 */
 	Application::ExitCode_t SetConstraint(std::string const & res_path,
-			Constraint::BoundType type, uint32_t value);
+			Constraint::BoundType_t type, uint32_t value);
 
 	/**
 	 * @brief Remove a constraint upon a specific resource.
@@ -248,14 +247,14 @@ public:
 	 * @return An error code (@see ExitCode)
 	 */
 	Application::ExitCode_t RemoveConstraint(std::string const & res_path,
-			Constraint::BoundType type);
+			Constraint::BoundType_t type);
 
 private:
 
 	/** The application name */
 	std::string name;
 
-	/**The user who has launched the application */
+	/** The user who has launched the application */
 	std::string user;
 
 	/** The PID assigned from the OS */
@@ -296,7 +295,7 @@ private:
 	 * @param value The value of the constraint
 	 */
 	void workingModesEnabling(std::string const & res_path,
-			Constraint::BoundType type, uint64_t value);
+			Constraint::BoundType_t type, uint64_t value);
 
 };
 

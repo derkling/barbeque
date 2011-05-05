@@ -130,7 +130,7 @@ uint64_t ResourceAccounter::stateInformation(std::string const & _path,
 }
 
 
-void ResourceAccounter::changeUsages(app::Application const * _app,
+void ResourceAccounter::changeUsages(ba::Application const * _app,
 		UsageAction_t _sel) {
 
 	// Map of resource usages of the application

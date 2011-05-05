@@ -165,7 +165,7 @@ CoreInteractionsTest::CoreInteractionsTest():
 	std::string logger_name(COREINT_NAMESPACE);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger =
-		std::unique_ptr<plugins::LoggerIF>
+		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	if (logger)
@@ -391,11 +391,14 @@ void CoreInteractionsTest::Test() {
 	ba::PluginsDataContainer pdc;
 	ba::PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
 
-	if (pdata.get() != NULL)
-		std::cout << "Plugin YaMCa - Author :" << pdata->Get("author")
-			<< std::endl;
-	else
+	if (pdata.get() == NULL) {
 		logger->Warn("Unable to get plugin info");
+	}
+	else {
+		std::string pl_author;
+		if ((pdata->Get("author", pl_author)) == ba::PluginData::PDATA_SUCCESS)
+			std::cout << "Plugin YaMCa - Author :" << pl_author << std::endl;
+	}
 
 	// Print out working modes details
 	WorkingModesDetails(test_app, res_names);
