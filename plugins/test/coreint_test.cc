@@ -581,7 +581,7 @@ void CoreInteractionsTest::Test() {
 		return;
 	}
 
-	logger->Debug("Applications loaded = %d", sv->ApplicationsReady().size());
+	logger->Debug("Applications loaded = %d", sv->ApplicationsReady()->size());
 
 	// Plugin specific data
 	ba::PluginsDataContainer pdc;

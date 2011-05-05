@@ -355,7 +355,7 @@ void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 
 	// The application descriptor now will manage the change of
 	// working mode
-	papp->SwitchToNextScheduled(time);
+	papp->UpdateScheduledStatus(time);
 
 	logger->Debug("Changed EXC [%s] status to [%d]",
 			papp->StrId(),
