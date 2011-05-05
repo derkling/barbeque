@@ -30,14 +30,9 @@
 
 #include "bbque/res/resource_accounter_status.h"
 
-namespace bbque { namespace app {
+using bbque::app::Application;
 
-	// Forward declarations
-	class Application;
-} // namespace app
-
-namespace ba = bbque::app;
-namespace res {
+namespace bbque { namespace res {
 
 /**
  * @class ResourceAccounterConfIF
@@ -53,14 +48,14 @@ public:
 	 * (exit or is killed) and releases all the resources usages.
 	 * @param app The application holding the usage of resources
 	 */
-	virtual void Release(ba::Application const * app) = 0;
+	virtual void Release(Application const * app) = 0;
 
 	/**
 	 * @brief This releases the current resources used and get the
 	 * next set.
 	 * @param app The application holding the usage of resources
 	 */
-	virtual void SwitchUsage(ba::Application const * app) = 0;
+	virtual void SwitchUsage(Application const * app) = 0;
 
 	/**
 	 * @brief Setup informations about a resource installed into the system

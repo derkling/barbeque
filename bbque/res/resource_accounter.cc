@@ -37,9 +37,9 @@
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 
+namespace ba = bbque::app;
 
 namespace bbque { namespace res {
-
 
 ResourceAccounter *ResourceAccounter::GetInstance() {
 	static ResourceAccounter *instance = NULL;

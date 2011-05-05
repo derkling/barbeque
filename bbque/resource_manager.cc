@@ -28,6 +28,7 @@
 #include "bbque/plugins/logger.h"
 
 namespace bp = bbque::plugins;
+namespace po = boost::program_options;
 
 namespace bbque {
 

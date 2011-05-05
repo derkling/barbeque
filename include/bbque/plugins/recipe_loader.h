@@ -30,7 +30,8 @@
 
 #define RECIPE_LOADER_NAMESPACE "rloader."
 
-namespace ba = bbque::app;
+using bbque::app::Application;
+using bbque::app::Recipe;
 
 namespace bbque { namespace plugins {
 
@@ -75,9 +76,9 @@ public:
 	 * @param recipe The recipe object to fill with the data to parse
 	 * @return An exit code indicating the loading status
 	 */
-	virtual	ExitCode_t LoadRecipe(std::shared_ptr<ba::Application> app,
+	virtual	ExitCode_t LoadRecipe(std::shared_ptr<Application> app,
 				std::string const & rname,
-				std::shared_ptr<ba::Recipe> recipe)
+				std::shared_ptr<Recipe> recipe)
 		= 0;
 
 	/**

@@ -30,6 +30,9 @@
 #include "bbque/plugins/recipe_loader.h"
 #include "bbque/res/resources.h"
 
+namespace ba = bbque::app;
+namespace bp = bbque::plugins;
+namespace po = boost::program_options;
 
 namespace bbque {
 

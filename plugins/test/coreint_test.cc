@@ -269,7 +269,7 @@ int CoreInteractionsTest::WorkingModesDetails(
 	for (; it2 != endm; ++it2) {
 		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages ***\n",
 				(*it2)->Name().c_str(), (*it2)->Value(),
-				(*it2)->ResourceUsages().size());
+				(int)(*it2)->ResourceUsages().size());
 
 		ba::AwmStatusPtr_t awm_get(*it2);
 

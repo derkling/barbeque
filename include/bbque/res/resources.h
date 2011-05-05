@@ -32,7 +32,7 @@
 
 #include "bbque/app/application.h"
 
-namespace ba = bbque::app;
+using bbque::app::Application;
 
 namespace bbque { namespace res {
 
@@ -55,7 +55,7 @@ typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
 typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 
 /** Map of Application descriptor pointers. Key: application name */
-typedef std::map<std::string, ba::Application const *> AppMap_t;
+typedef std::map<std::string, Application const *> AppMap_t;
 
 
 /**
@@ -216,7 +216,7 @@ public:
 	 * @brief Set the resource as used by a given application
 	 * @param app_ptr The pointer to the application using the resource
 	 */
-	inline void UsedBy(ba::Application const * app_ptr) {
+	inline void UsedBy(Application const * app_ptr) {
 		apps[app_ptr->Name()] = app_ptr;
 	}
 
@@ -224,7 +224,7 @@ public:
 	 * @brief Unset the the application from the use of the resource
 	 * @param app_ptr The pointer to the application pastly using the resource
 	 */
-	inline void NoMoreUsedBy(ba::Application const * app_ptr) {
+	inline void NoMoreUsedBy(Application const * app_ptr) {
 		apps.erase(app_ptr->Name());
 	}
 

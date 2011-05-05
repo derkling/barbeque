@@ -32,6 +32,7 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resource_accounter.h"
 
+namespace ba = bbque::app;
 namespace br = bbque::res;
 namespace bp = bbque::plugins;
 

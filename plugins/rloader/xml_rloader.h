@@ -37,6 +37,11 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/plugin.h"
 
+using bbque::app::Application;
+using bbque::app::Recipe;
+using bbque::app::WorkingMode;
+using bbque::app::PluginData;
+
 // Parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
 
@@ -85,9 +90,9 @@ public:
 	/**
 	 * @see RecipeLoaderIF
 	 */
-	ExitCode_t LoadRecipe(std::shared_ptr<ba::Application> app,
+	ExitCode_t LoadRecipe(std::shared_ptr<Application> app,
 			std::string const & recipe_path,
-			std::shared_ptr<ba::Recipe> recipe);
+			std::shared_ptr<Recipe> recipe);
 
 	/**
 	 * @see RecipeLoaderIF
@@ -117,12 +122,12 @@ private:
 	/**
 	 * Shared pointer to the recipe object
 	 */
-	std::shared_ptr<ba::Recipe> recipe_ptr;
+	std::shared_ptr<Recipe> recipe_ptr;
 
 	/**
 	 * Shared pointer to the application requiring the recipe
 	 */
-	std::shared_ptr<ba::Application> app_ptr;
+	std::shared_ptr<Application> app_ptr;
 
 	/**
 	 * The constructor
@@ -153,7 +158,7 @@ private:
 	 * expected section tag
 	 */
 	uint8_t loadResources(ticpp::Element * xml_elem,
-			std::shared_ptr<ba::WorkingMode> & wm,
+			std::shared_ptr<WorkingMode> & wm,
 			std::string const & res_path);
 
 	/**
@@ -164,7 +169,7 @@ private:
 	 * @param res_usage Resource usage value
 	 * @return An internal error code
 	 */
-	uint8_t appendToWorkingMode(std::shared_ptr<ba::WorkingMode> & wm,
+	uint8_t appendToWorkingMode(std::shared_ptr<WorkingMode> & wm,
 		std::string const & res_path, ulong res_usage);
 
 	/**
@@ -175,7 +180,7 @@ private:
 	 * @param res_path Resource path
 	 */
 	uint8_t parseResourceData(ticpp::Element * res_elem,
-		std::shared_ptr<ba::WorkingMode> & wm, std::string & res_path);
+		std::shared_ptr<WorkingMode> & wm, std::string & res_path);
 
 	/**
 	 * @brief Parse the section containing plugins specific data for the
@@ -202,7 +207,7 @@ private:
 	 * @param pdata PluginData object to fill
 	 * @param plugdata_node The XML Node to check for data
 	 */
-	void parsePluginData(std::shared_ptr<ba::PluginData> & pdata,
+	void parsePluginData(std::shared_ptr<PluginData> & pdata,
 		ticpp::Node * plugdata_node);
 
 	/**

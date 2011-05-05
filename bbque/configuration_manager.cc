@@ -28,6 +28,8 @@
 
 #include "bbque/barbeque.h"
 
+namespace po = boost::program_options;
+
 namespace bbque {
 
 ConfigurationManager::ConfigurationManager() :

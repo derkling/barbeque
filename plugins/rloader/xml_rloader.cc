@@ -31,6 +31,9 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
 
+namespace ba = bbque::app;
+namespace po = boost::program_options;
+
 namespace bbque { namespace plugins {
 
 bool XMLRecipeLoader::configured = false;

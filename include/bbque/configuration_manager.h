@@ -28,7 +28,9 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
-namespace po = boost::program_options;
+
+using boost::program_options::options_description;
+using boost::program_options::variables_map;
 
 namespace bbque {
 
@@ -68,14 +70,14 @@ public:
 	 * @param 	opts the map of configuration parameters values returned
 	 */
 	void ParseConfigurationFile(
-			po::options_description const & opts_desc,
-			po::variables_map & opts);
+			options_description const & opts_desc,
+			variables_map & opts);
 
 	/**
 	 * @brief   Get a reference to the configuration parameters values map
 	 * @return  A reference to the  configuration parameters values map
 	 */
-	inline po::variables_map const & GetOptions() const {
+	inline variables_map const & GetOptions() const {
 		return std::cref(opts_vm);
 	}
 
@@ -105,25 +107,25 @@ private:
 	/**
 	 * The decription of each core modules parameters
 	 */
-	po::options_description core_opts_desc;
+	options_description core_opts_desc;
 
 	/**
 	 * The description of all supported parameters
 	 */
-	po::options_description all_opts_desc;
+	options_description all_opts_desc;
 
 #ifdef BBQUE_DEBUG
 	/**
 	 * The description of debugging parameters
 	 */
-	po::options_description dbg_opts_desc;
+	options_description dbg_opts_desc;
 	uint16_t test_run;
 #endif
 
 	/**
 	 * The description of application parameters
 	 */
-	po::options_description app_opts_desc;
+	options_description app_opts_desc;
 
 	/**
 	 * Greatest integer value for the lowest application priority
@@ -133,12 +135,12 @@ private:
 	/**
 	 * The description of command line available parameters
 	 */
-	po::options_description cmd_opts_desc;
+	options_description cmd_opts_desc;
 
 	/**
 	 * The map of all parameters values
 	 */
-	po::variables_map opts_vm;
+	variables_map opts_vm;
 
 	/**
 	 * The path of the configuration file

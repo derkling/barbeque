@@ -32,7 +32,7 @@
 namespace bb = bbque;
 namespace bp = bbque::plugins;
 namespace bu = bbque::utils;
-
+namespace po = boost::program_options;
 
 #define FMT(fmt) BBQUE_FMT(COLOR_GREEN, "BQ", fmt)
 

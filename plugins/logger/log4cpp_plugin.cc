@@ -25,7 +25,6 @@
 #include "bbque/platform_services.h"
 #include "bbque/plugins/static_plugin.h"
 
-
 namespace bp = bbque::plugins;
 
 extern "C"

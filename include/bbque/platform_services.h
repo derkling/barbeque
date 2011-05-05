@@ -84,14 +84,15 @@ typedef enum PF_ServiceResponse {
 //----- START - PF_SERVICE_CONF_DATA -----
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
-namespace po = boost::program_options;
+using boost::program_options::options_description;
+using boost::program_options::variables_map;
 
 /**
  * Request data for a PF_SERVICE_CONF_DATA service request
  */
 typedef struct PF_Service_ConfDataIn {
 	/** Pointer to a set of options descriptors required */
-	po::options_description const * opts_desc;
+	options_description const * opts_desc;
 } PF_Service_ConfDataIn;
 
 /**
@@ -99,7 +100,7 @@ typedef struct PF_Service_ConfDataIn {
  */
 typedef struct PF_Service_ConfDataOut {
 	/** Pointer to a map to store the values of required options */
-	po::variables_map * opts_value;
+	variables_map * opts_value;
 } PF_Service_ConfDataOut;
 //----- END - PF_SERVICE_CONF_DATA -----
 
