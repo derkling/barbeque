@@ -224,7 +224,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 					errorString);
 	if (!dl) {
 		// not a dynamic library
-		fprintf(stderr, FMT("[%s] is not a valid .so plugin\n"),
+		fprintf(stderr, FMT("FAILED: [%s] is not a valid dynamic library\n"),
 				path.filename().c_str());
 		return -1;
 	}
@@ -244,6 +244,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 		fprintf(stderr, FMT("Initialization failed\n"));
 		return res;
 	}
+	DB(fprintf(stdout, FMT("Plugin initialized [%s]\n"), pluginPath.c_str()));
 
 	return 0;
 }

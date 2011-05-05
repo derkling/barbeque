@@ -26,6 +26,9 @@
 #include <sstream>
 #include <iostream>
 
+#include "bbque/utils/utility.h"
+#define FMT(fmt) BBQUE_FMT(COLOR_LGREEN, "DL", fmt)
+
 namespace bbque { namespace plugins {
 
 DynamicLibrary::DynamicLibrary(void * _handle) :
@@ -43,8 +46,8 @@ DynamicLibrary * DynamicLibrary::Load(const std::string & name,
 	void * handle = NULL;
 
 	if (name.empty()) {
-		errorString = "Empty path.";
-		return NULL;
+		errorString = "Empty path";
+		goto err_load;
 	}
 
 	handle = ::dlopen(name.c_str(), RTLD_NOW);
@@ -52,16 +55,19 @@ DynamicLibrary * DynamicLibrary::Load(const std::string & name,
 		std::string dlErrorString;
 		const char *zErrorString = ::dlerror();
 		if (zErrorString)
-			dlErrorString = zErrorString;
+			errorString = zErrorString;
+		else
+			errorString = std::string("Undef");
 
-		errorString += "Failed to load \"" + name + '"';
-		if(dlErrorString.size())
-			errorString += ": " + dlErrorString;
-
-		return NULL;
+		goto err_load;
 	}
 
 	return new DynamicLibrary(handle);
+
+err_load:
+	fprintf(stderr, FMT("FAILED loading [%s], Error:\n%s\n"),
+			name.c_str(), errorString.c_str());
+	return NULL;
 }
 
 void * DynamicLibrary::GetSymbol(const std::string & symbol) {

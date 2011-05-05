@@ -29,6 +29,8 @@
 #include "bbque/utils/timer.h"
 #include "bbque/utils/utility.h"
 
+#include "bbque/plugins/test.h"
+
 namespace bb = bbque;
 namespace bp = bbque::plugins;
 namespace bu = bbque::utils;
@@ -43,10 +45,11 @@ bu::Timer bbque_tmr(true);
 bool runTests(bp::PluginManager & pm) {
 	const bp::PluginManager::RegistrationMap & rm = pm.GetRegistrationMap();
 	bp::PluginManager::RegistrationMap::const_iterator near_match =
-		rm.lower_bound("test.");
+		rm.lower_bound(TEST_NAMESPACE);
 
 	if (near_match == rm.end() ||
-			((*near_match).first.compare(0,5,"test.")))
+			((*near_match).first.compare(0,
+				strlen(TEST_NAMESPACE),TEST_NAMESPACE)))
 		return false;
 
 	fprintf(stdout, FMT(".:: Entering Testing Mode\n"));
