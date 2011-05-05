@@ -43,6 +43,7 @@ public:
 	 * @param user Who's the user ?
 	 * @param prio Static priority
 	 * @param pid PID of the application (assigned from the OS)
+	 * @param exc_id The ID of the Execution Context (assigned from the application)
 	 * @param rpath Recipe location
 	 * @param weak_load If true, the recipe accept a "weak load".
 	 * It means that if a resource is missing, Barbeque can look for a
@@ -52,7 +53,8 @@ public:
 	 */
 	virtual plugins::RecipeLoaderIF::ExitCode_t StartApplication(
 			std::string const & name, std::string const & user,	uint16_t prio,
-			uint32_t pid, std::string const & rpath, bool weak_load) = 0;
+			uint32_t pid, uint32_t exc_id, std::string const & rpath,
+			bool weak_load) = 0;
 
 };
 

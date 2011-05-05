@@ -351,7 +351,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 
 	// Now switch!
 	ApplicationManager * appman = ApplicationManager::GetInstance();
-	appman->ChangedSchedule(test_app->Pid(), ov_time);
+	appman->ChangedSchedule(test_app, ov_time);
 	PrintScheduleInfo(test_app);
 }
 
@@ -374,7 +374,7 @@ void CoreInteractionsTest::Test() {
 		return;
 	}
 	// Start an application
-	appman->StartApplication("mp3player", "giuseppe", 3, 3324, "r1_platA", true);
+	appman->StartApplication("mp3player", "giuseppe", 3, 3324, 0, "r1_platA", true);
 
 	std::shared_ptr<ba::ApplicationStatusIF>
 		test_app(appman->GetApplication(3324));

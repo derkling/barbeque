@@ -36,8 +36,12 @@ typedef std::shared_ptr<app::Application> AppPtr_t;
  * Map containing shared pointers to Application descriptors, where the key is
  * the application PID
  */
-typedef std::map<uint32_t, AppPtr_t > AppsMap_t;
+typedef std::multimap<uint32_t, AppPtr_t > AppsMap_t;
 
+/**
+ * An entry of the Application Map
+ */
+typedef std::pair<uint32_t, AppPtr_t> AppsMapEntry_t;
 
 /**
  * @class ApplicationManagerStatusIF
@@ -52,14 +56,14 @@ public:
 	 * manager
 	 * @return A map of all applications
 	 */
-	virtual AppsMap_t const & Applications() = 0;
+	virtual AppsMap_t const & Applications() const = 0;
 
 	/**
 	 * @brief Retrieve all the applications of a specific priority
 	 * @param prio The priority value
 	 * @return A map of applications of the request priority
 	 */
-	virtual AppsMap_t const & Applications(uint16_t prio) = 0;
+	virtual AppsMap_t const & Applications(uint16_t prio) const = 0;
 
 	/**
 	 * @brief Retrieve all the applications in a specific scheduling state
@@ -67,13 +71,16 @@ public:
 	 * @return A map of applications in the schedule status request
 	 */
 	virtual AppsMap_t const & Applications(
-			app::Application::ScheduleFlag_t sched_state) = 0;
+			app::Application::ScheduleFlag_t sched_state) const = 0;
 
 	/**
-	 * @brief Retrieve an application descriptor (shared pointer) by name
+	 * @brief Retrieve an application descriptor (shared pointer) by PID and
+	 * Excution Context
 	 * @param pid Application PID
+	 * @param exc_id Execution Contetx ID
 	 */
-	virtual AppPtr_t const GetApplication(uint32_t pid) = 0;
+	virtual AppPtr_t const GetApplication(uint32_t pid,
+			uint32_t exc_id = 0) = 0;
 
 	/**
 	 * @brief Maximum integer value for the minimum application priority

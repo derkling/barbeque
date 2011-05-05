@@ -95,34 +95,10 @@ ApplicationManager::~ApplicationManager() {
 }
 
 
-AppsMap_t const & ApplicationManager::Applications(uint16_t _prio) {
-
-	// Check priority value bounds
-	if (_prio <= lowest_priority)
-		return priority_vec[_prio];
-
-	// Return an empty map if priority is out of range
-	return empty_map;
-}
-
-
-AppsMap_t const & ApplicationManager::Applications(
-		ba::Application::ScheduleFlag_t sched_state) {
-
-	// Return a map of application descriptor (pointers) with
-	// the same priority
-	if (sched_state >= ba::Application::READY   &&
-	        sched_state <= ba::Application::FINISHED) {
-		return status_vec[sched_state];
-	}
-	// Return an empty map if the state value is not valid
-	return empty_map;
-}
-
-
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
     std::string const & _name, std::string const & _user, uint16_t _prio,
-    uint32_t _pid, std::string const & _rname, bool weak_load = false) {
+	uint32_t _pid, uint32_t _exc_id, std::string const & _rname,
+	bool weak_load) {
 
 	// A shared pointer the application object descriptor
 	AppPtr_t app_ptr;
@@ -133,7 +109,7 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 	    bp::RecipeLoaderIF::RL_SUCCESS;
 
 	// Create a new descriptor
-	app_ptr = AppPtr_t(new ba::Application(_name, _user, _pid));
+	app_ptr = AppPtr_t(new app::Application(_name, _user, _pid, _exc_id));
 	app_ptr->SetPriority(_prio);
 
 	// The recipe has been loaded in the past ?
@@ -172,60 +148,111 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 	// Set the recipe of the application
 	app_ptr->SetRecipe(recp_ptr);
 	// Application descriptors map
-	apps[app_ptr->Pid()] = app_ptr;
+	apps.insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
 	// Priority map
-	priority_vec[app_ptr->Priority()][app_ptr->Pid()] = app_ptr;
+	(priority_vec[app_ptr->Priority()]).
+		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
 	// Status map
-	status_vec[static_cast<uint8_t>(app_ptr->CurrentState())][app_ptr->Pid()] =
-	    app_ptr;
+	(status_vec[static_cast<uint8_t>(app_ptr->CurrentState())]).
+		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
 
 	return retcode;
 }
 
 
-void ApplicationManager::ChangedSchedule(uint32_t _pid, double _time) {
+void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 
-	// Check existance of application instance with PID = "_pid"
-	AppsMap_t::iterator pid_it = apps.find(_pid);
-	if (pid_it == apps.end())
-		return;
-
-	// Get the pointer to the application descriptor
-	AppPtr_t _app = AppPtr_t(pid_it->second);
+	// Check existance of application instance
+	assert(_papp);
 
 	// If the scheduled state changes we need to update the application
 	// descriptor (pointer) position, moving it in the right map
-	if (_app->CurrentState() != _app->NextState()) {
+	if (_papp->CurrentState() != _papp->NextState()) {
 
 		// Retrieve the runtime map from the status vector
-		AppsMap_t curr_state_map = Applications(_app->CurrentState());
-		AppsMap_t next_state_map = Applications(_app->NextState());
+		AppsMap_t curr_state_map = Applications(_papp->CurrentState());
+		AppsMap_t next_state_map = Applications(_papp->NextState());
 
 		// Find the application descriptor the current status map
-		AppsMap_t::iterator it = curr_state_map.find(_app->Pid());
-		if (it == curr_state_map.end()) {
+		std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
+			curr_state_map.equal_range(_papp->Pid());
+		if (range.first == range.second) {
 			logger->Error("Cannot find %s in the expected status",
-			              _app->Name().c_str());
+			              _papp->Name().c_str());
 			return;
 		}
-		// Move it from the current to the next status map
-		next_state_map[_app->Pid()] = it->second;
+
+		logger->Debug("Looking for Application [Name: %s, Pid: %d, ExcId: %d]...",
+				_papp->Name().c_str(),
+				_papp->Pid(),
+				_papp->ExcId());
+
+		AppsMap_t::iterator it = range.first;
+		for ( ; it!=range.second; it++) {
+			logger->Debug("Found Application [Name: %s, Pid: %d, ExcId: %d]",
+					((*it).second)->Name().c_str(),
+					((*it).second)->Pid(),
+					((*it).second)->ExcId());
+			if (_papp->ExcId() == ((*it).second)->ExcId())
+				break;
+		}
+		// The required application should be found, otherwise a data
+		// structure corruption has occurred
+		assert(it!=range.second);
+
+		logger->Debug("Changed Application [Name: %s, Pid: %d, ExcId: %d] "
+				"status to [%d]",
+				((*it).second)->Name().c_str(),
+				((*it).second)->Pid(),
+				((*it).second)->ExcId(),
+				((*it).second)->NextState());
+
 		curr_state_map.erase(it);
+
+		// Move it from the current to the next status map
+		next_state_map.insert(AppsMapEntry_t(_papp->Pid(), _papp));
+
 	}
 	// The application descriptor now will manage the change of working mode
-	_app->SwitchToNextScheduled(_time);
+	_papp->SwitchToNextScheduled(_time);
+
 }
 
 
-AppPtr_t const ApplicationManager::GetApplication(uint32_t _pid) {
-	// Null shared pointer
+AppPtr_t const ApplicationManager::GetApplication(uint32_t _pid,
+		uint32_t _exc_id) {
 	AppPtr_t app_ptr;
-	app_ptr.reset();
 
-	// Find the application by name
-	AppsMap_t::iterator app_it = apps.find(_pid);
-	if (app_it != apps.end())
-		app_ptr = AppPtr_t(app_it->second);
+	logger->Debug("Looking for Application [Pid: %d, ExcId: %d]...",
+			_pid, _exc_id);
+
+	// Find all the Execution Contexts of the specified application PID
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
+		apps.equal_range(_pid);
+	if (range.first == range.second) {
+		logger->Debug("Application [Pid: %d] NOT FOUND", _pid);
+		return app_ptr;
+	}
+
+	// Look for the required Execution Context
+	AppsMap_t::iterator it = range.first;
+	for ( ; it!=range.second; it++) {
+		if (_exc_id == ((*it).second)->ExcId())
+			break;
+	}
+	if (it == range.second) {
+		logger->Debug("Execution Context [Pid: %d, ExcId: %d] NOT FOUND",
+				_pid, _exc_id);
+		return app_ptr;
+	}
+
+	logger->Debug("Application Excution Context "
+			"[Name: %s, Pid: %d, ExcId: %d] FOUND",
+			((*it).second)->Name().c_str(),
+			((*it).second)->Pid(),
+			((*it).second)->ExcId());
+
+	app_ptr = ((*it).second);
 
 	return app_ptr;
 }

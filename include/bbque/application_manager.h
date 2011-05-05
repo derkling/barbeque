@@ -34,7 +34,7 @@
 #include "bbque/application_manager_conf.h"
 #include "bbque/app/application.h"
 
-#define APPLICATION_MANAGER_NAMESPACE "bq.appman"
+#define APPLICATION_MANAGER_NAMESPACE "bq.am"
 
 using bbque::app::Application;
 using bbque::app::Recipe;
@@ -75,6 +75,7 @@ public:
 	 * @param user Who's the user ?
 	 * @param prio Application priority
 	 * @param pid PID of the application (assigned from the OS)
+	 * @param The ID of the Execution Context (assigned from the application)
 	 * @param rpath Recipe path
 	 * @param weak_load If true a weak load of the recipe is accepted.
 	 * It is when some resource requests doesn't match perfectly.
@@ -82,14 +83,15 @@ public:
 	 */
 	RecipeLoaderIF::ExitCode_t StartApplication(
 			std::string const & name, std::string const & user, uint16_t prio,
-			uint32_t pid, std::string const & rpath, bool weak_load);
+			uint32_t pid, uint32_t exc_id, std::string const & rpath,
+			bool weak_load = false);
 
 	/**
 	 * @brief Retrieve all the applications which entered the resource
 	 * manager
 	 * @return The list of all applications which entered the RTRM
 	 */
-	inline AppsMap_t const & Applications() {
+	inline AppsMap_t const & Applications() const {
 		return apps;
 	}
 
@@ -98,21 +100,30 @@ public:
 	 * @param prio Application priority
 	 * @return The map of applications (of the given priority class)
 	 */
-	AppsMap_t const & Applications(uint16_t prio);
+	AppsMap_t const & Applications(uint16_t prio) const {
+		assert(prio<=lowest_priority);
+		if (prio>lowest_priority)
+			prio=lowest_priority;
+		return priority_vec[prio];
+	}
 
 	/**
 	 * @brief Retrieve all the applications in a specific scheduling state
 	 * @param sched_state The scheduled state
 	 * @return The map of applications in the given scheduled state
 	 */
-	AppsMap_t const & Applications(
-			Application::ScheduleFlag_t sched_state);
+	AppsMap_t const & Applications (
+			Application::ScheduleFlag_t sched_state) const {
+		return status_vec[sched_state];
+	}
 
 	/**
-	 * @brief Retrieve an application descriptor (shared pointer) by PID
+	 * @brief Retrieve an application descriptor (shared pointer) by PID and
+	 * Excution Context
 	 * @param pid Application PID
+	 * @param exc_id Execution Contetx ID
 	 */
-	AppPtr_t const GetApplication(uint32_t pid);
+	AppPtr_t const GetApplication(uint32_t pid, uint32_t exc_id = 0);
 
 	/**
 	 * @brief Return the maximum integer value for the minimum application
@@ -131,10 +142,10 @@ public:
 	 * schedule state has changed), and then update the application runtime
 	 * info.
 	 *
-	 * @param pid Application PID
+	 * @param papp The Application which scheduling has chenged
 	 * @param time Working mode switch time measured
 	 */
-	void ChangedSchedule(uint32_t pid, double time);
+	void ChangedSchedule(AppPtr_t papp, double time);
 
 private:
 
@@ -175,11 +186,6 @@ private:
 	 * Each position points to a set of maps pointing applications
 	 */
 	std::vector<AppsMap_t> status_vec;
-
-	/**
-	 * Utility empty map
-	 */
-	const AppsMap_t empty_map;
 
 };
 

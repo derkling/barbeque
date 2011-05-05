@@ -40,11 +40,12 @@ namespace bbque { namespace app {
 
 
 Application::Application(std::string const & _name, std::string const & _user,
-		uint32_t _pid):
+		uint32_t _pid, uint32_t _exc_id):
 	Object(APPLICATION_NAMESPACE + _name),
 	name(_name),
 	user(_user),
-	pid(_pid) {
+	pid(_pid),
+	exc_id(_exc_id) {
 
 	// Scheduling state
 	curr_sched.state = next_sched.state = READY;
