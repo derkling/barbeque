@@ -36,12 +36,12 @@ typedef std::shared_ptr<app::Application> AppPtr_t;
  * Map containing shared pointers to Application descriptors, where the key is
  * the application PID
  */
-typedef std::multimap<uint32_t, AppPtr_t > AppsMap_t;
+typedef std::multimap<pid_t, AppPtr_t > AppsMap_t;
 
 /**
  * An entry of the Application Map
  */
-typedef std::pair<uint32_t, AppPtr_t> AppsMapEntry_t;
+typedef std::pair<pid_t, AppPtr_t> AppsMapEntry_t;
 
 /**
  * @class ApplicationManagerStatusIF
@@ -79,8 +79,8 @@ public:
 	 * @param pid Application PID
 	 * @param exc_id Execution Contetx ID
 	 */
-	virtual AppPtr_t const GetApplication(uint32_t pid,
-			uint32_t exc_id = 0) = 0;
+	virtual AppPtr_t const GetApplication(pid_t pid,
+			uint8_t exc_id = 0) = 0;
 
 	/**
 	 * @brief Maximum integer value for the minimum application priority

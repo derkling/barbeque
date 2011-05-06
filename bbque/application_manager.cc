@@ -138,7 +138,7 @@ RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
 
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
     std::string const & _name, std::string const & _user, uint16_t _prio,
-	uint32_t _pid, uint32_t _exc_id, std::string const & _rname,
+	pid_t _pid, uint8_t _exc_id, std::string const & _rname,
 	bool _weak_load) {
 
 	// A shared pointer the application object descriptor
@@ -227,8 +227,8 @@ void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 }
 
 
-AppPtr_t const ApplicationManager::GetApplication(uint32_t _pid,
-		uint32_t _exc_id) {
+AppPtr_t const ApplicationManager::GetApplication(pid_t _pid,
+		uint8_t _exc_id) {
 	AppPtr_t app_ptr;
 
 	logger->Debug("Looking for Application [Pid: %d, ExcId: %d]...",

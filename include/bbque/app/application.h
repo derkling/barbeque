@@ -85,7 +85,7 @@ public:
 	 * @param exc_id The ID of the Execution Context (assigned from the application)
 	 */
 	explicit Application(std::string const & name, std::string const & user,
-			uint32_t pid, uint32_t exc_id);
+			pid_t pid, uint8_t exc_id);
 
 	/**
 	 * @brief Default destructor
@@ -128,7 +128,7 @@ public:
 	 * @brief Get the process ID of the application
 	 * @return PID value
 	 */
-	inline uint32_t Pid() const {
+	inline pid_t Pid() const {
 		return pid;
 	}
 
@@ -136,7 +136,7 @@ public:
 	 * @brief Get the ID of this Execution Context
 	 * @return PID value
 	 */
-	inline uint32_t ExcId() const {
+	inline uint8_t ExcId() const {
 		return exc_id;
 	}
 
@@ -259,10 +259,10 @@ private:
 	std::string user;
 
 	/** The PID assigned from the OS */
-	uint32_t pid;
+	pid_t pid;
 
 	/** The ID of this Execution Context */
-	uint32_t exc_id;
+	uint8_t exc_id;
 
 	/** A numeric priority value */
 	uint16_t priority;

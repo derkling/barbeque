@@ -83,7 +83,7 @@ public:
 	 */
 	RecipeLoaderIF::ExitCode_t StartApplication(
 			std::string const & name, std::string const & user, uint16_t prio,
-			uint32_t pid, uint32_t exc_id, std::string const & rpath,
+			pid_t pid, uint8_t exc_id, std::string const & rpath,
 			bool weak_load = false);
 
 	/**
@@ -123,7 +123,7 @@ public:
 	 * @param pid Application PID
 	 * @param exc_id Execution Contetx ID
 	 */
-	AppPtr_t const GetApplication(uint32_t pid, uint32_t exc_id = 0);
+	AppPtr_t const GetApplication(pid_t pid, uint8_t exc_id = 0);
 
 	/**
 	 * @brief Return the maximum integer value for the minimum application
