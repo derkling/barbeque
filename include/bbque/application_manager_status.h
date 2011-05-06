@@ -46,7 +46,7 @@ typedef std::pair<AppPid_t, AppPtr_t> AppsMapEntry_t;
 /**
  * An entry of the Application Map
  */
-typedef std::pair<uint32_t, AppPtr_t> AppsMapEntry_t;
+typedef std::pair<pid_t, AppPtr_t> AppsMapEntry_t;
 
 /**
  * @class ApplicationManagerStatusIF

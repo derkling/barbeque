@@ -49,7 +49,7 @@ typedef std::list<ResourcePtr_t> ResourcePtrList_t;
 /** Shared pointer to ResourceState object */
 typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
 /** Map of amounts of resource used by applications. Key: Application PID */
-typedef std::map<uint32_t, uint64_t> AppUseQtyMap_t;
+typedef std::map<pid_t, uint64_t> AppUseQtyMap_t;
 /** Numeric value used as token for the resource views */
 typedef size_t RViewToken_t;
 /** Hash map collecting the state views of a resource */

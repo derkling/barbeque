@@ -52,7 +52,7 @@ typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 /** Constant pointer to the map of ResourceUsage descriptors */
 typedef UsagesMap_t const * UsagesMapPtr_t;
 /** Map of map of ResourceUsage descriptors. Key: application */
-typedef std::map<uint32_t, UsagesMapPtr_t> AppUsagesMap_t;
+typedef std::map<pid_t, UsagesMapPtr_t> AppUsagesMap_t;
 /** Shared pointer to a map of pair Application/ResourceUsages */
 typedef std::shared_ptr<AppUsagesMap_t> AppUsagesMapPtr_t;
 /** Map of AppUsagesMap_t having the resource state view token as key */
