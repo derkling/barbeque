@@ -82,6 +82,105 @@ rpc_msg_type_t ApplicationProxy::GetNextMessage(pchMsg_t & pChMsg) {
 }
 
 
+/*******************************************************************************
+ * Command Sessions
+ ******************************************************************************/
+
+inline ApplicationProxy::pcmdSn_t ApplicationProxy::SetupCmdSession(
+		AppPtr_t papp) const {
+	pcmdSn_t psn = pcmdSn_t(new cmdSn_t);
+	psn->papp = papp;
+	psn->resp_prm = resp_prm_t();
+	return psn;
+}
+
+inline void ApplicationProxy::EnqueueHandler(pcmdSn_t snHdr) {
+	std::unique_lock<std::mutex> cmdSnMm_ul(cmdSnMm_mtx);
+	snHdr->pid = gettid();
+	cmdSnMm.insert(std::pair<pid_t, pcmdSn_t>(snHdr->pid, snHdr));
+}
+
+RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
+	conCtxMap_t::iterator it;
+	pconCtx_t pcon;
+	rpc_msg_bbq_stop_t stop_msg = {
+		{RPC_BBQ_STOP_EXECUTION, papp->Pid(), papp->ExcId()},
+		{0, 100} // FIXME get a timeout parameter
+	};
+
+	// Send the stop command
+	logger->Debug("APPs PRX: Send Command [RPC_BBQ_STOP_EXECUTION] to "
+			"[app: %s, pid: %d, exc: %d]",
+			papp->Name().c_str(), papp->Pid(), papp->ExcId());
+
+	assert(rpc);
+
+	// Recover the communication context for this application
+	conCtxMap_ul.lock();
+	it = conCtxMap.find(papp->Pid());
+	conCtxMap_ul.unlock();
+
+	// Check we have a connection contexe already configured
+	if (it == conCtxMap.end()) {
+		logger->Error("APPs PRX: Connection context not found for application "
+				"[app: %s, pid: %d]", papp->Name().c_str(), papp->Pid());
+		return RTLIB_BBQUE_CHANNEL_UNAVAILABLE;
+	}
+
+	// Sending message on the application connection context
+	pcon = (*it).second;
+	rpc->SendMessage(pcon->pd, &stop_msg.header, (size_t)RPC_PKT_SIZE(bbq_stop));
+
+	return RTLIB_OK;
+}
+
+void ApplicationProxy::StopExecutionTrd(pcmdSn_t snHdr) {
+	pcmdRsp_t pcmdRsp(new cmdRsp_t);
+
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(snHdr);
+
+	logger->Debug("APPs PRX: StopExecutionTrd [pid: %5d] "
+			"START [app: %s, pid: %d, exc: %d]",
+			snHdr->pid, snHdr->papp->Name().c_str(),
+			snHdr->papp->Pid(), snHdr->papp->ExcId());
+
+	// Run the Command Synchronously
+	pcmdRsp->result = StopExecutionSync(snHdr->papp);
+	// Give back the result to the calling thread
+	(snHdr->resp_prm).set_value(pcmdRsp);
+
+	logger->Debug("APPs PRX: StopExecutionTrd [pid: %5d] "
+			"END [app: %s, pid: %d, exc: %d]",
+			snHdr->pid, snHdr->papp->Name().c_str(),
+			snHdr->papp->Pid(), snHdr->papp->ExcId());
+
+}
+
+ApplicationProxy::resp_ftr_t ApplicationProxy::StopExecution(AppPtr_t papp) {
+	ApplicationProxy::pcmdSn_t psn;
+
+	// Ensure the application is still active
+	assert(papp->CurrentState()<Application::KILLED);
+	if (papp->CurrentState()>=Application::KILLED) {
+		logger->Warn("Multiple stopping the same application [%s]",
+				papp->Name().c_str());
+		return resp_ftr_t();
+	}
+
+	// Setup a new command session
+	psn = SetupCmdSession(papp);
+
+	// Spawn a new Command Executor (passing the future)
+	psn->exe = std::thread(&ApplicationProxy::StopExecutionTrd, this, psn);
+
+	// Return the promise (thus unlocking the executor)
+	return resp_ftr_t((psn->resp_prm).get_future());
+
+}
+
+
 void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
 	logger->Debug("APPs PRX: processing transaction response...");
 	(void)msg;

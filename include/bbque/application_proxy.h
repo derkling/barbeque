@@ -25,16 +25,20 @@
 #ifndef BBQUE_APPLICATION_PROXY_H_
 #define BBQUE_APPLICATION_PROXY_H_
 
+#include "bbque/app/application.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/rpc_channel.h"
 #include "bbque/rtlib/rpc_messages.h"
 
-#include <thread>
+#include <future>
 #include <memory>
+#include <thread>
+
 #include <map>
 
 using namespace bbque::plugins;
 using namespace bbque::rtlib;
+using namespace bbque::app;
 
 namespace bbque {
 
@@ -53,6 +57,22 @@ public:
 	static ApplicationProxy & GetInstance();
 
 	void Start();
+
+	typedef struct cmdRsp {
+		RTLIB_ExitCode result;
+	} cmdRsp_t;
+
+	typedef std::shared_ptr<cmdRsp_t> pcmdRsp_t;
+
+	typedef std::promise<pcmdRsp_t> resp_prm_t;
+
+	typedef std::future<pcmdRsp_t> resp_ftr_t;
+
+	typedef std::shared_ptr<resp_ftr_t> prespFtr_t;
+
+	resp_ftr_t StopExecution(AppPtr_t papp);
+
+	RTLIB_ExitCode StopExecutionSync(AppPtr_t papp);
 
 	~ApplicationProxy();
 
@@ -97,14 +117,45 @@ private:
 
 	typedef std::shared_ptr<rqsSn_t> prqsSn_t;
 
+	typedef struct cmdSn : public snCtx_t {
+		AppPtr_t papp;
+		resp_prm_t resp_prm;
+		std::mutex resp_mtx;
+		std::condition_variable resp_cv;
+		pchMsg_t pmsg;
+	} cmdSn_t;
 
-	typedef struct cmdRsp {
-		RTLIB_ExitCode result;
-	} cmdRsp_t;
+	typedef std::shared_ptr<cmdSn_t> pcmdSn_t;
+
+
+	/**
+	 * @brief	A multimap to track active Command Sessions.
+	 *
+	 * This multimap maps command session threads ID on the session session
+	 * data.
+	 * @param pid_t the command session thread ID
+	 * @param pcmdSn_t the command session handler
+	 */
+	typedef std::multimap<pid_t, pcmdSn_t> cmdSnMm_t;
+
+	cmdSnMm_t cmdSnMm;
+
+	std::mutex cmdSnMm_mtx;
 
 	ApplicationProxy();
 
 	rpc_msg_type_t GetNextMessage(pchMsg_t & pmsg);
+
+
+/*******************************************************************************
+ * Command Sessions
+ ******************************************************************************/
+
+	inline pcmdSn_t SetupCmdSession(AppPtr_t papp) const;
+
+	inline void EnqueueHandler(pcmdSn_t snHdr);
+
+	void StopExecutionTrd(pcmdSn_t snHdr);
 
 	void CompleteTransaction(pchMsg_t & pmsg);
 

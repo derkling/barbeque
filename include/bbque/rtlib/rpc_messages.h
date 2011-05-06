@@ -114,6 +114,15 @@ typedef struct rpc_msg_exc_register {
 	char recipe[RTLIB_RECIPE_NAME_LENGTH];
 } rpc_msg_exc_register_t;
 
+/**
+ * @brief Command to STOP an application execution context.
+ */
+typedef struct rpc_msg_bbq_stop {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+	/** The Timeout for stopping the application */
+	struct timespec timeout;
+} rpc_msg_bbq_stop_t;
 
 /**
  * @brief Command to notify an application is exiting.
