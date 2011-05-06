@@ -32,7 +32,8 @@
 
 namespace fs = boost::filesystem;
 
-#define FMT(fmt) BBQUE_FMT(COLOR_LGREEN, "PM", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_LGRAY, "PM", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED, "PM", fmt)
 
 namespace bbque { namespace plugins {
 
@@ -94,7 +95,7 @@ int32_t PluginManager::RegisterObject(const char * id,
 	// Verify that versions match
 	PF_PluginAPIVersion v = pm.platform_services.version;
 	if (v.major != params->version.major) {
-		fprintf(stderr, FMT("Module [%s] version mismatching\n"), id);
+		fprintf(stderr, FMT_ERR("Plugin [%s] version mismatching\n"), id);
 		return -2;
 	}
 
@@ -107,13 +108,13 @@ int32_t PluginManager::RegisterObject(const char * id,
 
 	if (pm.exact_match_map.find(key) != pm.exact_match_map.end()) {
 		// item already exists in exact_match_map fail (only one can handle)
-		fprintf(stderr, FMT("Module [%s] already registered\n"), id);
+		fprintf(stderr, FMT_ERR("Plugin [%s] already registered\n"), id);
 		return -3;
 	}
 
 	pm.exact_match_map[key] = *params;
-	//fprintf(stdout, FMT("New module [%s:%p] registered\n"),
-	//	key.c_str(), (void*)params->CreateFunc);
+	DB(fprintf(stdout, FMT_INF("New module [%s:%p] registered\n"),
+		key.c_str(), (void*)params->CreateFunc));
 	return 0;
 }
 
@@ -123,7 +124,7 @@ int32_t PluginManager::LoadAll(const std::string & pluginDir,
 
 	if (pluginDir.empty()) {
 		// The path is empty
-		fprintf(stderr, FMT("Empty plugins dir [%s]\n"), pluginDir.c_str());
+		DB(fprintf(stderr, FMT_INF("Empty plugins dir [%s]\n"), pluginDir.c_str()));
 		return -1;
 	}
 
@@ -218,14 +219,14 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	if (dl_map.find(path.string()) != dl_map.end())
 		return -1;
 
-	DB(fprintf(stdout, FMT("Loading plugin [%s]\n"), pluginPath.c_str()));
+	DB(fprintf(stdout, FMT_INF("Loading plugin [%s]\n"), pluginPath.c_str()));
 
 	std::string errorString;
 	DynamicLibrary * dl = LoadLibrary(fs::system_complete(path).string(),
 					errorString);
 	if (!dl) {
 		// not a dynamic library
-		fprintf(stderr, FMT("FAILED: [%s] is not a valid dynamic library\n"),
+		fprintf(stderr, FMT_ERR("Plugin [%s] is not a valid dynamic library\n"),
 				path.filename().c_str());
 		return -1;
 	}
@@ -235,17 +236,19 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	PF_InitFunc initFunc = pft->init;
 	if (!initFunc) {
 		// missing dynamic library entry point
-		fprintf(stderr, FMT("Missing [PF_initPlugin] plugin entry point\n"));
+		fprintf(stderr, FMT_ERR("Missing [PF_initPlugin] plugin entry point\n"));
 		return -1;
 	}
 
 	int32_t res = InitializePlugin(initFunc);
 	if (res < 0) {
 		// initialization failed
-		fprintf(stderr, FMT("Initialization failed\n"));
+		fprintf(stderr, FMT_ERR("Plugin [%s] initialization FAILED\n"),
+				pluginPath.c_str());
 		return res;
 	}
-	DB(fprintf(stdout, FMT("Plugin initialized [%s]\n"), pluginPath.c_str()));
+	DB(fprintf(stdout, FMT_INF("Plugin [%s] initialization DONE\n"),
+				pluginPath.c_str()));
 
 	return 0;
 }
@@ -268,7 +271,7 @@ void * PluginManager::CreateObject(const std::string & id,
 	if ( near_match != exact_match_map.end() &&
 			((*near_match).first.compare(0,id.size(),id)) == 0 ) {
 
-		DB(fprintf(stdout, FMT("Found matching module [%s]\n"),
+		DB(fprintf(stdout, FMT_INF("Found matching module [%s]\n"),
 			(*near_match).first.c_str()));
 
 		// Class (or full) match found
@@ -320,6 +323,8 @@ void * PluginManager::CreateObject(const std::string & id,
 	}
 
 	// Too bad no one can create this id
+	fprintf(stderr, FMT_ERR("required plugin [%s] NOT FOUND\n"),
+				id.c_str());
 	return NULL;
 }
 
@@ -330,7 +335,7 @@ DynamicLibrary * PluginManager::LoadLibrary(const std::string & path,
 	if (!dl) {
 		// not a dynamic library?
 		fs::path _path(path);
-		fprintf(stderr, FMT("[%s] library load ERROR:\n\n%s\n\n"),
+		fprintf(stderr, FMT_ERR("[%s] library load ERROR:\n\n%s\n\n"),
 				_path.filename().c_str(), errorString.c_str());
 		return NULL;
 	}
