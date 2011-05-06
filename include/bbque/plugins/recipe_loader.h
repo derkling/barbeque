@@ -83,6 +83,10 @@ public:
 		RL_ABORTED
 	};
 
+	// FIXME this method should be application independent
+	// REFACTOR NEDDED:
+	// - save static constraint within the recipe
+	// - add a method to get static constraints from a recipe object
 	/**
 	 * @brief Load the recipe of the application
 	 * @param app Pointer to the application using the recipe
