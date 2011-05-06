@@ -39,7 +39,7 @@
 #include "bbque/app/recipe.h"
 #include "bbque/app/plugin_data.h"
 
-#define APPLICATION_NAMESPACE "bq.apps."
+#define APPLICATION_NAMESPACE "ap."
 
 namespace bbque { namespace app {
 

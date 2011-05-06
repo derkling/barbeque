@@ -53,14 +53,13 @@ Application::Application(std::string const & _name, std::string const & _user,
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	logger =
-		std::unique_ptr<bp::LoggerIF>
+	logger = std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+	assert(logger);
 
-	if (logger)
-		logger->Info("Starting...");
+	logger->Info("NEW Application [Name: %s, Pid: %d, ExcId: %d]",
+			Name().c_str(), Pid(), ExcId());
 
-	enabled_awms.resize(0);
 }
 
 

@@ -65,7 +65,9 @@ public:
 		/** Recipe wrong data and/or format */
 		RL_FORMAT_ERROR,
 		/** Loading aborted (i.e., a RTRM component is missing) */
-		RL_ABORTED
+		RL_ABORTED,
+		/** Recipe load failed for some reason (generic error) */
+		RL_FAILED
 	};
 
 	/**
@@ -76,6 +78,10 @@ public:
 	 * @param recipe The recipe object to fill with the data to parse
 	 * @return An exit code indicating the loading status
 	 */
+	// FIXME this method should be application independent
+	// REFACTOR NEDDED:
+	// - save static constraint within the recipe
+	// - add a method to get static constraints from a recipe object
 	virtual	ExitCode_t LoadRecipe(std::shared_ptr<Application> app,
 				std::string const & rname,
 				std::shared_ptr<Recipe> recipe)

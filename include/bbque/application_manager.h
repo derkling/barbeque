@@ -149,9 +149,6 @@ public:
 
 private:
 
-	/** The constructor */
-	ApplicationManager();
-
 	/** Lowest application priority value (maximum integer) */
 	uint16_t lowest_priority;
 
@@ -186,6 +183,17 @@ private:
 	 * Each position points to a set of maps pointing applications
 	 */
 	std::vector<AppsMap_t> status_vec;
+
+	/** The constructor */
+	ApplicationManager();
+
+	/** Return a pointer to a loaded recipe */
+	// FIXME this method should be application independent
+	// REFACTOR NEDDED:
+	// - save static constraint within the recipe
+	// - add a method to get static constraints from a recipe object
+	RecipePtr_t LoadRecipe(AppPtr_t _app_ptr, std::string const & _rname,
+			bool weak_load = false);
 
 };
 

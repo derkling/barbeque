@@ -58,7 +58,8 @@ ApplicationManager::ApplicationManager():
 
 	// Set the lowest application priority
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
-	uint16_t lowest_priority = cm.GetOptions()["application.lowest_prio"].as<uint16_t>();
+	uint16_t lowest_priority =
+		cm.GetOptions()["application.lowest_prio"].as<uint16_t>();
 
 	// Pre-allocate priority and status vectors
 	priority_vec = std::vector<AppsMap_t>(lowest_priority + 1);
@@ -94,69 +95,76 @@ ApplicationManager::~ApplicationManager() {
 	logger->Debug("Cleared applications");
 }
 
+RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
+		std::string const & _rname, bool _weak_load) {
+	bp::RecipeLoaderIF::ExitCode_t retcode;
+	RecipePtr_t recp_ptr;
+
+	//---  Checking for previously loaded recipe
+	std::map<std::string, RecipePtr_t>::iterator it = recipes.find(_rname);
+	if (it != recipes.end()) {
+		// Return a previously loaded recipe
+		return (*it).second;
+	}
+
+	//---  Loading a new recipe
+
+	//  Get the recipe loader instance
+	std::string rloader_name(RECIPE_LOADER_NAMESPACE);
+	bp::RecipeLoaderIF * rloader =
+		ModulesFactory::GetRecipeLoaderModule(rloader_name);
+	if (!rloader) {
+		// Cannot load recipes without the plugin!
+		logger->Fatal("Missing RecipeLoader plugin");
+		assert(rloader);
+	}
+
+	// Load the required recipe
+	recp_ptr = RecipePtr_t(new ba::Recipe(_rname));
+	retcode = rloader->LoadRecipe(_app_ptr, _rname, recp_ptr);
+
+	// If a weak load has done, but the we didn't want it,
+	// or a parsing error happened: then return an empty recipe
+	if ((retcode == bp::RecipeLoaderIF::RL_WEAK_LOAD && !_weak_load)
+			|| (retcode == bp::RecipeLoaderIF::RL_FORMAT_ERROR)) {
+		return RecipePtr_t();
+	}
+
+	// Place the new recipe object in the map, and return it
+	recipes[_rname] = recp_ptr;
+	return recp_ptr;
+
+}
 
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
     std::string const & _name, std::string const & _user, uint16_t _prio,
 	uint32_t _pid, uint32_t _exc_id, std::string const & _rname,
-	bool weak_load) {
+	bool _weak_load) {
 
 	// A shared pointer the application object descriptor
 	AppPtr_t app_ptr;
 	RecipePtr_t recp_ptr;
 
-	// The method return value
-	bp::RecipeLoaderIF::ExitCode_t retcode =
-	    bp::RecipeLoaderIF::RL_SUCCESS;
-
 	// Create a new descriptor
-	app_ptr = AppPtr_t(new app::Application(_name, _user, _pid, _exc_id));
+	app_ptr = AppPtr_t(new ba::Application(_name, _user, _pid, _exc_id));
 	app_ptr->SetPriority(_prio);
 
-	// The recipe has been loaded in the past ?
-	std::map<std::string, RecipePtr_t>::iterator it_recp =
-		recipes.find(_rname);
-
-	if (it_recp != recipes.end()) {
-		// Recipe yet loaded in the past. Get it.
-		recp_ptr = it_recp->second;
+	// Load the required recipe
+	recp_ptr = LoadRecipe(app_ptr, _rname, _weak_load);
+	if (!recp_ptr) {
+		logger->Error("FAILED loading recipe [%s]", _rname.c_str());
+		return bp::RecipeLoaderIF::RL_FAILED;
 	}
-	else {
-		//  Recipe never loaded before...
-		//  Get the recipe loader instance
-		std::string rloader_name(RECIPE_LOADER_NAMESPACE);
-		bp::RecipeLoaderIF * rloader =
-			ModulesFactory::GetRecipeLoaderModule(rloader_name);
-
-		if (!rloader) {
-			// Cannot load recipes without the plugin!
-			logger->Error("Missing RecipeLoader plugin");
-			return bp::RecipeLoaderIF::RL_ABORTED;
-		}
-		// Load the "recipe" of the application
-		recp_ptr = RecipePtr_t(new ba::Recipe(_rname));
-		retcode = rloader->LoadRecipe(app_ptr, _rname, recp_ptr);
-
-		// If a weak load has done, but the we didn't want it
-		// abort the application descriptor creation
-		if ((retcode == bp::RecipeLoaderIF::RL_WEAK_LOAD && !weak_load)
-				|| (retcode == bp::RecipeLoaderIF::RL_FORMAT_ERROR)) {
-			return retcode;
-		}
-		// Place the new recipe object in the map
-		recipes[_rname] = recp_ptr;
-	}
-	// Set the recipe of the application
 	app_ptr->SetRecipe(recp_ptr);
-	// Application descriptors map
+
+	// Save the application descriptor
 	apps.insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
-	// Priority map
 	(priority_vec[app_ptr->Priority()]).
 		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
-	// Status map
 	(status_vec[static_cast<uint8_t>(app_ptr->CurrentState())]).
 		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
 
-	return retcode;
+	return bp::RecipeLoaderIF::RL_SUCCESS;
 }
 
 
