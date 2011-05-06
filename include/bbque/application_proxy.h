@@ -108,13 +108,11 @@ private:
 
 	void CompleteTransaction(pchMsg_t & pmsg);
 
-#define DETACHED_THREAD
-#ifdef DETACHED_THREAD
-#warning using DETACHED_THREADS
+/*******************************************************************************
+ * Request Sessions
+ ******************************************************************************/
+
 	void RpcAppPair(prqsSn_t prqs);
-#else
-	void RpcAppPair(pchMsg_t pmsg);
-#endif
 
 	void RpcAppExit(prqsSn_t prqs);
 

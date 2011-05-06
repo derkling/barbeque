@@ -87,7 +87,11 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
 	(void)msg;
 }
 
-#ifdef DETACHED_THREAD
+
+/*******************************************************************************
+ * Request Sessions
+ ******************************************************************************/
+
 void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
 	pchMsg_t pmsg = prqs->pmsg;
@@ -129,38 +133,6 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
 
 }
-#else
-void ApplicationProxy::RpcAppPair(pchMsg_t pmsg) {
-	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
-	rpc_msg_resp_t resp;
-	pconCtx_t pcon;
-
-	// Ensure this application has not yet registerd
-	assert(pmsg->typ == RPC_APP_PAIR);
-
-	// Build a new communication context
-	logger->Debug("APPs PRX: Setup RPC channel with [app_pid: %d]",
-			pmsg->app_pid);
-	pcon = pconCtx_t(new conCtx_t);
-	pcon->app_pid = pmsg->app_pid;
-	pcon->pd = rpc->GetPluginData(pmsg);
-
-	// Backup communication context for further messages
-	conCtxMap_ul.lock();
-	conCtxMap.insert(std::pair<pid_t, pconCtx_t>(
-				pmsg->app_pid, pcon));
-	conCtxMap_ul.unlock();
-
-	// Sending responce to application
-	logger->Debug("APPs PRX: Send RPC channel ACK [app_pid: %d]",
-			pmsg->app_pid);
-	::memcpy(&resp.header, pmsg, RPC_PKT_SIZE(header));
-	resp.header.typ = RPC_BBQ_RESP;
-	resp.result = RTLIB_OK;
-	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
-
-}
-#endif
 
 void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx);
@@ -184,10 +156,8 @@ void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
 	conCtxMap.erase(conCtxIt);
 	conCtxMap_ul.unlock();
 
-
-#warning TODO: release all application resources
-
-#warning TODO: run optimizer
+	logger->Warn("APPs PRX: TODO release all application resources");
+	logger->Warn("APPs PRX: TODO run optimizer");
 
 }
 
@@ -235,12 +205,10 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 	case RPC_EXC_STOP:
 		logger->Debug("EXC_STOP");
 		break;
-#ifdef DETACHED_THREAD
 	case RPC_APP_PAIR:
 		logger->Debug("APP_PAIR");
 		RpcAppPair(prqs);
 		break;
-#endif
 	case RPC_APP_EXIT:
 		logger->Debug("APP_EXIT");
 		RpcAppExit(prqs);
@@ -300,21 +268,10 @@ void ApplicationProxy::Dispatcher() {
 	logger->Info("Command dispatcher thread started");
 
 	while(1) {
-
 		if (GetNextMessage(pmsg)>RPC_APP_MSGS_COUNT) {
 			CompleteTransaction(pmsg);
 			continue;
 		}
-#ifndef DETACHED_THREAD
-		// Pairing should be performed on this execution context so that
-		// to preserve the allocated resources (e.g. file descriptions,
-		// socks, etc)
-		if (pmsg->typ == RPC_APP_PAIR) {
-			logger->Debug("APP_PAIR");
-			RpcAppPair(pmsg);
-			continue;
-		}
-#endif
 		ProcessCommand(pmsg);
 	}
 
