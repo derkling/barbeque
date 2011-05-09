@@ -82,15 +82,9 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-<<<<<<< HEAD
 	 AppPtr_t StartApplication(
 			std::string const & name, AppPid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio = BBQUE_APP_PRIO_MIN,
-=======
-	RecipeLoaderIF::ExitCode_t StartApplication(
-			std::string const & name, std::string const & user, uint16_t prio,
-			pid_t pid, uint8_t exc_id, std::string const & rpath,
->>>>>>> 67ebb6e... [Application] Update PID and ExcID data types
 			bool weak_load = false);
 
 	/**
@@ -131,11 +125,7 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-<<<<<<< HEAD
 	AppPtr_t const GetApplication(AppPid_t pid, uint8_t exc_id = 0);
-=======
-	AppPtr_t const GetApplication(pid_t pid, uint8_t exc_id = 0);
->>>>>>> 67ebb6e... [Application] Update PID and ExcID data types
 
 	/**
 	 * @see ApplicationManagerStatusIF
