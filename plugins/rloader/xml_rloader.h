@@ -48,10 +48,10 @@ struct PF_ObjectParams;
 namespace bbque { namespace plugins {
 
 /** Shared pointer to @ref WorkingMode*/
-typedef std::shared_ptr<ba::WorkingMode> AwmPtr_t;
+typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 
 /** Shared pointer to @ref PluginData */
-typedef std::shared_ptr<ba::PluginData> PluginDataPtr_t;
+typedef std::shared_ptr<PluginData> PluginDataPtr_t;
 
 
 // Return code for internal purpose
