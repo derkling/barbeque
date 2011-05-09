@@ -29,6 +29,10 @@
 
 #include "bbque/rtlib.h"
 
+#include <map>
+#include <memory>
+#include <string>
+
 namespace bbque { namespace rtlib {
 
 class BbqueRPC {
@@ -90,6 +94,18 @@ public:
 
 protected:
 
+	typedef struct RegisteredExecutionContext {
+		/** The Execution Context data */
+		RTLIB_ExecutionContextParams exc_params;
+		/** The name of this Execuion Context */
+		std::string name;
+		/** The RTLIB assigned ID for this Execution Context */
+		uint8_t exc_id;
+	} RegisteredExecutionContext_t;
+
+	typedef std::shared_ptr<RegisteredExecutionContext_t> pregExCtx_t;
+
+
 	/**
 	 * @brief Build a new RTLib
 	 */
@@ -102,9 +118,7 @@ protected:
 	virtual RTLIB_ExitCode _Init(
 			const char *name) = 0;
 
-	virtual RTLIB_ExecutionContextHandler _Register(
-			const char* name,
-			const RTLIB_ExecutionContextParams* params) = 0;
+	virtual RTLIB_ExitCode _Register(pregExCtx_t pregExCtx) = 0;
 
 	virtual void _Unregister(
 			const RTLIB_ExecutionContextHandler ech) = 0;
@@ -129,8 +143,30 @@ protected:
 
 	virtual void _Exit() = 0;
 
+
 private:
 
+	bool initialized;
+
+	/**
+	 * @brief The map of Execution Context registered by the application
+	 *
+	 * This maps Execution Context ID (exc_id) into pointers to
+	 * RegisteredExecutionContext structures.
+	 */
+	typedef std::map<uint8_t, pregExCtx_t> excMap_t;
+
+	excMap_t exc_map;
+
+	typedef std::pair<uint8_t, pregExCtx_t> excMapEntry_t;
+
+
+
+
+	/**
+	 * @brief Get the next available (and unique) Execution Context ID
+	 */
+	uint8_t GetNextExcID();
 
 /******************************************************************************
  * Application Callbacks Proxies

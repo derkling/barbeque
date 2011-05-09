@@ -123,7 +123,11 @@ typedef enum RTLIB_ExitCode {
 	/** The (expected) communicaiton channel is not available */
 	RTLIB_BBQUE_CHANNEL_UNAVAILABLE,
 	/** The Barbeque RTRM is not available */
-	RTLIB_BBQUE_UNREACHABLE
+	RTLIB_BBQUE_UNREACHABLE,
+	/** The Execution Context Duplicated */
+	RTLIB_EXC_DUPLICATE,
+	/** The Execution Context Registration Failed */
+	RTLIB_EXC_REGISTRATION_FAILED
 } RTLIB_ExitCode;
 
 

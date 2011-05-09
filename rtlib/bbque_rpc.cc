@@ -54,7 +54,8 @@ BbqueRPC * BbqueRPC::GetInstance() {
 	return instance;
 }
 
-BbqueRPC::BbqueRPC(void) {
+BbqueRPC::BbqueRPC(void) :
+	initialized(false) {
 
 }
 
@@ -65,6 +66,12 @@ BbqueRPC::~BbqueRPC(void) {
 RTLIB_ExitCode BbqueRPC::Init(const char *name) {
 	RTLIB_ExitCode exitCode;
 
+	if (initialized) {
+		fprintf(stderr, FMT_WRN("RTLIB already initialized for app [%s]\n"),
+				name);
+		return RTLIB_OK;
+	}
+
 	DB(fprintf(stderr, FMT_DBG("Initializing app [%s]\n"), name));
 
 	exitCode = _Init(name);
@@ -73,19 +80,70 @@ RTLIB_ExitCode BbqueRPC::Init(const char *name) {
 		return exitCode;
 	}
 
+	initialized = true;
+
 	DB(fprintf(stderr, FMT_DBG("Initialation DONE\n")));
 	return RTLIB_OK;
 
 }
 
+uint8_t BbqueRPC::GetNextExcID() {
+	static uint8_t exc_id = 0;
+	excMap_t::iterator it = exc_map.find(exc_id);
+
+	// Ensuring unicity of the Execution Context ID
+	while (it != exc_map.end()) {
+		exc_id++;
+		it = exc_map.find(exc_id);
+	}
+
+	return exc_id;
+}
+
 RTLIB_ExecutionContextHandler BbqueRPC::Register(
 		const char* name,
 		const RTLIB_ExecutionContextParams* params) {
-	//Silence "args not used" warning.
-	(void)name;
-	(void)params;
+	RTLIB_ExitCode result;
+	excMap_t::iterator it;
+	pregExCtx_t prec;
 
-	return NULL;
+	assert(initialized);
+	assert(name && params);
+	assert(params->StopExecution);
+
+	if (!initialized) {
+		fprintf(stderr, FMT_ERR("Execution context [%s] registration FAILED "
+					"(RTLIB not initialized)\n"), name);
+		return NULL;
+	}
+
+	// Ensuring the execution context has not been already registered
+	for(excMap_t::iterator it = exc_map.begin(); it != exc_map.end(); it++) {
+		prec = (*it).second;
+		if (prec->name == name) {
+			fprintf(stderr, FMT_ERR("Execution context [%s] already "
+						"registered\n"), name);
+			assert(prec->name != name);
+			return NULL;
+		}
+	}
+
+	// Build a new registered EXC
+	prec = pregExCtx_t(new RegisteredExecutionContext_t);
+	memcpy((void*)&(prec->exc_params), (void*)params,
+			sizeof(RTLIB_ExecutionContextParams));
+	prec->name = name;
+	prec->exc_id = GetNextExcID();
+
+	// Calling the Low-level registration
+	result = _Register(prec);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] registration failed "
+						"(Error %d)\n"), name, result));
+		return NULL;
+	}
+
+	return (RTLIB_ExecutionContextHandler)&(prec->exc_params);
 }
 
 void BbqueRPC::Unregister(

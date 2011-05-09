@@ -53,9 +53,7 @@ protected:
 	RTLIB_ExitCode _Init(
 			const char *name);
 
-	RTLIB_ExecutionContextHandler _Register(
-			const char* name,
-			const RTLIB_ExecutionContextParams* params);
+	RTLIB_ExitCode _Register(pregExCtx_t pregExCtx);
 
 	void _Unregister(
 			const RTLIB_ExecutionContextHandler ech);

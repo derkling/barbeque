@@ -367,16 +367,84 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
 	return result;
 }
 
-RTLIB_ExecutionContextHandler BbqueRPC_FIFO_Client::_Register(
-			const char* name,
-			const RTLIB_ExecutionContextParams* params) {
-	//Silence "args not used" warning.
-	(void)name;
-	(void)params;
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
+	rpc_fifo_undef_t fifo_register = {
+		{
+			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_register),
+			FIFO_PKT_SIZE(undef),
+			RPC_EXC_REGISTER
+		}
+	};
+	rpc_msg_exc_register_t msg_register = {
+		{RPC_EXC_REGISTER, chTrdPid, pregExCtx->exc_id},
+		"\0",
+		"\0"};
+	RTLIB_ExitCode result;
+	size_t bytes;
 
-	fprintf(stderr, FMT_DBG("EXC Regisister: not yet implemeted"));
+	// Initializing RPC message
+	::strncpy(msg_register.exc_name, pregExCtx->name.c_str(),
+			RTLIB_EXC_NAME_LENGTH);
+	::strncpy(msg_register.recipe, pregExCtx->exc_params.recipe,
+			RTLIB_EXC_NAME_LENGTH);
 
-	return NULL;
+	DB(fprintf(stderr, FMT_DBG("Registering EXC [%d:%d:%s]...\n"),
+				msg_register.header.app_pid,
+				msg_register.header.exc_id,
+				msg_register.exc_name));
+
+	// Send FIFO header
+	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
+		"[sze: %hd, off: %hd, typ: %hd]...\n"),
+		fifo_register.header.fifo_msg_size,
+		fifo_register.header.rpc_msg_offset,
+		fifo_register.header.rpc_msg_type
+	));
+	bytes = ::write(server_fifo_fd, (void*)&fifo_register,
+			FIFO_PKT_SIZE(undef));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
+					"(Error %d: %s)\n"),
+				bbque_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
+
+	// Send RPC header
+	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
+		"[typ: %d, pid: %d, eid: %hd, exc: %s, recipe: %s]...\n"),
+		msg_register.header.typ,
+		msg_register.header.app_pid,
+		msg_register.header.exc_id,
+		msg_register.exc_name,
+		msg_register.recipe
+	));
+	bytes = ::write(server_fifo_fd, (void*)&msg_register,
+			RPC_PKT_SIZE(exc_register));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
+					"(Error %d: %s)\n"),
+				bbque_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
+
+	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
+
+	// Waiting for BBQUE response (up to a 500ms timeout)
+	result = WaitBbqueResp();
+	if (result != RTLIB_OK)
+		return result;
+
+	// Check RPC server response
+	result = BbqueResult();
+	if (result != RTLIB_OK) {
+		fprintf(stderr, FMT_ERR("Execution Context registration "
+					"FAILED\n"));
+		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	return RTLIB_OK;
 }
 
 void BbqueRPC_FIFO_Client::_Unregister(

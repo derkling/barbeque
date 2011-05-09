@@ -85,8 +85,8 @@ typedef struct rpc_msg_header {
 typedef struct rpc_msg_resp {
 	/** The RPC fifo command header */
 	rpc_msg_header_t header;
-	/** The RPC protocol major version */
-	int8_t result;
+	/** The RTLIB command exit code */
+	RTLIB_ExitCode result;
 } rpc_msg_resp_t;
 
 

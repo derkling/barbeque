@@ -9,7 +9,8 @@ set(PLUGIN_DUMMY_SRC  dummy_test dummy_plugin)
 
 #----- Add "testing" target dynamic library
 add_library(plugin_test_dummy_so MODULE ${PLUGIN_DUMMY_SRC})
-set_target_properties(plugin_test_dummy_so PROPERTIES COMPILE_FLAGS "-DBBQUE_DYNAMIC_PLUGIN")
+set_target_properties(plugin_test_dummy_so PROPERTIES COMPILE_FLAGS
+	"-DBBQUE_DYNAMIC_PLUGIN")
 
 #----- Add "testing" target dynamic library
 set(PLUGIN_TEST_APROX_SRC  aprox_test aprox_plugin)
