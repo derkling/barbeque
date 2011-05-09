@@ -178,12 +178,12 @@ void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 	if (_papp->CurrentState() != _papp->NextState()) {
 
 		// Retrieve the runtime map from the status vector
-		AppsMap_t curr_state_map = Applications(_papp->CurrentState());
-		AppsMap_t next_state_map = Applications(_papp->NextState());
+		AppsMap_t * curr_state_map = &(status_vec[_papp->CurrentState()]);
+		AppsMap_t * next_state_map = &(status_vec[_papp->NextState()]);
 
 		// Find the application descriptor the current status map
 		std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
-			curr_state_map.equal_range(_papp->Pid());
+			(*curr_state_map).equal_range(_papp->Pid());
 		if (range.first == range.second) {
 			logger->Error("Cannot find %s in the expected status",
 			              _papp->Name().c_str());
@@ -215,10 +215,10 @@ void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 				((*it).second)->ExcId(),
 				((*it).second)->NextState());
 
-		curr_state_map.erase(it);
+		(*curr_state_map).erase(it);
 
 		// Move it from the current to the next status map
-		next_state_map.insert(AppsMapEntry_t(_papp->Pid(), _papp));
+		(*next_state_map).insert(AppsMapEntry_t(_papp->Pid(), _papp));
 
 	}
 	// The application descriptor now will manage the change of working mode

@@ -69,21 +69,21 @@ public:
 	/**
 	 * @brief Return the map containing all the ready applications
 	 */
-	inline AppsMap_t ApplicationsReady() {
+	inline AppsMap_t const * ApplicationsReady() {
 		return app_man->Applications(app::ApplicationStatusIF::READY);
 	}
 
 	/**
 	 * @brief Map of application (descriptors) just scheduled
 	 */
-	inline AppsMap_t ApplicationsScheduled() {
+	inline AppsMap_t const * ApplicationsScheduled() {
 		return app_man->Applications(app::ApplicationStatusIF::SCHEDULED);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
-	inline AppsMap_t ApplicationsRunning() {
+	inline AppsMap_t const * ApplicationsRunning() {
 		return app_man->Applications(app::ApplicationStatusIF::RUNNING);
 	}
 

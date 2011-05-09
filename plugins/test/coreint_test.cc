@@ -385,7 +385,7 @@ void CoreInteractionsTest::Test() {
 	}
 	// SystemView
 	SystemView *sv = SystemView::GetInstance();
-	logger->Debug("Applications loaded = %d", sv->ApplicationsReady().size());
+	logger->Debug("Applications loaded = %d", sv->ApplicationsReady()->size());
 
 	// Plugin specific data
 	ba::PluginsDataContainer pdc;

@@ -52,25 +52,27 @@ class ApplicationManagerStatusIF {
 public:
 
 	/**
-	 * @brief Retrieve all the applications which entered the resource
-	 * manager
-	 * @return A map of all applications
+	 * @brief Retrieve regietered applications map
+	 *
+	 * @return A pointer to the Map of all applications registered to the RTRM
 	 */
-	virtual AppsMap_t const & Applications() const = 0;
+	virtual AppsMap_t const * Applications() const = 0;
 
 	/**
-	 * @brief Retrieve all the applications of a specific priority
+	 * @brief Retrieve registered applications with the specified priority
+	 *
 	 * @param prio The priority value
-	 * @return A map of applications of the request priority
+	 * @return A pointer to the map of applications with the request priority
 	 */
-	virtual AppsMap_t const & Applications(uint16_t prio) const = 0;
+	virtual AppsMap_t const * Applications(uint16_t prio) const = 0;
 
 	/**
-	 * @brief Retrieve all the applications in a specific scheduling state
+	 * @brief Retrieve reigstered applications with the specified scheduling state
+	 *
 	 * @param sched_state The scheduling state
-	 * @return A map of applications in the schedule status request
+	 * @return A pointer to the map of applications with the requested schedule status
 	 */
-	virtual AppsMap_t const & Applications(
+	virtual AppsMap_t const * Applications(
 			app::Application::ScheduleFlag_t sched_state) const = 0;
 
 	/**

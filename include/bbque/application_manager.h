@@ -87,34 +87,36 @@ public:
 			bool weak_load = false);
 
 	/**
-	 * @brief Retrieve all the applications which entered the resource
-	 * manager
-	 * @return The list of all applications which entered the RTRM
+	 * @brief Retrieve regietered applications map
+	 *
+	 * @return A pointer to the Map of all applications registered to the RTRM
 	 */
-	inline AppsMap_t const & Applications() const {
-		return apps;
+	inline AppsMap_t const * Applications() const {
+		return &apps;
 	}
 
 	/**
-	 * @brief Retrieve all the applications of a specific priority class
-	 * @param prio Application priority
-	 * @return The map of applications (of the given priority class)
+	 * @brief Retrieve registered applications with the specified priority
+	 *
+	 * @param prio The priority value
+	 * @return A pointer to the map of applications with the request priority
 	 */
-	AppsMap_t const & Applications(uint16_t prio) const {
+	AppsMap_t const * Applications(uint16_t prio) const {
 		assert(prio<=lowest_priority);
 		if (prio>lowest_priority)
 			prio=lowest_priority;
-		return priority_vec[prio];
+		return &(priority_vec[prio]);
 	}
 
 	/**
-	 * @brief Retrieve all the applications in a specific scheduling state
-	 * @param sched_state The scheduled state
-	 * @return The map of applications in the given scheduled state
+	 * @brief Retrieve reigstered applications with the specified scheduling state
+	 *
+	 * @param sched_state The scheduling state
+	 * @return A pointer to the map of applications with the requested schedule status
 	 */
-	AppsMap_t const & Applications (
+	AppsMap_t const * Applications (
 			Application::ScheduleFlag_t sched_state) const {
-		return status_vec[sched_state];
+		return &(status_vec[sched_state]);
 	}
 
 	/**
