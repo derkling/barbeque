@@ -140,8 +140,9 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 }
 
 
-Application::ExitCode_t Application::SetNextSchedule(
-		AwmPtr_t & awm, ScheduleFlag_t _state) {
+Application::ExitCode_t
+Application::SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t _state,
+		RViewToken_t vtok) {
 
 	// Get the working mode pointer
 	if (!awm) {
@@ -160,7 +161,7 @@ Application::ExitCode_t Application::SetNextSchedule(
 	switch (next_sched.state) {
 	case RUNNING:
 		// Set new resource usages
-		if (res_acc->AcquireUsageSet(this) !=
+		if (res_acc->AcquireUsageSet(this, vtok) !=
 				br::ResourceAccounter::RA_SUCCESS) {
 			// Set next awm null
 			next_sched.awm = curr_sched.awm;
@@ -172,7 +173,7 @@ Application::ExitCode_t Application::SetNextSchedule(
 	case KILLED:
 	case FINISHED:
 		// Release resources
-		res_acc->ReleaseUsageSet(this);
+		res_acc->ReleaseUsageSet(this, vtok);
 		logger->Info("Resources released");
 	default:
 		break;
@@ -206,9 +207,9 @@ void Application::UpdateScheduledStatus(double _time) {
 }
 
 
-Application::ExitCode_t Application::SetConstraint(
-		std::string const & _res_name, Constraint::BoundType_t _type,
-		uint32_t _value) {
+Application::ExitCode_t
+Application::SetConstraint(std::string const & _res_name,
+		Constraint::BoundType_t _type, uint32_t _value) {
 
 	// Lookup the resource by name
 	std::map<std::string, ConstrPtr_t>::iterator it_con =
@@ -247,8 +248,9 @@ Application::ExitCode_t Application::SetConstraint(
 }
 
 
-Application::ExitCode_t Application::RemoveConstraint(
-		std::string const & _res_name, Constraint::BoundType_t _type) {
+Application::ExitCode_t
+Application::RemoveConstraint(std::string const & _res_name,
+		Constraint::BoundType_t _type) {
 
 	// Lookup the resource by name
 	std::map<std::string, ConstrPtr_t>::iterator it_con =

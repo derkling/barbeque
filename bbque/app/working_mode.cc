@@ -188,8 +188,10 @@ WorkingMode::ExitCode_t WorkingMode::BindResources(std::string const & rsrc_name
 
 	UsagesMap_t::iterator usage_it = rsrc_usages.begin();
 	UsagesMap_t::iterator it_end = rsrc_usages.end();
+
 	// For each resource usages
 	for (; usage_it != it_end; ++usage_it) {
+
 		// Current resource usage path ("recipe view" path)
 		std::string curr_rsrc_path = usage_it->first;
 		// If an ID has been specified, append it to the resource name
@@ -201,10 +203,10 @@ WorkingMode::ExitCode_t WorkingMode::BindResources(std::string const & rsrc_name
 		// If the resource name is part of the current resource path we must
 		// substitute it in the resource path with its binding name
 		if (start_pos != std::string::npos) {
-			// Position of "." after the resource name
-			size_t dot_pos = curr_rsrc_path.find(".", start_pos);
 			// Build the binding name
+			size_t dot_pos = curr_rsrc_path.find(".", start_pos);
 			std::string bind_rsrc_name = AppendID(rsrc_name, dst_id);
+
 			// Do the replacement into the resource path
 			curr_rsrc_path.replace(start_pos, (dot_pos - start_pos),
 					bind_rsrc_name);

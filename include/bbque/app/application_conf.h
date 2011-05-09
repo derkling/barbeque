@@ -57,8 +57,8 @@ public:
 	 * @param awm Next working mode scheduled for the application
 	 * @param state The new scheduled state
 	 */
-	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t state)
-		= 0;
+	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t state,
+			RViewToken_t tok = 0) = 0;
 
 };
 

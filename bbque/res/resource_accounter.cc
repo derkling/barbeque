@@ -28,6 +28,9 @@
 
 #include <cassert>
 #include <cmath>
+#include <cstring>
+#include <limits>
+#include <locale>
 #include <memory>
 #include <map>
 #include <string>
@@ -42,8 +45,8 @@ namespace ba = bbque::app;
 
 namespace bbque { namespace res {
 
-ResourceAccounter *ResourceAccounter::GetInstance() {
-	static ResourceAccounter *instance = NULL;
+ResourceAccounter * ResourceAccounter::GetInstance() {
+	static ResourceAccounter * instance;
 
 	if (instance == NULL)
 		instance = new ResourceAccounter();
@@ -62,55 +65,62 @@ ResourceAccounter::ResourceAccounter():
 		std::unique_ptr<plugins::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
-	if (logger)
-		logger->Debug("Resource accounter instanced.");
+	// Init the system resources state view
+	sys_usages_view = AppUsagesMapPtr_t(new AppUsagesMap_t);
+	sys_view_token = 0;
+	usages_per_views[sys_view_token] = sys_usages_view;
+	rsrc_per_views[sys_view_token] = ResourceSetPtr_t(new ResourceSet_t);
 }
 
 
 ResourceAccounter::~ResourceAccounter() {
 	resources.clear();
-	usages.clear();
+	usages_per_views.clear();
+	rsrc_per_views.clear();
 }
 
 
-ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
-		std::string const & _path, std::string const & _units,
-		uint64_t _amount) {
+ResourceAccounter::ExitCode_t
+ResourceAccounter::RegisterResource(std::string const & _path,
+		std::string	const & _units,	uint64_t _amount) {
 
 	// Check arguments
 	if(_path.empty())
 		return RA_ERR_MISS_PATH;
 
 	// Insert a new resource in the tree
-	ResourcePtr_t res_ptr;
-	res_ptr = resources.insert(_path);
-	if (res_ptr.get() == NULL)
+	ResourcePtr_t res_ptr = resources.insert(_path);
+	if (!res_ptr)
 		return RA_ERR_MEM;
 
-	// Set the amount of resource on the units base
+	// Set the amount of resource considering the units
 	res_ptr->SetTotal(ConvertValue(_amount, _units));
 	return RA_SUCCESS;
 }
 
 
-uint64_t ResourceAccounter::queryStatus(ResourcePtrList_t const & rsrc_set,
-		QueryOption_t _att) const {
+uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
+		QueryOption_t _att, RViewToken_t vtok) const {
 
-	// For all the descriptors the list) add the amount of resource in the
-	// specified state (available, used, total)
-	ResourcePtrList_t::const_iterator res_it = rsrc_set.begin();
-	ResourcePtrList_t::const_iterator res_end = rsrc_set.end();
+	// Cumulative value to return
 	uint64_t val = 0;
 
+	// Resource descriptor iterators
+	ResourcePtrList_t::const_iterator res_it = rsrc_set.begin();
+	ResourcePtrList_t::const_iterator res_end = rsrc_set.end();
+
+	// For all the descriptors in the list add the quantity of resource in the
+	// specified state (available, used, total)
 	for (; res_it != res_end; ++res_it) {
+
 		switch(_att) {
 		// Resource availability
 		case RA_AVAIL:
-			val += (*res_it)->Availability();
+			val += (*res_it)->Availability(vtok);
 			break;
 		// Resource used
 		case RA_USED:
-			val += (*res_it)->Used();
+			val += (*res_it)->Used(vtok);
 			break;
 		// Resource total
 		case RA_TOTAL:
@@ -122,8 +132,9 @@ uint64_t ResourceAccounter::queryStatus(ResourcePtrList_t const & rsrc_set,
 }
 
 
-ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(
-		ba::Application const * _app) {
+ResourceAccounter::ExitCode_t
+ResourceAccounter::AcquireUsageSet(ba::Application const * _app,
+		RViewToken_t vtok) {
 
 	// Check to avoid null pointer seg-fault
 	if (!_app)
@@ -133,100 +144,203 @@ ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(
 	if (!_app->NextAWM())
 		return RA_ERR_MISS_USAGES;
 
-	// Does the application hold a resource usages set yet?
-	std::map<uint32_t, UsagesMap_t const *>::iterator usemap_it;
-	usemap_it = usages.find(_app->Pid());
+	// Get the map of applications resource usages related to the state view
+	// referenced by 'vtok'. A missing view implies that the token is not
+	// valid.
+	AppUsagesMapPtr_t apps_usages;
+	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW)
+		return RA_ERR_MISS_VIEW;
+
 	// Each application can hold just one resource usages set
-	if (usemap_it != usages.end())
-		// Release current resources
-		ReleaseUsageSet(_app);
+	AppUsagesMap_t::iterator usemap_it;
+	usemap_it = apps_usages->find(_app->Pid());
+	if (usemap_it != apps_usages->end())
+		ReleaseUsageSet(_app, vtok);
 
-	// Set resource usages from the next working mode
-	usages[_app->Pid()] = &(_app->NextAWM()->ResourceUsages());
+	// Set resource usages of the next working mode
+	(*(apps_usages))[_app->Pid()] = &(_app->NextAWM()->ResourceUsages());
+	ExitCode_t ret = IncUsageCounts((*(apps_usages))[_app->Pid()], _app, vtok);
 
-	// Increment resources counts
-	ExitCode_t ret = incUsageCounts(usages[_app->Pid()], _app);
-
-	// If the resource allocation
+	// Resource allocation/reservation failed?
 	if (ret != RA_SUCCESS)
-		usages.erase(_app->Pid());
+		apps_usages->erase(_app->Pid());
 
 	return ret;
 }
 
 
-void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app) {
+void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app,
+		RViewToken_t vtok) {
 
 	// Check to avoid null pointer seg-fault
 	if (!_app)
 		return;
 
-	// Get the map of resource usages of the application
-	std::map<uint32_t, UsagesMap_t const *>::iterator usemap_it;
-	usemap_it = usages.find(_app->Pid());
-	// If there isn't any map return
-	if (usemap_it == usages.end())
+	// Get the map of applications resource usages related to the state view
+	// referenced by 'vtok'
+	AppUsagesMapPtr_t apps_usages;
+	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW)
 		return;
 
-	// Decrement resources counts
-	decUsageCounts(usemap_it->second, _app);
+	// Get the map of resource usages of the application
+	AppUsagesMap_t::iterator usemap_it;
+	usemap_it = apps_usages->find(_app->Pid());
+	if (usemap_it == apps_usages->end())
+		return;
 
-	// Remove the application from the map of usages
-	usages.erase(_app->Pid());
+	// Decrement resources counts and remove the usages map
+	DecUsageCounts(usemap_it->second, _app, vtok);
+	apps_usages->erase(_app->Pid());
 }
 
 
-inline ResourceAccounter::ExitCode_t ResourceAccounter::incUsageCounts(
-		UsagesMap_t const * app_usages, ba::Application const * _app) {
+RViewToken_t ResourceAccounter::GetNewView(const char * req_path) {
+	if (req_path == NULL)
+		return -1;
+	// Token
+	RViewToken_t _token = std::hash<const char *>()(req_path);
 
-	// ResourceUsages iterators
-	std::map<std::string, UsagePtr_t>::const_iterator usages_it =
-		app_usages->begin();
-	std::map<std::string, UsagePtr_t>::const_iterator usages_end =
-		app_usages->end();
+	// Allocate a new view for the applications resource usages and the
+	// set fo resources allocated
+	usages_per_views[_token] = AppUsagesMapPtr_t(new AppUsagesMap_t);
+	rsrc_per_views[_token] = ResourceSetPtr_t(new ResourceSet_t);
 
-	// Resource usage descriptor
+	return _token;
+}
+
+
+void ResourceAccounter::PutView(RViewToken_t vtok) {
+
+	// Do nothing if the token references the system state view
+	if (vtok == sys_view_token)
+		return;
+
+	// Get the resource set using the referenced view
+	ResourceViewsMap_t::iterator rviews_it = rsrc_per_views.find(vtok);
+	if (rviews_it == rsrc_per_views.end())
+		return;
+
+	// For each resource delete the view
+	ResourceSet_t::iterator rsrc_set_it = rviews_it->second->begin();
+	ResourceSet_t::iterator rsrc_set_end = rviews_it->second->end();
+	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it) {
+		(*rsrc_set_it)->DeleteView(vtok);
+	}
+
+	// Remove the map of applications resource usages of this view
+	usages_per_views.erase(vtok);
+}
+
+
+RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
+
+	// Do nothing if the token references the system state view
+	if (vtok == sys_view_token)
+		return sys_view_token;
+
+	// Set the system state view pointer to the map of applications resource
+	// usages of this view and point to
+	AppUsagesViewsMap_t::iterator us_view_it = usages_per_views.find(vtok);
+	if (us_view_it == usages_per_views.end())
+		return sys_view_token;
+
+	sys_usages_view = us_view_it->second;
+	sys_view_token = vtok;
+
+	// Get the resource set using the referenced view
+	ResourceViewsMap_t::iterator rviews_it = rsrc_per_views.find(vtok);
+	if (rviews_it == rsrc_per_views.end())
+		return sys_view_token;
+
+	// For each resource set the view as default
+	ResourceSet_t::iterator rsrc_set_it = rviews_it->second->begin();
+	ResourceSet_t::iterator rsrc_set_end = rviews_it->second->end();
+	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it) {
+		(*rsrc_set_it)->SetAsDefaultView(vtok);
+	}
+
+	return sys_view_token;
+}
+
+
+ResourceAccounter::ExitCode_t
+ResourceAccounter::GetAppUsagesByView(RViewToken_t vtok,
+		AppUsagesMapPtr_t & apps_usages) {
+
+	AppUsagesViewsMap_t::iterator view;
+	if (vtok != 0) {
+		// Select a "secondary" view
+		view = usages_per_views.find(vtok);
+		if (view == usages_per_views.end())
+			return RA_ERR_MISS_VIEW;
+		apps_usages = view->second;
+	}
+	else {
+		// The default view is the system state
+		assert(sys_usages_view);
+		apps_usages = sys_usages_view;
+	}
+
+	return RA_SUCCESS;
+}
+
+
+inline ResourceAccounter::ExitCode_t
+ResourceAccounter::IncUsageCounts(UsagesMapPtr_t app_usages,
+		ba::Application const * _app, RViewToken_t vtok) {
+
+	// Resource usages iterators
+	UsagesMap_t::const_iterator usages_it = app_usages->begin();
+	UsagesMap_t::const_iterator usages_end = app_usages->end();
+
+	// For each resource usage make a couple of checks
 	UsagePtr_t curr_usage;
-
-	// For each resource in the usages map make a couple of checks
 	for (; usages_it != usages_end; ++usages_it) {
-		// Current resource usage descriptor
+
+		// Current usage descriptor
 		curr_usage = usages_it->second;
 
 		// Is there a resource binding ?
 		if (curr_usage->binds.empty())
 			return RA_ERR_MISS_BIND;
 
-		// Is the request satisfable ?
-		if (curr_usage->value > queryStatus(curr_usage->binds, RA_AVAIL))
+		// Is the request satisfiable ?
+		if (curr_usage->value > QueryStatus(curr_usage->binds, RA_AVAIL, vtok))
 			return RA_ERR_USAGE_EXC;
 	}
 
-	// Checks passed, go with resources reservation
+	// Checks passed, iterate again doing the resources reservations
 	for (usages_it = app_usages->begin(); usages_it != usages_end;
 			++usages_it) {
-		// Current resource usage descriptor
-		curr_usage = usages_it->second;
 
-		// Current resource binds iterators
+		// Current usage value to reserve
+		curr_usage = usages_it->second;
+		uint64_t usage_value = curr_usage->value;
+
+		// Resource binds iterators
 		ResourcePtrList_t::iterator it_bind = curr_usage->binds.begin();
 		ResourcePtrList_t::iterator end_it = curr_usage->binds.end();
 
-		// Usage value to be acquired/reserved to the application
-		uint64_t usage_value = curr_usage->value;
-
-		// Allocate the request to the resources binds
+		// Allocate the usage request to the resources binds
 		while ((usage_value > 0) && (it_bind != end_it)) {
-			// Check the availability of the current resource bind
-			if (usage_value < (*it_bind)->Availability())
-				// Allocate the quantity into the current resource bind
-				usage_value -= (*it_bind)->Acquire(usage_value, _app);
+
+			// If the current bind has enough availability, reserve the whole
+			// quantity requested here. Otherwise split it in more "sibling"
+			// resource binds.
+			if (usage_value < (*it_bind)->Availability(vtok))
+				usage_value -= (*it_bind)->Acquire(usage_value, _app, vtok);
 			else
-				// Acquire the whole available quantity of the current
-				// resource bind
 				usage_value -=
-					(*it_bind)->Acquire((*it_bind)->Availability(), _app);
-			// Next bind
+					(*it_bind)->Acquire((*it_bind)->Availability(vtok), _app,
+							vtok);
+
+			// Get the resource set using the referenced view and insert the
+			// pointer to the resource bind
+			ResourceViewsMap_t::iterator rviews_it = rsrc_per_views.find(vtok);
+			assert(rviews_it != rsrc_per_views.end());
+			rviews_it->second->insert(*it_bind);
+
+			// Next resource bind
 			++it_bind;
 		}
 	}
@@ -234,36 +348,33 @@ inline ResourceAccounter::ExitCode_t ResourceAccounter::incUsageCounts(
 }
 
 
-inline void ResourceAccounter::decUsageCounts(UsagesMap_t const * app_usages,
-		ba::Application const * _app) {
+inline void ResourceAccounter::DecUsageCounts(UsagesMapPtr_t app_usages,
+		ba::Application const * _app, RViewToken_t vtok) {
 
-	// ResourceUsages iterators
-	std::map<std::string, UsagePtr_t>::const_iterator usages_it =
-		app_usages->begin();
-	std::map<std::string, UsagePtr_t>::const_iterator usages_end =
-		app_usages->end();
+	// Resource usages iterators
+	UsagesMap_t::const_iterator usages_it = app_usages->begin();
+	UsagesMap_t::const_iterator usages_end = app_usages->end();
 
 	// For each resource in the usages map...
 	for (; usages_it != usages_end; ++usages_it) {
-		// Resource usage descriptor
-		UsagePtr_t curr_usage = usages_it->second;
 
+		// Current resource usage to release
+		UsagePtr_t curr_usage = usages_it->second;
 		// Count of the amount of resource freed
 		uint64_t usage_freed = 0;
 
+		// Resource binds iterators
 		ResourcePtrList_t::iterator it_bind = curr_usage->binds.begin();
 		ResourcePtrList_t::iterator end_it = curr_usage->binds.end();
 
-		// Release the resources held
+		// For each resource bind release the quantity held
 		while (usage_freed < curr_usage->value) {
-			// Release the quantity allocated in the current resource bind
-			usage_freed += (*it_bind)->Release(_app);
-			// Next bind
+			assert(it_bind != end_it);
+			usage_freed += (*it_bind)->Release(_app, vtok);
 			++it_bind;
 		}
 	}
 }
-
 
 }   // namespace res
 

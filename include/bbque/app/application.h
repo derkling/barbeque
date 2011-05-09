@@ -48,13 +48,10 @@ class Application;
 
 /** Shared pointer to Application object */
 typedef std::shared_ptr<Application> AppPtr_t;
-
 /** Shared pointer to Recipe object */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
-
 /** Shared pointer to Constraint object */
 typedef std::shared_ptr<Constraint> ConstrPtr_t;
-
 /** Map of Constraints pointers, with the resource path as key*/
 typedef std::map<std::string, ConstrPtr_t> ConstrPtrMap_t;
 
@@ -206,8 +203,8 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	Application::ExitCode_t SetNextSchedule(AwmPtr_t & awm,
-			ScheduleFlag_t state);
+	ExitCode_t SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t state,
+			RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Switch from the current working mode to the next one.
@@ -241,7 +238,7 @@ public:
 	 * @param value The constraint value
 	 * @return An error code (@see ExitCode_t)
 	 */
-	Application::ExitCode_t SetConstraint(std::string const & res_path,
+	ExitCode_t SetConstraint(std::string const & res_path,
 			Constraint::BoundType_t type, uint32_t value);
 
 	/**
@@ -252,7 +249,7 @@ public:
 	 * @param type The constraint type (@see ContraintType)
 	 * @return An error code (@see ExitCode)
 	 */
-	Application::ExitCode_t RemoveConstraint(std::string const & res_path,
+	ExitCode_t RemoveConstraint(std::string const & res_path,
 			Constraint::BoundType_t type);
 
 private:

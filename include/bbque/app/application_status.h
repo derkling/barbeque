@@ -41,7 +41,6 @@ class WorkingModeStatusIF;
 
 /** Shared pointer to a WorkingModeStatusIF object */
 typedef std::shared_ptr<WorkingModeStatusIF> AwmStatusPtr_t;
-
 /** List of WorkingModeStatusIF pointers */
 typedef std::list<AwmStatusPtr_t> AwmStatusPtrList_t;
 

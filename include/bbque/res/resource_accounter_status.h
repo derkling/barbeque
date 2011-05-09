@@ -32,7 +32,6 @@ struct Resource;
 
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
-
 /** List of shared pointer to Resource*/
 typedef std::list<ResourcePtr_t> ResourcePtrList_t;
 
@@ -51,23 +50,29 @@ public:
 	/**
 	 * @brief Amount of resource available given an identifying resource path
 	 * @param path Resource path
+	 * @param vtok The token referencing the resource state view
 	 * @return The amount of resource available
 	 */
-	virtual uint64_t Available(std::string const & path) const = 0;
+	virtual uint64_t Available(std::string const & path, RViewToken_t vtok = 0)
+		const = 0;
 
 	/**
 	 * @brief Total amount of resource given an identifying resource path
 	 * @param path Resource path
+	 * @param vtok The token referencing the resource state view
 	 * @return The total amount of resource
 	 */
-	virtual uint64_t Total(std::string const & path) const = 0;
+	virtual uint64_t Total(std::string const & path, RViewToken_t vtok = 0)
+		const = 0;
 
 	/**
 	 * @brief Amount of resource used given an identifying resource path
 	 * @param path Resource path
+	 * @param vtok The token referencing the resource state view
 	 * @return The used amount of resource
 	 */
-	virtual uint64_t Used(std::string const & path) const = 0;
+	virtual uint64_t Used(std::string const & path, RViewToken_t vtok = 0)
+		const = 0;
 
 	/**
 	 * @brief Get a resource descriptor

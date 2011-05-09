@@ -35,8 +35,10 @@ namespace bbque { namespace res {
 // Forward declaration
 struct ResourceNode;
 
-/** Shared pointer to ResourceNode */
-typedef std::list<ResourceNode *> ResourceNodeList_t;
+/** List of pointers to ResourceNode */
+typedef std::list<ResourceNode *> ResourceNodesList_t;
+/** List of shared pointers to Resource descriptors */
+typedef std::list<ResourcePtr_t> ResourcesList_t;
 
 
 /**
@@ -50,7 +52,7 @@ struct ResourceNode {
 	ResourcePtr_t data;
 
 	/** Children nodes */
-	ResourceNodeList_t children;
+	ResourceNodesList_t children;
 
 	/** Parent node */
 	ResourceNode * parent;
@@ -132,7 +134,7 @@ public:
 	inline ResourcePtr_t find(std::string const & rsrc_path) const {
 		// Null shared pointer
 		ResourcePtr_t null_ptr;
-		null_ptr.reset();
+		assert(null_ptr.use_count() == 0);
 
 		// List of matches to be filled
 		std::list<ResourcePtr_t> matches;
@@ -150,10 +152,9 @@ public:
 	 * @param temp_path Template path to match
 	 * @return A list of resource descriptors (pointers)
 	 */
-	inline std::list<ResourcePtr_t> findAll(std::string const & temp_path)
-		const {
+	inline ResourcesList_t findAll(std::string const & temp_path) const {
 		// List of matches to return
-		std::list<ResourcePtr_t> matches;
+		ResourcesList_t matches;
 
 		// Start the recursive search
 		find_node(root, temp_path, RT_ALL_MATCHES, matches);
@@ -174,10 +175,9 @@ public:
 	 * @param hyb_path The resource path in hybrid form
 	 * @return A list of resource descriptors (pointers)
 	 */
-	inline std::list<ResourcePtr_t> findSet(std::string const & hyb_path)
-		const {
+	inline ResourcesList_t findSet(std::string const & hyb_path) const {
 		// List of matches to return
-		std::list<ResourcePtr_t> matches;
+		ResourcesList_t matches;
 
 		// Start the recursive search
 		find_node(root, hyb_path, RT_SET_MATCHES, matches);
@@ -195,7 +195,7 @@ public:
 	 */
 	inline bool existPath(std::string const & temp_path) const {
 		// List of matches to be filled
-		std::list<ResourcePtr_t> matches;
+		ResourcesList_t matches;
 
 		// Start the recursive search
 		return find_node(root, temp_path, RT_FIRST_MATCH, matches);
@@ -250,16 +250,16 @@ private:
 	 * @return True if the search have found some matchings.
 	 */
 	bool find_node(ResourceNode * curr_node, std::string const & rsrc_path,
-			SearchOption_t opt, std::list<ResourcePtr_t> & matches) const;
+			SearchOption_t opt, ResourcesList_t & matches) const;
 
 	/**
 	 * @brief Append a child to the current node
 	 * @param curr_node Current resource node
-	 * @param curr_ns Current pathlevel (namespace) name
+	 * @param rsrc_name Name of the child resource
 	 * @return The child node just created
 	 */
-	ResourceNode * insert_child(ResourceNode * curr_node,
-			std::string const & curr_ns);
+	ResourceNode * add_child(ResourceNode * curr_node,
+			std::string const & rsrc_name);
 
 	/**
 	 * @brief Recursive method for printing nodes content in a tree-like form

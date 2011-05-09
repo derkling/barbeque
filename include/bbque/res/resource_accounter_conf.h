@@ -54,6 +54,8 @@ public:
 		RA_ERR_MISS_PATH,
 		/** Unable to allocate a new resource descriptor */
 		RA_ERR_MEM,
+		/** Unable to find the state view specified */
+		RA_ERR_MISS_VIEW,
 		/** Application reference missing */
 		RA_ERR_MISS_APP,
 		/** Resource usages map missing	 */
@@ -65,6 +67,30 @@ public:
 	};
 
 	/**
+	 * @brief Register a resource
+	 *
+	 * Setup informations about a resource installed into the system.
+	 * Resources can be system-wide or placed on the platform. A resource is
+	 * identified by its pathname. The latters for instance must have the
+	 * "arch." suffix in front. While the formers doesn't show any suffix.
+	 *
+	 * Thus we could have resource paths as below :
+	 *
+	 * "mem0" 		: system memory
+	 * "spi0" 		: SPI system bus
+	 * "arch.mem0 	: internal memory (to the platform)
+	 * "arch.tile.cluster2 		: cluster 2 of the platform
+	 * "arch.tile.cluster0.pe1 	: processing element 1 in cluster 0
+	 *
+	 * @param path Resource path
+	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)
+	 * @param amount The total amount available
+	 * @return An exit code (@see ExitCode_t)
+	 */
+	virtual ExitCode_t RegisterResource(std::string const & path,
+			std::string const & units, uint64_t amount) = 0;
+
+	/**
 	 * @brief Acquire the next set of resources
 	 *
 	 * The method first check that the application doesn't hold another
@@ -73,9 +99,11 @@ public:
 	 * quantity.
 	 *
 	 * @param app The application requiring resource usages
+	 * @param vtok The token referencing the resource state view
 	 * @return An exit code (@see ExitCode_t)
 	 */
-	virtual ExitCode_t AcquireUsageSet(ba::Application const * app) = 0;
+	virtual ExitCode_t AcquireUsageSet(Application const * app,
+			RViewToken_t vtok = 0) = 0;
 
 	/**
 	 * @brief Release the resources
@@ -86,33 +114,50 @@ public:
 	 * release it all.
 	 *
 	 * @param app The application holding the resources
+	 * @param vtok The token referencing the resource state view
 	 */
-	virtual void ReleaseUsageSet(ba::Application const * app) = 0;
+	virtual void ReleaseUsageSet(Application const * app,
+			RViewToken_t vtok = 0) = 0;
 
 	/**
-	 * @brief Register a resource
+	 * @brief Get a new resources view
 	 *
-	 * Setup informations about a resource installed into the system.
-	 * Resources can be system-wide or placed on the platform.
-	 * A resource is identified by its pathname. The latters for instance must
-	 * have the "arch." suffix in front. While the formers doesn't show any
-	 * suffix.
+	 * A component (core or module) can require a "personal" view of the
+	 * resources. This means that ResourceAccounter "virtually clones"
+	 * the system resources, blanking their states, allowing the component to
+	 * make accounting without modify the real state of the resources.
 	 *
-	 * Thus we could have resource paths as below :
+	 * The component (i.e. Scheduler/Optimizer) should use the token returned
+	 * with all the accounting methods, as a reference to the considered
+	 * resources view. Note that a requiring component can manage more than
+	 * one view.
 	 *
-	 * "mem0" 		: system memory
-	 * "spi0" 		: SPI system bus
-	 * "arch.mem0 	: internal memory (to the platform)
-	 * "arch.clusters.cluster2 		: cluster 2 of the platform
-	 * "arch.clusters.cluster0.pe1 	: processing element 1 in cluster 0
-	 *
-	 * @param path Resource path
-	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)
-	 * @param amount The total amount available
-	 * @return An exit code (@see ExitCode_t)
+	 * @param who_req A string identifying who requires the view
+	 * @return A token to use with ResourceAccounter calls
 	 */
-	virtual ExitCode_t RegisterResource(std::string const & path,
-			std::string const & units, uint64_t amount) = 0;
+	virtual RViewToken_t GetNewView(const char * who_req) = 0;
+
+	/**
+	 * @brief Release a resources state view
+	 *
+	 * Remove the resources state view referenced by the token number.
+	 *
+	 * @param tok The token used as reference to the resources state view.
+	 */
+	virtual void PutView(RViewToken_t tok) = 0;
+
+	/**
+	 * @see Set a view as the new resources state of the system
+	 *
+	 * Set a new system state view means that for each resource used in that
+	 * view, such view becomes the default one.
+	 * This is how the Scheduler/Optimizer has defined the resource assignment
+	 * to the running applications.
+	 *
+	 * @param tok The token used as reference to the resources view.
+	 * @return The token referencing the system state view.
+	 */
+	virtual RViewToken_t SetAsSystemState(RViewToken_t vtok) = 0;
 
 };
 

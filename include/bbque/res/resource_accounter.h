@@ -27,6 +27,9 @@
 #ifndef BBQUE_RESOURCE_ACCOUNTER_H_
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
+#include <map>
+#include <set>
+
 #include "bbque/object.h"
 #include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter_conf.h"
@@ -42,15 +45,45 @@ using bbque::app::Application;
 
 namespace bbque { namespace res {
 
+/** Shared pointer to ResourceUsage object */
+typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
+/** Map of ResourceUsage descriptors. Key: resource path */
+typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
+/** Constant pointer to the map of ResourceUsage descriptors */
+typedef UsagesMap_t const * UsagesMapPtr_t;
+/** Map of map of ResourceUsage descriptors. Key: application */
+typedef std::map<uint32_t, UsagesMapPtr_t> AppUsagesMap_t;
+/** Shared pointer to a map of pair Application/ResourceUsages */
+typedef std::shared_ptr<AppUsagesMap_t> AppUsagesMapPtr_t;
+/** Map of AppUsagesMap_t having the resource state view token as key */
+typedef std::map<RViewToken_t, AppUsagesMapPtr_t> AppUsagesViewsMap_t;
+/** Set of pointers to the resources allocated under a given state view*/
+typedef std::set<ResourcePtr_t> ResourceSet_t;
+/** Shared pointer to ResourceSet_t */
+typedef std::shared_ptr<ResourceSet_t> ResourceSetPtr_t;
+/** Map of ResourcesSetPtr_t. The key is the view token */
+typedef std::map<RViewToken_t, ResourceSetPtr_t> ResourceViewsMap_t;
+
+
 /**
  * @class ResourceAccounter
  *
- * @brief Resource accounter component
+ * This component is used by the RTRM to do accounting of system resources.
+ * Thus ResourceAccounter is in charge of estabilish if a resource usages
+ * configuration (defined by the Scheduler/Optimizer module) is valid or not.
  *
- * This component is used by the RTRM to keep track of the resources in
- * the system, their availability and usages information. It manages their
- * status update and information about which applications are using a given
- * resource.
+ * On the front-side of the accounting mechanisms there are methods through
+ * which an application can require a set of resources, using the scheduled
+ * working mode as reference.
+ *
+ * ResourceAccounter keeps track of the state of each resource (amount used,
+ * availables, total) and exposes methods for making query.
+ *
+ * Moreover it exploits the multi-view support of the Resource object. Such
+ * feature allow a Scheduler/Optimizer module to do accounting, basing its
+ * procedure on a temporary (initially empty) view of the resource states.
+ * Once defined a valid configuration, a "commit" can be done. Setting the
+ * view defined by the configuration found as the new resources system state.
  */
 class ResourceAccounter: public ResourceAccounterConfIF, public Object {
 
@@ -59,7 +92,7 @@ public:
 	/**
 	 * @brief Return the instance of the ResourceAccounter
 	 */
-	static ResourceAccounter *GetInstance();
+	static ResourceAccounter * GetInstance();
 
 	/**
 	 * @brief Destructor
@@ -69,25 +102,28 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Available(std::string const & path) const {
-		ResourcePtrList_t matches = GetResources(path);
-		return queryStatus(matches, RA_AVAIL);
+	inline uint64_t Available(std::string const & path, RViewToken_t vtok = 0)
+		const {
+			ResourcePtrList_t matches = GetResources(path);
+			return QueryStatus(matches, RA_AVAIL, vtok);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Total(std::string const & path) const {
-		ResourcePtrList_t matches = GetResources(path);
-		return queryStatus(matches, RA_TOTAL);
+	inline uint64_t Total(std::string const & path, RViewToken_t vtok = 0)
+		const {
+			ResourcePtrList_t matches = GetResources(path);
+			return QueryStatus(matches, RA_TOTAL, vtok);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Used(std::string const & path) const {
-		ResourcePtrList_t matches = GetResources(path);
-		return queryStatus(matches, RA_USED);
+	inline uint64_t Used(std::string const & path, RViewToken_t vtok = 0)
+		const {
+			ResourcePtrList_t matches = GetResources(path);
+			return QueryStatus(matches, RA_USED, vtok);
 	}
 
 	/**
@@ -101,13 +137,11 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline ResourcePtrList_t GetResources(std::string const & path) const {
-		// Check if the path is template or ID-based (specific resource)
+		// If the path is a template find all the resources matching the
+		// template. Otherwise do an "hybrid" path based search.
 		if (IsPathTemplate(path))
-			// Find all the resources related to the path template
 			return resources.findAll(path);
-		else
-			// Lookup the resource descriptor by path
-			return resources.findSet(path);
+		return resources.findSet(path);
 	}
 
 	/**
@@ -129,9 +163,8 @@ public:
 		int16_t clust_patt_pos = path.find(CLUSTERS_PATH_TEMP);
 		if (clust_patt_pos < 0)
 			return 1;
-		// Check if the clustering factor has been computed yet
+		// Compute the factor only if not done yet
 		if (clustering_factor == 0) {
-			// Compute the factor
 			clustering_factor = Total(CLUSTERS_PATH_TEMP);
 			// If the query returns 0 the plaform is not cluster-based.
 			// Thus we must set clustering factor to 1.
@@ -144,18 +177,33 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	ResourceAccounter::ExitCode_t AcquireUsageSet(ba::Application const * app);
-
-	/**
-	 * @see ResourceAccounterConfIF
-	 */
-	void ReleaseUsageSet(ba::Application const * app);
-
-	/**
-	 * @see ResourceAccounterConfIF
-	 */
-	ResourceAccounter::ExitCode_t RegisterResource(std::string const & path,
+	ExitCode_t RegisterResource(std::string const & path,
 			std::string const & units, uint64_t amount);
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	ExitCode_t AcquireUsageSet(Application const * app, RViewToken_t vtok = 0);
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	void ReleaseUsageSet(Application const * app, RViewToken_t vtok = 0);
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	RViewToken_t GetNewView(const char * who_req);
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	void PutView(RViewToken_t tok);
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	RViewToken_t SetAsSystemState(RViewToken_t vtok);
 
 	/**
 	 * @brief Print the resource hierarchy in a tree-like form
@@ -190,10 +238,27 @@ private:
 	 *
 	 * @param rsrc_set A list of resource descriptors
 	 * @param q_opt Resource state attribute requested (@see QueryOption_t)
+	 * @param vtok The token referencing the resource state view
 	 * @return The value of the attribute request
 	 */
-	uint64_t queryStatus(ResourcePtrList_t const & rsrc_set,
-				QueryOption_t q_opt) const;
+	uint64_t QueryStatus(ResourcePtrList_t const & rsrc_set,
+				QueryOption_t q_opt, RViewToken_t vtok = 0) const;
+
+	/**
+	 * @brief Get a pointer to the map of applications resource usages
+	 *
+	 * Each application (or better, "execution context") can hold just one set
+	 * of resource usages. It's the one defined through the working mode
+	 * scheduled. Such assertion is valid inside the scope of the resources
+	 * state view referenced by the token.
+	 *
+	 * @param vtok The token referencing the resource state view
+	 * @param apps_usages The map of applications resource usages to get
+	 * @return RA_SUCCESS if the map is found. RA_ERR_MISS_VIEW if the token
+	 * doesn't match any state view.
+	 */
+	ExitCode_t GetAppUsagesByView(RViewToken_t vtok,
+			AppUsagesMapPtr_t &	apps_usages);
 
 	/**
 	 * @brief Increment the resource usages counts
@@ -203,10 +268,11 @@ private:
 	 *
 	 * @param app_usages Map of next resource usages
 	 * @param app The application acquiring the resources
+	 * @param vtok The token referencing the resource state view
 	 * @return An exit code (@see ExitCode_t)
 	 */
-	ResourceAccounter::ExitCode_t incUsageCounts(UsagesMap_t const * app_usages,
-			ba::Application const * app);
+	ExitCode_t IncUsageCounts(UsagesMapPtr_t app_usages,
+			Application const * app, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Decrement the resource usages counts
@@ -216,23 +282,43 @@ private:
 	 *
 	 * @param app_usages Map of current resource usages
 	 * @param app The application releasing the resources
+	 * @param vtok The token referencing the resource state view
 	 */
-	void decUsageCounts(UsagesMap_t const * app_usages,
-			ba::Application const * app);
+	void DecUsageCounts(UsagesMapPtr_t  app_usages,
+			Application const * app, RViewToken_t vtok = 0);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;
 
 	/**
-	 * The map of resource usages specified in the working modes of each
-	 * application. The key is the application name through which lookup the
-	 * list of current usages (relative to the current working mode)
+	 * Map containing the pointers to the map of resource usages specified in
+	 * the current working modes of each application. The key is the view
+	 * token. For each view an application can hold just one set of resource
+	 * usages.
 	 */
-	std::map<uint32_t, UsagesMap_t const *> usages;
+	AppUsagesViewsMap_t usages_per_views;
 
 	/**
-	 * Clustering factor.
-	 * This is equal to the number of clusters in the platform.
+	 * Pointer (shared) to the map of applications resource usages, currently
+	 * describing the resources system state (default view).
+	 */
+	AppUsagesMapPtr_t sys_usages_view;
+
+	/**
+	 * The token referencing the system resources state (default view).
+	 */
+	RViewToken_t sys_view_token;
+
+	/**
+	 * Keep track of the resources allocated for each view. This data
+	 * structure is needed to supports easily a view deletion or to set a view
+	 * as the new system state.
+	 */
+	ResourceViewsMap_t rsrc_per_views;
+
+	/**
+	 * Clustering factor. This is equal to the number of clusters in the
+	 * platform.
 	 */
 	uint16_t clustering_factor;
 

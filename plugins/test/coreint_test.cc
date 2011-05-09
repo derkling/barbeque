@@ -36,6 +36,7 @@
 
 namespace ba = bbque::app;
 namespace bp = bbque::plugins;
+namespace br = bbque::res;
 namespace bu = bbque::utils;
 
 namespace bbque { namespace plugins {
@@ -194,13 +195,7 @@ int32_t CoreInteractionsTest::Destroy(void * plugin) {
 void CoreInteractionsTest::RegisterSomeResources() {
 
 	// Get ResourceAccounter instance
-	bbque::res::ResourceAccounter * RA =
-		bbque::res::ResourceAccounter::GetInstance();
-
-	if (RA == NULL) {
-		printf("Error: ResourceAccounter missing");
-		return;
-	}
+	br::ResourceAccounter * RA = br::ResourceAccounter::GetInstance();
 
 	std::cout << "names=" << res_names.size()
 		<< " units=" << res_units.size()
@@ -228,13 +223,8 @@ void CoreInteractionsTest::RegisterSomeResources() {
 
 void CoreInteractionsTest::PrintResourceAvailabilities() {
 
-	bbque::res::ResourceAccounter * RA =
-		bbque::res::ResourceAccounter::GetInstance();
-
-	if (RA == NULL) {
-		printf("Error: ResourceAccounter missing");
-		return;
-	}
+	// SystemView
+	SystemView *sv = SystemView::GetInstance();
 
 	std::cout
 		<<
@@ -244,7 +234,8 @@ void CoreInteractionsTest::PrintResourceAvailabilities() {
 	// Print resource availabilities info
 	for (uint16_t i = 0; i < res_names.size(); ++i) {
 		std::cout << std::setw(50) << std::left << res_names[i].c_str() << "| "
-			<< std::setw(15) << std::right << RA->Available(res_names[i])
+			<< std::setw(15) << std::right <<
+			sv->ResourceAvailability(res_names[i])
 			<< " |" << std::endl;
 	}
 	std::cout
