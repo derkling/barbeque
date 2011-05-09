@@ -119,6 +119,9 @@ private:
 
 	void ChannelTrd();
 
+	RTLIB_ExitCode WaitBbqueResp(int ms = 500);
+
+	RTLIB_ExitCode BbqueResult();
 };
 
 } // namespace rtlib

@@ -114,6 +114,62 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelRelease() {
 
 }
 
+RTLIB_ExitCode BbqueRPC_FIFO_Client::WaitBbqueResp(int ms) {
+	int nfds;
+
+	nfds = epoll_wait(epoll_fd, epoll_evts, MAX_EPOLL_EVENTS, ms);
+	if (nfds < 0) {
+		fprintf(stderr, FMT_ERR("FAILED epoll_wait (Error %d: %s)\n"),
+			errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+	if (!nfds) {
+		fprintf(stderr, FMT_DBG("TIMEOUT epoll_wait\n"));
+		// TODO instead of returing an error, maybe better to try again a
+		// connection by re-sending the PAIR message without wasting time on
+		// destrying-reconstructing the client channel.
+		// But this should be somehow controller by the application...
+		return RTLIB_BBQUE_CHANNEL_READ_TIMEOUT;
+	}
+
+	// NOTE we use epoll just to monitor the client_fifo_fs, thus if we get
+	// here there sould be some data ready to read
+	assert(epoll_evts[0].data.fd == client_fifo_fd);
+
+	return RTLIB_OK;
+}
+
+
+RTLIB_ExitCode BbqueRPC_FIFO_Client::BbqueResult() {
+	rpc_fifo_header_t hdr;
+	rpc_msg_resp_t resp;
+	size_t bytes;
+
+	// Read response FIFO header
+	bytes = ::read(client_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+	assert(hdr.rpc_msg_type == RPC_BBQ_RESP);
+
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&resp, RPC_PKT_SIZE(resp));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	return resp.result;
+
+}
+
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 	rpc_fifo_app_pair_t fifo_pair = {
 		{
@@ -127,10 +183,8 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 		{RPC_APP_PAIR, chTrdPid, 0},
 		BBQUE_RPC_FIFO_MAJOR_VERSION,
 		BBQUE_RPC_FIFO_MINOR_VERSION};
-	rpc_fifo_header_t hdr;
-	rpc_msg_resp_t resp;
+	RTLIB_ExitCode result;
 	size_t bytes;
-	int nfds;
 
 	DB(fprintf(stderr, FMT_DBG("Pairing FIFO channels...\n")));
 
@@ -171,44 +225,13 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	// Waiting for BBQUE response (up to a 500ms timeout)
-	nfds = epoll_wait(epoll_fd, epoll_evts, MAX_EPOLL_EVENTS, 500);
-	if (nfds < 0) {
-		fprintf(stderr, FMT_ERR("FAILED epoll_wait (Error %d: %s)\n"),
-			errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
-	}
-	if (!nfds) {
-		fprintf(stderr, FMT_DBG("TIMEOUT epoll_wait\n"));
-		// TODO instead of returing an error, maybe better to try again a
-		// connection by re-sending the PAIR message without wasting time on
-		// destrying-reconstructing the client channel.
-		// But this should be somehow controller by the application...
-		return RTLIB_BBQUE_CHANNEL_READ_TIMEOUT;
-	}
-
-	// NOTE we use epoll just to monitor the client_fifo_fs, thus if we get
-	// here there sould be some data ready to read
-	assert(epoll_evts[0].data.fd == client_fifo_fd);
-
-	// Read response FIFO header
-	bytes = ::read(client_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("FAILED read from application fifo [%s]\n"),
-				app_fifo_path.c_str());
-		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
-	}
-	assert(hdr.rpc_msg_type == RPC_BBQ_RESP);
-
-	// Read response RPC header
-	bytes = ::read(client_fifo_fd, (void*)&resp, RPC_PKT_SIZE(resp));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("FAILED read from application fifo [/%s]\n"),
-				app_fifo_path.c_str());
-		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
-	}
+	result = WaitBbqueResp();
+	if (result != RTLIB_OK)
+		return result;
 
 	// Check RPC server response
-	if (resp.result != RTLIB_OK) {
+	result = BbqueResult();
+	if (result != RTLIB_OK) {
 		fprintf(stderr, FMT_ERR("bbque RPC pairing FAILED\n"));
 		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
 	}
