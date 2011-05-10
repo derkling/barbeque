@@ -84,8 +84,7 @@ public:
 	 * @param pid Process ID
 	 * @param exc_id The ID of the Execution Context (assigned from the application)
 	 */
-	explicit Application(std::string const & name, std::string const & user,
-			pid_t pid, uint8_t exc_id);
+	explicit Application(std::string const & name, pid_t pid, uint8_t exc_id);
 
 	/**
 	 * @brief Default destructor
@@ -106,22 +105,6 @@ public:
 	 */
 	inline void SetName(std::string const & app_name) {
 		name = app_name;
-	}
-
-	/**
-	 * @brief Get the current user of the application
-	 * @return The user name
-	 */
-	inline std::string const & User() const {
-		return user;
-	}
-
-	/**
-	 * @brief Set the current user of the application
-	 * @param app_user The user name
-	 */
-	inline void SetUser(std::string const & app_user) {
-		user = app_user;
 	}
 
 	/**

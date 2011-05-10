@@ -374,7 +374,7 @@ void CoreInteractionsTest::Test() {
 		return;
 	}
 	// Start an application
-	appman->StartApplication("mp3player", "giuseppe", 3, 3324, 0, "r1_platA", true);
+	appman->StartApplication("mp3player", 3, 3324, 0, "r1_platA", true);
 
 	std::shared_ptr<ba::ApplicationStatusIF>
 		test_app(appman->GetApplication(3324));

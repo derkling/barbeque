@@ -39,11 +39,9 @@ namespace bp = bbque::plugins;
 namespace bbque { namespace app {
 
 
-Application::Application(std::string const & _name, std::string const & _user,
-		pid_t _pid, uint8_t _exc_id):
+Application::Application(std::string const & _name, pid_t _pid, uint8_t _exc_id) :
 	Object(APPLICATION_NAMESPACE + _name),
 	name(_name),
-	user(_user),
 	pid(_pid),
 	exc_id(_exc_id) {
 

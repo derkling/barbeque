@@ -137,16 +137,15 @@ RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
 }
 
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
-    std::string const & _name, std::string const & _user, uint16_t _prio,
-	pid_t _pid, uint8_t _exc_id, std::string const & _rname,
-	bool _weak_load) {
+    std::string const & _name, uint16_t _prio, pid_t _pid,
+	uint8_t _exc_id, std::string const & _rname, bool _weak_load) {
 
 	// A shared pointer the application object descriptor
 	AppPtr_t app_ptr;
 	RecipePtr_t recp_ptr;
 
 	// Create a new descriptor
-	app_ptr = AppPtr_t(new ba::Application(_name, _user, _pid, _exc_id));
+	app_ptr = AppPtr_t(new ba::Application(_name, _pid, _exc_id));
 	app_ptr->SetPriority(_prio);
 
 	// Load the required recipe

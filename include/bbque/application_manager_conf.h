@@ -40,7 +40,6 @@ public:
 	/**
 	 * @brief The entry point for the applications requiring Barbeque.
 	 * @param name The application name
-	 * @param user Who's the user ?
 	 * @param prio Static priority
 	 * @param pid PID of the application (assigned from the OS)
 	 * @param exc_id The ID of the Execution Context (assigned from the application)
@@ -52,9 +51,8 @@ public:
 	 * @return An error code
 	 */
 	virtual plugins::RecipeLoaderIF::ExitCode_t StartApplication(
-			std::string const & name, std::string const & user,	uint16_t prio,
-			pid_t pid, uint8_t exc_id, std::string const & rpath,
-			bool weak_load) = 0;
+			std::string const & name, uint16_t prio, pid_t pid, uint8_t exc_id,
+			std::string const & rpath, bool weak_load) = 0;
 
 };
 
