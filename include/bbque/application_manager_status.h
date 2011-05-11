@@ -43,6 +43,7 @@ typedef std::multimap<AppPid_t, AppPtr_t > AppsMap_t;
  */
 typedef std::pair<AppPid_t, AppPtr_t> AppsMapEntry_t;
 
+
 /**
  * @class ApplicationManagerStatusIF
  * @brief "Read-only" interface for ApplicationManager status

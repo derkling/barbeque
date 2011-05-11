@@ -25,7 +25,6 @@
 #include "bbque/app/application_status.h"
 
 namespace bbque { namespace app {
-
 // Forward declaration
 class WorkingMode;
 
