@@ -26,6 +26,14 @@
 
 namespace bbque { namespace app {
 
+// Forward declaration
+class WorkingMode;
+
+/** Shared pointer to WorkingMode object */
+typedef std::shared_ptr<WorkingMode> AwmPtr_t;
+/** Numeric value used as token for the resource views */
+typedef size_t RViewToken_t;
+
 /**
  * @class ApplicationConfIF
  * @brief Provide interfaces to update runtime application information of the

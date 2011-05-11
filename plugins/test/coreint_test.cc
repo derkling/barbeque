@@ -425,6 +425,10 @@ void CoreInteractionsTest::Test() {
 	DoScheduleSwitch(app_conf, "wm1", 0.409);
 	PrintResourceAvailabilities();
 
+	// Stop application
+	appman->StopApplication(3324);
+	PrintResourceAvailabilities();
+
 	delete appman;
 
 	logger->Debug(".....: CoreInteractions Test finished :.....");

@@ -48,11 +48,31 @@ public:
 	 * It means that if a resource is missing, Barbeque can look for a
 	 * substituting resource taken from a higher level in the resource tree.
 	 *
-	 * @return An error code
+	 * @return A pointer to the newly allocated application, NULL otherwise.
 	 */
 	virtual AppPtr_t StartApplication(
 			std::string const & name, pid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio, bool weak_load) = 0;
+
+	/**
+	 * @brief Exit point for applications
+	 *
+	 * Stop the execution of an application scheduled with Barbeque RTRM.
+	 *
+	 * @param pid The process ID of the application
+	 */
+	virtual void StopApplication(pid_t pid) = 0;
+
+	/**
+	 * @brief Exit point for execution contexts of applications
+	 *
+	 * Stop the execution of an execution context, belonging to a given
+	 * application scheduled with Barbeque RTRM.
+	 *
+	 * @param pid The process ID of the application
+	 * @param exc_id The internal ID of the execution context
+	 */
+	virtual void StopApplication(pid_t pid, uint8_t exc_id) = 0;
 
 };
 

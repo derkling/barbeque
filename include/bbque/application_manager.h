@@ -55,11 +55,6 @@ using bbque::app::Application;
 using bbque::app::Recipe;
 using bbque::plugins::RecipeLoaderIF;
 
-namespace bbque { namespace app {
-	// Forward declaration
-	class Recipe;
-}}
-
 namespace bbque {
 
 /** Shared pointer to Recipe object */
@@ -102,9 +97,17 @@ public:
 			bool weak_load = false);
 
 	/**
-	 * @brief Retrieve regietered applications map
-	 *
-	 * @return A pointer to the Map of all applications registered to the RTRM
+	 * @see ApplicationManagerConfIF
+	 */
+	void StopApplication(pid_t pid);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	void StopApplication(pid_t pid, uint8_t exc_id);
+
+	/**
+	 * @see ApplicationManagerConfIF
 	 */
 	inline AppsMap_t const * Applications() const {
 		return &apps;

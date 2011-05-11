@@ -204,6 +204,70 @@ AppPtr_t ApplicationManager::StartApplication(
 	return app_ptr;
 }
 
+void ApplicationManager::StopApplication(pid_t pid) {
+
+	// Get all the execution context of the application
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
+		apps.equal_range(pid);
+	if (range.first == range.second)
+		return;
+
+	// Stop executions and update scheduling information
+	AppsMap_t::iterator it = range.first;
+	for ( ; it!=range.second; it++) {
+		((*it).second)->StopExecution();
+		ChangedSchedule((*it).second, 0);
+
+		// Remove application (ECs) descriptors from global and priority map
+		priority_vec[((*it).second)->Priority()].erase(pid);
+	}
+
+	apps.erase(pid);
+}
+
+
+void ApplicationManager::StopApplication(pid_t pid, uint8_t exc_id) {
+
+	// Execution context pointer
+	AppPtr_t _pexc;
+
+	// Get all the execution context of the application
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
+		apps.equal_range(pid);
+	if (range.first == range.second)
+		return;
+
+	// Find the execution context "exc_id", stop it and update scheduling
+	// information
+	AppsMap_t::iterator it = range.first;
+	for ( ; it!=range.second; ++it)
+
+		if (((*it).second)->ExcId() == exc_id) {
+			((*it).second)->StopExecution();
+			ChangedSchedule((*it).second, 0);
+
+			// Remove execution context descriptor from global map
+			_pexc = AppPtr_t((*it).second);
+			apps.erase(it);
+			break;
+		}
+
+	if (!_pexc)
+		return;
+
+	// Get all the execution context from the priority of the application
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> prio_range =
+		priority_vec[_pexc->Priority()].equal_range(pid);
+	if (prio_range.first == prio_range.second)
+		return;
+
+	// Remove application (EC) descriptor from priority map
+	AppsMap_t::iterator prio_it = prio_range.first;
+	for (; prio_it != prio_range.second; ++prio_it)
+		if (((*prio_it).second)->ExcId() == exc_id) {
+			priority_vec[_pexc->Priority()].erase(prio_it);
+		}
+}
 
 void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 

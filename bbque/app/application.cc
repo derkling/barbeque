@@ -63,14 +63,32 @@ Application::Application(std::string const & _name, pid_t _pid, uint8_t _exc_id)
 
 Application::~Application() {
 
-	// Release the resources (if any)
+	logger->Debug("...Application destruction...");
+	StopExecution();
+
+	enabled_awms.clear();
+	constraints.clear();
+}
+
+
+void Application::StopExecution() {
+
+	logger->Debug("*** Closing application ***");
+
+	// Release the resources
 	br::ResourceAccounter * ra = br::ResourceAccounter::GetInstance();
 	assert(ra != NULL);
 	ra->Release(this);
 
-	// Free the maps
-	enabled_awms.clear();
-	constraints.clear();
+	// Release the recipe used
+	recipe.reset();
+
+	// Reset scheduling info
+	curr_sched.awm.reset();
+	next_sched.awm.reset();
+	next_sched.state = FINISHED;
+
+	logger->Info("%s exit", name.c_str());
 }
 
 
