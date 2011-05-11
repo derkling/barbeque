@@ -38,6 +38,11 @@ extern "C" {
 #define RTLIB_VERSION_MINOR 0
 
 /**
+ * The maximum length for an "application" name
+ */
+#define RTLIB_APP_NAME_LENGTH 32
+
+/**
  * The maximum length for an "execution context" name
  */
 #define RTLIB_EXC_NAME_LENGTH 32

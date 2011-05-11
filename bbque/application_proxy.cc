@@ -193,24 +193,55 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
 
 void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
-	pchMsg_t pmsg = prqs->pmsg;
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	rpc_msg_app_pair_t * pmsg_pyl = (rpc_msg_app_pair_t*)pmsg_hdr;
 	rpc_msg_resp_t resp;
 	pconCtx_t pcon;
 
 	// Ensure this application has not yet registerd
-	assert(pmsg->typ == RPC_APP_PAIR);
-	assert(conCtxMap.find(pmsg->app_pid) == conCtxMap.end());
+	assert(pmsg_hdr->typ == RPC_APP_PAIR);
+	assert(conCtxMap.find(pmsg_hdr->app_pid) == conCtxMap.end());
 
 	// Build a new communication context
-	logger->Debug("APPs PRX: Setting-up RPC channel [app_pid: %d]...",
-			pmsg->app_pid);
-	pcon = pconCtx_t(new conCtx_t);
-	pcon->app_pid = pmsg->app_pid;
-	pcon->pd = rpc->GetPluginData(pmsg);
+	logger->Debug("APPs PRX: Setting-up RPC channel [pid: %d, name: %s]...",
+			pmsg_hdr->app_pid, pmsg_pyl->app_name);
 
+	// Checking API versioning
+	if (pmsg_pyl->mjr_version != RTLIB_VERSION_MAJOR ||
+			pmsg_pyl->mnr_version > RTLIB_VERSION_MINOR) {
+		logger->Error("APPs PRX: Setup RPC channel [pid: %d, name: %s] "
+				"FAILED (Error: version mismatch, "
+				"app_v%d.%d != rtlib_v%d.%d)",
+			pmsg_hdr->app_pid, pmsg_pyl->app_name,
+			pmsg_pyl->mjr_version, pmsg_pyl->mnr_version,
+			RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR);
+		return;
+	}
+
+	// Setting up a new communication context
+	pcon = pconCtx_t(new conCtx_t);
+	assert(pcon);
+	if (!pcon) {
+		logger->Error("APPs PRX: Setup RPC channel [pid: %d, name: %s] "
+				"FAILED (Error: connection context setup)",
+			pcon->app_pid,
+			pcon->app_name);
+		// TODO If an application do not get a responce withih a timeout
+		// should try again to register. This support should be provided by
+		// the RTLib
+		return;
+	}
+
+	pcon->app_pid = pmsg_hdr->app_pid;
+	::strncpy(pcon->app_name, pmsg_pyl->app_name, RTLIB_APP_NAME_LENGTH);
+	pcon->pd = rpc->GetPluginData(pchMsg);
+	assert(pcon->pd);
 	if (!pcon->pd) {
-		logger->Error("APPs PRX: Setup RPC channel [app_pid: %d] FAILED",
-			pmsg->app_pid);
+		logger->Error("APPs PRX: Setup RPC channel [pid: %d, name: %s] "
+				"FAILED (Error: communication channel setup)",
+			pcon->app_pid,
+			pcon->app_name);
 		// TODO If an application do not get a responce withih a timeout
 		// should try again to register. This support should be provided by
 		// the RTLib
@@ -220,13 +251,13 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	// Backup communication context for further messages
 	conCtxMap_ul.lock();
 	conCtxMap.insert(std::pair<pid_t, pconCtx_t>(
-				pmsg->app_pid, pcon));
+				pcon->app_pid, pcon));
 	conCtxMap_ul.unlock();
 
-	// Sending responce to application
-	logger->Debug("APPs PRX: Send RPC channel ACK [app_pid: %d]",
-			pmsg->app_pid);
-	::memcpy(&resp.header, pmsg, RPC_PKT_SIZE(header));
+	// Sending response to application
+	logger->Debug("APPs PRX: Send RPC channel ACK [pid: %d, name: %s]",
+			pcon->app_pid, pcon->app_name);
+	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
 	resp.header.typ = RPC_BBQ_RESP;
 	resp.result = RTLIB_OK;
 	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
@@ -304,10 +335,12 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 	case RPC_EXC_STOP:
 		logger->Debug("EXC_STOP");
 		break;
+
 	case RPC_APP_PAIR:
 		logger->Debug("APP_PAIR");
 		RpcAppPair(prqs);
 		break;
+
 	case RPC_APP_EXIT:
 		logger->Debug("APP_EXIT");
 		RpcAppExit(prqs);
@@ -339,6 +372,8 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 void ApplicationProxy::ProcessCommand(pchMsg_t & pmsg) {
 	std::unique_lock<std::mutex> snCtxMap_ul(snCtxMap_mtx);
 	prqsSn_t prqsSn = prqsSn_t(new rqsSn_t);
+	assert(prqsSn);
+
 	prqsSn->pmsg = pmsg;
 	// Create a new executor thread, this will start locked since it needs the
 	// execMap_mtx we already hold. This is used to ensure that the executor

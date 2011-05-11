@@ -170,7 +170,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::BbqueResult() {
 
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
+RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	rpc_fifo_app_pair_t fifo_pair = {
 		{
 			FIFO_PKT_SIZE(app_pair)+RPC_PKT_SIZE(app_pair),
@@ -182,11 +182,13 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 	rpc_msg_app_pair_t msg_pair = {
 		{RPC_APP_PAIR, chTrdPid, 0},
 		BBQUE_RPC_FIFO_MAJOR_VERSION,
-		BBQUE_RPC_FIFO_MINOR_VERSION};
+		BBQUE_RPC_FIFO_MINOR_VERSION,
+		"\0"};
 	RTLIB_ExitCode result;
 	size_t bytes;
 
-	DB(fprintf(stderr, FMT_DBG("Pairing FIFO channels...\n")));
+	DB(fprintf(stderr, FMT_DBG("Pairing FIFO channels [app: %s, pid: %d]\n"),
+					name, chTrdPid));
 
 	// Setting up FIFO name
 	strncpy(fifo_pair.rpc_fifo, app_fifo_filename, BBQUE_FIFO_NAME_LENGTH);
@@ -206,14 +208,17 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
 	}
 
+	::strncpy(msg_pair.app_name, name, RTLIB_APP_NAME_LENGTH);
+
 	// Send RPC header
 	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd, mjr: %d, mnr: %d]...\n"),
+		"[typ: %d, pid: %d, eid: %hd, mjr: %d, mnr: %d, name: %s]...\n"),
 		msg_pair.header.typ,
 		msg_pair.header.app_pid,
 		msg_pair.header.exc_id,
 		msg_pair.mjr_version,
-		msg_pair.mnr_version
+		msg_pair.mnr_version,
+		msg_pair.app_name
 	));
 	bytes = ::write(server_fifo_fd, (void*)&msg_pair, RPC_PKT_SIZE(app_pair));
 	if (bytes<=0) {
@@ -240,17 +245,19 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair() {
 
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
+RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup(const char *name) {
 	RTLIB_ExitCode result = RTLIB_OK;
 	int error;
 
 	DB(fprintf(stderr, FMT_INF("Initializing RPC FIFO channel\n")));
 
 	// Opening server FIFO
-	DB(fprintf(stderr, FMT_DBG("Opening bbque fifo [%s]...\n"), bbque_fifo_path.c_str()));
+	DB(fprintf(stderr, FMT_DBG("Opening bbque fifo [%s]...\n"),
+				bbque_fifo_path.c_str()));
 	server_fifo_fd = ::open(bbque_fifo_path.c_str(), O_WRONLY|O_NONBLOCK);
 	if (server_fifo_fd < 0) {
-		fprintf(stderr, FMT_ERR("FAILED opening bbque fifo [%s] (Error %d: %s)\n"),
+		fprintf(stderr, FMT_ERR("FAILED opening bbque fifo [%s] "
+					"(Error %d: %s)\n"),
 				bbque_fifo_path.c_str(), errno, strerror(errno));
 		return RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
 	}
@@ -298,14 +305,15 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
 	epoll_ev.events = EPOLLIN|EPOLLPRI;
 	epoll_ev.data.fd = client_fifo_fd;
 	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fifo_fd, &epoll_ev) == -1) {
-		fprintf(stderr, FMT_ERR("FAILED epoll configuration (Error %d: %s)\n"),
+		fprintf(stderr, FMT_ERR("FAILED epoll configuration "
+					"(Error %d: %s)\n"),
 				errno, strerror(errno));
 		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
 		goto err_epoll;
 	}
 
 	// Pairing channel with server
-	result = ChannelPair();
+	result = ChannelPair(name);
 	if (result != RTLIB_OK)
 		goto err_use;
 
@@ -357,7 +365,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
 			"bbque_%05d_%s", chTrdPid, name);
 
 	// Setting up the communication channel
-	result = ChannelSetup();
+	result = ChannelSetup(name);
 	if (result != RTLIB_OK)
 		return result;
 

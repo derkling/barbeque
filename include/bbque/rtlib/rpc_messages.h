@@ -100,6 +100,8 @@ typedef struct rpc_msg_app_pair {
 	uint8_t mjr_version;
 	/** The RPC protocol minor version */
 	uint8_t mnr_version;
+	/** The name of the application */
+	char app_name[RTLIB_APP_NAME_LENGTH];
 } rpc_msg_app_pair_t;
 
 /**

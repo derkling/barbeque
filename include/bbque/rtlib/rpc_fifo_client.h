@@ -111,9 +111,9 @@ private:
 
 	RTLIB_ExitCode ChannelRelease();
 
-	RTLIB_ExitCode ChannelPair();
+	RTLIB_ExitCode ChannelPair(const char *name);
 
-	RTLIB_ExitCode ChannelSetup();
+	RTLIB_ExitCode ChannelSetup(const char *name);
 
 	void ChannelTrd();
 

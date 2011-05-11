@@ -99,7 +99,11 @@ private:
 	std::condition_variable trdStatus_cv;
 
 	typedef struct conCtx {
+		/** The applicaiton PID */
 		pid_t app_pid;
+		/** The application name */
+		char app_name[RTLIB_APP_NAME_LENGTH];
+		/** The communication channel data to connect the applicaton */
 		RPCChannelIF::plugin_data_t pd;
 	} conCtx_t;
 
