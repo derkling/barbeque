@@ -44,11 +44,6 @@ typedef std::multimap<AppPid_t, AppPtr_t > AppsMap_t;
 typedef std::pair<AppPid_t, AppPtr_t> AppsMapEntry_t;
 
 /**
- * An entry of the Application Map
- */
-typedef std::pair<pid_t, AppPtr_t> AppsMapEntry_t;
-
-/**
  * @class ApplicationManagerStatusIF
  * @brief "Read-only" interface for ApplicationManager status
  */
@@ -69,11 +64,7 @@ public:
 	 * @param prio The priority value
 	 * @return A pointer to the map of applications with the request priority
 	 */
-<<<<<<< HEAD
 	virtual AppsMap_t const * Applications(app::AppPrio_t prio) const = 0;
-=======
-	virtual AppsMap_t const * Applications(uint16_t prio) const = 0;
->>>>>>> 85ffb9f... [ApplicationManager] Get methods using pointers
 
 	/**
 	 * @brief Retrieve reigstered applications with the specified scheduling state

@@ -203,24 +203,21 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	ExitCode_t SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t state,
-			RViewToken_t vtok = 0);
+	ExitCode_t SetNextSchedule(AwmPtr_t & awm, RViewToken_t vtok = 0);
 
 	/**
-	 * @brief Switch from the current working mode to the next one.
-	 * Then update transition overhead data and the scheduled status.
+	 * @brief Update scheduled status and reconfiguration overheads data
 	 *
-	 * @param time The time measured/estimated.
+	 * When the application manager receives a notify about a change of
+	 * scheduling profile (state and working mode) of an application, it needs
+	 * to update some internal structures, and set the new state in the
+	 * application descriptor.
+	 * The method set the new current state and forward to the application
+	 * information about overheads occourred in the reconfiguration phase.
+	 *
+	 * @param time The time measured/estimated in the reconfiguration process.
 	 */
-	void UpdateScheduledStatus(double time);
-
-	/**
-	 * @brief Check if the optimizer has set a new scheduling to switch in
-	 * @return True for yes, false otherwise.
-	 */
-	bool MarkedToSwitch() const {
-		return switch_mark;
-	}
+	void UpdateScheduledStatus(ScheduleFlag_t new_state, double time);
 
 	/**
 	 * @brief Stop the application execution
@@ -277,9 +274,6 @@ private:
 
 	/** Next scheduled status */
 	SchedulingInfo_t next_sched;
-
-	/** Marker set when the application has been set for schedule switching */
-	bool switch_mark;
 
 	/**
 	 * Recipe pointer for the current application instance.

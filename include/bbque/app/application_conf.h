@@ -49,16 +49,18 @@ public:
 	virtual void SetPriority(AppPrio_t prio) = 0;
 
 	/**
-	 * @brief Set next scheduled status and working mode
+	 * @brief Set next scheduled working mode
 	 *
-	 * Let the Optimizer (or other components) to set both next
-	 * schedule state and the new working mode of the application.
+	 * Let the Scheduler/Optimizer module to new working mode of the
+	 * application. The method infers if the scheduling choice implies a
+	 * reconfiguration (change of working mode), a migration (move the
+	 * application from a cluster to another), both, or to continue in the
+	 * same working mode, in the same cluster scope.
 	 *
 	 * @param awm Next working mode scheduled for the application
-	 * @param state The new scheduled state
+	 * @param tok The token referencing the resources state view
 	 */
-	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t state,
-			RViewToken_t tok = 0) = 0;
+	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm, RViewToken_t tok = 0) = 0;
 
 };
 

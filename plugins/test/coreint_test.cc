@@ -362,7 +362,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 	d_wm->BindResources("cluster", 1, -1, path_err);
 
 	// Let's set next schedule for the application above
-	test_app->SetNextSchedule(d_wm,	ba::Application::RUNNING);
+	test_app->SetNextSchedule(d_wm);
 	PrintScheduleInfo(test_app);
 
 	// Now switch!

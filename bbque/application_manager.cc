@@ -79,7 +79,7 @@ ApplicationManager::ApplicationManager():
 
 	// Pre-allocate priority and status vectors
 	priority_vec.resize(lowest_prio + 1);
-	status_vec.resize(ba::Application::FINISHED);
+	status_vec.resize(ba::Application::S_EXITED);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
@@ -355,7 +355,7 @@ void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 
 	// The application descriptor now will manage the change of
 	// working mode
-	papp->UpdateScheduledStatus(time);
+	papp->UpdateScheduledStatus(papp->NextState(), time);
 
 	logger->Debug("Changed EXC [%s] status to [%d]",
 			papp->StrId(),

@@ -1,26 +1,26 @@
 /**
- *       @file  application.cc
- *      @brief  Application descriptor implementation
- *
- * This implements the application descriptor.
- * Such descriptor includes static and dynamic information upon application
- * execution. It embeds usual information about name, priority, user, PID
- * (could be different from the one given by OS) plus a reference to the
- * recipe object, the list of enabled working modes and resource constraints.
- *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
- *
- *   @internal
- *     Created  06/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
- */
+*       @file  application.cc
+*      @brief  Application descriptor implementation
+*
+* This implements the application descriptor.
+* Such descriptor includes static and dynamic information upon application
+* execution. It embeds usual information about name, priority, user, PID
+* (could be different from the one given by OS) plus a reference to the
+* recipe object, the list of enabled working modes and resource constraints.
+*
+*     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+*
+*   @internal
+*     Created  06/04/2011
+*    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
+*    Compiler  gcc/g++
+*     Company  Politecnico di Milano
+*   Copyright  Copyright (c) 2011, Giuseppe Massari
+*
+* This source code is released for free distribution under the terms of the
+* GNU General Public License as published by the Free Software Foundation.
+* ============================================================================
+*/
 
 #include "bbque/app/application.h"
 
@@ -53,7 +53,7 @@ Application::Application(std::string const & _name,
 	exc_id(_exc_id) {
 
 	// Scheduling state
-	curr_sched.state = next_sched.state = READY;
+	curr_sched.state = next_sched.state = S_READY;
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
@@ -98,7 +98,7 @@ void Application::StopExecution() {
 	// Reset scheduling info
 	curr_sched.awm.reset();
 	next_sched.awm.reset();
-	next_sched.state = FINISHED;
+	next_sched.state = S_EXITED;
 
 	// Releasing AWMs and Constraints...
 	enabled_awms.clear();
@@ -141,69 +141,56 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 
 
 Application::ExitCode_t
-Application::SetNextSchedule(AwmPtr_t & awm, ScheduleFlag_t _state,
-		RViewToken_t vtok) {
+Application::SetNextSchedule(AwmPtr_t & n_awm, RViewToken_t vtok) {
 
 	// Get the working mode pointer
-	if (!awm) {
-		// AWM name mismatch
+	if (!n_awm) {
 		logger->Error("Trying to switch to an unknown working mode");
 		return APP_WM_NOT_FOUND;
 	}
 
-	// Set next working mode
-	next_sched.awm = awm;
-
-	// Update resource usages
+	// Set net working mode and try to acquire the resources
+	next_sched.awm = n_awm;
 	br::ResourceAccounter *res_acc =
 			br::ResourceAccounter::GetInstance();
+	if (res_acc->AcquireUsageSet(this, vtok) !=
+				br::ResourceAccounter::RA_SUCCESS)
+		return APP_WM_REJECTED;
 
-	switch (next_sched.state) {
-	case RUNNING:
-		// Set new resource usages
-		if (res_acc->AcquireUsageSet(this, vtok) !=
-				br::ResourceAccounter::RA_SUCCESS) {
-			// Set next awm null
-			next_sched.awm = curr_sched.awm;
-			return APP_WM_REJECTED;
-		}
-		logger->Info("Set working mode [%s]", awm->Name().c_str());
-		break;
+	// Define the transitional scheduling state
+	ScheduleFlag_t tran_state;
+	if (curr_sched.awm != n_awm)
+		tran_state = T_RECONF;
 
-	case KILLED:
-	case FINISHED:
-		// Release resources
-		res_acc->ReleaseUsageSet(this, vtok);
-		logger->Info("Resources released");
-	default:
-		break;
-	}
+	// --- manage migration cases here --- //
 
-	next_sched.state = _state;
-	switch_mark = true;
+	// Set the next state (transitional)
+	next_sched.state = tran_state;
+
 	return APP_SUCCESS;
 }
 
 
-void Application::UpdateScheduledStatus(double _time) {
+void Application::UpdateScheduledStatus(ScheduleFlag_t _new_state,
+		double _time) {
 
-	// Check next working mode != current one
-	if (curr_sched.awm != next_sched.awm) {
-
-		// Update transition overheads info
-		AwmStatusPtr_t curr_awm(curr_sched.awm);
-		if (curr_awm) {
-			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_awm->Name()));
+	switch (next_sched.state) {
+	case T_MIGREC:
+	case T_MIGRATE:
+	case T_RECONF:
+		// Update the reconfiguration overheads
+		if (curr_sched.awm) {
+			AwmPtr_t _awm = GetRecipe()->WorkingMode(curr_sched.awm->Name());
 			_awm->AddOverheadInfo(next_sched.awm->Name(), _time);
 		}
-		// Switch to next working mode in scheduling info
-		curr_sched.awm = next_sched.awm;
+	default:
+		break;
 	}
 
-	// Switch scheduled state
-	curr_sched.state = next_sched.state;
-	switch_mark = false;
-	logger->Info("Set schedule state {%d}",	next_sched.state);
+	// Switch to next working mode in scheduling info
+	curr_sched.state = next_sched.state = _new_state;
+	curr_sched.awm = next_sched.awm;
+	logger->Info("Final scheduled state = {%d}", curr_sched.state);
 }
 
 

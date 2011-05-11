@@ -72,29 +72,42 @@ public:
 
 	/**
 	 * @enum ScheduleFlag_t
-	 * This defines flags describing a schedule state
+	 *
+	 * This defines flags describing a schedule state.
+	 * Suffixes (S, T) have just a code readability purpose. "S" means
+	 * "stable" and "T" is "transitional".
+	 * The semantic behind a transitional state implies that the scheduling
+	 * should be finalized moving the application into a stable state.
+	 * Transitional states are useful to make more explicit the
+	 * scheduler/optimizer decisions, and eventually to trigger some overheads
+	 * statistics data collection.
 	 */
 	enum ScheduleFlag_t {
-		/** Waiting for a scheduling */
-		READY  = 0,
-		/** Optimizer has defined a scheduling */
-		SCHEDULED,
+		/** Ready to be scheduled */
+		S_READY  = 0,
+		/** Must change working mode */
+		T_RECONF,
+		/** Must migrate into another cluster */
+		T_MIGRATE,
+		/** Must migrate and change working mode */
+		T_MIGREC,
 		/** Running */
-		RUNNING,
+		S_RUNNING,
 		/** Waiting for an event or resource */
-		BLOCKED,
+		T_BLOCKED,
 		/** Forced to exit */
-		KILLED,
-		/** Finished */
-		FINISHED
+		S_KILLED,
+		/** Regular exit */
+		S_EXITED
 	};
 
 	/**
 	 * @struct SchedulingInfo_t
 	 *
-	 * Application scheduling informations. We have to keep track of the state
-	 * (READY, RUNNING, BLOCKED, KILLED, FINISHED ...) and the working mode,
-	 * that is going to be the one in which the application is running, or the
+	 * Application scheduling informations.
+	 * The scheduling of an application is characterized by a pair of
+	 * information: the state (@see ScheduleFlag_t), and the working mode
+	 * choosed by the scheduler/optimizer module.
 	 */
 	struct SchedulingInfo_t {
 		/** A schedule state */
@@ -184,13 +197,6 @@ public:
 	 * value
 	 */
 	virtual AwmStatusPtr_t const & HighValueAWM() = 0;
-
-	/**
-	 * @brief Check if the optimizer has set a new schedule state for the
-	 * application
-	 * @return True for yes, false otherwise.
-	 */
-	virtual bool MarkedToSwitch() const = 0;
 
 };
 
