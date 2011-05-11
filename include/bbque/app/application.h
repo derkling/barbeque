@@ -47,7 +47,6 @@ namespace bbque { namespace app {
 class WorkingMode;
 class Application;
 
-
 /** Shared pointer to Application object */
 typedef std::shared_ptr<Application> AppPtr_t;
 
@@ -127,14 +126,14 @@ public:
 	 * @brief Get the priority associated to
 	 * @return The priority value
 	 */
-	uint16_t Priority() const {
+	AppPrio_t Priority() const {
 		return priority;
 	}
 
 	/**
 	 * @see ApplicationConfIF
 	 */
-	void SetPriority(uint16_t prio);
+	void SetPriority(AppPrio_t prio);
 
 	/**
 	 * @brief This returns all the informations loaded from the recipe and
@@ -248,7 +247,7 @@ private:
 	uint8_t exc_id;
 
 	/** A numeric priority value */
-	uint16_t priority;
+	AppPrio_t priority;
 
 	/** Current scheduling informations */
 	SchedulingInfo_t curr_sched;

@@ -30,6 +30,9 @@
 
 namespace bbque { namespace app {
 
+/** The application priotity */
+typedef uint16_t AppPrio_t;
+
 // Forward declaration
 class WorkingModeStatusIF;
 
@@ -110,7 +113,7 @@ public:
 	 * @brief Get the priority associated to
 	 * @return The priority value
 	 */
-	virtual uint16_t Priority() const = 0;
+	virtual AppPrio_t Priority() const = 0;
 
 	/**
 	 * @brief Get the current schedule state

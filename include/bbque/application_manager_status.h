@@ -64,7 +64,7 @@ public:
 	 * @param prio The priority value
 	 * @return A pointer to the map of applications with the request priority
 	 */
-	virtual AppsMap_t const * Applications(uint16_t prio) const = 0;
+	virtual AppsMap_t const * Applications(app::AppPrio_t prio) const = 0;
 
 	/**
 	 * @brief Retrieve reigstered applications with the specified scheduling state
@@ -87,7 +87,7 @@ public:
 	/**
 	 * @brief Maximum integer value for the minimum application priority
 	 */
-	virtual uint16_t LowestPriority() const = 0;
+	virtual app::AppPrio_t LowestPriority() const = 0;
 
 };
 

@@ -38,7 +38,7 @@ public:
 	/**
 	 * @brief Set the priority of the application
 	 */
-	virtual void SetPriority(uint16_t prio) = 0;
+	virtual void SetPriority(AppPrio_t prio) = 0;
 
 	/**
 	 * @brief Set next scheduled status and working mode

@@ -36,6 +36,21 @@
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
 
+#ifndef BBQUE_APP_PRIO_MIN
+/**
+  * @brief The (default) minimum priority for an Application
+  *
+  * Applicaitons are scheduled according to their priority which is a
+  * value ranging from 0 (highest priority) to a Bbque defined minimum values.
+  * The default minimum value is defined by BBQUE_APP_PRIO_MIN, but it can be
+  * tuned by a Barbeque configuration parameter.
+  *
+  * Recipies could define the priority of the corresponding Application.
+  *
+  */
+# define BBQUE_APP_PRIO_MIN 10
+#endif
+
 using bbque::app::Application;
 using bbque::app::Recipe;
 using bbque::plugins::RecipeLoaderIF;
@@ -72,17 +87,18 @@ public:
 	/**
 	 * @brief The entry point for the applications requiring Barbeque.
 	 * @param name Application name
-	 * @param prio Application priority
 	 * @param pid PID of the application (assigned from the OS)
 	 * @param The ID of the Execution Context (assigned from the application)
-	 * @param rpath Recipe path
+	 * @param recipe The name of the recipe to use for this application
+	 * @param prio Application priority
 	 * @param weak_load If true a weak load of the recipe is accepted.
 	 * It is when some resource requests doesn't match perfectly.
 	 * @return An error code
 	 */
 	RecipeLoaderIF::ExitCode_t StartApplication(
-			std::string const & name, uint16_t prio, pid_t pid, uint8_t exc_id,
-			std::string const & rpath, bool weak_load = false);
+			std::string const & name, pid_t pid, uint8_t exc_id,
+			std::string const & recipe, app::AppPrio_t prio = BBQUE_APP_PRIO_MIN,
+			bool weak_load = false);
 
 	/**
 	 * @brief Retrieve regietered applications map
@@ -99,10 +115,10 @@ public:
 	 * @param prio The priority value
 	 * @return A pointer to the map of applications with the request priority
 	 */
-	AppsMap_t const * Applications(uint16_t prio) const {
-		assert(prio<=lowest_priority);
-		if (prio>lowest_priority)
-			prio=lowest_priority;
+	AppsMap_t const * Applications(app::AppPrio_t prio) const {
+		assert(prio<=lowest_prio);
+		if (prio>lowest_prio)
+			prio=lowest_prio;
 		return &(priority_vec[prio]);
 	}
 
@@ -129,8 +145,8 @@ public:
 	 * @brief Return the maximum integer value for the minimum application
 	 * priority
 	 */
-	inline uint16_t LowestPriority() const {
-		return lowest_priority;
+	inline app::AppPrio_t LowestPriority() const {
+		return lowest_prio;
 	};
 
 	/**
@@ -150,7 +166,7 @@ public:
 private:
 
 	/** Lowest application priority value (maximum integer) */
-	uint16_t lowest_priority;
+	app::AppPrio_t lowest_prio;
 
 	/**
 	 * List of all the applications instances which entered the
@@ -192,7 +208,7 @@ private:
 	// REFACTOR NEDDED:
 	// - save static constraint within the recipe
 	// - add a method to get static constraints from a recipe object
-	RecipePtr_t LoadRecipe(AppPtr_t _app_ptr, std::string const & _rname,
+	RecipePtr_t LoadRecipe(AppPtr_t _app_ptr, std::string const & _recipe,
 			bool weak_load = false);
 
 };

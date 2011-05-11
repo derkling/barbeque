@@ -74,7 +74,7 @@ Application::~Application() {
 }
 
 
-void Application::SetPriority(uint16_t _prio) {
+void Application::SetPriority(AppPrio_t _prio) {
 
 	bbque::ApplicationManager * appman =
 		bbque::ApplicationManager::GetInstance();

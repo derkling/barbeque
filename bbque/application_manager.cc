@@ -30,6 +30,9 @@
 #include "bbque/plugins/recipe_loader.h"
 #include "bbque/res/resources.h"
 
+#include <boost/program_options/options_description.hpp>
+#include <boost/program_options/variables_map.hpp>
+
 namespace ba = bbque::app;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
@@ -56,17 +59,23 @@ ApplicationManager::ApplicationManager():
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 
-	// Set the lowest application priority
+	// Read the lowest application priority from configuraiton file
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
-	uint16_t lowest_priority =
-		cm.GetOptions()["application.lowest_prio"].as<uint16_t>();
+	po::options_description opts_desc("Application Manager Options");
+	opts_desc.add_options()
+		("app.lowest_prio",
+		 po::value<app::AppPrio_t>(&lowest_prio)->default_value(BBQUE_APP_PRIO_MIN),
+		 "Low application priority (the higher the value, the lower the prio")
+		;
+	po::variables_map opts_vm;
+	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	// Pre-allocate priority and status vectors
-	priority_vec = std::vector<AppsMap_t>(lowest_priority + 1);
+	priority_vec = std::vector<AppsMap_t>(lowest_prio + 1);
 	status_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
 
 	// Debug logging
-	logger->Debug("Min priority = %d", lowest_priority);
+	logger->Debug("Min priority = %d", lowest_prio);
 	logger->Debug("Priority vector size = %d", priority_vec.size());
 	logger->Debug("Status vector size = %d", status_vec.size());
 }
@@ -96,12 +105,12 @@ ApplicationManager::~ApplicationManager() {
 }
 
 RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
-		std::string const & _rname, bool _weak_load) {
+		std::string const & _recipe, bool _weak_load) {
 	bp::RecipeLoaderIF::ExitCode_t retcode;
 	RecipePtr_t recp_ptr;
 
 	//---  Checking for previously loaded recipe
-	std::map<std::string, RecipePtr_t>::iterator it = recipes.find(_rname);
+	std::map<std::string, RecipePtr_t>::iterator it = recipes.find(_recipe);
 	if (it != recipes.end()) {
 		// Return a previously loaded recipe
 		return (*it).second;
@@ -120,8 +129,8 @@ RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
 	}
 
 	// Load the required recipe
-	recp_ptr = RecipePtr_t(new ba::Recipe(_rname));
-	retcode = rloader->LoadRecipe(_app_ptr, _rname, recp_ptr);
+	recp_ptr = RecipePtr_t(new ba::Recipe(_recipe));
+	retcode = rloader->LoadRecipe(_app_ptr, _recipe, recp_ptr);
 
 	// If a weak load has done, but the we didn't want it,
 	// or a parsing error happened: then return an empty recipe
@@ -131,14 +140,14 @@ RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
 	}
 
 	// Place the new recipe object in the map, and return it
-	recipes[_rname] = recp_ptr;
+	recipes[_recipe] = recp_ptr;
 	return recp_ptr;
 
 }
 
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
-    std::string const & _name, uint16_t _prio, pid_t _pid,
-	uint8_t _exc_id, std::string const & _rname, bool _weak_load) {
+    std::string const & _name, pid_t _pid, uint8_t _exc_id,
+	std::string const & _rname, app::AppPrio_t _prio, bool _weak_load) {
 
 	// A shared pointer the application object descriptor
 	AppPtr_t app_ptr;
