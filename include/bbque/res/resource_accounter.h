@@ -27,9 +27,7 @@
 #ifndef BBQUE_RESOURCE_ACCOUNTER_H_
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
-#include <map>
 #include <set>
-
 #include "bbque/object.h"
 #include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter_conf.h"
@@ -38,13 +36,10 @@
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
 
-// Path template for querying clusters state info
-#define CLUSTERS_PATH_TEMP "arch.tile.cluster"
-
-using bbque::app::Application;
-
 namespace bbque { namespace res {
 
+/** Type for ID used in resource path */
+typedef int16_t ResID_t;
 /** Shared pointer to ResourceUsage object */
 typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
 /** Map of ResourceUsage descriptors. Key: resource path */
@@ -160,12 +155,12 @@ public:
 		if (GetResource(path).get() == 0)
 			return 0;
 		// Check if the resource is clustered
-		int16_t clust_patt_pos = path.find(CLUSTERS_PATH_TEMP);
+		int16_t clust_patt_pos = path.find(RSRC_CLUSTER);
 		if (clust_patt_pos < 0)
 			return 1;
 		// Compute the factor only if not done yet
 		if (clustering_factor == 0) {
-			clustering_factor = Total(CLUSTERS_PATH_TEMP);
+			clustering_factor = Total(RSRC_CLUSTER);
 			// If the query returns 0 the plaform is not cluster-based.
 			// Thus we must set clustering factor to 1.
 			if (clustering_factor == 0)

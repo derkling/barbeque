@@ -359,7 +359,7 @@ void CoreInteractionsTest::DoScheduleSwitch(
 
 	char path_err[30];
 	// Do a binding!
-	d_wm->BindResources("cluster", 1, -1, path_err);
+	d_wm->BindResources("cluster", RSRC_ID_ANY, 1, path_err);
 
 	// Let's set next schedule for the application above
 	test_app->SetNextSchedule(d_wm);

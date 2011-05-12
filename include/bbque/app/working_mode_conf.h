@@ -23,9 +23,17 @@
 #define BBQUE_WORKING_MODE_CONF_IF_H
 
 #include "bbque/app/working_mode_status.h"
+#include "bbque/res/resource_accounter.h"
+
+/**
+ * BindResources(): use this macro if you want to bind the resource
+ * (referenced by the given path) without care about its ID.
+ */
+#define RSRC_ID_ANY	-1
+
+using bbque::res::ResID_t;
 
 namespace bbque { namespace app {
-
 
 /**
  * @class WorkingModeConfIF
@@ -80,14 +88,14 @@ public:
 	 * the system.
 	 *
 	 * @param rsrc_name The resource name we want to bind
-	 * @param dst_id System resource name destination ID
-	 * @param src_id Recipe resource name source ID
+	 * @param src_ID Recipe resource name source ID
+	 * @param dst_ID System resource name destination ID
 	 * @param rsrc_path_unbound A resource path left to bind
 	 * @return An exit code (@see ExitCode_t)
 	 */
 	ExitCode_t BindResources(std::string const & rsrc_name,
-			int32_t dst_id, int32_t src_id = -1,
-			const char * rsrc_path_unbound = NULL);
+			ResID_t src_ID, ResID_t dst_ID,
+			const char * rsrc_path_unb = NULL);
 
 };
 

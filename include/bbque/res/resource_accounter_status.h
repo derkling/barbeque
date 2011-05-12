@@ -26,8 +26,38 @@
 #include <memory>
 #include <string>
 
+// Following macros are defined in order to give a lightweight abstraction
+// upon the path template details of some typical resources. The purpose is
+// simply to give a more clean way in writing code for Barbeque modules using
+// ResourceAccounter calls.
+
+/** System memory */
+#define RSRC_SYS_MEM 	"mem"
+
+/** Platform internal memory */
+#define RSRC_PLAT_MEM 	"arch.mem"
+
+/** Set of clusters */
+#define RSRC_TILE 	"arch.tile"
+
+/** Memory at Tile scope */
+#define RSRC_TILE_MEM 	"arch.tile.mem"
+
+/** Cluster of processing element */
+#define RSRC_CLUSTER 	"arch.tile.cluster"
+
+/** Memory at Cluster level */
+#define RSRC_CLUST_MEM 	"arch.tile.cluster.mem"
+
+/** Processing element of the Cluster */
+#define RSRC_CLUST_PE 	"arch.tile.cluster.pe"
+
+
+using bbque::app::Application;
+
 namespace bbque { namespace res {
 
+// Forward declaration
 struct Resource;
 
 /** Shared pointer to Resource descriptor */

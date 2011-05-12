@@ -33,7 +33,6 @@
 #include "bbque/app/overheads.h"
 #include "bbque/app/recipe.h"
 #include "bbque/res/resources.h"
-#include "bbque/res/resource_accounter.h"
 
 namespace br = bbque::res;
 namespace bp = bbque::plugins;
@@ -97,11 +96,12 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 }
 
 
-uint64_t WorkingMode::ResourceUsageValue(std::string const & _res_path)
-	const {
+uint64_t WorkingMode::ResourceUsageValue(
+		std::string const & _res_path) const {
+
 	// Check if the resource is really requested
-	std::map<std::string, UsagePtr_t>::const_iterator it =
-		rsrc_usages.find(_res_path);
+	UsagesMap_t::const_iterator it = rsrc_usages.find(_res_path);
+
 	// If yes return the usage value
 	if (it != rsrc_usages.end())
 		return it->second->value;
@@ -162,13 +162,16 @@ OverheadPtr_t WorkingMode::OverheadInfo(std::string const & _dest_awm) const {
 	return over_ptr;
 }
 
+
 // Append and ID number to the resource name specified, after checking the ID
 // validity
-inline std::string AppendID(std::string const & _rsrc, int32_t _id) {
+inline std::string AppendID(std::string const & _rsrc, ResID_t _id) {
+
 	// Resource name + ID to return
 	std::string ret_rsrc = _rsrc;
+
 	// Check ID validity
-	if (_id > -1) {
+	if (_id > RSRC_ID_ANY) {
 		std::stringstream ss;
 		ss << _id;
 		ret_rsrc += ss.str();
@@ -177,8 +180,9 @@ inline std::string AppendID(std::string const & _rsrc, int32_t _id) {
 }
 
 
-WorkingMode::ExitCode_t WorkingMode::BindResources(std::string const & rsrc_name,
-		int32_t dst_id, int32_t src_id, const char * rsrc_path_unbound) {
+WorkingMode::ExitCode_t WorkingMode::BindResources(
+		std::string const & rsrc_name, ResID_t src_ID, ResID_t dst_ID,
+		const char * rsrc_path_unb) {
 
 	if (rsrc_name.empty())
 		return WM_RSRC_ERR_NAME;
@@ -186,47 +190,49 @@ WorkingMode::ExitCode_t WorkingMode::BindResources(std::string const & rsrc_name
 	// Number of binding solved
 	uint16_t num_of_solved = 0;
 
+	// Resource usages iterators
 	UsagesMap_t::iterator usage_it = rsrc_usages.begin();
 	UsagesMap_t::iterator it_end = rsrc_usages.end();
 
 	// For each resource usages
 	for (; usage_it != it_end; ++usage_it) {
 
-		// Current resource usage path ("recipe view" path)
-		std::string curr_rsrc_path = usage_it->first;
+		// Current resource usage path ("recipe view" path).
 		// If an ID has been specified, append it to the resource name
-		std::string rsrc_name_match = AppendID(rsrc_name, src_id);
-		// Starting position of the resource name to bind in the current
-		// resource path
-		size_t start_pos = curr_rsrc_path.find(rsrc_name_match);
+		std::string curr_rsrc_path = usage_it->first;
+		std::string rsrc_name_match = AppendID(rsrc_name, src_ID);
 
 		// If the resource name is part of the current resource path we must
 		// substitute it in the resource path with its binding name
+		size_t start_pos = curr_rsrc_path.find(rsrc_name_match);
 		if (start_pos != std::string::npos) {
+
 			// Build the binding name
 			size_t dot_pos = curr_rsrc_path.find(".", start_pos);
-			std::string bind_rsrc_name = AppendID(rsrc_name, dst_id);
+			std::string bind_rsrc_name = AppendID(rsrc_name, dst_ID);
 
 			// Do the replacement into the resource path
 			curr_rsrc_path.replace(start_pos, (dot_pos - start_pos),
 					bind_rsrc_name);
 		}
+
 		// Set the list of resource descriptors matching the binding
 		br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
 		usage_it->second->binds = ra->GetResources(curr_rsrc_path);
 
-		// If "binds" attribute list is empty matching has failed
+		// Update the number of solved bindings
 		if (!usage_it->second->binds.empty()) {
-			// Update the number of solved bindings
 			++num_of_solved;
 		}
 		else {
-			// Last unsolved resource path
-			if (rsrc_path_unbound)
-				rsrc_path_unbound = usage_it->first.c_str();
+			// The current binding has not be solved
+			if (rsrc_path_unb)
+				rsrc_path_unb = usage_it->first.c_str();
 		}
 	}
 	// Are all the resource usages bound ?
+	// If the answer is no, the argument "rsrc_path_unbound" will store the
+	// path of the last resource not bound.
 	if (num_of_solved < rsrc_usages.size())
 		return WM_RSRC_MISS_BIND;
 

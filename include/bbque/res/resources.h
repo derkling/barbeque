@@ -54,10 +54,9 @@ typedef std::map<pid_t, uint64_t> AppUseQtyMap_t;
 typedef size_t RViewToken_t;
 /** Hash map collecting the state views of a resource */
 typedef std::unordered_map<RViewToken_t, ResourceStatePtr_t> RSHashMap_t;
-
-
 /** Map of Application descriptor pointers. Key: application name */
 typedef std::map<std::string, Application const *> AppMap_t;
+
 
 /**
  * @struct ResourceState

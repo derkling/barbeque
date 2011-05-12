@@ -146,8 +146,8 @@ public:
 	 * @see WorkingModeConfIF
 	 */
 	ExitCode_t BindResources(std::string const & rsrc_name,
-			int32_t dst_id, int32_t src_id = -1,
-			const char * rsrc_path_unbound = NULL);
+			ResID_t src_ID, ResID_t dst_ID,
+			const char * rsrc_path_unb = NULL);
 private:
 
 	/**
