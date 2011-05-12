@@ -222,7 +222,7 @@ RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 	::strncpy(pd->app_fifo_filename, hdr->rpc_fifo, BBQUE_FIFO_NAME_LENGTH);
 	pd->app_fifo_fd = fd;
 
-	logger->Info("FIFO RPC: app channel [%d:%s] initialization DONE",
+	logger->Info("FIFO RPC: [%5d:%s] channel initialization DONE",
 			pd->app_fifo_fd, hdr->rpc_fifo);
 
 	return plugin_data_t(pd);
@@ -240,11 +240,11 @@ void FifoRPC::ReleasePluginData(plugin_data_t & pd) {
 	assert(initialized==true);
 	assert(ppd && ppd->app_fifo_fd);
 
-	logger->Info("FIFO RPC: releasing app channel [%d:%s]",
-			ppd->app_fifo_fd, ppd->app_fifo_filename);
-
 	// Close the FIFO and cleanup plugin data
 	::close(ppd->app_fifo_fd);
+
+	logger->Info("FIFO RPC: [%5d:%s] channel release DONE",
+			ppd->app_fifo_fd, ppd->app_fifo_filename);
 
 }
 

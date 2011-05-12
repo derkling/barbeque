@@ -54,7 +54,7 @@ BbqueRPC_FIFO_Client::BbqueRPC_FIFO_Client() :
 }
 
 BbqueRPC_FIFO_Client::~BbqueRPC_FIFO_Client() {
-	DB(fprintf(stderr, FMT_DBG("Releaseing the FIFO RPC channel...\n")));
+	DB(fprintf(stderr, FMT_DBG("BbqueRPC_FIFO_Client dtor\n")));
 	ChannelRelease();
 }
 

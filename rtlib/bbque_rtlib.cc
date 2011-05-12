@@ -138,7 +138,7 @@ static void RTLIB_Exit(void) {
 	if (!rtlib_initialized)
 		return;
 
-	// Close th[M#;e RPC FIFO channel thus releasin all BBQUE resource used by
+	// Close the RPC FIFO channel thus releasin all BBQUE resource used by
 	// this application
 	assert(rpc);
 	delete rpc;

@@ -275,7 +275,7 @@ void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
 	assert(conCtxIt!=conCtxMap.end());
 
 	// Releasing application resources
-	logger->Debug("APPs PRX: Application [app_pid: %d] ended, releasing resources...",
+	logger->Info("APPs PRX: Application [app_pid: %d] ended, releasing resources...",
 			pmsg->app_pid);
 
 	// Cleanup communication channel resources
@@ -383,7 +383,7 @@ void ApplicationProxy::ProcessCommand(pchMsg_t & pmsg) {
 				this, prqsSn);
 	prqsSn->exe.detach();
 
-	logger->Info("Processing new command...");
+	logger->Debug("Processing new command...");
 
 	// Add a new threaded command executor
 	snCtxMap.insert(std::pair<rpc_msg_type_t, psnCtx_t>(

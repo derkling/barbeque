@@ -60,7 +60,7 @@ BbqueRPC::BbqueRPC(void) :
 }
 
 BbqueRPC::~BbqueRPC(void) {
-	DB(fprintf(stderr, FMT_DBG("Releaseing the RPC channel...\n")));
+	DB(fprintf(stderr, FMT_DBG("BbqueRPC dtor\n")));
 }
 
 RTLIB_ExitCode BbqueRPC::Init(const char *name) {
