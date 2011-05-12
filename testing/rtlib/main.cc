@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 			"Where:" << std::endl;
 		std::cout << 	"<st> - simulation time [s]\n"
 				"<rt> - max reconfigurations interval time [s]\n"
-				"<ne> - number of EXC to generate\n"
+				"<ne> - number of EXC to register (max 999)\n"
 				"<mp> - max processing time [s] for each AWM\n"
 				"<mr> - max reconfiguration time [s] for each"
 						"AWM switch\n"
@@ -76,11 +76,22 @@ int main(int argc, char *argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	// Upper limit the number of execution context to register
+	if (num_exc>999)
+		num_exc = 999;
+
 	// Starting the simulation timer
 	simulation_tmr.start();
 
 	LOG("building application [%s]...", ::basename(argv[0]));
 	BbqueApp app(::basename(argv[0]));
+
+	char exc_name[] = "exc_000";
+	LOG("registering [%03d] excution contexts...", num_exc);
+	for (uint8_t i = 0; i<num_exc; i++) {
+		::snprintf(exc_name, 8, "exc_%03d", i);
+		app.RegisterEXC(exc_name, i);
+	}
 
 	LOG("starting application processing...");
 	app.Start();
@@ -89,8 +100,8 @@ int main(int argc, char *argv[]) {
 
 	sleep(simulation_time);
 
-	LOG("stopping application...");
-	app.Stop();
+
+
 
 	std::cout << "\n\n" << std::endl;
 

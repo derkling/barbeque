@@ -25,10 +25,10 @@
 
 #include <assert.h>
 
-#define LOG(fmt, ...) LOGGER(COLOR_GREEN, "BBQAPP      ", fmt, ## __VA_ARGS__)
+#define LOG(fmt, ...) LOGGER(COLOR_GREEN, "BAPP        ", fmt, ## __VA_ARGS__)
 
 #ifndef DBG
-# define DBG(fmt, ...) LOGGER(COLOR_LGRAY, "BBQAPP      ", fmt, ## __VA_ARGS__)
+# define DBG(fmt, ...) LOGGER(COLOR_LGRAY, "BAPP        ", fmt, ## __VA_ARGS__)
 #endif
 
 BbqueApp::BbqueApp(std::string const & name) {
@@ -41,24 +41,39 @@ BbqueApp::BbqueApp(std::string const & name) {
 
 }
 
-int BbqueApp::RegisterEXC(std::string const & name) {
-	(void)name;
+int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
+	char recipe_name[] = "exRecipe_000";
+	RTLIB_ExecutionContextParams exc_params = {
+		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
+		RTLIB_LANG_CPP,
+		recipe_name,
+		BbqueApp::Stop
+	};
+	RTLIB_ExecutionContextHandler exc_hdl;
 
-	LOG("Registering EXC [%s]...", name.c_str());
+	LOG("Registering EXC [%s:exRecipe_%03d]...", name.c_str(), recipe_id%999);
+
+	::snprintf(recipe_name, 13, "exRecipe_%03d", recipe_id%999);
+
+	assert(rtlib && rtlib->RegisterExecutionContext);
+	exc_hdl = rtlib->RegisterExecutionContext(name.c_str(), &exc_params);
+	exc_hdls.push_back(exc_hdl);
 
 	return 0;
 }
 
 void BbqueApp::Start() {
 
-	LOG("Starting application...");
+	LOG("Execution Context START...");
+
 
 }
 
-void BbqueApp::Stop() {
+RTLIB_ExitCode BbqueApp::Stop(RTLIB_ExecutionContextHandler ech,
+		struct timespec timeout) {
+	LOG("Execution Context STOP...");
 
-	LOG("Stopping application...");
-
+	return RTLIB_OK;
 }
 
 

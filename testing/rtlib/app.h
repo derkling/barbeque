@@ -25,6 +25,7 @@
 #include "bbque/rtlib.h"
 
 #include <string>
+#include <vector>
 
 class BbqueApp {
 
@@ -32,16 +33,19 @@ public:
 
 	BbqueApp(std::string const & name);
 
-	int RegisterEXC(std::string const & name);
+	int RegisterEXC(std::string const & name, uint8_t recipe_id);
 
 	void Start();
 
-	void Stop();
+	static RTLIB_ExitCode Stop(
+			RTLIB_ExecutionContextHandler ech,
+			struct timespec timeout);
 
 private:
 
 	RTLIB_Services *rtlib;
 
+	std::vector<RTLIB_ExecutionContextHandler> exc_hdls;
 };
 
 #endif // BBQUE_APP_H_
