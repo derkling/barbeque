@@ -24,6 +24,7 @@
 
 #include "bbque/application_proxy.h"
 
+#include "bbque/application_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/utils/utility.h"
 
@@ -191,12 +192,68 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
  * Request Sessions
  ******************************************************************************/
 
+void ApplicationProxy::RpcExcACK(pconCtx_t pcon, rpc_msg_header_t * pmsg_hdr) {
+	rpc_msg_resp_t resp;
+
+	// Sending response to application
+	logger->Debug("APPs PRX: Send RPC channel ACK [pid: %d, name: %s]",
+			pcon->app_pid, pcon->app_name);
+	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
+	resp.header.typ = RPC_BBQ_RESP;
+	resp.result = RTLIB_OK;
+	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
+
+}
+
+void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	rpc_msg_exc_register_t * pmsg_pyl = (rpc_msg_exc_register_t*)pmsg_hdr;
+	conCtxMap_t::iterator it;
+	pconCtx_t pcon;
+	AppPtr_t papp;
+
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	conCtxMap_ul.lock();
+	it = conCtxMap.find(pmsg_hdr->app_pid);
+	if (it == conCtxMap.end()) {
+		conCtxMap_ul.unlock();
+		logger->Warn("APPs PRX: Execution Context registration FAILED",
+			"[pid: %d, exc: %d] (Error: application not paired)",
+			pmsg_hdr->app_pid, pmsg_hdr->exc_id);
+		return;
+	}
+	pcon = (*it).second;
+	conCtxMap_ul.unlock();
+
+	// Registering a new Execution Context
+	logger->Info("APPs PRX: Registering Execution Context "
+			"[app: %s, pid: %d, exc: %d, nme: %s]",
+			pcon->app_name, pcon->app_pid,
+			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
+
+	// Register the EXC with the ApplicationManager
+	papp  = am.CreateEXC(pmsg_pyl->exc_name, pcon->app_pid,
+			pmsg_hdr->exc_id, pmsg_pyl->recipe);
+	if (!papp) {
+		logger->Warn("APPs PRX: TODO, send NAK to application");
+		return;
+	}
+
+	// Sending ACK response to application
+	RpcExcACK(pcon, pmsg_hdr);
+
+}
+
 void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
 	rpc_msg_app_pair_t * pmsg_pyl = (rpc_msg_app_pair_t*)pmsg_hdr;
-	rpc_msg_resp_t resp;
 	pconCtx_t pcon;
 
 	// Ensure this application has not yet registerd
@@ -254,14 +311,8 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 				pcon->app_pid, pcon));
 	conCtxMap_ul.unlock();
 
-	// Sending response to application
-	logger->Debug("APPs PRX: Send RPC channel ACK [pid: %d, name: %s]",
-			pcon->app_pid, pcon->app_name);
-	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
-	resp.header.typ = RPC_BBQ_RESP;
-	resp.result = RTLIB_OK;
-	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
-
+	// Sending ACK response to application
+	RpcExcACK(pcon, pmsg_hdr);
 }
 
 void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
@@ -314,6 +365,7 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 	switch(prqs->pmsg->typ) {
 	case RPC_EXC_REGISTER:
 		logger->Debug("EXC_REGISTER");
+		RpcExcRegister(prqs);
 		break;
 
 	case RPC_EXC_UNREGISTER:

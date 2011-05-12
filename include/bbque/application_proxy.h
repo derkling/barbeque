@@ -167,9 +167,14 @@ private:
  * Request Sessions
  ******************************************************************************/
 
+	void RpcExcRegister(prqsSn_t prqs);
+
 	void RpcAppPair(prqsSn_t prqs);
 
 	void RpcAppExit(prqsSn_t prqs);
+
+
+	void RpcExcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr);
 
 	void CommandExecutor(prqsSn_t prqs);
 

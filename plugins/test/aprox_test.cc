@@ -22,18 +22,18 @@
 
 #include "aprox_test.h"
 
-#include "bbque/application_manager.h"
 #include "bbque/modules_factory.h"
 
 #include "bbque/res/resource_accounter.h"
+#include "bbque/application_manager.h"
 #include "bbque/application_proxy.h"
+#include "bbque/system_view.h"
 
 #include <iomanip>
 
 namespace ba = bbque::app;
 namespace bp = bbque::plugins;
-
-using bbque::res::ResourceAccounter;
+namespace br = bbque::res;
 
 namespace bbque { namespace plugins {
 
@@ -41,7 +41,7 @@ namespace bbque { namespace plugins {
 ApplicationProxyTest::ApplicationProxyTest() {
 
 	// Get a logger
-	std::string logger_name(APROX_NAMESPACE);
+	std::string logger_name(TEST_NAMESPACE APROX_NAMESPACE);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = std::unique_ptr<bp::LoggerIF>(
 			ModulesFactory::GetLoggerModule(std::cref(conf)));
@@ -182,19 +182,18 @@ int ApplicationProxyTest::PrintResourceAvailabilities() {
 	// Get ResourceAccounter instance
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 
-	std::cout <<
-		"\n______________________| Resource availabilities |___________________\n"
-		<< std::endl;
+	std::cout << "\n______________________| Resource availabilities "
+		"|___________________\n" << std::endl;
 
 	// Print resource availabilities info
 	for (uint16_t i = 0; i < res_names.size(); ++i) {
-		std::cout << std::setw(50) << std::left << res_names[i].c_str() << "| "
-			<< std::setw(15) << std::right << ra.Available(res_names[i])
+		std::cout << std::setw(50) << std::left << res_names[i].c_str()
+			<< "| " << std::setw(15) << std::right
+			<< ra.Available(res_names[i])
 			<< " |" << std::endl;
 	}
-	std::cout <<
-		"____________________________________________________________________\n"
-		<< std::endl;
+	std::cout << "__________________________________________________"
+		"__________________\n" << std::endl;
 
 	return 0;
 }
@@ -203,13 +202,14 @@ int ApplicationProxyTest::PrintResourceAvailabilities() {
 // ===================[ Start the test ]=======================================
 
 void ApplicationProxyTest::Test() {
-	bbque::ApplicationProxy &ap(bbque::ApplicationProxy::GetInstance());
 	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	bbque::ApplicationProxy &ap(bbque::ApplicationProxy::GetInstance());
+	bbque::SystemView &sv(bbque::SystemView::GetInstance());
 	ApplicationProxy::resp_ftr_t stopResp_ftr;
 	ApplicationProxy::pcmdRsp_t pcmdRsp;
 	AppPtr_t papp;
 
-	logger->Info("\nApplicationProxy TEST STARTED");
+	logger->Info("ApplicationProxy TEST STARTED");
 
 	// Platform setup
 	if (RegisterSomeResources()) {
@@ -220,6 +220,19 @@ void ApplicationProxyTest::Test() {
 		logger->Error("FAILED: resources registration");
 		goto exit_failed;
 	}
+
+	// Starting the ApplicationProxy service
+	ap.Start();
+
+	// Periodically stop READY applications
+	logger->Debug("Killing REDY application loop...");
+	for (uint8_t i=10; i; i--) {
+		::sleep(6);
+		logger->Debug("Registered READY applications: %d",
+			sv.ApplicationsReady()->size());
+	}
+
+	return;
 
 	// Start an application to use for testing
 	am.CreateEXC("mp3player", 3324, 0, "simple_1Tl2Cl2Pe");
