@@ -41,7 +41,6 @@ struct Resource;
 struct ResourceUsage;
 struct ResourceState;
 
-
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointers to Resource descriptors */
@@ -123,6 +122,7 @@ public:
 	 */
 	Resource(std::string const & nm):
 		name(nm),
+		total(1),
 		default_key(0) {
 		// Init the default view
 		default_view = ResourceStatePtr_t(new ResourceState());
