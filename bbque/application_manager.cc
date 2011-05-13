@@ -58,6 +58,12 @@ ApplicationManager::ApplicationManager():
 		std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
+	//  Get the recipe loader instance
+	rloader = ModulesFactory::GetRecipeLoaderModule();
+	if (!rloader) {
+		logger->Fatal("Missing RecipeLoader plugin");
+		assert(rloader);
+	}
 
 	// Read the lowest application priority from configuraiton file
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
@@ -104,66 +110,87 @@ ApplicationManager::~ApplicationManager() {
 	logger->Debug("Cleared applications");
 }
 
-RecipePtr_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
-		std::string const & _recipe, bool _weak_load) {
-	bp::RecipeLoaderIF::ExitCode_t retcode;
+bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
+		std::string const & _recipe_name, RecipePtr_t & _recipe,
+		bool _weak_load) {
+	bp::RecipeLoaderIF::ExitCode_t result;
 	RecipePtr_t recp_ptr;
 
+	logger->Debug("Loading recipe [%s]...", _recipe_name.c_str());
+
+	assert(rloader);
+	if (!rloader) {
+		logger->Error("Cannot load recipe [%s] (Error: missing recipe loader module)",
+				_recipe_name.c_str());
+		return bp::RecipeLoaderIF::RL_ABORTED;
+	}
+
 	//---  Checking for previously loaded recipe
-	std::map<std::string, RecipePtr_t>::iterator it = recipes.find(_recipe);
+	std::map<std::string, RecipePtr_t>::iterator it = recipes.find(_recipe_name);
 	if (it != recipes.end()) {
 		// Return a previously loaded recipe
-		return (*it).second;
+		logger->Debug("recipe [%s] already loaded", _recipe_name.c_str());
+		_recipe = (*it).second;
+		return bp::RecipeLoaderIF::RL_SUCCESS;
 	}
 
 	//---  Loading a new recipe
-
-	//  Get the recipe loader instance
-	std::string rloader_name(RECIPE_LOADER_NAMESPACE);
-	bp::RecipeLoaderIF * rloader =
-		ModulesFactory::GetRecipeLoaderModule(rloader_name);
-	if (!rloader) {
-		// Cannot load recipes without the plugin!
-		logger->Fatal("Missing RecipeLoader plugin");
-		assert(rloader);
-	}
+	logger->Info("Loading NEW recipe [%s]...", _recipe_name.c_str());
 
 	// Load the required recipe
-	recp_ptr = RecipePtr_t(new ba::Recipe(_recipe));
-	retcode = rloader->LoadRecipe(_app_ptr, _recipe, recp_ptr);
+	recp_ptr = RecipePtr_t(new ba::Recipe(_recipe_name));
+	result = rloader->LoadRecipe(_app_ptr, _recipe_name, recp_ptr);
 
 	// If a weak load has done, but the we didn't want it,
 	// or a parsing error happened: then return an empty recipe
-	if ((retcode == bp::RecipeLoaderIF::RL_WEAK_LOAD && !_weak_load)
-			|| (retcode == bp::RecipeLoaderIF::RL_FORMAT_ERROR)) {
-		return RecipePtr_t();
+	if (result == bp::RecipeLoaderIF::RL_WEAK_LOAD && !_weak_load) {
+		logger->Error("Load NEW recipe [%s] FAILED "
+				"(Error: weak load not accepted)",
+				_recipe_name.c_str());
+		_recipe = RecipePtr_t();
+		return result;
+
+	}
+	// On all other case just WEAK_LOAD and SUCCESS are acceptable
+	if (result >= bp::RecipeLoaderIF::RL_FAILED ) {
+		logger->Error("Load NEW recipe [%s] FAILED "
+				"(Error: %d)",
+				_recipe_name.c_str(), result);
+		_recipe = RecipePtr_t();
+		return result;
 	}
 
+	logger->Debug("recipe [%s] load DONE", _recipe_name.c_str());
+
 	// Place the new recipe object in the map, and return it
-	recipes[_recipe] = recp_ptr;
-	return recp_ptr;
+	recipes[_recipe_name] = recp_ptr;
+	_recipe = recp_ptr;
+
+	return bp::RecipeLoaderIF::RL_SUCCESS;
 
 }
 
-bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
+AppPtr_t ApplicationManager::StartApplication(
     std::string const & _name, pid_t _pid, uint8_t _exc_id,
-	std::string const & _rname, app::AppPrio_t _prio, bool _weak_load) {
-
-	// A shared pointer the application object descriptor
+	std::string const & _rcp_name, app::AppPrio_t _prio, bool _weak_load) {
+	RecipeLoaderIF::ExitCode_t result;
+	RecipePtr_t rcp_ptr;
 	AppPtr_t app_ptr;
-	RecipePtr_t recp_ptr;
+
+	logger->Info("Starting NEW application [%s]...", _name.c_str());
 
 	// Create a new descriptor
 	app_ptr = AppPtr_t(new ba::Application(_name, _pid, _exc_id));
 	app_ptr->SetPriority(_prio);
 
 	// Load the required recipe
-	recp_ptr = LoadRecipe(app_ptr, _rname, _weak_load);
-	if (!recp_ptr) {
-		logger->Error("FAILED loading recipe [%s]", _rname.c_str());
-		return bp::RecipeLoaderIF::RL_FAILED;
+	result = LoadRecipe(app_ptr, _rcp_name, rcp_ptr, _weak_load);
+	if (!rcp_ptr) {
+		logger->Error("Start application [%s] FAILED (Error: unable to load recipe [%s])",
+				_name.c_str(), _rcp_name.c_str());
+		return AppPtr_t();
 	}
-	app_ptr->SetRecipe(recp_ptr);
+	app_ptr->SetRecipe(rcp_ptr);
 
 	// Save the application descriptor
 	apps.insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
@@ -172,7 +199,9 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::StartApplication(
 	(status_vec[static_cast<uint8_t>(app_ptr->CurrentState())]).
 		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
 
-	return bp::RecipeLoaderIF::RL_SUCCESS;
+	logger->Debug("application [%s] started DONE", _name.c_str());
+
+	return app_ptr;
 }
 
 

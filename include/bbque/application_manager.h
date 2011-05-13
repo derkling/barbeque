@@ -93,9 +93,10 @@ public:
 	 * @param prio Application priority
 	 * @param weak_load If true a weak load of the recipe is accepted.
 	 * It is when some resource requests doesn't match perfectly.
-	 * @return An error code
+	 *
+	 * @return A pointer to the newly allocated application, NULL otherwise.
 	 */
-	RecipeLoaderIF::ExitCode_t StartApplication(
+	 AppPtr_t StartApplication(
 			std::string const & name, pid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio = BBQUE_APP_PRIO_MIN,
 			bool weak_load = false);
@@ -165,6 +166,9 @@ public:
 
 private:
 
+	/** The recipe loader module used to parse recipes */
+	RecipeLoaderIF * rloader;
+
 	/** Lowest application priority value (maximum integer) */
 	app::AppPrio_t lowest_prio;
 
@@ -208,7 +212,9 @@ private:
 	// REFACTOR NEDDED:
 	// - save static constraint within the recipe
 	// - add a method to get static constraints from a recipe object
-	RecipePtr_t LoadRecipe(AppPtr_t _app_ptr, std::string const & _recipe,
+	RecipeLoaderIF::ExitCode_t LoadRecipe(AppPtr_t _app_ptr,
+			std::string const & _recipe_name,
+			RecipePtr_t & _recipe,
 			bool weak_load = false);
 
 };

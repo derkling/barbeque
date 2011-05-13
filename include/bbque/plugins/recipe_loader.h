@@ -56,18 +56,23 @@ public:
 	 * @enum Recipe load exit codes
 	 */
 	enum ExitCode_t {
+		//--- Success load
 		/** Load completed with success */
 		RL_SUCCESS = 0,
 		/** Partial load completed (i.e., some resources are missing) */
 		RL_WEAK_LOAD,
+
+		//--- Failed load
+		/** Recipe load failed for some reason (generic error) */
+		RL_FAILED,
+		/** Load completed with success */
+		RL_MISSING_LOADER,
 		/** Recipe not found */
 		RL_NOT_FOUND,
 		/** Recipe wrong data and/or format */
 		RL_FORMAT_ERROR,
 		/** Loading aborted (i.e., a RTRM component is missing) */
-		RL_ABORTED,
-		/** Recipe load failed for some reason (generic error) */
-		RL_FAILED
+		RL_ABORTED
 	};
 
 	/**
