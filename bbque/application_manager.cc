@@ -77,8 +77,8 @@ ApplicationManager::ApplicationManager():
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	// Pre-allocate priority and status vectors
-	priority_vec = std::vector<AppsMap_t>(lowest_prio + 1);
-	status_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
+	priority_vec.resize(lowest_prio + 1);
+	status_vec.resize(ba::Application::FINISHED);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
@@ -281,6 +281,8 @@ void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 		// Retrieve the runtime map from the status vector
 		AppsMap_t * curr_state_map = &(status_vec[_papp->CurrentState()]);
 		AppsMap_t * next_state_map = &(status_vec[_papp->NextState()]);
+
+		assert(*curr_state_map != *next_state_map);
 
 		// Find the application descriptor the current status map
 		std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
