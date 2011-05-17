@@ -113,6 +113,26 @@ public:
 	virtual std::string const & Name() const = 0;
 
 	/**
+	 * @brief Get the process ID of the application
+	 * @return PID value
+	 */
+	virtual AppPid_t Pid() const = 0;
+
+	/**
+	 * @brief Get the ID of this Execution Context
+	 * @return PID value
+	 */
+	virtual uint8_t ExcId() const = 0;
+
+	/**
+	 * @brief Get a string ID for this Execution Context
+	 * This method build a string ID according to this format:
+	 * <PID>:<TASK_NAME>:<EXC_ID>
+	 * @return String ID
+	 */
+	virtual const char *StrId() const = 0;
+
+	/**
 	 * @brief Get the priority associated to
 	 * @return The priority value
 	 */

@@ -57,29 +57,33 @@ Application::Application(std::string const & _name,
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 	assert(logger);
 
-	logger->Info("NEW Application [Name: %s, Pid: %d, ExcId: %d]",
-			Name().c_str(), Pid(), ExcId());
+	::snprintf(str_id, 16, "%05d:%6s:%02d",
+			Pid(), Name().substr(0,6).c_str(), ExcId());
+
+	logger->Info("Built new EXC [%s]", StrId());
 
 }
 
 
 Application::~Application() {
 
-	logger->Debug("...Application destruction...");
+	logger->Debug("Destroying EXC [%s]", StrId());
 	StopExecution();
-
-	enabled_awms.clear();
-	constraints.clear();
 }
 
 
 void Application::StopExecution() {
 
-	logger->Debug("*** Closing application ***");
+	logger->Info("Stopping EXC [%s]", StrId());
 
 	// Release the resources
 	br::ResourceAccounter * ra = br::ResourceAccounter::GetInstance();
-	assert(ra != NULL);
+	assert(ra);
+	if (!ra) {
+		logger->Warn("Stopping EXC [%s] FAILED "
+				"(Error: ResourceAccounter unavailable)");
+		return;
+	}
 	ra->Release(this);
 
 	// Release the recipe used
@@ -90,7 +94,10 @@ void Application::StopExecution() {
 	next_sched.awm.reset();
 	next_sched.state = FINISHED;
 
-	logger->Info("%s exit", name.c_str());
+	// Releasing AWMs and Constraints...
+	enabled_awms.clear();
+	constraints.clear();
+
 }
 
 

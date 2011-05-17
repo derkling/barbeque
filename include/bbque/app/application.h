@@ -123,6 +123,16 @@ public:
 	}
 
 	/**
+	 * @brief Get a string ID for this Execution Context
+	 * This method build a string ID according to this format:
+	 * <PID>:<TASK_NAME>:<EXC_ID>
+	 * @return String ID
+	 */
+	inline const char *StrId() const {
+		return str_id;
+	}
+
+	/**
 	 * @brief Get the priority associated to
 	 * @return The priority value
 	 */
@@ -252,6 +262,9 @@ private:
 
 	/** The ID of this Execution Context */
 	uint8_t exc_id;
+
+	/** The application string ID */
+	char str_id[16];
 
 	/** A numeric priority value */
 	AppPrio_t priority;
