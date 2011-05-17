@@ -82,7 +82,7 @@ private:
 
 	typedef struct snCtx {
 		std::thread exe;
-		pid_t pid;
+		AppPid_t pid;
 	} snCtx_t;
 
 	typedef std::shared_ptr<snCtx_t> psnCtx_t;
@@ -100,7 +100,7 @@ private:
 
 	typedef struct conCtx {
 		/** The applicaiton PID */
-		pid_t app_pid;
+		AppPid_t app_pid;
 		/** The application name */
 		char app_name[RTLIB_APP_NAME_LENGTH];
 		/** The communication channel data to connect the applicaton */
@@ -109,7 +109,7 @@ private:
 
 	typedef std::shared_ptr<conCtx_t> pconCtx_t;
 
-	typedef std::map<pid_t, pconCtx_t> conCtxMap_t;
+	typedef std::map<AppPid_t, pconCtx_t> conCtxMap_t;
 
 	conCtxMap_t conCtxMap;
 
@@ -137,10 +137,10 @@ private:
 	 *
 	 * This multimap maps command session threads ID on the session session
 	 * data.
-	 * @param pid_t the command session thread ID
+	 * @param AppPid_t the command session thread ID
 	 * @param pcmdSn_t the command session handler
 	 */
-	typedef std::multimap<pid_t, pcmdSn_t> cmdSnMm_t;
+	typedef std::multimap<AppPid_t, pcmdSn_t> cmdSnMm_t;
 
 	cmdSnMm_t cmdSnMm;
 
