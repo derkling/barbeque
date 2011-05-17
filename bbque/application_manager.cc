@@ -54,8 +54,7 @@ ApplicationManager::ApplicationManager():
 	// Get a logger
 	std::string logger_name(APPLICATION_MANAGER_NAMESPACE);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	logger =
-		std::unique_ptr<bp::LoggerIF>
+	logger = std::unique_ptr<bp::LoggerIF>
 		(ModulesFactory::GetLoggerModule(std::cref(conf)));
 
 	//  Get the recipe loader instance
@@ -70,8 +69,10 @@ ApplicationManager::ApplicationManager():
 	po::options_description opts_desc("Application Manager Options");
 	opts_desc.add_options()
 		("app.lowest_prio",
-		 po::value<app::AppPrio_t>(&lowest_prio)->default_value(BBQUE_APP_PRIO_MIN),
-		 "Low application priority (the higher the value, the lower the prio")
+		 po::value<app::AppPrio_t>
+		 (&lowest_prio)->default_value(BBQUE_APP_PRIO_MIN),
+		 "Low application priority (the higher the value, "
+		 "the lower the prio")
 		;
 	po::variables_map opts_vm;
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
@@ -95,10 +96,6 @@ ApplicationManager::~ApplicationManager() {
 
 	// Clear the priority vector
 	logger->Debug("Clearing priority vector...");
-	std::vector<AppsMap_t>::iterator it = priority_vec.begin();
-	std::vector<AppsMap_t>::iterator endv = priority_vec.end();
-	for (; it < endv; ++it)
-		it->clear();
 	priority_vec.clear();
 
 	// Clear the status vector
@@ -110,44 +107,48 @@ ApplicationManager::~ApplicationManager() {
 	logger->Debug("Cleared applications");
 }
 
-bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
-		std::string const & _recipe_name, RecipePtr_t & _recipe,
-		bool _weak_load) {
+bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t papp,
+		std::string const & recipe_name, RecipePtr_t & recipe,
+		bool weak_load) {
 	bp::RecipeLoaderIF::ExitCode_t result;
-	RecipePtr_t recp_ptr;
 
-	logger->Debug("Loading recipe [%s]...", _recipe_name.c_str());
+	logger->Debug("Loading recipe [%s]...", recipe_name.c_str());
 
 	assert(rloader);
 	if (!rloader) {
-		logger->Error("Cannot load recipe [%s] (Error: missing recipe loader module)",
-				_recipe_name.c_str());
+		logger->Error("Cannot load recipe [%s] "
+				"(Error: missing recipe loader module)",
+				recipe_name.c_str());
 		return bp::RecipeLoaderIF::RL_ABORTED;
 	}
 
 	//---  Checking for previously loaded recipe
-	std::map<std::string, RecipePtr_t>::iterator it = recipes.find(_recipe_name);
+	std::map<std::string, RecipePtr_t>::iterator it(
+			recipes.find(recipe_name));
 	if (it != recipes.end()) {
 		// Return a previously loaded recipe
-		logger->Debug("recipe [%s] already loaded", _recipe_name.c_str());
-		_recipe = (*it).second;
+		logger->Debug("recipe [%s] already loaded",
+				recipe_name.c_str());
+		recipe = (*it).second;
 		return bp::RecipeLoaderIF::RL_SUCCESS;
 	}
 
 	//---  Loading a new recipe
-	logger->Info("Loading NEW recipe [%s]...", _recipe_name.c_str());
+	logger->Info("Loading NEW recipe [%s]...", recipe_name.c_str());
 
 	// Load the required recipe
-	recp_ptr = RecipePtr_t(new ba::Recipe(_recipe_name));
-	result = rloader->LoadRecipe(_app_ptr, _recipe_name, recp_ptr);
+	// FIXME the RecipeLoader should be a pure client of this class.
+	// See ticket #2
+	recipe = RecipePtr_t(new ba::Recipe(recipe_name));
+	result = rloader->LoadRecipe(papp, recipe_name, recipe);
 
 	// If a weak load has done, but the we didn't want it,
 	// or a parsing error happened: then return an empty recipe
-	if (result == bp::RecipeLoaderIF::RL_WEAK_LOAD && !_weak_load) {
+	if (result == bp::RecipeLoaderIF::RL_WEAK_LOAD && !weak_load) {
 		logger->Error("Load NEW recipe [%s] FAILED "
 				"(Error: weak load not accepted)",
-				_recipe_name.c_str());
-		_recipe = RecipePtr_t();
+				recipe_name.c_str());
+		recipe = RecipePtr_t();
 		return result;
 
 	}
@@ -155,16 +156,15 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
 	if (result >= bp::RecipeLoaderIF::RL_FAILED ) {
 		logger->Error("Load NEW recipe [%s] FAILED "
 				"(Error: %d)",
-				_recipe_name.c_str(), result);
-		_recipe = RecipePtr_t();
+				recipe_name.c_str(), result);
+		recipe = RecipePtr_t();
 		return result;
 	}
 
-	logger->Debug("recipe [%s] load DONE", _recipe_name.c_str());
+	logger->Debug("recipe [%s] load DONE", recipe_name.c_str());
 
 	// Place the new recipe object in the map, and return it
-	recipes[_recipe_name] = recp_ptr;
-	_recipe = recp_ptr;
+	recipes[recipe_name] = recipe;
 
 	return bp::RecipeLoaderIF::RL_SUCCESS;
 
@@ -176,194 +176,218 @@ AppPtr_t ApplicationManager::StartApplication(
 		bool _weak_load) {
 	RecipeLoaderIF::ExitCode_t result;
 	RecipePtr_t rcp_ptr;
-	AppPtr_t app_ptr;
-
-	logger->Info("Starting NEW application [%s]...", _name.c_str());
+	AppPtr_t papp;
 
 	// Create a new descriptor
-	app_ptr = AppPtr_t(new ba::Application(_name, _pid, _exc_id));
-	app_ptr->SetPriority(_prio);
+	papp = AppPtr_t(new ba::Application(_name, _pid, _exc_id));
+	papp->SetPriority(_prio);
+
+	logger->Info("Starting new EXC [%s], prio[%d]",
+			papp->StrId(), papp->Priority());
 
 	// Load the required recipe
-	result = LoadRecipe(app_ptr, _rcp_name, rcp_ptr, _weak_load);
+	result = LoadRecipe(papp, _rcp_name, rcp_ptr, _weak_load);
 	if (!rcp_ptr) {
-		logger->Error("Start application [%s] FAILED (Error: unable to load recipe [%s])",
-				_name.c_str(), _rcp_name.c_str());
+		logger->Error("Starting EXC [%s] FAILED "
+				"(Error: unable to load recipe [%s])",
+				papp->StrId(), _rcp_name.c_str());
 		return AppPtr_t();
 	}
-	app_ptr->SetRecipe(rcp_ptr);
+	papp->SetRecipe(rcp_ptr);
 
-	// Save the application descriptor
-	apps.insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
-	(priority_vec[app_ptr->Priority()]).
-		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
-	(status_vec[static_cast<uint8_t>(app_ptr->CurrentState())]).
-		insert(AppsMapEntry_t(app_ptr->Pid(), app_ptr));
+	// Save application descriptors
+	apps.insert(AppsMapEntry_t(papp->Pid(), papp));
+	priority_vec[papp->Priority()].insert(
+			AppsMapEntry_t(papp->Pid(), papp));
+	status_vec[papp->CurrentState()].insert(
+			AppsMapEntry_t(papp->Pid(), papp));
 
-	logger->Debug("application [%s] started DONE", _name.c_str());
+	logger->Debug("EXC [%s] start DONE",
+			papp->StrId(), papp->ExcId());
 
-	return app_ptr;
+	return papp;
 }
 
 void ApplicationManager::StopApplication(AppPid_t pid) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMapVec_t::iterator vit;
+	AppsMapVec_t::iterator end;
+	AppsMap_t::iterator ait;
 
-	// Get all the execution context of the application
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
-		apps.equal_range(pid);
-	if (range.first == range.second)
-		return;
+	logger->Debug("Stopping all EXCs for application [%d] ...", pid);
+	range = apps.equal_range(pid);
+	ait = range.first;
+	for ( ; ait!=range.second; ++ait) {
+		((*ait).second)->StopExecution();
+	 }
 
-	// Stop executions and update scheduling information
-	AppsMap_t::iterator it = range.first;
-	for ( ; it!=range.second; it++) {
-		((*it).second)->StopExecution();
-		ChangedSchedule((*it).second, 0);
-
-		// Remove application (ECs) descriptors from global and priority map
-		priority_vec[((*it).second)->Priority()].erase(pid);
+	// Remove application (EXCs) descriptors from status map
+	logger->Debug("Releasing [%d] EXCs from status maps...", pid);
+	vit  = status_vec.begin();
+	end = status_vec.end();
+	for ( ; vit!=end; ++vit) {
+		(*vit).erase(pid);
 	}
 
+	// Remove application (EXCs) descriptors from priority map
+	logger->Debug("Releasing [%d] EXCs from priority maps...", pid);
+	vit  = priority_vec.begin();
+	end = priority_vec.end();
+	for ( ; vit!=end; ++vit) {
+		(*vit).erase(pid);
+	}
+
+	// Remove application (EXCs) descriptors from applications map
+	logger->Debug("Releasing [%d] EXCs from applications maps...", pid);
 	apps.erase(pid);
+
 }
 
 
 void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+	AppPtr_t papp;
 
-	// Execution context pointer
-	AppPtr_t _pexc;
-
-	// Get all the execution context of the application
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
-		apps.equal_range(pid);
-	if (range.first == range.second)
+	// Find the required EXC
+	papp = GetApplication(pid, exc_id);
+	assert(papp);
+	if (!papp) {
+		logger->Warn("Stop EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
 		return;
-
-	// Find the execution context "exc_id", stop it and update scheduling
-	// information
-	AppsMap_t::iterator it = range.first;
-	for ( ; it!=range.second; ++it)
-
-		if (((*it).second)->ExcId() == exc_id) {
-			((*it).second)->StopExecution();
-			ChangedSchedule((*it).second, 0);
-
-			// Remove execution context descriptor from global map
-			_pexc = AppPtr_t((*it).second);
-			apps.erase(it);
-			break;
-		}
-
-	if (!_pexc)
-		return;
-
-	// Get all the execution context from the priority of the application
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> prio_range =
-		priority_vec[_pexc->Priority()].equal_range(pid);
-	if (prio_range.first == prio_range.second)
-		return;
-
-	// Remove application (EC) descriptor from priority map
-	AppsMap_t::iterator prio_it = prio_range.first;
-	for (; prio_it != prio_range.second; ++prio_it)
-		if (((*prio_it).second)->ExcId() == exc_id) {
-			priority_vec[_pexc->Priority()].erase(prio_it);
-		}
-}
-
-void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
-
-	// Check existance of application instance
-	assert(_papp);
-
-	// If the scheduled state changes we need to update the application
-	// descriptor (pointer) position, moving it in the right map
-	if (_papp->CurrentState() != _papp->NextState()) {
-
-		// Retrieve the runtime map from the status vector
-		AppsMap_t * curr_state_map = &(status_vec[_papp->CurrentState()]);
-		AppsMap_t * next_state_map = &(status_vec[_papp->NextState()]);
-
-		assert(*curr_state_map != *next_state_map);
-
-		// Find the application descriptor the current status map
-		std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
-			(*curr_state_map).equal_range(_papp->Pid());
-		if (range.first == range.second) {
-			logger->Error("Cannot find %s in the expected status",
-			              _papp->Name().c_str());
-			return;
-		}
-
-		logger->Debug("Looking for Application [Name: %s, Pid: %d, ExcId: %d]...",
-				_papp->Name().c_str(),
-				_papp->Pid(),
-				_papp->ExcId());
-
-		AppsMap_t::iterator it = range.first;
-		for ( ; it!=range.second; it++) {
-			logger->Debug("Found Application [Name: %s, Pid: %d, ExcId: %d]",
-					((*it).second)->Name().c_str(),
-					((*it).second)->Pid(),
-					((*it).second)->ExcId());
-			if (_papp->ExcId() == ((*it).second)->ExcId())
-				break;
-		}
-		// The required application should be found, otherwise a data
-		// structure corruption has occurred
-		assert(it!=range.second);
-
-		logger->Debug("Changed Application [Name: %s, Pid: %d, ExcId: %d] "
-				"status to [%d]",
-				((*it).second)->Name().c_str(),
-				((*it).second)->Pid(),
-				((*it).second)->ExcId(),
-				((*it).second)->NextState());
-
-		(*curr_state_map).erase(it);
-
-		// Move it from the current to the next status map
-		(*next_state_map).insert(AppsMapEntry_t(_papp->Pid(), _papp));
-
-	}
-	// The application descriptor now will manage the change of working mode
-	_papp->SwitchToNextScheduled(_time);
-
-}
-
-
-AppPtr_t const ApplicationManager::GetApplication(AppPid_t _pid,
-		uint8_t _exc_id) {
-	AppPtr_t app_ptr;
-
-	// Find all the Execution Contexts of the specified application PID
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
-		apps.equal_range(_pid);
-	if (range.first == range.second) {
-		logger->Debug("Application [Pid: %d] NOT FOUND", _pid);
-		return app_ptr;
 	}
 
-	// Look for the required Execution Context
-	AppsMap_t::iterator it = range.first;
-	for ( ; it!=range.second; it++) {
-		if (_exc_id == ((*it).second)->ExcId())
-			break;
+	// Remove execution context descriptor from priority map
+	logger->Debug("Releasing [%s] EXCs from priority maps...",
+			papp->StrId());
+	range = priority_vec[papp->Priority()].equal_range(pid);
+	it = range.first;
+	while (it != range.second &&
+		((*it).second)->ExcId() != exc_id) {
+		++it;
+	}
+	assert(it != range.second);
+	if (it == range.second) {
+		logger->Crit("EXCs [%s] not found in priority maps "
+				"(Error: possible data structure corruption)",
+			papp->StrId());
+		return;
+	}
+	priority_vec[papp->Priority()].erase(it);
+
+	// Remove execution context descriptor from status map
+	logger->Debug("Releasing [%s] EXCs from status maps...",
+			papp->StrId());
+	range = status_vec[papp->CurrentState()].equal_range(pid);
+	it = range.first;
+	while (it != range.second &&
+		((*it).second)->ExcId() != exc_id) {
+		++it;
+	}
+	assert(it != range.second);
+	if (it == range.second) {
+		logger->Crit("EXCs [%s] not found in status maps "
+				"(Error: possible data structure corruption)",
+			papp->StrId());
+		return;
+	}
+	status_vec[papp->CurrentState()].erase(it);
+
+	// Remove execution context descriptor from applications map
+	logger->Debug("Stopping EXC [%s] ...", papp->StrId());
+	range = apps.equal_range(pid);
+	it = range.first;
+	while (it != range.second &&
+		((*it).second)->ExcId() != exc_id) {
+		++it;
+	}
+	assert(it != range.second);
+	if (it == range.second) {
+		logger->Crit("EXCs [%s] not found in application map "
+				"(Error: possible data structure corruption)",
+			papp->StrId());
+		return;
+	}
+	apps.erase(it);
+}
+
+void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+	assert(papp);
+
+	logger->Info("Changed EXC [%s] schedule [%d ==> %d]", papp->StrId(),
+			papp->CurrentState(), papp->NextState());
+
+	// We need to update the application descriptor (moving it into the
+	// right map) just if the scheduled state has changed.
+	if (papp->CurrentState() == papp->NextState())
+		return;
+
+	// Retrieve the runtime map from the status vector
+	AppsMap_t *curr_state_map = &(status_vec[papp->CurrentState()]);
+	AppsMap_t *next_state_map = &(status_vec[papp->NextState()]);
+	assert(curr_state_map != next_state_map);
+
+	// Find the application descriptor the current status map
+	range = curr_state_map->equal_range(papp->Pid());
+	assert(range.first != range.second);
+	it = range.first;
+	while (it != range.second &&
+		((*it).second)->ExcId() != papp->ExcId()) {
+		++it;
+	}
+	// The required application should be found, otherwise a data
+	// structure corruption has occurred
+	assert(it != range.second);
+	if (it == range.second) {
+		logger->Crit("unexpected state for EXC [%s] "
+				"(Error: possible currupted data structures)",
+				papp->StrId());
+		return;
+	}
+
+	// Move it from the current to the next status map
+	next_state_map->insert(next_state_map->begin(),
+			AppsMapEntry_t(papp->Pid(), papp));
+	curr_state_map->erase(it);
+
+	// The application descriptor now will manage the change of
+	// working mode
+	papp->SwitchToNextScheduled(time);
+
+	logger->Debug("Changed EXC [%s] status to [%d]",
+			papp->StrId(),
+			papp->CurrentState());
+}
+
+
+AppPtr_t const ApplicationManager::GetApplication(AppPid_t pid,
+		uint8_t exc_id) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+	AppPtr_t papp;
+
+	logger->Debug("Looking for EXC [%05d:*:%02d]...",
+			pid, exc_id);
+
+	//----- Find the required EXC
+	range = apps.equal_range(pid);
+	it = range.first;
+	while (it != range.second &&
+			((*it).second)->ExcId() != exc_id ) {
+		++it;
 	}
 	if (it == range.second) {
-		logger->Debug("Execution Context [Pid: %d, ExcId: %d] NOT FOUND",
-				_pid, _exc_id);
-		return app_ptr;
+		logger->Debug("EXC [%05d:*:%02d] NOT FOUND", pid, exc_id);
+		return AppPtr_t();
 	}
+	papp = (*it).second;
 
-	logger->Debug("Application Excution Context "
-			"[Name: %s, Pid: %d, ExcId: %d] FOUND",
-			((*it).second)->Name().c_str(),
-			((*it).second)->Pid(),
-			((*it).second)->ExcId());
+	logger->Debug("EXC [%s] FOUND", papp->StrId());
 
-	app_ptr = ((*it).second);
-
-	return app_ptr;
+	return papp;
 }
 
 }   // namespace bbque

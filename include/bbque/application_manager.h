@@ -77,7 +77,7 @@ public:
 	/**
 	 * @brief The destructor
 	 */
-	~ApplicationManager();
+	virtual ~ApplicationManager();
 
 	/**
 	 * @brief The entry point for the applications requiring Barbeque.
@@ -193,19 +193,26 @@ private:
 	std::map<std::string, RecipePtr_t> recipes;
 
 	/**
+	 * A (generic) vector of application maps.
+	 * These vectors are used to classify applications, e.g. based on their
+	 * priority or current status.
+	 */
+	typedef std::vector<AppsMap_t> AppsMapVec_t;
+
+	/**
 	 * Priority vector of currently scheduled applications (actives).
 	 * Vector index expresses the application priority, where "0" labels
 	 * "critical" applications. Indices greater than 0 are used for best effort
 	 * ones. Each position in the vector points to a set of maps grouping active
 	 * applications by priority.
 	 */
-	std::vector<AppsMap_t> priority_vec;
+	AppsMapVec_t priority_vec;
 
 	/**
 	 * Vector grouping the applications by status (@see ScheduleFlag).
 	 * Each position points to a set of maps pointing applications
 	 */
-	std::vector<AppsMap_t> status_vec;
+	AppsMapVec_t status_vec;
 
 	/** The constructor */
 	ApplicationManager();

@@ -71,7 +71,8 @@ Application::~Application() {
 	StopExecution();
 }
 
-
+// FIXME we should deliver the error code to the application
+// This is tracked by Issues tiket #10
 void Application::StopExecution() {
 
 	logger->Info("Stopping EXC [%s]", StrId());
