@@ -171,8 +171,9 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t _app_ptr,
 }
 
 AppPtr_t ApplicationManager::StartApplication(
-    std::string const & _name, pid_t _pid, uint8_t _exc_id,
-	std::string const & _rcp_name, app::AppPrio_t _prio, bool _weak_load) {
+		std::string const & _name, AppPid_t _pid, uint8_t _exc_id,
+		std::string const & _rcp_name, app::AppPrio_t _prio,
+		bool _weak_load) {
 	RecipeLoaderIF::ExitCode_t result;
 	RecipePtr_t rcp_ptr;
 	AppPtr_t app_ptr;
@@ -204,7 +205,7 @@ AppPtr_t ApplicationManager::StartApplication(
 	return app_ptr;
 }
 
-void ApplicationManager::StopApplication(pid_t pid) {
+void ApplicationManager::StopApplication(AppPid_t pid) {
 
 	// Get all the execution context of the application
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =
@@ -226,7 +227,7 @@ void ApplicationManager::StopApplication(pid_t pid) {
 }
 
 
-void ApplicationManager::StopApplication(pid_t pid, uint8_t exc_id) {
+void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 
 	// Execution context pointer
 	AppPtr_t _pexc;
@@ -330,12 +331,9 @@ void ApplicationManager::ChangedSchedule(AppPtr_t _papp, double _time) {
 }
 
 
-AppPtr_t const ApplicationManager::GetApplication(pid_t _pid,
+AppPtr_t const ApplicationManager::GetApplication(AppPid_t _pid,
 		uint8_t _exc_id) {
 	AppPtr_t app_ptr;
-
-	logger->Debug("Looking for Application [Pid: %d, ExcId: %d]...",
-			_pid, _exc_id);
 
 	// Find all the Execution Contexts of the specified application PID
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range =

@@ -51,7 +51,7 @@ public:
 	 * @return A pointer to the newly allocated application, NULL otherwise.
 	 */
 	virtual AppPtr_t StartApplication(
-			std::string const & name, pid_t pid, uint8_t exc_id,
+			std::string const & name, AppPid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio, bool weak_load) = 0;
 
 	/**
@@ -61,7 +61,7 @@ public:
 	 *
 	 * @param pid The process ID of the application
 	 */
-	virtual void StopApplication(pid_t pid) = 0;
+	virtual void StopApplication(AppPid_t pid) = 0;
 
 	/**
 	 * @brief Exit point for execution contexts of applications
@@ -72,7 +72,7 @@ public:
 	 * @param pid The process ID of the application
 	 * @param exc_id The internal ID of the execution context
 	 */
-	virtual void StopApplication(pid_t pid, uint8_t exc_id) = 0;
+	virtual void StopApplication(AppPid_t pid, uint8_t exc_id) = 0;
 
 };
 

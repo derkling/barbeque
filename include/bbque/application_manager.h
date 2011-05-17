@@ -92,19 +92,19 @@ public:
 	 * @return A pointer to the newly allocated application, NULL otherwise.
 	 */
 	 AppPtr_t StartApplication(
-			std::string const & name, pid_t pid, uint8_t exc_id,
+			std::string const & name, AppPid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio = BBQUE_APP_PRIO_MIN,
 			bool weak_load = false);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void StopApplication(pid_t pid);
+	void StopApplication(AppPid_t pid);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void StopApplication(pid_t pid, uint8_t exc_id);
+	void StopApplication(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF
@@ -143,7 +143,7 @@ public:
 	 * @param pid Application PID
 	 * @param exc_id Execution Contetx ID
 	 */
-	AppPtr_t const GetApplication(pid_t pid, uint8_t exc_id = 0);
+	AppPtr_t const GetApplication(AppPid_t pid, uint8_t exc_id = 0);
 
 	/**
 	 * @brief Return the maximum integer value for the minimum application

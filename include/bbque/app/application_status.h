@@ -28,6 +28,9 @@
 
 #include "bbque/app/plugin_data.h"
 
+/** The application identifier */
+typedef uint32_t AppPid_t;
+
 namespace bbque { namespace app {
 
 /** The application priotity */
