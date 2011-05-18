@@ -91,8 +91,7 @@ public:
 	virtual ~Application();
 
 	/**
-	 * @brief Get the application name
-	 * @return The application name
+	 * @see ApplicationStatusIF
 	 */
 	inline std::string const & Name() const {
 		return name;
@@ -115,8 +114,7 @@ public:
 	}
 
 	/**
-	 * @brief Get the ID of this Execution Context
-	 * @return PID value
+	 * @see ApplicationStatusIF
 	 */
 	inline uint8_t ExcId() const {
 		return exc_id;
@@ -133,8 +131,7 @@ public:
 	}
 
 	/**
-	 * @brief Get the priority associated to
-	 * @return The priority value
+	 * @see ApplicationStatusIF
 	 */
 	AppPrio_t Priority() const {
 		return priority;

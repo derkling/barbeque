@@ -80,16 +80,7 @@ public:
 	virtual ~ApplicationManager();
 
 	/**
-	 * @brief The entry point for the applications requiring Barbeque.
-	 * @param name Application name
-	 * @param pid PID of the application (assigned from the OS)
-	 * @param The ID of the Execution Context (assigned from the application)
-	 * @param recipe The name of the recipe to use for this application
-	 * @param prio Application priority
-	 * @param weak_load If true a weak load of the recipe is accepted.
-	 * It is when some resource requests doesn't match perfectly.
-	 *
-	 * @return A pointer to the newly allocated application, NULL otherwise.
+	 * @see ApplicationManagerConfIF
 	 */
 	 AppPtr_t StartApplication(
 			std::string const & name, AppPid_t pid, uint8_t exc_id,
@@ -114,10 +105,7 @@ public:
 	}
 
 	/**
-	 * @brief Retrieve registered applications with the specified priority
-	 *
-	 * @param prio The priority value
-	 * @return A pointer to the map of applications with the request priority
+	 * @see ApplicationManagerStatusIF
 	 */
 	AppsMap_t const * Applications(app::AppPrio_t prio) const {
 		assert(prio<=lowest_prio);
@@ -127,10 +115,7 @@ public:
 	}
 
 	/**
-	 * @brief Retrieve reigstered applications with the specified scheduling state
-	 *
-	 * @param sched_state The scheduling state
-	 * @return A pointer to the map of applications with the requested schedule status
+	 * @see ApplicationManagerStatusIF
 	 */
 	AppsMap_t const * Applications (
 			Application::ScheduleFlag_t sched_state) const {
@@ -138,16 +123,12 @@ public:
 	}
 
 	/**
-	 * @brief Retrieve an application descriptor (shared pointer) by PID and
-	 * Excution Context
-	 * @param pid Application PID
-	 * @param exc_id Execution Contetx ID
+	 * @see ApplicationManagerStatusIF
 	 */
 	AppPtr_t const GetApplication(AppPid_t pid, uint8_t exc_id = 0);
 
 	/**
-	 * @brief Return the maximum integer value for the minimum application
-	 * priority
+	 * @see ApplicationManagerStatusIF
 	 */
 	inline app::AppPrio_t LowestPriority() const {
 		return lowest_prio;

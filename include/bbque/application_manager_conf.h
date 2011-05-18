@@ -31,14 +31,17 @@ namespace bbque {
 
 /**
  * @class ApplicationManagerConfIF
- * @brief "Updating" interface for ApplicationManager
+ *
+ * The interface exposes the ApplicationManager methods for applications
+ * lifecycle manipulation.
  */
 class ApplicationManagerConfIF: public ApplicationManagerStatusIF {
 
 public:
 
 	/**
-	 * @brief The entry point for the applications requiring Barbeque.
+	 * @brief Entry point for applications
+	 *
 	 * @param name The application name
 	 * @param pid PID of the application (assigned from the OS)
 	 * @param exc_id The ID of the Execution Context (assigned from the application)

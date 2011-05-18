@@ -43,6 +43,7 @@ typedef std::multimap<AppPid_t, AppPtr_t > AppsMap_t;
  */
 typedef std::pair<AppPid_t, AppPtr_t> AppsMapEntry_t;
 
+
 /**
  * @class ApplicationManagerStatusIF
  * @brief "Read-only" interface for ApplicationManager status
@@ -85,7 +86,8 @@ public:
 			uint8_t exc_id = 0) = 0;
 
 	/**
-	 * @brief Maximum integer value for the minimum application priority
+	 * @brief Lowest application priority
+	 * @return The maximum integer value for the (lowest) priority level
 	 */
 	virtual app::AppPrio_t LowestPriority() const = 0;
 
