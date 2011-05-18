@@ -55,14 +55,15 @@ protected:
 
 	RTLIB_ExitCode _Register(pregExCtx_t pregExCtx);
 
-	void _Unregister(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode _Unregister(pregExCtx_t pregExCtx);
 
-	RTLIB_ExitCode _Start(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode _Start(pregExCtx_t pregExCtx);
 
-	RTLIB_ExitCode _Stop(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode _Stop(pregExCtx_t pregExCtx);
+
+	RTLIB_ExitCode _GetWorkingMode(
+			pregExCtx_t prec,
+			RTLIB_WorkingModeParams *wm);
 
 	RTLIB_ExitCode _Set(
 			const RTLIB_ExecutionContextHandler ech,
@@ -72,9 +73,6 @@ protected:
 	RTLIB_ExitCode _Clear(
 			const RTLIB_ExecutionContextHandler ech);
 
-	RTLIB_ExitCode _GetWorkingMode(
-			RTLIB_ExecutionContextHandler ech,
-			RTLIB_WorkingModeParams *wm);
 
 	void _Exit();
 

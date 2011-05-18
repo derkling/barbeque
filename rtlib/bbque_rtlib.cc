@@ -69,10 +69,16 @@ static RTLIB_ExitCode rtlib_stop(
 	return rpc->Stop(ech);
 }
 
-
-static bool rtlib_sync(const RTLIB_ExecutionContextHandler ech,
+static bool rtlib_sync(
+		const RTLIB_ExecutionContextHandler ech,
 		const char *name, RTLIB_SyncType type) {
 	return rpc->Sync(ech, name, type);
+}
+
+static RTLIB_ExitCode rtlib_getwm(
+		const RTLIB_ExecutionContextHandler ech,
+		RTLIB_WorkingModeParams *wm) {
+	return rpc->GetWorkingMode(ech, wm);
 }
 
 static RTLIB_ExitCode rtlib_set(
@@ -104,6 +110,7 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	rtlib_services.RegisterExecutionContext = rtlib_register;
 	rtlib_services.StartExecutionContext = rtlib_start;
 	rtlib_services.NotifySync = rtlib_sync;
+	rtlib_services.GetWorkingMode = rtlib_getwm;
 	rtlib_services.SetConstraints = rtlib_set;
 	rtlib_services.ClearConstraints = rtlib_clear;
 	rtlib_services.StopExecutionContext = rtlib_stop;

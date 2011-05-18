@@ -29,6 +29,11 @@
 
 #include <libgen.h>
 
+#define FMT_DBG(fmt) "MAIN       [DBG] - "fmt
+#define FMT_INF(fmt) "MAIN       [INF] - "fmt
+#define FMT_WRN(fmt) "MAIN       [WRN] - "fmt
+#define FMT_ERR(fmt) "MAIN       [ERR] - "fmt
+
 #define LOG(fmt, ...) LOGGER(COLOR_BLUE, "MAIN        ", fmt, ## __VA_ARGS__)
 
 #ifndef DBG
@@ -56,12 +61,12 @@ int main(int argc, char *argv[]) {
 		<< std::endl;
 
 	// Dummy and dirty command line processing
-	if (argc<6						||
-		!sscanf(argv[1], "%hu",  &simulation_time)	||
-		!sscanf(argv[2], "%hu",  &max_reconf_time)	||
-		!sscanf(argv[3], "%hhu", &num_exc)		||
-		!sscanf(argv[4], "%hhu", &max_pt)		||
-		!sscanf(argv[5], "%hhu", &max_rt) ) {
+	if (argc<6															||
+			!sscanf(argv[1], "%hu",  &simulation_time)					||
+			!sscanf(argv[2], "%hu", (unsigned short*) &max_reconf_time)	||
+			!sscanf(argv[3], "%hu", (unsigned short*) &num_exc)			||
+			!sscanf(argv[4], "%hu", (unsigned short*) &max_pt)			||
+			!sscanf(argv[5], "%hu", (unsigned short*) &max_rt) ) {
 
 		std::cout << "Usage: " << ::basename(argv[0]) <<
 			" <st> <rt> <ne> <mp> <mr>\n"
@@ -77,34 +82,38 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Upper limit the number of execution context to register
-	if (num_exc>999)
-		num_exc = 999;
+	if (num_exc>99)
+		num_exc = 99;
 
 	// Starting the simulation timer
 	simulation_tmr.start();
 
-	LOG("building application [%s]...", ::basename(argv[0]));
+	fprintf(stderr, FMT_INF("building application [%s]..."), ::basename(argv[0]));
 	BbqueApp app(::basename(argv[0]));
 
 	char exc_name[] = "exc_000";
-	LOG("registering [%03d] excution contexts...", num_exc);
+	fprintf(stderr, FMT_INF("registering [%03d] excution contexts..."), num_exc);
 	for (uint8_t i = 0; i<num_exc; i++) {
 		::snprintf(exc_name, 8, "exc_%03d", i);
 		app.RegisterEXC(exc_name, i);
 	}
 
-	LOG("starting application processing...");
-	app.Start();
+	fprintf(stderr, FMT_INF("starting application processing..."));
+	app.Start(0, num_exc);
 
-	LOG("running simulation for [%d]s", simulation_time);
+	fprintf(stderr, FMT_INF("running simulation for [%d]s"), simulation_time);
 
 	sleep(simulation_time);
 
+	fprintf(stderr, FMT_INF("stopping application processing..."));
+	app.Stop(0, num_exc);
 
+
+	fprintf(stderr, FMT_INF("unregistering [%03d] execution contexts..."), num_exc);
+	app.UnregisterAllEXC();
 
 
 	std::cout << "\n\n" << std::endl;
-
 	return EXIT_SUCCESS;
 }
 

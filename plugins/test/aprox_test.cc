@@ -73,23 +73,23 @@ std::vector<std::string> res_names = {
 	"mem0",
 	"dma0",
 	"arch.mem0",
-	"arch.clusters.mem0",
+	"arch.tile0.mem0",
 //--- Cluster 0 (with 2PEs)
-	"arch.clusters.cluster0",
-	"arch.clusters.cluster0.mem0",
-	"arch.clusters.cluster0.dma0",
-	"arch.clusters.cluster0.pe0",
-	"arch.clusters.cluster0.pe0.mem0",
-	"arch.clusters.cluster0.pe1",
-	"arch.clusters.cluster0.pe1.mem0",
+	"arch.tile0.cluster0",
+	"arch.tile0.cluster0.mem0",
+	"arch.tile0.cluster0.dma0",
+	"arch.tile0.cluster0.pe0",
+	"arch.tile0.cluster0.pe0.mem0",
+	"arch.tile0.cluster0.pe1",
+	"arch.tile0.cluster0.pe1.mem0",
 //--- Cluster 1 (with 2PEs)
-	"arch.clusters.cluster1",
-	"arch.clusters.cluster1.mem0",
-	"arch.clusters.cluster1.dma0",
-	"arch.clusters.cluster1.pe0",
-	"arch.clusters.cluster1.pe0.mem0",
-	"arch.clusters.cluster1.pe1",
-	"arch.clusters.cluster1.pe1.mem0"
+	"arch.tile0.cluster1",
+	"arch.tile0.cluster1.mem0",
+	"arch.tile0.cluster1.dma0",
+	"arch.tile0.cluster1.pe0",
+	"arch.tile0.cluster1.pe0.mem0",
+	"arch.tile0.cluster1.pe1",
+	"arch.tile0.cluster1.pe1.mem0"
 };
 
 std::vector<std::string> res_types = {
@@ -225,7 +225,7 @@ void ApplicationProxyTest::Test() {
 	ap.Start();
 
 	// Periodically stop READY applications
-	logger->Debug("Killing REDY application loop...");
+	logger->Debug("Killing READY application loop...");
 	for (uint8_t i=10; i; i--) {
 		::sleep(6);
 		logger->Debug("Registered READY applications: %d",

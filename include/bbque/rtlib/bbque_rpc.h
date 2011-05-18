@@ -120,14 +120,11 @@ protected:
 
 	virtual RTLIB_ExitCode _Register(pregExCtx_t pregExCtx) = 0;
 
-	virtual void _Unregister(
-			const RTLIB_ExecutionContextHandler ech) = 0;
+	virtual RTLIB_ExitCode _Unregister(pregExCtx_t pregExCtx) = 0;
 
-	virtual RTLIB_ExitCode _Start(
-			const RTLIB_ExecutionContextHandler ech) = 0;
+	virtual RTLIB_ExitCode _Start(pregExCtx_t pregExCtx) = 0;
 
-	virtual RTLIB_ExitCode _Stop(
-			const RTLIB_ExecutionContextHandler ech) = 0;
+	virtual RTLIB_ExitCode _Stop(pregExCtx_t pregExCtx) = 0;
 
 	virtual RTLIB_ExitCode _Set(
 		const RTLIB_ExecutionContextHandler ech,
@@ -138,7 +135,7 @@ protected:
 			const RTLIB_ExecutionContextHandler ech) = 0;
 
 	virtual RTLIB_ExitCode _GetWorkingMode(
-			RTLIB_ExecutionContextHandler ech,
+			pregExCtx_t prec,
 			RTLIB_WorkingModeParams *wm) = 0;
 
 	virtual void _Exit() = 0;
@@ -175,6 +172,13 @@ private:
 	RTLIB_ExitCode StopExecution(
 			RTLIB_ExecutionContextHandler ech,
 			struct timespec timeout);
+
+/******************************************************************************
+ * Utility functions
+ ******************************************************************************/
+
+	pregExCtx_t getRegistered(
+			const RTLIB_ExecutionContextHandler ech);
 
 };
 

@@ -109,10 +109,10 @@ typedef struct RTLIB_APIVersion {
 typedef enum RTLIB_ExitCode {
 	/** Success (no errors) */
 	RTLIB_OK = 0,
-	/** No new working mode error */
-	RTLIB_NO_WORKING_MODE,
 	/** Uspecified (generic) error */
 	RTLIB_ERROR,
+	/** No new working mode error */
+	RTLIB_NO_WORKING_MODE,
 	/** Failed to setup the channel to connect the Barbeque RTRM */
 	RTLIB_BBQUE_CHANNEL_SETUP_FAILED,
 	/** Failed to release the channel to connect the Barbeque RTRM */
@@ -131,8 +131,20 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_BBQUE_UNREACHABLE,
 	/** The Execution Context Duplicated */
 	RTLIB_EXC_DUPLICATE,
+	/** The Execution Context has not been registered */
+	RTLIB_EXC_NOT_REGISTERED,
 	/** The Execution Context Registration Failed */
-	RTLIB_EXC_REGISTRATION_FAILED
+	RTLIB_EXC_REGISTRATION_FAILED,
+	/** The Execution Context Registration Failed */
+	RTLIB_EXC_MISSING_RECIPE,
+	/** The Execution Context Unregistration Failed */
+	RTLIB_EXC_UNREGISTRATION_FAILED,
+	/** The Execution Context Start Failed */
+	RTLIB_EXC_START_FAILED,
+	/** The Execution Context Stop Failed */
+	RTLIB_EXC_STOP_FAILED,
+	/** Failed to get a working mode */
+	RTLIB_EXC_GWM_FAILED
 } RTLIB_ExitCode;
 
 

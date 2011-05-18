@@ -169,12 +169,25 @@ private:
 
 	void RpcExcRegister(prqsSn_t prqs);
 
+	void RpcExcUnregister(prqsSn_t prqs);
+
+
+	void RpcExcStart(prqsSn_t prqs);
+
+	void RpcExcStop(prqsSn_t prqs);
+
+
 	void RpcAppPair(prqsSn_t prqs);
 
 	void RpcAppExit(prqsSn_t prqs);
 
 
+	pconCtx_t GetConnectionContext(rpc_msg_header_t *pmsg_hdr);
+
 	void RpcExcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr);
+
+	void RpcExcNAK(pconCtx_t pcon, rpc_msg_header_t * pmsg_hdr,
+			RTLIB_ExitCode error);
 
 	void CommandExecutor(prqsSn_t prqs);
 

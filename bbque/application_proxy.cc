@@ -191,8 +191,25 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
 /*******************************************************************************
  * Request Sessions
  ******************************************************************************/
+ApplicationProxy::pconCtx_t ApplicationProxy::GetConnectionContext(
+		rpc_msg_header_t *pmsg_hdr)  {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx);
+	conCtxMap_t::iterator it;
+	pconCtx_t pcon;
 
-void ApplicationProxy::RpcExcACK(pconCtx_t pcon, rpc_msg_header_t * pmsg_hdr) {
+	// Looking for a valid connection context
+	it = conCtxMap.find(pmsg_hdr->app_pid);
+	if (it == conCtxMap.end()) {
+		conCtxMap_ul.unlock();
+		logger->Warn("APPs PRX: Execution Context registration FAILED",
+			"[pid: %d, exc: %d] (Error: application not paired)",
+			pmsg_hdr->app_pid, pmsg_hdr->exc_id);
+		return pconCtx_t();
+	}
+	return (*it).second;
+}
+
+void ApplicationProxy::RpcExcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr) {
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
@@ -205,30 +222,35 @@ void ApplicationProxy::RpcExcACK(pconCtx_t pcon, rpc_msg_header_t * pmsg_hdr) {
 
 }
 
+void ApplicationProxy::RpcExcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
+		RTLIB_ExitCode error) {
+	rpc_msg_resp_t resp;
+
+	// Sending response to application
+	logger->Debug("APPs PRX: Send RPC channel NAK [pid: %d, name: %s, err: %d]",
+			pcon->app_pid, pcon->app_name, error);
+	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
+	resp.header.typ = RPC_BBQ_RESP;
+	resp.result = error;
+	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
+
+}
+
 void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
 	rpc_msg_exc_register_t * pmsg_pyl = (rpc_msg_exc_register_t*)pmsg_hdr;
-	conCtxMap_t::iterator it;
 	pconCtx_t pcon;
 	AppPtr_t papp;
 
 	assert(pchMsg);
 
 	// Looking for a valid connection context
-	conCtxMap_ul.lock();
-	it = conCtxMap.find(pmsg_hdr->app_pid);
-	if (it == conCtxMap.end()) {
-		conCtxMap_ul.unlock();
-		logger->Warn("APPs PRX: Execution Context registration FAILED",
-			"[pid: %d, exc: %d] (Error: application not paired)",
-			pmsg_hdr->app_pid, pmsg_hdr->exc_id);
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
 		return;
-	}
-	pcon = (*it).second;
-	conCtxMap_ul.unlock();
 
 	// Registering a new Execution Context
 	logger->Info("APPs PRX: Registering Execution Context "
@@ -240,7 +262,113 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 	papp  = am.CreateEXC(pmsg_pyl->exc_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->recipe);
 	if (!papp) {
-		logger->Warn("APPs PRX: TODO, send NAK to application");
+		logger->Error("APPs PRX: Execution Context "
+			"[app: %s, pid: %d, exc: %d, nme: %s] "
+			"registration FAILED "
+			"(Error: missing recipe or recipe load failure)",
+			pcon->app_name, pcon->app_pid,
+			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
+		RpcExcNAK(pcon, pmsg_hdr, RTLIB_EXC_MISSING_RECIPE);
+		return;
+	}
+
+	// Sending ACK response to application
+	RpcExcACK(pcon, pmsg_hdr);
+
+}
+
+void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	rpc_msg_exc_unregister_t * pmsg_pyl = (rpc_msg_exc_unregister_t*)pmsg_hdr;
+	pconCtx_t pcon;
+
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
+		return;
+
+	// Unregister an Execution Context
+	logger->Info("APPs PRX: Unregistering Execution Context "
+			"[app: %s, pid: %d, exc: %d, nme: %s]",
+			pcon->app_name, pcon->app_pid,
+			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
+
+	// Unregister the EXC from the ApplicationManager
+	am.DestroyEXC(pcon->app_pid, pmsg_hdr->exc_id);
+	// FIXME we should deliver the error code to the application
+	// This is tracked by Issues tiket #10
+
+	// Sending ACK response to application
+	RpcExcACK(pcon, pmsg_hdr);
+
+}
+
+void ApplicationProxy::RpcExcStart(prqsSn_t prqs) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	pconCtx_t pcon;
+	ApplicationManager::ExitCode_t result;
+
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
+		return;
+
+	// Registering a new Execution Context
+	logger->Info("APPs PRX: Starting Execution Context "
+			"[app: %s, pid: %d, exc: %d]",
+			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
+
+	// Enabling the EXC to the ApplicationManager
+	result = am.EnableEXC(pcon->app_pid, pmsg_hdr->exc_id);
+	if (result != ApplicationManager::AM_SUCCESS) {
+		logger->Error("APPs PRX: Execution Context "
+			"[pid: %d, exc: %d] "
+			"start FAILED",
+			pcon->app_pid, pmsg_hdr->exc_id);
+		RpcExcNAK(pcon, pmsg_hdr, RTLIB_EXC_START_FAILED);
+		return;
+	}
+
+	// Sending ACK response to application
+	RpcExcACK(pcon, pmsg_hdr);
+
+}
+
+void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	pconCtx_t pcon;
+	ApplicationManager::ExitCode_t result;
+
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
+		return;
+
+	// Registering a new Execution Context
+	logger->Info("APPs PRX: Stopping Execution Context "
+			"[app: %s, pid: %d, exc: %d]",
+			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
+
+	// Enabling the EXC to the ApplicationManager
+	result = am.DisableEXC(pcon->app_pid, pmsg_hdr->exc_id);
+	if (result != ApplicationManager::AM_SUCCESS) {
+		logger->Error("APPs PRX: Execution Context "
+			"[pid: %d, exc: %d] "
+			"stop FAILED",
+			pcon->app_pid, pmsg_hdr->exc_id);
+		RpcExcNAK(pcon, pmsg_hdr, RTLIB_EXC_STOP_FAILED);
 		return;
 	}
 
@@ -326,7 +454,8 @@ void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
 	assert(conCtxIt!=conCtxMap.end());
 
 	// Releasing application resources
-	logger->Info("APPs PRX: Application [app_pid: %d] ended, releasing resources...",
+	logger->Info("APPs PRX: Application [app_pid: %d] ended, "
+			"releasing resources...",
 			pmsg->app_pid);
 
 	// Cleanup communication channel resources
@@ -370,6 +499,7 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 
 	case RPC_EXC_UNREGISTER:
 		logger->Debug("EXC_UNREGISTER");
+		RpcExcUnregister(prqs);
 		break;
 
 	case RPC_EXC_SET:
@@ -382,10 +512,12 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 
 	case RPC_EXC_START:
 		logger->Debug("EXC_START");
+		RpcExcStart(prqs);
 		break;
 
 	case RPC_EXC_STOP:
 		logger->Debug("EXC_STOP");
+		RpcExcStop(prqs);
 		break;
 
 	case RPC_APP_PAIR:

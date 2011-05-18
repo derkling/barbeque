@@ -104,7 +104,8 @@ RTLIB_ExecutionContextHandler BbqueRPC::Register(
 		const char* name,
 		const RTLIB_ExecutionContextParams* params) {
 	RTLIB_ExitCode result;
-	excMap_t::iterator it;
+	excMap_t::iterator it(exc_map.begin());
+	excMap_t::iterator end(exc_map.end());
 	pregExCtx_t prec;
 
 	assert(initialized);
@@ -118,7 +119,7 @@ RTLIB_ExecutionContextHandler BbqueRPC::Register(
 	}
 
 	// Ensuring the execution context has not been already registered
-	for(excMap_t::iterator it = exc_map.begin(); it != exc_map.end(); it++) {
+	for( ; it != end; ++it) {
 		prec = (*it).second;
 		if (prec->name == name) {
 			fprintf(stderr, FMT_ERR("Execution context [%s] already "
@@ -138,33 +139,123 @@ RTLIB_ExecutionContextHandler BbqueRPC::Register(
 	// Calling the Low-level registration
 	result = _Register(prec);
 	if (result != RTLIB_OK) {
-		DB(fprintf(stderr, FMT_ERR("Execution context [%s] registration failed "
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] REGISTRATION FAILED "
 						"(Error %d)\n"), name, result));
 		return NULL;
 	}
 
+	// Save the registered execution context
+	exc_map.insert(excMapEntry_t(prec->exc_id, prec));
+
 	return (RTLIB_ExecutionContextHandler)&(prec->exc_params);
 }
 
+BbqueRPC::pregExCtx_t BbqueRPC::getRegistered(
+		const RTLIB_ExecutionContextHandler ech) {
+	excMap_t::iterator it(exc_map.begin());
+	excMap_t::iterator end(exc_map.end());
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	// Checking for library initialization
+	if (!initialized) {
+		fprintf(stderr, FMT_ERR("Execution context lookup FAILED "
+					"(RTLIB not initialized)\n"));
+		assert(initialized);
+		return pregExCtx_t();
+	}
+
+	// Ensuring the execution context has been registered
+	for( ; it != end; ++it) {
+		prec = (*it).second;
+		if ((void*)ech == (void*)&prec->exc_params)
+			break;
+	}
+	if (it == end) {
+		fprintf(stderr, FMT_ERR("Execution context [%p] NOT registered\n"),
+				(void*)ech);
+		assert(it != end);
+		return pregExCtx_t();
+	}
+
+	return prec;
+}
+
+
 void BbqueRPC::Unregister(
 		const RTLIB_ExecutionContextHandler ech) {
-	//Silence "args not used" warning.
-	(void)ech;
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Execution context [%p] UNREGISTRATION FAILED "
+					"(Execution Context not registered)\n"), (void*)ech);
+		return;
+	}
+
+	// Calling the low-level unregistration
+	result = _Unregister(prec);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] UNREGISTRATION FAILED "
+						"(Error %d)\n"), prec->name.c_str(), result));
+		return;
+	}
+
+	// Unegistered the execution context
+	exc_map.erase(prec->exc_id);
 
 }
 
 RTLIB_ExitCode BbqueRPC::Start(
 		const RTLIB_ExecutionContextHandler ech) {
-	//Silence "args not used" warning.
-	(void)ech;
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Execution context [%p] START FAILED "
+					"(Execution Context not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	// Calling the low-level start
+	result = _Start(prec);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] START FAILED "
+						"(Error %d)\n"), prec->name.c_str(), result));
+		return RTLIB_EXC_START_FAILED;
+	}
 
 	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC::Stop(
 		const RTLIB_ExecutionContextHandler ech) {
-	//Silence "args not used" warning.
-	(void)ech;
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Execution context [%p] STOP FAILED "
+					"(Execution Context not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	// Calling the low-level start
+	result = _Stop(prec);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] STOP FAILED "
+						"(Error %d)\n"), prec->name.c_str(), result));
+		return RTLIB_EXC_STOP_FAILED;
+	}
 
 	return RTLIB_OK;
 }
@@ -180,6 +271,33 @@ bool BbqueRPC::Sync(
 
 	// Go on with the current working mode
 	return true;
+}
+
+RTLIB_ExitCode BbqueRPC::GetWorkingMode(
+		const RTLIB_ExecutionContextHandler ech,
+		RTLIB_WorkingModeParams *wm) {
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Execution context [%p] GWM FAILED "
+					"(Execution Context not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	// Calling the low-level start
+	result = _GetWorkingMode(prec, wm);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
+						"(Error %d)\n"), prec->name.c_str(), result));
+		return RTLIB_EXC_GWM_FAILED;
+	}
+
+	return RTLIB_OK;
+
 }
 
 RTLIB_ExitCode BbqueRPC::Set(
@@ -200,17 +318,6 @@ RTLIB_ExitCode BbqueRPC::Clear(
 	(void)ech;
 
 	return RTLIB_OK;
-}
-
-RTLIB_ExitCode BbqueRPC::GetWorkingMode(
-			RTLIB_ExecutionContextHandler ech,
-			RTLIB_WorkingModeParams *wm) {
-	//Silence "args not used" warning.
-	(void)ech;
-	(void)wm;
-
-
-	return RTLIB_NO_WORKING_MODE;
 }
 
 RTLIB_ExitCode BbqueRPC::StopExecution(

@@ -117,6 +117,39 @@ typedef struct rpc_msg_exc_register {
 } rpc_msg_exc_register_t;
 
 /**
+ * @brief Command to unregister an execution context.
+ */
+typedef struct rpc_msg_exc_unregister {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+	/** The name of the execution context */
+	char exc_name[RTLIB_EXC_NAME_LENGTH];
+} rpc_msg_exc_unregister_t;
+
+
+/**
+ * @brief Command to start an execution context.
+ */
+typedef struct rpc_msg_exc_start {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+} rpc_msg_exc_start_t;
+
+/**
+ * @brief Command to stop an execution context.
+ */
+typedef struct rpc_msg_exc_stop {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+} rpc_msg_exc_stop_t;
+
+
+
+
+
+
+
+/**
  * @brief Command to STOP an application execution context.
  */
 typedef struct rpc_msg_bbq_stop {
