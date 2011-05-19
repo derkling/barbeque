@@ -53,7 +53,7 @@ Application::Application(std::string const & _name,
 	exc_id(_exc_id) {
 
 	// Scheduling state
-	curr_sched.state = next_sched.state = S_READY;
+	curr_sched.state = next_sched.state = READY;
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
@@ -98,7 +98,7 @@ void Application::StopExecution() {
 	// Reset scheduling info
 	curr_sched.awm.reset();
 	next_sched.awm.reset();
-	next_sched.state = S_EXITED;
+	next_sched.state = FINISHED;
 
 	// Releasing AWMs and Constraints...
 	enabled_awms.clear();
@@ -158,26 +158,21 @@ Application::SetNextSchedule(AwmPtr_t & n_awm, RViewToken_t vtok) {
 		return APP_WM_REJECTED;
 
 	// Define the transitional scheduling state
-	ScheduleFlag_t tran_state;
 	if (curr_sched.awm != n_awm)
-		tran_state = T_RECONF;
+		next_sched.state = RECONF;
 
 	// --- manage migration cases here --- //
-
-	// Set the next state (transitional)
-	next_sched.state = tran_state;
 
 	return APP_SUCCESS;
 }
 
 
-void Application::UpdateScheduledStatus(ScheduleFlag_t _new_state,
-		double _time) {
+void Application::UpdateScheduledStatus(double _time) {
 
 	switch (next_sched.state) {
-	case T_MIGREC:
-	case T_MIGRATE:
-	case T_RECONF:
+	case MIGREC:
+	case MIGRATE:
+	case RECONF:
 		// Update the reconfiguration overheads
 		if (curr_sched.awm) {
 			AwmPtr_t _awm = GetRecipe()->WorkingMode(curr_sched.awm->Name());
@@ -188,9 +183,9 @@ void Application::UpdateScheduledStatus(ScheduleFlag_t _new_state,
 	}
 
 	// Switch to next working mode in scheduling info
-	curr_sched.state = next_sched.state = _new_state;
+	curr_sched.state = next_sched.state;
 	curr_sched.awm = next_sched.awm;
-	logger->Info("Final scheduled state = {%d}", curr_sched.state);
+	logger->Info("Scheduled state = {%d}", curr_sched.state);
 }
 
 

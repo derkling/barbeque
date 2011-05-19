@@ -84,21 +84,20 @@ public:
 	 */
 	enum ScheduleFlag_t {
 		/** Ready to be scheduled */
-		S_READY  = 0,
+		READY  = 0,
 		/** Must change working mode */
-		T_RECONF,
+		RECONF,
 		/** Must migrate into another cluster */
-		T_MIGRATE,
+		MIGRATE,
 		/** Must migrate and change working mode */
-		T_MIGREC,
+		MIGREC,
 		/** Running */
-		S_RUNNING,
+		RUNNING,
 		/** Waiting for an event or resource */
-		T_BLOCKED,
-		/** Forced to exit */
-		S_KILLED,
+		BLOCKED,
 		/** Regular exit */
-		S_EXITED
+		FINISHED
+
 	};
 
 	/**

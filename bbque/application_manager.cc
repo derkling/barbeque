@@ -78,8 +78,8 @@ ApplicationManager::ApplicationManager():
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	// Pre-allocate priority and status vectors
-	priority_vec.resize(lowest_prio + 1);
-	status_vec.resize(ba::Application::S_EXITED);
+	priority_vec = std::vector<AppsMap_t>(lowest_prio + 1);
+	status_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
@@ -355,7 +355,7 @@ void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 
 	// The application descriptor now will manage the change of
 	// working mode
-	papp->UpdateScheduledStatus(papp->NextState(), time);
+	papp->UpdateScheduledStatus(time);
 
 	logger->Debug("Changed EXC [%s] status to [%d]",
 			papp->StrId(),

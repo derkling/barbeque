@@ -70,14 +70,14 @@ public:
 	 * @brief Return the map containing all the ready applications
 	 */
 	inline AppsMap_t const * ApplicationsReady() {
-		return app_man->Applications(app::ApplicationStatusIF::S_READY);
+		return app_man->Applications(app::ApplicationStatusIF::READY);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
 	inline AppsMap_t const * ApplicationsRunning() {
-		return app_man->Applications(app::ApplicationStatusIF::S_RUNNING);
+		return app_man->Applications(app::ApplicationStatusIF::RUNNING);
 	}
 
 	/**

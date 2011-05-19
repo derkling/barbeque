@@ -217,7 +217,7 @@ public:
 	 *
 	 * @param time The time measured/estimated in the reconfiguration process.
 	 */
-	void UpdateScheduledStatus(ScheduleFlag_t new_state, double time);
+	void UpdateScheduledStatus(double time);
 
 	/**
 	 * @brief Stop the application execution
