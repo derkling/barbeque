@@ -113,8 +113,8 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline UsagesMap_t const & ResourceUsages() const {
-		return rsrc_usages;
+	inline UsagesMap_t const * ResourceUsages() const {
+		return &rsrc_usages;
 	}
 
 	/**

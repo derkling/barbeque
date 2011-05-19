@@ -158,7 +158,7 @@ ResourceAccounter::AcquireUsageSet(ba::Application const * _app,
 		ReleaseUsageSet(_app, vtok);
 
 	// Set resource usages of the next working mode
-	(*(apps_usages))[_app->Pid()] = &(_app->NextAWM()->ResourceUsages());
+	(*(apps_usages))[_app->Pid()] = _app->NextAWM()->ResourceUsages();
 	ExitCode_t ret = IncUsageCounts((*(apps_usages))[_app->Pid()], _app, vtok);
 
 	// Resource allocation/reservation failed?

@@ -182,8 +182,8 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtrList_t const & WorkingModes() {
-		return enabled_awms;
+	inline AwmStatusPtrList_t const * WorkingModes() {
+		return &enabled_awms;
 	}
 
 	/**

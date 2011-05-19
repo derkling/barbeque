@@ -104,7 +104,7 @@ public:
 	 * mode.
 	 * @return A constant reference to the map of resources
 	 */
-	virtual UsagesMap_t const & ResourceUsages() const = 0;
+	virtual UsagesMap_t const * ResourceUsages() const = 0;
 
 	/**
 	 * @brief How many resources the working mode uses
