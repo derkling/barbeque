@@ -29,6 +29,7 @@
 #include <memory>
 #include <vector>
 #include "bbque/object.h"
+#include "bbque/system_view.h"
 #include "bbque/app/application.h"
 #include "bbque/plugins/plugin.h"
 #include "bbque/plugins/test.h"
@@ -43,6 +44,9 @@
 
 #define COREINT_NAMESPACE "coreint"
 
+using namespace bbque::app;
+using bbque::ApplicationManager;
+
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
 
@@ -51,9 +55,20 @@ namespace bbque { namespace plugins {
 /**
  * @class CoreInteractionsTest
  *
- * It embeds a set of calls for testing the managing of an application
- * lifecycle inside Barbeque RTRM. The class is the core of a plugin is used
- * for testing purpose.
+ * This test class simulate core interactions between applications and
+ * Barbeque RTRM.
+ *
+ * By using the term "core" we are excluding the part regarding the
+ * communication interface with the RTLib. Indeed the focus of the test is to
+ * verify the correctness of the changes of scheduling status of applications.
+ * Such changes are triggered by propèr method calls.
+ *
+ * As a consequence of scheduling changes, a variation in resource usages
+ * accounting should be observed.
+ *
+ * Platform initialization is simulated too through a function that, given an
+ * hard-coded set of resources, invokes the resource registration method of
+ * ResourceAccounter for each of them.
  */
 class CoreInteractionsTest: public TestIF, public Object {
 
@@ -81,43 +96,34 @@ public:
 
 private:
 
+	/** System view instance */
+	SystemView * sys_view;
+
+	/** Application manager instance */
+	ApplicationManager * app_man;
+
 	/**
 	 * @brief Constructor
 	 */
 	CoreInteractionsTest();
 
 	/**
-	 * @brief Register some resources and print out info
-	 */
-	void RegisterSomeResources();
-
-	/**
-	 * @brief Print resource availabilities.
-	 */
-	void PrintResourceAvailabilities();
-
-	/**
-	 * @brief Print working modes details of an application
+	 * @brief Test application reconfiguration action
 	 *
 	 * @param test_app A shared pointer to the application descriptor
-	 * @return 0 for succes, or other values for errors
-	 */
-	int WorkingModesDetails(
-			std::shared_ptr<app::ApplicationStatusIF> test_app);
-
-	/**
-	 * @brief Print scheduling information of a given application
-	 */
-	void PrintScheduleInfo(std::shared_ptr<app::Application> test_app);
-
-	/**
-	 * @brief Get a single working mode and set next schedule.
-	 * @param test_app A shared pointer to the application descriptor
-	 * @param wm Working mode identifying name
+	 * @param wm Working mode to switch in
 	 * @param ov_time Switching time overhead
 	 */
-	void DoScheduleSwitch(std::shared_ptr<app::Application> test_app,
-			std::string const & wm, double ov_time);
+	void testScheduleSwitch(AppPtr_t & test_app, std::string const & wm,
+			double ov_time);
+
+	/**
+	 * @brief Test working mode reconfigurations and constraints assertion
+	 *
+	 * @param am Application Manager instance
+	 * @param test_app Object application test
+	 */
+	void testApplicationLifecycle(AppPtr_t & test_app);
 
 };
 

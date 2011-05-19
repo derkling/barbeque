@@ -27,7 +27,6 @@
 #include <sstream>
 
 #include "bbque/modules_factory.h"
-#include "bbque/system_view.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/app/plugin_data.h"
@@ -42,7 +41,7 @@ namespace bu = bbque::utils;
 namespace bbque { namespace plugins {
 
 /** Map of application descriptor shared pointers */
-typedef std::map<uint32_t, ba::AppPtr_t> AppsMap_t;
+typedef std::map<uint32_t, AppPtr_t> AppsMap_t;
 
 // Test set
 std::vector<std::string> res_names = {
@@ -156,6 +155,16 @@ std::vector<uint64_t> res_totals = {
 	1
 };
 
+std::vector<std::string> rsrcSearchPaths = {
+	"arch.tile0.mem",
+	"arch.tile0.cluster",
+	"arch.tile.cluster.pe",
+	"dma",
+	"spi",
+	RSRC_CLUSTER,
+	"arch.tile.cluster2.pe0"
+};
+
 
 CoreInteractionsTest::CoreInteractionsTest():
 	bbque::Object(COREINT_NAMESPACE) {
@@ -182,6 +191,7 @@ void * CoreInteractionsTest::Create(PF_ObjectParams *) {
 	return new CoreInteractionsTest();
 }
 
+
 int32_t CoreInteractionsTest::Destroy(void * plugin) {
 	if (!plugin)
 		return -1;
@@ -190,9 +200,7 @@ int32_t CoreInteractionsTest::Destroy(void * plugin) {
 }
 
 
-// ===================[ Test functions ]=======================================
-
-void CoreInteractionsTest::RegisterSomeResources() {
+void RegisterSomeResources() {
 
 	// Get ResourceAccounter instance
 	br::ResourceAccounter * RA = br::ResourceAccounter::GetInstance();
@@ -221,10 +229,9 @@ void CoreInteractionsTest::RegisterSomeResources() {
 }
 
 
-void CoreInteractionsTest::PrintResourceAvailabilities() {
+// ===================[ Print functions ]=======================================
 
-	// SystemView
-	SystemView *sv = SystemView::GetInstance();
+void PrintResourceAvailabilities(SystemView * sv) {
 
 	std::cout
 		<<
@@ -245,73 +252,17 @@ void CoreInteractionsTest::PrintResourceAvailabilities() {
 }
 
 
-int CoreInteractionsTest::WorkingModesDetails(
-		std::shared_ptr<ba::ApplicationStatusIF> test_app) {
-
-	// Application descriptor pointer is valid?
-	if (!test_app) {
-		std::cout << "Application is NULL" << std::endl;
-		return 1;
-	}
-
-	// Get all the enabled working modes
-	ba::AwmStatusPtrList_t awms = test_app->WorkingModes();
-
-	if (awms.size() == 0) {
-		std::cout << "Cannot find any working modes" << std::endl;
-		return 2;
-	}
-
-	// For each of them print out resources usages
-	std::list<ba::AwmStatusPtr_t>::iterator it2 =  awms.begin();
-	std::list<ba::AwmStatusPtr_t>::iterator endm = awms.end();
-	for (; it2 != endm; ++it2) {
-		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages ***\n",
-				(*it2)->Name().c_str(), (*it2)->Value(),
-				(int)(*it2)->ResourceUsages().size());
-
-		ba::AwmStatusPtr_t awm_get(*it2);
-
-		ba::UsagesMap_t::const_iterator res_it =
-			awm_get->ResourceUsages().begin();
-		ba::UsagesMap_t::const_iterator res_end =
-			awm_get->ResourceUsages().end();
-
-		std::cout
-			<< "\n--------------------------------[ " << awm_get->Name()
-			<< " ]----------------------------" << std::endl;
-
-		for ( ; res_it != res_end; ++res_it) {
-			std::cout << std::setw(50) << std::left << (res_it->first).c_str() << ":"
-				<< std::setw(15) << std::right
-				<< awm_get->ResourceUsageValue(res_it->first) << " |" << std::endl;
-		}
-		std::cout
-			<< "-------------------------------------------------------------"
-			<< "-----" << std::endl;
-	}
-
-	ba::AwmStatusPtr_t l_awm = test_app->LowValueAWM();
-	std::cout << l_awm->Name() << " is the working mode with the lowest "
-		"value [" << l_awm->Value() << "]" << std::endl;
-
-	std::cout << "Press a key..." << std::endl;
-	getchar();
-
-	return 0;
-}
-
-
-void CoreInteractionsTest::PrintScheduleInfo(
-		std::shared_ptr<ba::Application> test_app) {
+void PrintScheduleInfo(AppPtr_t & test_app) {
 
 	if (test_app.get() == NULL) {
-		std::cout << "Null application descriptor pointer passed" <<
-			std::endl;
+		std::cout
+			<< "Null application descriptor pointer passed"
+			<<	std::endl;
 		return;
 	}
 
-	std::cout << std::endl
+	std::cout
+		<< std::endl
 		<< "**************************************************"
 		<< std::endl;
 
@@ -319,7 +270,9 @@ void CoreInteractionsTest::PrintScheduleInfo(
 		std::cout << "[!] Current AWM not set" << std::endl;
 	}
 	else {
-		std::cout << "Current schedule of " << test_app->Name().c_str() << " is "
+		std::cout
+			<< "Current schedule of "
+			<< test_app->Name().c_str() << " is "
 			<< test_app->CurrentAWM()->Name() << " "
 			<< test_app->CurrentState() << std::endl;
 	}
@@ -328,7 +281,9 @@ void CoreInteractionsTest::PrintScheduleInfo(
 		std::cout << "[!] Next AWM not set" << std::endl;
 	}
 	else {
-		std::cout << "Next schedule of " << test_app->Name().c_str() << " is "
+		std::cout
+			<< "Next schedule of "
+			<< test_app->Name().c_str() << " is "
 			<< test_app->NextAWM()->Name() << " "
 			<< test_app->NextState() << std::endl;
 	}
@@ -342,77 +297,86 @@ void CoreInteractionsTest::PrintScheduleInfo(
 }
 
 
-void CoreInteractionsTest::DoScheduleSwitch(
-		std::shared_ptr<ba::Application> test_app,
-		std::string const & wm, double ov_time) {
+int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
 
-	// Get working mode wm1
-	if (test_app.get() == NULL) {
-		std::cout << "Null application descriptor pointer passed"
-			<< std::endl;
-		return;
+	// Application descriptor pointer is valid?
+	if (!test_app) {
+		std::cout << "Application is NULL" << std::endl;
+		return 1;
 	}
-	// Get working mode descriptor related to "wm"
-	ba::AwmPtr_t d_wm = test_app->GetRecipe()->WorkingMode(wm);
-	if (d_wm.get() == NULL)
-		return;
 
-	char path_err[30];
-	// Do a binding!
-	d_wm->BindResources("cluster", RSRC_ID_ANY, 1, path_err);
+	// Get all the enabled working modes
+	AwmStatusPtrList_t awms = test_app->WorkingModes();
+	if (awms.empty()) {
+		std::cout << "Cannot find any working modes" << std::endl;
+		return 2;
+	}
 
-	// Let's set next schedule for the application above
-	test_app->SetNextSchedule(d_wm);
-	PrintScheduleInfo(test_app);
+	// For each working mode...
+	std::list<AwmStatusPtr_t>::const_iterator wm_it =  awms.begin();
+	std::list<AwmStatusPtr_t>::const_iterator endm = awms.end();
+	for (; wm_it != endm; ++wm_it) {
 
-	// Now switch!
-	ApplicationManager * appman = ApplicationManager::GetInstance();
-	appman->ChangedSchedule(test_app, ov_time);
-	PrintScheduleInfo(test_app);
+		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages ***\n",
+				(*wm_it)->Name().c_str(), (*wm_it)->Value(),
+				(int)(*wm_it)->ResourceUsages().size());
+
+		std::cout
+			<< "\n--------------------------------[ "
+			<< (*wm_it)->Name()
+			<< " ]----------------------------" << std::endl;
+
+		// Casting to WorkingModeStatusIF
+		AwmStatusPtr_t c_awm = *wm_it;
+
+		UsagesMap_t::const_iterator res_it = c_awm->ResourceUsages().begin();
+		UsagesMap_t::const_iterator res_end = c_awm->ResourceUsages().end();
+
+		// Print resource usage values
+		for ( ; res_it != res_end; ++res_it) {
+			std::cout <<
+				std::setw(50) << std::left	<< (res_it->first).c_str() << ":"
+				<< std::setw(15) << std::right
+				<< c_awm->ResourceUsageValue(res_it->first) << " |" << std::endl;
+		}
+
+		std::cout
+			<< "-------------------------------------------------------------"
+			<< "-----" << std::endl;
+	}
+
+	AwmStatusPtr_t l_awm = test_app->LowValueAWM();
+	std::cout
+		<< l_awm->Name()
+		<< " is the working mode with the lowest value [" << l_awm->Value()
+		<< "]" << std::endl;
+
+	std::cout << "Press a key..." << std::endl;
+	getchar();
+
+	return 0;
 }
 
 
-void SearchResources(SystemView * sv) {
+// ===================[ Test methods ]========================================
+
+void testPathTemplateSearch(SystemView * sv,
+		std::vector<std::string> & rsrc_paths) {
 
 	bu::Timer _t(true);
 	std::cout << ".........: Test resource template search :......\n"
 		<< std::endl;
 
-	std::cout << "arch.tile0.mem : ";
-	if (sv->ExistResource("arch.tile0.mem"))
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
+	// Make a path template based search of the given resources set
+	for (std::vector<std::string>::iterator it = rsrc_paths.begin();
+			it != rsrc_paths.end(); ++it) {
 
-	std::cout << "arch.tile0.cluster : ";
-	if (sv->ExistResource("arch.tile0.cluster"))
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
-
-	std::cout << "arch.tile.cluster.pe : ";
-	if (sv->ExistResource("arch.tile.cluster.pe"))
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
-
-	std::cout << "arch.tile0.pe : ";
-	if (sv->ExistResource("arch.tile0.pe"))
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
-
-	std::cout << "dma : ";
-	if (sv->ExistResource("dma"))
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
-
-	std::cout << "spi : ";
-	if (sv->ExistResource("spi"))
-		std::cout << "FOUND" << std::endl;
-	else
-		std::cout << "NOT FOUND" << std::endl;
+		std::cout << std::setw(40) << (*it) << ": ";
+		if (sv->ExistResource((*it)))
+			std::cout << std::right << "FOUND" << std::endl;
+		else
+			std::cout << "NOT FOUND" << std::endl;
+	}
 
 	_t.stop();
 	std::cout << "\nSearch finished in " << _t.getElapsedTimeUs() << " us"
@@ -423,29 +387,8 @@ void SearchResources(SystemView * sv) {
 }
 
 
-void GetClusteredInfo(SystemView * sv) {
-
-	std::cout
-		<< "-----------------| Resource clustering factor |----------------"
-		<< std::endl;
-
-	std::cout << "dma  c.f. = "
-		<< sv->ResourceClusterFactor("dma") << std::endl;
-	std::cout << "arch.tile0.mem0 	c.f. = "
-		<< sv->ResourceClusterFactor("arch.tile0.mem0") << std::endl;
-	std::cout << "arch.tile0.cluster1 c.f. = "
-		<< sv->ResourceClusterFactor("arch.tile0.cluster1") << std::endl;
-	std::cout << "arch.mem0 c.f. = "
-		<< sv->ResourceClusterFactor("arch.mem0") << std::endl;
-	std::cout << "arch.tile0.cluster0.pe0  c.f. = "
-		<< sv->ResourceClusterFactor("arch.tile0.cluster0.pe0") << std::endl;
-	std::cout << "arch.spi  c.f. = "
-		<< sv->ResourceClusterFactor("arch.spi") << std::endl;
-	std::cout << std::endl;
-}
-
-
-void SearchResourceGroups(SystemView * sv) {
+void testResourceSetSearch(SystemView *sv,
+		std::vector<std::string> & rsrc_paths) {
 
 	bu::Timer _t(true);
 	std::cout << "_________| Test resource groups search |_______\n"
@@ -454,87 +397,31 @@ void SearchResourceGroups(SystemView * sv) {
 	// List of matches
 	std::list<br::ResourcePtr_t> res_match;
 
-	// Search... cluster
-	res_match = sv->GetResources("arch.tile0.cluster");
-	std::cout << "[arch.tile0.cluster] matchings : "
-		<< res_match.size() << std::endl;
+	// Make a path template based search of the given resources set
+	for (std::vector<std::string>::iterator rsrc_it = rsrc_paths.begin();
+			rsrc_it != rsrc_paths.end(); ++rsrc_it) {
 
-	br::ResourcePtrList_t::iterator it = res_match.begin();
-	br::ResourcePtrList_t::iterator end = res_match.end();
-	for(; it != end; ++it)
-		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
-
-	std::string base_clust = "arch.tile0.cluster";
-	std::string curr_clust;
-	for(int i = 0; i < 4; ++i) {
-		// Build the "hybrid" resource path
-		curr_clust = base_clust;
-		std::stringstream ss;
-		ss << i;
-		curr_clust.append(ss.str());
-		curr_clust.append(".pe");
-		// Get the list of matchings
-		res_match = sv->GetResources(curr_clust);
-		// Print the results
-		std::cout << "[" << curr_clust.c_str() << "] matchings : "
+		// How many matchings ?
+		res_match = sv->GetResources((*rsrc_it));
+		std::cout << "[" << (*rsrc_it) << "] matchings : "
 			<< res_match.size() << std::endl;
-		it = res_match.begin();
-		end = res_match.end();
+
+		// Print out one by one
+		br::ResourcePtrList_t::iterator it = res_match.begin();
+		br::ResourcePtrList_t::iterator end = res_match.end();
 		for(; it != end; ++it)
 			std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 
-		std::cout << "\tavailability = "
-			<< sv->ResourceAvailability(curr_clust) << std::endl;
-		std::cout << "\tused = "
-			<< sv->ResourceUsed(curr_clust) << std::endl;
-		std::cout << "\ttotal = "
-			<< sv->ResourceTotal(curr_clust) << std::endl;
+		// Print amounts information
+		std::cout
+			<< "\tUSED: "
+			<< sv->ResourceUsed((*rsrc_it))
+			<< "\tTOT: "
+			<< sv->ResourceTotal((*rsrc_it))
+			<< "\tAVAIL: "
+			<< sv->ResourceAvailability((*rsrc_it))
+			<< std::endl << std::endl;
 	}
-
-	// Search... cluster.pe
-	res_match = sv->GetResources("arch.tile0.cluster.pe");
-	std::cout << "[arch.tile0.cluster.pe] matchings : "
-		<< res_match.size() << std::endl;
-
-	it = res_match.begin();
-	end = res_match.end();
-	for(; it != end; ++it)
-		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
-	std::cout << "\tavailability = "
-		<< sv->ResourceAvailability("arch.tile0.cluster.pe") << std::endl;
-	std::cout << "\tused = "
-		<< sv->ResourceUsed("arch.tile0.cluster.pe") << std::endl;
-	std::cout << "\ttotal = "
-		<< sv->ResourceTotal("arch.tile0.cluster.pe") << std::endl;
-
-	// Search... spi
-	res_match = sv->GetResources("arch.spi");
-	std::cout << "[arch.spi] matchings : " << res_match.size() << std::endl;
-
-	it = res_match.begin();
-	end = res_match.end();
-	for(; it != end; ++it)
-		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
-
-	// Search... mem
-	res_match = sv->GetResources("mem");
-	std::cout << "[mem] matchings : "
-		<< res_match.size() << std::endl;
-
-	it = res_match.begin();
-	end = res_match.end();
-	for(; it != end; ++it)
-		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
-
-	// ...cluster.pe3
-	res_match = sv->GetResources("arch.tile0.cluster.pe3");
-	std::cout << "[arch.tile0.cluster.pe3] matchings : "
-		<< res_match.size() << std::endl;
-
-	it = res_match.begin();
-	end = res_match.end();
-	for(; it != end; ++it)
-		std::cout << "\t" << (*it)->Name().c_str() << std::endl;
 
 	_t.stop();
 	std::cout << "\nSearch finished in " << _t.getElapsedTimeUs() << " us"
@@ -542,6 +429,95 @@ void SearchResourceGroups(SystemView * sv) {
 
 	std::cout << "Press a key..." << std::endl;
 	getchar();
+}
+
+
+void GetClusteredInfo(SystemView * sv,
+		std::vector<std::string> & rsrc_paths) {
+
+	bu::Timer _t(true);
+	std::cout
+		<< "-----------------| Resource clustering factor |----------------"
+		<< std::endl;
+
+	// Test for the clustering factor computation
+	for (std::vector<std::string>::iterator it = rsrc_paths.begin();
+			it != rsrc_paths.end(); ++it) {
+
+		std::cout
+			<< std::setw(40) << std::left
+			<< (*it) << " CF = " << sv->ResourceClusterFactor((*it))
+			<< std::endl;
+	}
+
+	_t.stop();
+	std::cout << "\nSearch finished in " << _t.getElapsedTimeUs() << " us"
+		<< std::endl;
+
+	std::cout << "Press a key..." << std::endl;
+	getchar();
+}
+
+
+void CoreInteractionsTest::testScheduleSwitch(
+		AppPtr_t & test_app, std::string const & wm,
+		double ov_time) {
+
+	// Get working mode wm1
+	if (test_app.get() == NULL) {
+		std::cout << "Null application descriptor pointer passed"
+			<< std::endl;
+		return;
+	}
+
+	// Get working mode descriptor related to "wm"
+	AwmPtr_t d_wm = test_app->GetRecipe()->WorkingMode(wm);
+	if (d_wm.get() == NULL) {
+		std::cout << "Working mode " << wm.c_str() << " not found"
+			<< std::endl;
+		return;
+	}
+
+	// Do a binding!
+	d_wm->BindResources("cluster", RSRC_ID_ANY, 1);
+
+	// Let's set next schedule for the application above
+	test_app->SetNextSchedule(d_wm);
+	PrintScheduleInfo(test_app);
+
+	// Now switch!
+	ApplicationManager * app_man = ApplicationManager::GetInstance();
+	app_man->ChangedSchedule(test_app, ov_time);
+	PrintScheduleInfo(test_app);
+}
+
+
+void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & test_app) {
+
+	// Print out working modes details
+	PrintWorkingModesInfo(test_app);
+
+	// Get the application descriptor
+	AppPtr_t app_conf(app_man->GetApplication(3324));
+
+	// Simulate a schedulation 1
+	testScheduleSwitch(app_conf, "wm1", 0.381);
+	PrintResourceAvailabilities(sys_view);
+
+	// Set a constraint
+	app_conf->RemoveConstraint("cacheL3", Constraint::UPPER_BOUND);
+
+	// Simulate a schedulation 2
+	testScheduleSwitch(app_conf, "wm2", 0.445);
+	PrintResourceAvailabilities(sys_view);
+
+	// Come back to awm  1
+	testScheduleSwitch(app_conf, "wm1", 0.409);
+	PrintResourceAvailabilities(sys_view);
+
+	// Stop application
+	app_man->StopApplication(3324);
+	PrintResourceAvailabilities(sys_view);
 }
 
 
@@ -551,77 +527,66 @@ void CoreInteractionsTest::Test() {
 
 	logger->Debug("....: CoreInteractions Test starting :.....\n");
 
-	// Resources
-	RegisterSomeResources();
-	PrintResourceAvailabilities();
-
 	// SystemView
-	SystemView *sv = SystemView::GetInstance();
-
-	// Some resource search test
-	SearchResources(sv);
-	SearchResourceGroups(sv);
-	GetClusteredInfo(sv);
+	sys_view = SystemView::GetInstance();
+	if (!sys_view) {
+		logger->Error("Cannot retrieve system view instance");
+		return;
+	}
 
 	// ApplicationManager instance
-	ApplicationManager *appman = ApplicationManager::GetInstance();
-
-	if (!appman) {
+	app_man = ApplicationManager::GetInstance();
+	if (!app_man) {
 		logger->Error("Cannot find the application manager");
 		return;
 	}
+
+	// Resources
+	RegisterSomeResources();
+	PrintResourceAvailabilities(sys_view);
+
+	// Some resource search test
+	testPathTemplateSearch(sys_view, rsrcSearchPaths);
+	testResourceSetSearch(sys_view, rsrcSearchPaths);
+	GetClusteredInfo(sys_view, rsrcSearchPaths);
+
 	// Start an application
-	appman->StartApplication("mp3player", 3324, 0, "r1_platA", 0, true);
-
-	std::shared_ptr<ba::ApplicationStatusIF>
-		test_app(appman->GetApplication(3324));
-
+	app_man->StartApplication("mp3player", 3324, 0, "r1_platA", 0, true);
+	AppPtr_t test_app(app_man->GetApplication(3324));
 	if (!test_app) {
 		logger->Error("Application not started.");
 		return;
 	}
 
-	logger->Debug("Applications loaded = %d", sv->ApplicationsReady()->size());
+	logger->Debug("Applications loaded = %d",
+			sys_view->ApplicationsReady()->size());
 
 	// Plugin specific data
-	ba::PluginsDataContainer pdc;
-	ba::PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
+	PluginsDataContainer pdc;
+	PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
 
 	if (pdata.get() == NULL) {
 		logger->Warn("Unable to get plugin info");
 	}
 	else {
 		std::string pl_author;
-		if ((pdata->Get("author", pl_author)) == ba::PluginData::PDATA_SUCCESS)
+		if ((pdata->Get("author", pl_author)) == PluginData::PDATA_SUCCESS)
 			std::cout << "Plugin YaMCa - Author :" << pl_author << std::endl;
 	}
 
-	// Print out working modes details
-	WorkingModesDetails(test_app);
+	// Is there a Scheduling Policy ?
+	plugins::SchedulerPolicyIF * scheduler =
+		ModulesFactory::GetSchedulerPolicyModule();
 
-	// Get the application descriptor
-	std::shared_ptr<ba::Application> app_conf(appman->GetApplication(3324));
+	if (!scheduler) {
+		logger->Error("SchedulerPolicy not found");
+		getchar();
+	}
 
-	// Simulate a schedulation 1
-	DoScheduleSwitch(app_conf, "wm1", 0.381);
-	PrintResourceAvailabilities();
+	// Test working mode switching
+	testApplicationLifecycle(test_app);
 
-	// Set a constraint
-	app_conf->RemoveConstraint("cacheL3", ba::Constraint::UPPER_BOUND);
-
-	// Simulate a schedulation 2
-	DoScheduleSwitch(app_conf, "wm2", 0.445);
-	PrintResourceAvailabilities();
-
-	// Come back to awm 1
-	DoScheduleSwitch(app_conf, "wm1", 0.409);
-	PrintResourceAvailabilities();
-
-	// Stop application
-	appman->StopApplication(3324);
-	PrintResourceAvailabilities();
-
-	delete appman;
+	delete app_man;
 }
 
 }   // namespae test
