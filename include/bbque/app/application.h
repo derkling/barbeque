@@ -138,12 +138,12 @@ public:
 	/**
 	 * @see ApplicationConfIF
 	 */
-	void Enable();
+	ExitCode_t Enable();
 
 	/**
 	 * @see ApplicationConfIF
 	 */
-	void Disable();
+	ExitCode_t Disable();
 
 	/**
 	 * @brief This returns all the informations loaded from the recipe and

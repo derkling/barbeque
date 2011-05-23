@@ -105,22 +105,22 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void EnableApplication(AppPtr_t papp);
+	ExitCode_t EnableApplication(AppPtr_t papp);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void EnableApplication(AppPid_t pid, uint8_t exc_id);
+	ExitCode_t EnableApplication(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void DisableApplication(AppPtr_t papp);
+	ExitCode_t DisableApplication(AppPtr_t papp);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void DisableApplication(AppPid_t pid, uint8_t exc_id);
+	ExitCode_t DisableApplication(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF
@@ -171,7 +171,7 @@ public:
 	 * @param papp The Application which scheduling has chenged
 	 * @param time Working mode switch time measured
 	 */
-	void ChangedSchedule(AppPtr_t papp, double time = 0);
+	ExitCode_t ChangedSchedule(AppPtr_t papp, double time = 0);
 
 private:
 

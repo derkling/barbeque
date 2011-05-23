@@ -348,18 +348,22 @@ ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 	return StopApplication(papp);
 }
 
-void ApplicationManager::EnableApplication(AppPtr_t papp) {
+ApplicationManager::ExitCode_t
+ApplicationManager::EnableApplication(AppPtr_t papp) {
 
 	// Enabling the execution context
 	logger->Debug("Enabling EXC [%s] ...", papp->StrId());
-	papp->Enable();
+	if (papp->Enable() != Application::APP_SUCCESS) {
+		return AM_ABORT;
+	}
 
 	// Update internal maps
-	ChangedSchedule(papp);
+	return ChangedSchedule(papp);
 
 }
 
-void ApplicationManager::EnableApplication(AppPid_t pid, uint8_t exc_id) {
+ApplicationManager::ExitCode_t
+ApplicationManager::EnableApplication(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
@@ -368,23 +372,28 @@ void ApplicationManager::EnableApplication(AppPid_t pid, uint8_t exc_id) {
 	if (!papp) {
 		logger->Warn("Enable EXC [%d:*:%d] FAILED "
 				"(Error: EXC not found)");
-		return;
+		return AM_EXC_NOT_FOUND;
 	}
 
-	EnableApplication(papp);
+	return EnableApplication(papp);
+
 }
 
-void ApplicationManager::DisableApplication(AppPtr_t papp) {
+ApplicationManager::ExitCode_t
+ApplicationManager::DisableApplication(AppPtr_t papp) {
 
 	// Disable the execution context
 	logger->Debug("Disabling EXC [%s] ...", papp->StrId());
-	papp->Disable();
+	if (papp->Disable() != Application::APP_SUCCESS) {
+		return AM_ABORT;
+	}
 
 	// Update status map
-	ChangedSchedule(papp);
+	return ChangedSchedule(papp);
 }
 
-void ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
+ApplicationManager::ExitCode_t
+ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
@@ -393,13 +402,14 @@ void ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
 	if (!papp) {
 		logger->Warn("Disable EXC [%d:*:%d] FAILED "
 				"(Error: EXC not found)");
-		return;
+		return AM_ABORT;
 	}
 
-	DisableApplication(papp);
+	return DisableApplication(papp);
 }
 
-void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
+ApplicationManager::ExitCode_t
+ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 	assert(papp);
@@ -410,7 +420,7 @@ void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 	// We need to update the application descriptor (moving it into the
 	// right map) just if the scheduled state has changed.
 	if (papp->CurrentState() == papp->NextState())
-		return;
+		return AM_SUCCESS;
 
 	// Retrieve the runtime map from the status vector
 	AppsMap_t *curr_state_map = &(status_vec[papp->CurrentState()]);
@@ -432,7 +442,7 @@ void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 		logger->Crit("unexpected state for EXC [%s] "
 				"(Error: possible currupted data structures)",
 				papp->StrId());
-		return;
+		return AM_ABORT;
 	}
 
 	// Move it from the current to the next status map
@@ -447,6 +457,8 @@ void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 	logger->Debug("Changed EXC [%s] status to [%d]",
 			papp->StrId(),
 			papp->CurrentState());
+
+	return AM_SUCCESS;
 }
 
 

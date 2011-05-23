@@ -53,7 +53,7 @@ public:
 	 * A newly created application is disabled by default, thus it will not be
 	 * considered for resource scheduling until it is enabled.
 	 */
-	virtual void Enable() = 0;
+	virtual ExitCode_t Enable() = 0;
 
 	/**
 	 * @brief Disabled the application for resources assignment
@@ -61,7 +61,7 @@ public:
 	 * A disabled application will not be considered for resources scheduling.
 	 */
 
-	virtual void Disable() = 0;
+	virtual ExitCode_t Disable() = 0;
 
 	/**
 	 * @brief Set next scheduled working mode

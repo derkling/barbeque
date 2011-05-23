@@ -62,7 +62,9 @@ public:
 		AM_EXC_NOT_FOUND,
 		/** Execution of a method interrupted by an unexpected state in an
 		 * internal data structure state */
-		AM_DATA_CORRUPT
+		AM_DATA_CORRUPT,
+		/** Method forced to exit */
+		AM_ABORT
 	};
 
 	/**

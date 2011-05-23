@@ -118,7 +118,7 @@ void Application::SetPriority(AppPrio_t _prio) {
 	priority = std::min(_prio, appman->LowestPriority());
 }
 
-void Application::Enable() {
+Application::ExitCode_t Application::Enable() {
 
 	// Not disabled applications could not be marked as READY
 	if (curr_sched.state != DISABLED) {
@@ -126,15 +126,17 @@ void Application::Enable() {
 				"(Error: possible data structure curruption?)",
 				StrId());
 		assert(curr_sched.state==DISABLED);
-		return;
+		return APP_ABORT;
 	}
 
 	next_sched.state = READY;
 	logger->Info("EXC [%s] ENABLED", StrId());
 
+	return APP_SUCCESS;
+
 }
 
-void Application::Disable() {
+Application::ExitCode_t Application::Disable() {
 	br::ResourceAccounter * ra(br::ResourceAccounter::GetInstance());
 
 	logger->Debug("Disabling EXC [%s]...", StrId());
@@ -145,7 +147,7 @@ void Application::Disable() {
 				"(Error: possible data structure curruption?)",
 				StrId());
 		assert(curr_sched.state!=DISABLED);
-		return;
+		return APP_ABORT;
 	}
 
 	// Release assigned resources
@@ -153,7 +155,7 @@ void Application::Disable() {
 		logger->Warn("Stopping EXC [%s] FAILED "
 				"(Error: ResourceAccounter unavailable)");
 		assert(ra);
-		return;
+		return APP_ABORT;
 	}
 	ra->ReleaseUsageSet(this);
 
@@ -162,6 +164,8 @@ void Application::Disable() {
 	next_sched.awm.reset();
 	next_sched.state = DISABLED;
 	logger->Info("EXC [%s] DISABLED", StrId());
+
+	return APP_SUCCESS;
 
 }
 

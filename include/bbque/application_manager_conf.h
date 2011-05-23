@@ -92,7 +92,7 @@ public:
 	 * Enable assignment of resources to the specified application.
 	 * @param papp pointer to the application to enable
 	 */
-	virtual void EnableApplication(AppPtr_t papp) = 0;
+	virtual ExitCode_t EnableApplication(AppPtr_t papp) = 0;
 
 	/**
 	 * @brief Enable the application for resources scheduling
@@ -101,7 +101,7 @@ public:
 	 * @param pid the processi ID of the application
 	 * @param exc_id the Execution Context ID to enable
 	 */
-	virtual void EnableApplication(AppPid_t pid, uint8_t exc_id) = 0;
+	virtual ExitCode_t EnableApplication(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
 	 * @brief Disable the application for resources scheduling
@@ -109,7 +109,7 @@ public:
 	 * Disble assignment of resources to the specified application.
 	 * @param papp pointer to the application to enable
 	 */
-	virtual void DisableApplication(AppPtr_t papp) = 0;
+	virtual ExitCode_t DisableApplication(AppPtr_t papp) = 0;
 
 	/**
 	 * @brief Disable the application for resources scheduling
@@ -118,7 +118,7 @@ public:
 	 * @param pid the processi ID of the application
 	 * @param exc_id the Execution Context ID to enable
 	 */
-	virtual void DisableApplication(AppPid_t pid, uint8_t exc_id) = 0;
+	virtual ExitCode_t DisableApplication(AppPid_t pid, uint8_t exc_id) = 0;
 };
 
 } // namespace bbque
