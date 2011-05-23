@@ -95,6 +95,11 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
+	void StopApplication(AppPtr_t papp);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
 	void StopApplication(AppPid_t pid, uint8_t exc_id);
 
 	/**
@@ -227,6 +232,17 @@ private:
 			std::string const & _recipe_name,
 			RecipePtr_t & _recipe,
 			bool weak_load = false);
+
+
+	/**
+	 * Remove the specified application from the priority maps
+	 */
+	void PriorityRemove(AppPtr_t papp);
+
+	/**
+	 * Remove the specified application from the status maps
+	 */
+	void StatusRemove(AppPtr_t papp);
 
 };
 

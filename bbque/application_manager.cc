@@ -242,47 +242,40 @@ void ApplicationManager::StopApplication(AppPid_t pid) {
 	apps.erase(pid);
 
 }
-
-
-void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
+void ApplicationManager::PriorityRemove(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
-	AppPtr_t papp;
-
-	// Find the required EXC
-	papp = GetApplication(pid, exc_id);
-	assert(papp);
-	if (!papp) {
-		logger->Warn("Stop EXC [%d:*:%d] FAILED "
-				"(Error: EXC not found)");
-		return;
-	}
 
 	// Remove execution context descriptor from priority map
 	logger->Debug("Releasing [%s] EXCs from priority maps...",
 			papp->StrId());
-	range = priority_vec[papp->Priority()].equal_range(pid);
+	range = priority_vec[papp->Priority()].equal_range(papp->Pid());
 	it = range.first;
 	while (it != range.second &&
-		((*it).second)->ExcId() != exc_id) {
+		((*it).second)->ExcId() != papp->ExcId()) {
 		++it;
 	}
 	assert(it != range.second);
 	if (it == range.second) {
 		logger->Crit("EXCs [%s] not found in priority maps "
-				"(Error: possible data structure corruption)",
+				"(Error: possible data structure corruption?)",
 			papp->StrId());
 		return;
 	}
 	priority_vec[papp->Priority()].erase(it);
 
-	// Remove execution context descriptor from status map
+}
+
+void ApplicationManager::StatusRemove(AppPtr_t papp) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+
 	logger->Debug("Releasing [%s] EXCs from status maps...",
 			papp->StrId());
-	range = status_vec[papp->CurrentState()].equal_range(pid);
+	range = status_vec[papp->CurrentState()].equal_range(papp->Pid());
 	it = range.first;
 	while (it != range.second &&
-		((*it).second)->ExcId() != exc_id) {
+		((*it).second)->ExcId() != papp->ExcId()) {
 		++it;
 	}
 	assert(it != range.second);
@@ -294,12 +287,21 @@ void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 	}
 	status_vec[papp->CurrentState()].erase(it);
 
-	// Remove execution context descriptor from applications map
-	logger->Debug("Stopping EXC [%s] ...", papp->StrId());
-	range = apps.equal_range(pid);
+}
+
+void ApplicationManager::StopApplication(AppPtr_t papp) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+
+	// Remove execution context form priority and status maps
+	PriorityRemove(papp);
+	StatusRemove(papp);
+
+	logger->Debug("Removing EXC [%s] ...", papp->StrId());
+	range = apps.equal_range(papp->Pid());
 	it = range.first;
 	while (it != range.second &&
-		((*it).second)->ExcId() != exc_id) {
+		((*it).second)->ExcId() != papp->ExcId()) {
 		++it;
 	}
 	assert(it != range.second);
@@ -310,6 +312,22 @@ void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 		return;
 	}
 	apps.erase(it);
+
+}
+
+void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
+	AppPtr_t papp;
+
+	// Find the required EXC
+	papp = GetApplication(pid, exc_id);
+	assert(papp);
+	if (!papp) {
+		logger->Warn("Stop EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
+		return;
+	}
+
+	StopApplication(papp);
 
 }
 

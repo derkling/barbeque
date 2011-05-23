@@ -67,6 +67,15 @@ public:
 	virtual void StopApplication(AppPid_t pid) = 0;
 
 	/**
+	 * @brief Exit point for applications
+	 *
+	 * Stop the execution of an application scheduled with Barbeque RTRM.
+	 *
+	 * @param papp The pointer to the application to stop
+	 */
+	virtual void StopApplication(AppPtr_t papp) = 0;
+
+	/**
 	 * @brief Exit point for execution contexts of applications
 	 *
 	 * Stop the execution of an execution context, belonging to a given
