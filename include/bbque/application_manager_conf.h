@@ -64,7 +64,7 @@ public:
 	 *
 	 * @param pid The process ID of the application
 	 */
-	virtual void StopApplication(AppPid_t pid) = 0;
+	virtual ExitCode_t StopApplication(AppPid_t pid) = 0;
 
 	/**
 	 * @brief Exit point for applications
@@ -73,7 +73,7 @@ public:
 	 *
 	 * @param papp The pointer to the application to stop
 	 */
-	virtual void StopApplication(AppPtr_t papp) = 0;
+	virtual ExitCode_t StopApplication(AppPtr_t papp) = 0;
 
 	/**
 	 * @brief Exit point for execution contexts of applications
@@ -84,7 +84,7 @@ public:
 	 * @param pid The process ID of the application
 	 * @param exc_id The internal ID of the execution context
 	 */
-	virtual void StopApplication(AppPid_t pid, uint8_t exc_id) = 0;
+	virtual ExitCode_t StopApplication(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
 	 * @brief Enable the application for resources scheduling

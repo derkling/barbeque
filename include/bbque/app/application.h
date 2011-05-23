@@ -234,7 +234,7 @@ public:
 	 *
 	 * Finalize the end of the execution.
 	 */
-	void StopExecution();
+	ExitCode_t StopExecution();
 
 	/**
 	 * @brief Define a specific resource constraint. If exists yet it

@@ -516,7 +516,12 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & test_app) {
 	PrintResourceAvailabilities(sys_view);
 
 	// Stop application
-	app_man->StopApplication(3324);
+	ApplicationManager::ExitCode_t result = app_man->StopApplication(3324);
+	if (result == ApplicationManager::AM_SUCCESS)
+		logger->Info("Application correctly exited.");
+	else
+		logger->Info("Error: Application didn't exit correctly"
+				" [ExitCode = %d]", result);
 	PrintResourceAvailabilities(sys_view);
 }
 

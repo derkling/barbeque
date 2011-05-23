@@ -90,17 +90,17 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void StopApplication(AppPid_t pid);
+	ExitCode_t StopApplication(AppPid_t pid);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void StopApplication(AppPtr_t papp);
+	ExitCode_t StopApplication(AppPtr_t papp);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	void StopApplication(AppPid_t pid, uint8_t exc_id);
+	ExitCode_t StopApplication(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF
@@ -233,16 +233,15 @@ private:
 			RecipePtr_t & _recipe,
 			bool weak_load = false);
 
-
 	/**
 	 * Remove the specified application from the priority maps
 	 */
-	void PriorityRemove(AppPtr_t papp);
+	ExitCode_t PriorityRemove(AppPtr_t papp);
 
 	/**
 	 * Remove the specified application from the status maps
 	 */
-	void StatusRemove(AppPtr_t papp);
+	ExitCode_t StatusRemove(AppPtr_t papp);
 
 };
 

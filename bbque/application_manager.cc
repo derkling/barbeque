@@ -208,7 +208,9 @@ AppPtr_t ApplicationManager::StartApplication(
 	return papp;
 }
 
-void ApplicationManager::StopApplication(AppPid_t pid) {
+
+ApplicationManager::ExitCode_t
+ApplicationManager::StopApplication(AppPid_t pid) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMapVec_t::iterator vit;
 	AppsMapVec_t::iterator end;
@@ -241,8 +243,11 @@ void ApplicationManager::StopApplication(AppPid_t pid) {
 	logger->Debug("Releasing [%d] EXCs from applications maps...", pid);
 	apps.erase(pid);
 
+	return AM_SUCCESS;
 }
-void ApplicationManager::PriorityRemove(AppPtr_t papp) {
+
+ApplicationManager::ExitCode_t
+ApplicationManager::PriorityRemove(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 
@@ -260,13 +265,15 @@ void ApplicationManager::PriorityRemove(AppPtr_t papp) {
 		logger->Crit("EXCs [%s] not found in priority maps "
 				"(Error: possible data structure corruption?)",
 			papp->StrId());
-		return;
+		return AM_DATA_CORRUPT;
 	}
 	priority_vec[papp->Priority()].erase(it);
 
+	return AM_SUCCESS;
 }
 
-void ApplicationManager::StatusRemove(AppPtr_t papp) {
+ApplicationManager::ExitCode_t
+ApplicationManager::StatusRemove(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 
@@ -283,21 +290,30 @@ void ApplicationManager::StatusRemove(AppPtr_t papp) {
 		logger->Crit("EXCs [%s] not found in status maps "
 				"(Error: possible data structure corruption)",
 			papp->StrId());
-		return;
+		return AM_DATA_CORRUPT;
 	}
 	status_vec[papp->CurrentState()].erase(it);
 
+	return AM_SUCCESS;
 }
 
-void ApplicationManager::StopApplication(AppPtr_t papp) {
+ApplicationManager::ExitCode_t
+ApplicationManager::StopApplication(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
-
-	// Remove execution context form priority and status maps
-	PriorityRemove(papp);
-	StatusRemove(papp);
+	ExitCode_t result;
 
 	logger->Debug("Removing EXC [%s] ...", papp->StrId());
+
+	// Remove execution context form priority and status maps
+	result = PriorityRemove(papp);
+	if (result != AM_SUCCESS)
+		return result;
+
+	result = StatusRemove(papp);
+	if (result != AM_SUCCESS)
+		return result;
+
 	range = apps.equal_range(papp->Pid());
 	it = range.first;
 	while (it != range.second &&
@@ -309,13 +325,15 @@ void ApplicationManager::StopApplication(AppPtr_t papp) {
 		logger->Crit("EXCs [%s] not found in application map "
 				"(Error: possible data structure corruption)",
 			papp->StrId());
-		return;
+		return AM_DATA_CORRUPT;
 	}
 	apps.erase(it);
 
+	return AM_SUCCESS;
 }
 
-void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
+ApplicationManager::ExitCode_t
+ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
@@ -324,11 +342,10 @@ void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 	if (!papp) {
 		logger->Warn("Stop EXC [%d:*:%d] FAILED "
 				"(Error: EXC not found)");
-		return;
+		return AM_EXC_NOT_FOUND;
 	}
 
-	StopApplication(papp);
-
+	return StopApplication(papp);
 }
 
 void ApplicationManager::EnableApplication(AppPtr_t papp) {

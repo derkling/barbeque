@@ -53,6 +53,19 @@ class ApplicationManagerStatusIF {
 public:
 
 	/**
+	 * @enum Exit code to return
+	 */
+	enum ExitCode_t {
+		/** Success */
+		AM_SUCCESS = 0,
+		/** Application Execution Context not found */
+		AM_EXC_NOT_FOUND,
+		/** Execution of a method interrupted by an unexpected state in an
+		 * internal data structure state */
+		AM_DATA_CORRUPT
+	};
+
+	/**
 	 * @brief Retrieve regietered applications map
 	 *
 	 * @return A pointer to the Map of all applications registered to the RTRM

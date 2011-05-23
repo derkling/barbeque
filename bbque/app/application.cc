@@ -76,9 +76,8 @@ Application::~Application() {
 	StopExecution();
 }
 
-// FIXME we should deliver the error code to the application
-// This is tracked by Issues tiket #10
-void Application::StopExecution() {
+
+Application::ExitCode_t Application::StopExecution() {
 
 	logger->Info("Stopping EXC [%s]", StrId());
 
@@ -88,7 +87,7 @@ void Application::StopExecution() {
 	if (!ra) {
 		logger->Warn("Stopping EXC [%s] FAILED "
 				"(Error: ResourceAccounter unavailable)");
-		return;
+		return APP_ABORT;
 	}
 	ra->ReleaseUsageSet(this);
 
@@ -104,6 +103,7 @@ void Application::StopExecution() {
 	enabled_awms.clear();
 	constraints.clear();
 
+	return APP_SUCCESS;
 }
 
 
