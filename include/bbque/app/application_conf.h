@@ -48,6 +48,22 @@ public:
 	virtual void SetPriority(AppPrio_t prio) = 0;
 
 	/**
+	 * @brief Enable the application for resources assignment
+	 *
+	 * A newly created application is disabled by default, thus it will not be
+	 * considered for resource scheduling until it is enabled.
+	 */
+	virtual void Enable() = 0;
+
+	/**
+	 * @brief Disabled the application for resources assignment
+	 *
+	 * A disabled application will not be considered for resources scheduling.
+	 */
+
+	virtual void Disable() = 0;
+
+	/**
 	 * @brief Set next scheduled working mode
 	 *
 	 * Let the Scheduler/Optimizer module to new working mode of the

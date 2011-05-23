@@ -136,6 +136,16 @@ public:
 	void SetPriority(AppPrio_t prio);
 
 	/**
+	 * @see ApplicationConfIF
+	 */
+	void Enable();
+
+	/**
+	 * @see ApplicationConfIF
+	 */
+	void Disable();
+
+	/**
 	 * @brief This returns all the informations loaded from the recipe and
 	 * stored in a specific object
 	 * @return A shared pointer to the recipe object

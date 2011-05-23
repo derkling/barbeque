@@ -83,8 +83,10 @@ public:
 	 * statistics data collection.
 	 */
 	enum ScheduleFlag_t {
+		/** Registered within Barbeque but currently disabled */
+		DISABLED = 0,
 		/** Ready to be scheduled */
-		READY  = 0,
+		READY,
 		/** Must change working mode */
 		RECONF,
 		/** Must migrate into another cluster */
@@ -97,7 +99,6 @@ public:
 		BLOCKED,
 		/** Regular exit */
 		FINISHED
-
 	};
 
 	/**

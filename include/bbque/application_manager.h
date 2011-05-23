@@ -100,6 +100,26 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
+	void EnableApplication(AppPtr_t papp);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	void EnableApplication(AppPid_t pid, uint8_t exc_id);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	void DisableApplication(AppPtr_t papp);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	void DisableApplication(AppPid_t pid, uint8_t exc_id);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
 	inline AppsMap_t const * Applications() const {
 		return &apps;
 	}
@@ -146,7 +166,7 @@ public:
 	 * @param papp The Application which scheduling has chenged
 	 * @param time Working mode switch time measured
 	 */
-	void ChangedSchedule(AppPtr_t papp, double time);
+	void ChangedSchedule(AppPtr_t papp, double time = 0);
 
 private:
 

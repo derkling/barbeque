@@ -310,6 +310,58 @@ void ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 		return;
 	}
 	apps.erase(it);
+
+}
+
+void ApplicationManager::EnableApplication(AppPtr_t papp) {
+
+	// Enabling the execution context
+	logger->Debug("Enabling EXC [%s] ...", papp->StrId());
+	papp->Enable();
+
+	// Update internal maps
+	ChangedSchedule(papp);
+
+}
+
+void ApplicationManager::EnableApplication(AppPid_t pid, uint8_t exc_id) {
+	AppPtr_t papp;
+
+	// Find the required EXC
+	papp = GetApplication(pid, exc_id);
+	assert(papp);
+	if (!papp) {
+		logger->Warn("Enable EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
+		return;
+	}
+
+	EnableApplication(papp);
+}
+
+void ApplicationManager::DisableApplication(AppPtr_t papp) {
+
+	// Disable the execution context
+	logger->Debug("Disabling EXC [%s] ...", papp->StrId());
+	papp->Disable();
+
+	// Update status map
+	ChangedSchedule(papp);
+}
+
+void ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
+	AppPtr_t papp;
+
+	// Find the required EXC
+	papp = GetApplication(pid, exc_id);
+	assert(papp);
+	if (!papp) {
+		logger->Warn("Disable EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
+		return;
+	}
+
+	DisableApplication(papp);
 }
 
 void ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {

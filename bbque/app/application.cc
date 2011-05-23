@@ -53,7 +53,7 @@ Application::Application(std::string const & _name,
 	exc_id(_exc_id) {
 
 	// Scheduling state
-	curr_sched.state = next_sched.state = READY;
+	curr_sched.state = next_sched.state = DISABLED;
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
@@ -118,6 +118,52 @@ void Application::SetPriority(AppPrio_t _prio) {
 	priority = std::min(_prio, appman->LowestPriority());
 }
 
+void Application::Enable() {
+
+	// Not disabled applications could not be marked as READY
+	if (curr_sched.state != DISABLED) {
+		logger->Crit("Trying to enable already enabled application [%s] "
+				"(Error: possible data structure curruption?)",
+				StrId());
+		assert(curr_sched.state==DISABLED);
+		return;
+	}
+
+	next_sched.state = READY;
+	logger->Info("EXC [%s] ENABLED", StrId());
+
+}
+
+void Application::Disable() {
+	br::ResourceAccounter * ra(br::ResourceAccounter::GetInstance());
+
+	logger->Debug("Disabling EXC [%s]...", StrId());
+
+	// Not disabled applications could not be marked as READY
+	if (curr_sched.state == DISABLED) {
+		logger->Crit("Trying to disable already disabled application [%s] "
+				"(Error: possible data structure curruption?)",
+				StrId());
+		assert(curr_sched.state!=DISABLED);
+		return;
+	}
+
+	// Release assigned resources
+	if (!ra) {
+		logger->Warn("Stopping EXC [%s] FAILED "
+				"(Error: ResourceAccounter unavailable)");
+		assert(ra);
+		return;
+	}
+	ra->ReleaseUsageSet(this);
+
+	// Reset scheduling info
+	curr_sched.awm.reset();
+	next_sched.awm.reset();
+	next_sched.state = DISABLED;
+	logger->Info("EXC [%s] DISABLED", StrId());
+
+}
 
 void Application::SetRecipe(RecipePtr_t app_recipe) {
 	assert(app_recipe.get() != NULL);
