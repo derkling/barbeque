@@ -48,6 +48,7 @@ typedef enum rpc_msg_type {
 	RPC_EXC_CLEAR,
 	RPC_EXC_START,
 	RPC_EXC_STOP,
+	RPC_EXC_GWM,
 	RPC_EXC_RESP,
 	RPC_EXC_MSGS_COUNT, ///< The number of EXC originated messages
 	RPC_APP_PAIR,
@@ -143,6 +144,13 @@ typedef struct rpc_msg_exc_stop {
 	rpc_msg_header_t header;
 } rpc_msg_exc_stop_t;
 
+/**
+ * @brief Command to get assigned an AWM for an execution context.
+ */
+typedef struct rpc_msg_exc_gwm {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+} rpc_msg_exc_gwm_t;
 
 
 

@@ -177,6 +177,9 @@ private:
 	void RpcExcStop(prqsSn_t prqs);
 
 
+	void RpcExcGwm(prqsSn_t prqs);
+
+
 	void RpcAppPair(prqsSn_t prqs);
 
 	void RpcAppExit(prqsSn_t prqs);

@@ -185,6 +185,7 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 
 }
 
+
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_app_pair_t fifo_pair = {
@@ -618,13 +619,69 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Clear(
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_GetWorkingMode(
 		pregExCtx_t prec,
 		RTLIB_WorkingModeParams *wm) {
-	//Silence "args not used" warning.
-	(void)prec;
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
+	rpc_fifo_undef_t fifo_gwm = {
+		{
+			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_gwm),
+			FIFO_PKT_SIZE(undef),
+			RPC_EXC_GWM
+		}
+	};
+	rpc_msg_exc_gwm_t msg_gwm = {
+		{RPC_EXC_GWM, chTrdPid, prec->exc_id}
+	};
+	size_t bytes;
+
+	DB(fprintf(stderr, FMT_DBG("GetWorkingMode for EXC [%d:%d]...\n"),
+				msg_gwm.header.app_pid,
+				msg_gwm.header.exc_id));
+
+	// Send FIFO header
+	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
+		"[sze: %hd, off: %hd, typ: %hd]...\n"),
+		fifo_gwm.header.fifo_msg_size,
+		fifo_gwm.header.rpc_msg_offset,
+		fifo_gwm.header.rpc_msg_type
+	));
+	bytes = ::write(server_fifo_fd, (void*)&fifo_gwm,
+			FIFO_PKT_SIZE(undef));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
+					"(Error %d: %s)\n"),
+				bbque_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
+
+	// Send RPC header
+	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
+		"[typ: %d, pid: %d, eid: %hd]...\n"),
+		msg_gwm.header.typ,
+		msg_gwm.header.app_pid,
+		msg_gwm.header.exc_id
+	));
+	bytes = ::write(server_fifo_fd, (void*)&msg_gwm,
+			RPC_PKT_SIZE(exc_gwm));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
+					"(Error %d: %s)\n"),
+				bbque_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
+
+	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
+
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+
+	// NOTE the GWM is an asynchronous requres. It return as far as Barbeque
+	// as been notified about the application request to be scheduled.
+	// Then the application sit and wait for a working mode assignement.
+
 	(void)wm;
 
-	fprintf(stderr, FMT_DBG("EXC GetWorkingMode: not yet implemeted"));
-
 	return RTLIB_OK;
+
 }
 
 void BbqueRPC_FIFO_Client::_Exit() {

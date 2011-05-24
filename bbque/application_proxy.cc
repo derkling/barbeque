@@ -377,6 +377,36 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 
 }
 
+void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
+	ApplicationManager *am = ApplicationManager::GetInstance();
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	pconCtx_t pcon;
+	ApplicationManager::ExitCode_t result;
+
+	assert(am);
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
+		return;
+
+	// Registering a new Execution Context
+	logger->Info("APPs PRX: GetWorkingMode for Execution Context "
+			"[app: %s, pid: %d, exc: %d]",
+			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
+
+	// Running the resource allocator if needed
+	// This return success if a scheduling has been started, false if EXC
+	// is not enabled or the scheduled could not be run.
+	logger->Warn("APPs PRX: TODO run optimizer");
+
+	// Sending ACK response to application
+	RpcExcACK(pcon, pmsg_hdr);
+
+}
+
 void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
 	pchMsg_t pchMsg = prqs->pmsg;
@@ -518,6 +548,11 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 	case RPC_EXC_STOP:
 		logger->Debug("EXC_STOP");
 		RpcExcStop(prqs);
+		break;
+
+	case RPC_EXC_GWM:
+		logger->Debug("EXC_GWM");
+		RpcExcGwm(prqs);
 		break;
 
 	case RPC_APP_PAIR:
