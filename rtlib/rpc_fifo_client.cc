@@ -111,63 +111,82 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelRelease() {
 
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::WaitBbqueResp(int ms) {
-	int nfds;
-
-	nfds = epoll_wait(epoll_fd, epoll_evts, MAX_EPOLL_EVENTS, ms);
-	if (nfds < 0) {
-		fprintf(stderr, FMT_ERR("FAILED epoll_wait (Error %d: %s)\n"),
-			errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
-	}
-	if (!nfds) {
-		fprintf(stderr, FMT_DBG("TIMEOUT epoll_wait\n"));
-		// TODO instead of returing an error, maybe better to try again a
-		// connection by re-sending the PAIR message without wasting time on
-		// destrying-reconstructing the client channel.
-		// But this should be somehow controller by the application...
-		return RTLIB_BBQUE_CHANNEL_READ_TIMEOUT;
-	}
-
-	// NOTE we use epoll just to monitor the client_fifo_fs, thus if we get
-	// here there sould be some data ready to read
-	assert(epoll_evts[0].data.fd == client_fifo_fd);
-
-	return RTLIB_OK;
-}
-
-
-RTLIB_ExitCode BbqueRPC_FIFO_Client::BbqueResult() {
-	rpc_fifo_header_t hdr;
-	rpc_msg_resp_t resp;
+void BbqueRPC_FIFO_Client::RpcBbqResp() {
 	size_t bytes;
 
-	// Read response FIFO header
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&chResp, RPC_PKT_SIZE(resp));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		chResp.result = RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	// Notify about reception of a new response
+	DB(fprintf(stderr, FMT_INF("Notify response [%d]\n"), chResp.result));
+	chResp_cv.notify_one();
+
+}
+
+void BbqueRPC_FIFO_Client::ChannelFetch() {
+	rpc_fifo_header_t hdr;
+	size_t bytes;
+
+	DB(fprintf(stderr, FMT_INF("Waiting for FIFO header...\n")));
+
+	// Read FIFO header
 	bytes = ::read(client_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
 	if (bytes<=0) {
 		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
 					"(Error %d: %s)\n"),
 				app_fifo_path.c_str(),
 				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
-	}
-	assert(hdr.rpc_msg_type == RPC_BBQ_RESP);
-
-	// Read response RPC header
-	bytes = ::read(client_fifo_fd, (void*)&resp, RPC_PKT_SIZE(resp));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
-					"(Error %d: %s)\n"),
-				app_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_READ_FAILED;
+		assert(bytes==FIFO_PKT_SIZE(header));
+		// Exit the read thread if we are unable to read from the Barbeque
+		// FIXME an error should be notified to the application
+		done = true;
+		return;
 	}
 
-	return resp.result;
+	// Dispatching the received message
+	switch (hdr.rpc_msg_type) {
+	case RPC_BBQ_RESP:
+		DB(fprintf(stderr, FMT_INF("BBQ_RESP\n")));
+		RpcBbqResp();
+		break;
+	case RPC_BBQ_SET_WORKING_MODE:
+		DB(fprintf(stderr, FMT_INF("BBQ_SET_WORKING_MODE\n")));
+		break;
+	case RPC_BBQ_STOP_EXECUTION:
+		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
+		break;
+	default:
+		break;
+	}
+
+}
+
+void BbqueRPC_FIFO_Client::ChannelTrd() {
+	std::unique_lock<std::mutex> chSetup_ul(chSetup_mtx);
+	// Getting client PID
+	chTrdPid = gettid();
+	DB(fprintf(stderr, FMT_INF("channel thread [PID: %d] started\n"),
+				chTrdPid));
+	// Notifying the thread has beed started
+	trdStarted_cv.notify_one();
+
+	// Waiting for channel setup to be completed
+	chSetup_cv.wait(chSetup_ul);
+
+	while (!done)
+		ChannelFetch();
 
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_app_pair_t fifo_pair = {
 		{
 			FIFO_PKT_SIZE(app_pair)+RPC_PKT_SIZE(app_pair),
@@ -181,7 +200,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 		BBQUE_RPC_FIFO_MAJOR_VERSION,
 		BBQUE_RPC_FIFO_MINOR_VERSION,
 		"\0"};
-	RTLIB_ExitCode result;
 	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("Pairing FIFO channels [app: %s, pid: %d]\n"),
@@ -226,27 +244,16 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	// Waiting for BBQUE response (up to a 500ms timeout)
-	result = WaitBbqueResp();
-	if (result != RTLIB_OK)
-		return result;
-
-	// Check RPC server response
-	result = BbqueResult();
-	if (result != RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("bbque RPC pairing FAILED\n"));
-		return result;
-	}
-
-	return RTLIB_OK;
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return chResp.result;
 
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup(const char *name) {
+RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
 	RTLIB_ExitCode result = RTLIB_OK;
 	int error;
 
-	DB(fprintf(stderr, FMT_INF("Initializing RPC FIFO channel\n")));
+	DB(fprintf(stderr, FMT_INF("Initializing channel\n")));
 
 	// Opening server FIFO
 	DB(fprintf(stderr, FMT_DBG("Opening bbque fifo [%s]...\n"),
@@ -258,9 +265,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup(const char *name) {
 				bbque_fifo_path.c_str(), errno, strerror(errno));
 		return RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
 	}
-
-	// Linking the server pipe to an ASIO stream descriptor
-	//out.assign(server_fifo_fd);
 
 	// Setting up application FIFO complete path
 	app_fifo_path += app_fifo_filename;
@@ -290,38 +294,8 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup(const char *name) {
 		goto err_open;
 	}
 
-	// Create epoll events used for asynchronous I/O
-	epoll_fd = epoll_create(1);
-	if (epoll_fd == -1) {
-		fprintf(stderr, FMT_ERR("FAILED epoll creation\n"));
-		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
-		goto err_epoll;
-	}
-
-	// Configuring epoll
-	epoll_ev.events = EPOLLIN|EPOLLPRI;
-	epoll_ev.data.fd = client_fifo_fd;
-	if (epoll_ctl(epoll_fd, EPOLL_CTL_ADD, client_fifo_fd, &epoll_ev) == -1) {
-		fprintf(stderr, FMT_ERR("FAILED epoll configuration "
-					"(Error %d: %s)\n"),
-				errno, strerror(errno));
-		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
-		goto err_epoll;
-	}
-
-	// Pairing channel with server
-	result = ChannelPair(name);
-	if (result != RTLIB_OK)
-		goto err_use;
-
 	return RTLIB_OK;
 
-err_use:
-err_epoll:
-	if (epoll_fd>=0)
-		::close(epoll_fd);
-	if (client_fifo_fd>=0)
-		::close(client_fifo_fd);
 err_open:
 	::unlink(app_fifo_path.c_str());
 err_create:
@@ -330,30 +304,15 @@ err_create:
 
 }
 
-void BbqueRPC_FIFO_Client::ChannelTrd() {
-	std::unique_lock<std::mutex> chSetup_ul(chSetup_mtx);
 
-	// Getting client PID
-	chTrdPid = gettid();
-	DB(fprintf(stderr, FMT_INF("RPC FIFO channel thread [PID: %d] started\n"),
-				chTrdPid));
-
-	// Notifying the thread has beed started
-	trdStarted_cv.notify_one();
-
-	// Waiting for channel setup to be completed
-	chSetup_cv.wait(chSetup_ul);
-
-	// Wait for BBQ messages
-
-}
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
 			const char *name) {
 	std::unique_lock<std::mutex> trdStatus_ul(trdStatus_mtx);
-	RTLIB_ExitCode result = RTLIB_OK;
+	RTLIB_ExitCode result;
 
 	// Starting the communication thread
+	done = false;
 	ChTrd = std::thread(&BbqueRPC_FIFO_Client::ChannelTrd, this);
 	trdStarted_cv.wait(trdStatus_ul);
 
@@ -362,17 +321,26 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
 			"bbque_%05d_%s", chTrdPid, name);
 
 	// Setting up the communication channel
-	result = ChannelSetup(name);
+	result = ChannelSetup();
 	if (result != RTLIB_OK)
 		return result;
 
 	// Start the reception thread
 	chSetup_cv.notify_one();
 
-	return result;
+	// Pairing channel with server
+	result = ChannelPair(name);
+	if (result != RTLIB_OK) {
+		::unlink(app_fifo_path.c_str());
+		::close(server_fifo_fd);
+		return result;
+	}
+
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_undef_t fifo_register = {
 		{
 			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_register),
@@ -385,7 +353,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
 		"\0",
 		"\0"
 	};
-	RTLIB_ExitCode result;
 	size_t bytes;
 
 	// Initializing RPC message
@@ -437,23 +404,13 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	// Waiting for BBQUE response (up to a 500ms timeout)
-	result = WaitBbqueResp();
-	if (result != RTLIB_OK)
-		return result;
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return chResp.result;
 
-	// Check RPC server response
-	result = BbqueResult();
-	if (result != RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("Execution Context registration "
-					"FAILED\n"));
-		return result;
-	}
-
-	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_undef_t fifo_unregister = {
 		{
 			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_unregister),
@@ -465,7 +422,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 		{RPC_EXC_UNREGISTER, chTrdPid, prec->exc_id},
 		"\0"
 	};
-	RTLIB_ExitCode result;
 	size_t bytes;
 
 	// Initializing RPC message
@@ -514,24 +470,13 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	// Waiting for BBQUE response (up to a 500ms timeout)
-	result = WaitBbqueResp();
-	if (result != RTLIB_OK)
-		return result;
-
-	// Check RPC server response
-	result = BbqueResult();
-	if (result != RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("Execution Context registration "
-					"FAILED\n"));
-		return result;
-	}
-
-	return RTLIB_OK;
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return chResp.result;
 
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_undef_t fifo_start = {
 		{
 			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_start),
@@ -542,7 +487,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 	rpc_msg_exc_start_t msg_start = {
 		{RPC_EXC_START, chTrdPid, prec->exc_id}
 	};
-	RTLIB_ExitCode result;
 	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("Starting EXC [%d:%d]...\n"),
@@ -585,22 +529,12 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	// Waiting for BBQUE response (up to a 500ms timeout)
-	result = WaitBbqueResp();
-	if (result != RTLIB_OK)
-		return result;
-
-	// Check RPC server response
-	result = BbqueResult();
-	if (result != RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("Execution Context START FAILED\n"));
-		return result;
-	}
-
-	return RTLIB_OK;
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return chResp.result;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_undef_t fifo_stop = {
 		{
 			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_stop),
@@ -611,7 +545,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 	rpc_msg_exc_stop_t msg_stop = {
 		{RPC_EXC_STOP, chTrdPid, prec->exc_id}
 	};
-	RTLIB_ExitCode result;
 	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("Stopping EXC [%d:%d]...\n"),
@@ -654,19 +587,8 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	// Waiting for BBQUE response (up to a 500ms timeout)
-	result = WaitBbqueResp();
-	if (result != RTLIB_OK)
-		return result;
-
-	// Check RPC server response
-	result = BbqueResult();
-	if (result != RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("Execution Context STOP FAILED\n"));
-		return result;
-	}
-
-	return RTLIB_OK;
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return chResp.result;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Set(

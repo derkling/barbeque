@@ -88,12 +88,7 @@ private:
 
 	int server_fifo_fd;
 
-	int epoll_fd;
-
-	struct epoll_event epoll_ev;
-
-	#define MAX_EPOLL_EVENTS 1
-	struct epoll_event epoll_evts[MAX_EPOLL_EVENTS];
+	bool done;
 
 	pid_t chTrdPid;
 
@@ -107,17 +102,46 @@ private:
 
 	std::condition_variable chSetup_cv;
 
+	/**
+	 * @brief Serialize sending of command using the library
+	 *
+	 * The current implementation of the library allows to send a single
+	 * command at each time for single library instance. This is required do
+	 * properly handle responses from Barbque.
+	 * This mutex should be used to protect the chResp responce attribute,
+	 * which is always set to the last received response from Barbques.
+	 *
+	 * @see chResp
+	 */
+	std::mutex chCommand_mtx;
+
+	/**
+	 * @brief Signal the reception of a response from Barbeque
+	 *
+	 * Each time a new message has been received from Barbeque by the channel
+	 * fetch thread, this variable is notified. Thus, commands could wait for
+	 * a response by susepnding on it.
+	 */
+	std::condition_variable chResp_cv;
+
+	/**
+	 * @brief The last response reveiced by Barbeque
+	 *
+	 * This attribute should be always protected by the chCommand_mtx
+	 */
+	rpc_msg_resp_t chResp;
+
 	RTLIB_ExitCode ChannelRelease();
+
+	RTLIB_ExitCode ChannelSetup();
 
 	RTLIB_ExitCode ChannelPair(const char *name);
 
-	RTLIB_ExitCode ChannelSetup(const char *name);
+	void ChannelFetch();
 
 	void ChannelTrd();
 
-	RTLIB_ExitCode WaitBbqueResp(int ms = 500);
-
-	RTLIB_ExitCode BbqueResult();
+	void RpcBbqResp();
 };
 
 } // namespace rtlib
