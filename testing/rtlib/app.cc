@@ -25,23 +25,15 @@
 
 #include <assert.h>
 
-#define FMT_DBG(fmt) "BAPP       [DBG] - "fmt
-#define FMT_INF(fmt) "BAPP       [INF] - "fmt
-#define FMT_WRN(fmt) "BAPP       [WRN] - "fmt
-#define FMT_ERR(fmt) "BAPP       [ERR] - "fmt
-
-#define LOG(fmt, ...) LOGGER(COLOR_GREEN, "BAPP        ", fmt, ## __VA_ARGS__)
-#define WRN(fmt, ...) LOGGER(COLOR_YELLOW, "BAPP [WRN]  ", fmt, ## __VA_ARGS__)
-#define ERR(fmt, ...) LOGGER(COLOR_RED, "BAPP [ERR]  ", fmt, ## __VA_ARGS__)
-
-#ifndef DBG
-# define DBG(fmt, ...) LOGGER(COLOR_LGRAY, "BAPP        ", fmt, ## __VA_ARGS__)
-#endif
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "BAPP       [DBG]", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "BAPP       [INF]", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "BAPP       [WRN]", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "BAPP       [ERR]", fmt)
 
 BbqueApp::BbqueApp(std::string const & name) {
 	(void)name;
 
-	fprintf(stderr, FMT_INF("Initializing RPC library..."));
+	fprintf(stderr, FMT_INF("Initializing RPC library...\n"));
 
 	rtlib = RTLIB_Init(name.c_str());
 	assert(rtlib);
@@ -59,11 +51,11 @@ int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 	RTLIB_ExecutionContextHandler exc_hdl;
 	excMap_t::iterator it = exc_map.find(name);
 
-	fprintf(stderr, FMT_INF("Registering EXC [%s:exRecipe_%03d]..."),
+	fprintf(stderr, FMT_INF("Registering EXC [%s:exRecipe_%03d]...\n"),
 			name.c_str(), recipe_id%999);
 
 	if (it!=exc_map.end()) {
-		fprintf(stderr, FMT_ERR("FAILED: EXC [%s:exRecipe_%03d] already registered..."),
+		fprintf(stderr, FMT_ERR("FAILED: EXC [%s:exRecipe_%03d] already registered...\n"),
 				name.c_str(), recipe_id%999);
 		return -1;
 	}
@@ -73,12 +65,12 @@ int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 	assert(rtlib && rtlib->RegisterExecutionContext);
 	exc_hdl = rtlib->RegisterExecutionContext(name.c_str(), &exc_params);
 	if (!exc_hdl) {
-		fprintf(stderr, FMT_ERR("FAILED: registering EXC [%s:exRecipe_%03d]"),
+		fprintf(stderr, FMT_ERR("FAILED: registering EXC [%s:exRecipe_%03d]\n"),
 				name.c_str(), recipe_id%999);
 		return -2;
 	}
 
-	fprintf(stderr, FMT_INF("EXC [%s:exRecipe_%03d] registerd (@%p)..."),
+	fprintf(stderr, FMT_INF("EXC [%s:exRecipe_%03d] registerd (@%p)...\n"),
 			name.c_str(), recipe_id%999, (void*)exc_hdl);
 
 	// Savingthe  EXC handler
@@ -91,12 +83,12 @@ void BbqueApp::UnregisterAllEXC() {
 	excMap_t::iterator end(exc_map.end());
 	RTLIB_ExecutionContextHandler exc_hdl;
 
-	fprintf(stderr, FMT_INF("Unregistering all EXC..."));
+	fprintf(stderr, FMT_INF("Unregistering all EXC...\n"));
 
 	for ( ; it!=end; ++it) {
 		exc_hdl = (*it).second;
 		assert(exc_hdl);
-		fprintf(stderr, FMT_INF("Unregistering EXC [%s] (@%p)..."),
+		fprintf(stderr, FMT_INF("Unregistering EXC [%s] (@%p)...\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 
 		assert(rtlib && rtlib->UnregisterExecutionContext);
@@ -112,7 +104,7 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 	RTLIB_ExecutionContextHandler exc_hdl;
 	RTLIB_ExitCode result;
 
-	fprintf(stderr, FMT_INF("Starting [%d] EXCs..."), last-first+1);
+	fprintf(stderr, FMT_INF("Starting [%d] EXCs...\n"), last-first+1);
 
 	for (uint8_t idx=0; it!=end; ++it) {
 		// Starting only the selected EXCs
@@ -123,13 +115,13 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 
 		exc_hdl = (*it).second;
 		assert(exc_hdl);
-		fprintf(stderr, FMT_INF("Starting EXC [%s] (@%p)..."),
+		fprintf(stderr, FMT_INF("Starting EXC [%s] (@%p)...\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 
 		assert(rtlib && rtlib->UnregisterExecutionContext);
 		result = rtlib->StartExecutionContext(exc_hdl);
 		if (result!=RTLIB_OK) {
-			fprintf(stderr, FMT_INF("EXC [%s] (@%p) START FAILED"),
+			fprintf(stderr, FMT_INF("EXC [%s] (@%p) START FAILED\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 			return result;
 		}
@@ -144,7 +136,7 @@ RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {
 	RTLIB_ExecutionContextHandler exc_hdl;
 	RTLIB_ExitCode result;
 
-	fprintf(stderr, FMT_INF("Stopping [%d] EXCs..."), last-first+1);
+	fprintf(stderr, FMT_INF("Stopping [%d] EXCs...\n"), last-first+1);
 
 	for (uint8_t idx=0; it!=end; ++it) {
 		// Starting only the selected EXCs
@@ -155,13 +147,13 @@ RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {
 
 		exc_hdl = (*it).second;
 		assert(exc_hdl);
-		fprintf(stderr, FMT_INF("Stopping EXC [%s] (@%p)..."),
+		fprintf(stderr, FMT_INF("Stopping EXC [%s] (@%p)...\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 
 		assert(rtlib && rtlib->UnregisterExecutionContext);
 		result = rtlib->StopExecutionContext(exc_hdl);
 		if (result!=RTLIB_OK) {
-			fprintf(stderr, FMT_INF("EXC [%s] (@%p) STOP FAILED"),
+			fprintf(stderr, FMT_INF("EXC [%s] (@%p) STOP FAILED\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 			return result;
 		}

@@ -28,20 +28,17 @@
 #include "bbque/rtlib/rpc_fifo_client.h"
 
 #include "bbque/rtlib/rpc_messages.h"
-
+#include "bbque/utils/utility.h"
 
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
 
 
-#define DB(x) x
-
-#define FMT_DBG(fmt) "RTLIB_FIFO [DBG] - "fmt
-#define FMT_INF(fmt) "RTLIB_FIFO [INF] - "fmt
-#define FMT_WRN(fmt) "RTLIB_FIFO [WRN] - "fmt
-#define FMT_ERR(fmt) "RTLIB_FIFO [ERR] - "fmt
-
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_FIFO [DBG]", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_FIFO [INF]", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_FIFO [WRN]", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_FIFO [ERR]", fmt)
 
 namespace bbque { namespace rtlib {
 
@@ -681,7 +678,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Set(
 	(void)constraints;
 	(void)count;
 
-	fprintf(stderr, FMT_DBG("EXC Set: not yet implemeted"));
+	fprintf(stderr, FMT_WRN("EXC Set: not yet implemeted\n"));
 
 	return RTLIB_OK;
 }
@@ -691,7 +688,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Clear(
 	//Silence "args not used" warning.
 	(void)ech;
 
-	fprintf(stderr, FMT_DBG("EXC Clear: not yet implemeted"));
+	fprintf(stderr, FMT_WRN("EXC Clear: not yet implemeted\n"));
 
 	return RTLIB_OK;
 }

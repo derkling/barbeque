@@ -32,7 +32,10 @@ namespace bb = bbque;
 namespace bu = bbque::utils;
 namespace br = bbque::rtlib;
 
-#define FMT(fmt) BBQUE_FMT(COLOR_GREEN, "RTLIB", fmt)
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB      [DBG]", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB      [INF]", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB      [WRN]", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB      [ERR]", fmt)
 
 /**
  * The global timer, this can be used to get the time since the RTLib has been
@@ -101,8 +104,8 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	assert(rtlib_initialized==0);
 
 	// Welcome screen
-	fprintf(stderr, FMT(".:: Barbeque RTLIB (ver. %s) ::.\n"), g_git_version);
-	fprintf(stderr, FMT("Built: " __DATE__  " " __TIME__ "\n\n"));
+	fprintf(stderr, FMT_INF("Barbeque RTLIB (ver. %s)\n"), g_git_version);
+	fprintf(stderr, FMT_INF("Built: " __DATE__  " " __TIME__ "\n"));
 
 	// Data structure initialization
 	rtlib_services.version.major = RTLIB_VERSION_MAJOR;
@@ -119,14 +122,14 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	// Building a communication channel
 	rpc = br::BbqueRPC::GetInstance();
 	if (!rpc) {
-		fprintf(stderr, FMT("RPC communication channel build FAILED\n"));
+		fprintf(stderr, FMT_ERR("RPC communication channel build FAILED\n"));
 		return NULL;
 	}
 
 	// Initializing the RPC communication channel
 	result = rpc->Init(name);
 	if (result!=RTLIB_OK) {
-		fprintf(stderr, FMT("RPC communication channel initialization FAILED\n"));
+		fprintf(stderr, FMT_ERR("RPC communication channel initialization FAILED\n"));
 		return NULL;
 	}
 
@@ -140,7 +143,7 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 __attribute__((destructor))
 static void RTLIB_Exit(void) {
 
-	fprintf(stderr, FMT(".:: Barbeque RTLIB Destructor ::.\n"));
+	DB(fprintf(stderr, FMT_DBG("Barbeque RTLIB Destructor\n")));
 
 	if (!rtlib_initialized)
 		return;

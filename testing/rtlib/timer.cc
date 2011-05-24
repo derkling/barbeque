@@ -25,10 +25,10 @@
 
 #include "utility.h"
 
-#define LOG(fmt, ...) LOGGER(COLOR_BLUE, "Timer       ", fmt, ## __VA_ARGS__)
-#ifndef DBG
-# define DBG(fmt, ...) LOGGER(COLOR_LGRAY, "Timer       ", fmt, ## __VA_ARGS__)
-#endif
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "TIMER      [DBG] - ", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "TIMER      [INF] - ", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "TIMER      [WRN] - ", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "TIMER      [ERR] - ", fmt)
 
 namespace rtrm {
 

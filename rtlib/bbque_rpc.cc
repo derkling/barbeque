@@ -31,10 +31,11 @@
 
 #include <cstdio>
 
-#define FMT_DBG(fmt) "RTLIB [DBG] - "fmt
-#define FMT_INF(fmt) "RTLIB [INF] - "fmt
-#define FMT_WRN(fmt) "RTLIB [WRN] - "fmt
-#define FMT_ERR(fmt) "RTLIB [ERR] - "fmt
+
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_RPC  [DBG]", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_RPC  [INF]", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_RPC  [WRN]", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_RPC  [ERR]", fmt)
 
 namespace bbque { namespace rtlib {
 

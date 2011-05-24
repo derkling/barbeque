@@ -2,7 +2,7 @@
  *       @file  utility.h
  *      @brief  A set of utility functions
  *
- * This porvide a set of utility functions and definitions common to all other
+ * This provide a set of utility functions and definitions common to all other
  * modules.
  *
  *     @author  Patrick Bellasi (derkling), derkling@google.com
@@ -22,7 +22,12 @@
 #ifndef RTRM_UTILITY_H_
 #define RTRM_UTILITY_H_
 
+#include <assert.h>
 #include <stdio.h>
+#include <cstdint>
+#include <string>
+#include <unistd.h>
+
 #include "timer.h"
 
 #define COLOR_WHITE  "\033[1;37m"
@@ -44,12 +49,15 @@
 
 extern rtrm::Timer simulation_tmr;
 
-# define LOGGER(color, module, fmt, ...) \
-	        printf(color "[%11.6f] " module " " fmt "\033[0m\n", \
-			simulation_tmr.getElapsedTime(), ## __VA_ARGS__)
+# define BBQUE_FMT(color, module, fmt) \
+	        color "[%11.6f] " module ": " fmt "\033[0m", \
+			simulation_tmr.getElapsedTime()
 
-#ifdef RTRM_DEBUG
-# define DBG(fmt, ...) do {} while(0);
+#ifdef BBQUE_DEBUG
+# define DB(x) x
+
+#else
+# define DB(x)
 #endif
 
 #endif // RTRM_UTILITY_H_

@@ -29,16 +29,10 @@
 
 #include <libgen.h>
 
-#define FMT_DBG(fmt) "MAIN       [DBG] - "fmt
-#define FMT_INF(fmt) "MAIN       [INF] - "fmt
-#define FMT_WRN(fmt) "MAIN       [WRN] - "fmt
-#define FMT_ERR(fmt) "MAIN       [ERR] - "fmt
-
-#define LOG(fmt, ...) LOGGER(COLOR_BLUE, "MAIN        ", fmt, ## __VA_ARGS__)
-
-#ifndef DBG
-# define DBG(fmt, ...) LOGGER(COLOR_LGRAY, "MAIN        ", fmt, ## __VA_ARGS__)
-#endif
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "MAIN       [DBG]", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "MAIN       [INF]", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "MAIN       [WRN]", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "MAIN       [ERR]", fmt)
 
 /**
  * The RNG used for testcase initialization.
@@ -52,21 +46,21 @@ rtrm::Timer simulation_tmr;
 
 int main(int argc, char *argv[]) {
 	uint16_t simulation_time;
-	uint8_t max_reconf_time;
-	uint8_t num_exc;
-	uint8_t max_pt;
-	uint8_t max_rt;
+	unsigned short max_reconf_time;
+	unsigned short num_exc;
+	unsigned short max_pt;
+	unsigned short max_rt;
 
 	std::cout << "\n\t\t.:: Simple application using the Barbque RTRM ::.\n"
 		<< std::endl;
 
 	// Dummy and dirty command line processing
-	if (argc<6															||
-			!sscanf(argv[1], "%hu",  &simulation_time)					||
-			!sscanf(argv[2], "%hu", (unsigned short*) &max_reconf_time)	||
-			!sscanf(argv[3], "%hu", (unsigned short*) &num_exc)			||
-			!sscanf(argv[4], "%hu", (unsigned short*) &max_pt)			||
-			!sscanf(argv[5], "%hu", (unsigned short*) &max_rt) ) {
+	if (argc<6											||
+			!sscanf(argv[1], "%hu",  &simulation_time)	||
+			!sscanf(argv[2], "%hu", &max_reconf_time)	||
+			!sscanf(argv[3], "%hu", &num_exc)			||
+			!sscanf(argv[4], "%hu", &max_pt)			||
+			!sscanf(argv[5], "%hu", &max_rt) ) {
 
 		std::cout << "Usage: " << ::basename(argv[0]) <<
 			" <st> <rt> <ne> <mp> <mr>\n"
@@ -88,28 +82,28 @@ int main(int argc, char *argv[]) {
 	// Starting the simulation timer
 	simulation_tmr.start();
 
-	fprintf(stderr, FMT_INF("building application [%s]..."), ::basename(argv[0]));
+	fprintf(stderr, FMT_INF("building application [%s]...\n"), ::basename(argv[0]));
 	BbqueApp app(::basename(argv[0]));
 
 	char exc_name[] = "exc_000";
-	fprintf(stderr, FMT_INF("registering [%03d] excution contexts..."), num_exc);
+	fprintf(stderr, FMT_INF("registering [%03d] excution contexts...\n"), num_exc);
 	for (uint8_t i = 0; i<num_exc; i++) {
 		::snprintf(exc_name, 8, "exc_%03d", i);
 		app.RegisterEXC(exc_name, i);
 	}
 
-	fprintf(stderr, FMT_INF("starting application processing..."));
+	fprintf(stderr, FMT_INF("starting application processing...\n"));
 	app.Start(0, num_exc);
 
-	fprintf(stderr, FMT_INF("running simulation for [%d]s"), simulation_time);
+	fprintf(stderr, FMT_INF("running simulation for [%d]s\n"), simulation_time);
 
 	sleep(simulation_time);
 
-	fprintf(stderr, FMT_INF("stopping application processing..."));
+	fprintf(stderr, FMT_INF("stopping application processing...\n"));
 	app.Stop(0, num_exc);
 
 
-	fprintf(stderr, FMT_INF("unregistering [%03d] execution contexts..."), num_exc);
+	fprintf(stderr, FMT_INF("unregistering [%03d] execution contexts...\n"), num_exc);
 	app.UnregisterAllEXC();
 
 
