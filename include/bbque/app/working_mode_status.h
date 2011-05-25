@@ -54,7 +54,7 @@ typedef std::map<std::string, OverheadPtr_t> OverheadsMap_t;
  *
  * Read-only interface for the WorkingMode runtime status
  */
-class WorkingModeStatusIF: public PluginsDataContainer {
+class WorkingModeStatusIF: public PluginsData {
 
 public:
 

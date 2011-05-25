@@ -1,13 +1,11 @@
 /**
  *       @file  plugin_data.h
- *      @brief  Classes for managing plugin specific data attached to
- *      Application and WorkingMode descriptors
+ *      @brief  Class for managing plugin specific data
  *
- * This define classes for managing plugin specific data. Such data are loaded
- * from the application recipe and can be attached to Application and
- * WorkingMode object.
- * Thus Barbeque plugins can retrieve and update their own data by accessing
- * objects Application and WorkingMode.
+ * This defines a class for managing plugin specific data.
+ * The class provide an interface for setting and getting plugin specific
+ * attributes. We expect to use this class for extending classes as
+ * Application and WorkingMode.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -34,210 +32,71 @@ namespace bbque { namespace app {
 
 
 /** Map of string type data */
-typedef std::map<std::string, std::string> PluginStringDataMap_t;
+typedef std::pair<std::string, void *> DataPair_t;
 
 /** Map of 32-bit integer type data */
-typedef std::map<std::string, uint32_t> PluginIntegerDataMap_t;
-
-/** Map of custom (void pointer) data */
-typedef std::map<std::string, void *> PluginCustomDataMap_t;
+typedef std::multimap<std::string, DataPair_t> SpecDataMap_t;
 
 
 /**
- * @class PluginData
+ * @class PluginsData
  *
- * This is used for managing pairs key-value used as specific plugin data.
- * We allow the plugin to get and set three type of values: string, integer
- * (32 bit) and custom (void *).
+ * The class provide an interface for setting and getting plugin specific
+ * attributes. We expect to use this class for extending classes as Recipe,
+ * Application and WorkingMode, in order to manage information specific for
+ * each plugin in a flexible way.
  *
- * The class assorts data from a single plugin.
+ * Considering a scheduler module, the extention provided by this class could
+ * be exploit to append information to the Application descriptor. For
+ * instance how many times it has been re-scheduled, or in the WorkingMode
+ * descriptor (e.g. How much that working mode is "good" for the scheduling).
  */
-class PluginData {
+class PluginsData {
 
 public:
 
 	/**
-	 *@enum ExitCode_t
+	 * @brief Constructor
+	 */
+	PluginsData();
+
+	/**
+	 * @brief Destructor
+	 */
+	virtual ~PluginsData();
+
+	/**
+	 * @brief Set a plugin specific data
 	 *
-	 * Exit code returned when try to get a value related to a given key
+	 * @param plugin_name The name of the plugin owning the data
+	 * @param key The key referencing the data
+	 * @param value A void pointer to the data value
 	 */
-	typedef enum ExitCode_t {
-		/** Success. The value return is valid */
-		PDATA_SUCCESS = 0,
-		/** Error. Unable to find value with the given key */
-		PDATA_ERR_MISS_VALUE
-
-	} ExitCode_t;
+	void SetAttribute(std::string const & plugin_name, std::string const & key,
+			void * value);
 
 	/**
-	 * @brief The constructor
-	 * @param pl_name Plugin name
-	 * @param type Type of plugin
-	 * @param req Specify if the plugin is required
-	 */
-	PluginData(std::string const & pl_name, std::string const & type,
-			bool req);
-
-	/**
-	 * @brief Get plugin name
-	 * @return The name of the plugin
-	 */
-	inline std::string const & Name() { return plugin_name; }
-
-	/**
-	 * @brief Get plugin type
-	 * @return The type of plugin
-	 */
-	inline std::string const & Type() { return type; }
-
-	/**
-	 * @brief Check if the plugin is required
-	 * @return True for yes, false otherwise
-	 */
-	inline bool Required() { return required; }
-
-	/**
-	 * @brief Insert a data in string format
+	 * @brief Get a plugin specific data
 	 *
-	 * Insert a new data as a pair key (string) - value (string)
-	 *
-	 * @param key Data key
-	 * @param value Data value (string)
+	 * @param plugin_name The name of the plugin owning the data
+	 * @param key The key referencing the data
+	 * @return A void pointer to the data value
 	 */
-	inline void Set(std::string const & key, std::string const & value) {
-		str_data[key] = value;
-	}
+	void * GetAttribute(std::string const & plugin_name,
+			std::string const & key);
+
+private:
 
 	/**
-	 * @brief Insert a data as a 32-bit integer value
+	 * @brief Specific plugins data map
 	 *
-	 * Insert a new data as a pair key (string) - value (integer)
-	 *
-	 * @param key Data key
-	 * @param value Data value (integer)
+	 * The key is the name of the plugin. Such key references one or more
+	 * pairs key-value used to store the specific data.
+	 * Inside this pair, the key is the name of the attribute, while the value
+	 * is a void pointer to the data. This allows the storage of generic data
+	 * types.
 	 */
-	inline void Set(std::string const & key, int32_t value) {
-		int_data[key] = value;
-	}
-
-	/**
-	 * @brief Insert a data as a custom data structure (void pointer)
-	 *
-	 * Insert a new data as a pair key (string) - data (void *)
-	 * @param key Data key
-	 * @param value Data value (void *)
-	 */
-	inline void Set(std::string const & key, void * data) {
-		cust_data[key] = data;
-	}
-
-	/**
-	 * @brief The string value associated to the given key
-	 * @param key Data key
-	 * @param value Data value returned (string)
-	 * @return An exit code about the status of the request (@see ExitCode_t)
-	 */
-	PluginData::ExitCode_t Get(std::string const & key, std::string & value);
-
-	/**
-	 * @brief The 32-bit integer value associated to the given key
-	 * @param key Data key
-	 * @param value Data value returned (integer)
-	 * @return An exit code about the status of the request (@see ExitCode_t)
-	 */
-	PluginData::ExitCode_t Get(std::string const & key, uint32_t & value);
-
-	/**
-	 * @brief The customized data structure associated to the given key
-	 * @param key Data key
-	 * @param data Void pointer returned (custom data)
-	 * @return An exit code about the status of the request (@see ExitCode_t)
-	 */
-	PluginData::ExitCode_t Get(std::string const & key, void * data);
-
-
-protected:
-
-	/** Plugin name */
-	std::string plugin_name;
-
-	/** Type of plugin */
-	std::string type;
-
-	/** True if required */
-	bool required;
-
-	/** Set of plugin specific string data */
-	PluginStringDataMap_t str_data;
-
-	/** Set of plugin specific integer data */
-	PluginIntegerDataMap_t int_data;
-
-	/** Set of plugin specific custom data (void *) */
-	PluginCustomDataMap_t cust_data;
-
-};
-
-
-/** Shared pointer to @ref PluginData */
-typedef std::shared_ptr<PluginData> PluginDataPtr_t;
-
-
-/**
- * @class PluginsDataContainer
- *
- * The class let the managing of specific plugin data. It implements the
- * interface defined in PluginsDataContainerIF. The purpose is to store plugin
- * specific data parsed from the recipe. Such data can be referred to the
- * application or to the working mode. Remind that this are optional
- * information. The suffix "container" means that this objects store data
- * from different plugins.
- * The following class is inherited by Application and WorkingMode.
- * Thus specific plugin can retrieve and store their specific data by
- * accessing objects Application and WorkingMode.
- */
-class PluginsDataContainer {
-
-public:
-
-	/** PluginsDataContainer constructor  */
-	PluginsDataContainer();
-
-	/**
-	 * @brief Add a plugin data set
-	 *
-	 * Create a PluginData object of a specific plugin in order to
-	 * collect data useful for (or required by) that plugin
-	 *
-	 * @param plugin Plugin name
-	 * @param type Type of plugin
-	 * @param req Specify if the plugin is required
-	 */
-	PluginDataPtr_t AddPluginData(std::string const & plugin,
-			std::string const & type, bool req);
-
-	/**
-	 * @brief Get a plugin data set
-	 *
-	 * Get the PluginData object of a specific plugin
-	 *
-	 * @param plugin The name of the plugin
-	 * @return A shared pointer to the PluginData object
-	 */
-	PluginDataPtr_t GetPluginData(std::string const & plugin);
-
-protected:
-
-	/**
-	 * @brief Specific plugin data map
-	 *
-	 * The key is the name of the plugin. The value is a @ref PluginData
-	 * object storing data about a single plugin.
-	 * Thus each element in the map is a collection of data related to a
-	 * specific plugin.
-	 */
-	std::map<std::string, PluginDataPtr_t> plugins;
-
+	SpecDataMap_t data;
 };
 
 } // namespace app

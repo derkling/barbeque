@@ -49,7 +49,7 @@ typedef std::list<AwmStatusPtr_t> AwmStatusPtrList_t;
  * @class ApplicationStatusIF
  * @brief Provide interfaces to query application information
  */
-class ApplicationStatusIF: public PluginsDataContainer {
+class ApplicationStatusIF: public PluginsData {
 
 public:
 

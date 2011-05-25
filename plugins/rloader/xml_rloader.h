@@ -40,7 +40,7 @@
 using bbque::app::Application;
 using bbque::app::Recipe;
 using bbque::app::WorkingMode;
-using bbque::app::PluginData;
+using bbque::app::PluginsData;
 
 // Parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
@@ -50,15 +50,14 @@ namespace bbque { namespace plugins {
 /** Shared pointer to @ref WorkingMode*/
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 
-/** Shared pointer to @ref PluginData */
-typedef std::shared_ptr<PluginData> PluginDataPtr_t;
-
 
 // Return code for internal purpose
 #define __RSRC_SUCCESS 		0x0
 #define __RSRC_WEAK_LOAD 	0x1
 #define __RSRC_FORMAT_ERR 	0x2
 
+// Max string length for the plugins data
+#define PDATA_MAX_LEN 	20
 
 /**
  * @class XMLRecipeLoader
@@ -202,20 +201,25 @@ private:
 
 	/**
 	 * @brief Parse data from <plugin> element
-	 * @param plug_elem The XML element to parse for getting data
+	 *
 	 * @param container The object (usually Application or WorkingMode to
+	 * @param plugin_elem The XML element to parse for getting data
 	 * which add the plugin specific data)
 	 */
 	template<class T>
-	void parsePluginTag(ticpp::Element * plug_elem, T container);
+	void parsePluginTag(T container, ticpp::Element * plugin_elem);
 
 	/**
 	 * @brief Parse the data nested under <plugin>
-	 * @param pdata PluginData object to fill
+	 *
+	 * @param container The object to which append the plugins data (usually
+	 * an Application or a WorkingMode)
 	 * @param plugdata_node The XML Node to check for data
+	 * @param plugin_name The name of the plugin
 	 */
-	void parsePluginData(PluginDataPtr_t & pdata,
-			ticpp::Node * plugdata_node);
+	template<class T>
+	void parsePluginData(T container, ticpp::Node * plugdata_node,
+			std::string const & plugin_name);
 
 	/**
 	 * @brief Parse the section containing constraints assertions

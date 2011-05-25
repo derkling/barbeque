@@ -3,11 +3,10 @@
  *      @brief  Classes for managing plugin specific data attached to
  *      Application and WorkingMode descriptors (implementation)
  *
- * This implement classes for managing plugin specific data. Such data are loaded
- * from the application recipe and can be attached to Application and
- * WorkingMode object.
- * Thus Barbeque plugins can retrieve and update their own data by accessing
- * objects Application and WorkingMode.
+ * This implement a class for managing plugin specific data.
+ * The class provide an interface for setting and getting plugin specific
+ * attributes. We expect to use this class for extending classes as
+ * Application and WorkingMode.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -25,89 +24,64 @@
 
 #include "bbque/app/plugin_data.h"
 
-#include <iostream>
-
 namespace bbque { namespace app {
 
 
-// =====[ PluginData ]==========================================================
-
-PluginData::PluginData(std::string const &_plugin, std::string const &_type,
-                       bool _req):
-	plugin_name(_plugin),
-	type(_type),
-	required(_req) {
+PluginsData::PluginsData() {
 }
 
 
-PluginData::ExitCode_t PluginData::Get(std::string const & _key,
-		std::string & value) {
+PluginsData::~PluginsData() {
+	SpecDataMap_t::iterator it = data.begin();
+	for (; it != data.end(); ++it);
+		free((it->second).second);
 
-	std::map<std::string, std::string>::const_iterator it =
-		str_data.find(_key);
-
-	if (it == str_data.end())
-		return PDATA_ERR_MISS_VALUE;
-
-	value = it->second;
-	return PDATA_SUCCESS;
+	data.clear();
 }
 
 
-PluginData::ExitCode_t PluginData::Get(std::string const & _key,
-		uint32_t & value) {
+void * PluginsData::GetAttribute(std::string const & _plugin,
+		std::string const & _key) {
 
-	std::map<std::string, uint32_t>::const_iterator it =
-		int_data.find(_key);
+	// Find the plugin set of pairs
+	std::pair<SpecDataMap_t::iterator, SpecDataMap_t::iterator> range =
+		data.equal_range(_plugin);
 
-	if (it == int_data.end())
-		return PDATA_ERR_MISS_VALUE;
+	// Find the attribute
+	SpecDataMap_t::iterator it = range.first;
+	while (it != range.second &&
+		it->second.first.compare(_key) != 0) {
+		++it;
+	}
 
-	value = it->second;
-	return PDATA_SUCCESS;
+	// Return the value
+	if (it != range.second)
+		return it->second.second;
+	return NULL;
 }
 
 
-PluginData::ExitCode_t PluginData::Get(std::string const & _key, void * data) {
+void PluginsData::SetAttribute(std::string const & _plugin,
+		std::string const & _key, void * _value) {
 
-	std::map<std::string, void *>::const_iterator it =
-		cust_data.find(_key);
+	// Find the plugin set of pairs
+	std::pair<SpecDataMap_t::iterator, SpecDataMap_t::iterator> range =
+		data.equal_range(_plugin);
 
-	if (it == cust_data.end())
-		return PDATA_ERR_MISS_VALUE;
+	// Find the attribute
+	SpecDataMap_t::iterator it = range.first;
+	while (it != range.second &&
+		it->second.first.compare(_key) != 0) {
+		++it;
+	}
 
-	data = it->second;
-	return PDATA_SUCCESS;
-}
-
-
-// =====[ PluginsDataContainer ]===============================================
-
-PluginsDataContainer::PluginsDataContainer() {
-}
-
-
-PluginDataPtr_t PluginsDataContainer::AddPluginData(std::string const &_plugin,
-		std::string const &_type, bool _req) {
-
-	// Insert the plugin data into the map
-	PluginDataPtr_t pdata(new PluginData(_plugin, _type, _req));
-	plugins[_plugin] = pdata;
-	return pdata;
-}
-
-PluginDataPtr_t PluginsDataContainer::GetPluginData(std::string const &_plugin) {
-	PluginDataPtr_t pdata;
-	pdata.reset();
-
-	// Lookup the plugin data object
-	std::map<std::string, PluginDataPtr_t>::const_iterator plug_it =
-	    plugins.find(_plugin);
-
-	if (plug_it != plugins.end())
-		pdata = PluginDataPtr_t(plug_it->second);
-
-	return pdata;
+	// Set the attribute
+	if (it != range.second)
+		it->second.second = _value;
+	else
+		data.insert(data.begin(),
+				std::pair<std::string, DataPair_t>(_plugin,
+					DataPair_t(_key, _value)));
 }
 
 } // namespace app

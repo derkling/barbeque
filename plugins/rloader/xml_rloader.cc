@@ -20,6 +20,7 @@
 
 #include "xml_rloader.h"
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 #include <boost/filesystem/operations.hpp>
@@ -31,6 +32,7 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
+
 
 namespace ba = bbque::app;
 namespace po = boost::program_options;
@@ -346,7 +348,8 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
 // =======================[ Plugins specific data ]===========================
 
 template<class T>
-void XMLRecipeLoader::loadPluginsData(T _container, ticpp::Element * _xml_elem) {
+void XMLRecipeLoader::loadPluginsData(T _container,
+		ticpp::Element * _xml_elem) {
 
 	// <plugins> [Optional]
 	//  Section tag for plugin specific data.
@@ -366,7 +369,8 @@ void XMLRecipeLoader::loadPluginsData(T _container, ticpp::Element * _xml_elem) 
 	try {
 		while (plug_elem) {
 			// Parse the <plugin> tag
-			parsePluginTag<T>(plug_elem, _container);
+			parsePluginTag<T>(_container, plug_elem);
+
 			// Next plugin
 			plug_elem = plug_elem->NextSiblingElement("plugin", false);
 		}
@@ -377,34 +381,20 @@ void XMLRecipeLoader::loadPluginsData(T _container, ticpp::Element * _xml_elem) 
 
 
 template<class T>
-inline void XMLRecipeLoader::parsePluginTag(ticpp::Element * _plug_elem,
-		T _container) {
+inline void XMLRecipeLoader::parsePluginTag(T _container,
+		ticpp::Element * _plug_elem) {
 
 	try {
 		// Plugin attributes
 		std::string name;
 		_plug_elem->GetAttribute("name", &name);
 
-		std::string type;
-		_plug_elem->GetAttribute("type", &type);
-
-		// Is the plugin required ?
-		unsigned char required = 'n';
-		_plug_elem->GetAttribute("required", &required);
-		bool req_flag;
-		required == 'y' ? req_flag = true : req_flag = false;
-
-		// TODO: Insert the plugin existance control
-
-		// Create the PluginData object
-		PluginDataPtr_t pdata =
-			_container->AddPluginData(name, type, req_flag);
-
 		// Plugin data nodes under <plugin>
 		ticpp::Node * plugdata_node = _plug_elem->FirstChild(false);
 		while (plugdata_node) {
 			// Parse the data
-			parsePluginData(pdata, plugdata_node);
+			parsePluginData<T>(_container, plugdata_node, name);
+
 			// Next data
 			plugdata_node = plugdata_node->NextSibling(false);
 		}
@@ -414,28 +404,32 @@ inline void XMLRecipeLoader::parsePluginTag(ticpp::Element * _plug_elem,
 	}
 }
 
-
-inline void XMLRecipeLoader::parsePluginData(
-		PluginDataPtr_t & pdata, ticpp::Node * plugdata_node){
+template<class T>
+inline void XMLRecipeLoader::parsePluginData(T _container,
+		ticpp::Node * plugdata_node, std::string const & _plug_name) {
 
 	try {
 		// Is the node an element ?
 		if (plugdata_node->Type() != TiXmlNode::ELEMENT)
 			return;
 
-		// Get the pair key -
-		std::string key;
+		// Get the pair key - value
+		std::string key, value;
 		plugdata_node->GetValue(&key);
-
-		// - value
-		std::string value;
 		plugdata_node->ToElement()->GetText(&value, false);
 
-		logger->Debug("Plugin %s: %s=%s", pdata->Name().c_str(),
-				key.c_str(), value.c_str());
+		char * value_ptr =
+			(char *) malloc(sizeof(char) *
+					std::min((int)(value.size()), PDATA_MAX_LEN));
+		strcpy(value_ptr, value.c_str());
 
-		// Insert the data
-		pdata->Set(key, value);
+		// Set the plugin data
+		_container->SetAttribute(_plug_name, key, value_ptr);
+
+		logger->Info("Plugin %s: attribute %s = %s",
+				_plug_name.c_str(),
+				key.c_str(),
+				_container->GetAttribute(_plug_name, key));
 
 	} catch (ticpp::Exception &ex) {
 		logger->Error(ex.what());

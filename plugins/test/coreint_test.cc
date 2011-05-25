@@ -567,17 +567,9 @@ void CoreInteractionsTest::Test() {
 			sys_view->ApplicationsReady()->size());
 
 	// Plugin specific data
-	PluginsDataContainer pdc;
-	PluginDataPtr_t pdata = test_app->GetPluginData("YaMCa");
-
-	if (pdata.get() == NULL) {
-		logger->Warn("Unable to get plugin info");
-	}
-	else {
-		std::string pl_author;
-		if ((pdata->Get("author", pl_author)) == PluginData::PDATA_SUCCESS)
-			std::cout << "Plugin YaMCa - Author :" << pl_author << std::endl;
-	}
+	char * auth =
+		static_cast<char *>(test_app->GetAttribute("YaMCa", "author"));
+	logger->Info("Plugin YaMCa: <author> : %s", auth);
 
 	// Is there a Scheduling Policy ?
 	plugins::SchedulerPolicyIF * scheduler =
