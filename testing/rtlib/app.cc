@@ -55,7 +55,8 @@ int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 			name.c_str(), recipe_id%999);
 
 	if (it!=exc_map.end()) {
-		fprintf(stderr, FMT_ERR("FAILED: EXC [%s:exRecipe_%03d] already registered...\n"),
+		fprintf(stderr, FMT_ERR("FAILED: EXC [%s:exRecipe_%03d] "
+					"already registered...\n"),
 				name.c_str(), recipe_id%999);
 		return -1;
 	}
@@ -65,7 +66,8 @@ int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 	assert(rtlib && rtlib->RegisterExecutionContext);
 	exc_hdl = rtlib->RegisterExecutionContext(name.c_str(), &exc_params);
 	if (!exc_hdl) {
-		fprintf(stderr, FMT_ERR("FAILED: registering EXC [%s:exRecipe_%03d]\n"),
+		fprintf(stderr, FMT_ERR("FAILED: registering EXC "
+					"[%s:exRecipe_%03d]\n"),
 				name.c_str(), recipe_id%999);
 		return -2;
 	}
@@ -121,7 +123,8 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 		assert(rtlib && rtlib->UnregisterExecutionContext);
 		result = rtlib->StartExecutionContext(exc_hdl);
 		if (result!=RTLIB_OK) {
-			fprintf(stderr, FMT_INF("EXC [%s] (@%p) START FAILED\n"),
+			fprintf(stderr, FMT_INF("EXC [%s] (@%p) "
+						"START FAILED\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 			return result;
 		}

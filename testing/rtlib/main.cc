@@ -82,11 +82,13 @@ int main(int argc, char *argv[]) {
 	// Starting the simulation timer
 	simulation_tmr.start();
 
-	fprintf(stderr, FMT_INF("building application [%s]...\n"), ::basename(argv[0]));
+	fprintf(stderr, FMT_INF("building application [%s]...\n"),
+			::basename(argv[0]));
 	BbqueApp app(::basename(argv[0]));
 
 	char exc_name[] = "exc_000";
-	fprintf(stderr, FMT_INF("registering [%03d] excution contexts...\n"), num_exc);
+	fprintf(stderr, FMT_INF("registering [%03d] excution contexts...\n"),
+			num_exc);
 	for (uint8_t i = 0; i<num_exc; i++) {
 		::snprintf(exc_name, 8, "exc_%03d", i);
 		app.RegisterEXC(exc_name, i);
@@ -95,7 +97,8 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, FMT_INF("starting application processing...\n"));
 	app.Start(0, num_exc);
 
-	fprintf(stderr, FMT_INF("running simulation for [%d]s\n"), simulation_time);
+	fprintf(stderr, FMT_INF("running simulation for [%d]s\n"),
+			simulation_time);
 
 	sleep(simulation_time);
 
@@ -103,7 +106,8 @@ int main(int argc, char *argv[]) {
 	app.Stop(0, num_exc);
 
 
-	fprintf(stderr, FMT_INF("unregistering [%03d] execution contexts...\n"), num_exc);
+	fprintf(stderr, FMT_INF("unregistering [%03d] execution contexts...\n"),
+			num_exc);
 	app.UnregisterAllEXC();
 
 

@@ -169,7 +169,8 @@ int ApplicationProxyTest::RegisterSomeResources() {
 
 	// Start register resources
 	for (uint16_t i=0; i < res_names.size(); ++i) {
-		logger->Debug(" >>> Registering... :%s\n", res_names[i].c_str());
+		logger->Debug(" >>> Registering... :%s\n",
+				res_names[i].c_str());
 		ra.RegisterResource(res_names[i], res_units[i], res_totals[i]);
 	}
 	// Print a tree-like view of the resources

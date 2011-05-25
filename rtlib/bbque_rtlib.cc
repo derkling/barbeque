@@ -17,7 +17,7 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * =============================================================================
  */
 
 #include "bbque/rtlib.h"
@@ -129,7 +129,8 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	// Initializing the RPC communication channel
 	result = rpc->Init(name);
 	if (result!=RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("RPC communication channel initialization FAILED\n"));
+		fprintf(stderr, FMT_ERR("RPC communication channel "
+					"initialization FAILED\n"));
 		return NULL;
 	}
 

@@ -102,7 +102,8 @@ inline void ApplicationProxy::EnqueueHandler(pcmdSn_t snHdr) {
 }
 
 RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
-	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
+			std::defer_lock);
 	conCtxMap_t::iterator it;
 	pconCtx_t pcon;
 	rpc_msg_bbq_stop_t stop_msg = {
@@ -124,14 +125,17 @@ RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 
 	// Check we have a connection contexe already configured
 	if (it == conCtxMap.end()) {
-		logger->Error("APPs PRX: Connection context not found for application "
-				"[app: %s, pid: %d]", papp->Name().c_str(), papp->Pid());
+		logger->Error("APPs PRX: Connection context not found "
+				"for application "
+				"[app: %s, pid: %d]",
+				papp->Name().c_str(), papp->Pid());
 		return RTLIB_BBQUE_CHANNEL_UNAVAILABLE;
 	}
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &stop_msg.header, (size_t)RPC_PKT_SIZE(bbq_stop));
+	rpc->SendMessage(pcon->pd, &stop_msg.header,
+			(size_t)RPC_PKT_SIZE(bbq_stop));
 
 	return RTLIB_OK;
 }
@@ -227,7 +231,8 @@ void ApplicationProxy::RpcExcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
-	logger->Debug("APPs PRX: Send RPC channel NAK [pid: %d, name: %s, err: %d]",
+	logger->Debug("APPs PRX: Send RPC channel NAK "
+			"[pid: %d, name: %s, err: %d]",
 			pcon->app_pid, pcon->app_name, error);
 	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
 	resp.header.typ = RPC_BBQ_RESP;
@@ -281,7 +286,8 @@ void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
-	rpc_msg_exc_unregister_t * pmsg_pyl = (rpc_msg_exc_unregister_t*)pmsg_hdr;
+	rpc_msg_exc_unregister_t * pmsg_pyl =
+		(rpc_msg_exc_unregister_t*)pmsg_hdr;
 	pconCtx_t pcon;
 
 	assert(pchMsg);
@@ -408,7 +414,8 @@ void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
 }
 
 void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
-	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx, std::defer_lock);
+	std::unique_lock<std::mutex> conCtxMap_ul(
+			conCtxMap_mtx, std::defer_lock);
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
 	rpc_msg_app_pair_t * pmsg_pyl = (rpc_msg_app_pair_t*)pmsg_hdr;
@@ -443,8 +450,8 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 			pcon->app_pid,
 			pcon->app_name);
 		// TODO If an application do not get a responce withih a timeout
-		// should try again to register. This support should be provided by
-		// the RTLib
+		// should try again to register. This support should be provided
+		// by the RTLib
 		return;
 	}
 
@@ -458,8 +465,8 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 			pcon->app_pid,
 			pcon->app_name);
 		// TODO If an application do not get a responce withih a timeout
-		// should try again to register. This support should be provided by
-		// the RTLib
+		// should try again to register. This support should be provided
+		// by the RTLib
 		return;
 	}
 
@@ -511,8 +518,8 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 
 	// This look could be acquiren only when the ProcessCommand has returned
 	// Thus we use this lock to synchronize the CommandExecutr starting with
-	// the completion of the ProcessCommand, which also setup thread tracking
-	// data structures.
+	// the completion of the ProcessCommand, which also setup thread
+	// tracking data structures.
 	snCtxMap_ul.unlock();
 
 	logger->Debug("APPs PRX: CommandExecutor START [pid: %d, typ: %d]",
@@ -594,9 +601,10 @@ void ApplicationProxy::ProcessCommand(pchMsg_t & pmsg) {
 	assert(prqsSn);
 
 	prqsSn->pmsg = pmsg;
-	// Create a new executor thread, this will start locked since it needs the
-	// execMap_mtx we already hold. This is used to ensure that the executor
-	// thread start only alfter the playground has been properly prepared
+	// Create a new executor thread, this will start locked since it needs
+	// the execMap_mtx we already hold. This is used to ensure that the
+	// executor thread start only alfter the playground has been properly
+	// prepared
 	prqsSn->exe = std::thread(
 				&ApplicationProxy::CommandExecutor,
 				this, prqsSn);

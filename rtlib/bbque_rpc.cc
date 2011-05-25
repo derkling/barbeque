@@ -201,8 +201,9 @@ void BbqueRPC::Unregister(
 	// Calling the low-level unregistration
 	result = _Unregister(prec);
 	if (result != RTLIB_OK) {
-		DB(fprintf(stderr, FMT_ERR("Execution context [%s] UNREGISTRATION FAILED "
-						"(Error %d)\n"), prec->name.c_str(), result));
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] "
+						"UNREGISTRATION FAILED (Error %d)\n"),
+					prec->name.c_str(), result));
 		return;
 	}
 
