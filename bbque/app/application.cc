@@ -40,7 +40,7 @@ namespace bbque { namespace app {
 
 // Compare two working mode values.
 // This is used to sort the list of enabled working modes.
-bool CompareAWMsByValue(const AwmStatusPtr_t & wm1, const AwmStatusPtr_t & wm2) {
+bool CompareAWMsByValue(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
 		return wm1->Value() < wm2->Value();
 }
 
@@ -324,8 +324,8 @@ void Application::workingModesEnabling(std::string const & _res_name,
 		Constraint::BoundType_t _type, uint64_t _value) {
 
 	// Enabled working modes iterators
-	std::list<AwmStatusPtr_t>::iterator it_enabl = enabled_awms.begin();
-	std::list<AwmStatusPtr_t>::iterator enabl_end = enabled_awms.end();
+	AwmPtrList_t::iterator it_enabl = enabled_awms.begin();
+	AwmPtrList_t::iterator enabl_end = enabled_awms.end();
 
 	// All working modes iterators
 	std::vector<AwmPtr_t>::const_iterator it_awm =

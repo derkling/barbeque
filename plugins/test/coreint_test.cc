@@ -306,15 +306,15 @@ int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
 	}
 
 	// Get all the enabled working modes
-	AwmStatusPtrList_t const * awms = test_app->WorkingModes();
+	AwmPtrList_t const * awms = test_app->WorkingModes();
 	if (awms->empty()) {
 		std::cout << "Cannot find any working modes" << std::endl;
 		return 2;
 	}
 
 	// For each working mode...
-	std::list<AwmStatusPtr_t>::const_iterator wm_it =  awms->begin();
-	std::list<AwmStatusPtr_t>::const_iterator endm = awms->end();
+	AwmPtrList_t::const_iterator wm_it = awms->begin();
+	AwmPtrList_t::const_iterator endm = awms->end();
 	for (; wm_it != endm; ++wm_it) {
 
 		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages ***\n",
@@ -327,7 +327,7 @@ int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
 			<< " ]----------------------------" << std::endl;
 
 		// Casting to WorkingModeStatusIF
-		AwmStatusPtr_t c_awm = *wm_it;
+		AwmPtr_t c_awm = *wm_it;
 
 		UsagesMap_t::const_iterator res_it = c_awm->ResourceUsages()->begin();
 		UsagesMap_t::const_iterator res_end = c_awm->ResourceUsages()->end();
@@ -345,7 +345,7 @@ int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
 			<< "-----" << std::endl;
 	}
 
-	AwmStatusPtr_t l_awm = test_app->LowValueAWM();
+	AwmPtr_t l_awm = test_app->LowValueAWM();
 	std::cout
 		<< l_awm->Name()
 		<< " is the working mode with the lowest value [" << l_awm->Value()

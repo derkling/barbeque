@@ -171,7 +171,7 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtr_t const & CurrentAWM() const {
+	inline AwmPtr_t const & CurrentAWM() const {
 		return curr_sched.awm;
 	}
 
@@ -185,28 +185,28 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtr_t const & NextAWM() const {
+	inline AwmPtr_t const & NextAWM() const {
 		return next_sched.awm;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtrList_t const * WorkingModes() {
+	inline AwmPtrList_t const * WorkingModes() {
 		return &enabled_awms;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtr_t const & LowValueAWM() {
+	inline AwmPtr_t const & LowValueAWM() {
 		return enabled_awms.front();
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmStatusPtr_t const & HighValueAWM() {
+	inline AwmPtr_t const & HighValueAWM() {
 		return enabled_awms.back();
 	}
 
@@ -293,7 +293,7 @@ private:
 	RecipePtr_t recipe;
 
 	/** Map of pointers to enabled working modes for the Optimizer module */
-	AwmStatusPtrList_t enabled_awms;
+	AwmPtrList_t enabled_awms;
 
 	/** Runtime contraints specified by the application  */
 	ConstrPtrMap_t constraints;

@@ -31,18 +31,17 @@
 /** The application identifier */
 typedef uint32_t AppPid_t;
 
+
 namespace bbque { namespace app {
 
 /** The application priotity */
 typedef uint16_t AppPrio_t;
 
-// Forward declaration
-class WorkingModeStatusIF;
+class WorkingMode;
+typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 
-/** Shared pointer to a WorkingModeStatusIF object */
-typedef std::shared_ptr<WorkingModeStatusIF> AwmStatusPtr_t;
-/** List of WorkingModeStatusIF pointers */
-typedef std::list<AwmStatusPtr_t> AwmStatusPtrList_t;
+/** List of WorkingMode pointers */
+typedef std::list<AwmPtr_t> AwmPtrList_t;
 
 
 /**
@@ -115,7 +114,7 @@ public:
 		/** A schedule state */
 		ScheduleFlag_t state;
 		/** A pointer to an application working mode */
-		AwmStatusPtr_t awm;
+		AwmPtr_t awm;
 		/** Overloading of operator != for structure comparisons */
 		inline bool operator!=(SchedulingInfo_t const &other) const {
 			return ((this->state != other.state) || (this->awm != other.awm));
@@ -164,7 +163,7 @@ public:
 	 * @brief Get the current working mode
 	 * @return A shared pointer to the current application working mode
 	 */
-	virtual AwmStatusPtr_t const & CurrentAWM() const = 0;
+	virtual AwmPtr_t const & CurrentAWM() const = 0;
 
 	/**
 	 * @brief Get next schedule state
@@ -178,27 +177,27 @@ public:
 	 * @return A shared pointer to working mode descriptor (optimizer
 	 * interface)
 	 */
-	virtual AwmStatusPtr_t const & NextAWM() const = 0;
+	virtual AwmPtr_t const & NextAWM() const = 0;
 
 	/**
 	 * @brief The enabled working modes
 	 * @return All the schedulable working modes of the application
 	 */
-	virtual AwmStatusPtrList_t const * WorkingModes() = 0;
+	virtual AwmPtrList_t const * WorkingModes() = 0;
 
 	/**
 	 * @brief The working mode with the lowest value
 	 * @return A pointer to the working mode descriptor having the lowest
 	 * value
 	 */
-	virtual AwmStatusPtr_t const & LowValueAWM() = 0;
+	virtual AwmPtr_t const & LowValueAWM() = 0;
 
 	/**
 	 * @brief The working mode with the highest value
 	 * @return A pointer to the working mode descriptor having the highest
 	 * value
 	 */
-	virtual AwmStatusPtr_t const & HighValueAWM() = 0;
+	virtual AwmPtr_t const & HighValueAWM() = 0;
 
 };
 
