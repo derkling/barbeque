@@ -24,14 +24,19 @@
 
 #include "bbque/app/application_status.h"
 
-namespace bbque { namespace app {
-// Forward declaration
-class WorkingMode;
-
-/** Shared pointer to WorkingMode object */
-typedef std::shared_ptr<WorkingMode> AwmPtr_t;
+namespace bbque { namespace res {
 /** Numeric value used as token for the resource views */
 typedef size_t RViewToken_t;
+}}
+
+using bbque::res::RViewToken_t;
+
+namespace bbque { namespace app {
+
+// Forward declaration
+class WorkingMode;
+/** Shared pointer to WorkingMode object */
+typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 
 /**
  * @class ApplicationConfIF
@@ -75,7 +80,8 @@ public:
 	 * @param awm Next working mode scheduled for the application
 	 * @param tok The token referencing the resources state view
 	 */
-	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm, RViewToken_t tok = 0) = 0;
+	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm,
+			RViewToken_t tok = 0) = 0;
 
 };
 

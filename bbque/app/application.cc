@@ -22,9 +22,9 @@
 * ============================================================================
 */
 
-#include "bbque/app/application.h"
-
 #include <limits>
+
+#include "bbque/app/application.h"
 #include "bbque/application_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"

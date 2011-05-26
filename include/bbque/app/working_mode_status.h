@@ -24,12 +24,11 @@
 #include <list>
 #include <map>
 #include "bbque/app/plugin_data.h"
+#include "bbque/res/resource_accounter.h"
 
-namespace bbque { namespace res {
-	struct ResourceUsage;
-}}
-
-namespace br = bbque::res;
+using bbque::res::ResourceUsage;
+using bbque::res::UsagePtr_t;
+using bbque::res::UsagesMap_t;
 
 namespace bbque { namespace app {
 
@@ -39,10 +38,6 @@ class TransitionOverheads;
 
 /** Shared pointer to Application  */
 typedef std::shared_ptr<Application> AppPtr_t;
-/** Shared pointer to ResourceUsage */
-typedef std::shared_ptr<br::ResourceUsage> UsagePtr_t;
-/** Map of UsagePtr_t. Key: Resource path */
-typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 /**  Shared pointer to TransitionOverheads */
 typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
 /** Map of OverheadPtr_t. Key: destination working mode name */
