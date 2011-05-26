@@ -236,7 +236,7 @@ void ApplicationProxyTest::Test() {
 	return;
 
 	// Start an application to use for testing
-	am.CreateEXC("mp3player", 3324, 0, "simple_1Tl2Cl2Pe");
+	am.CreateEXC("mp3player", 3324, 0, "simple_1Tl2Cl2Pe", 0, true);
 	papp = am.GetApplication(3324);
 	if (!papp) {
 		logger->Error("FAILED: application not started.");

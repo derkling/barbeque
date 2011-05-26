@@ -384,13 +384,10 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 }
 
 void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
-	ApplicationManager *am = ApplicationManager::GetInstance();
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
 	pconCtx_t pcon;
-	ApplicationManager::ExitCode_t result;
 
-	assert(am);
 	assert(pchMsg);
 
 	// Looking for a valid connection context
