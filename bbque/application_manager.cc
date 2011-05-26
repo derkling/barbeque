@@ -45,14 +45,12 @@ ApplicationManager & ApplicationManager::GetInstance() {
 }
 
 
-ApplicationManager::ApplicationManager():
-	Object(APPLICATION_MANAGER_NAMESPACE) {
+ApplicationManager::ApplicationManager() {
 
 	// Get a logger
-	std::string logger_name(APPLICATION_MANAGER_NAMESPACE);
-	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	logger = std::unique_ptr<bp::LoggerIF>
-		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+	bp::LoggerIF::Configuration conf(APPLICATION_MANAGER_NAMESPACE);
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	assert(logger);
 
 	//  Get the recipe loader instance
 	rloader = ModulesFactory::GetRecipeLoaderModule();

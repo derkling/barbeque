@@ -24,10 +24,8 @@
 #ifndef BBQUE_WORKING_MODE_H_
 #define BBQUE_WORKING_MODE_H_
 
-#include "bbque/object.h"
 #include "bbque/app/working_mode_conf.h"
-
-#define WORKING_MODE_NAMESPACE "awms."
+#include "bbque/plugins/logger.h"
 
 namespace bbque { namespace app {
 
@@ -39,7 +37,7 @@ namespace bbque { namespace app {
  * A "working mode" is characterized by a set of resource usage request and a
  * "value" which expresses a level of Quality of Service
  */
-class WorkingMode: public Object, public WorkingModeConfIF {
+class WorkingMode: public WorkingModeConfIF {
 
 public:
 
@@ -149,6 +147,9 @@ public:
 			ResID_t src_ID, ResID_t dst_ID,
 			const char * rsrc_path_unb = NULL);
 private:
+
+	/** The logger used by the application manager */
+	LoggerIF  *logger;
 
 	/**
 	 * A pointer to the Application descriptor containing the

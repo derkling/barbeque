@@ -23,14 +23,22 @@
 #include "bbque/res/resource_tree.h"
 
 #include <iostream>
+
+#include "bbque/modules_factory.h"
 #include "bbque/res/resources.h"
 #include "bbque/utils/utility.h"
 
-namespace bbque { namespace res {
+namespace bp = bbque::plugins;
 
+namespace bbque { namespace res {
 
 ResourceTree::ResourceTree():
 	max_depth(0) {
+
+	// Get a logger
+	bp::LoggerIF::Configuration conf(RESOURCE_THREE_NAMESPACE);
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	assert(logger);
 
 	root = new ResourceNode;
 	root->data = ResourcePtr_t(new Resource("root"));
@@ -177,8 +185,9 @@ void ResourceTree::print_children(ResourceNode * _node, int _depth) {
 	for (; it != end; ++it) {
 		// Child name
 		for (int i= 0; i < _depth-1; ++i)
-			std::cout << "\t";
-		std::cout << "|-------" << (*it)->data->Name() << std::endl;
+			logger->Debug("\t");
+
+		logger->Debug("|-------%s", (*it)->data->Name().c_str());
 
 		// Recursive call if there are some children
 		if (!(*it)->children.empty())

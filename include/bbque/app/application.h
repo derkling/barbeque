@@ -33,13 +33,15 @@
 #include <string>
 #include <vector>
 
-#include "bbque/object.h"
 #include "bbque/app/application_conf.h"
 #include "bbque/app/constraints.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/plugin_data.h"
+#include "bbque/plugins/logger.h"
 
-#define APPLICATION_NAMESPACE "ap."
+#define APPLICATION_NAMESPACE "ap"
+
+using bbque::plugins::LoggerIF;
 
 namespace bbque { namespace app {
 
@@ -65,7 +67,7 @@ typedef std::map<std::string, ConstrPtr_t> ConstrPtrMap_t;
  * constraints. This very basic needs to let the RTRM doing policy-driven
  * choices upon resource assignments to the applications.
  */
-class Application: public Object, public ApplicationConfIF {
+class Application: public ApplicationConfIF {
 
 public:
 
@@ -260,6 +262,9 @@ public:
 			Constraint::BoundType_t type);
 
 private:
+
+	/** The logger used by the application */
+	LoggerIF  *logger;
 
 	/** The application name */
 	std::string name;

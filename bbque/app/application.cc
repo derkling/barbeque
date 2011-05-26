@@ -47,7 +47,6 @@ bool CompareAWMsByValue(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
 Application::Application(std::string const & _name,
 		AppPid_t _pid,
 		uint8_t _exc_id) :
-	Object(APPLICATION_NAMESPACE + _name),
 	name(_name),
 	pid(_pid),
 	exc_id(_exc_id) {
@@ -58,8 +57,7 @@ Application::Application(std::string const & _name,
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE + _name);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	logger = std::unique_ptr<bp::LoggerIF>
-		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
 
 	::snprintf(str_id, 16, "%05d:%6s:%02d",

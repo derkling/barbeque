@@ -52,15 +52,13 @@ ResourceAccounter & ResourceAccounter::GetInstance() {
 
 
 ResourceAccounter::ResourceAccounter():
-	bbque::Object(RESOURCE_ACCOUNTER_NAMESPACE),
 	clustering_factor(0) {
 
 	// Get a logger
 	std::string logger_name(RESOURCE_ACCOUNTER_NAMESPACE);
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());
-	logger =
-		std::unique_ptr<plugins::LoggerIF>
-		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	assert(logger);
 
 	// Init the system resources state view
 	sys_usages_view = AppUsagesMapPtr_t(new AppUsagesMap_t);

@@ -32,7 +32,9 @@ namespace bbque { namespace plugins {
 YamcaSchedPol::YamcaSchedPol() {
 
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(SCHEDULER_POLICY_NAMESPACE"yamca");
+	plugins::LoggerIF::Configuration conf(
+			SCHEDULER_POLICY_NAMESPACE
+			SCHEDULER_POLICY_NAME);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 
 	if (logger)

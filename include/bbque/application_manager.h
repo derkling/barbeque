@@ -30,9 +30,9 @@
 #include <map>
 #include <vector>
 
-#include "object.h"
 #include "bbque/application_manager_conf.h"
 #include "bbque/app/application.h"
+#include "bbque/plugins/logger.h"
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
 
@@ -53,6 +53,7 @@
 
 using bbque::app::Application;
 using bbque::app::Recipe;
+using bbque::plugins::LoggerIF;
 using bbque::plugins::RecipeLoaderIF;
 
 namespace bbque {
@@ -65,7 +66,7 @@ typedef std::shared_ptr<Recipe> RecipePtr_t;
 * @class ApplicationManager
 * @brief The class provides interfaces for managing the applications lifecycle.
 */
-class ApplicationManager: public ApplicationManagerConfIF, public Object {
+class ApplicationManager: public ApplicationManagerConfIF {
 
 public:
 
@@ -174,6 +175,9 @@ public:
 	ExitCode_t ChangedSchedule(AppPtr_t papp, double time = 0);
 
 private:
+
+	/** The logger used by the application manager */
+	LoggerIF  *logger;
 
 	/** The recipe loader module used to parse recipes */
 	RecipeLoaderIF * rloader;

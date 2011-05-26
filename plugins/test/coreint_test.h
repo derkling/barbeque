@@ -28,19 +28,11 @@
 
 #include <memory>
 #include <vector>
-#include "bbque/object.h"
 #include "bbque/system_view.h"
 #include "bbque/app/application.h"
+#include "bbque/plugins/logger.h"
 #include "bbque/plugins/plugin.h"
 #include "bbque/plugins/test.h"
-
-#ifndef BBQUE_DYNAMIC_PLUGIN
-# define CoreInteractionsTest CoreInteractionsTestS
-# define	PLUGIN_TYPE "STATIC"
-#else
-# define CoreInteractionsTest CoreInteractionsTestD
-# define	PLUGIN_TYPE "DYNAMIC"
-#endif
 
 #define COREINT_NAMESPACE "coreint"
 
@@ -70,7 +62,7 @@ namespace bbque { namespace plugins {
  * hard-coded set of resources, invokes the resource registration method of
  * ResourceAccounter for each of them.
  */
-class CoreInteractionsTest: public TestIF, public Object {
+class CoreInteractionsTest: public TestIF {
 
 public:
 
@@ -95,6 +87,9 @@ public:
 	void Test();
 
 private:
+
+	/** The logger used by the test */
+	LoggerIF  *logger;
 
 	/** System view instance */
 	SystemView & sv;

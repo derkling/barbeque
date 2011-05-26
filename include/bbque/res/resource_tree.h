@@ -28,7 +28,12 @@
 #include <map>
 #include <string>
 
+#include "bbque/plugins/logger.h"
 #include "bbque/res/resources.h"
+
+#define RESOURCE_THREE_NAMESPACE "rt"
+
+using bbque::plugins::LoggerIF;
 
 namespace bbque { namespace res {
 
@@ -214,7 +219,7 @@ public:
 	 */
 	inline void printTree() {
 		print_children(root, 0);
-		std::cout << std::endl << "Max depth: " << max_depth << std::endl;
+		logger->Debug("Max depth: %d", max_depth);
 	}
 
 	/**
@@ -225,6 +230,9 @@ public:
 	}
 
 private:
+
+	/** The logger used by the resource accounter */
+	LoggerIF  *logger;
 
 	/** Pointer to the root of the tree*/
 	ResourceNode * root;

@@ -22,6 +22,7 @@
 
 #include <cstdint>
 #include <iomanip>
+#include <iostream>
 #include <map>
 #include <vector>
 #include <sstream>
@@ -167,16 +168,14 @@ std::vector<std::string> rsrcSearchPaths = {
 
 
 CoreInteractionsTest::CoreInteractionsTest():
-	bbque::Object(COREINT_NAMESPACE),
 	sv(SystemView::GetInstance()),
 	am(ApplicationManager::GetInstance()) {
 
 	// Get a logger
 	std::string logger_name(COREINT_NAMESPACE);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	logger =
-		std::unique_ptr<bp::LoggerIF>
-		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
+	assert(logger);
 
 	if (logger)
 		logger->Debug("CoreInteractionsTest: %s", logger_name.c_str());

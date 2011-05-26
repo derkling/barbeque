@@ -40,26 +40,21 @@ namespace bp = bbque::plugins;
 namespace bbque { namespace app {
 
 
-WorkingMode::WorkingMode():
-	bbque::Object(APPLICATION_NAMESPACE WORKING_MODE_NAMESPACE) {
+WorkingMode::WorkingMode() {
+
 }
 
 
 WorkingMode::WorkingMode(AppPtr_t _app,	std::string const & _name,
 		uint16_t _value):
-	bbque::Object(APPLICATION_NAMESPACE + _app->Name() + "." +
-			WORKING_MODE_NAMESPACE + _name),
 	owner(_app),
 	name(_name),
 	value(_value) {
 
 	// Get a logger
-	std::string logger_name(APPLICATION_NAMESPACE +_app->Name()
-			+ "." + WORKING_MODE_NAMESPACE + _name);
+	std::string logger_name(APPLICATION_NAMESPACE"." +_app->Name());
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
-	logger =
-		std::unique_ptr<bp::LoggerIF>
-		(ModulesFactory::GetLoggerModule(std::cref(conf)));
+	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 }
 
 

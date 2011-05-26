@@ -27,6 +27,8 @@
 
 #include <cstdint>
 
+#define SCHEDULER_POLICY_NAME "yamca"
+
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
 

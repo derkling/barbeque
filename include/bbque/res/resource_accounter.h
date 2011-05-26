@@ -28,13 +28,15 @@
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
 #include <set>
-#include "bbque/object.h"
 #include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter_conf.h"
 #include "bbque/res/resource_tree.h"
+#include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
 
-#define RESOURCE_ACCOUNTER_NAMESPACE "bq.res_acc"
+using bbque::plugins::LoggerIF;
+
+#define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
 
 namespace bbque { namespace res {
 
@@ -80,7 +82,7 @@ typedef std::map<RViewToken_t, ResourceSetPtr_t> ResourceViewsMap_t;
  * Once defined a valid configuration, a "commit" can be done. Setting the
  * view defined by the configuration found as the new resources system state.
  */
-class ResourceAccounter: public ResourceAccounterConfIF, public Object {
+class ResourceAccounter: public ResourceAccounterConfIF {
 
 public:
 
@@ -221,6 +223,9 @@ private:
 		/** Total amount of resource */
 		RA_TOTAL
 	};
+
+	/** The logger used by the resource accounter */
+	LoggerIF  *logger;
 
 	/**
 	 * Default constructor
