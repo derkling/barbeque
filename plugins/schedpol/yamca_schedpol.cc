@@ -51,7 +51,12 @@ YamcaSchedPol::~YamcaSchedPol() {
 
 //----- Scheduler policy module interface
 
-SchedulerResult_t YamcaSchedPol::schedule(bbque::SystemView const & system) {
+char const * YamcaSchedPol::Name() {
+	return SCHEDULER_POLICY_NAME;
+}
+
+SchedulerPolicyIF::ExitCode_t
+YamcaSchedPol::Schedule(bbque::SystemView const & system) {
 	//Silence "args not used" warning.
 	(void)system;
 

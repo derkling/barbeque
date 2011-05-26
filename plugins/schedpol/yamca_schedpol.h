@@ -66,7 +66,10 @@ public:
 
 //----- Scheduler Policy module interface
 
-	virtual SchedulerResult_t schedule(bbque::SystemView const & system);
+	char const * Name();
+
+	SchedulerPolicyIF::ExitCode_t
+		Schedule(bbque::SystemView const & system);
 
 private:
 

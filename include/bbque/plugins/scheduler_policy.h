@@ -26,11 +26,6 @@
 
 #define SCHEDULER_POLICY_NAMESPACE "sched.pol."
 
-typedef enum SchedulerResult {
-	DONE = 0,
-	ERROR
-} SchedulerResult_t;
-
 namespace bbque {
 	class SystemView;
 }
@@ -48,13 +43,24 @@ class SchedulerPolicyIF {
 
 public:
 
+	typedef enum ExitCode {
+		DONE = 0,
+		ERROR
+	} ExitCode_t;
+
+	/**
+	 * @brief Return the name of the optimization policy
+	 * @return The name of the optimization policy
+	 */
+	virtual char const * Name() = 0;
+
 	/**
 	 * @brief Schedule a new set of applciation on available resources.
 	 *
 	 * @param system a reference to the system view which exposes information
 	 * related to both resources and applications.
 	 */
-	 virtual SchedulerResult_t schedule(bbque::SystemView const & system) = 0;
+	virtual ExitCode_t Schedule(bbque::SystemView const & system) = 0;
 
 };
 
