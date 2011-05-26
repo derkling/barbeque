@@ -16,7 +16,7 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * =============================================================================
  */
 
 #ifndef BBQUE_YAMCA_SCHEDPOL_H_
@@ -37,7 +37,8 @@ class LoggerIF;
 
 /**
  * @class YamcaSchedPol
- * @brief The YaMCA resource scheduler heuristic registered as a dynamic C++ plugin.
+ * @brief The YaMCA resource scheduler heuristic registered as a dynamic C++
+ * plugin.
  */
 class YamcaSchedPol : public SchedulerPolicyIF {
 

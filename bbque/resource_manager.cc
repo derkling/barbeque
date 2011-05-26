@@ -16,7 +16,7 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * =============================================================================
  */
 
 #include "bbque/resource_manager.h"
@@ -77,7 +77,8 @@ void ResourceManager::Tests() {
 	}
 
 	//---------- Get a logger module
-	fprintf(stderr, "\nRM: Looking for nearest matching module [logger.]\n");
+	fprintf(stderr, "\nRM: Looking for nearest matching module "
+			"[logger.]\n");
 	// Build a Logger object
 	std::string logger_name("bq.rm");
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());

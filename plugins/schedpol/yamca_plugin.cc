@@ -16,7 +16,7 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * =============================================================================
  */
 
 #include "yamca_plugin.h"

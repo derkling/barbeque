@@ -15,7 +15,7 @@
  *
  * This source code is released for free distribution under the terms of the
  * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * =============================================================================
  */
 
 #include "bbque/barbeque.h"
@@ -57,15 +57,18 @@ bool runTests(bp::PluginManager & pm) {
 	do {
 		bu::Timer test_tmr;
 
-		fprintf(stdout, "\n"FMT("___ Testing [%s]...\n"), (*near_match).first.c_str());
+		fprintf(stdout, "\n"FMT("___ Testing [%s]...\n"),
+				(*near_match).first.c_str());
 
-		bp::TestIF * tms = bb::ModulesFactory::GetTestModule((*near_match).first);
+		bp::TestIF * tms = bb::ModulesFactory::GetTestModule(
+				(*near_match).first);
 
 		test_tmr.start();
 		tms->Test();
 		test_tmr.stop();
 
-		fprintf(stdout, FMT("___ completed, [%11.6f]s\n"), test_tmr.getElapsedTime());
+		fprintf(stdout, FMT("___ completed, [%11.6f]s\n"),
+				test_tmr.getElapsedTime());
 
 		near_match++;
 
@@ -83,7 +86,8 @@ int main(int argc, char *argv[]) {
 	cm.ParseCommandLine(argc, argv);
 
 	// Welcome screen
-	fprintf(stdout, FMT(".:: Barbeque RTRM (ver. %s) ::.\n"), g_git_version);
+	fprintf(stdout, FMT(".:: Barbeque RTRM (ver. %s) ::.\n"),
+			g_git_version);
 	fprintf(stdout, FMT("Built: " __DATE__  " " __TIME__ "\n\n"));
 
 	// Initialization
@@ -98,7 +102,8 @@ int main(int argc, char *argv[]) {
 		pm.LoadAll(cm.GetPluginsDir());
 	}
 
-	// Check if we have tests to run (i.e. "test." objects have been registered)
+	// Check if we have tests to run (i.e. "test." objects have been
+	// registered)
 	if (runTests(pm))
 		return EXIT_SUCCESS;
 
