@@ -167,7 +167,9 @@ std::vector<std::string> rsrcSearchPaths = {
 
 
 CoreInteractionsTest::CoreInteractionsTest():
-	bbque::Object(COREINT_NAMESPACE) {
+	bbque::Object(COREINT_NAMESPACE),
+	sv(SystemView::GetInstance()),
+	am(ApplicationManager::GetInstance()) {
 
 	// Get a logger
 	std::string logger_name(COREINT_NAMESPACE);
@@ -203,7 +205,7 @@ int32_t CoreInteractionsTest::Destroy(void * plugin) {
 void RegisterSomeResources() {
 
 	// Get ResourceAccounter instance
-	br::ResourceAccounter * RA = br::ResourceAccounter::GetInstance();
+	br::ResourceAccounter & ra = br::ResourceAccounter::GetInstance();
 
 	std::cout << "names=" << res_names.size()
 		<< " units=" << res_units.size()
@@ -214,7 +216,7 @@ void RegisterSomeResources() {
 	// Start register resources
 	for (uint16_t i=0; i < res_names.size(); ++i) {
 		printf(" >>> Registering... :%s\n", res_names[i].c_str());
-		RA->RegisterResource(res_names[i], res_units[i],
+		ra.RegisterResource(res_names[i], res_units[i],
 				res_totals[i]);
 	}
 
@@ -223,7 +225,7 @@ void RegisterSomeResources() {
 		<< std::endl;
 
 	// Print a tree-like view of the resources
-	RA->TreeView();
+	ra.TreeView();
 	std::cout << "Press a key..." << std::endl;
 	getchar();
 }
@@ -231,7 +233,7 @@ void RegisterSomeResources() {
 
 // ===================[ Print functions ]=======================================
 
-void PrintResourceAvailabilities(SystemView * sv) {
+void PrintResourceAvailabilities(SystemView & sv) {
 
 	std::cout
 		<<
@@ -242,7 +244,7 @@ void PrintResourceAvailabilities(SystemView * sv) {
 	for (uint16_t i = 0; i < res_names.size(); ++i) {
 		std::cout << std::setw(50) << std::left << res_names[i].c_str() << "| "
 			<< std::setw(15) << std::right <<
-			sv->ResourceAvailability(res_names[i])
+			sv.ResourceAvailability(res_names[i])
 			<< " |" << std::endl;
 	}
 	std::cout
@@ -252,9 +254,9 @@ void PrintResourceAvailabilities(SystemView * sv) {
 }
 
 
-void PrintScheduleInfo(AppPtr_t & test_app) {
+void PrintScheduleInfo(AppPtr_t & papp) {
 
-	if (test_app.get() == NULL) {
+	if (papp.get() == NULL) {
 		std::cout
 			<< "Null application descriptor pointer passed"
 			<<	std::endl;
@@ -266,26 +268,26 @@ void PrintScheduleInfo(AppPtr_t & test_app) {
 		<< "**************************************************"
 		<< std::endl;
 
-	if (test_app->CurrentAWM().get() == NULL) {
+	if (papp->CurrentAWM().get() == NULL) {
 		std::cout << "[!] Current AWM not set" << std::endl;
 	}
 	else {
 		std::cout
 			<< "Current schedule of "
-			<< test_app->Name().c_str() << " is "
-			<< test_app->CurrentAWM()->Name() << " "
-			<< test_app->CurrentState() << std::endl;
+			<< papp->Name().c_str() << " is "
+			<< papp->CurrentAWM()->Name() << " "
+			<< papp->CurrentState() << std::endl;
 	}
 
-	if (test_app->NextAWM().get() == NULL) {
+	if (papp->NextAWM().get() == NULL) {
 		std::cout << "[!] Next AWM not set" << std::endl;
 	}
 	else {
 		std::cout
 			<< "Next schedule of "
-			<< test_app->Name().c_str() << " is "
-			<< test_app->NextAWM()->Name() << " "
-			<< test_app->NextState() << std::endl;
+			<< papp->Name().c_str() << " is "
+			<< papp->NextAWM()->Name() << " "
+			<< papp->NextState() << std::endl;
 	}
 
 	std::cout
@@ -297,16 +299,16 @@ void PrintScheduleInfo(AppPtr_t & test_app) {
 }
 
 
-int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
+int PrintWorkingModesInfo(AppPtr_t papp) {
 
 	// Application descriptor pointer is valid?
-	if (!test_app) {
+	if (!papp) {
 		std::cout << "Application is NULL" << std::endl;
 		return 1;
 	}
 
 	// Get all the enabled working modes
-	AwmPtrList_t const * awms = test_app->WorkingModes();
+	AwmPtrList_t const * awms = papp->WorkingModes();
 	if (awms->empty()) {
 		std::cout << "Cannot find any working modes" << std::endl;
 		return 2;
@@ -345,7 +347,7 @@ int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
 			<< "-----" << std::endl;
 	}
 
-	AwmPtr_t l_awm = test_app->LowValueAWM();
+	AwmPtr_t l_awm = papp->LowValueAWM();
 	std::cout
 		<< l_awm->Name()
 		<< " is the working mode with the lowest value [" << l_awm->Value()
@@ -360,7 +362,7 @@ int PrintWorkingModesInfo(std::shared_ptr<ApplicationStatusIF> test_app) {
 
 // ===================[ Test methods ]========================================
 
-void testPathTemplateSearch(SystemView * sv,
+void testPathTemplateSearch(SystemView & sv,
 		std::vector<std::string> & rsrc_paths) {
 
 	bu::Timer _t(true);
@@ -372,7 +374,7 @@ void testPathTemplateSearch(SystemView * sv,
 			it != rsrc_paths.end(); ++it) {
 
 		std::cout << std::setw(40) << (*it) << ": ";
-		if (sv->ExistResource((*it)))
+		if (sv.ExistResource((*it)))
 			std::cout << std::right << "FOUND" << std::endl;
 		else
 			std::cout << "NOT FOUND" << std::endl;
@@ -387,7 +389,7 @@ void testPathTemplateSearch(SystemView * sv,
 }
 
 
-void testResourceSetSearch(SystemView *sv,
+void testResourceSetSearch(SystemView & sv,
 		std::vector<std::string> & rsrc_paths) {
 
 	bu::Timer _t(true);
@@ -402,7 +404,7 @@ void testResourceSetSearch(SystemView *sv,
 			rsrc_it != rsrc_paths.end(); ++rsrc_it) {
 
 		// How many matchings ?
-		res_match = sv->GetResources((*rsrc_it));
+		res_match = sv.GetResources((*rsrc_it));
 		std::cout << "[" << (*rsrc_it) << "] matchings : "
 			<< res_match.size() << std::endl;
 
@@ -415,11 +417,11 @@ void testResourceSetSearch(SystemView *sv,
 		// Print amounts information
 		std::cout
 			<< "\tUSED: "
-			<< sv->ResourceUsed((*rsrc_it))
+			<< sv.ResourceUsed((*rsrc_it))
 			<< "\tTOT: "
-			<< sv->ResourceTotal((*rsrc_it))
+			<< sv.ResourceTotal((*rsrc_it))
 			<< "\tAVAIL: "
-			<< sv->ResourceAvailability((*rsrc_it))
+			<< sv.ResourceAvailability((*rsrc_it))
 			<< std::endl << std::endl;
 	}
 
@@ -432,7 +434,7 @@ void testResourceSetSearch(SystemView *sv,
 }
 
 
-void GetClusteredInfo(SystemView * sv,
+void GetClusteredInfo(SystemView & sv,
 		std::vector<std::string> & rsrc_paths) {
 
 	bu::Timer _t(true);
@@ -446,7 +448,7 @@ void GetClusteredInfo(SystemView * sv,
 
 		std::cout
 			<< std::setw(40) << std::left
-			<< (*it) << " CF = " << sv->ResourceClusterFactor((*it))
+			<< (*it) << " CF = " << sv.ResourceClusterFactor((*it))
 			<< std::endl;
 	}
 
@@ -460,18 +462,18 @@ void GetClusteredInfo(SystemView * sv,
 
 
 void CoreInteractionsTest::testScheduleSwitch(
-		AppPtr_t & test_app, std::string const & wm,
+		AppPtr_t & papp, std::string const & wm,
 		double ov_time) {
 
 	// Get working mode wm1
-	if (test_app.get() == NULL) {
+	if (papp.get() == NULL) {
 		std::cout << "Null application descriptor pointer passed"
 			<< std::endl;
 		return;
 	}
 
 	// Get working mode descriptor related to "wm"
-	AwmPtr_t d_wm = test_app->GetRecipe()->WorkingMode(wm);
+	AwmPtr_t d_wm = papp->GetRecipe()->WorkingMode(wm);
 	if (d_wm.get() == NULL) {
 		std::cout << "Working mode " << wm.c_str() << " not found"
 			<< std::endl;
@@ -482,47 +484,46 @@ void CoreInteractionsTest::testScheduleSwitch(
 	d_wm->BindResources("cluster", RSRC_ID_ANY, 1);
 
 	// Let's set next schedule for the application above
-	test_app->SetNextSchedule(d_wm);
-	PrintScheduleInfo(test_app);
+	papp->SetNextSchedule(d_wm);
+	PrintScheduleInfo(papp);
 
 	// Now switch!
-	ApplicationManager * app_man = ApplicationManager::GetInstance();
-	app_man->ChangedSchedule(test_app, ov_time);
-	PrintScheduleInfo(test_app);
+	am.ChangedSchedule(papp, ov_time);
+	PrintScheduleInfo(papp);
 }
 
 
-void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & test_app) {
+void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 
 	// Print out working modes details
-	PrintWorkingModesInfo(test_app);
+	PrintWorkingModesInfo(papp);
 
 	// Get the application descriptor
-	AppPtr_t app_conf(app_man->GetApplication(3324));
+	AppPtr_t app_conf(am.GetApplication(3324));
 
 	// Simulate a schedulation 1
 	testScheduleSwitch(app_conf, "wm1", 0.381);
-	PrintResourceAvailabilities(sys_view);
+	PrintResourceAvailabilities(sv);
 
 	// Set a constraint
 	app_conf->RemoveConstraint("cacheL3", Constraint::UPPER_BOUND);
 
 	// Simulate a schedulation 2
 	testScheduleSwitch(app_conf, "wm2", 0.445);
-	PrintResourceAvailabilities(sys_view);
+	PrintResourceAvailabilities(sv);
 
 	// Come back to awm  1
 	testScheduleSwitch(app_conf, "wm1", 0.409);
-	PrintResourceAvailabilities(sys_view);
+	PrintResourceAvailabilities(sv);
 
 	// Stop application
-	ApplicationManager::ExitCode_t result = app_man->StopApplication(3324);
+	ApplicationManager::ExitCode_t result = am.StopApplication(3324);
 	if (result == ApplicationManager::AM_SUCCESS)
 		logger->Info("Application correctly exited.");
 	else
 		logger->Info("Error: Application didn't exit correctly"
 				" [ExitCode = %d]", result);
-	PrintResourceAvailabilities(sys_view);
+	PrintResourceAvailabilities(sv);
 }
 
 
@@ -532,39 +533,26 @@ void CoreInteractionsTest::Test() {
 
 	logger->Debug("....: CoreInteractions Test starting :.....\n");
 
-	// SystemView
-	sys_view = SystemView::GetInstance();
-	if (!sys_view) {
-		logger->Error("Cannot retrieve system view instance");
-		return;
-	}
-
-	// ApplicationManager instance
-	app_man = ApplicationManager::GetInstance();
-	if (!app_man) {
-		logger->Error("Cannot find the application manager");
-		return;
-	}
 
 	// Resources
 	RegisterSomeResources();
-	PrintResourceAvailabilities(sys_view);
+	PrintResourceAvailabilities(sv);
 
 	// Some resource search test
-	testPathTemplateSearch(sys_view, rsrcSearchPaths);
-	testResourceSetSearch(sys_view, rsrcSearchPaths);
-	GetClusteredInfo(sys_view, rsrcSearchPaths);
+	testPathTemplateSearch(sv, rsrcSearchPaths);
+	testResourceSetSearch(sv, rsrcSearchPaths);
+	GetClusteredInfo(sv, rsrcSearchPaths);
 
 	// Start an application
-	app_man->StartApplication("mp3player", 3324, 0, "r1_platA", 0, true);
-	AppPtr_t test_app(app_man->GetApplication(3324));
+	am.StartApplication("mp3player", 3324, 0, "r1_platA", 0, true);
+	AppPtr_t test_app(am.GetApplication(3324));
 	if (!test_app) {
 		logger->Error("Application not started.");
 		return;
 	}
 
 	logger->Debug("Applications loaded = %d",
-			sys_view->ApplicationsReady()->size());
+			sv.ApplicationsReady()->size());
 
 	// Plugin specific data
 	char * auth =
@@ -583,7 +571,6 @@ void CoreInteractionsTest::Test() {
 	// Test working mode switching
 	testApplicationLifecycle(test_app);
 
-	delete app_man;
 }
 
 }   // namespae test

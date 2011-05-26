@@ -82,14 +82,8 @@ Application::ExitCode_t Application::StopExecution() {
 	logger->Info("Stopping EXC [%s]", StrId());
 
 	// Release the resources
-	br::ResourceAccounter * ra = br::ResourceAccounter::GetInstance();
-	assert(ra);
-	if (!ra) {
-		logger->Warn("Stopping EXC [%s] FAILED "
-				"(Error: ResourceAccounter unavailable)");
-		return APP_ABORT;
-	}
-	ra->ReleaseUsageSet(this);
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ra.ReleaseUsageSet(this);
 
 	// Release the recipe used
 	recipe.reset();
@@ -110,12 +104,11 @@ Application::ExitCode_t Application::StopExecution() {
 void Application::SetPriority(AppPrio_t _prio) {
 
 	// Application Manager instance
-	bbque::ApplicationManager * appman =
-		bbque::ApplicationManager::GetInstance();
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 
 	// If _prio value is greater then the lowest priority
 	// (maximum integer value) it is trimmed to the last one.
-	priority = std::min(_prio, appman->LowestPriority());
+	priority = std::min(_prio, am.LowestPriority());
 }
 
 Application::ExitCode_t Application::Enable() {
@@ -137,7 +130,7 @@ Application::ExitCode_t Application::Enable() {
 }
 
 Application::ExitCode_t Application::Disable() {
-	br::ResourceAccounter * ra(br::ResourceAccounter::GetInstance());
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 
 	logger->Debug("Disabling EXC [%s]...", StrId());
 
@@ -149,15 +142,7 @@ Application::ExitCode_t Application::Disable() {
 		assert(curr_sched.state!=DISABLED);
 		return APP_ABORT;
 	}
-
-	// Release assigned resources
-	if (!ra) {
-		logger->Warn("Stopping EXC [%s] FAILED "
-				"(Error: ResourceAccounter unavailable)");
-		assert(ra);
-		return APP_ABORT;
-	}
-	ra->ReleaseUsageSet(this);
+	ra.ReleaseUsageSet(this);
 
 	// Reset scheduling info
 	curr_sched.awm.reset();
@@ -201,9 +186,8 @@ Application::SetNextSchedule(AwmPtr_t & n_awm, RViewToken_t vtok) {
 
 	// Set net working mode and try to acquire the resources
 	next_sched.awm = n_awm;
-	br::ResourceAccounter *res_acc =
-			br::ResourceAccounter::GetInstance();
-	if (res_acc->AcquireUsageSet(this, vtok) !=
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	if (ra.AcquireUsageSet(this, vtok) !=
 				br::ResourceAccounter::RA_SUCCESS)
 		return APP_WM_REJECTED;
 
@@ -249,8 +233,8 @@ Application::SetConstraint(std::string const & _res_name,
 
 	if (it_con == constraints.end()) {
 		// Check for resource existance
-		br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
-		br::ResourcePtr_t rsrc_ptr(ra->GetResource(_res_name));
+		br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+		br::ResourcePtr_t rsrc_ptr(ra.GetResource(_res_name));
 
 		if (rsrc_ptr.get() == NULL) {
 			// If the resource doesn't exist abort

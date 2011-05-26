@@ -72,7 +72,7 @@ public:
 	/**
 	 * @brief Get the ApplicationManager instance
 	 */
-	static ApplicationManager *GetInstance();
+	static ApplicationManager & GetInstance();
 
 	/**
 	 * @brief The destructor

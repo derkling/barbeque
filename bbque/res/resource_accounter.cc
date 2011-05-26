@@ -45,11 +45,8 @@ namespace ba = bbque::app;
 
 namespace bbque { namespace res {
 
-ResourceAccounter * ResourceAccounter::GetInstance() {
-	static ResourceAccounter * instance;
-
-	if (instance == NULL)
-		instance = new ResourceAccounter();
+ResourceAccounter & ResourceAccounter::GetInstance() {
+	static ResourceAccounter instance;
 	return instance;
 }
 

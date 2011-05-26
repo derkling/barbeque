@@ -73,8 +73,8 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		std::string const & _res_path, uint64_t _value) {
 
 	// Check the total amount of resource
-	br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
-	uint64_t rsrc_total_qty = ra->Total(_res_path);
+	br::ResourceAccounter &ra = br::ResourceAccounter::GetInstance();
+	uint64_t rsrc_total_qty = ra.Total(_res_path);
 
 	// Does the resource exist ?
 	if (rsrc_total_qty == 0) {
@@ -217,8 +217,8 @@ WorkingMode::ExitCode_t WorkingMode::BindResources(
 		}
 
 		// Set the list of resource descriptors matching the binding
-		br::ResourceAccounter *ra = br::ResourceAccounter::GetInstance();
-		usage_it->second->binds = ra->GetResources(curr_rsrc_path);
+		br::ResourceAccounter &ra = br::ResourceAccounter::GetInstance();
+		usage_it->second->binds = ra.GetResources(curr_rsrc_path);
 
 		// Update the number of solved bindings
 		if (!usage_it->second->binds.empty()) {

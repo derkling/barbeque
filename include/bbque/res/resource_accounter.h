@@ -87,7 +87,7 @@ public:
 	/**
 	 * @brief Return the instance of the ResourceAccounter
 	 */
-	static ResourceAccounter * GetInstance();
+	static ResourceAccounter & GetInstance();
 
 	/**
 	 * @brief Destructor

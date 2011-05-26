@@ -26,15 +26,11 @@
 #include "bbque/application_manager.h"
 #include "bbque/res/resource_accounter.h"
 
-
-/** SystemView successfully instanced */
-#define SV_SUCCESS 		0
-/** Error: Application Manager missing */
-#define SV_ERR_APP_MAN 	1
-/** Error: Resource Accounter missing */
-#define SV_ERR_RES_ACC 	2
-/** Error: Missing both components */
-#define SV_ERR_BOTH		3
+using bbque::ApplicationManager;
+using bbque::ApplicationManagerStatusIF;
+using bbque::app::ApplicationStatusIF;
+using bbque::res::ResourceAccounter;
+using bbque::res::ResourceAccounterStatusIF;
 
 namespace bbque {
 
@@ -54,15 +50,8 @@ public:
 	/**
 	 * @brief Get the SystemVIew instance
 	 */
-	static SystemView *GetInstance() {
-		static SystemView *instance;
-		if (!instance) {
-			// Construct a new SystemView instance
-			uint8_t init_status;
-			instance = new SystemView(init_status);
-			if (init_status != SV_SUCCESS)
-				delete instance;
-		}
+	static SystemView & GetInstance() {
+		static SystemView instance;
 		return instance;
 	}
 
@@ -70,21 +59,21 @@ public:
 	 * @brief Return the map containing all the ready applications
 	 */
 	inline AppsMap_t const * ApplicationsReady() {
-		return app_man->Applications(app::ApplicationStatusIF::READY);
+		return am.Applications(ApplicationStatusIF::READY);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
 	inline AppsMap_t const * ApplicationsRunning() {
-		return app_man->Applications(app::ApplicationStatusIF::RUNNING);
+		return am.Applications(ApplicationStatusIF::RUNNING);
 	}
 
 	/**
 	 * @brief Maximum integer value for the minimum application priority
 	 */
 	inline uint16_t ApplicationLowestPriority() const {
-		return app_man->LowestPriority();
+		return am.LowestPriority();
 	}
 
 	/**
@@ -94,7 +83,7 @@ public:
 	 * @return The amount of resource available
 	 */
 	inline uint64_t ResourceAvailability(std::string const & path) const {
-		return res_acc->Available(path);
+		return ra.Available(path);
 	}
 
 	/**
@@ -103,7 +92,7 @@ public:
 	 * @return The total amount of resource available
 	 */
 	inline uint64_t ResourceTotal(std::string const & path) const {
-		return res_acc->Total(path);
+		return ra.Total(path);
 	}
 
 	/**
@@ -112,7 +101,7 @@ public:
 	 * @return The used amount of resource available
 	 */
 	inline uint64_t ResourceUsed(std::string const & path) const {
-		return res_acc->Used(path);
+		return ra.Used(path);
 	}
 
 	/**
@@ -121,7 +110,7 @@ public:
 	 * @return A shared pointer to the resource desciptor found
 	 */
 	inline res::ResourcePtr_t GetResource(std::string const & path) const {
-		return res_acc->GetResource(path);
+		return ra.GetResource(path);
 	}
 
 	/**
@@ -131,7 +120,7 @@ public:
 	 */
 	inline res::ResourcePtrList_t GetResources(std::string const & temp_path)
 		const {
-			return res_acc->GetResources(temp_path);
+			return ra.GetResources(temp_path);
 	}
 
 	/**
@@ -141,7 +130,7 @@ public:
 	 * @return True if the resource exists, false otherwise.
 	 */
 	inline bool ExistResource(std::string const & path) const {
-		return res_acc->ExistResource(path);
+		return ra.ExistResource(path);
 	}
 
 	/**
@@ -149,32 +138,21 @@ public:
 	 * @see ClusteringFactor
 	 */
 	inline uint16_t ResourceClusterFactor(std::string const & path) {
-		return res_acc->ClusteringFactor(path);
+		return ra.ClusteringFactor(path);
 	}
 
 private:
 
 	/** ApplicationManager instance */
-	ApplicationManagerStatusIF * app_man;
+	ApplicationManagerStatusIF & am;
 
 	/** ResourceAccounter instance */
-	res::ResourceAccounterStatusIF * res_acc;
+	ResourceAccounterStatusIF & ra;
 
 	/** Constructor */
-	SystemView(uint8_t & status) {
-		status = SV_SUCCESS;
-
-		// Application Manager instance
-		app_man = (ApplicationManagerStatusIF *)
-			ApplicationManager::GetInstance();
-		if (app_man == NULL)
-			status += SV_ERR_APP_MAN;
-
-		// Resource Accounter instance
-		res_acc = (res::ResourceAccounterStatusIF *)
-			res::ResourceAccounter::GetInstance();
-		if (res_acc == NULL)
-			status += SV_ERR_RES_ACC;
+	SystemView() :
+		am(ApplicationManager::GetInstance()),
+		ra(ResourceAccounter::GetInstance()) {
 	}
 };
 

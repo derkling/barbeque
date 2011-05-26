@@ -39,11 +39,8 @@ namespace po = boost::program_options;
 
 namespace bbque {
 
-ApplicationManager *ApplicationManager::GetInstance() {
-	static ApplicationManager *instance;
-
-	if (instance == NULL)
-		instance = new ApplicationManager();
+ApplicationManager & ApplicationManager::GetInstance() {
+	static ApplicationManager instance;
 	return instance;
 }
 

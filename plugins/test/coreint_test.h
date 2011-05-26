@@ -97,10 +97,10 @@ public:
 private:
 
 	/** System view instance */
-	SystemView * sys_view;
+	SystemView & sv;
 
 	/** Application manager instance */
-	ApplicationManager * app_man;
+	ApplicationManager & am;
 
 	/**
 	 * @brief Constructor
