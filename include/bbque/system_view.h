@@ -58,14 +58,14 @@ public:
 	/**
 	 * @brief Return the map containing all the ready applications
 	 */
-	inline AppsMap_t const * ApplicationsReady() {
+	inline AppsMap_t const * ApplicationsReady() const {
 		return am.Applications(ApplicationStatusIF::READY);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
-	inline AppsMap_t const * ApplicationsRunning() {
+	inline AppsMap_t const * ApplicationsRunning() const {
 		return am.Applications(ApplicationStatusIF::RUNNING);
 	}
 
