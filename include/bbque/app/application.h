@@ -215,7 +215,7 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	ExitCode_t SetNextSchedule(AwmPtr_t & awm, RViewToken_t vtok = 0);
+	ExitCode_t SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Update scheduled status and reconfiguration overheads data

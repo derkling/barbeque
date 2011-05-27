@@ -75,7 +75,7 @@ public:
 	 * @param awm Next working mode scheduled for the application
 	 * @param tok The token referencing the resources state view
 	 */
-	virtual ExitCode_t SetNextSchedule(AwmPtr_t & awm,
+	virtual ExitCode_t SetNextSchedule(AwmPtr_t const & awm,
 			RViewToken_t tok = 0) = 0;
 
 };

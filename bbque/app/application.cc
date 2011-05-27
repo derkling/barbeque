@@ -174,20 +174,28 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 
 
 Application::ExitCode_t
-Application::SetNextSchedule(AwmPtr_t & n_awm, RViewToken_t vtok) {
+Application::SetNextSchedule(AwmPtr_t const & n_awm, RViewToken_t vtok) {
+
+	// Application is blocked, until the AWM validity is verified
+	next_sched.state = BLOCKED;
 
 	// Get the working mode pointer
 	if (!n_awm) {
-		logger->Error("Trying to switch to an unknown working mode");
+		logger->Warn("Trying to switch to an unknown working mode");
 		return APP_WM_NOT_FOUND;
 	}
 
-	// Set net working mode and try to acquire the resources
+	// Set next working mode
 	next_sched.awm = n_awm;
+
+	// Check resources availability
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	if (ra.AcquireUsageSet(this, vtok) !=
-				br::ResourceAccounter::RA_SUCCESS)
+    if (ra.AcquireUsageSet(this, vtok) != br::ResourceAccounter::RA_SUCCESS) {
+		// Set next working mode to null
+		next_sched.awm = AwmPtr_t();
+		logger->Info("Working Mode {%s} rejected", n_awm->Name().c_str());
 		return APP_WM_REJECTED;
+	}
 
 	// Define the transitional scheduling state
 	if (curr_sched.awm != n_awm)
