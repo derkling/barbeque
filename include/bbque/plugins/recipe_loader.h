@@ -36,9 +36,6 @@ using bbque::app::Recipe;
 namespace bbque { namespace plugins {
 
 
-/** Shared pointer to @ref Application */
-typedef std::shared_ptr<Application> AppPtr_t;
-
 /** Shared pointer to @ref Recipe */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
 

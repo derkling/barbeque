@@ -38,6 +38,7 @@
 #include "bbque/plugins/plugin.h"
 
 using bbque::app::Application;
+using bbque::app::AppPtr_t;
 using bbque::app::Recipe;
 using bbque::app::WorkingMode;
 using bbque::app::PluginsData;
