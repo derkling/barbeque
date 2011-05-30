@@ -364,7 +364,8 @@ void XMLRecipeLoader::loadPluginsData(T _container,
 		return;
 
 	// <plugin ...>
-	ticpp::Element * plug_elem = plugins_elem->FirstChildElement("plugin");
+	ticpp::Element * plug_elem = plugins_elem->FirstChildElement("plugin",
+			false);
 
 	try {
 		while (plug_elem) {
