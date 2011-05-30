@@ -94,7 +94,7 @@ public:
 	 */
 	ExitCode_t BindResources(std::string const & rsrc_name,
 			ResID_t src_ID, ResID_t dst_ID,
-			const char * rsrc_path_unb = NULL);
+			char * rsrc_path_unb = NULL);
 
 };
 
