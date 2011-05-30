@@ -2,11 +2,11 @@
 <BarbequeRTRM version="0.4">
 	<application priority="5">
 		<awms>
-			<awm name="wm0" value="5">
+			<awm name="wm0" value="4">
 				<resources>
-					<mem qty="1" units="Mb"/>
+					<mem qty="512" units="Kb"/>
 					<arch name="P2012">
-						<mem qty="100" units="Kb"/>
+						<mem qty="40" units="Kb"/>
 						<tile id="0">
 							<cluster id="0">
 								<pe qty="4"/>
@@ -20,12 +20,12 @@
 			</awm>
 			<awm name="wm1" value="3">
 				<resources>
-					<mem qty="512" units="Kb"/>
+					<mem qty="200" units="Kb"/>
 					<arch name="P2012">
-						<mem qty="100" units="Kb"/>
+						<mem qty="30" units="Kb"/>
 						<tile id="0">
 							<cluster id="0">
-								<pe qty="3"/>
+								<pe qty="4"/>
 								<mem qty="4" units="Kb"/>
 							</cluster>
 						</tile>
@@ -34,15 +34,15 @@
 				<plugins>
 				</plugins>
 			</awm>
-			<awm name="wm2" value="2">
+			<awm name="wm2" value="1">
 				<resources>
-					<mem qty="128" units="Kb"/>
+					<mem qty="220" units="Kb"/>
 					<arch name="P2012">
-						<mem qty="300" units="Kb"/>
+						<mem qty="20" units="Kb"/>
 						<tile id="0">
 							<cluster id="0">
-								<pe qty="1"/>
-								<mem qty="4" units="Kb"/>
+								<pe qty="2"/>
+								<mem qty="6" units="Kb"/>
 							</cluster>
 						</tile>
 					</arch>
