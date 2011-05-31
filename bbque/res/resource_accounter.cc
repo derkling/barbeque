@@ -75,10 +75,10 @@ ResourceAccounter::~ResourceAccounter() {
 }
 
 
-ResourceAccounter::ExitCode_t
-ResourceAccounter::RegisterResource(std::string const & _path,
-		std::string	const & _units,	uint64_t _amount) {
-
+ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
+		std::string const & _path,
+		std::string const & _units,
+		uint64_t _amount) {
 	// Check arguments
 	if(_path.empty())
 		return RA_ERR_MISS_PATH;
@@ -95,17 +95,15 @@ ResourceAccounter::RegisterResource(std::string const & _path,
 
 
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
-		QueryOption_t _att, RViewToken_t vtok) const {
-
+		QueryOption_t _att,
+		RViewToken_t vtok) const {
 	// Cumulative value to return
 	uint64_t val = 0;
 
-	// Resource descriptor iterators
-	ResourcePtrList_t::const_iterator res_it = rsrc_set.begin();
-	ResourcePtrList_t::const_iterator res_end = rsrc_set.end();
-
 	// For all the descriptors in the list add the quantity of resource in the
 	// specified state (available, used, total)
+	ResourcePtrList_t::const_iterator res_it(rsrc_set.begin());
+	ResourcePtrList_t::const_iterator res_end(rsrc_set.end());
 	for (; res_it != res_end; ++res_it) {
 
 		switch(_att) {
@@ -127,11 +125,10 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 }
 
 
-ResourceAccounter::ExitCode_t
-ResourceAccounter::AcquireUsageSet(ba::Application const * _app,
+ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(
+		ba::Application const * _app,
 		RViewToken_t vtok) {
-
-	// Check to avoid null pointer seg-fault
+	// Check to avoid null pointer segmentation fault
 	if (!_app)
 		return RA_ERR_MISS_APP;
 
@@ -140,15 +137,14 @@ ResourceAccounter::AcquireUsageSet(ba::Application const * _app,
 		return RA_ERR_MISS_USAGES;
 
 	// Get the map of applications resource usages related to the state view
-	// referenced by 'vtok'. A missing view implies that the token is not
-	// valid.
+	// referenced by 'vtok'.
+	// A missing view implies that the token is not valid.
 	AppUsagesMapPtr_t apps_usages;
 	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW)
 		return RA_ERR_MISS_VIEW;
 
 	// Each application can hold just one resource usages set
-	AppUsagesMap_t::iterator usemap_it;
-	usemap_it = apps_usages->find(_app->Pid());
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Pid()));
 	if (usemap_it != apps_usages->end())
 		ReleaseUsageSet(_app, vtok);
 
@@ -166,7 +162,6 @@ ResourceAccounter::AcquireUsageSet(ba::Application const * _app,
 
 void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app,
 		RViewToken_t vtok) {
-
 	// Check to avoid null pointer seg-fault
 	if (!_app)
 		return;
@@ -178,8 +173,7 @@ void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app,
 		return;
 
 	// Get the map of resource usages of the application
-	AppUsagesMap_t::iterator usemap_it;
-	usemap_it = apps_usages->find(_app->Pid());
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Pid()));
 	if (usemap_it == apps_usages->end())
 		return;
 
@@ -190,34 +184,37 @@ void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app,
 
 
 RViewToken_t ResourceAccounter::GetNewView(const char * req_path) {
+	// Null-string check
 	if (req_path == NULL)
 		return -1;
+
 	// Token
 	RViewToken_t _token = std::hash<const char *>()(req_path);
 
 	// Allocate a new view for the applications resource usages and the
 	// set fo resources allocated
-	usages_per_views[_token] = AppUsagesMapPtr_t(new AppUsagesMap_t);
-	rsrc_per_views[_token] = ResourceSetPtr_t(new ResourceSet_t);
+	usages_per_views.insert(std::pair<RViewToken_t, AppUsagesMapPtr_t>(_token,
+				AppUsagesMapPtr_t(new AppUsagesMap_t)));
+	rsrc_per_views.insert(std::pair<RViewToken_t, ResourceSetPtr_t>(_token,
+				ResourceSetPtr_t(new ResourceSet_t)));
 
 	return _token;
 }
 
 
 void ResourceAccounter::PutView(RViewToken_t vtok) {
-
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token)
 		return;
 
 	// Get the resource set using the referenced view
-	ResourceViewsMap_t::iterator rviews_it = rsrc_per_views.find(vtok);
+	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 	if (rviews_it == rsrc_per_views.end())
 		return;
 
 	// For each resource delete the view
-	ResourceSet_t::iterator rsrc_set_it = rviews_it->second->begin();
-	ResourceSet_t::iterator rsrc_set_end = rviews_it->second->end();
+	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
+	ResourceSet_t::iterator rsrc_set_end(rviews_it->second->end());
 	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it) {
 		(*rsrc_set_it)->DeleteView(vtok);
 	}
@@ -228,14 +225,13 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 
 
 RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
-
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token)
 		return sys_view_token;
 
 	// Set the system state view pointer to the map of applications resource
 	// usages of this view and point to
-	AppUsagesViewsMap_t::iterator us_view_it = usages_per_views.find(vtok);
+	AppUsagesViewsMap_t::iterator us_view_it(usages_per_views.find(vtok));
 	if (us_view_it == usages_per_views.end())
 		return sys_view_token;
 
@@ -243,13 +239,13 @@ RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
 	sys_view_token = vtok;
 
 	// Get the resource set using the referenced view
-	ResourceViewsMap_t::iterator rviews_it = rsrc_per_views.find(vtok);
+	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 	if (rviews_it == rsrc_per_views.end())
 		return sys_view_token;
 
 	// For each resource set the view as default
-	ResourceSet_t::iterator rsrc_set_it = rviews_it->second->begin();
-	ResourceSet_t::iterator rsrc_set_end = rviews_it->second->end();
+	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
+	ResourceSet_t::iterator rsrc_set_end(rviews_it->second->end());
 	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it) {
 		(*rsrc_set_it)->SetAsDefaultView(vtok);
 	}
@@ -258,20 +254,19 @@ RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
 }
 
 
-ResourceAccounter::ExitCode_t
-ResourceAccounter::GetAppUsagesByView(RViewToken_t vtok,
+ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
+		RViewToken_t vtok,
 		AppUsagesMapPtr_t & apps_usages) {
-
 	AppUsagesViewsMap_t::iterator view;
 	if (vtok != 0) {
-		// Select a "secondary" view
+		// "Alternate" view case
 		view = usages_per_views.find(vtok);
 		if (view == usages_per_views.end())
 			return RA_ERR_MISS_VIEW;
 		apps_usages = view->second;
 	}
 	else {
-		// The default view is the system state
+		// Default view / System state case
 		assert(sys_usages_view);
 		apps_usages = sys_usages_view;
 	}
@@ -280,15 +275,13 @@ ResourceAccounter::GetAppUsagesByView(RViewToken_t vtok,
 }
 
 
-inline ResourceAccounter::ExitCode_t
-ResourceAccounter::IncUsageCounts(UsagesMapPtr_t app_usages,
-		ba::Application const * _app, RViewToken_t vtok) {
-
-	// Resource usages iterators
+inline ResourceAccounter::ExitCode_t ResourceAccounter::IncUsageCounts(
+		UsagesMapPtr_t app_usages,
+		ba::Application const * _app,
+		RViewToken_t vtok) {
+	// For each resource usage make a couple of checks
 	UsagesMap_t::const_iterator usages_it = app_usages->begin();
 	UsagesMap_t::const_iterator usages_end = app_usages->end();
-
-	// For each resource usage make a couple of checks
 	UsagePtr_t curr_usage;
 	for (; usages_it != usages_end; ++usages_it) {
 
@@ -312,16 +305,14 @@ ResourceAccounter::IncUsageCounts(UsagesMapPtr_t app_usages,
 		curr_usage = usages_it->second;
 		uint64_t usage_value = curr_usage->value;
 
-		// Resource binds iterators
-		ResourcePtrList_t::iterator it_bind = curr_usage->binds.begin();
-		ResourcePtrList_t::iterator end_it = curr_usage->binds.end();
-
 		// Allocate the usage request to the resources binds
+		ResourcePtrList_t::iterator it_bind(curr_usage->binds.begin());
+		ResourcePtrList_t::iterator end_it(curr_usage->binds.end());
 		while ((usage_value > 0) && (it_bind != end_it)) {
 
 			// If the current bind has enough availability, reserve the whole
-			// quantity requested here. Otherwise split it in more "sibling"
-			// resource binds.
+			// quantity requested here.
+			// Otherwise split it in more "sibling" resource binds.
 			if (usage_value < (*it_bind)->Availability(vtok))
 				usage_value -= (*it_bind)->Acquire(usage_value, _app, vtok);
 			else
@@ -331,7 +322,7 @@ ResourceAccounter::IncUsageCounts(UsagesMapPtr_t app_usages,
 
 			// Get the resource set using the referenced view and insert the
 			// pointer to the resource bind
-			ResourceViewsMap_t::iterator rviews_it = rsrc_per_views.find(vtok);
+			ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 			assert(rviews_it != rsrc_per_views.end());
 			rviews_it->second->insert(*it_bind);
 
@@ -344,25 +335,20 @@ ResourceAccounter::IncUsageCounts(UsagesMapPtr_t app_usages,
 
 
 inline void ResourceAccounter::DecUsageCounts(UsagesMapPtr_t app_usages,
-		ba::Application const * _app, RViewToken_t vtok) {
-
-	// Resource usages iterators
-	UsagesMap_t::const_iterator usages_it = app_usages->begin();
-	UsagesMap_t::const_iterator usages_end = app_usages->end();
-
-	// For each resource in the usages map...
+		ba::Application const * _app,
+		RViewToken_t vtok) {
+	// Release the amount of resource hold by each application
+	UsagesMap_t::const_iterator usages_it(app_usages->begin());
+	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end; ++usages_it) {
 
-		// Current resource usage to release
+		// Resource usage to release / released
 		UsagePtr_t curr_usage = usages_it->second;
-		// Count of the amount of resource freed
 		uint64_t usage_freed = 0;
 
-		// Resource binds iterators
-		ResourcePtrList_t::iterator it_bind = curr_usage->binds.begin();
-		ResourcePtrList_t::iterator end_it = curr_usage->binds.end();
-
 		// For each resource bind release the quantity held
+		ResourcePtrList_t::iterator it_bind(curr_usage->binds.begin());
+		ResourcePtrList_t::iterator end_it(curr_usage->binds.end());
 		while (usage_freed < curr_usage->value) {
 			assert(it_bind != end_it);
 			usage_freed += (*it_bind)->Release(_app, vtok);

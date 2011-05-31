@@ -99,28 +99,28 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Available(std::string const & path, RViewToken_t vtok = 0)
-		const {
-			ResourcePtrList_t matches = GetResources(path);
-			return QueryStatus(matches, RA_AVAIL, vtok);
+	inline uint64_t Available(std::string const & path,
+			RViewToken_t vtok = 0) const {
+		ResourcePtrList_t matches = GetResources(path);
+		return QueryStatus(matches, RA_AVAIL, vtok);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Total(std::string const & path, RViewToken_t vtok = 0)
-		const {
-			ResourcePtrList_t matches = GetResources(path);
-			return QueryStatus(matches, RA_TOTAL, vtok);
+	inline uint64_t Total(std::string const & path,
+			RViewToken_t vtok = 0) const {
+		ResourcePtrList_t matches = GetResources(path);
+		return QueryStatus(matches, RA_TOTAL, vtok);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Used(std::string const & path, RViewToken_t vtok = 0)
-		const {
-			ResourcePtrList_t matches = GetResources(path);
-			return QueryStatus(matches, RA_USED, vtok);
+	inline uint64_t Used(std::string const & path,
+			RViewToken_t vtok = 0) const {
+		ResourcePtrList_t matches = GetResources(path);
+		return QueryStatus(matches, RA_USED, vtok);
 	}
 
 	/**
