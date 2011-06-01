@@ -554,9 +554,11 @@ void CoreInteractionsTest::Test() {
 			sv.ApplicationsReady()->size());
 
 	// Plugin specific data
-	char * auth =
-		static_cast<char *>(test_app->GetAttribute("YaMCa", "author"));
-	logger->Info("Plugin YaMCa: <author> : %s", auth);
+	std::string * auth =
+		(static_cast<std::string *>(
+					(test_app->GetAttribute("YaMCa", "author")).get()));
+	if (auth)
+		logger->Info("Plugin YaMCa: <author> : %s", auth->c_str());
 
 	// Is there a Scheduling Policy ?
 	plugins::SchedulerPolicyIF * scheduler =

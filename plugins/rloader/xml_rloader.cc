@@ -419,18 +419,16 @@ inline void XMLRecipeLoader::parsePluginData(T _container,
 		plugdata_node->GetValue(&key);
 		plugdata_node->ToElement()->GetText(&value, false);
 
-		char * value_ptr =
-			(char *) malloc(sizeof(char) *
-					std::min((int)(value.size()), PDATA_MAX_LEN));
-		strcpy(value_ptr, value.c_str());
-
 		// Set the plugin data
+		VoidPtr_t value_ptr = VoidPtr_t(new std::string(value));
 		_container->SetAttribute(_plug_name, key, value_ptr);
 
 		logger->Info("Plugin %s: attribute %s = %s",
 				_plug_name.c_str(),
 				key.c_str(),
-				_container->GetAttribute(_plug_name, key));
+				(static_cast<std::string *>(
+					(_container->GetAttribute(_plug_name,
+											  key)).get()))->c_str());
 
 	} catch (ticpp::Exception &ex) {
 		logger->Error(ex.what());

@@ -28,11 +28,13 @@
 #include <memory>
 #include <string>
 
+typedef std::shared_ptr<void> VoidPtr_t;
+
 namespace bbque { namespace app {
 
 
-/** Map of string type data */
-typedef std::pair<std::string, void *> DataPair_t;
+/** Pair key-value type */
+typedef std::pair<std::string, VoidPtr_t> DataPair_t;
 
 /** Map of 32-bit integer type data */
 typedef std::multimap<std::string, DataPair_t> SpecDataMap_t;
@@ -73,7 +75,7 @@ public:
 	 * @param value A void pointer to the data value
 	 */
 	void SetAttribute(std::string const & plugin_name, std::string const & key,
-			void * value);
+			VoidPtr_t value);
 
 	/**
 	 * @brief Get a plugin specific data
@@ -82,7 +84,7 @@ public:
 	 * @param key The key referencing the data
 	 * @return A void pointer to the data value
 	 */
-	void * GetAttribute(std::string const & plugin_name,
+	VoidPtr_t GetAttribute(std::string const & plugin_name,
 			std::string const & key);
 
 private:

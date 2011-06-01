@@ -24,6 +24,8 @@
 
 #include "bbque/app/plugin_data.h"
 
+#include <iostream>
+
 namespace bbque { namespace app {
 
 
@@ -33,14 +35,11 @@ PluginsData::PluginsData() {
 
 PluginsData::~PluginsData() {
 	SpecDataMap_t::iterator it = data.begin();
-	for (; it != data.end(); ++it);
-		free((it->second).second);
-
 	data.clear();
 }
 
 
-void * PluginsData::GetAttribute(std::string const & _plugin,
+VoidPtr_t PluginsData::GetAttribute(std::string const & _plugin,
 		std::string const & _key) {
 
 	// Find the plugin set of pairs
@@ -57,12 +56,12 @@ void * PluginsData::GetAttribute(std::string const & _plugin,
 	// Return the value
 	if (it != range.second)
 		return it->second.second;
-	return NULL;
+	return VoidPtr_t();
 }
 
 
 void PluginsData::SetAttribute(std::string const & _plugin,
-		std::string const & _key, void * _value) {
+		std::string const & _key, VoidPtr_t _value) {
 
 	// Find the plugin set of pairs
 	std::pair<SpecDataMap_t::iterator, SpecDataMap_t::iterator> range =
@@ -77,7 +76,7 @@ void PluginsData::SetAttribute(std::string const & _plugin,
 
 	// Set the attribute
 	if (it != range.second)
-		it->second.second = _value;
+		it->second.second = VoidPtr_t(_value);
 	else
 		data.insert(data.begin(),
 				std::pair<std::string, DataPair_t>(_plugin,
