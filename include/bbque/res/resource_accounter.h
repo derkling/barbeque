@@ -35,6 +35,7 @@
 #include "bbque/utils/utility.h"
 
 using bbque::plugins::LoggerIF;
+using bbque::app::AppPtr_t;
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
 
@@ -49,7 +50,7 @@ typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
 /** Constant pointer to the map of ResourceUsage descriptors */
 typedef UsagesMap_t const * UsagesMapPtr_t;
 /** Map of map of ResourceUsage descriptors. Key: application */
-typedef std::map<pid_t, UsagesMapPtr_t> AppUsagesMap_t;
+typedef std::map<AppPtr_t, UsagesMapPtr_t> AppUsagesMap_t;
 /** Shared pointer to a map of pair Application/ResourceUsages */
 typedef std::shared_ptr<AppUsagesMap_t> AppUsagesMapPtr_t;
 /** Map of AppUsagesMap_t having the resource state view token as key */
@@ -180,12 +181,12 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	ExitCode_t AcquireUsageSet(Application const * app, RViewToken_t vtok = 0);
+	ExitCode_t AcquireUsageSet(AppPtr_t papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	void ReleaseUsageSet(Application const * app, RViewToken_t vtok = 0);
+	void ReleaseUsageSet(AppPtr_t papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @see ResourceAccounterConfIF
@@ -272,7 +273,7 @@ private:
 	 * @return An exit code (@see ExitCode_t)
 	 */
 	ExitCode_t IncUsageCounts(UsagesMapPtr_t app_usages,
-			Application const * app, RViewToken_t vtok = 0);
+			AppPtr_t papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Decrement the resource usages counts
@@ -285,7 +286,7 @@ private:
 	 * @param vtok The token referencing the resource state view
 	 */
 	void DecUsageCounts(UsagesMapPtr_t  app_usages,
-			Application const * app, RViewToken_t vtok = 0);
+			AppPtr_t app, RViewToken_t vtok = 0);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;

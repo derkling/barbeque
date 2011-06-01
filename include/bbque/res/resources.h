@@ -33,6 +33,7 @@
 #include "bbque/app/application.h"
 
 using bbque::app::Application;
+using bbque::app::AppPtr_t;
 
 namespace bbque { namespace res {
 
@@ -251,7 +252,7 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource acquired if success, 0 otherwise.
 	 */
-	inline uint64_t Acquire(uint64_t amount, Application const * app_ptr,
+	inline uint64_t Acquire(uint64_t amount, AppPtr_t const & app_ptr,
 			RViewToken_t vtok = 0) {
 
 		ResourceStatePtr_t view;
@@ -287,7 +288,7 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource released
 	 */
-	inline uint64_t Release(Application const * app_ptr,
+	inline uint64_t Release(AppPtr_t const & app_ptr,
 			RViewToken_t vtok =	0) {
 
 		ResourceStatePtr_t view;

@@ -41,8 +41,6 @@
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 
-namespace ba = bbque::app;
-
 namespace bbque { namespace res {
 
 ResourceAccounter & ResourceAccounter::GetInstance() {
@@ -125,8 +123,7 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 }
 
 
-ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(
-		ba::Application const * _app,
+ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(AppPtr_t _app,
 		RViewToken_t vtok) {
 	// Check to avoid null pointer segmentation fault
 	if (!_app)
@@ -144,24 +141,24 @@ ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(
 		return RA_ERR_MISS_VIEW;
 
 	// Each application can hold just one resource usages set
-	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Pid()));
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app));
 	if (usemap_it != apps_usages->end())
 		ReleaseUsageSet(_app, vtok);
 
 	// Set resource usages of the next working mode
-	(*(apps_usages))[_app->Pid()] = _app->NextAWM()->ResourceUsages();
-	ExitCode_t ret = IncUsageCounts((*(apps_usages))[_app->Pid()], _app, vtok);
+	apps_usages->insert(std::pair<AppPtr_t, UsagesMapPtr_t>(
+				_app, _app->NextAWM()->ResourceUsages()));
+	ExitCode_t ret = IncUsageCounts((*(apps_usages))[_app], _app, vtok);
 
 	// Resource allocation/reservation failed?
 	if (ret != RA_SUCCESS)
-		apps_usages->erase(_app->Pid());
+		apps_usages->erase(_app);
 
 	return ret;
 }
 
 
-void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app,
-		RViewToken_t vtok) {
+void ResourceAccounter::ReleaseUsageSet(AppPtr_t _app, RViewToken_t vtok) {
 	// Check to avoid null pointer seg-fault
 	if (!_app)
 		return;
@@ -173,13 +170,13 @@ void ResourceAccounter::ReleaseUsageSet(ba::Application const * _app,
 		return;
 
 	// Get the map of resource usages of the application
-	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Pid()));
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app));
 	if (usemap_it == apps_usages->end())
 		return;
 
 	// Decrement resources counts and remove the usages map
 	DecUsageCounts(usemap_it->second, _app, vtok);
-	apps_usages->erase(_app->Pid());
+	apps_usages->erase(_app);
 }
 
 
@@ -277,7 +274,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 
 inline ResourceAccounter::ExitCode_t ResourceAccounter::IncUsageCounts(
 		UsagesMapPtr_t app_usages,
-		ba::Application const * _app,
+		AppPtr_t _app,
 		RViewToken_t vtok) {
 	// For each resource usage make a couple of checks
 	UsagesMap_t::const_iterator usages_it = app_usages->begin();
@@ -335,7 +332,7 @@ inline ResourceAccounter::ExitCode_t ResourceAccounter::IncUsageCounts(
 
 
 inline void ResourceAccounter::DecUsageCounts(UsagesMapPtr_t app_usages,
-		ba::Application const * _app,
+		AppPtr_t _app,
 		RViewToken_t vtok) {
 	// Release the amount of resource hold by each application
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());

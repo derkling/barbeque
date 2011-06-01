@@ -81,7 +81,8 @@ Application::ExitCode_t Application::StopExecution() {
 
 	// Release the resources
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	ra.ReleaseUsageSet(this);
+	if (curr_sched.awm)
+		ra.ReleaseUsageSet(curr_sched.awm->OwnerApplication());
 
 	// Release the recipe used
 	recipe.reset();
@@ -140,7 +141,9 @@ Application::ExitCode_t Application::Disable() {
 		assert(curr_sched.state!=DISABLED);
 		return APP_ABORT;
 	}
-	ra.ReleaseUsageSet(this);
+
+	if (curr_sched.awm)
+		ra.ReleaseUsageSet(curr_sched.awm->OwnerApplication());
 
 	// Reset scheduling info
 	curr_sched.awm.reset();
@@ -190,7 +193,8 @@ Application::SetNextSchedule(AwmPtr_t const & n_awm, RViewToken_t vtok) {
 
 	// Check resources availability
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-    if (ra.AcquireUsageSet(this, vtok) != br::ResourceAccounter::RA_SUCCESS) {
+    if (ra.AcquireUsageSet(n_awm->OwnerApplication(), vtok)
+			!= br::ResourceAccounter::RA_SUCCESS) {
 		// Set next working mode to null
 		next_sched.awm = AwmPtr_t();
 		logger->Info("Working Mode {%s} rejected", n_awm->Name().c_str());

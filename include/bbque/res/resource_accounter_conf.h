@@ -30,6 +30,7 @@
 
 #include "bbque/res/resource_accounter_status.h"
 
+using bbque::app::AppPtr_t;
 using bbque::app::Application;
 
 namespace bbque { namespace res {
@@ -102,8 +103,8 @@ public:
 	 * @param vtok The token referencing the resource state view
 	 * @return An exit code (@see ExitCode_t)
 	 */
-	virtual ExitCode_t AcquireUsageSet(Application const * app,
-			RViewToken_t vtok = 0) = 0;
+	virtual ExitCode_t AcquireUsageSet(AppPtr_t app, RViewToken_t vtok = 0)
+		= 0;
 
 	/**
 	 * @brief Release the resources
@@ -116,8 +117,7 @@ public:
 	 * @param app The application holding the resources
 	 * @param vtok The token referencing the resource state view
 	 */
-	virtual void ReleaseUsageSet(Application const * app,
-			RViewToken_t vtok = 0) = 0;
+	virtual void ReleaseUsageSet(AppPtr_t app, RViewToken_t vtok = 0) = 0;
 
 	/**
 	 * @brief Get a new resources view
