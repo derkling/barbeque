@@ -23,6 +23,7 @@
 #define BBQUE_RESOURCE_MANAGER_H_
 
 #include "bbque/config.h"
+#include "bbque/application_manager.h"
 #include "bbque/application_proxy.h"
 #include "bbque/platform_services.h"
 #include "bbque/plugin_manager.h"
@@ -54,6 +55,12 @@ public:
 	static ResourceManager & GetInstance();
 
 	/**
+	 * @brief  Clean-up the grill by releasing current resource manager
+	 * resources and modules.
+	 */
+	~ResourceManager();
+
+	/**
 	 * @brief Start managing resources
 	 * This is the actual run-time manager entry-point, after the playground
 	 * setup the main should call this method to start grilling applications.
@@ -65,45 +72,14 @@ public:
 private:
 
 	/**
-	 * @brief   Build a new instance of the resource manager
-	 */
-	ResourceManager();
-
-	/**
-	 * @brief  Clean-up the grill by releasing current resource manager
-	 * resources and modules.
-	 */
-	~ResourceManager();
-
-#ifdef BBQUE_DEBUG
-	/**
-	 * @brief 	A set of tests to run just un debugging mode
-	 *
-	 * This is a set of tests to be run only when Barbeque is compiled in
-	 * debugging mode.
-	 */
-	void Tests();
-#endif
-
-	/**
-	 * @brief   The run-time resource manager setup routine
-	 * This provides all the required playground setup to run the Barbeque RTRM.
-	 */
-	void Setup();
-
-	/**
-	 * @brief   The run-time resource manager control loop
-	 * This provides the Barbeuqe applications and resources control logic.
-	 * This is actually the entry point of the Barbeque state machine.
-	 */
-	void ControlLoop();
-
-private:
-
-	/**
 	 * Set true when Barbeuque should terminate
 	 */
 	bool done;
+
+	/**
+	 * @brief The logger used by the resource manager.
+	 */
+	plugins::LoggerIF *logger;
 
 	/**
 	 * Reference to supported platform services class.
@@ -122,14 +98,40 @@ private:
 	plugins::PluginManager & pm;
 
 	/**
-	 * @brief The logger used by the resource manager.
+	 * @brief The Application Proxy module
 	 */
-	plugins::LoggerIF *logger;
+	ApplicationManager & am;
 
 	/**
-	 * @brief The Application Proxy
+	 * @brief The Application Proxy module
 	 */
 	ApplicationProxy & ap;
+
+
+	/**
+	 * @brief   Build a new instance of the resource manager
+	 */
+	ResourceManager();
+
+	/**
+	 * @brief   The run-time resource manager setup routine
+	 * This provides all the required playground setup to run the Barbeque RTRM.
+	 */
+	void Setup();
+
+	/**
+	 * @brief   The run-time resource manager control loop
+	 * This provides the Barbeuqe applications and resources control logic.
+	 * This is actually the entry point of the Barbeque state machine.
+	 */
+	void ControlLoop();
+
+	/**
+	 * @brief Process a EXC_START event
+	 */
+
+	/**
+	 */
 
 };
 

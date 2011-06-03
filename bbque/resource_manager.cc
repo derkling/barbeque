@@ -41,64 +41,13 @@ ResourceManager & ResourceManager::GetInstance() {
 ResourceManager::ResourceManager() :
 	ps(PlatformServices::GetInstance()),
 	pm(plugins::PluginManager::GetInstance()),
+	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()) {
 
 }
 
 ResourceManager::~ResourceManager() {
 }
-
-#ifdef BBQUE_DEBUG
-void ResourceManager::Tests() {
-	//---------- JustForTest: Static Module
-	fprintf(stderr, "\nRM: Looking for nearest matching module [test.]\n");
-	// Build a Test object
-	plugins::TestIF * tms = ModulesFactory::GetTestModule();
-	if (tms) {
-		fprintf(stderr, "RM: Found a module within namespace '"
-				TEST_NAMESPACE "'\n");
-		tms->Test();
-	} else {
-		fprintf(stderr, "RM: Unable to find a module within namespace '"
-				TEST_NAMESPACE "'\n");
-	}
-
-	//---------- JustForTest: Dynamic Module
-	fprintf(stderr, "\nRM: Looking for (nearest matching) module"
-			"[test.dummy_dyn]\n");
-	// Build a Test object
-	plugins::TestIF * tmd = ModulesFactory::GetTestModule("test.dummy_dyn");
-	if (tmd) {
-		fprintf(stderr, "RM: Found a module within namespace '"
-				TEST_NAMESPACE "'\n");
-		tmd->Test();
-	} else {
-		fprintf(stderr, "RM: Unable to find a module within namespace '"
-				TEST_NAMESPACE "'\n");
-	}
-
-	//---------- Get a logger module
-	fprintf(stderr, "\nRM: Looking for nearest matching module "
-			"[logger.]\n");
-	// Build a Logger object
-	std::string logger_name("bq.rm");
-	plugins::LoggerIF::Configuration conf(logger_name.c_str());
-	plugins::LoggerIF * logger =
-		ModulesFactory::GetLoggerModule(std::cref(conf));
-	if (logger) {
-		fprintf(stderr, "RM: Found a module within namespace '"
-				TEST_NAMESPACE "'\n");
-		logger->Debug("Test DEBUG message");
-		logger->Info("Test INFO message");
-		logger->Warn("Test WARN message");
-	} else {
-		fprintf(stderr, "RM: Unable to find a module within namespace '"
-				LOGGER_NAMESPACE "'\n");
-	}
-	std::cout << "\n" << std::endl;
-
-}
-#endif
 
 void ResourceManager::Setup() {
 
@@ -139,8 +88,6 @@ void ResourceManager::ControlLoop() {
 void ResourceManager::Go() {
 
 	Setup();
-
-	DB(Tests());
 
 	while (!done) {
 		ControlLoop();
