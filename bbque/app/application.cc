@@ -22,9 +22,10 @@
 * ============================================================================
 */
 
+#include "bbque/app/application.h"
+
 #include <limits>
 
-#include "bbque/app/application.h"
 #include "bbque/application_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
@@ -44,6 +45,7 @@ bool CompareAWMsByValue(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
 		return wm1->Value() < wm2->Value();
 }
 
+
 Application::Application(std::string const & _name,
 		AppPid_t _pid,
 		uint8_t _exc_id) :
@@ -55,7 +57,7 @@ Application::Application(std::string const & _name,
 	curr_sched.state = next_sched.state = DISABLED;
 
 	// Get a logger
-	std::string logger_name(APPLICATION_NAMESPACE + _name);
+	std::string logger_name(APPLICATION_NAMESPACE"." + _name);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
@@ -64,12 +66,10 @@ Application::Application(std::string const & _name,
 			Pid(), Name().substr(0,6).c_str(), ExcId());
 
 	logger->Info("Built new EXC [%s]", StrId());
-
 }
 
 
 Application::~Application() {
-
 	logger->Debug("Destroying EXC [%s]", StrId());
 	StopExecution();
 }
@@ -102,13 +102,12 @@ Application::ExitCode_t Application::StopExecution() {
 
 void Application::SetPriority(AppPrio_t _prio) {
 
-	// Application Manager instance
-	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
-
 	// If _prio value is greater then the lowest priority
 	// (maximum integer value) it is trimmed to the last one.
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	priority = std::min(_prio, am.LowestPriority());
 }
+
 
 Application::ExitCode_t Application::Enable() {
 
@@ -125,8 +124,8 @@ Application::ExitCode_t Application::Enable() {
 	logger->Info("EXC [%s] ENABLED", StrId());
 
 	return APP_SUCCESS;
-
 }
+
 
 Application::ExitCode_t Application::Disable() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
@@ -142,6 +141,7 @@ Application::ExitCode_t Application::Disable() {
 		return APP_ABORT;
 	}
 
+	// Release the resources
 	if (curr_sched.awm)
 		ra.ReleaseUsageSet(curr_sched.awm->OwnerApplication());
 
@@ -152,10 +152,11 @@ Application::ExitCode_t Application::Disable() {
 	logger->Info("EXC [%s] DISABLED", StrId());
 
 	return APP_SUCCESS;
-
 }
 
+
 void Application::SetRecipe(RecipePtr_t app_recipe) {
+	// Set the recipe that the application will use
 	assert(app_recipe.get() != NULL);
 	recipe = app_recipe;
 
@@ -164,27 +165,22 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 	// constraints asserted
 	if (enabled_awms.empty() && constraints.empty()) {
 		// Constraints list is empty. Get all the working modes.
-		std::vector<AwmPtr_t> wms = recipe->WorkingModesAll();
-		std::vector<AwmPtr_t>::iterator it = wms.begin();
-		std::vector<AwmPtr_t>::iterator end = wms.end();
-
-		for (; it < end; ++it)
-			enabled_awms.push_back(*it);
-
+		AwmPtrVect_t const & wms(recipe->WorkingModesAll());
+		enabled_awms.assign(wms.begin(), wms.end());
 		enabled_awms.sort(CompareAWMsByValue);
+		logger->Debug("%d working modes enabled.", enabled_awms.size());
 	}
 }
 
 
-Application::ExitCode_t
-Application::SetNextSchedule(AwmPtr_t const & n_awm, RViewToken_t vtok) {
-
+Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
+				RViewToken_t vtok) {
 	// Application is blocked, until the AWM validity is verified
 	next_sched.state = BLOCKED;
 
 	// Get the working mode pointer
 	if (!n_awm) {
-		logger->Warn("Trying to switch to an unknown working mode");
+		logger->Warn("Working mode rejected: AWM not found");
 		return APP_WM_NOT_FOUND;
 	}
 
@@ -197,7 +193,8 @@ Application::SetNextSchedule(AwmPtr_t const & n_awm, RViewToken_t vtok) {
 			!= br::ResourceAccounter::RA_SUCCESS) {
 		// Set next working mode to null
 		next_sched.awm = AwmPtr_t();
-		logger->Info("Working Mode {%s} rejected", n_awm->Name().c_str());
+		logger->Debug("Working Mode {%s} rejected by Resource Accounter",
+						n_awm->Name().c_str());
 		return APP_WM_REJECTED;
 	}
 
@@ -212,49 +209,48 @@ Application::SetNextSchedule(AwmPtr_t const & n_awm, RViewToken_t vtok) {
 
 
 void Application::UpdateScheduledStatus(double _time) {
-
+	// Accordingly to the next scheduling state, update some info
 	switch (next_sched.state) {
 	case MIGREC:
 	case MIGRATE:
 	case RECONF:
-		// Update the reconfiguration overheads
+		// Reconfiguration overheads
 		if (curr_sched.awm) {
-			AwmPtr_t _awm = GetRecipe()->WorkingMode(curr_sched.awm->Name());
+			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_sched.awm->Name()));
 			_awm->AddOverheadInfo(next_sched.awm->Name(), _time);
 		}
 	default:
 		break;
 	}
 
-	// Switch to next working mode in scheduling info
+	// Update current scheduling info
 	curr_sched.state = next_sched.state;
 	curr_sched.awm = next_sched.awm;
 	logger->Info("Scheduled state = {%d}", curr_sched.state);
 }
 
 
-Application::ExitCode_t
-Application::SetConstraint(std::string const & _res_name,
-		Constraint::BoundType_t _type, uint32_t _value) {
-
-	// Lookup the resource by name
-	std::map<std::string, ConstrPtr_t>::iterator it_con =
-	    constraints.find(_res_name);
-
+Application::ExitCode_t Application::SetConstraint(
+				std::string const & _res_name,
+				Constraint::BoundType_t _type,
+				uint32_t _value) {
+	// Check if the resource exists, and get the descriptor.
+	// If doesn't, return.
+	ConstrMap_t::iterator it_con(constraints.find(_res_name));
 	if (it_con == constraints.end()) {
-		// Check for resource existance
 		br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 		br::ResourcePtr_t rsrc_ptr(ra.GetResource(_res_name));
-
-		if (rsrc_ptr.get() == NULL) {
-			// If the resource doesn't exist abort
+		if (!rsrc_ptr) {
+			logger->Warn("Constraint rejected: unknown resource path");
 			return APP_RSRC_NOT_FOUND;
 		}
+
 		// Create a constraint object, set its resource reference
 		// and insert it into the constraints map
 		ConstrPtr_t constr_ptr(new Constraint);
 		constr_ptr->resource = rsrc_ptr;
-		constraints[_res_name] = constr_ptr;
+		constraints.insert(std::pair<std::string, ConstrPtr_t>(
+								_res_name, constr_ptr));
 	}
 
 	// Set the constraint bound value
@@ -262,95 +258,79 @@ Application::SetConstraint(std::string const & _res_name,
 	case Constraint::LOWER_BOUND:
 		constraints[_res_name]->lower = _value;
 		break;
-
 	case Constraint::UPPER_BOUND:
 		constraints[_res_name]->upper = _value;
 		break;
 	}
 	// Check if there are some awms to disable
-	workingModesEnabling(_res_name, _type, _value);
+	WorkingModesEnabling(_res_name, _type, _value);
 
 	return APP_SUCCESS;
 }
 
 
-Application::ExitCode_t
-Application::RemoveConstraint(std::string const & _res_name,
-		Constraint::BoundType_t _type) {
-
-	// Lookup the resource by name
-	std::map<std::string, ConstrPtr_t>::iterator it_con =
-	    constraints.find(_res_name);
-
+Application::ExitCode_t Application::RemoveConstraint(
+				std::string const & _res_name,
+				Constraint::BoundType_t _type) {
+	// Lookup the constraint by resource pathname
+	ConstrMap_t::iterator it_con(constraints.find(_res_name));
 	if (it_con == constraints.end()) {
-		logger->Warn("Tried to remove an unknown constraint");
+		logger->Warn("Constraint removing failed: unknown resource path");
 		return APP_CONS_NOT_FOUND;
 	}
 
-	// Which kind of constraint ?
+	// Reset the constraint and check for AWM to enable
 	switch (_type) {
-
 	case Constraint::LOWER_BOUND :
-		// Remove the lower bound constraint
 		it_con->second->lower = 0;
-		// Check if there are some awms to re-enable now
-		workingModesEnabling(_res_name, _type, it_con->second->lower);
-		// Constraint object complete removal ?
+		WorkingModesEnabling(_res_name, _type, it_con->second->lower);
+		// If there isn't an upper bound value, remove the constraint object
 		if (it_con->second->upper == std::numeric_limits<uint64_t>::max())
 			constraints.erase(it_con);
 		break;
 
 	case Constraint::UPPER_BOUND :
-		// Remove the upper bound constraint
 		it_con->second->upper = std::numeric_limits<uint64_t>::max();
-		// Check if there are some awms to re-enable
-		workingModesEnabling(_res_name, _type, it_con->second->upper);
-		// Constraint object complete removal ?
+		WorkingModesEnabling(_res_name, _type, it_con->second->upper);
+		// If there isn't a lower bound value, remove the constraint object
 		if (it_con->second->lower == 0)
 			constraints.erase(it_con);
 		break;
 	}
+
 	return APP_SUCCESS;
 }
 
 
-void Application::workingModesEnabling(std::string const & _res_name,
-		Constraint::BoundType_t _type, uint64_t _value) {
-
-	// Enabled working modes iterators
-	AwmPtrList_t::iterator it_enabl = enabled_awms.begin();
-	AwmPtrList_t::iterator enabl_end = enabled_awms.end();
-
-	// All working modes iterators
-	std::vector<AwmPtr_t>::const_iterator it_awm =
-		recipe->WorkingModesAll().begin();
-	std::vector<AwmPtr_t>::const_iterator awms_end =
-		recipe->WorkingModesAll().end();
-
-	uint64_t usage_value;
-
-	// Iterate over all the working modes
+void Application::WorkingModesEnabling(std::string const & _res_name,
+				Constraint::BoundType_t _type,
+				uint64_t _constr_value) {
+	// Iterate over all the working modes to check the resource usage value
+	AwmPtrVect_t::const_iterator it_awm(recipe->WorkingModesAll().begin());
+	AwmPtrVect_t::const_iterator awms_end(recipe->WorkingModesAll().end());
 	for (; it_awm < awms_end; ++it_awm) {
-		usage_value = (*it_awm)->ResourceUsageValue(_res_name);
 
 		// If a resource usage is below an upper bound constraint or
-		// above a lower bound one...
-		if (((_type == Constraint::LOWER_BOUND) && (usage_value < _value))  ||
-		    ((_type == Constraint::UPPER_BOUND) && (usage_value > _value))) {
-
-			// disable the working mode
+		// above a lower bound one disable the working mode, by removing it
+		// from the enabled list
+		uint64_t usage_value = (*it_awm)->ResourceUsageValue(_res_name);
+		if (((_type == Constraint::LOWER_BOUND) &&
+				(usage_value < _constr_value)) ||
+						((_type == Constraint::UPPER_BOUND) &&
+							(usage_value > _constr_value))) {
 			enabled_awms.remove(*it_awm);
 			logger->Debug("Disabled : %s", (*it_awm)->Name().c_str());
 		}
 		else {
 			// The working mode is enabled yet ?
-			for (; it_enabl != enabl_end; ++it_awm) {
+			AwmPtrList_t::iterator it_enabl(enabled_awms.begin());
+			AwmPtrList_t::iterator enabl_end(enabled_awms.end());
+			for (; it_enabl != enabl_end; ++it_awm)
 				if ((*it_enabl)->Name().compare((*it_awm)->Name()) == 0)
 					break;
-			}
-			// Check the search result
+
+			// If no, enable it
 			if (it_enabl == enabl_end) {
-				// No. Enable it
 				enabled_awms.push_back(*it_awm);
 				logger->Debug("Enabled : %s", (*it_awm)->Name().c_str());
 			}

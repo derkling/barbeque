@@ -55,7 +55,7 @@ typedef std::shared_ptr<Recipe> RecipePtr_t;
 /** Shared pointer to Constraint object */
 typedef std::shared_ptr<Constraint> ConstrPtr_t;
 /** Map of Constraints pointers, with the resource path as key*/
-typedef std::map<std::string, ConstrPtr_t> ConstrPtrMap_t;
+typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
 
 
 /**
@@ -301,7 +301,7 @@ private:
 	AwmPtrList_t enabled_awms;
 
 	/** Runtime contraints specified by the application  */
-	ConstrPtrMap_t constraints;
+	ConstrMap_t constraints;
 
 	/**
 	 * @brief Whenever a constraint is set or removed, the method is called in
@@ -312,7 +312,7 @@ private:
 	 * @param type Constraint type (lower or upper bound)
 	 * @param value The value of the constraint
 	 */
-	void workingModesEnabling(std::string const & res_path,
+	void WorkingModesEnabling(std::string const & res_path,
 			Constraint::BoundType_t type, uint64_t value);
 
 };

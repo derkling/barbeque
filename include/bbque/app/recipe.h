@@ -36,9 +36,10 @@ class WorkingMode;
 
 /** Shared pointer to Application descriptor  */
 typedef std::shared_ptr<Application> AppPtr_t;
-
 /** Shared pointer to Working Mode descriptor */
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
+/** Vector of shared pointers to WorkingMode */
+typedef std::vector<AwmPtr_t> AwmPtrVect_t;
 
 /**
  * @class Recipe
@@ -100,7 +101,7 @@ public:
 	 * @brief All the working modes defined into the recipe
 	 * @return A vector containing all the working modes
 	 */
-	inline std::vector<AwmPtr_t> const & WorkingModesAll() {
+	inline AwmPtrVect_t const & WorkingModesAll() {
 		return working_modes;
 	}
 
@@ -116,15 +117,14 @@ private:
 	std::string pathname;
 
 	/** The complete set of working modes descriptors defined in the recipe */
-	std::vector<AwmPtr_t> working_modes;
+	AwmPtrVect_t working_modes;
 
 	/**
 	 * @brief Internal method used for working mode searches.
 	 * @return An iterator pointing to the working mode object found in
 	 * the <tt>working_modes</tt> vector
 	 */
-	std::vector<AwmPtr_t>::const_iterator wmIterator(
-			std::string	const & name);
+	AwmPtrVect_t::const_iterator wmIterator(std::string const & name);
 
 };
 
