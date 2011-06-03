@@ -21,10 +21,12 @@
 #include "bbque/barbeque.h"
 
 #include "bbque/configuration_manager.h"
+#include "bbque/modules_factory.h"
 #include "bbque/platform_services.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/resource_manager.h"
 #include "bbque/modules_factory.h"
+#include "bbque/signals_manager.h"
 #include "bbque/test_platform_data.h"
 
 #include "bbque/utils/timer.h"
@@ -110,6 +112,9 @@ int main(int argc, char *argv[]) {
 	bb::TestPlatformData &tpd(bb::TestPlatformData::GetInstance());
 	tpd.LoadPlatformData();
 #endif // BBQUE_TEST_PLATFORM_DATA
+
+	// Initialize Signals Manager module
+	bb::SignalsManager::GetInstance();
 
 	// Check if we have tests to run (i.e. "test." objects have been
 	// registered)

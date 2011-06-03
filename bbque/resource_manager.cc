@@ -24,6 +24,7 @@
 #include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/modules_factory.h"
+#include "bbque/signals_manager.h"
 
 #include "bbque/utils/utility.h"
 
@@ -71,18 +72,87 @@ void ResourceManager::Setup() {
 	ap.Start();
 }
 
-void ResourceManager::ControlLoop() {
+void ResourceManager::NotifyEvent(controlEvent_t evt) {
+	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx);
 
-	DB(
-	ConfigurationManager & cm = ConfigurationManager::GetInstance();
-	uint16_t test_run = cm.GetOptions()["debug.test_time"].as<uint16_t>();
+	// Ensure we have a valid event
+	assert(evt<EVENTS_COUNT);
 
-	// Fake control loop implementation
-	std::cerr << "Exiting in " << test_run << "s..." << std::endl;
-	::sleep(test_run);
-	);
+	// Set the corresponding event flag
+	pendingEvts.set(evt);
 
+	// Notify (the control loop)
+	pendingEvts_cv.notify_one();
+}
+
+
+
+
+void ResourceManager::EvtBbqExit() {
+	ApplicationManager & am = ApplicationManager::GetInstance();
+	//ApplicationProxy & ap = ApplicationProxy::GetInstance();
+	AppsMap_t const * apps = am.Applications();
+	AppsMap_t::const_iterator it = apps->begin();
+	AppsMap_t::const_iterator end = apps->end();
+	ApplicationProxy::resp_ftr_t ftr;
+	AppPtr_t papp;
+
+	logger->Info("Terminating Barbeque...");
 	done = true;
+
+	// Stop applications
+	for ( ; it!=end; ++it) {
+		papp = (*it).second;
+		// Terminating the application
+		logger->Warn("TODO: Send application STOP command");
+		// Removing internal data structures
+		am.StopApplication(papp);
+	}
+
+} 
+
+void ResourceManager::ControlLoop() {
+	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx);
+
+	// Wait for a new event
+	pendingEvts_cv.wait(pendingEvts_ul);
+
+	// Checking for pending events, starting from higer priority ones.
+	for(uint8_t evt=EVENTS_COUNT; evt; --evt) {
+
+		logger->Debug("Checking events [%d:%s]",
+				evt-1, pendingEvts[evt-1] ? "Pending" : "None");
+
+		// Jump not pending events
+		if (!pendingEvts[evt-1])
+			continue;
+
+		// Dispatching events to handlers
+		switch(evt-1) {
+		case EXC_START:
+			logger->Debug("Event [EXC_START]");
+			break;
+		case EXC_STOP:
+			logger->Debug("Event [EXC_STOP");
+			break;
+		case BBQ_EXIT:
+			logger->Debug("Event [BBQ_EXIT]");
+			EvtBbqExit();
+			return;
+		case BBQ_ABORT:
+			logger->Debug("Event [BBQ_ABORT]");
+			logger->Fatal("Abortive quit");
+			exit(EXIT_FAILURE);
+		default:
+			logger->Crit("Unhandled event [%d]", evt-1);
+		}
+
+		// Resetting event
+		pendingEvts.reset(evt-1);
+
+	}	
+		
+
 }
 
 void ResourceManager::Go() {

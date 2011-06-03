@@ -30,6 +30,8 @@
 
 #include "bbque/plugins/logger.h"
 
+#include <bitset>
+
 namespace bbque {
 
 	/**
@@ -44,6 +46,16 @@ namespace bbque {
 class ResourceManager {
 
 public:
+
+	typedef enum controlEvent {
+		EXC_START = 0,
+		EXC_STOP,
+
+		BBQ_EXIT,
+		BBQ_ABORT,
+
+		EVENTS_COUNT
+	} controlEvent_t;
 
 	/**
 	 * @brief Get a reference to the resource manager
@@ -68,6 +80,18 @@ public:
 	 * the control cycle.
 	 */
 	void Go();
+
+	/**
+	 * @brief Notify an event to the resource manager
+	 *
+	 * This method is used to notify the resource manager about events related
+	 * to system activity (e.g. stopping/killing Barbeque), applications (e.g.
+	 * starting a new execution context) and resources (e.g. changed resources
+	 * availability). Notified events could trigger actions within the control
+	 * loop, e.g. running the optimization policy to find a new resources
+	 * schedule.
+	 */
+	void NotifyEvent(controlEvent_t evt);
 
 private:
 
@@ -108,6 +132,13 @@ private:
 	ApplicationProxy & ap;
 
 
+	std::bitset<EVENTS_COUNT> pendingEvts;
+
+	std::mutex pendingEvts_mtx;
+
+	std::condition_variable pendingEvts_cv;
+
+
 	/**
 	 * @brief   Build a new instance of the resource manager
 	 */
@@ -131,7 +162,9 @@ private:
 	 */
 
 	/**
+	 * @brief Process a BBQ_EXIT event
 	 */
+	void EvtBbqExit();
 
 };
 

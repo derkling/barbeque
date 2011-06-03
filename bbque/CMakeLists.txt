@@ -36,9 +36,12 @@ add_subdirectory(app)
 add_subdirectory(res)
 
 # Add "barbeque" target binary
-set (BARBEQUE_SRC barbeque version object resource_manager configuration_manager)
-set (BARBEQUE_SRC platform_services dynamic_library plugin_manager modules_factory ${BARBEQUE_SRC})
-set (BARBEQUE_SRC application_manager application_proxy rpc_proxy console_logger ${BARBEQUE_SRC})
+set (BARBEQUE_SRC barbeque version object configuration_manager console_logger)
+set (BARBEQUE_SRC platform_services dynamic_library ${BARBEQUE_SRC})
+set (BARBEQUE_SRC plugin_manager modules_factory ${BARBEQUE_SRC})
+set (BARBEQUE_SRC resource_manager application_manager ${BARBEQUE_SRC})
+set (BARBEQUE_SRC application_proxy rpc_proxy ${BARBEQUE_SRC})
+set (BARBEQUE_SRC signals_manager ${BARBEQUE_SRC})
 if(BBQUE_TEST_PLATFORM_DATA)
 	# This is just a temporary replacement for the still missing
 	# ResourceAbstraction module
