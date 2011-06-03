@@ -205,7 +205,7 @@ ApplicationProxy::pconCtx_t ApplicationProxy::GetConnectionContext(
 	it = conCtxMap.find(pmsg_hdr->app_pid);
 	if (it == conCtxMap.end()) {
 		conCtxMap_ul.unlock();
-		logger->Warn("APPs PRX: Execution Context registration FAILED",
+		logger->Warn("APPs PRX: EXC registration FAILED",
 			"[pid: %d, exc: %d] (Error: application not paired)",
 			pmsg_hdr->app_pid, pmsg_hdr->exc_id);
 		return pconCtx_t();
@@ -258,7 +258,7 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: Registering Execution Context "
+	logger->Info("APPs PRX: Registering EXC "
 			"[app: %s, pid: %d, exc: %d, nme: %s]",
 			pcon->app_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
@@ -267,7 +267,7 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 	papp  = am.CreateEXC(pmsg_pyl->exc_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->recipe);
 	if (!papp) {
-		logger->Error("APPs PRX: Execution Context "
+		logger->Error("APPs PRX: EXC "
 			"[app: %s, pid: %d, exc: %d, nme: %s] "
 			"registration FAILED "
 			"(Error: missing recipe or recipe load failure)",
@@ -298,7 +298,7 @@ void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
 		return;
 
 	// Unregister an Execution Context
-	logger->Info("APPs PRX: Unregistering Execution Context "
+	logger->Info("APPs PRX: Unregistering EXC "
 			"[app: %s, pid: %d, exc: %d, nme: %s]",
 			pcon->app_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
@@ -328,14 +328,14 @@ void ApplicationProxy::RpcExcStart(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: Starting Execution Context "
+	logger->Info("APPs PRX: Starting EXC "
 			"[app: %s, pid: %d, exc: %d]",
 			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
 
 	// Enabling the EXC to the ApplicationManager
 	result = am.EnableEXC(pcon->app_pid, pmsg_hdr->exc_id);
 	if (result != ApplicationManager::AM_SUCCESS) {
-		logger->Error("APPs PRX: Execution Context "
+		logger->Error("APPs PRX: EXC "
 			"[pid: %d, exc: %d] "
 			"start FAILED",
 			pcon->app_pid, pmsg_hdr->exc_id);
@@ -363,14 +363,14 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: Stopping Execution Context "
+	logger->Info("APPs PRX: Stopping EXC "
 			"[app: %s, pid: %d, exc: %d]",
 			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
 
 	// Enabling the EXC to the ApplicationManager
 	result = am.DisableEXC(pcon->app_pid, pmsg_hdr->exc_id);
 	if (result != ApplicationManager::AM_SUCCESS) {
-		logger->Error("APPs PRX: Execution Context "
+		logger->Error("APPs PRX: EXC "
 			"[pid: %d, exc: %d] "
 			"stop FAILED",
 			pcon->app_pid, pmsg_hdr->exc_id);
@@ -396,7 +396,7 @@ void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: GetWorkingMode for Execution Context "
+	logger->Info("APPs PRX: GetWorkingMode for EXC "
 			"[app: %s, pid: %d, exc: %d]",
 			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
 
