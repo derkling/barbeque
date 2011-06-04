@@ -48,11 +48,12 @@ public:
 
 	/**
 	 * @brief Constructor with parameters
-	 * @param app A pointer to the application which to refer
-	 * @param name The working mode name
+	 * @param app Application owning the working mode
+	 * @param id Working mode ID
+	 * @param name Working mode descripting name
 	 * @param value The user QoS value of the working mode
 	 */
-	explicit WorkingMode(AppPtr_t app, std::string const & name,
+	explicit WorkingMode(AppPtr_t app, uint16_t id, std::string const & name,
 			uint16_t value);
 
 	/**
@@ -65,6 +66,13 @@ public:
 	 */
 	inline std::string const & Name() const {
 		return name;
+	}
+
+	/**
+	 * @see WorkingModeStatusIF
+	 */
+	inline uint16_t Id() const {
+		return id;
 	}
 
 	/**
@@ -125,19 +133,19 @@ public:
 	/**
 	 * @see WorkingModeConfIF
 	 */
-	ExitCode_t AddOverheadInfo(std::string const & dest_awm, double time);
+	ExitCode_t AddOverheadInfo(uint16_t dest_awm_id, double time);
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	OverheadPtr_t OverheadInfo(std::string const & dest_awm) const;
+	OverheadPtr_t OverheadInfo(uint16_t dest_awm_id) const;
 
 	/**
 	 * @brief Remove switching overhead information
-	 * @param dest_awm The destination working mode
+	 * @param dest_awm_id Destination working mode ID
 	 */
-	inline void RemoveOverheadInfo(std::string const & dest_awm) {
-		overheads.erase(dest_awm);
+	inline void RemoveOverheadInfo(uint16_t dest_awm_id) {
+		overheads.erase(dest_awm_id);
 	}
 
 	/**
@@ -157,7 +165,10 @@ private:
 	 */
 	AppPtr_t owner;
 
-	/** The identifier name */
+	/** A numerical ID  */
+	uint16_t id;
+
+	/** A descriptive name */
 	std::string name;
 
 	/** The QoS value associated to the working mode */

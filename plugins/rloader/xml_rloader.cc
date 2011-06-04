@@ -184,15 +184,26 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 		ticpp::Element * awm_elem = awms_elem->FirstChildElement("awm", true);
 		while (awm_elem) {
 			// Working mode attributes
+			unsigned int wm_id;
+			awm_elem->GetAttribute("id", &wm_id, true);
 			std::string wm_name;
-			awm_elem->GetAttribute("name", &wm_name, true);
+			awm_elem->GetAttribute("name", &wm_name, false);
 			unsigned int wm_value;
 			awm_elem->GetAttribute("value", &wm_value, true);
 
+			// The awm ID must be unique!
+			if (recipe_ptr->WorkingMode(wm_id)) {
+				logger->Warn("Skipping working mode %s [doubled ID found]",
+								wm_name.c_str());
+				awm_elem = awm_elem->NextSiblingElement("awm", false);
+				continue;
+			}
+
 			// Add a new working mode passing its name and value
-			recipe_ptr->AddWorkingMode(app_ptr, wm_name,
-					static_cast<uint8_t> (wm_value));
-			AwmPtr_t awm(recipe_ptr->WorkingMode(wm_name));
+			AwmPtr_t & awm(recipe_ptr->AddWorkingMode(app_ptr,
+							wm_id,
+							wm_name,
+							static_cast<uint8_t> (wm_value)));
 			assert(awm.get() != NULL);
 
 			// Load resource usages of the working mode
@@ -202,10 +213,9 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 					__RSRC_FORMAT_ERR)
 				return RL_FORMAT_ERROR;
 
-			// Plugin specific data (of the AWM)
-			ba::AwmPtr_t this_awm(recipe_ptr->WorkingMode(wm_name));
-			if (this_awm.get() != NULL)
-				loadPluginsData<ba::AwmPtr_t>(this_awm, awm_elem);
+			// AWM plugin specific data
+			if (awm)
+				loadPluginsData<ba::AwmPtr_t>(awm, awm_elem);
 
 			// Next working mode
 			awm_elem = awm_elem->NextSiblingElement("awm", false);

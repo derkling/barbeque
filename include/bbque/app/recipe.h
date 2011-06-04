@@ -38,8 +38,8 @@ class WorkingMode;
 typedef std::shared_ptr<Application> AppPtr_t;
 /** Shared pointer to Working Mode descriptor */
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
-/** Vector of shared pointers to WorkingMode */
-typedef std::vector<AwmPtr_t> AwmPtrVect_t;
+/** Map of shared pointers to WorkingMode */
+typedef std::map<uint16_t, AwmPtr_t> AwmMap_t;
 
 /**
  * @class Recipe
@@ -77,31 +77,35 @@ public:
 
 	/**
 	 * @brief Insert an application working mode
-	 * @param app Application descriptor pointer
-	 * @param name Working mode name
-	 * @param value The QoS value
+	 * @param app Application owning the working mode
+	 * @param id Working mode ID
+	 * @param name Working mode descripting name
+	 * @param value The user QoS value of the working mode
 	 */
-	void AddWorkingMode(AppPtr_t app, std::string const & name, uint8_t value);
+	AwmPtr_t & AddWorkingMode(AppPtr_t app, uint16_t id, std::string const & name,
+					uint16_t value);
 
 	/**
 	 * @brief Remove an application working mode inserted
-	 * @param name Working mode name
+	 * @param id Working mode ID
 	 */
-	void RemoveWorkingMode(std::string const & name);
+	inline void RemoveWorkingMode(uint16_t id) {
+		working_modes.erase(id);
+	}
 
 	/**
 	 * @brief Return an application working mode object by specifying
 	 * its identifying name
-	 * @param name Working mode name
+	 * @param id Working mode ID
 	 * @return A shared pointer to the application working mode searched
 	 */
-	AwmPtr_t WorkingMode(std::string const & name);
+	AwmPtr_t WorkingMode(uint16_t id);
 
 	/**
 	 * @brief All the working modes defined into the recipe
 	 * @return A vector containing all the working modes
 	 */
-	inline AwmPtrVect_t const & WorkingModesAll() {
+	inline AwmMap_t const & WorkingModesAll() {
 		return working_modes;
 	}
 
@@ -117,14 +121,7 @@ private:
 	std::string pathname;
 
 	/** The complete set of working modes descriptors defined in the recipe */
-	AwmPtrVect_t working_modes;
-
-	/**
-	 * @brief Internal method used for working mode searches.
-	 * @return An iterator pointing to the working mode object found in
-	 * the <tt>working_modes</tt> vector
-	 */
-	AwmPtrVect_t::const_iterator wmIterator(std::string const & name);
+	AwmMap_t working_modes;
 
 };
 

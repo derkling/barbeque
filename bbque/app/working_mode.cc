@@ -46,9 +46,11 @@ WorkingMode::WorkingMode() {
 
 
 WorkingMode::WorkingMode(AppPtr_t _app,
+		uint16_t _id,
 		std::string const & _name,
 		uint16_t _value):
 	owner(_app),
+	id(_id),
 	name(_name),
 	value(_value) {
 
@@ -105,22 +107,21 @@ uint64_t WorkingMode::ResourceUsageValue(
 }
 
 
-WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(
-		std::string const & _dest_awm,
+WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
 		double _time) {
 	// Check the existance of the destination AWM
 	assert(owner->GetRecipe().get() != NULL);
-	if (!(owner->GetRecipe()->WorkingMode(_dest_awm))) {
-		logger->Warn("Working mode %s not found in %s",
-		             _dest_awm.c_str(), owner->Name().c_str());
+	if (!(owner->GetRecipe()->WorkingMode(_dest_awm_id))) {
+		logger->Warn("Working mode ID=%d not found in %s",
+		             _dest_awm_id, owner->Name().c_str());
 		return WM_NOT_FOUND;
 	}
 
 	// Update overhead info
-	OverheadsMap_t::iterator it(overheads.find(_dest_awm));
+	OverheadsMap_t::iterator it(overheads.find(_dest_awm_id));
 	if (it == overheads.end()) {
-		overheads.insert(std::pair<std::string, OverheadPtr_t>(
-					_dest_awm, OverheadPtr_t(new TransitionOverheads(_time))));
+		overheads.insert(std::pair<uint16_t, OverheadPtr_t>(
+					_dest_awm_id, OverheadPtr_t(new TransitionOverheads(_time))));
 	}
 	else {
 		it->second->IncCount();
@@ -128,20 +129,19 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(
 	}
 
 	// Debug messages
-	logger->Debug("%s -> %s  overhead [t] :\n", name.c_str(),
-			_dest_awm.c_str());
-	logger->Debug("\tlast : %.4f", OverheadInfo(_dest_awm)->LastTime());
-	logger->Debug("\tmin  : %.4f", OverheadInfo(_dest_awm)->MinTime());
-	logger->Debug("\tmax  : %.4f", OverheadInfo(_dest_awm)->MaxTime());
-	logger->Debug("\tcount  : %d", OverheadInfo(_dest_awm)->Count());
+	logger->Debug("AWM %d -> AWM%d  overhead [t] :\n", id, _dest_awm_id);
+	logger->Debug("\tlast : %.4f", OverheadInfo(_dest_awm_id)->LastTime());
+	logger->Debug("\tmin  : %.4f", OverheadInfo(_dest_awm_id)->MinTime());
+	logger->Debug("\tmax  : %.4f", OverheadInfo(_dest_awm_id)->MaxTime());
+	logger->Debug("\tcount  : %d", OverheadInfo(_dest_awm_id)->Count());
 
 	return WM_SUCCESS;
 }
 
 
-OverheadPtr_t WorkingMode::OverheadInfo(std::string const & _dest_awm) const {
+OverheadPtr_t WorkingMode::OverheadInfo(uint16_t _dest_awm_id) const {
 	// Overhead descriptor of the destination working mode
-	OverheadsMap_t::const_iterator it(overheads.find(_dest_awm));
+	OverheadsMap_t::const_iterator it(overheads.find(_dest_awm_id));
 	if (it != overheads.end())
 		return it->second;
 	// Otherwise... null pointer return

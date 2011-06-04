@@ -2,7 +2,7 @@
 <BarbequeRTRM version="0.4">
 	<application priority="5">
 		<awms>
-			<awm name="wm0" value="6">
+			<awm id="0" name="maxperf" value="6">
 				<resources>
 					<mem qty="500" units="Kb"/>
 					<arch name="P2012">
@@ -18,7 +18,7 @@
 				<plugins>
 				</plugins>
 			</awm>
-			<awm name="wm1" value="4">
+			<awm id="1" name="avgperf" value="4">
 				<resources>
 					<mem qty="320" units="Kb"/>
 					<arch name="P2012">
@@ -34,7 +34,7 @@
 				<plugins>
 				</plugins>
 			</awm>
-			<awm name="wm2" value="2">
+			<awm id="2" name="lowperf" value="2">
 				<resources>
 					<mem qty="300" units="Kb"/>
 					<arch name="P2012">

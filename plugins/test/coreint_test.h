@@ -109,7 +109,7 @@ private:
 	 * @param wm Working mode to switch in
 	 * @param ov_time Switching time overhead
 	 */
-	void testScheduleSwitch(AppPtr_t & test_app, std::string const & wm,
+	void testScheduleSwitch(AppPtr_t & test_app, uint8_t wm_id,
 			double ov_time);
 
 	/**

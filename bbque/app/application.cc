@@ -165,8 +165,12 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 	// constraints asserted
 	if (enabled_awms.empty() && constraints.empty()) {
 		// Constraints list is empty. Get all the working modes.
-		AwmPtrVect_t const & wms(recipe->WorkingModesAll());
-		enabled_awms.assign(wms.begin(), wms.end());
+		AwmMap_t const & wms(recipe->WorkingModesAll());
+		AwmMap_t::const_iterator it = wms.begin();
+		AwmMap_t::const_iterator end = wms.end();
+		//enabled_awms.assign(wms.begin(), wms.end());
+		for (; it != end; ++it)
+			enabled_awms.push_back(it->second);
 		enabled_awms.sort(CompareAWMsByValue);
 		logger->Debug("%d working modes enabled.", enabled_awms.size());
 	}
@@ -216,8 +220,8 @@ void Application::UpdateScheduledStatus(double _time) {
 	case RECONF:
 		// Reconfiguration overheads
 		if (curr_sched.awm) {
-			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_sched.awm->Name()));
-			_awm->AddOverheadInfo(next_sched.awm->Name(), _time);
+			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_sched.awm->Id()));
+			_awm->AddOverheadInfo(next_sched.awm->Id(), _time);
 		}
 	default:
 		break;
@@ -306,33 +310,33 @@ void Application::WorkingModesEnabling(std::string const & _res_name,
 				Constraint::BoundType_t _type,
 				uint64_t _constr_value) {
 	// Iterate over all the working modes to check the resource usage value
-	AwmPtrVect_t::const_iterator it_awm(recipe->WorkingModesAll().begin());
-	AwmPtrVect_t::const_iterator awms_end(recipe->WorkingModesAll().end());
-	for (; it_awm < awms_end; ++it_awm) {
+	AwmMap_t::const_iterator it_awm(recipe->WorkingModesAll().begin());
+	AwmMap_t::const_iterator awms_end(recipe->WorkingModesAll().end());
+	for (; it_awm != awms_end; ++it_awm) {
 
 		// If a resource usage is below an upper bound constraint or
 		// above a lower bound one disable the working mode, by removing it
 		// from the enabled list
-		uint64_t usage_value = (*it_awm)->ResourceUsageValue(_res_name);
+		uint64_t usage_value = (it_awm->second)->ResourceUsageValue(_res_name);
 		if (((_type == Constraint::LOWER_BOUND) &&
 				(usage_value < _constr_value)) ||
 						((_type == Constraint::UPPER_BOUND) &&
 							(usage_value > _constr_value))) {
-			enabled_awms.remove(*it_awm);
-			logger->Debug("Disabled : %s", (*it_awm)->Name().c_str());
+			enabled_awms.remove(it_awm->second);
+			logger->Debug("Disabled : %s", (it_awm->second)->Name().c_str());
 		}
 		else {
 			// The working mode is enabled yet ?
 			AwmPtrList_t::iterator it_enabl(enabled_awms.begin());
 			AwmPtrList_t::iterator enabl_end(enabled_awms.end());
 			for (; it_enabl != enabl_end; ++it_awm)
-				if ((*it_enabl)->Name().compare((*it_awm)->Name()) == 0)
+				if ((*it_enabl)->Name().compare((it_awm->second)->Name()) == 0)
 					break;
 
 			// If no, enable it
 			if (it_enabl == enabl_end) {
-				enabled_awms.push_back(*it_awm);
-				logger->Debug("Enabled : %s", (*it_awm)->Name().c_str());
+				enabled_awms.push_back(it_awm->second);
+				logger->Debug("Enabled : %s", (it_awm->second)->Name().c_str());
 			}
 		}
 	}

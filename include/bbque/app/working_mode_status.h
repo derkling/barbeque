@@ -41,7 +41,7 @@ typedef std::shared_ptr<Application> AppPtr_t;
 /**  Shared pointer to TransitionOverheads */
 typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
 /** Map of OverheadPtr_t. Key: destination working mode name */
-typedef std::map<std::string, OverheadPtr_t> OverheadsMap_t;
+typedef std::map<uint16_t, OverheadPtr_t> OverheadsMap_t;
 
 
 /**
@@ -77,6 +77,12 @@ public:
 	virtual std::string const & Name() const = 0;
 
 	/**
+	 * @brief Working Mode ID
+	 * @return ID number
+	 */
+	virtual uint16_t Id() const = 0;
+
+	/**
 	 * @brief Get the application owning the working mode
 	 * @return A shared pointer to the application descriptor
 	 */
@@ -110,10 +116,10 @@ public:
 	/**
 	 * @brief Retrieve overhead information about switching to <tt>awm_name</tt>
 	 * working mode
-	 * @param awm_name The destination working mode
+	 * @param dest_awm_id Destination working mode ID
 	 * @return A pointer to the TransitionOverheads object
 	 */
-	virtual OverheadPtr_t OverheadInfo(std::string const & awm_name) const = 0;
+	virtual OverheadPtr_t OverheadInfo(uint16_t dest_awm_id) const = 0;
 
 };
 

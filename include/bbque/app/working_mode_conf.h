@@ -58,12 +58,11 @@ public:
 	 * Create a new object TransitionOverheads managing the overhead
 	 * information in switching to 'dest_awm' working mode.
 	 *
-	 * @param dest_awm Destination working mode
+	 * @param dest_awm_id Destination working mode ID
 	 * @param time Time spent in switching to destination working mode
 	 * @return A reference to the TransitionOverheads just created
 	 */
-	virtual ExitCode_t AddOverheadInfo(std::string const & dest_awm,
-			double time) = 0;
+	virtual ExitCode_t AddOverheadInfo(uint16_t dest_awm_id, double time) = 0;
 
 	/**
 	 * @brief Bind resource usages paths to system resources

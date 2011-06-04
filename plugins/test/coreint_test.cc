@@ -255,27 +255,23 @@ void PrintResourceAvailabilities(SystemView & sv) {
 
 void PrintScheduleInfo(AppPtr_t & papp) {
 
-	if (papp.get() == NULL) {
+	if (!papp) {
 		std::cout
 			<< "Null application descriptor pointer passed"
-			<<	std::endl;
+			<< std::endl;
 		return;
 	}
 
-	std::cout
-		<< std::endl
-		<< "**************************************************"
-		<< std::endl;
-
-	if (papp->CurrentAWM().get() == NULL) {
-		std::cout << "[!] Current AWM not set" << std::endl;
+	if (!(papp->CurrentAWM())) {
+		std::cout << "! - Current AWM not set - " << std::endl;
 	}
 	else {
 		std::cout
-			<< "Current schedule of "
-			<< papp->Name().c_str() << " is "
-			<< papp->CurrentAWM()->Name() << " "
-			<< papp->CurrentState() << std::endl;
+			<< papp->Name().c_str() << ": "
+			<< "Curr sched = "
+			<< "AWM" << papp->CurrentAWM()->Id()
+			<< " " << papp->CurrentAWM()->Name()
+			<< " | State " << papp->CurrentState() << std::endl;
 	}
 
 	if (papp->NextAWM().get() == NULL) {
@@ -283,15 +279,12 @@ void PrintScheduleInfo(AppPtr_t & papp) {
 	}
 	else {
 		std::cout
-			<< "Next schedule of "
-			<< papp->Name().c_str() << " is "
-			<< papp->NextAWM()->Name() << " "
-			<< papp->NextState() << std::endl;
+			<< papp->Name().c_str() << ": "
+			<< "Next sched = "
+			<< "AWM" << papp->NextAWM()->Id()
+			<< " " << papp->NextAWM()->Name()
+			<< " | State " << papp->NextState() << std::endl;
 	}
-
-	std::cout
-		<< "**************************************************"
-		<< std::endl << std::endl;
 
 	std::cout << "Press a key..." << std::endl;
 	getchar();
@@ -318,12 +311,15 @@ int PrintWorkingModesInfo(AppPtr_t papp) {
 	AwmPtrList_t::const_iterator endm = awms->end();
 	for (; wm_it != endm; ++wm_it) {
 
-		fprintf(stderr, "\n\n *** [ %s ] (value = %d) %d resource usages ***\n",
-				(*wm_it)->Name().c_str(), (*wm_it)->Value(),
+		fprintf(stderr, "\n\n *** AWM%d [ %s ] (value = %d) %d resource usages ***\n",
+				(*wm_it)->Id(),
+				(*wm_it)->Name().c_str(),
+				(*wm_it)->Value(),
 				(int)(*wm_it)->ResourceUsages()->size());
 
 		std::cout
 			<< "\n--------------------------------[ "
+			<< (*wm_it)->Id() << " "
 			<< (*wm_it)->Name()
 			<< " ]----------------------------" << std::endl;
 
@@ -460,8 +456,8 @@ void GetClusteredInfo(SystemView & sv,
 }
 
 
-void CoreInteractionsTest::testScheduleSwitch(
-		AppPtr_t & papp, std::string const & wm,
+void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
+		uint8_t wm_id,
 		double ov_time) {
 
 	// Get working mode wm1
@@ -472,9 +468,9 @@ void CoreInteractionsTest::testScheduleSwitch(
 	}
 
 	// Get working mode descriptor related to "wm"
-	AwmPtr_t d_wm = papp->GetRecipe()->WorkingMode(wm);
+	AwmPtr_t d_wm = papp->GetRecipe()->WorkingMode(wm_id);
 	if (d_wm.get() == NULL) {
-		std::cout << "Working mode " << wm.c_str() << " not found"
+		std::cout << "Working mode ID=" << wm_id << " not found"
 			<< std::endl;
 		return;
 	}
@@ -501,18 +497,18 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 	AppPtr_t app_conf(am.GetApplication(3324));
 
 	// Simulate a schedulation 1
-	testScheduleSwitch(app_conf, "wm1", 0.381);
+	testScheduleSwitch(app_conf, 1, 0.381);
 	PrintResourceAvailabilities(sv);
 
 	// Set a constraint
 	app_conf->RemoveConstraint("cacheL3", Constraint::UPPER_BOUND);
 
 	// Simulate a schedulation 2
-	testScheduleSwitch(app_conf, "wm2", 0.445);
+	testScheduleSwitch(app_conf, 2, 0.445);
 	PrintResourceAvailabilities(sv);
 
 	// Come back to awm  1
-	testScheduleSwitch(app_conf, "wm1", 0.409);
+	testScheduleSwitch(app_conf, 1, 0.409);
 	PrintResourceAvailabilities(sv);
 
 	// Stop application

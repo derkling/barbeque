@@ -29,51 +29,22 @@ Recipe::~Recipe() {
 }
 
 
-void Recipe::AddWorkingMode(AppPtr_t _app, std::string const & _name,
-		uint8_t _value) {
-
-	// Insert a new working mode descriptor into the list
-	AwmPtr_t new_awm(new class WorkingMode(_app, _name, _value));
-	working_modes.push_back(new_awm);
+AwmPtr_t & Recipe::AddWorkingMode(AppPtr_t _app,
+				uint16_t _id,
+				std::string const & _name,
+				uint16_t _value) {
+	// Insert a new working mode descriptor into the map
+	AwmPtr_t new_awm(new class WorkingMode(_app, _id, _name, _value));
+	working_modes.insert(std::pair<uint16_t, AwmPtr_t>(_id, new_awm));
+	return working_modes[_id];
 }
 
 
-void Recipe::RemoveWorkingMode(std::string const & _name) {
-
-	// Remove it from the vector
-	std::vector<AwmPtr_t>::iterator awm_it = working_modes.begin();
-	for ( ; awm_it != working_modes.end(); ++awm_it)
-		if ((*awm_it)->Name().compare(_name) == 0)
-			working_modes.erase(awm_it);
-}
-
-
-AwmPtr_t Recipe::WorkingMode(std::string const & _name) {
-	AwmPtr_t awm_null;
-	awm_null.reset();
-
-	std::vector<AwmPtr_t>::const_iterator it = wmIterator(_name);
-	if (it != working_modes.end())
-		return *it;
-
-	// _name doesn't match any working mode
-	return awm_null;
-}
-
-
-std::vector<AwmPtr_t>::const_iterator Recipe::wmIterator(
-		std::string	const & _name) {
-
-	std::vector<AwmPtr_t>::const_iterator it = working_modes.begin();
-	std::vector<AwmPtr_t>::const_iterator endv = working_modes.end();
-
-	// Linear search.
-	for (; it < endv; ++it) {
-		std::string temp = (*it)->Name();
-		if (temp.compare(_name) == 0)
-			break;
-	}
-	return it;
+AwmPtr_t Recipe::WorkingMode(uint16_t _id) {
+	AwmMap_t::iterator it = working_modes.find(_id);
+	if (it == working_modes.end())
+		return AwmPtr_t();
+	return it->second;
 }
 
 } // namespace app
