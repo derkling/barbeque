@@ -177,6 +177,20 @@ void Application::SetRecipe(RecipePtr_t app_recipe) {
 }
 
 
+AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
+	AwmPtrList_t::iterator awm_it(enabled_awms.begin());
+	AwmPtrList_t::iterator end_awm(enabled_awms.end());
+
+	while(awm_it != end_awm) {
+		if ((*awm_it)->Id() == wmId)
+			return (*awm_it);
+		++awm_it;
+	}
+
+	return AwmPtr_t();
+}
+
+
 Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 				RViewToken_t vtok) {
 	// Application is blocked, until the AWM validity is verified
@@ -220,7 +234,7 @@ void Application::UpdateScheduledStatus(double _time) {
 	case RECONF:
 		// Reconfiguration overheads
 		if (curr_sched.awm) {
-			AwmPtr_t _awm(GetRecipe()->WorkingMode(curr_sched.awm->Id()));
+			AwmPtr_t _awm(GetWorkingMode(curr_sched.awm->Id()));
 			_awm->AddOverheadInfo(next_sched.awm->Id(), _time);
 		}
 	default:

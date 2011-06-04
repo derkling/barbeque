@@ -213,6 +213,15 @@ public:
 	}
 
 	/**
+	 * @brief Get a working mode descriptor
+	 * @param wmId Working mode ID
+	 * @return The (enabled) working mode descriptor
+	 *
+	 * @note The working mode must come from the enabled list
+	 */
+	AwmPtr_t GetWorkingMode(uint16_t wmId);
+
+	/**
 	 * @see ApplicationStatusIF
 	 */
 	ExitCode_t SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);

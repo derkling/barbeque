@@ -468,7 +468,7 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 	}
 
 	// Get working mode descriptor related to "wm"
-	AwmPtr_t d_wm = papp->GetRecipe()->WorkingMode(wm_id);
+	AwmPtr_t d_wm = papp->GetWorkingMode(wm_id);
 	if (d_wm.get() == NULL) {
 		std::cout << "Working mode ID=" << wm_id << " not found"
 			<< std::endl;
