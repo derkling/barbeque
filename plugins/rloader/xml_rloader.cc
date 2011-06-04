@@ -117,14 +117,13 @@ int32_t XMLRecipeLoader::Destroy(void *plugin) {
 
 // =======================[ MODULE INTERFACE ]================================
 
-RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
-		AppPtr_t _app, std::string const & _recipe_name, RecipePtr_t _recipe) {
-
-	RecipeLoaderIF::ExitCode_t ret_awms;
-
+RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(AppPtr_t _app,
+				std::string const & _recipe_name,
+				RecipePtr_t _recipe) {
+	// Result of loading application working modes
+	RecipeLoaderIF::ExitCode_t result;
 	// The current application descriptor
 	app_ptr = ba::AppPtr_t(_app);
-
 	// The recipe object
 	recipe_ptr = ba::RecipePtr_t(_recipe);
 
@@ -145,18 +144,14 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		ticpp::Node * root_node = doc.FirstChild();
 		root_node = root_node->NextSibling("BarbequeRTRM", true);
 
-		// <application> - Application root tag
+		// Application Working Modes
 		ticpp::Element * app_elem =
-			root_node->FirstChildElement("application", true);
+				root_node->FirstChildElement("application", true);
+		result = loadWorkingModes(app_elem);
 
-		// Load working modes data
-		ret_awms = loadWorkingModes(app_elem);
-
-		// Are there any 'static' constraints in the recipe ?
-		if (ret_awms != RL_FORMAT_ERROR) {
-			// Load constraints
+		// "Static" constraints and plugins specific data
+		if (result != RL_FORMAT_ERROR) {
 			loadConstraints(app_elem);
-			// Load plugins data
 			loadPluginsData<ba::AppPtr_t>(app_ptr, app_elem);
 		}
 
@@ -165,12 +160,11 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		doc.Clear();
 		return RL_ABORTED;
 	}
-	return ret_awms;
+	return result;
 }
 
 
 std::time_t XMLRecipeLoader::LastModifiedTime(std::string const & _name) {
-
 	boost::filesystem::path p(recipe_dir + "/" + _name + ".recipe");
 	return boost::filesystem::last_write_time(p);
 }
@@ -180,20 +174,15 @@ std::time_t XMLRecipeLoader::LastModifiedTime(std::string const & _name) {
 
 RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 		ticpp::Element *_xml_elem) {
-
-	// For each working mode we need resource usages data and (optionally)
-	// plugins specific data
-
-	uint8_t ret_res = __RSRC_SUCCESS;
+	// Loading resources info exit code
+	uint8_t result = __RSRC_SUCCESS;
 
 	try {
-		// <awms> - Application Working Modes
+		// For each working mode we need resource usages data and (optionally)
+		// plugins specific data
 		ticpp::Node * awms_elem = _xml_elem->FirstChildElement("awms", true);
-
-		// <awm>
 		ticpp::Element * awm_elem = awms_elem->FirstChildElement("awm", true);
 		while (awm_elem) {
-
 			// Working mode attributes
 			std::string wm_name;
 			awm_elem->GetAttribute("name", &wm_name, true);
@@ -203,19 +192,14 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 			// Add a new working mode passing its name and value
 			recipe_ptr->AddWorkingMode(app_ptr, wm_name,
 					static_cast<uint8_t> (wm_value));
-
-			// Get the descriptor of the working mode just created
-			AwmPtr_t awm;
-			awm = recipe_ptr->WorkingMode(wm_name);
+			AwmPtr_t awm(recipe_ptr->WorkingMode(wm_name));
+			assert(awm.get() != NULL);
 
 			// Load resource usages of the working mode
-			// <resources>
 			ticpp::Element * resources_elem =
 				awm_elem->FirstChildElement("resources", true);
-
-			if ((ret_res = loadResources(resources_elem, awm, "")) ==
+			if ((result = loadResources(resources_elem, awm, "")) ==
 					__RSRC_FORMAT_ERR)
-				// Abort loading whenever a format error occours
 				return RL_FORMAT_ERROR;
 
 			// Plugin specific data (of the AWM)
@@ -232,7 +216,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 		return RL_ABORTED;
 	}
 
-	if (ret_res == __RSRC_WEAK_LOAD)
+	if (result == __RSRC_WEAK_LOAD)
 		return RL_WEAK_LOAD;
 
 	return RL_SUCCESS;
@@ -242,30 +226,26 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 // =======================[ Resources ]=======================================
 
 uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
-		AwmPtr_t & _wm,	std::string const &	_curr_path = "") {
-
-	uint8_t ret_code = __RSRC_SUCCESS;
+		AwmPtr_t & _wm,
+		std::string const & _curr_path = "") {
+	// Exit code
+	uint8_t result = __RSRC_SUCCESS;
 
 	try {
 		// Get the resource xml element
 		ticpp::Element * res_elem = _xml_elem->FirstChildElement(true);
-
 		while (res_elem) {
-			// The current resource path
-			// (updated when parseResourceData returns)
-			std::string res_path = _curr_path;
 
-			// Parse the data from the resource element
-			ret_code |= parseResourceData(res_elem, _wm, res_path);
+			// Parse the attributes from the resource element
+			std::string res_path = _curr_path;
+			result |= getResourceAttributes(res_elem, _wm, res_path);
 
 			// The current resource is a container of other resources,
 			// thus load the children resources recursively
 			if (!res_elem->NoChildren())
-				ret_code |= loadResources(res_elem, _wm, res_path);
-
-			// Return if a format error has found
-			if (ret_code == __RSRC_FORMAT_ERR)
-				return ret_code;
+				result |= loadResources(res_elem, _wm, res_path);
+			if (result == __RSRC_FORMAT_ERR)
+				return result;
 
 			// Next resource
 			res_elem = res_elem->NextSiblingElement(false);
@@ -275,34 +255,29 @@ uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
 		return __RSRC_FORMAT_ERR;
 	}
 
-	return ret_code;
+	return result;
 }
 
 
-inline uint8_t XMLRecipeLoader::appendToWorkingMode(
-		AwmPtr_t & wm, std::string const & _res_path, uint64_t _res_usage) {
-
+inline uint8_t XMLRecipeLoader::appendToWorkingMode(AwmPtr_t & wm,
+				std::string const & _res_path,
+				uint64_t _res_usage) {
 	// Add the resource usage to the working mode
-	ba::WorkingMode::ExitCode_t wm_err_code;
-	wm_err_code = wm->AddResourceUsage(_res_path, _res_usage);
+	ba::WorkingMode::ExitCode_t result;
+	result = wm->AddResourceUsage(_res_path, _res_usage);
 
 	// Check error code returned
-	int int_err = static_cast<int>(wm_err_code);
+	int int_err = static_cast<int>(result);
 	switch(int_err) {
-
-	// Resource not found
+	// Resource not found :
+	// Signal a weak load (some resources are missing)
 	case (int) ba::WorkingMode::WM_RSRC_NOT_FOUND:
-		// If the resource is not available in the system signal a
-		// weak load, meaning that the working mode has a partial
-		// definition.
 		logger->Warn("'%s' recipe:\n\tResource '%s' not available.\n",
 				 recipe_ptr->Path().c_str(), _res_path.c_str());
 		return __RSRC_WEAK_LOAD;
-
-	// Usage value exceeds availability
+	// Usage value exceeds availability:
+	// The working mode cannot be accepted.
 	case (int) ba::WorkingMode::WM_RSRC_USAGE_EXCEEDS:
-		// If the usage value requests is greater than the total
-		// availability of the resource, signal a format error.
 		logger->Error("'%s' recipe:\n\tResource '%s' usage exceeds.",
 					 recipe_ptr->Path().c_str(), _res_path.c_str());
 		return __RSRC_FORMAT_ERR;
@@ -312,9 +287,10 @@ inline uint8_t XMLRecipeLoader::appendToWorkingMode(
 }
 
 
-inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
-		AwmPtr_t & _wm, std::string & _res_path) {
-
+inline uint8_t XMLRecipeLoader::getResourceAttributes(
+				ticpp::Element * _res_elem,
+				AwmPtr_t & _wm,
+				std::string & _res_path) {
 	// Resource ID
 	std::string res_id;
 	_res_elem->GetAttribute("id", &res_id, false);
@@ -324,20 +300,16 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
 		_res_path += ".";
 	_res_path += _res_elem->Value() + res_id;
 
-	// Resource quantity request
+	// Resource quantity request and units
 	uint64_t res_usage = 0;
 	_res_elem->GetAttribute("qty", &res_usage, false);
-
-	// Units
 	std::string res_units;
 	_res_elem->GetAttribute("units", &res_units, false);
 
+	// Convert the usage value accordingly to the units, and then append the
+	// request to the working mode.
 	if (res_usage > 0) {
-		// Parse the units string and update correctly the resource amount
-		// value
 		res_usage = ConvertValue(res_usage, res_units);
-		// Append the resource usage request to the current working mode
-		// descriptor
 		return appendToWorkingMode(_wm, _res_path, res_usage);
 	}
 
@@ -350,29 +322,21 @@ inline uint8_t XMLRecipeLoader::parseResourceData(ticpp::Element * _res_elem,
 template<class T>
 void XMLRecipeLoader::loadPluginsData(T _container,
 		ticpp::Element * _xml_elem) {
-
 	// <plugins> [Optional]
-	//  Section tag for plugin specific data.
-	//  This section can be embedded in the <application> section and in the
-	//  <awm> section.
-
-	// <plugins>
+	// Section tag for plugin specific data. This can be included into the
+	// <application> section and into the <awm> section.
 	ticpp::Element * plugins_elem =
 		_xml_elem->FirstChildElement("plugins",	false);
-
 	if (plugins_elem == NULL)
 		return;
 
-	// <plugin ...>
-	ticpp::Element * plug_elem = plugins_elem->FirstChildElement("plugin",
-			false);
-
 	try {
-		while (plug_elem) {
-			// Parse the <plugin> tag
-			parsePluginTag<T>(_container, plug_elem);
+		// Parse the <plugin> tags
+		ticpp::Element * plug_elem =
+				plugins_elem->FirstChildElement("plugin", false);
 
-			// Next plugin
+		while (plug_elem) {
+			parsePluginTag<T>(_container, plug_elem);
 			plug_elem = plug_elem->NextSiblingElement("plugin", false);
 		}
 	} catch (ticpp::Exception &ex) {
@@ -384,19 +348,15 @@ void XMLRecipeLoader::loadPluginsData(T _container,
 template<class T>
 inline void XMLRecipeLoader::parsePluginTag(T _container,
 		ticpp::Element * _plug_elem) {
-
 	try {
 		// Plugin attributes
 		std::string name;
 		_plug_elem->GetAttribute("name", &name);
 
-		// Plugin data nodes under <plugin>
+		// Plugin data in <plugin>
 		ticpp::Node * plugdata_node = _plug_elem->FirstChild(false);
 		while (plugdata_node) {
-			// Parse the data
-			parsePluginData<T>(_container, plugdata_node, name);
-
-			// Next data
+			getPluginData<T>(_container, plugdata_node, name);
 			plugdata_node = plugdata_node->NextSibling(false);
 		}
 
@@ -405,10 +365,11 @@ inline void XMLRecipeLoader::parsePluginTag(T _container,
 	}
 }
 
-template<class T>
-inline void XMLRecipeLoader::parsePluginData(T _container,
-		ticpp::Node * plugdata_node, std::string const & _plug_name) {
 
+template<class T>
+inline void XMLRecipeLoader::getPluginData(T _container,
+		ticpp::Node * plugdata_node,
+		std::string const & _plug_name) {
 	try {
 		// Is the node an element ?
 		if (plugdata_node->Type() != TiXmlNode::ELEMENT)
@@ -441,56 +402,48 @@ inline void XMLRecipeLoader::parsePluginData(T _container,
 void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 
 	// <constraints> [Optional]
-	//  An application can specify bounds for resource usages
-	//  over which the execution can yield an unsatisfactory
-	//  behavior. This method loads static constraint assertions.
-	//  Constraints may turn some working mode disabled.
-
+	// An application can specify bounds for resource usages
+	// over which the execution can yield an unsatisfactory
+	// behavior.
+	// This method loads static constraint assertions.
+	// Constraints may disable some working mode.
 	ticpp::Element * constr_elem =
 		_xml_elem->NextSiblingElement("constraints", false);
+	if (!constr_elem)
+		return;
 
-	// <constraint ...>
-	if (constr_elem) {
-
+	try {
+		// Constraint tags
 		ticpp::Element * con_elem =
-		    constr_elem->FirstChildElement("constraint", false);
+			constr_elem->FirstChildElement("constraint", false);
+		while (con_elem) {
+			// Attributes
+			std::string constraint_type;
+			con_elem->GetAttribute("type", &constraint_type);
+			std::string resource;
+			con_elem->GetAttribute("resource", &resource);
+			uint32_t value;
+			con_elem->GetText(&value, true);
+			ba::Constraint::BoundType_t type;
 
-		try {
-			// For each <constraint> element
-			while (con_elem) {
-				// Constraint attributes
-				std::string constraint_type;
-				con_elem->GetAttribute("type", &constraint_type);
-
-				std::string resource;
-				con_elem->GetAttribute("resource", &resource);
-
-				uint32_t value;
-				con_elem->GetText(&value, true);
-				ba::Constraint::BoundType_t type;
-
-				if (constraint_type.compare("L") == 0) {
-					// A lower bound constraint
-					type = ba::Constraint::LOWER_BOUND;
-				}
-				else if (constraint_type.compare("U") == 0) {
-					// An upper bound constraint
-					type = ba::Constraint::UPPER_BOUND;
-				}
-				else {
-					// Uncorrected type specified
-					logger->Warn("Unknown bound type");
-					continue;
-				}
-				// Set the constraint
-				app_ptr->SetConstraint(resource, type, value);
-
-				// Next constraint tag
-				con_elem = con_elem->NextSiblingElement("constraint", false);
+			// Constraint type
+			if (constraint_type.compare("L") == 0) {
+				type = ba::Constraint::LOWER_BOUND;
 			}
-		} catch (ticpp::Exception &ex) {
-			logger->Error(ex.what());
+			else if (constraint_type.compare("U") == 0) {
+				type = ba::Constraint::UPPER_BOUND;
+			}
+			else {
+				logger->Warn("Constraint: unknown bound type");
+				continue;
+			}
+
+			// Set the constraint
+			app_ptr->SetConstraint(resource, type, value);
+			con_elem = con_elem->NextSiblingElement("constraint", false);
 		}
+	} catch (ticpp::Exception &ex) {
+		logger->Error(ex.what());
 	}
 }
 

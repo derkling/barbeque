@@ -186,7 +186,7 @@ private:
 	 * @param wm The working mode to which add the resource usage
 	 * @param res_path Resource path
 	 */
-	uint8_t parseResourceData(ticpp::Element * res_elem, AwmPtr_t & wm,
+	uint8_t getResourceAttributes(ticpp::Element * res_elem, AwmPtr_t & wm,
 			std::string & res_path);
 
 	/**
@@ -219,7 +219,7 @@ private:
 	 * @param plugin_name The name of the plugin
 	 */
 	template<class T>
-	void parsePluginData(T container, ticpp::Node * plugdata_node,
+	void getPluginData(T container, ticpp::Node * plugdata_node,
 			std::string const & plugin_name);
 
 	/**
