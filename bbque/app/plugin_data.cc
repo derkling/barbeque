@@ -34,8 +34,7 @@ PluginsData::PluginsData() {
 
 
 PluginsData::~PluginsData() {
-	SpecDataMap_t::iterator it = data.begin();
-	data.clear();
+	plugins_data.clear();
 }
 
 
@@ -43,11 +42,11 @@ VoidPtr_t PluginsData::GetAttribute(std::string const & _plugin,
 		std::string const & _key) {
 
 	// Find the plugin set of pairs
-	std::pair<SpecDataMap_t::iterator, SpecDataMap_t::iterator> range =
-		data.equal_range(_plugin);
+	std::pair<PlugDataMap_t::iterator, PlugDataMap_t::iterator> range =
+		plugins_data.equal_range(_plugin);
 
 	// Find the attribute
-	SpecDataMap_t::iterator it = range.first;
+	PlugDataMap_t::iterator it = range.first;
 	while (it != range.second &&
 		it->second.first.compare(_key) != 0) {
 		++it;
@@ -64,11 +63,11 @@ void PluginsData::SetAttribute(std::string const & _plugin,
 		std::string const & _key, VoidPtr_t _value) {
 
 	// Find the plugin set of pairs
-	std::pair<SpecDataMap_t::iterator, SpecDataMap_t::iterator> range =
-		data.equal_range(_plugin);
+	std::pair<PlugDataMap_t::iterator, PlugDataMap_t::iterator> range =
+		plugins_data.equal_range(_plugin);
 
 	// Find the attribute
-	SpecDataMap_t::iterator it = range.first;
+	PlugDataMap_t::iterator it = range.first;
 	while (it != range.second &&
 		it->second.first.compare(_key) != 0) {
 		++it;
@@ -78,9 +77,9 @@ void PluginsData::SetAttribute(std::string const & _plugin,
 	if (it != range.second)
 		it->second.second = VoidPtr_t(_value);
 	else
-		data.insert(data.begin(),
-				std::pair<std::string, DataPair_t>(_plugin,
-					DataPair_t(_key, _value)));
+		plugins_data.insert(plugins_data.begin(),
+						std::pair<std::string, DataPair_t>(_plugin,
+								DataPair_t(_key, _value)));
 }
 
 } // namespace app

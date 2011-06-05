@@ -32,12 +32,10 @@ typedef std::shared_ptr<void> VoidPtr_t;
 
 namespace bbque { namespace app {
 
-
 /** Pair key-value type */
 typedef std::pair<std::string, VoidPtr_t> DataPair_t;
-
 /** Map of 32-bit integer type data */
-typedef std::multimap<std::string, DataPair_t> SpecDataMap_t;
+typedef std::multimap<std::string, DataPair_t> PlugDataMap_t;
 
 
 /**
@@ -87,7 +85,7 @@ public:
 	VoidPtr_t GetAttribute(std::string const & plugin_name,
 			std::string const & key);
 
-private:
+protected:
 
 	/**
 	 * @brief Specific plugins data map
@@ -98,7 +96,7 @@ private:
 	 * is a void pointer to the data. This allows the storage of generic data
 	 * types.
 	 */
-	SpecDataMap_t data;
+	PlugDataMap_t plugins_data;
 };
 
 } // namespace app
