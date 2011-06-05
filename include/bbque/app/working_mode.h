@@ -84,10 +84,18 @@ public:
 	}
 
 	/**
-	 * @brief see WorkingModeStatusIF
+	 * @see WorkingModeStatusIF
 	 */
-	inline AppPtr_t const & OwnerApplication() const {
+	inline AppPtr_t const & Owner() const {
 		return owner;
+	}
+
+	/**
+	 * @brief Set the application owning the AWM
+	 * @param papp Application descriptor pointer
+	 */
+	inline void SetOwner(AppPtr_t const & papp) {
+		owner = papp;
 	}
 
 	/**

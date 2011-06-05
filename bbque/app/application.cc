@@ -82,7 +82,7 @@ Application::ExitCode_t Application::StopExecution() {
 	// Release the resources
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	if (curr_sched.awm)
-		ra.ReleaseUsageSet(curr_sched.awm->OwnerApplication());
+		ra.ReleaseUsageSet(curr_sched.awm->Owner());
 
 	// Release the recipe used
 	recipe.reset();
@@ -143,7 +143,7 @@ Application::ExitCode_t Application::Disable() {
 
 	// Release the resources
 	if (curr_sched.awm)
-		ra.ReleaseUsageSet(curr_sched.awm->OwnerApplication());
+		ra.ReleaseUsageSet(curr_sched.awm->Owner());
 
 	// Reset scheduling info
 	curr_sched.awm.reset();
@@ -207,11 +207,11 @@ Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 
 	// Check resources availability
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-    if (ra.AcquireUsageSet(n_awm->OwnerApplication(), vtok)
+    if (ra.AcquireUsageSet(n_awm->Owner(), vtok)
 			!= br::ResourceAccounter::RA_SUCCESS) {
 		// Set next working mode to null
 		next_sched.awm = AwmPtr_t();
-		logger->Debug("Working Mode {%s} rejected by Resource Accounter",
+		logger->Warn("Working Mode {%s} rejected by Resource Accounter",
 						n_awm->Name().c_str());
 		return APP_WM_REJECTED;
 	}
