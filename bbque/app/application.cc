@@ -265,10 +265,9 @@ Application::ExitCode_t Application::SetConstraint(
 
 		// Create a constraint object, set its resource reference
 		// and insert it into the constraints map
-		ConstrPtr_t constr_ptr(new Constraint);
-		constr_ptr->resource = rsrc_ptr;
 		constraints.insert(std::pair<std::string, ConstrPtr_t>(
-								_res_name, constr_ptr));
+								_res_name,
+								ConstrPtr_t(new Constraint(rsrc_ptr))));
 	}
 
 	// Set the constraint bound value

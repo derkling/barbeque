@@ -52,14 +52,32 @@ struct Constraint {
 		UPPER_BOUND
 	};
 
+	/**
+	 * @brief Constructor with resource descriptor
+	 * @param rsrc_ptr Resource descriptor pointer
+	 */
+	Constraint(ResourcePtr_t const & rsrc_ptr):
+		resource(rsrc_ptr) {
+	}
+
+	/**
+	 * @brief Constructor with init values
+	 * @param lb Lower bound value
+	 * @param ub Upper bound value
+	 */
+	Constraint(uint64_t lb, uint64_t ub):
+		lower(lb),
+		upper(ub) {
+	}
+
 	/** Resource to constraint (shared pointer) */
 	ResourcePtr_t resource;
 
-	/** Resource usage upper bound   */
-	uint64_t upper;
-
 	/** Resource usage lower bound   */
 	uint64_t lower;
+
+	/** Resource usage upper bound   */
+	uint64_t upper;
 
 };
 
