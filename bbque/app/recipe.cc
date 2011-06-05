@@ -34,7 +34,7 @@ Recipe::Recipe(std::string const & name):
 	pathname(name) {
 
 	// Get a logger
-	std::string logger_name(RECIPE_NAMESPACE + name);
+	std::string logger_name(RECIPE_NAMESPACE"." + name);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
@@ -47,19 +47,18 @@ Recipe::~Recipe() {
 }
 
 
-AwmPtr_t & Recipe::AddWorkingMode(AppPtr_t _app,
-				uint16_t _id,
+AwmPtr_t & Recipe::AddWorkingMode(uint16_t _id,
 				std::string const & _name,
 				uint16_t _value) {
 	// Insert a new working mode descriptor into the map
-	AwmPtr_t new_awm(new class WorkingMode(_app, _id, _name, _value));
+	AwmPtr_t new_awm(new class WorkingMode(_id, _name, _value));
 	working_modes.insert(std::pair<uint16_t, AwmPtr_t>(_id, new_awm));
 	return working_modes[_id];
 }
 
 
 AwmPtr_t Recipe::WorkingMode(uint16_t _id) {
-	AwmMap_t::iterator it = working_modes.find(_id);
+	AwmMap_t::iterator it(working_modes.find(_id));
 	if (it == working_modes.end())
 		return AwmPtr_t();
 	return it->second;

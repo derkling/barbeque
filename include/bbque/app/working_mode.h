@@ -27,6 +27,8 @@
 #include "bbque/app/working_mode_conf.h"
 #include "bbque/plugins/logger.h"
 
+#define AWM_NAMESPACE "ap.awm"
+
 namespace bbque { namespace app {
 
 /**
@@ -53,7 +55,7 @@ public:
 	 * @param name Working mode descripting name
 	 * @param value The user QoS value of the working mode
 	 */
-	explicit WorkingMode(AppPtr_t app, uint16_t id, std::string const & name,
+	explicit WorkingMode(uint16_t id, std::string const & name,
 			uint16_t value);
 
 	/**

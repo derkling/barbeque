@@ -98,8 +98,7 @@ public:
 	/**
 	 * @see RecipeLoaderIF
 	 */
-	ExitCode_t LoadRecipe(AppPtr_t app,	std::string const &	recipe_name,
-			RecipePtr_t recipe);
+	ExitCode_t LoadRecipe(std::string const & recipe_name, RecipePtr_t recipe);
 
 	/**
 	 * @see RecipeLoaderIF
@@ -130,12 +129,6 @@ private:
 	 * Shared pointer to the recipe object
 	 */
 	RecipePtr_t recipe_ptr;
-
-	/**
-	 * Shared pointer to the application requiring the recipe
-	 */
-
-	AppPtr_t app_ptr;
 
 	/**
 	 * The constructor

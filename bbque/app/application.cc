@@ -31,7 +31,6 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/app/overheads.h"
 #include "bbque/app/working_mode.h"
-#include "bbque/res/resource_accounter.h"
 
 namespace ba = bbque::app;
 namespace br = bbque::res;
@@ -155,24 +154,56 @@ Application::ExitCode_t Application::Disable() {
 }
 
 
-void Application::SetRecipe(RecipePtr_t app_recipe) {
+void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
 	// Set the recipe that the application will use
-	assert(app_recipe.get() != NULL);
-	recipe = app_recipe;
+	assert(_recipe.get() != NULL);
+	recipe = _recipe;
 
-	// After Recipe loading we have to init the list of working modes enabled.
-	// Its should contain all the working modes, if there aren't any
-	// constraints asserted
-	if (enabled_awms.empty() && constraints.empty()) {
-		// Constraints list is empty. Get all the working modes.
-		AwmMap_t const & wms(recipe->WorkingModesAll());
-		AwmMap_t::const_iterator it = wms.begin();
-		AwmMap_t::const_iterator end = wms.end();
-		//enabled_awms.assign(wms.begin(), wms.end());
-		for (; it != end; ++it)
-			enabled_awms.push_back(it->second);
-		enabled_awms.sort(CompareAWMsByValue);
-		logger->Debug("%d working modes enabled.", enabled_awms.size());
+	// Init information got from the recipe
+	InitWorkingModes(papp);
+	InitConstraints();
+	plugins_data = PlugDataMap_t(recipe->plugins_data);
+
+	// Debug messages
+	logger->Info("%d working modes (enabled = %d).", working_modes.size(),
+					enabled_awms.size());
+	logger->Info("%d constraints in the application.", constraints.size());
+	logger->Info("%d plugins specific attributes.", plugins_data.size());
+}
+
+
+void Application::InitWorkingModes(AppPtr_t & papp) {
+	// Copy the working modes and set the owner
+	AwmMap_t const & wms(recipe->WorkingModesAll());
+	AwmMap_t::const_iterator it(wms.begin());
+	AwmMap_t::const_iterator end(wms.end());
+	for (; it != end; ++it) {
+		AwmPtr_t app_awm(new WorkingMode((*(it->second).get())));
+		app_awm->SetOwner(papp);
+		working_modes.insert(std::pair<uint16_t, AwmPtr_t>(app_awm->Id(),
+								app_awm));
+		enabled_awms.push_back(app_awm);
+	}
+
+	// Sort the enabled list by "value"
+	enabled_awms.sort(CompareAWMsByValue);
+}
+
+
+void Application::InitConstraints() {
+	// For each static constraint make an assertion
+	logger->Warn("%d constraints in the recipe", recipe->ConstraintsAll().size());
+	ConstrMap_t::const_iterator cons_it(recipe->ConstraintsAll().begin());
+	ConstrMap_t::const_iterator end_cons(recipe->ConstraintsAll().end());
+	for (; cons_it != end_cons; ++cons_it) {
+		// Lower bound
+		if ((cons_it->second)->lower > 0)
+				SetConstraint(cons_it->first, Constraint::LOWER_BOUND,
+								(cons_it->second)->lower);
+		// Upper bound
+		if ((cons_it->second)->upper > 0)
+				SetConstraint(cons_it->first, Constraint::UPPER_BOUND,
+								(cons_it->second)->upper);
 	}
 }
 

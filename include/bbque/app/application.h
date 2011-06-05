@@ -34,7 +34,6 @@
 #include <vector>
 
 #include "bbque/app/application_conf.h"
-#include "bbque/app/constraints.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/plugin_data.h"
 #include "bbque/plugins/logger.h"
@@ -157,11 +156,18 @@ public:
 	}
 
 	/**
-	 * @brief Set the current recipe used by the application. The recipe
-	 * should be loaded by the application manager using a specific plugin.
-	 * @param app_recipe Recipe object shared pointer
+	 * @brief Set the current recipe used by the application.
+	 *
+	 * The recipe should be loaded by the application manager using a
+	 * specific plugin.
+	 *
+	 * @param recipe Recipe object shared pointer
+	 * @param papp Shared pointer to the current Application.
+	 *
+	 * @note papp should be provided by ApplicationManager, which instances
+	 * the new Application descriptor
 	 */
-	void SetRecipe(RecipePtr_t app_recipe);
+	void SetRecipe(RecipePtr_t & recipe, AppPtr_t & papp);
 
 	/**
 	 * @see ApplicationStatusIF
@@ -306,11 +312,28 @@ private:
 	 */
 	RecipePtr_t recipe;
 
-	/** Map of pointers to enabled working modes for the Optimizer module */
+	/** Map containing all the working modes */
+	AwmMap_t working_modes;
+
+	/** List of pointers to enabled working modes */
 	AwmPtrList_t enabled_awms;
 
-	/** Runtime contraints specified by the application  */
+	/** Resource contraints asserted */
 	ConstrMap_t constraints;
+
+	/**
+	 * @brief Init working modes by reading the recipe
+	 * @param papp Pointer to the current Application, allocated by
+	 * ApplicationManager
+	 */
+	void InitWorkingModes(AppPtr_t & papp);
+
+	/**
+	 * @brief Init constraints by reading the recipe
+	 *
+	 * The method reads the "static" constraints on resources.
+	 */
+	void InitConstraints();
 
 	/**
 	 * @brief Whenever a constraint is set or removed, the method is called in

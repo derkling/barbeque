@@ -228,14 +228,8 @@ private:
 	ApplicationManager();
 
 	/** Return a pointer to a loaded recipe */
-	// FIXME this method should be application independent
-	// REFACTOR NEDDED:
-	// - save static constraint within the recipe
-	// - add a method to get static constraints from a recipe object
-	RecipeLoaderIF::ExitCode_t LoadRecipe(AppPtr_t _app_ptr,
-			std::string const & _recipe_name,
-			RecipePtr_t & _recipe,
-			bool weak_load = false);
+	RecipeLoaderIF::ExitCode_t LoadRecipe(std::string const & _recipe_name,
+			RecipePtr_t & _recipe, bool weak_load = false);
 
 	/**
 	 * Remove the specified application from the priority maps

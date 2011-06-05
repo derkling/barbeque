@@ -60,7 +60,9 @@ typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
  * one recipe, but a single instance must specify the one upon which base its
  * execution.
  */
-class Recipe {
+class Recipe: public PluginsData {
+
+friend class Application;
 
 public:
 
@@ -90,7 +92,7 @@ public:
 	 * @param name Working mode descripting name
 	 * @param value The user QoS value of the working mode
 	 */
-	AwmPtr_t & AddWorkingMode(AppPtr_t app, uint16_t id, std::string const & name,
+	AwmPtr_t & AddWorkingMode(uint16_t id, std::string const & name,
 					uint16_t value);
 
 	/**

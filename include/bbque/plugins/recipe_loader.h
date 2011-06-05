@@ -80,10 +80,6 @@ public:
 		RL_ABORTED
 	};
 
-	// FIXME this method should be application independent
-	// REFACTOR NEDDED:
-	// - save static constraint within the recipe
-	// - add a method to get static constraints from a recipe object
 	/**
 	 * @brief Load the recipe of the application
 	 * @param app Pointer to the application using the recipe
@@ -92,14 +88,8 @@ public:
 	 * @param recipe The recipe object to fill with the data to parse
 	 * @return An exit code indicating the loading status
 	 */
-	// FIXME this method should be application independent
-	// REFACTOR NEDDED:
-	// - save static constraint within the recipe
-	// - add a method to get static constraints from a recipe object
-	virtual	ExitCode_t LoadRecipe(std::shared_ptr<Application> app,
-				std::string const & rname,
-				std::shared_ptr<Recipe> recipe)
-		= 0;
+	virtual	ExitCode_t LoadRecipe(std::string const & rname,
+				std::shared_ptr<Recipe> recipe)	= 0;
 
 	/**
 	 * @brief The last modified time of the recipe

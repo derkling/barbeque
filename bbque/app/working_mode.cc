@@ -21,10 +21,10 @@
  * ============================================================================
  */
 
+#include "bbque/app/working_mode.h"
+
 #include <sstream>
 #include <string>
-
-#include "bbque/app/working_mode.h"
 
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
@@ -45,17 +45,15 @@ WorkingMode::WorkingMode() {
 }
 
 
-WorkingMode::WorkingMode(AppPtr_t _app,
-		uint16_t _id,
+WorkingMode::WorkingMode(uint16_t _id,
 		std::string const & _name,
 		uint16_t _value):
-	owner(_app),
 	id(_id),
 	name(_name),
 	value(_value) {
 
 	// Get a logger
-	std::string logger_name(APPLICATION_NAMESPACE"." +_app->Name());
+	std::string logger_name(AWM_NAMESPACE ".");
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 }

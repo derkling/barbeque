@@ -117,14 +117,10 @@ int32_t XMLRecipeLoader::Destroy(void *plugin) {
 
 // =======================[ MODULE INTERFACE ]================================
 
-RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(AppPtr_t _app,
+RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 				std::string const & _recipe_name,
 				RecipePtr_t _recipe) {
-	// Result of loading application working modes
 	RecipeLoaderIF::ExitCode_t result;
-	// The current application descriptor
-	app_ptr = ba::AppPtr_t(_app);
-	// The recipe object
 	recipe_ptr = ba::RecipePtr_t(_recipe);
 
 	// Plugin needs a logger
@@ -152,7 +148,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(AppPtr_t _app,
 		// "Static" constraints and plugins specific data
 		if (result != RL_FORMAT_ERROR) {
 			loadConstraints(app_elem);
-			loadPluginsData<ba::AppPtr_t>(app_ptr, app_elem);
+			loadPluginsData<ba::RecipePtr_t>(recipe_ptr, app_elem);
 		}
 
 	} catch(ticpp::Exception &ex) {
@@ -200,9 +196,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 			}
 
 			// Add a new working mode passing its name and value
-			AwmPtr_t & awm(recipe_ptr->AddWorkingMode(app_ptr,
-							wm_id,
-							wm_name,
+			AwmPtr_t & awm(recipe_ptr->AddWorkingMode(wm_id, wm_name,
 							static_cast<uint8_t> (wm_value)));
 			assert(awm.get() != NULL);
 
@@ -433,23 +427,21 @@ void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 			std::string resource;
 			con_elem->GetAttribute("resource", &resource);
 			uint32_t value;
-			ba::Constraint::BoundType_t type;
 			con_elem->GetAttribute("bound", &value);
 
-			// Constraint type
+			// Add the constraint
 			if (constraint_type.compare("L") == 0) {
-				type = ba::Constraint::LOWER_BOUND;
+				recipe_ptr->AddConstraint(resource, value, 0);
 			}
 			else if (constraint_type.compare("U") == 0) {
-				type = ba::Constraint::UPPER_BOUND;
+				recipe_ptr->AddConstraint(resource, 0, value);
 			}
 			else {
 				logger->Warn("Constraint: unknown bound type");
 				continue;
 			}
 
-			// Set the constraint
-			app_ptr->SetConstraint(resource, type, value);
+			// Next constraint
 			con_elem = con_elem->NextSiblingElement("constraint", false);
 		}
 	} catch (ticpp::Exception &ex) {

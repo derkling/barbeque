@@ -102,11 +102,11 @@ ApplicationManager::~ApplicationManager() {
 	logger->Debug("Cleared applications");
 }
 
-bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t papp,
-		std::string const & recipe_name, RecipePtr_t & recipe,
+bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
+		std::string const & recipe_name,
+		RecipePtr_t & recipe,
 		bool weak_load) {
 	bp::RecipeLoaderIF::ExitCode_t result;
-
 	logger->Debug("Loading recipe [%s]...", recipe_name.c_str());
 
 	assert(rloader);
@@ -132,10 +132,8 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(AppPtr_t papp,
 	logger->Info("Loading NEW recipe [%s]...", recipe_name.c_str());
 
 	// Load the required recipe
-	// FIXME the RecipeLoader should be a pure client of this class.
-	// See ticket #2
 	recipe = RecipePtr_t(new ba::Recipe(recipe_name));
-	result = rloader->LoadRecipe(papp, recipe_name, recipe);
+	result = rloader->LoadRecipe(recipe_name, recipe);
 
 	// If a weak load has done, but the we didn't want it,
 	// or a parsing error happened: then return an empty recipe
@@ -181,14 +179,14 @@ AppPtr_t ApplicationManager::StartApplication(
 			papp->StrId(), papp->Priority());
 
 	// Load the required recipe
-	result = LoadRecipe(papp, _rcp_name, rcp_ptr, _weak_load);
+	result = LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
 	if (!rcp_ptr) {
 		logger->Error("Starting EXC [%s] FAILED "
 				"(Error: unable to load recipe [%s])",
 				papp->StrId(), _rcp_name.c_str());
 		return AppPtr_t();
 	}
-	papp->SetRecipe(rcp_ptr);
+	papp->SetRecipe(rcp_ptr, papp);
 
 	// Save application descriptors
 	apps.insert(AppsMapEntry_t(papp->Pid(), papp));
