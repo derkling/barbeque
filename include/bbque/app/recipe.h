@@ -26,7 +26,13 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "bbque/app/constraints.h"
 #include "bbque/app/plugin_data.h"
+#include "bbque/plugins/logger.h"
+
+#define RECIPE_NAMESPACE "rcp"
+
+using bbque::plugins::LoggerIF;
 
 namespace bbque { namespace app {
 
@@ -40,6 +46,10 @@ typedef std::shared_ptr<Application> AppPtr_t;
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 /** Map of shared pointers to WorkingMode */
 typedef std::map<uint16_t, AwmPtr_t> AwmMap_t;
+/** Shared pointer to Constraint object */
+typedef std::shared_ptr<Constraint> ConstrPtr_t;
+/** Map of Constraints pointers, with the resource path as key*/
+typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
 
 /**
  * @class Recipe
@@ -58,9 +68,7 @@ public:
 	 * @brief Constructor
 	 * @param path The pathname for retrieving the recipe
 	 */
-	Recipe(std::string path):
-		pathname(path) {
-	}
+	Recipe(std::string const & name);
 
 	/**
 	 * @brief Destructor
@@ -109,7 +117,33 @@ public:
 		return working_modes;
 	}
 
+	/**
+	 * @brief Add a constraint to the static constraint map
+	 *
+	 * Lower bound assertion: AddConstraint(<resource_path>, value, 0);
+	 * Upper bound assertion: AddConstraint(<resource_path>, 0, value);
+	 *
+	 * If a bound value has been specified previously, take the the greater
+	 * between the previous and the current one.
+	 *
+	 * @param rsrc_path Resource path to constrain.
+	 * @param lb Lower bound value
+	 * @param ub Upper bound value
+	 */
+	void AddConstraint(std::string const & rsrc_path, uint64_t lb, uint64_t ub);
+
+	/**
+	 * @brief Get all the static constraints
+	 * @return The map of static constraints
+	 */
+	inline ConstrMap_t const & ConstraintsAll() {
+		return constraints;
+	}
+
 private:
+
+	/** The logger used by the application */
+	LoggerIF  *logger;
 
 	/**
 	 * Starting from a common recipes root directory, each recipe file
@@ -122,6 +156,9 @@ private:
 
 	/** The complete set of working modes descriptors defined in the recipe */
 	AwmMap_t working_modes;
+
+	/** Static constraints included in the recipe */
+	ConstrMap_t constraints;
 
 };
 
