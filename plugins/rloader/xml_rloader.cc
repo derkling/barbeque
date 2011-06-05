@@ -418,7 +418,7 @@ void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 	// This method loads static constraint assertions.
 	// Constraints may disable some working mode.
 	ticpp::Element * constr_elem =
-		_xml_elem->NextSiblingElement("constraints", false);
+		_xml_elem->FirstChildElement("constraints", false);
 	if (!constr_elem)
 		return;
 
@@ -433,8 +433,8 @@ void XMLRecipeLoader::loadConstraints(ticpp::Element * _xml_elem) {
 			std::string resource;
 			con_elem->GetAttribute("resource", &resource);
 			uint32_t value;
-			con_elem->GetText(&value, true);
 			ba::Constraint::BoundType_t type;
+			con_elem->GetAttribute("bound", &value);
 
 			// Constraint type
 			if (constraint_type.compare("L") == 0) {
