@@ -163,6 +163,21 @@ public:
 	};
 
 	/**
+	 * @brief Mark the application for a pending scheduling change
+	 *
+	 * Once an application should be re-scheduled into a different working
+	 * mode or status (e.g. stopped) this method must be called to mark the
+	 * applicaiton for the change. Client moduels of the ApplicationManager
+	 * (e.g. the SynchronizationManager) could expoit this information to
+	 * directly access applications to be reconfigured based on their future
+	 * state.
+	 *
+	 * @param papp The application to mark for a scheduling state chenge
+	 * @see Applications
+	 */
+	ExitCode_t SetSchedule(AppPtr_t papp);
+
+	/**
 	 * @brief The method is called to notify an application scheduling change
 	 *
 	 * The ApplicationManager is notified of an application change of

@@ -404,6 +404,50 @@ ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
 }
 
 ApplicationManager::ExitCode_t
+ApplicationManager::SetSchedule(AppPtr_t papp) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator app_it;
+	AppsMap_t *scheduleMap;
+
+	assert(papp);
+
+	logger->Info("Mark EXC [%s] for next state [%d ==> %d]",
+			papp->StrId(), papp->CurrentState(), papp->NextState());
+
+	if (papp->CurrentState() == papp->NextState()) {
+		logger->Warn("Mark EXC [%s] for next state FAILED "
+				"(Error: status [%d] not changed)",
+				papp->StrId(), papp->CurrentState());
+		assert(papp->CurrentState() != papp->NextState());
+		return AM_SUCCESS;
+	}
+
+	// Clean-up (eventaully) previous occurrence
+	for(uint8_t state = Application::DISABLED;
+			state <= Application::BLOCKED; ++state) {
+		scheduleMap = &(schedule_vec[state]);
+		range = scheduleMap->equal_range(papp->Pid());
+		for( ; range.first != range.second; ++range.first) {
+			app_it = range.first;
+			if (((*app_it).second)->ExcId() == papp->ExcId()) {
+				scheduleMap->erase(app_it);
+				break;
+			}
+		}
+	}
+
+	// Mark the application for scheduling into the next state
+	scheduleMap = &(schedule_vec[papp->NextState()]);
+	scheduleMap->insert(AppsMapEntry_t(papp->Pid(), papp));
+
+	logger->Debug("Marked EXC [%s] for next status [%d]",
+			papp->StrId(),
+			papp->NextState());
+
+	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
 ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
