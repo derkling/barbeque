@@ -456,6 +456,11 @@ ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 	logger->Info("Changed EXC [%s] schedule [%d ==> %d]", papp->StrId(),
 			papp->CurrentState(), papp->NextState());
 
+	// The application descriptor now will manage the change of
+	// working mode
+	papp->UpdateScheduledStatus(time);
+	assert(papp->NextState()>=Application::DISABLED);
+
 	// We need to update the application descriptor (moving it into the
 	// right map) just if the scheduled state has changed.
 	if (papp->CurrentState() == papp->NextState())
@@ -489,9 +494,17 @@ ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 			AppsMapEntry_t(papp->Pid(), papp));
 	curr_state_map->erase(it);
 
-	// The application descriptor now will manage the change of
-	// working mode
-	papp->UpdateScheduledStatus(time);
+	// Removing mark for next state scheduling
+	next_state_map = &(schedule_vec[papp->NextState()]);
+	range = next_state_map->equal_range(papp->Pid());
+	for( ; range.first != range.second; ++range.first) {
+		it = range.first;
+		if (((*it).second)->ExcId() == papp->ExcId()) {
+			next_state_map->erase(it);
+			break;
+		}
+	}
+
 
 	logger->Debug("Changed EXC [%s] status to [%d]",
 			papp->StrId(),

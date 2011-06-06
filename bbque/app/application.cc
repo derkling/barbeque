@@ -224,6 +224,7 @@ AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
 
 Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 				RViewToken_t vtok) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
 	// Application is blocked, until the AWM validity is verified
 	next_sched.state = BLOCKED;
 
@@ -247,11 +248,19 @@ Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 		return APP_WM_REJECTED;
 	}
 
+	// State not changed: returning immediatly
+	if (curr_sched.awm == next_sched.awm)
+		return APP_SUCCESS;
+
 	// Define the transitional scheduling state
 	if (curr_sched.awm != n_awm)
 		next_sched.state = RECONF;
 
-	// --- manage migration cases here --- //
+	// TODO manage migration cases here
+	logger->Warn("TODO: add support for EXC migration");
+
+	// Mark application for status update pending
+	am.SetSchedule(n_awm->Owner());
 
 	return APP_SUCCESS;
 }
@@ -268,6 +277,7 @@ void Application::UpdateScheduledStatus(double _time) {
 			AwmPtr_t _awm(GetWorkingMode(curr_sched.awm->Id()));
 			_awm->AddOverheadInfo(next_sched.awm->Id(), _time);
 		}
+		next_sched.state = RUNNING;
 	default:
 		break;
 	}
