@@ -75,11 +75,13 @@ ApplicationManager::ApplicationManager() {
 	// Pre-allocate priority and status vectors
 	priority_vec = std::vector<AppsMap_t>(lowest_prio + 1);
 	status_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
+	schedule_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
 	logger->Debug("Priority vector size = %d", priority_vec.size());
 	logger->Debug("Status vector size = %d", status_vec.size());
+	logger->Debug("Schedule vector size = %d", schedule_vec.size());
 }
 
 

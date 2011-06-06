@@ -144,8 +144,10 @@ public:
 	 * @see ApplicationManagerStatusIF
 	 */
 	AppsMap_t const * Applications (
-			Application::ScheduleFlag_t sched_state) const {
-		return &(status_vec[sched_state]);
+			Application::ScheduleFlag_t sched_state, bool current = true) const {
+		if (current)
+			return &(status_vec[sched_state]);
+		return &(schedule_vec[sched_state]);
 	}
 
 	/**
@@ -223,6 +225,16 @@ private:
 	 * Each position points to a set of maps pointing applications
 	 */
 	AppsMapVec_t status_vec;
+
+	/**
+	 * @brief Applications grouping based on next state to be scheduled.
+	 *
+	 * Vector grouping the applicaitons by the value of theis next_sched.state
+	 * (@see ScheduleFlag). Each entry is a vector of applications on the
+	 * correposnding scheduled status. This view on applicaitons could be
+	 * exploited by the synchronization module to update applications.
+	 */
+	AppsMapVec_t schedule_vec;
 
 	/** The constructor */
 	ApplicationManager();
