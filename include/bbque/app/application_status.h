@@ -84,16 +84,22 @@ public:
 	 * statistics data collection.
 	 */
 	enum ScheduleFlag_t {
-		/** Registered within Barbeque but currently disabled */
-		DISABLED = 0,
-		/** Ready to be scheduled */
-		READY,
+
+		//--- Transitional states
+
 		/** Must change working mode */
-		RECONF,
+		RECONF = 0,
 		/** Must migrate into another cluster */
 		MIGRATE,
 		/** Must migrate and change working mode */
 		MIGREC,
+
+		//--- Stable states
+
+		/** Registered within Barbeque but currently disabled */
+		DISABLED,
+		/** Ready to be scheduled */
+		READY,
 		/** Running */
 		RUNNING,
 		/** Waiting for an event or resource */
