@@ -70,6 +70,28 @@ public:
 	}
 
 	/**
+	 * @brief Map of blocked applications (descriptors)
+	 */
+	inline AppsMap_t const * ApplicationsBlocked() const {
+		return am.Applications(ApplicationStatusIF::BLOCKED);
+	}
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	inline AppsMap_t const * Applications(app::AppPrio_t prio) const {
+		return am.Applications(prio);
+	}
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	inline AppsMap_t const * Applications (
+			Application::ScheduleFlag_t sched_state, bool current = true) const {
+		return am.Applications(sched_state, current);
+	}
+
+	/**
 	 * @brief Maximum integer value for the minimum application priority
 	 */
 	inline uint16_t ApplicationLowestPriority() const {
