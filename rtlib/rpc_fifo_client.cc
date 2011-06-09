@@ -64,7 +64,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelRelease() {
 		}
 	};
 	rpc_msg_app_exit_t msg_exit = {
-		RPC_APP_EXIT, chTrdPid, 0};
+		RPC_APP_EXIT, RpcMsgToken(), chTrdPid, 0};
 	size_t bytes;
 	int error;
 
@@ -204,7 +204,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 		"\0"
 	};
 	rpc_msg_app_pair_t msg_pair = {
-		{RPC_APP_PAIR, chTrdPid, 0},
+		{RPC_APP_PAIR, RpcMsgToken(), chTrdPid, 0},
 		BBQUE_RPC_FIFO_MAJOR_VERSION,
 		BBQUE_RPC_FIFO_MINOR_VERSION,
 		"\0"};
@@ -357,7 +357,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
 		}
 	};
 	rpc_msg_exc_register_t msg_register = {
-		{RPC_EXC_REGISTER, chTrdPid, pregExCtx->exc_id},
+		{RPC_EXC_REGISTER, RpcMsgToken(), chTrdPid, pregExCtx->exc_id},
 		"\0",
 		"\0"
 	};
@@ -427,7 +427,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 		}
 	};
 	rpc_msg_exc_unregister_t msg_unregister = {
-		{RPC_EXC_UNREGISTER, chTrdPid, prec->exc_id},
+		{RPC_EXC_UNREGISTER, RpcMsgToken(), chTrdPid, prec->exc_id},
 		"\0"
 	};
 	size_t bytes;
@@ -493,7 +493,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 		}
 	};
 	rpc_msg_exc_start_t msg_start = {
-		{RPC_EXC_START, chTrdPid, prec->exc_id}
+		{RPC_EXC_START, RpcMsgToken(), chTrdPid, prec->exc_id}
 	};
 	size_t bytes;
 
@@ -551,7 +551,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 		}
 	};
 	rpc_msg_exc_stop_t msg_stop = {
-		{RPC_EXC_STOP, chTrdPid, prec->exc_id}
+		{RPC_EXC_STOP, RpcMsgToken(), chTrdPid, prec->exc_id}
 	};
 	size_t bytes;
 
@@ -635,7 +635,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_GetWorkingMode(
 		}
 	};
 	rpc_msg_exc_gwm_t msg_gwm = {
-		{RPC_EXC_GWM, chTrdPid, prec->exc_id}
+		{RPC_EXC_GWM, RpcMsgToken(), chTrdPid, prec->exc_id}
 	};
 	size_t bytes;
 

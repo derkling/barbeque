@@ -77,6 +77,9 @@ typedef struct rpc_msg_header {
 	/** The command to execute (defines the message "payload" type) */
 	rpc_msg_type_t typ;
 
+	/** A token used by the message sender to match responses */
+	rpc_msg_token_t token;
+
 //FIXME These is maybe superflous... it is required just for the pairing
 // Than it is better to exchange a communication token ;-)
 	/** The application ID (thread ID) */

@@ -115,7 +115,8 @@ RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 	conCtxMap_t::iterator it;
 	pconCtx_t pcon;
 	rpc_msg_bbq_stop_t stop_msg = {
-		{RPC_BBQ_STOP_EXECUTION, papp->Pid(), papp->ExcId()},
+		// FIXME The token should be defined as the thread id
+		{RPC_BBQ_STOP_EXECUTION, 1234, papp->Pid(), papp->ExcId()},
 		{0, 100} // FIXME get a timeout parameter
 	};
 

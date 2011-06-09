@@ -76,6 +76,10 @@ protected:
 
 	void _Exit();
 
+	inline uint32_t RpcMsgToken() {
+		return chTrdPid;
+	}
+
 private:
 
 	char app_fifo_filename[BBQUE_FIFO_NAME_LENGTH];
