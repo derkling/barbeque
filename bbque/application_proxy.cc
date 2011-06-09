@@ -213,21 +213,22 @@ ApplicationProxy::pconCtx_t ApplicationProxy::GetConnectionContext(
 	return (*it).second;
 }
 
-void ApplicationProxy::RpcExcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr) {
+void ApplicationProxy::RpcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
+		rpc_msg_type_t type) {
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
 	logger->Debug("APPs PRX: Send RPC channel ACK [pid: %d, name: %s]",
 			pcon->app_pid, pcon->app_name);
 	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
-	resp.header.typ = RPC_BBQ_RESP;
+	resp.header.typ = type;
 	resp.result = RTLIB_OK;
 	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
 
 }
 
-void ApplicationProxy::RpcExcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
-		RTLIB_ExitCode error) {
+void ApplicationProxy::RpcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
+		rpc_msg_type_t type, RTLIB_ExitCode error) {
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
@@ -235,7 +236,7 @@ void ApplicationProxy::RpcExcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 			"[pid: %d, name: %s, err: %d]",
 			pcon->app_pid, pcon->app_name, error);
 	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
-	resp.header.typ = RPC_BBQ_RESP;
+	resp.header.typ = type;
 	resp.result = error;
 	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
 
@@ -273,12 +274,12 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 			"(Error: missing recipe or recipe load failure)",
 			pcon->app_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
-		RpcExcNAK(pcon, pmsg_hdr, RTLIB_EXC_MISSING_RECIPE);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_MISSING_RECIPE);
 		return;
 	}
 
 	// Sending ACK response to application
-	RpcExcACK(pcon, pmsg_hdr);
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
 
 }
 
@@ -309,7 +310,7 @@ void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
 	// This is tracked by Issues tiket #10
 
 	// Sending ACK response to application
-	RpcExcACK(pcon, pmsg_hdr);
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
 
 }
 
@@ -339,12 +340,12 @@ void ApplicationProxy::RpcExcStart(prqsSn_t prqs) {
 			"[pid: %d, exc: %d] "
 			"start FAILED",
 			pcon->app_pid, pmsg_hdr->exc_id);
-		RpcExcNAK(pcon, pmsg_hdr, RTLIB_EXC_START_FAILED);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_START_FAILED);
 		return;
 	}
 
 	// Sending ACK response to application
-	RpcExcACK(pcon, pmsg_hdr);
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
 
 }
 
@@ -374,12 +375,12 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 			"[pid: %d, exc: %d] "
 			"stop FAILED",
 			pcon->app_pid, pmsg_hdr->exc_id);
-		RpcExcNAK(pcon, pmsg_hdr, RTLIB_EXC_STOP_FAILED);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_STOP_FAILED);
 		return;
 	}
 
 	// Sending ACK response to application
-	RpcExcACK(pcon, pmsg_hdr);
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
 
 }
 
@@ -406,7 +407,7 @@ void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
 	logger->Warn("APPs PRX: TODO run optimizer");
 
 	// Sending ACK response to application
-	RpcExcACK(pcon, pmsg_hdr);
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
 
 }
 
@@ -474,7 +475,7 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 	conCtxMap_ul.unlock();
 
 	// Sending ACK response to application
-	RpcExcACK(pcon, pmsg_hdr);
+	RpcACK(pcon, pmsg_hdr, RPC_APP_RESP);
 }
 
 void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
@@ -505,7 +506,7 @@ void ApplicationProxy::RpcAppExit(prqsSn_t prqs) {
 
 }
 
-void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
+void ApplicationProxy::RequestExecutor(prqsSn_t prqs) {
 	std::unique_lock<std::mutex> snCtxMap_ul(snCtxMap_mtx);
 	snCtxMap_t::iterator it;
 	psnCtx_t psc;
@@ -519,10 +520,10 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 	// tracking data structures.
 	snCtxMap_ul.unlock();
 
-	logger->Debug("APPs PRX: CommandExecutor START [pid: %d, typ: %d]",
+	logger->Debug("APPs PRX [%d:%d]: RequestExecutor START",
 			prqs->pid, prqs->pmsg->typ);
 
-	assert(prqs->pmsg->typ<RPC_APP_MSGS_COUNT);
+	assert(prqs->pmsg->typ<RPC_EXC_MSGS_COUNT);
 
 	// TODO put here command execution code
 	switch(prqs->pmsg->typ) {
@@ -587,12 +588,12 @@ void ApplicationProxy::CommandExecutor(prqsSn_t prqs) {
 	}
 	snCtxMap_ul.unlock();
 
-	logger->Debug("APPs PRX: CommandExecutor END [pid: %d, typ: %d]",
+	logger->Debug("APPs PRX [%d:%d]: RequestExecutor END",
 			prqs->pid, prqs->pmsg->typ);
 
 }
 
-void ApplicationProxy::ProcessCommand(pchMsg_t & pmsg) {
+void ApplicationProxy::ProcessRequest(pchMsg_t & pmsg) {
 	std::unique_lock<std::mutex> snCtxMap_ul(snCtxMap_mtx);
 	prqsSn_t prqsSn = prqsSn_t(new rqsSn_t);
 	assert(prqsSn);
@@ -603,11 +604,11 @@ void ApplicationProxy::ProcessCommand(pchMsg_t & pmsg) {
 	// executor thread start only alfter the playground has been properly
 	// prepared
 	prqsSn->exe = std::thread(
-				&ApplicationProxy::CommandExecutor,
+				&ApplicationProxy::RequestExecutor,
 				this, prqsSn);
 	prqsSn->exe.detach();
 
-	logger->Debug("Processing new command...");
+	logger->Debug("APPs PRX: Processing NEW REQUEST...");
 
 	// Add a new threaded command executor
 	snCtxMap.insert(std::pair<rpc_msg_type_t, psnCtx_t>(
@@ -623,17 +624,17 @@ void ApplicationProxy::Dispatcher() {
 	trdStatus_cv.wait(trdStatus_ul);
 	trdStatus_ul.unlock();
 
-	logger->Info("Command dispatcher thread started");
+	logger->Info("APPs PRX: Messages dispatcher STARTED");
 
 	while(1) {
-		if (GetNextMessage(pmsg)>RPC_APP_MSGS_COUNT) {
+		if (GetNextMessage(pmsg)>RPC_EXC_MSGS_COUNT) {
 			CompleteTransaction(pmsg);
 			continue;
 		}
-		ProcessCommand(pmsg);
+		ProcessRequest(pmsg);
 	}
 
-	logger->Info("Command dispatcher thread ended");
+	logger->Info("APPs PRX: Messages dispatcher ENDED");
 }
 
 } // namespace bbque

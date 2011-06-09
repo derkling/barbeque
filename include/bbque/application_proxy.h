@@ -187,14 +187,16 @@ private:
 
 	pconCtx_t GetConnectionContext(rpc_msg_header_t *pmsg_hdr);
 
-	void RpcExcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr);
+	void RpcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
+			rpc_msg_type_t type);
 
-	void RpcExcNAK(pconCtx_t pcon, rpc_msg_header_t * pmsg_hdr,
+	void RpcNAK(pconCtx_t pcon, rpc_msg_header_t * pmsg_hdr,
+			rpc_msg_type_t type,
 			RTLIB_ExitCode error);
 
-	void CommandExecutor(prqsSn_t prqs);
+	void RequestExecutor(prqsSn_t prqs);
 
-	void ProcessCommand(pchMsg_t & pmsg);
+	void ProcessRequest(pchMsg_t & pmsg);
 
 
 	/**

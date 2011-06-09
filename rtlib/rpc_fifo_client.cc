@@ -152,8 +152,12 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 
 	// Dispatching the received message
 	switch (hdr.rpc_msg_type) {
-	case RPC_BBQ_RESP:
-		DB(fprintf(stderr, FMT_INF("BBQ_RESP\n")));
+	case RPC_APP_RESP:
+		DB(fprintf(stderr, FMT_INF("APP_RESP\n")));
+		RpcBbqResp();
+		break;
+	case RPC_EXC_RESP:
+		DB(fprintf(stderr, FMT_INF("EXC_RESP\n")));
 		RpcBbqResp();
 		break;
 	case RPC_BBQ_SET_WORKING_MODE:
@@ -163,6 +167,9 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
 		break;
 	default:
+		fprintf(stderr, FMT_ERR("Unknown BBQ response/command [%d]\n"),
+				hdr.rpc_msg_type);
+		assert(false);
 		break;
 	}
 

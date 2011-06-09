@@ -41,7 +41,15 @@ namespace bbque { namespace rtlib {
  * The higer the message id the higer the message priority.
  */
 typedef enum rpc_msg_type {
-	//--- Execution Context Originated Messages
+
+//--- Application Originated Messages
+	RPC_APP_PAIR,
+	RPC_APP_EXIT,
+
+	RPC_APP_RESP, ///< Response to an APP request
+	RPC_APP_MSGS_COUNT, ///< The number of APP originated messages
+
+//--- Execution Context Originated Messages
 	RPC_EXC_REGISTER,
 	RPC_EXC_UNREGISTER,
 	RPC_EXC_SET,
@@ -49,16 +57,14 @@ typedef enum rpc_msg_type {
 	RPC_EXC_START,
 	RPC_EXC_STOP,
 	RPC_EXC_GWM,
-	RPC_EXC_RESP,
+
+	RPC_EXC_RESP, ///< Response to an EXC request
 	RPC_EXC_MSGS_COUNT, ///< The number of EXC originated messages
-	RPC_APP_PAIR,
-	RPC_APP_EXIT,
-	RPC_APP_RESP,
-	RPC_APP_MSGS_COUNT, ///< The number of APP originated messages
-	//--- Barbeque Originated Messages
-	RPC_BBQ_RESP,
+
+//--- Barbeque Originated Messages
 	RPC_BBQ_SET_WORKING_MODE,
 	RPC_BBQ_STOP_EXECUTION,
+	RPC_BBQ_RESP, ///< Response to a BBQ command
 	RPC_BBQ_MSGS_COUNT ///< The number of EXC originated messages
 } rpc_msg_type_t;
 
