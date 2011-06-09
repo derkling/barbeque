@@ -95,10 +95,18 @@ inline ApplicationProxy::pcmdSn_t ApplicationProxy::SetupCmdSession(
 	return psn;
 }
 
-inline void ApplicationProxy::EnqueueHandler(pcmdSn_t snHdr) {
-	std::unique_lock<std::mutex> cmdSnMm_ul(cmdSnMm_mtx);
-	snHdr->pid = gettid();
-	cmdSnMm.insert(std::pair<pid_t, pcmdSn_t>(snHdr->pid, snHdr));
+inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
+	std::unique_lock<std::mutex> cmdSnMap_ul(cmdSnMap_mtx);
+	pcs->pid = gettid();
+
+	if (cmdSnMap.find(pcs->pid) != cmdSnMap.end()) {
+		logger->Crit("APPs PRX: handler enqueuing FAILED "
+				"(Error: possible data structure corruption)");
+		assert(cmdSnMap.find(pcs->pid)==cmdSnMap.end());
+		return;
+	}
+
+	cmdSnMap.insert(std::pair<pid_t, pcmdSn_t>(pcs->pid, pcs));
 }
 
 RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {

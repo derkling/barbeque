@@ -135,16 +135,15 @@ private:
 	/**
 	 * @brief	A multimap to track active Command Sessions.
 	 *
-	 * This multimap maps command session threads ID on the session session
-	 * data.
+	 * This multimap maps command session threads ID on the session data.
 	 * @param AppPid_t the command session thread ID
 	 * @param pcmdSn_t the command session handler
 	 */
-	typedef std::multimap<AppPid_t, pcmdSn_t> cmdSnMm_t;
+	typedef std::map<rpc_msg_token_t, pcmdSn_t> cmdSnMap_t;
 
-	cmdSnMm_t cmdSnMm;
+	cmdSnMap_t cmdSnMap;
 
-	std::mutex cmdSnMm_mtx;
+	std::mutex cmdSnMap_mtx;
 
 	ApplicationProxy();
 
@@ -157,7 +156,21 @@ private:
 
 	inline pcmdSn_t SetupCmdSession(AppPtr_t papp) const;
 
-	inline void EnqueueHandler(pcmdSn_t snHdr);
+	/**
+	 * @brief Enqueue a command session for response processing
+	 *
+	 * Since Barbeque has a single input RPC channel for each application,
+	 * each response received from an applications should be dispatched to the
+	 * thread which generated the command. Thus, the execution context which
+	 * has generated a command must save a reference to itself for the proper
+	 * dispatching of resposes.
+	 *
+	 * @param pcs command session handler which is waiting for a response
+	 *
+	 * @note This method must be called from within the session execution
+	 * context, i.e. the command processing thread for asynchronous commands.
+	 */
+	inline void EnqueueHandler(pcmdSn_t pcs);
 
 	void StopExecutionTrd(pcmdSn_t snHdr);
 

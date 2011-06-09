@@ -68,6 +68,8 @@ typedef enum rpc_msg_type {
 	RPC_BBQ_MSGS_COUNT ///< The number of EXC originated messages
 } rpc_msg_type_t;
 
+typedef uint32_t rpc_msg_token_t;
+
 /**
  * @brief The RPC message header
  */
