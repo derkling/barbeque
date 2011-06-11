@@ -172,7 +172,7 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline ScheduleFlag_t CurrentState() const {
+	inline State_t CurrentState() const {
 		return curr_sched.state;
 	}
 
@@ -186,7 +186,7 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline ScheduleFlag_t NextState() const {
+	inline State_t NextState() const {
 		return next_sched.state;
 	}
 

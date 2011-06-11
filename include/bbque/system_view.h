@@ -87,7 +87,7 @@ public:
 	 * @see ApplicationManagerStatusIF
 	 */
 	inline AppsMap_t const * Applications (
-			Application::ScheduleFlag_t sched_state, bool current = true) const {
+			Application::State_t sched_state, bool current = true) const {
 		return am.Applications(sched_state, current);
 	}
 

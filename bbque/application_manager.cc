@@ -75,13 +75,13 @@ ApplicationManager::ApplicationManager() {
 	// Pre-allocate priority and status vectors
 	priority_vec = std::vector<AppsMap_t>(lowest_prio + 1);
 	status_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
-	schedule_vec = std::vector<AppsMap_t>(ba::Application::FINISHED);
+	sync_vec = std::vector<AppsMap_t>(ba::Application::TERMINATE);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
 	logger->Debug("Priority vector size = %d", priority_vec.size());
 	logger->Debug("Status vector size = %d", status_vec.size());
-	logger->Debug("Schedule vector size = %d", schedule_vec.size());
+	logger->Debug("Sync vector size = %d", sync_vec.size());
 }
 
 
@@ -425,7 +425,7 @@ ApplicationManager::SetSchedule(AppPtr_t papp) {
 	// Clean-up (eventaully) previous occurrence
 	for(uint8_t state = Application::DISABLED;
 			state <= Application::BLOCKED; ++state) {
-		scheduleMap = &(schedule_vec[state]);
+		scheduleMap = &(sync_vec[state]);
 		range = scheduleMap->equal_range(papp->Pid());
 		for( ; range.first != range.second; ++range.first) {
 			app_it = range.first;
@@ -437,7 +437,7 @@ ApplicationManager::SetSchedule(AppPtr_t papp) {
 	}
 
 	// Mark the application for scheduling into the next state
-	scheduleMap = &(schedule_vec[papp->NextState()]);
+	scheduleMap = &(sync_vec[papp->NextState()]);
 	scheduleMap->insert(AppsMapEntry_t(papp->Pid(), papp));
 
 	logger->Debug("Marked EXC [%s] for next status [%d]",
@@ -495,7 +495,7 @@ ApplicationManager::ChangedSchedule(AppPtr_t papp, double time) {
 	curr_state_map->erase(it);
 
 	// Removing mark for next state scheduling
-	next_state_map = &(schedule_vec[papp->NextState()]);
+	next_state_map = &(sync_vec[papp->NextState()]);
 	range = next_state_map->equal_range(papp->Pid());
 	for( ; range.first != range.second; ++range.first) {
 		it = range.first;

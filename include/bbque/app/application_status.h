@@ -72,53 +72,52 @@ public:
 	};
 
 	/**
-	 * @enum ScheduleFlag_t
+	 * @brief A possible application state
 	 *
-	 * This defines flags describing a schedule state.
-	 * Suffixes (S, T) have just a code readability purpose. "S" means
-	 * "stable" and "T" is "transitional".
-	 * The semantic behind a transitional state implies that the scheduling
-	 * should be finalized moving the application into a stable state.
-	 * Transitional states are useful to make more explicit the
-	 * scheduler/optimizer decisions, and eventually to trigger some overheads
-	 * statistics data collection.
+	 * This is the set of possible state an application could be.
+	 * TODO: add complete explaination of each state, detailing how each state
+	 * could be entered, when and which other Barbeque module trigger the
+	 * transition.
 	 */
-	enum ScheduleFlag_t {
-
-		//--- Transitional states
-
-		/** Must change working mode */
-		RECONF = 0,
-		/** Must migrate into another cluster */
-		MIGRATE,
-		/** Must migrate and change working mode */
-		MIGREC,
-
-		//--- Stable states
-
+	typedef enum State {
 		/** Registered within Barbeque but currently disabled */
-		DISABLED,
+		DISABLED = 0,
 		/** Ready to be scheduled */
 		READY,
+		/** The application must be reconfigured */
+		SYNC,
 		/** Running */
 		RUNNING,
-		/** Waiting for an event or resource */
-		BLOCKED,
 		/** Regular exit */
 		FINISHED
-	};
+	} State_t;
+
+	typedef enum SyncState {
+		/** The application is entering the system */
+		STARTING = 0,
+		/** Must change working mode */
+		RECONF ,
+		/** Must migrate and change working mode */
+		MIGREC,
+		/** Must migrate into another cluster */
+		MIGRATE,
+		/** Must be blocked becaus of resource are not more available */
+		BLOCKED,
+		/** The applications is exiting the system */
+		TERMINATE
+	} SyncState_t;
 
 	/**
 	 * @struct SchedulingInfo_t
 	 *
 	 * Application scheduling informations.
 	 * The scheduling of an application is characterized by a pair of
-	 * information: the state (@see ScheduleFlag_t), and the working mode
+	 * information: the state (@see State_t), and the working mode
 	 * choosed by the scheduler/optimizer module.
 	 */
 	struct SchedulingInfo_t {
 		/** A schedule state */
-		ScheduleFlag_t state;
+		State_t state;
 		/** A pointer to an application working mode */
 		AwmPtr_t awm;
 		/** Overloading of operator != for structure comparisons */
@@ -163,7 +162,7 @@ public:
 	 * @brief Get the current schedule state
 	 * @return The current scheduled state
 	 */
-	virtual ScheduleFlag_t CurrentState() const = 0;
+	virtual State_t CurrentState() const = 0;
 
 	/**
 	 * @brief Get the current working mode
@@ -175,7 +174,7 @@ public:
 	 * @brief Get next schedule state
 	 * @return Next schedule state
 	 */
-	virtual ScheduleFlag_t NextState() const = 0;
+	virtual State_t NextState() const = 0;
 
 	/**
 	 * @brief Get next working mode to switch in when the application is

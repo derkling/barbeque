@@ -95,7 +95,7 @@ public:
 	 * @return A pointer to the map of applications with the requested schedule status
 	 */
 	virtual AppsMap_t const * Applications(
-			app::Application::ScheduleFlag_t sched_state,
+			app::Application::State_t sched_state,
 			bool current = true) const = 0;
 
 	/**

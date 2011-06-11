@@ -144,10 +144,10 @@ public:
 	 * @see ApplicationManagerStatusIF
 	 */
 	AppsMap_t const * Applications (
-			Application::ScheduleFlag_t sched_state, bool current = true) const {
+			Application::State_t sched_state, bool current = true) const {
 		if (current)
 			return &(status_vec[sched_state]);
-		return &(schedule_vec[sched_state]);
+		return &(sync_vec[sched_state]);
 	}
 
 	/**
@@ -249,7 +249,7 @@ private:
 	 * correposnding scheduled status. This view on applicaitons could be
 	 * exploited by the synchronization module to update applications.
 	 */
-	AppsMapVec_t schedule_vec;
+	AppsMapVec_t sync_vec;
 
 	/** The constructor */
 	ApplicationManager();
