@@ -164,6 +164,14 @@ public:
 	ExitCode_t BindResources(std::string const & rsrc_name,
 			ResID_t src_ID, ResID_t dst_ID,
 			char * rsrc_path_unb = NULL);
+
+	/**
+	 * TODO: This is just a fake  GetBinding
+	 */
+	inline UsagesMapPtr_t & _GetBinding() {
+		return sys_rsrc_usages;
+	}
+
 private:
 
 	/** The logger used by the application manager */
@@ -186,6 +194,8 @@ private:
 
 	/** The set of resources required (usages) */
 	UsagesMap_t rsrc_usages;
+
+	UsagesMapPtr_t sys_rsrc_usages;
 
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;

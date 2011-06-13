@@ -27,8 +27,17 @@
 namespace bbque { namespace res {
 /** Numeric value used as token for the resource views */
 typedef size_t RViewToken_t;
+
+struct ResourceUsage;
+/** Shared pointer to ResourceUsage object */
+typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
+/** Map of ResourceUsage descriptors. Key: resource path */
+typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
+/** Constant pointer to the map of ResourceUsage descriptors */
+typedef std::shared_ptr<UsagesMap_t> UsagesMapPtr_t;
 }}
 
+using bbque::res::UsagesMapPtr_t;
 using bbque::res::RViewToken_t;
 
 namespace bbque { namespace app {
@@ -60,7 +69,6 @@ public:
 	 *
 	 * A disabled application will not be considered for resources scheduling.
 	 */
-
 	virtual ExitCode_t Disable() = 0;
 
 	/**
@@ -75,6 +83,7 @@ public:
 	 * going to be re-scheduled otherwise, it is un-scheduled.
 	 * 
 	 * @param awm Next working mode scheduled for the application
+	 * @param resource_set The map of resources on which bind the working mode
 	 * @param tok The token referencing the resources state view
 	 *
 	 * @return The method return an exit code representing the decision taken:
@@ -83,7 +92,11 @@ public:
 	 * scheduled.
 	 */
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
-			RViewToken_t tok = 0) = 0;
+			UsagesMapPtr_t & resource_set, RViewToken_t tok = 0) = 0;
+
+	// TODO: Remove this
+	virtual ExitCode_t SetNextSchedule(AwmPtr_t const & awm,
+			UsagesMapPtr_t & resource_set, RViewToken_t tok = 0) = 0;
 
 	/**
 	 * @brief Commit a previsously required re-scheduling request.

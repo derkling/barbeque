@@ -61,8 +61,8 @@ public:
 		RA_ERR_MISS_APP,
 		/** Resource usages map missing	 */
 		RA_ERR_MISS_USAGES,
-		/** Resource usage required miss the binding */
-		RA_ERR_MISS_BIND,
+		/** Application uses yet another resource set */
+		RA_ERR_APP_USAGES,
 		/** Resource usage required exceeds the availabilities */
 		RA_ERR_USAGE_EXC
 	};
@@ -92,19 +92,19 @@ public:
 			std::string const & units, uint64_t amount) = 0;
 
 	/**
-	 * @brief Acquire the next set of resources
+	 * @brief Acquire a set of resources
 	 *
 	 * The method first check that the application doesn't hold another
 	 * resource set. If so such resources are released. Then it reserves, for
-	 * each resource in the usages map of the next working mode, the required
-	 * quantity.
+	 * each resource in the usages map specified, the required quantity.
 	 *
 	 * @param app The application requiring resource usages
+	 * @oparam usages Map of ResourceUsage objects
 	 * @param vtok The token referencing the resource state view
 	 * @return An exit code (@see ExitCode_t)
 	 */
-	virtual ExitCode_t AcquireUsageSet(AppPtr_t app, RViewToken_t vtok = 0)
-		= 0;
+	virtual ExitCode_t BookResources(AppPtr_t app,
+			UsagesMapPtr_t const & usages, RViewToken_t vtok = 0) = 0;
 
 	/**
 	 * @brief Release the resources
@@ -117,7 +117,7 @@ public:
 	 * @param app The application holding the resources
 	 * @param vtok The token referencing the resource state view
 	 */
-	virtual void ReleaseUsageSet(AppPtr_t app, RViewToken_t vtok = 0) = 0;
+	virtual void ReleaseResources(AppPtr_t app, RViewToken_t vtok = 0) = 0;
 
 	/**
 	 * @brief Get a new resources view

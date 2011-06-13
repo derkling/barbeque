@@ -478,7 +478,9 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 	d_wm->BindResources("cluster", RSRC_ID_ANY, 1);
 
 	// Let's set next schedule for the application above
-	papp->ScheduleRequest(d_wm);
+	papp->ScheduleRequest(d_wm, d_wm->_GetBinding());
+//	papp->SetNextSchedule(d_wm, d_wm->_GetBinding());
+
 	PrintScheduleInfo(papp);
 
 	// Now switch!

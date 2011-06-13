@@ -28,7 +28,6 @@
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
 #include <set>
-#include "bbque/res/resources.h"
 #include "bbque/res/resource_accounter_conf.h"
 #include "bbque/res/resource_tree.h"
 #include "bbque/plugins/logger.h"
@@ -41,14 +40,6 @@ using bbque::app::AppPtr_t;
 
 namespace bbque { namespace res {
 
-/** Type for ID used in resource path */
-typedef int16_t ResID_t;
-/** Shared pointer to ResourceUsage object */
-typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
-/** Map of ResourceUsage descriptors. Key: resource path */
-typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
-/** Constant pointer to the map of ResourceUsage descriptors */
-typedef UsagesMap_t const * UsagesMapPtr_t;
 /** Map of map of ResourceUsage descriptors. Key: application */
 typedef std::map<AppPtr_t, UsagesMapPtr_t> AppUsagesMap_t;
 /** Shared pointer to a map of pair Application/ResourceUsages */
@@ -109,6 +100,16 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	inline uint64_t Available(UsagePtr_t const & usage_ptr,
+			RViewToken_t vtok = 0) const {
+		if (usage_ptr->binds.empty())
+			return 0;
+		return QueryStatus(usage_ptr->binds, RA_AVAIL, vtok);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	inline uint64_t Total(std::string const & path,
 			RViewToken_t vtok = 0) const {
 		ResourcePtrList_t matches = GetResources(path);
@@ -118,10 +119,30 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	inline uint64_t Total(UsagePtr_t const & usage_ptr,
+			RViewToken_t vtok = 0) const {
+		if (usage_ptr->binds.empty())
+			return 0;
+		return QueryStatus(usage_ptr->binds, RA_TOTAL, vtok);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	inline uint64_t Used(std::string const & path,
 			RViewToken_t vtok = 0) const {
 		ResourcePtrList_t matches = GetResources(path);
 		return QueryStatus(matches, RA_USED, vtok);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	inline uint64_t Used(UsagePtr_t const & usage_ptr,
+			RViewToken_t vtok = 0) const {
+		if (usage_ptr->binds.empty())
+			return 0;
+		return QueryStatus(usage_ptr->binds, RA_USED, vtok);
 	}
 
 	/**
@@ -181,14 +202,13 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	ExitCode_t AcquireUsageSet(AppPtr_t papp, RViewToken_t vtok = 0);
-
-	ExitCode_t _BookResources(AppPtr_t papp, RViewToken_t vtok = 0);
+	ExitCode_t BookResources(AppPtr_t papp, UsagesMapPtr_t const & usages,
+			RViewToken_t vtok = 0);
 
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	void ReleaseUsageSet(AppPtr_t papp, RViewToken_t vtok = 0);
+	void ReleaseResources(AppPtr_t papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @see ResourceAccounterConfIF
@@ -248,6 +268,17 @@ private:
 				QueryOption_t q_opt, RViewToken_t vtok = 0) const;
 
 	/**
+	 * @brief Check the resource availability for a whole set
+	 *
+	 * @param usages A map of ResourceUsage objects to check
+	 * @param vtok The token referencing the resource state view
+	 * @return RA_SUCCESS if all the resources are availables,
+	 * RA_ERR_USAGE_EXC otherwise.
+	 */
+	ExitCode_t CheckAvailability(UsagesMapPtr_t const & usages,
+			RViewToken_t vtok = 0) const;
+
+	/**
 	 * @brief Get a pointer to the map of applications resource usages
 	 *
 	 * Each application (or better, "execution context") can hold just one set
@@ -274,8 +305,8 @@ private:
 	 * @param vtok The token referencing the resource state view
 	 * @return An exit code (@see ExitCode_t)
 	 */
-	ExitCode_t IncUsageCounts(UsagesMapPtr_t app_usages,
-			AppPtr_t papp, RViewToken_t vtok = 0);
+	ExitCode_t IncBookingCounts(UsagesMapPtr_t const & app_usages,
+			AppPtr_t const & papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Decrement the resource usages counts
@@ -287,8 +318,8 @@ private:
 	 * @param app The application releasing the resources
 	 * @param vtok The token referencing the resource state view
 	 */
-	void DecUsageCounts(UsagesMapPtr_t  app_usages,
-			AppPtr_t app, RViewToken_t vtok = 0);
+	void DecBookingCounts(UsagesMapPtr_t const & app_usages,
+			AppPtr_t const & app, RViewToken_t vtok = 0);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;

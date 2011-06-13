@@ -95,7 +95,7 @@ Application::~Application() {
 	// Release the resources
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	if (CurrentAWM())
-		ra.ReleaseUsageSet(CurrentAWM()->Owner());
+		ra.ReleaseResources(CurrentAWM()->Owner());
 
 	// Release the recipe used
 	recipe.reset();
@@ -210,7 +210,8 @@ void Application::InitWorkingModes(AppPtr_t & papp) {
 
 void Application::InitConstraints() {
 	// For each static constraint make an assertion
-	logger->Warn("%d constraints in the recipe", recipe->ConstraintsAll().size());
+	logger->Debug("%d constraints in the recipe",
+			recipe->ConstraintsAll().size());
 	ConstrMap_t::const_iterator cons_it(recipe->ConstraintsAll().begin());
 	ConstrMap_t::const_iterator end_cons(recipe->ConstraintsAll().end());
 	for (; cons_it != end_cons; ++cons_it) {
@@ -225,7 +226,6 @@ void Application::InitConstraints() {
 	}
 }
 
-
 AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
 	AwmPtrList_t::iterator awm_it(enabled_awms.begin());
 	AwmPtrList_t::iterator end_awm(enabled_awms.end());
@@ -239,8 +239,18 @@ AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
 	return AwmPtr_t();
 }
 
+Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & awm,
+		br::UsagesMapPtr_t & resource_set,
+		RViewToken_t vtok) {
+	// Silence "args" warning
+	(void) awm;
+	(void) resource_set;
+	(void) vtok;
+}
+
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
-				RViewToken_t vtok) {
+		br::UsagesMapPtr_t & resource_set,
+		RViewToken_t vtok) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
 	AppPtr_t papp(awm->Owner());
@@ -254,7 +264,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	}
 
 	// Checking for resources availability
-	booking = ra._BookResources(papp, vtok);
+	booking = ra.BookResources(papp, resource_set, vtok);
 
 	// If resourecs are available:
 	if (booking == br::ResourceAccounter::RA_SUCCESS) {

@@ -230,7 +230,12 @@ public:
 	/**
 	 * @see ApplicationConfIF
 	 */
-	ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
+			UsagesMapPtr_t & resource_set, RViewToken_t vtok = 0);
+
+	// TODO: Remove this
+	ExitCode_t SetNextSchedule(AwmPtr_t const & awm,
+			UsagesMapPtr_t & resource_set, RViewToken_t vtok = 0);
 
 	/**
 	 * @see ApplicationConfIF

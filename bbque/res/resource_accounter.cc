@@ -123,59 +123,43 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 }
 
 
-ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(AppPtr_t _app,
+ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
+		UsagesMapPtr_t const & resource_set,
 		RViewToken_t vtok) {
 	// Check to avoid null pointer segmentation fault
-	if (!_app)
+	if (!papp)
 		return RA_ERR_MISS_APP;
-
 	// Check that the next working mode has been set
-	if (!_app->NextAWM())
+	if ((!resource_set) || (resource_set->empty()))
 		return RA_ERR_MISS_USAGES;
 
-	// Get the map of applications resource usages related to the state view
-	// referenced by 'vtok'.
-	// A missing view implies that the token is not valid.
+	// Get the map of resources used by the application (from the state view
+	// referenced by 'vtok'). A missing view implies that the token is not
+	// valid.
 	AppUsagesMapPtr_t apps_usages;
 	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW)
 		return RA_ERR_MISS_VIEW;
 
 	// Each application can hold just one resource usages set
-	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app));
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(papp));
 	if (usemap_it != apps_usages->end())
-		ReleaseUsageSet(_app, vtok);
-
-	// Set resource usages of the next working mode
-	apps_usages->insert(std::pair<AppPtr_t, UsagesMapPtr_t>(
-				_app, _app->NextAWM()->ResourceUsages()));
-	ExitCode_t ret = IncUsageCounts((*(apps_usages))[_app], _app, vtok);
-
-	// Resource allocation/reservation failed?
-	if (ret != RA_SUCCESS)
-		apps_usages->erase(_app);
-
-	return ret;
-}
-
-ResourceAccounter::ExitCode_t ResourceAccounter::_BookResources(AppPtr_t papp,
-		RViewToken_t vtok) {
-	(void)papp;
-	(void)vtok;
-	// NOTE: how you find the proper resource ser? Should it be placed into
-	// the method disgnature?!?
-	// DO NOT DO HYPOTESYS on other components (e.g. applicatiopn
-
+		return RA_ERR_APP_USAGES;
 
 	// Try booking required resources for the specified application and view
-	
-	// If successfull: return a success exit code
-	
-	// Otherwise: release booked resources and return failure exit code
+	if (CheckAvailability(resource_set, vtok) == RA_ERR_USAGE_EXC) {
+		logger->Debug("Cannot allocate the resource set");
+		return RA_ERR_USAGE_EXC;
+	}
 
+	// Increment the booking counts and save the reference to the resource set
+	// used by the application
+	IncBookingCounts(resource_set, papp, vtok);
+	apps_usages->insert(std::pair<AppPtr_t, UsagesMapPtr_t>(papp, resource_set));
 	return RA_SUCCESS;
 }
 
-void ResourceAccounter::ReleaseUsageSet(AppPtr_t _app, RViewToken_t vtok) {
+
+void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 	// Check to avoid null pointer seg-fault
 	if (!_app)
 		return;
@@ -192,8 +176,21 @@ void ResourceAccounter::ReleaseUsageSet(AppPtr_t _app, RViewToken_t vtok) {
 		return;
 
 	// Decrement resources counts and remove the usages map
-	DecUsageCounts(usemap_it->second, _app, vtok);
+	DecBookingCounts(usemap_it->second, _app, vtok);
 	apps_usages->erase(_app);
+}
+
+
+ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
+		UsagesMapPtr_t const & usages,
+		RViewToken_t vtok) const {
+	UsagesMap_t::const_iterator usages_it(usages->begin());
+	UsagesMap_t::const_iterator usages_end(usages->end());
+	for (; usages_it != usages_end; ++usages_it)
+		if (Available(usages_it->second, vtok) < usages_it->second->value)
+			return RA_ERR_USAGE_EXC;
+
+	return RA_SUCCESS;
 }
 
 
@@ -289,34 +286,17 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 }
 
 
-inline ResourceAccounter::ExitCode_t ResourceAccounter::IncUsageCounts(
-		UsagesMapPtr_t app_usages,
-		AppPtr_t _app,
+inline ResourceAccounter::ExitCode_t ResourceAccounter::IncBookingCounts(
+		UsagesMapPtr_t const & app_usages,
+		AppPtr_t const & _app,
 		RViewToken_t vtok) {
-	// For each resource usage make a couple of checks
-	UsagesMap_t::const_iterator usages_it = app_usages->begin();
-	UsagesMap_t::const_iterator usages_end = app_usages->end();
-	UsagePtr_t curr_usage;
-	for (; usages_it != usages_end; ++usages_it) {
-
-		// Current usage descriptor
-		curr_usage = usages_it->second;
-
-		// Is there a resource binding ?
-		if (curr_usage->binds.empty())
-			return RA_ERR_MISS_BIND;
-
-		// Is the request satisfiable ?
-		if (curr_usage->value > QueryStatus(curr_usage->binds, RA_AVAIL, vtok))
-			return RA_ERR_USAGE_EXC;
-	}
-
-	// Checks passed, iterate again doing the resources reservations
+	// Acquire resources for the application
+	UsagesMap_t::const_iterator usages_it(app_usages->begin());
+	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (usages_it = app_usages->begin(); usages_it != usages_end;
 			++usages_it) {
-
 		// Current usage value to reserve
-		curr_usage = usages_it->second;
+		UsagePtr_t curr_usage = usages_it->second;
 		uint64_t usage_value = curr_usage->value;
 
 		// Allocate the usage request to the resources binds
@@ -348,14 +328,14 @@ inline ResourceAccounter::ExitCode_t ResourceAccounter::IncUsageCounts(
 }
 
 
-inline void ResourceAccounter::DecUsageCounts(UsagesMapPtr_t app_usages,
-		AppPtr_t _app,
+inline void ResourceAccounter::DecBookingCounts(
+		UsagesMapPtr_t const & app_usages,
+		AppPtr_t const & _app,
 		RViewToken_t vtok) {
 	// Release the amount of resource hold by each application
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end; ++usages_it) {
-
 		// Resource usage to release / released
 		UsagePtr_t curr_usage = usages_it->second;
 		uint64_t usage_freed = 0;

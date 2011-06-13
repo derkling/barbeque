@@ -26,6 +26,8 @@
 #include <memory>
 #include <string>
 
+#include "bbque/res/resources.h"
+
 // Following macros are defined in order to give a lightweight abstraction
 // upon the path template details of some typical resources. The purpose is
 // simply to give a more clean way in writing code for Barbeque modules using
@@ -57,13 +59,18 @@ using bbque::app::Application;
 
 namespace bbque { namespace res {
 
-// Forward declaration
-struct Resource;
-
+/** Type for ID used in resource path */
+typedef int16_t ResID_t;
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointer to Resource*/
 typedef std::list<ResourcePtr_t> ResourcePtrList_t;
+/** Shared pointer to ResourceUsage object */
+typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
+/** Map of ResourceUsage descriptors. Key: resource path */
+typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
+/** Constant pointer to the map of ResourceUsage descriptors */
+typedef std::shared_ptr<UsagesMap_t> UsagesMapPtr_t;
 
 
 /**
@@ -78,7 +85,7 @@ class ResourceAccounterStatusIF {
 public:
 
 	/**
-	 * @brief Amount of resource available given an identifying resource path
+	 * @brief Amount of resource available
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
 	 * @return The amount of resource available
@@ -87,7 +94,16 @@ public:
 		const = 0;
 
 	/**
-	 * @brief Total amount of resource given an identifying resource path
+	 * @brief Amount of resources available
+	 * @param usage A pointer to ResourceUsage
+	 * @param vtok The token referencing the resource state view
+	 * @return The amount of resource available
+	 */
+	virtual uint64_t Available(UsagePtr_t const & usage,
+			RViewToken_t vtok = 0) const = 0;
+
+	/**
+	 * @brief Total amount of resources
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
 	 * @return The total amount of resource
@@ -96,12 +112,30 @@ public:
 		const = 0;
 
 	/**
-	 * @brief Amount of resource used given an identifying resource path
+	 * @brief Total amount of resources
+	 * @param usage A pointer to ResourceUsage
+	 * @param vtok The token referencing the resource state view
+	 * @return The total amount of resource
+	 */
+	virtual uint64_t Total(UsagePtr_t const & usage, RViewToken_t vtok = 0)
+		const = 0;
+
+	/**
+	 * @brief Amount of resources used
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
 	 * @return The used amount of resource
 	 */
 	virtual uint64_t Used(std::string const & path, RViewToken_t vtok = 0)
+		const = 0;
+
+	/**
+	 * @brief Amount of resources used
+	 * @param usage A pointer to ResourceUsage
+	 * @param vtok The token referencing the resource state view
+	 * @return The used amount of resource
+	 */
+	virtual uint64_t Used(UsagePtr_t const & usage, RViewToken_t vtok = 0)
 		const = 0;
 
 	/**
