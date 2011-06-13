@@ -193,9 +193,9 @@ public:
 
 	ExitCode_t _UpdateStatusMaps(AppPtr_t papp,
 			Application::State_t prev, Application::State_t next);
-	ExitCode_t _RequestSync(AppPtr_t papp, Application::SyncState_t state);
-	ExitCode_t _SyncDone(AppPtr_t papp);
-	void _RemoveSync(AppPtr_t papp, uint8_t state = Application::STARTING);
+	ExitCode_t _SyncRequest(AppPtr_t papp, Application::SyncState_t state);
+	ExitCode_t _SyncCommit(AppPtr_t papp);
+	void _SyncRemove(AppPtr_t papp, uint8_t state = Application::STARTING);
 
 private:
 

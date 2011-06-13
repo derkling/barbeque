@@ -289,7 +289,7 @@ Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 	return APP_SUCCESS;
 }
 
-Application::ExitCode_t Application::_SetNextSchedule(AwmPtr_t const & awm,
+Application::ExitCode_t Application::_ScheduleRequest(AwmPtr_t const & awm,
 				RViewToken_t vtok) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
@@ -368,7 +368,7 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 			StrId(), sync, SyncStateStr(sync));
 
 	// Request the application manager to synchronization this application
-	result = am._RequestSync(AppPtr_t(this), sync);
+	result = am._SyncRequest(AppPtr_t(this), sync);
 	if (result != ApplicationManager::AM_SUCCESS) {
 		logger->Error("Request synchronization FAILED (Error: %d)", result);
 		return APP_ABORT;
@@ -385,7 +385,7 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 }
 
 Application::ExitCode_t
-Application::_SyncCompleted() {
+Application::_ScheduleCommit() {
 
 	assert(CurrentState() == SYNC);
 

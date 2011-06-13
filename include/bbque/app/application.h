@@ -234,7 +234,7 @@ public:
 
 	// DERKLING: [public]
 	// These methods should be moved into the proper _conf and _status header
-	ExitCode_t _SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t _ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 	inline static char const *StateStr(State_t state) {
 		assert(state < STATE_COUNT);
 		return stateStr[state];
@@ -246,7 +246,7 @@ public:
 	inline SyncState_t SyncState() {
 		return curr_sched.syncState;
 	}
-	ExitCode_t _SyncCompleted();
+	ExitCode_t _ScheduleCommit();
 	// DERKLING: [private]
 	// These methods should be private
 	void _SetState(State_t state, SyncState_t sync = SYNC_NONE);

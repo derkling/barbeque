@@ -543,7 +543,7 @@ AppPtr_t const ApplicationManager::GetApplication(AppPid_t pid,
 
 
 void
-ApplicationManager::_RemoveSync(AppPtr_t papp, uint8_t state) {
+ApplicationManager::_SyncRemove(AppPtr_t papp, uint8_t state) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator app_it;
 	AppsMap_t *scheduleMap;
@@ -617,7 +617,7 @@ ApplicationManager::_UpdateStatusMaps(AppPtr_t papp,
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::_RequestSync(AppPtr_t papp, Application::SyncState_t state) {
+ApplicationManager::_SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 	AppsMap_t *scheduleMap;
 
 	logger->Debug("Requesting sync for EXC [%s, %s]", papp->StrId(),
@@ -633,7 +633,7 @@ ApplicationManager::_RequestSync(AppPtr_t papp, Application::SyncState_t state) 
 	}
 
 	// Releasing any previous sync request
-	_RemoveSync(papp);
+	_SyncRemove(papp);
 
 	// Mark the application for scheduling into the next state
 	scheduleMap = &(sync_vec[state]);
@@ -649,7 +649,7 @@ ApplicationManager::_RequestSync(AppPtr_t papp, Application::SyncState_t state) 
 
 
 ApplicationManager::ExitCode_t
-ApplicationManager::_SyncDone(AppPtr_t papp) {
+ApplicationManager::_SyncCommit(AppPtr_t papp) {
 	Application::SyncState_t syncState = papp->SyncState();
 
 	assert(syncState != Application::SYNC_NONE);
@@ -658,7 +658,7 @@ ApplicationManager::_SyncDone(AppPtr_t papp) {
 			Application::SyncStateStr(syncState));
 
 	// Releasing previous sync request
-	_RemoveSync(papp);
+	_SyncRemove(papp);
 
 	// Updating status maps
 	switch(syncState) {
@@ -682,7 +682,7 @@ ApplicationManager::_SyncDone(AppPtr_t papp) {
 	};
 
 	// Notify application
-	papp->_SyncCompleted();
+	papp->_ScheduleCommit();
 
 	return AM_SUCCESS;
 }
