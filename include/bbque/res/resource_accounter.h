@@ -183,6 +183,8 @@ public:
 	 */
 	ExitCode_t AcquireUsageSet(AppPtr_t papp, RViewToken_t vtok = 0);
 
+	ExitCode_t _BookResources(AppPtr_t papp, RViewToken_t vtok = 0);
+
 	/**
 	 * @see ResourceAccounterConfIF
 	 */

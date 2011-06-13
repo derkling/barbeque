@@ -232,6 +232,13 @@ public:
 	 */
 	ExitCode_t SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
+	ExitCode_t _SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	void _SetState(State_t state);
+	ExitCode_t _RequestSync(SyncState_t ss);
+	SyncState_t _SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t _Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t _Unschedule();
+
 	/**
 	 * @brief Update scheduled status and reconfiguration overheads data
 	 *

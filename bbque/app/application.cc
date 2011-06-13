@@ -31,6 +31,7 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/app/overheads.h"
 #include "bbque/app/working_mode.h"
+#include "bbque/res/resource_accounter.h"
 
 namespace ba = bbque::app;
 namespace br = bbque::res;
@@ -242,6 +243,10 @@ AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
 
 Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 				RViewToken_t vtok) {
+	(void)n_awm;
+	(void)vtok;
+	// TODO Temporarely disabled for new API merging
+#if 0
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	// Application is blocked, until the AWM validity is verified
 	next_sched.state = BLOCKED;
@@ -279,8 +284,140 @@ Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
 
 	// Mark application for status update pending
 	am.SetSchedule(n_awm->Owner());
+#endif
+	return APP_SUCCESS;
+}
+
+Application::ExitCode_t Application::_SetNextSchedule(AwmPtr_t const & awm,
+				RViewToken_t vtok) {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	br::ResourceAccounter::ExitCode_t booking;
+	AppPtr_t papp(awm->Owner());
+	ExitCode_t result;
+
+	// Get the working mode pointer
+	if (!awm) {
+		logger->Crit("Working mode selection FAILED (Error: AWM not existing)");
+		assert(awm);
+		return APP_WM_NOT_FOUND;
+	}
+
+	// Checking for resources availability
+	booking = ra._BookResources(papp, vtok);
+
+	// If resourecs are available:
+	if (booking == br::ResourceAccounter::RA_SUCCESS) {
+		// reschedule the application within the specified working mode
+		result = _Reschedule(awm, vtok);
+	} else {
+		// Otherwise: unschedule the application
+		result = _Unschedule();
+	}
+
+	if (result == APP_SUCCESS)
+		return APP_WM_ACCEPTED;
+
+	return APP_WM_REJECTED;
+
+}
+
+void Application::_SetState(State_t state) {
+
+	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
+			StrId(),
+			CurrentState(), StateStr[CurrentState()],
+			state, StateStr[state]);
+
+	curr_sched.state = state;
+}
+
+Application::ExitCode_t Application::_RequestSync(SyncState_t ss) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	ApplicationManager::ExitCode_t result;
+
+	if ( (CurrentState() != READY) || 
+			(CurrentState() != RUNNING) ) {
+		logger->Crit("Sync request FAILED (Error: wrong application status)");
+		assert( (CurrentState() == READY) || 
+				(CurrentState() == RUNNING) );
+		return APP_ABORT;
+	}
+
+	logger->Debug("Request synchronization [%s, %d:%s]",
+			StrId(), ss, SyncStateStr[ss]);
+
+	// Request the application manager to synchronization this application
+	result = am._RequestSync(AppPtr_t(this), ss);
+	if (result != ApplicationManager::AM_SUCCESS) {
+		logger->Error("Request synchronization FAILED (Error: %d)", result);
+		return APP_ABORT;
+	}
+
+	// If the request has been accepted: update our state
+	_SetState(SYNC);
 
 	return APP_SUCCESS;
+
+}
+
+Application::SyncState_t
+Application::_SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
+	(void)awm;
+	(void)vtok;
+
+	// This must be called only by running applications
+	assert(CurrentState() == RUNNING);
+
+	// Check if the assiged resources requires 
+	// TODO: add code to compare current vs assigned configuration
+	// In case of reconfgiuration required, should return:
+	// RECONF|MIGREC|MIGRATE
+
+	// NOTE: By default no reconfiguration is assumed to be required, thus we
+	// return the SYNC_STATE_COUNT which must be read as false values
+	return SYNC_STATE_COUNT;
+}
+
+Application::ExitCode_t
+Application::_Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
+	SyncState_t ss;
+
+	// Ready application could be synchronized to start
+	if (CurrentState() == READY)
+		return _RequestSync(STARTING);
+	
+	// Otherwise, the application should be running...
+	if (CurrentState() != RUNNING) {
+		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
+		assert(CurrentState() == RUNNING);
+		return APP_ABORT;
+	}
+
+	// Checking if a synchronization is required
+	ss = _SyncRequired(awm, vtok);
+	if (ss == SYNC_STATE_COUNT)
+		return APP_SUCCESS;
+
+	// Request a synchronization for the identified reconfiguration
+	return _RequestSync(ss);
+}
+
+Application::ExitCode_t
+Application::_Unschedule() {
+
+	// Ready application remain into ready state
+	if (CurrentState() == READY)
+		return APP_ABORT;
+
+	// Otherwise, the application should be running...
+	if (CurrentState() != RUNNING) {
+		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
+		assert(CurrentState() == RUNNING);
+		return APP_ABORT;
+	}
+
+	// The application should be blocked
+	return _RequestSync(BLOCKED);
 }
 
 

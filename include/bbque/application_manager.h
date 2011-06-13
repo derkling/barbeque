@@ -191,6 +191,8 @@ public:
 	 */
 	ExitCode_t ChangedSchedule(AppPtr_t papp, double time = 0);
 
+	ExitCode_t _RequestSync(AppPtr_t papp, Application::SyncState_t state);
+
 private:
 
 	/** The logger used by the application manager */

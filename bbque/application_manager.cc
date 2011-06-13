@@ -541,5 +541,15 @@ AppPtr_t const ApplicationManager::GetApplication(AppPid_t pid,
 	return papp;
 }
 
+
+ApplicationManager::ExitCode_t
+ApplicationManager::_RequestSync(AppPtr_t papp, Application::SyncState_t state) {
+	(void)papp;
+	(void)state;
+
+	return AM_SUCCESS;
+}
+
+
 }   // namespace bbque
 

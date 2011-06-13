@@ -157,6 +157,23 @@ ResourceAccounter::ExitCode_t ResourceAccounter::AcquireUsageSet(AppPtr_t _app,
 	return ret;
 }
 
+ResourceAccounter::ExitCode_t ResourceAccounter::_BookResources(AppPtr_t papp,
+		RViewToken_t vtok) {
+	(void)papp;
+	(void)vtok;
+	// NOTE: how you find the proper resource ser? Should it be placed into
+	// the method disgnature?!?
+	// DO NOT DO HYPOTESYS on other components (e.g. applicatiopn
+
+
+	// Try booking required resources for the specified application and view
+	
+	// If successfull: return a success exit code
+	
+	// Otherwise: release booked resources and return failure exit code
+
+	return RA_SUCCESS;
+}
 
 void ResourceAccounter::ReleaseUsageSet(AppPtr_t _app, RViewToken_t vtok) {
 	// Check to avoid null pointer seg-fault
