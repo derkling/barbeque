@@ -542,14 +542,147 @@ AppPtr_t const ApplicationManager::GetApplication(AppPid_t pid,
 }
 
 
+void
+ApplicationManager::_RemoveSync(AppPtr_t papp, uint8_t state) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator app_it;
+	AppsMap_t *scheduleMap;
+
+	logger->Debug("Remove sync request for EXC [%s]", papp->StrId());
+
+	// Clean-up (eventaully) previous occurrence
+	for( ; state < Application::SYNC_STATE_COUNT; ++state) {
+		// Get the applications map
+		scheduleMap = &(sync_vec[state]);
+		range = scheduleMap->equal_range(papp->Pid());
+		for( ; range.first != range.second; ++range.first) {
+			app_it = range.first;
+			if (((*app_it).second)->ExcId() == papp->ExcId()) {
+				scheduleMap->erase(app_it);
+				logger->Info("Removed sync request for EXC [%s, %s]",
+						papp->StrId(),
+						Application::SyncStateStr(
+							(Application::SyncState_t)state));
+				break;
+			}
+		}
+	}
+
+}
+
+
 ApplicationManager::ExitCode_t
-ApplicationManager::_RequestSync(AppPtr_t papp, Application::SyncState_t state) {
-	(void)papp;
-	(void)state;
+ApplicationManager::_UpdateStatusMaps(AppPtr_t papp,
+		Application::State_t prev, Application::State_t next) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+
+	assert(papp);
+
+	if (prev == next) {
+		// This should never happen
+		assert(prev != next);
+		return AM_SUCCESS;
+	}
+
+	// Retrieve the runtime map from the status vector
+	AppsMap_t *curr_state_map = &(status_vec[prev]);
+	AppsMap_t *next_state_map = &(status_vec[next]);
+	assert(curr_state_map != next_state_map);
+	
+	// Find the application descriptor the current status map
+	range = curr_state_map->equal_range(papp->Pid());
+	assert(range.first != range.second);
+	it = range.first;
+	while (it != range.second &&
+		((*it).second)->ExcId() != papp->ExcId()) {
+		++it;
+	}
+	// The required application should be found, otherwise a data
+	// structure corruption has occurred
+	assert(it != range.second);
+	if (it == range.second) {
+		logger->Crit("unexpected state for EXC [%s] "
+				"(Error: possible currupted data structures)",
+				papp->StrId());
+		return AM_ABORT;
+	}
+
+	// Move it from the current to the next status map
+	next_state_map->insert(next_state_map->begin(),
+			AppsMapEntry_t(papp->Pid(), papp));
+	curr_state_map->erase(it);
 
 	return AM_SUCCESS;
 }
 
+ApplicationManager::ExitCode_t
+ApplicationManager::_RequestSync(AppPtr_t papp, Application::SyncState_t state) {
+	AppsMap_t *scheduleMap;
+
+	logger->Debug("Requesting sync for EXC [%s, %s]", papp->StrId(),
+			Application::SyncStateStr(state));
+
+	// Check valid state has beed required
+	if (state >= Application::SYNC_STATE_COUNT) {
+		logger->Crit("Sync request for EXC [%s] FAILED "
+				"(Error: invalid state [%d]",
+				papp->StrId(), state);
+		assert(state<Application::SYNC_STATE_COUNT);
+		return AM_ABORT;
+	}
+
+	// Releasing any previous sync request
+	_RemoveSync(papp);
+
+	// Mark the application for scheduling into the next state
+	scheduleMap = &(sync_vec[state]);
+	scheduleMap->insert(AppsMapEntry_t(papp->Pid(), papp));
+
+	// Move into synchronization status
+
+	logger->Info("Sync request for EXC [%s, %s]", papp->StrId(),
+			Application::SyncStateStr(state));
+
+	return AM_SUCCESS;
+}
+
+
+ApplicationManager::ExitCode_t
+ApplicationManager::_SyncDone(AppPtr_t papp) {
+	Application::SyncState_t syncState = papp->SyncState();
+
+	assert(syncState != Application::SYNC_NONE);
+
+	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
+			Application::SyncStateStr(syncState));
+
+	// Releasing previous sync request
+	_RemoveSync(papp);
+
+	// Updating status maps
+	switch(syncState) {
+	case Application::STARTING:
+	case Application::RECONF:
+	case Application::MIGREC:
+	case Application::MIGRATE:
+		_UpdateStatusMaps(papp, Application::SYNC, Application::RUNNING);
+		break;
+	case Application::BLOCKED:
+		_UpdateStatusMaps(papp, Application::SYNC, Application::READY);
+		break;
+	case Application::TERMINATE:
+		_UpdateStatusMaps(papp, Application::SYNC, Application::FINISHED);
+		break;
+	default:
+		logger->Crit("Sync for EXC [%s] FAILED"
+				"(Error: invalid synchronization state)");
+		assert(syncState < Application::SYNC_NONE);
+		return AM_ABORT;
+	};
+
+	return AM_SUCCESS;
+}
 
 }   // namespace bbque
 
