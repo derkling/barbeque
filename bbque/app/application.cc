@@ -377,9 +377,45 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 	// If the request has been accepted: update our state
 	_SetState(SYNC, sync);
 
+	logger->Info("Sync scheduled [%s, %d:%s]",
+			StrId(), sync, SyncStateStr(sync));
+
 	return APP_SUCCESS;
 
 }
+
+Application::ExitCode_t
+Application::_SyncCompleted() {
+
+	assert(CurrentState() == SYNC);
+
+	switch(SyncState()) {
+	case STARTING:
+	case RECONF:
+	case MIGREC:
+	case MIGRATE:
+		_SetState(RUNNING);
+		break;
+	case BLOCKED:
+		_SetState(READY);
+		break;
+	case TERMINATE:
+		_SetState(FINISHED);
+		break;
+	default:
+		logger->Crit("Sync for EXC [%s] FAILED"
+				"(Error: invalid synchronization state)");
+		assert(SyncState() < Application::SYNC_NONE);
+		return APP_ABORT;
+	}
+
+	logger->Info("Sync completed [%s, %d:%s]",
+			StrId(), CurrentState(), StateStr(CurrentState()));
+
+	return APP_SUCCESS;
+
+}
+
 
 Application::SyncState_t
 Application::_SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {

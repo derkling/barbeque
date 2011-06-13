@@ -246,6 +246,7 @@ public:
 	inline SyncState_t SyncState() {
 		return curr_sched.syncState;
 	}
+	ExitCode_t _SyncCompleted();
 	// DERKLING: [private]
 	// These methods should be private
 	void _SetState(State_t state, SyncState_t sync = SYNC_NONE);

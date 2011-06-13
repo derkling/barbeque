@@ -681,6 +681,9 @@ ApplicationManager::_SyncDone(AppPtr_t papp) {
 		return AM_ABORT;
 	};
 
+	// Notify application
+	papp->_SyncCompleted();
+
 	return AM_SUCCESS;
 }
 
