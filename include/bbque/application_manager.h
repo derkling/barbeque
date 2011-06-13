@@ -175,7 +175,7 @@ public:
 	 * @param papp The application to mark for a scheduling state chenge
 	 * @see Applications
 	 */
-	ExitCode_t SetSchedule(AppPtr_t papp);
+	ExitCode_t _SetSchedule(AppPtr_t papp);
 
 	/**
 	 * @brief The method is called to notify an application scheduling change
@@ -189,13 +189,28 @@ public:
 	 * @param papp The Application which scheduling has chenged
 	 * @param time Working mode switch time measured
 	 */
-	ExitCode_t ChangedSchedule(AppPtr_t papp, double time = 0);
+	ExitCode_t _ChangedSchedule(AppPtr_t papp, double time = 0);
+	
+	/**
+	 * @brief Request the synchronization of an application
+	 *
+	 * @param papp the application to synchronize
+	 * @param state the synchronization state required
+	 *
+	 * @return AM_SUCCESS if the synchronization request has been accepted,
+	 * AM_ABORT on synchronization request errors
+	 */
+	ExitCode_t SyncRequest(AppPtr_t papp, Application::SyncState_t state);
 
-	ExitCode_t _UpdateStatusMaps(AppPtr_t papp,
-			Application::State_t prev, Application::State_t next);
-	ExitCode_t _SyncRequest(AppPtr_t papp, Application::SyncState_t state);
-	ExitCode_t _SyncCommit(AppPtr_t papp);
-	void _SyncRemove(AppPtr_t papp, uint8_t state = Application::STARTING);
+	/**
+	 * @brief Commit the synchronization for the specified application
+	 *
+	 * @brief papp the application which has been synchronized
+	 *
+	 * @return AM_SUCCESS on commit succesfull, AM_ABORT on errors.
+	 */
+	ExitCode_t SyncCommit(AppPtr_t papp);
+
 
 private:
 
@@ -273,6 +288,25 @@ private:
 	 * Remove the specified application from the status maps
 	 */
 	ExitCode_t StatusRemove(AppPtr_t papp);
+	
+	/**
+	 * @brief Move the application from state vectors
+	 *
+	 * @param papp a pointer to an application
+	 * @param prev previous application status
+	 * @param next next application status
+	 */
+	ExitCode_t UpdateStatusMaps(AppPtr_t papp,
+			Application::State_t prev, Application::State_t next);
+
+	/**
+	 * @brief Release a synchronization request for the specified application
+	 *
+	 * @param papp the application to release
+	 * @param state the synchronization state to remo
+	 */
+	void SyncRemove(AppPtr_t papp,
+			Application::SyncState_t state = Application::STARTING);
 
 };
 

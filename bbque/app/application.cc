@@ -368,7 +368,7 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 			StrId(), sync, SyncStateStr(sync));
 
 	// Request the application manager to synchronization this application
-	result = am._SyncRequest(AppPtr_t(this), sync);
+	result = am.SyncRequest(AppPtr_t(this), sync);
 	if (result != ApplicationManager::AM_SUCCESS) {
 		logger->Error("Request synchronization FAILED (Error: %d)", result);
 		return APP_ABORT;
