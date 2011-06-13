@@ -53,7 +53,8 @@ char const *Application::syncStateStr[] = {
 	"MIGREC",
 	"MIGRATE",
 	"BLOCKED",
-	"TERMINATE"
+	"TERMINATE",
+	"NONE"
 }
 ;
 
@@ -321,17 +322,37 @@ Application::ExitCode_t Application::_SetNextSchedule(AwmPtr_t const & awm,
 
 }
 
-void Application::_SetState(State_t state) {
+void Application::_SetSyncState(SyncState_t sync) {
+
+	logger->Debug("Changing sync state [%s, %d:%s => %d:%s]",
+			StrId(),
+			SyncState(), SyncStateStr(SyncState()),
+			sync, SyncStateStr(sync));
+
+	curr_sched.syncState = sync;
+
+}
+
+void Application::_SetState(State_t state, SyncState_t sync) {
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
 			StrId(),
 			CurrentState(), StateStr(CurrentState()),
 			state, StateStr(state));
 
+	if (state == SYNC) {
+		assert(sync != SYNC_NONE);
+		curr_sched.preSyncState = curr_sched.state;
+	} else {
+		assert(sync == SYNC_NONE);
+		curr_sched.preSyncState = state;
+	}
+
 	curr_sched.state = state;
+	_SetSyncState(sync);
 }
 
-Application::ExitCode_t Application::_RequestSync(SyncState_t ss) {
+Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ApplicationManager::ExitCode_t result;
 
@@ -344,17 +365,17 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t ss) {
 	}
 
 	logger->Debug("Request synchronization [%s, %d:%s]",
-			StrId(), ss, SyncStateStr(ss));
+			StrId(), sync, SyncStateStr(sync));
 
 	// Request the application manager to synchronization this application
-	result = am._RequestSync(AppPtr_t(this), ss);
+	result = am._RequestSync(AppPtr_t(this), sync);
 	if (result != ApplicationManager::AM_SUCCESS) {
 		logger->Error("Request synchronization FAILED (Error: %d)", result);
 		return APP_ABORT;
 	}
 
 	// If the request has been accepted: update our state
-	_SetState(SYNC);
+	_SetState(SYNC, sync);
 
 	return APP_SUCCESS;
 
@@ -375,12 +396,12 @@ Application::_SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
 
 	// NOTE: By default no reconfiguration is assumed to be required, thus we
 	// return the SYNC_STATE_COUNT which must be read as false values
-	return SYNC_STATE_COUNT;
+	return SYNC_NONE;
 }
 
 Application::ExitCode_t
 Application::_Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
-	SyncState_t ss;
+	SyncState_t sync;
 
 	// Ready application could be synchronized to start
 	if (CurrentState() == READY)
@@ -394,12 +415,12 @@ Application::_Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
 	}
 
 	// Checking if a synchronization is required
-	ss = _SyncRequired(awm, vtok);
-	if (ss == SYNC_STATE_COUNT)
+	sync = _SyncRequired(awm, vtok);
+	if (sync == SYNC_NONE)
 		return APP_SUCCESS;
 
 	// Request a synchronization for the identified reconfiguration
-	return _RequestSync(ss);
+	return _RequestSync(sync);
 }
 
 Application::ExitCode_t

@@ -232,13 +232,9 @@ public:
 	 */
 	ExitCode_t SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
-	// DERKLING: This should be moved into the proper _conf and _status header
+	// DERKLING: [public]
+	// These methods should be moved into the proper _conf and _status header
 	ExitCode_t _SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
-	void _SetState(State_t state);
-	ExitCode_t _RequestSync(SyncState_t ss);
-	SyncState_t _SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
-	ExitCode_t _Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
-	ExitCode_t _Unschedule();
 	inline static char const *StateStr(State_t state) {
 		assert(state < STATE_COUNT);
 		return stateStr[state];
@@ -247,6 +243,17 @@ public:
 		assert(state < SYNC_STATE_COUNT);
 		return syncStateStr[state];
 	}
+	inline SyncState_t SyncState() {
+		return curr_sched.syncState;
+	}
+	// DERKLING: [private]
+	// These methods should be private
+	void _SetState(State_t state, SyncState_t sync = SYNC_NONE);
+	void _SetSyncState(SyncState_t sync);
+	ExitCode_t _RequestSync(SyncState_t sync);
+	ExitCode_t _Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t _Unschedule();
+	SyncState_t _SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Update scheduled status and reconfiguration overheads data
@@ -296,7 +303,7 @@ private:
 
 	static char const *stateStr[STATE_COUNT];
 
-	static char const *syncStateStr[SYNC_STATE_COUNT];
+	static char const *syncStateStr[SYNC_STATE_COUNT+1];
 
 	/** The logger used by the application */
 	LoggerIF  *logger;

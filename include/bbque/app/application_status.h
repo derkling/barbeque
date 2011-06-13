@@ -115,6 +115,9 @@ public:
 		SYNC_STATE_COUNT
 	} SyncState_t;
 
+#define SYNC_NONE SYNC_STATE_COUNT
+
+
 	/**
 	 * @struct SchedulingInfo_t
 	 *
@@ -124,13 +127,20 @@ public:
 	 * choosed by the scheduler/optimizer module.
 	 */
 	struct SchedulingInfo_t {
-		/** A schedule state */
+		/** The current scheduled state */
 		State_t state;
+		/** The state before a sync has been required */
+		State_t preSyncState;
+		/** The current synchronization state */
+		SyncState_t syncState;
 		/** A pointer to an application working mode */
 		AwmPtr_t awm;
 		/** Overloading of operator != for structure comparisons */
 		inline bool operator!=(SchedulingInfo_t const &other) const {
-			return ((this->state != other.state) || (this->awm != other.awm));
+			return ((this->state != other.state) ||
+					(this->preSyncState != other.preSyncState) ||
+					(this->syncState != other.syncState) ||
+					(this->awm != other.awm));
 		};
 	};
 
