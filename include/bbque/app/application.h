@@ -232,12 +232,21 @@ public:
 	 */
 	ExitCode_t SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
+	// DERKLING: This should be moved into the proper _conf and _status header
 	ExitCode_t _SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 	void _SetState(State_t state);
 	ExitCode_t _RequestSync(SyncState_t ss);
 	SyncState_t _SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 	ExitCode_t _Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 	ExitCode_t _Unschedule();
+	inline static char const *StateStr(State_t state) {
+		assert(state < STATE_COUNT);
+		return stateStr[state];
+	}
+	inline static char const *SyncStateStr(SyncState_t state) {
+		assert(state < SYNC_STATE_COUNT);
+		return syncStateStr[state];
+	}
 
 	/**
 	 * @brief Update scheduled status and reconfiguration overheads data
@@ -285,9 +294,9 @@ public:
 
 private:
 
-	static char const *StateStr[STATE_COUNT];
+	static char const *stateStr[STATE_COUNT];
 
-	static char const *SyncStateStr[SYNC_STATE_COUNT];
+	static char const *syncStateStr[SYNC_STATE_COUNT];
 
 	/** The logger used by the application */
 	LoggerIF  *logger;

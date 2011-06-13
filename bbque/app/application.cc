@@ -39,16 +39,16 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace app {
 
-char const *Application::StateStr[] = {
+char const *Application::stateStr[] = {
 	"DISABLED",
 	"READY",
 	"SYNC",
 	"RUNNING",
-	"FINISCHED"
+	"FINISHED"
 };
 
-char const *Application::SyncStateStr[] = {
-	"STARING",
+char const *Application::syncStateStr[] = {
+	"STARTING",
 	"RECONF",
 	"MIGREC",
 	"MIGRATE",
@@ -325,8 +325,8 @@ void Application::_SetState(State_t state) {
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
 			StrId(),
-			CurrentState(), StateStr[CurrentState()],
-			state, StateStr[state]);
+			CurrentState(), StateStr(CurrentState()),
+			state, StateStr(state));
 
 	curr_sched.state = state;
 }
@@ -344,7 +344,7 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t ss) {
 	}
 
 	logger->Debug("Request synchronization [%s, %d:%s]",
-			StrId(), ss, SyncStateStr[ss]);
+			StrId(), ss, SyncStateStr(ss));
 
 	// Request the application manager to synchronization this application
 	result = am._RequestSync(AppPtr_t(this), ss);
