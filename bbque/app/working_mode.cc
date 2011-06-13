@@ -23,7 +23,6 @@
 
 #include "bbque/app/working_mode.h"
 
-#include <sstream>
 #include <string>
 
 #include "bbque/modules_factory.h"
@@ -32,7 +31,8 @@
 #include "bbque/app/application.h"
 #include "bbque/app/overheads.h"
 #include "bbque/app/recipe.h"
-#include "bbque/res/resources.h"
+#include "bbque/res/resource_accounter.h"
+#include "bbque/utils/utility.h"
 
 namespace br = bbque::res;
 namespace bp = bbque::plugins;
@@ -119,7 +119,8 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
 	OverheadsMap_t::iterator it(overheads.find(_dest_awm_id));
 	if (it == overheads.end()) {
 		overheads.insert(std::pair<uint16_t, OverheadPtr_t>(
-					_dest_awm_id, OverheadPtr_t(new TransitionOverheads(_time))));
+					_dest_awm_id, OverheadPtr_t(
+						new TransitionOverheads(_time))));
 	}
 	else {
 		it->second->IncCount();
@@ -147,75 +148,93 @@ OverheadPtr_t WorkingMode::OverheadInfo(uint16_t _dest_awm_id) const {
 }
 
 
-// Append and ID number to the resource name specified, after checking the ID
-// validity
-inline std::string AppendID(std::string const & _rsrc, ResID_t _id) {
-	// Resource name + ID to return
-	std::string ret_rsrc(_rsrc);
-
-	// Check ID validity
-	if (_id > RSRC_ID_ANY) {
-		std::stringstream ss;
-		ss << _id;
-		ret_rsrc += ss.str();
-	}
-	return ret_rsrc;
-}
-
-
-WorkingMode::ExitCode_t WorkingMode::BindResources(
+WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string const & rsrc_name,
 		ResID_t src_ID,
 		ResID_t dst_ID,
+		UsagesMapPtr_t & usages_bind,
 		char * rsrc_path_unb) {
-	// Null path check
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+
+	// Null name check
 	if (rsrc_name.empty())
 		return WM_RSRC_ERR_NAME;
-
-	// Number of binding solved
-	uint16_t num_of_solved = 0;
 
 	// Resource usages
 	UsagesMap_t::iterator usage_it(rsrc_usages.begin());
 	UsagesMap_t::iterator it_end(rsrc_usages.end());
 	for (; usage_it != it_end; ++usage_it) {
+		// Replace resource name+src_ID with resource_name+dst_ID in the
+		// resource path
+		std::string bind_rsrc_path =
+				ReplaceResourceID(usage_it->first, rsrc_name, src_ID, dst_ID);
 
-		// Current resource usage path ("recipe view" path).
-		std::string curr_rsrc_path(usage_it->first);
-		std::string rsrc_name_match(AppendID(rsrc_name, src_ID));
+		// Create a new ResourceUsage object, fill "binds" attribute with the
+		// list of resource descriptors and insert it into the binding map
+		UsagePtr_t bind_rsrc_map =
+			UsagePtr_t(new ResourceUsage(usage_it->second->value));
+		bind_rsrc_map->binds = ra.GetResources(bind_rsrc_path);
+		usages_bind->insert(std::pair<std::string,
+						UsagePtr_t>(bind_rsrc_path, bind_rsrc_map));
 
-		// Is the resource name to bind part of the current resource path ?
-		size_t start_pos = curr_rsrc_path.find(rsrc_name_match);
-		if (start_pos != std::string::npos) {
-
-			// Build the new binding name and replace into the path
-			size_t dot_pos = curr_rsrc_path.find(".", start_pos);
-			std::string bind_rsrc_name(AppendID(rsrc_name, dst_ID));
-			curr_rsrc_path.replace(start_pos, (dot_pos - start_pos),
-					bind_rsrc_name);
-		}
-
-		// Set the list of resource descriptors matching the binding
-		br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-		usage_it->second->binds = ra.GetResources(curr_rsrc_path);
-
-		// If the current binding has not be solved, save the path of the last
-		// unbound resource
-		if (!usage_it->second->binds.empty()) {
+		// If the current resource binding has not be solved, save the path of
+		// the last unbound resource
+		if (bind_rsrc_map->binds.empty()) {
 			if (rsrc_path_unb)
 				strncpy(rsrc_path_unb, usage_it->first.c_str(),
 						(usage_it->first).size());
+			logger->Error("Not bound: %s", bind_rsrc_path.c_str());
 			continue;
 		}
+	}
 
-		// Update the number of solved bindings
-		++num_of_solved;
+	// Debug messages
+	usage_it = usages_bind->begin();
+	it_end = usages_bind->end();
+	logger->Debug("Binding resources...");
+	for (; usage_it != it_end; ++usage_it) {
+		logger->Debug("\t%s [value = %llu #binds = %d]",
+				usage_it->first.c_str(),
+				usage_it->second->value,
+				usage_it->second->binds.size());
 	}
 
 	// Are all the resource usages bound ?
-	if (num_of_solved < rsrc_usages.size())
+	if (rsrc_usages.size() < usages_bind->size())
 		return WM_RSRC_MISS_BIND;
 
+	return WM_SUCCESS;
+}
+
+
+WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
+		UsagesMapPtr_t & usages_bind) {
+	// If the bind map has a size different from the resource usages one
+	// return
+	if (usages_bind->size() != rsrc_usages.size())
+		return WM_RSRC_MISS_BIND;
+
+	UsagesMap_t::iterator bind_it(usages_bind->begin());
+	UsagesMap_t::iterator end_bind(usages_bind->end());
+	UsagesMap_t::iterator rsrc_it(rsrc_usages.begin());
+	UsagesMap_t::iterator end_rsrc(rsrc_usages.end());
+
+	// If there's a path template mismatch returns
+	while ((bind_it != end_bind) && (rsrc_it != end_rsrc)) {
+		if (PathTemplate(bind_it->first).compare(
+					PathTemplate(rsrc_it->first)) != 0)
+			return WM_RSRC_MISS_BIND;
+
+		ResID_t gid = GetResourceID(bind_it->first, "cluster");
+		if (gid != RSRC_ID_NONE)
+			logger->Debug("Binding in CLUSTER %d", gid);
+
+		++rsrc_it;
+		++bind_it;
+	}
+
+	// Set the bind map
+	sys_rsrc_usages = usages_bind;
 	return WM_SUCCESS;
 }
 

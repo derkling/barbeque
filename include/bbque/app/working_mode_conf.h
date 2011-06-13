@@ -24,9 +24,6 @@
 
 #include "bbque/app/working_mode_status.h"
 
-/** @see BindResources */
-#define RSRC_ID_ANY	-1
-
 using bbque::res::ResID_t;
 
 namespace bbque { namespace app {
@@ -65,36 +62,16 @@ public:
 	virtual ExitCode_t AddOverheadInfo(uint16_t dest_awm_id, double time) = 0;
 
 	/**
-	 * @brief Bind resource usages paths to system resources
+	 * @brief Set a resource binding for the resource usages
 	 *
-	 * Resource paths taken from the recipes use IDs that don't care about the
-	 * real system resource IDs registered by Barbeque. Thus a binding must be
-	 * solved in order to make the request of resources satisfiables.
+	 * Use BindResources to get a map of ResourceUsage objects. These objects
+	 * contain the amount of resource requested (value) and a list of system
+	 * resource descriptors.
 	 *
-	 * The method takes the resource name we want to bind (i.e. "cluster"),
-	 * the ID of the destination system resource, and the source resource ID
-	 * (optional). Then it substitutes "cluster+[source ID]" with
-	 * "cluster+[dest ID]" and get the descriptor (list of) returned by
-	 * ResourceAccounter.
-	 *
-	 * If the source ID is left blank, the method will bind ALL the
-	 * resource path containing "cluster" or "clusterN" to the descriptor
-	 * referenced by such path, with the destination resource ID in
-	 * the system.
-	 *
-	 * @param rsrc_name The resource name we want to bind
-	 * @param src_ID Recipe resource name source ID
-	 * @param dst_ID System resource name destination ID
-	 * @param rsrc_path_unbound A resource path left to bind
-	 * @return An exit code (@see ExitCode_t)
-	 *
-	 * @note Use RSRC_ID_ANY if you want to bind the resource without care
-	 * about its ID.
+	 * @param usages_bind A map of ResourceUsage objects with solved binds
+	 * @return WM_SUCCESS, or WM_RSRC_MISS_BIND	if some binds are missing
 	 */
-	ExitCode_t BindResources(std::string const & rsrc_name,
-			ResID_t src_ID, ResID_t dst_ID,
-			char * rsrc_path_unb = NULL);
-
+	ExitCode_t SetResourceBinding(UsagesMapPtr_t & usages_bind);
 };
 
 } // namespace app

@@ -314,7 +314,7 @@ int PrintWorkingModesInfo(AppPtr_t papp) {
 				(*wm_it)->Id(),
 				(*wm_it)->Name().c_str(),
 				(*wm_it)->Value(),
-				(int)(*wm_it)->ResourceUsages()->size());
+				(int)(*wm_it)->ResourceUsages().size());
 
 		std::cout
 			<< "\n--------------------------------[ "
@@ -325,8 +325,8 @@ int PrintWorkingModesInfo(AppPtr_t papp) {
 		// Casting to WorkingModeStatusIF
 		AwmPtr_t c_awm = *wm_it;
 
-		UsagesMap_t::const_iterator res_it = c_awm->ResourceUsages()->begin();
-		UsagesMap_t::const_iterator res_end = c_awm->ResourceUsages()->end();
+		UsagesMap_t::const_iterator res_it = c_awm->ResourceUsages().begin();
+		UsagesMap_t::const_iterator res_end = c_awm->ResourceUsages().end();
 
 		// Print resource usage values
 		for ( ; res_it != res_end; ++res_it) {
@@ -474,13 +474,17 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 		return;
 	}
 
-	// Do a binding!
-	d_wm->BindResources("cluster", RSRC_ID_ANY, 1);
+	// Do a resource binding!
+	UsagesMapPtr_t rsrc_binds(new UsagesMap_t);
+	d_wm->BindResource("cluster", RSRC_ID_ANY, 1, rsrc_binds);
+//	logger->Info("Cluster... %d", d_wm->UsingCluster());
+	logger->Debug("Usages / Binds = %d / %d",
+			d_wm->ResourceUsages().size(),
+			rsrc_binds->size());
 
 	// Let's set next schedule for the application above
-	papp->ScheduleRequest(d_wm, d_wm->_GetBinding());
-//	papp->SetNextSchedule(d_wm, d_wm->_GetBinding());
-
+	papp->ScheduleRequest(d_wm, rsrc_binds);
+	//papp->SetNextSchedule(d_wm, rsrc_binds);
 	PrintScheduleInfo(papp);
 
 	// Now switch!
@@ -490,6 +494,8 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 
 
 void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
+
+	am.EnableEXC(papp);
 
 	// Print out working modes details
 	PrintWorkingModesInfo(papp);
@@ -557,21 +563,20 @@ void CoreInteractionsTest::Test() {
 	if (auth)
 		logger->Info("Plugin YaMCa: <author> : %s", auth->c_str());
 
-	// Is there a Scheduling Policy ?
-	plugins::SchedulerPolicyIF * scheduler =
-		ModulesFactory::GetSchedulerPolicyModule();
+/*
+	// Scheduler test
+	testScheduling();
+	PrintResourceAvailabilities(sv);
 
-	if (!scheduler) {
-		logger->Error("SchedulerPolicy not found");
-		getchar();
-	}
-
-	// Test working mode switching
-	testApplicationLifecycle(test_app);
-
+	// Stop applications
+	AppsMap_t::const_iterator apps_it(sv.ApplicationsRunning()->begin());
+	AppsMap_t::const_iterator end_apps(sv.ApplicationsRunning()->end());
+	for (; apps_it != end_apps; ++apps_it)
+		am.StopApplication(apps_it->second);
+*/
 }
 
-}   // namespae test
+}   // namespace test
 
 }   // namespace bbque
 

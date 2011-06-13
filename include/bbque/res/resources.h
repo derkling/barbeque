@@ -32,6 +32,10 @@
 #include <unordered_map>
 #include "bbque/app/application.h"
 
+/** @see WorkingMode BindResource */
+#define RSRC_ID_ANY 	-1
+#define RSRC_ID_NONE 	-2
+
 using bbque::app::Application;
 using bbque::app::AppPtr_t;
 

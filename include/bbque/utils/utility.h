@@ -24,10 +24,13 @@
 
 #include "bbque/config.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <cstdint>
+#include <cstdlib>
+#include <sstream>
 #include <string>
 #include "bbque/utils/timer.h"
+#include "bbque/res/resources.h"
 
 #define COLOR_WHITE  "\033[1;37m"
 #define COLOR_LGRAY  "\033[37m"
@@ -61,6 +64,11 @@ extern bbque::utils::Timer bbque_tmr;
 #define POW_2_10 0x400
 #define POW_2_20 0x100000
 #define POW_2_30 0x40000000
+
+
+/** Type for ID used in resource path */
+typedef int16_t ResID_t;
+
 
 /**
  * @brief Convert to unity
@@ -172,6 +180,82 @@ inline std::string const PathTemplate(std::string const & path) {
 inline bool IsPathTemplate(std::string const & path) {
 	return (path.find_first_of("0123456789") == std::string::npos);
 }
+
+
+/**
+ * @brief Append a resource ID number to a string
+ *
+ * @param orig_name Original string
+ * @param rid Resource ID number
+ * @return The string updated
+ */
+inline std::string AppendID(std::string const & orig_name, ResID_t rid) {
+	std::string ret_name(orig_name);
+
+	// Check ID validity
+	if (rid <= RSRC_ID_ANY)
+		return orig_name;
+
+	std::stringstream ss;
+	ss << rid;
+	ret_name += ss.str();
+	return ret_name;
+}
+
+
+/**
+ * @brief Replace the ID of a resource in a path
+ *
+ * If the given resource name is contained into the resource path, substitute
+ * its ID with the one specified in dst_ID.
+ *
+ * @param curr_rsrc_path The resource path
+ * @param rsrc_name Name of the resource
+ * @param src_ID ID to replace
+ * @param dst_ID New ID number
+ * @return The resource path updated
+ */
+inline std::string ReplaceResourceID(std::string const & curr_rsrc_path,
+				std::string	const & rsrc_name,
+				ResID_t src_ID,
+				ResID_t dst_ID) {
+
+	// Search the resource name in the current path
+	std::string bind_rsrc_path(curr_rsrc_path);
+	std::string rsrc_name_orig(AppendID(rsrc_name, src_ID));
+	size_t start_pos = bind_rsrc_path.find(rsrc_name_orig);
+	if (start_pos == std::string::npos)
+		return bind_rsrc_path;
+
+	// Replace it with the dst_ID-based form
+	size_t dot_pos = bind_rsrc_path.find(".", start_pos);
+	std::string bind_rsrc_name(AppendID(rsrc_name, dst_ID));
+	bind_rsrc_path.replace(start_pos, (dot_pos - start_pos), bind_rsrc_name);
+	return bind_rsrc_path;
+}
+
+
+/**
+ * @brief Get ID of a resource in a path
+ *
+ * @param rsrc_path Resource path
+ * @param rsrc_name Resource name
+ * @return The ID of the resource if it is part of the part. RSRC_ID_NONE
+ * otherwise.
+ */
+inline ResID_t GetResourceID(std::string const & rsrc_path,
+				std::string	const & rsrc_name) {
+	// Find the ID of the resource in the path
+	size_t start_pos = rsrc_path.find(rsrc_name);
+	if (start_pos == std::string::npos)
+		return RSRC_ID_NONE;
+
+	// Extract and return the ID value
+	size_t dot_pos = rsrc_path.find(".", start_pos);
+	std::string id(rsrc_path.substr(start_pos + rsrc_name.length(), dot_pos));
+	return atoi(id.c_str());
+}
+
 
 #endif // BBQUE_UTILITY_H_
 

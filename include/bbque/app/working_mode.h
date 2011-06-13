@@ -129,8 +129,8 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline UsagesMap_t const * ResourceUsages() const {
-		return &rsrc_usages;
+	inline UsagesMap_t const & ResourceUsages() const {
+		return rsrc_usages;
 	}
 
 	/**
@@ -159,17 +159,29 @@ public:
 	}
 
 	/**
-	 * @see WorkingModeConfIF
+	 * @see WorkingModeStatusIF
 	 */
-	ExitCode_t BindResources(std::string const & rsrc_name,
-			ResID_t src_ID, ResID_t dst_ID,
+	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
+			ResID_t dst_ID, UsagesMapPtr_t & usages_bind,
 			char * rsrc_path_unb = NULL);
 
 	/**
-	 * TODO: This is just a fake  GetBinding
+	 * @see WorkingModeStatusIF
 	 */
-	inline UsagesMapPtr_t & _GetBinding() {
+	inline UsagesMapPtr_t GetResourceBinding() const {
 		return sys_rsrc_usages;
+	}
+
+	/**
+	 * @see WorkingModeConfIF
+	 */
+	ExitCode_t SetResourceBinding(UsagesMapPtr_t & usages_bind);
+
+	/**
+	 * @brief Clear the current binding with the system resources
+	 */
+	inline void ClearResourceBinding() {
+		sys_rsrc_usages->clear();
 	}
 
 private:
@@ -195,6 +207,10 @@ private:
 	/** The set of resources required (usages) */
 	UsagesMap_t rsrc_usages;
 
+	/**
+	 * The set of the system resources used by the working mode
+	 * @see SetResourceBinding()
+	 */
 	UsagesMapPtr_t sys_rsrc_usages;
 
 	/** The overheads coming from switching to other working modes */
