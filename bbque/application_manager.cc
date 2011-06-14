@@ -196,8 +196,8 @@ AppPtr_t ApplicationManager::CreateEXC(
 			AppsMapEntry_t(papp->Pid(), papp));
 
 	// All new EXC are initialli disabled
-	assert(papp->CurrentState() == Application::DISABLED);
-	status_vec[papp->CurrentState()].insert(
+	assert(papp->State() == Application::DISABLED);
+	status_vec[papp->State()].insert(
 			AppsMapEntry_t(papp->Pid(), papp));
 
 	logger->Debug("Create EXC [%s] DONE",
@@ -269,7 +269,7 @@ ApplicationManager::StatusRemove(AppPtr_t papp) {
 
 	logger->Debug("Releasing [%s] EXCs from status maps...",
 			papp->StrId());
-	range = status_vec[papp->CurrentState()].equal_range(papp->Pid());
+	range = status_vec[papp->State()].equal_range(papp->Pid());
 	it = range.first;
 	while (it != range.second &&
 		((*it).second)->ExcId() != papp->ExcId()) {
@@ -282,7 +282,7 @@ ApplicationManager::StatusRemove(AppPtr_t papp) {
 			papp->StrId());
 		return AM_DATA_CORRUPT;
 	}
-	status_vec[papp->CurrentState()].erase(it);
+	status_vec[papp->State()].erase(it);
 
 	return AM_SUCCESS;
 }
@@ -414,20 +414,23 @@ ApplicationManager::DisableEXC(AppPid_t pid, uint8_t exc_id) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::_SetSchedule(AppPtr_t papp) {
+	(void)papp;
+	(void)time;
+	logger->Fatal("Deprecated API");
+	assert(false);
+#if 0
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator app_it;
 	AppsMap_t *scheduleMap;
 
-	assert(papp);
+	logger->Info("Mark EXC [%s] for next state [%d]",
+			papp->StrId(), papp->State());
 
-	logger->Info("Mark EXC [%s] for next state [%d ==> %d]",
-			papp->StrId(), papp->CurrentState(), papp->NextState());
-
-	if (papp->CurrentState() == papp->NextState()) {
+	if (papp->State() == papp->NextState()) {
 		logger->Warn("Mark EXC [%s] for next state FAILED "
 				"(Error: status [%d] not changed)",
-				papp->StrId(), papp->CurrentState());
-		assert(papp->CurrentState() != papp->NextState());
+				papp->StrId(), papp->State());
+		assert(papp->State() != papp->NextState());
 		return AM_SUCCESS;
 	}
 
@@ -452,18 +455,23 @@ ApplicationManager::_SetSchedule(AppPtr_t papp) {
 	logger->Debug("Marked EXC [%s] for next status [%d]",
 			papp->StrId(),
 			papp->NextState());
-
+#endif
 	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
 ApplicationManager::_ChangedSchedule(AppPtr_t papp, double time) {
+	(void)papp;
+	(void)time;
+	logger->Fatal("Deprecated API");
+	assert(false);
+#if 0
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 	assert(papp);
 
 	logger->Info("Changed EXC [%s] schedule [%d ==> %d]", papp->StrId(),
-			papp->CurrentState(), papp->NextState());
+			papp->State(), papp->NextState());
 
 	// The application descriptor now will manage the change of
 	// working mode
@@ -473,11 +481,11 @@ ApplicationManager::_ChangedSchedule(AppPtr_t papp, double time) {
 
 	// We need to update the application descriptor (moving it into the
 	// right map) just if the scheduled state has changed.
-	if (papp->CurrentState() == papp->NextState())
+	if (papp->State() == papp->NextState())
 		return AM_SUCCESS;
 
 	// Retrieve the runtime map from the status vector
-	AppsMap_t *curr_state_map = &(status_vec[papp->CurrentState()]);
+	AppsMap_t *curr_state_map = &(status_vec[papp->State()]);
 	AppsMap_t *next_state_map = &(status_vec[papp->NextState()]);
 	assert(curr_state_map != next_state_map);
 
@@ -518,8 +526,8 @@ ApplicationManager::_ChangedSchedule(AppPtr_t papp, double time) {
 
 	logger->Debug("Changed EXC [%s] status to [%d]",
 			papp->StrId(),
-			papp->CurrentState());
-
+			papp->State());
+#endif
 	return AM_SUCCESS;
 }
 

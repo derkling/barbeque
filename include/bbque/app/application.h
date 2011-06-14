@@ -172,36 +172,29 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline State_t CurrentState() const {
-		return curr_sched.state;
+	inline State_t State() const {
+		return schedule.state;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
 	inline SyncState_t SyncState() const {
-		return curr_sched.syncState;
+		return schedule.syncState;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
 	inline AwmPtr_t const & CurrentAWM() const {
-		return curr_sched.awm;
-	}
-
-	/**
-	 * @see ApplicationStatusIF
-	 */
-	inline State_t NextState() const {
-		return next_sched.state;
+		return schedule.awm;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
 	inline AwmPtr_t const & NextAWM() const {
-		return next_sched.awm;
+		return schedule.next_awm;
 	}
 
 	/**
@@ -299,10 +292,7 @@ private:
 	AppPrio_t priority;
 
 	/** Current scheduling informations */
-	SchedulingInfo_t curr_sched;
-
-	/** Next scheduled status */
-	SchedulingInfo_t next_sched;
+	SchedulingInfo_t schedule;
 
 	/**
 	 * Recipe pointer for the current application instance.

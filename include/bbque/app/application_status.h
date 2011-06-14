@@ -133,8 +133,10 @@ public:
 		State_t preSyncState;
 		/** The current synchronization state */
 		SyncState_t syncState;
-		/** A pointer to an application working mode */
+		/** The current application working mode */
 		AwmPtr_t awm;
+		/** The next scheduled application working mode */
+		AwmPtr_t next_awm;
 		/** Overloading of operator != for structure comparisons */
 		inline bool operator!=(SchedulingInfo_t const &other) const {
 			return ((this->state != other.state) ||
@@ -191,7 +193,7 @@ public:
 	 * @brief Get the schedule state
 	 * @return The current scheduled state
 	 */
-	virtual State_t CurrentState() const = 0;
+	virtual State_t State() const = 0;
 
 	/**
 	 * @brief Get the synchronization state
@@ -203,12 +205,6 @@ public:
 	 * @return A shared pointer to the current application working mode
 	 */
 	virtual AwmPtr_t const & CurrentAWM() const = 0;
-
-	/**
-	 * @brief Get next schedule state
-	 * @return Next schedule state
-	 */
-	virtual State_t NextState() const = 0;
 
 	/**
 	 * @brief Get next working mode to switch in when the application is

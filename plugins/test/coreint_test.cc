@@ -271,7 +271,7 @@ void PrintScheduleInfo(AppPtr_t & papp) {
 			<< "Curr sched = "
 			<< "AWM" << papp->CurrentAWM()->Id()
 			<< " " << papp->CurrentAWM()->Name()
-			<< " | State " << papp->CurrentState() << std::endl;
+			<< " | State " << papp->State() << std::endl;
 	}
 
 	if (papp->NextAWM().get() == NULL) {
@@ -282,8 +282,7 @@ void PrintScheduleInfo(AppPtr_t & papp) {
 			<< papp->Name().c_str() << ": "
 			<< "Next sched = "
 			<< "AWM" << papp->NextAWM()->Id()
-			<< " " << papp->NextAWM()->Name()
-			<< " | State " << papp->NextState() << std::endl;
+			<< " " << papp->NextAWM()->Name() << std::endl;
 	}
 
 	std::cout << "Press a key..." << std::endl;

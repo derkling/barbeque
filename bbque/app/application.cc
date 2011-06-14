@@ -71,8 +71,6 @@ Application::Application(std::string const & _name,
 	pid(_pid),
 	exc_id(_exc_id) {
 
-	// Scheduling state
-	curr_sched.state = next_sched.state = DISABLED;
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE"." + _name);
@@ -85,6 +83,8 @@ Application::Application(std::string const & _name,
 
 	logger->Info("Built new EXC [%s]", StrId());
 
+	// Scheduling state
+	SetState(DISABLED);
 
 }
 
@@ -94,19 +94,25 @@ Application::~Application() {
 
 	// Release the resources
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	if (curr_sched.awm)
-		ra.ReleaseUsageSet(curr_sched.awm->Owner());
+	if (CurrentAWM())
+		ra.ReleaseUsageSet(CurrentAWM()->Owner());
 
 	// Release the recipe used
 	recipe.reset();
 
 	// Reset scheduling info
-	curr_sched.awm.reset();
+	schedule.awm.reset();
 
 	// Releasing AWMs and Constraints...
 	enabled_awms.clear();
 	constraints.clear();
 
+}
+
+Application::ExitCode_t Application::StopExecution() {
+
+	logger->Info("Stopping EXC [%s]", StrId());
+	return APP_SUCCESS;
 }
 
 void Application::SetPriority(AppPrio_t _prio) {
@@ -121,15 +127,15 @@ void Application::SetPriority(AppPrio_t _prio) {
 Application::ExitCode_t Application::Enable() {
 
 	// Not disabled applications could not be marked as READY
-	if (curr_sched.state != DISABLED) {
+	if (State() != DISABLED) {
 		logger->Crit("Trying to enable already enabled application [%s] "
 				"(Error: possible data structure curruption?)",
 				StrId());
-		assert(curr_sched.state==DISABLED);
+		assert(State() == DISABLED);
 		return APP_ABORT;
 	}
 
-	next_sched.state = READY;
+	SetState(READY);
 	logger->Info("EXC [%s] ENABLED", StrId());
 
 	return APP_SUCCESS;
@@ -142,22 +148,20 @@ Application::ExitCode_t Application::Disable() {
 	logger->Debug("Disabling EXC [%s]...", StrId());
 
 	// Not disabled applications could not be marked as READY
-	if (curr_sched.state == DISABLED) {
+	if (State() == DISABLED) {
 		logger->Crit("Trying to disable already disabled application [%s] "
 				"(Error: possible data structure curruption?)",
 				StrId());
-		assert(curr_sched.state!=DISABLED);
+		assert(State() != DISABLED);
 		return APP_ABORT;
 	}
 
 	// Release the resources
-	if (curr_sched.awm)
-		ra.ReleaseUsageSet(curr_sched.awm->Owner());
+	if (CurrentAWM())
+		ra.ReleaseUsageSet(CurrentAWM()->Owner());
 
 	// Reset scheduling info
-	curr_sched.awm.reset();
-	next_sched.awm.reset();
-	next_sched.state = DISABLED;
+	SetState(DISABLED);
 	logger->Info("EXC [%s] DISABLED", StrId());
 
 	return APP_SUCCESS;
@@ -271,7 +275,7 @@ void Application::SetSyncState(SyncState_t sync) {
 			SyncState(), SyncStateStr(SyncState()),
 			sync, SyncStateStr(sync));
 
-	curr_sched.syncState = sync;
+	schedule.syncState = sync;
 
 }
 
@@ -279,18 +283,25 @@ void Application::SetState(State_t state, SyncState_t sync) {
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
 			StrId(),
-			CurrentState(), StateStr(CurrentState()),
+			State(), StateStr(State()),
 			state, StateStr(state));
 
+	// Update pre-sync state
 	if (state == SYNC) {
 		assert(sync != SYNC_NONE);
-		curr_sched.preSyncState = curr_sched.state;
+		schedule.preSyncState = State();
 	} else {
 		assert(sync == SYNC_NONE);
-		curr_sched.preSyncState = state;
+		schedule.preSyncState = state;
 	}
 
-	curr_sched.state = state;
+	// Update resources on disabled
+	if ((state == DISABLED) ||
+			(state == READY) )
+		schedule.awm.reset();
+
+	// Update state
+	schedule.state = state;
 	SetSyncState(sync);
 }
 
@@ -298,11 +309,11 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ApplicationManager::ExitCode_t result;
 
-	if ( (CurrentState() != READY) || 
-			(CurrentState() != RUNNING) ) {
+	if ( (State() != READY) && 
+			(State() != RUNNING) ) {
 		logger->Crit("Sync request FAILED (Error: wrong application status)");
-		assert( (CurrentState() == READY) || 
-				(CurrentState() == RUNNING) );
+		assert( (State() == READY) || 
+				(State() == RUNNING) );
 		return APP_ABORT;
 	}
 
@@ -328,7 +339,7 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 
 Application::ExitCode_t Application::ScheduleCommit() {
 
-	assert(CurrentState() == SYNC);
+	assert(State() == SYNC);
 
 	switch(SyncState()) {
 	case STARTING:
@@ -351,7 +362,7 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	}
 
 	logger->Info("Sync completed [%s, %d:%s]",
-			StrId(), CurrentState(), StateStr(CurrentState()));
+			StrId(), State(), StateStr(State()));
 
 	return APP_SUCCESS;
 
@@ -364,7 +375,7 @@ Application::SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
 	(void)vtok;
 
 	// This must be called only by running applications
-	assert(CurrentState() == RUNNING);
+	assert(State() == RUNNING);
 
 	// Check if the assiged resources requires 
 	// TODO: add code to compare current vs assigned configuration
@@ -381,13 +392,13 @@ Application::Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
 	SyncState_t sync;
 
 	// Ready application could be synchronized to start
-	if (CurrentState() == READY)
+	if (State() == READY)
 		return RequestSync(STARTING);
 	
 	// Otherwise, the application should be running...
-	if (CurrentState() != RUNNING) {
+	if (State() != RUNNING) {
 		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
-		assert(CurrentState() == RUNNING);
+		assert(State() == RUNNING);
 		return APP_ABORT;
 	}
 
@@ -403,13 +414,13 @@ Application::Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
 Application::ExitCode_t Application::Unschedule() {
 
 	// Ready application remain into ready state
-	if (CurrentState() == READY)
+	if (State() == READY)
 		return APP_ABORT;
 
 	// Otherwise, the application should be running...
-	if (CurrentState() != RUNNING) {
+	if (State() != RUNNING) {
 		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
-		assert(CurrentState() == RUNNING);
+		assert(State() == RUNNING);
 		return APP_ABORT;
 	}
 
