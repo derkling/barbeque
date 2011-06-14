@@ -31,6 +31,7 @@
 
 namespace bbque { namespace app {
 
+
 /**
  * @class WorkingMode
  * @brief Profile for supporting the application execution.
@@ -184,6 +185,18 @@ public:
 		sys_rsrc_usages->clear();
 	}
 
+	/**
+	 * @brief Get the bitmap of the clusters currently used.
+	 *
+	 * Eeach bit set represents a cluster in use. When SetResourceBinding() is
+	 * called the set of clusters is properly filled.
+	 *
+	 * @return A bitset data structure
+	 */
+	inline ClustersBitSet const & GetClusterSet() const {
+		return cluster_set;
+	}
+
 private:
 
 	/** The logger used by the application manager */
@@ -215,6 +228,9 @@ private:
 
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;
+
+	/** The set of clusters currently used by this working mode */
+	ClustersBitSet cluster_set;
 
 };
 

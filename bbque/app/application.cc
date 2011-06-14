@@ -246,6 +246,7 @@ Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & awm,
 	(void) awm;
 	(void) resource_set;
 	(void) vtok;
+	return APP_SUCCESS;
 }
 
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,

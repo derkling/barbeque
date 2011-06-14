@@ -21,10 +21,13 @@
 #ifndef BBQUE_WORKING_MODE_STATUS_IF_H_
 #define BBQUE_WORKING_MODE_STATUS_IF_H_
 
+#include <bitset>
 #include <list>
 #include <map>
 #include "bbque/app/plugin_data.h"
 #include "bbque/res/resource_accounter.h"
+
+#define MAX_NUM_CLUSTERS	32
 
 using bbque::res::ResID_t;
 using bbque::res::ResourceUsage;
@@ -43,6 +46,8 @@ typedef std::shared_ptr<Application> AppPtr_t;
 typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
 /** Map of OverheadPtr_t. Key: destination working mode name */
 typedef std::map<uint16_t, OverheadPtr_t> OverheadsMap_t;
+/** Bitset for clusters use monitoring */
+typedef std::bitset<MAX_NUM_CLUSTERS> ClustersBitSet;
 
 
 /**
@@ -161,6 +166,16 @@ public:
 	 * @return A map of ResourceUsage objects
 	 */
 	virtual UsagesMapPtr_t GetResourceBinding() const = 0;
+
+	/**
+	 * @brief Get the bitmap of the clusters currently used.
+	 *
+	 * Eeach bit set represents a cluster in use. When SetResourceBinding() is
+	 * called the set of clusters is properly filled.
+	 *
+	 * @return A bitset data structure
+	 */
+	virtual ClustersBitSet const & GetClusterSet() const = 0;
 
 };
 

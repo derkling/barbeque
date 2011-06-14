@@ -225,12 +225,21 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 					PathTemplate(rsrc_it->first)) != 0)
 			return WM_RSRC_MISS_BIND;
 
-		ResID_t gid = GetResourceID(bind_it->first, "cluster");
-		if (gid != RSRC_ID_NONE)
-			logger->Debug("Binding in CLUSTER %d", gid);
-
 		++rsrc_it;
 		++bind_it;
+	}
+
+	// Update the clusters bitset
+	cluster_set.reset();
+	bind_it = usages_bind->begin();
+	end_bind = usages_bind->end();
+	for (; bind_it != end_bind; ++bind_it) {
+		// If this is a clustered resource mark the cluster bit in the set
+		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
+		if (cl_id != RSRC_ID_NONE) {
+			logger->Debug("Binding in CLUSTER %d", cl_id);
+			cluster_set.set(cl_id);
+		}
 	}
 
 	// Set the bind map
