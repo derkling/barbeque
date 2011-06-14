@@ -64,19 +64,34 @@ public:
 	virtual ExitCode_t Disable() = 0;
 
 	/**
-	 * @brief Set next scheduled working mode
+	 * @brief Request to re-schedule this application into a new configuration
 	 *
-	 * Let the Scheduler/Optimizer module to new working mode of the
-	 * application. The method infers if the scheduling choice implies a
-	 * reconfiguration (change of working mode), a migration (move the
-	 * application from a cluster to another), both, or to continue in the
-	 * same working mode, in the same cluster scope.
-	 *
+	 * The Optimizer call this method when an AWM is selected for this
+	 * application to verify if it could be scheduled, i.e. resources are
+	 * available, and eventually to update the application status.
+	 * 
+	 * First the application verify resources availability. If the quality and
+	 * amount of required resources could be satisfied, the application is
+	 * going to be re-scheduled otherwise, it is un-scheduled.
+	 * 
 	 * @param awm Next working mode scheduled for the application
 	 * @param tok The token referencing the resources state view
+	 *
+	 * @return The method return an exit code representing the decision taken:
+	 * APP_WM_ACCEPTED if the specified working mode could be scheduled for
+	 * this application, APP_WM_REJECTED if the working mode could not beed
+	 * scheduled.
 	 */
-	virtual ExitCode_t SetNextSchedule(AwmPtr_t const & awm,
+	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
 			RViewToken_t tok = 0) = 0;
+
+	/**
+	 * @brief Commit a previsously required re-scheduling request.
+	 *
+	 * @return APP_SUCCESS on successful update of internal data structures,
+	 * APP_ABORT on errors.
+	 */
+	virtual ExitCode_t ScheduleCommit() = 0;
 
 };
 

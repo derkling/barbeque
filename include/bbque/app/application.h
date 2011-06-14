@@ -179,6 +179,13 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
+	inline SyncState_t SyncState() const {
+		return curr_sched.syncState;
+	}
+
+	/**
+	 * @see ApplicationStatusIF
+	 */
 	inline AwmPtr_t const & CurrentAWM() const {
 		return curr_sched.awm;
 	}
@@ -228,47 +235,14 @@ public:
 	AwmPtr_t GetWorkingMode(uint16_t wmId);
 
 	/**
-	 * @see ApplicationStatusIF
+	 * @see ApplicationConfIF
 	 */
-	ExitCode_t SetNextSchedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
-
-	// DERKLING: [public]
-	// These methods should be moved into the proper _conf and _status header
-	ExitCode_t _ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok = 0);
-	inline static char const *StateStr(State_t state) {
-		assert(state < STATE_COUNT);
-		return stateStr[state];
-	}
-	inline static char const *SyncStateStr(SyncState_t state) {
-		assert(state < SYNC_STATE_COUNT);
-		return syncStateStr[state];
-	}
-	inline SyncState_t SyncState() {
-		return curr_sched.syncState;
-	}
-	ExitCode_t _ScheduleCommit();
-	// DERKLING: [private]
-	// These methods should be private
-	void _SetState(State_t state, SyncState_t sync = SYNC_NONE);
-	void _SetSyncState(SyncState_t sync);
-	ExitCode_t _RequestSync(SyncState_t sync);
-	ExitCode_t _Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
-	ExitCode_t _Unschedule();
-	SyncState_t _SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
 	/**
-	 * @brief Update scheduled status and reconfiguration overheads data
-	 *
-	 * When the application manager receives a notify about a change of
-	 * scheduling profile (state and working mode) of an application, it needs
-	 * to update some internal structures, and set the new state in the
-	 * application descriptor.
-	 * The method set the new current state and forward to the application
-	 * information about overheads occourred in the reconfiguration phase.
-	 *
-	 * @param time The time measured/estimated in the reconfiguration process.
+	 * @see ApplicationConfIF
 	 */
-	void UpdateScheduledStatus(double time);
+	ExitCode_t ScheduleCommit();
 
 	/**
 	 * @brief Stop the application execution
@@ -302,9 +276,6 @@ public:
 
 private:
 
-	static char const *stateStr[STATE_COUNT];
-
-	static char const *syncStateStr[SYNC_STATE_COUNT+1];
 
 	/** The logger used by the application */
 	LoggerIF  *logger;
@@ -374,6 +345,64 @@ private:
 	 */
 	void WorkingModesEnabling(std::string const & res_path,
 			Constraint::BoundType_t type, uint64_t value);
+
+	/**
+	 * @brief Update the application state and sync state
+	 *
+	 * @param state the new application state
+	 * @param sync the new synchronization state (SYNC_NONE by default)
+	 */
+	void SetState(State_t state, SyncState_t sync = SYNC_NONE);
+
+	/**
+	 * @brief Update the application synchronization state
+	 */
+	void SetSyncState(SyncState_t sync);
+
+	/**
+	 * @brief Request a synchronization of this application into the specied
+	 * state.
+	 *
+	 * @param sync the new synchronization state (SYNC_NONE by default)
+	 */
+	ExitCode_t RequestSync(SyncState_t sync);
+
+	/**
+	 * @brief Configure this application to switch to the specified AWM
+	 */
+	ExitCode_t Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+
+	/**
+	 * @brief Configure this application to release resources.
+	 */
+	ExitCode_t Unschedule();
+
+	/**
+	 * @brief Verify if a synchronization is required to move into the
+	 * specified AWM.
+	 *
+	 * The method is called only if the Application is currently RUNNING.
+	 * Compare the WorkingMode specified with the currently used by the
+	 * Application. Compare the Resources set with the one binding the
+	 * resources of the current WorkingMode, in order to check if the
+	 * Application is going to run using processing elements from the same
+	 * clusters used in the previous execution step.
+	 *
+	 * @param awm the target working mode
+	 * @param vtok the view (on resources) to consider for the evaluation
+ 	 *
+	 * @return One of the following values:
+	 * - RECONF: Application is being scheduled for using PEs from the same
+	 *   clusters, but with a different WorkingMode.
+	 * - MIGRATE: Application is going to run in the same WorkingMode, but
+	 *   it’s going to be moved onto a different clusters set.
+	 * - MIGREC: Application changes completely its execution profile. Both
+	 *   WorkingMode and clusters set are different from the previous run.
+	 * - SYNC_NONE: Nothing changes. Application is going to run in the same
+	 *   operating point.
+	 *
+	 */
+	SyncState_t SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
 
 };
 

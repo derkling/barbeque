@@ -39,7 +39,7 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace app {
 
-char const *Application::stateStr[] = {
+char const *ApplicationStatusIF::stateStr[] = {
 	"DISABLED",
 	"READY",
 	"SYNC",
@@ -47,7 +47,7 @@ char const *Application::stateStr[] = {
 	"FINISHED"
 };
 
-char const *Application::syncStateStr[] = {
+char const *ApplicationStatusIF::syncStateStr[] = {
 	"STARTING",
 	"RECONF",
 	"MIGREC",
@@ -55,8 +55,7 @@ char const *Application::syncStateStr[] = {
 	"BLOCKED",
 	"TERMINATE",
 	"NONE"
-}
-;
+};
 
 // Compare two working mode values.
 // This is used to sort the list of enabled working modes.
@@ -241,55 +240,7 @@ AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
 	return AwmPtr_t();
 }
 
-
-Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & n_awm,
-				RViewToken_t vtok) {
-	(void)n_awm;
-	(void)vtok;
-	// TODO Temporarely disabled for new API merging
-#if 0
-	ApplicationManager &am(ApplicationManager::GetInstance());
-	// Application is blocked, until the AWM validity is verified
-	next_sched.state = BLOCKED;
-
-	// Get the working mode pointer
-	if (!n_awm) {
-		logger->Warn("Working mode rejected: AWM not found");
-		return APP_WM_NOT_FOUND;
-	}
-
-	// Set next working mode
-	next_sched.awm = n_awm;
-
-	// Check resources availability
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-    if (ra.AcquireUsageSet(n_awm->Owner(), vtok)
-			!= br::ResourceAccounter::RA_SUCCESS) {
-		// Set next working mode to null
-		next_sched.awm = AwmPtr_t();
-		logger->Warn("Working Mode {%s} rejected by Resource Accounter",
-						n_awm->Name().c_str());
-		return APP_WM_REJECTED;
-	}
-
-	// State not changed: returning immediatly
-	if (curr_sched.awm == next_sched.awm)
-		return APP_SUCCESS;
-
-	// Define the transitional scheduling state
-	if (curr_sched.awm != n_awm)
-		next_sched.state = RECONF;
-
-	// TODO manage migration cases here
-	logger->Warn("TODO: add support for EXC migration");
-
-	// Mark application for status update pending
-	am.SetSchedule(n_awm->Owner());
-#endif
-	return APP_SUCCESS;
-}
-
-Application::ExitCode_t Application::_ScheduleRequest(AwmPtr_t const & awm,
+Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 				RViewToken_t vtok) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
@@ -309,10 +260,10 @@ Application::ExitCode_t Application::_ScheduleRequest(AwmPtr_t const & awm,
 	// If resourecs are available:
 	if (booking == br::ResourceAccounter::RA_SUCCESS) {
 		// reschedule the application within the specified working mode
-		result = _Reschedule(awm, vtok);
+		result = Reschedule(awm, vtok);
 	} else {
 		// Otherwise: unschedule the application
-		result = _Unschedule();
+		result = Unschedule();
 	}
 
 	if (result == APP_SUCCESS)
@@ -322,7 +273,7 @@ Application::ExitCode_t Application::_ScheduleRequest(AwmPtr_t const & awm,
 
 }
 
-void Application::_SetSyncState(SyncState_t sync) {
+void Application::SetSyncState(SyncState_t sync) {
 
 	logger->Debug("Changing sync state [%s, %d:%s => %d:%s]",
 			StrId(),
@@ -333,7 +284,7 @@ void Application::_SetSyncState(SyncState_t sync) {
 
 }
 
-void Application::_SetState(State_t state, SyncState_t sync) {
+void Application::SetState(State_t state, SyncState_t sync) {
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
 			StrId(),
@@ -349,10 +300,10 @@ void Application::_SetState(State_t state, SyncState_t sync) {
 	}
 
 	curr_sched.state = state;
-	_SetSyncState(sync);
+	SetSyncState(sync);
 }
 
-Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
+Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ApplicationManager::ExitCode_t result;
 
@@ -375,7 +326,7 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 	}
 
 	// If the request has been accepted: update our state
-	_SetState(SYNC, sync);
+	SetState(SYNC, sync);
 
 	logger->Info("Sync scheduled [%s, %d:%s]",
 			StrId(), sync, SyncStateStr(sync));
@@ -384,8 +335,7 @@ Application::ExitCode_t Application::_RequestSync(SyncState_t sync) {
 
 }
 
-Application::ExitCode_t
-Application::_ScheduleCommit() {
+Application::ExitCode_t Application::ScheduleCommit() {
 
 	assert(CurrentState() == SYNC);
 
@@ -394,13 +344,13 @@ Application::_ScheduleCommit() {
 	case RECONF:
 	case MIGREC:
 	case MIGRATE:
-		_SetState(RUNNING);
+		SetState(RUNNING);
 		break;
 	case BLOCKED:
-		_SetState(READY);
+		SetState(READY);
 		break;
 	case TERMINATE:
-		_SetState(FINISHED);
+		SetState(FINISHED);
 		break;
 	default:
 		logger->Crit("Sync for EXC [%s] FAILED"
@@ -418,7 +368,7 @@ Application::_ScheduleCommit() {
 
 
 Application::SyncState_t
-Application::_SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
+Application::SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
 	(void)awm;
 	(void)vtok;
 
@@ -436,12 +386,12 @@ Application::_SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
 }
 
 Application::ExitCode_t
-Application::_Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
+Application::Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
 	SyncState_t sync;
 
 	// Ready application could be synchronized to start
 	if (CurrentState() == READY)
-		return _RequestSync(STARTING);
+		return RequestSync(STARTING);
 	
 	// Otherwise, the application should be running...
 	if (CurrentState() != RUNNING) {
@@ -451,16 +401,15 @@ Application::_Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
 	}
 
 	// Checking if a synchronization is required
-	sync = _SyncRequired(awm, vtok);
+	sync = SyncRequired(awm, vtok);
 	if (sync == SYNC_NONE)
 		return APP_SUCCESS;
 
 	// Request a synchronization for the identified reconfiguration
-	return _RequestSync(sync);
+	return RequestSync(sync);
 }
 
-Application::ExitCode_t
-Application::_Unschedule() {
+Application::ExitCode_t Application::Unschedule() {
 
 	// Ready application remain into ready state
 	if (CurrentState() == READY)
@@ -474,32 +423,8 @@ Application::_Unschedule() {
 	}
 
 	// The application should be blocked
-	return _RequestSync(BLOCKED);
+	return RequestSync(BLOCKED);
 }
-
-
-void Application::UpdateScheduledStatus(double _time) {
-	// Accordingly to the next scheduling state, update some info
-	switch (next_sched.state) {
-	case MIGREC:
-	case MIGRATE:
-	case RECONF:
-		// Reconfiguration overheads
-		if (curr_sched.awm) {
-			AwmPtr_t _awm(GetWorkingMode(curr_sched.awm->Id()));
-			_awm->AddOverheadInfo(next_sched.awm->Id(), _time);
-		}
-		next_sched.state = RUNNING;
-	default:
-		break;
-	}
-
-	// Update current scheduling info
-	curr_sched.state = next_sched.state;
-	curr_sched.awm = next_sched.awm;
-	logger->Info("Scheduled state = {%d}", curr_sched.state);
-}
-
 
 Application::ExitCode_t Application::SetConstraint(
 				std::string const & _res_name,

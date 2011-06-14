@@ -170,6 +170,17 @@ public:
 	 */
 	virtual const char *StrId() const = 0;
 
+	inline static char const *StateStr(State_t state) {
+		assert(state < STATE_COUNT);
+		return stateStr[state];
+	}
+
+	inline static char const *SyncStateStr(SyncState_t state) {
+		assert(state < SYNC_STATE_COUNT+1);
+		return syncStateStr[state];
+	}
+
+
 	/**
 	 * @brief Get the priority associated to
 	 * @return The priority value
@@ -177,10 +188,15 @@ public:
 	virtual AppPrio_t Priority() const = 0;
 
 	/**
-	 * @brief Get the current schedule state
+	 * @brief Get the schedule state
 	 * @return The current scheduled state
 	 */
 	virtual State_t CurrentState() const = 0;
+
+	/**
+	 * @brief Get the synchronization state
+	 */
+	virtual SyncState_t SyncState() const = 0;
 
 	/**
 	 * @brief Get the current working mode
@@ -221,6 +237,18 @@ public:
 	 * value
 	 */
 	virtual AwmPtr_t const & HighValueAWM() = 0;
+
+private:
+
+	/**
+	 * @brief Verbose application state names
+	 */
+	static char const *stateStr[STATE_COUNT];
+
+	/**
+	 * @brief Verbose synchronization state names
+	 */
+	static char const *syncStateStr[SYNC_STATE_COUNT+1];
 
 };
 
