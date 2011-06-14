@@ -278,6 +278,10 @@ public:
 
 private:
 
+	static char const *StateStr[STATE_COUNT];
+
+	static char const *SyncStateStr[SYNC_STATE_COUNT];
+
 	/** The logger used by the application */
 	LoggerIF  *logger;
 

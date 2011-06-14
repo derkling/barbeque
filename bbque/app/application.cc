@@ -38,6 +38,24 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace app {
 
+char const *Application::StateStr[] = {
+	"DISABLED",
+	"READY",
+	"SYNC",
+	"RUNNING",
+	"FINISCHED"
+};
+
+char const *Application::SyncStateStr[] = {
+	"STARING",
+	"RECONF",
+	"MIGREC",
+	"MIGRATE",
+	"BLOCKED",
+	"TERMINATE"
+}
+;
+
 // Compare two working mode values.
 // This is used to sort the list of enabled working modes.
 bool CompareAWMsByValue(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
