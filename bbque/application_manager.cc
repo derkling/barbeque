@@ -208,18 +208,11 @@ AppPtr_t ApplicationManager::CreateEXC(
 
 
 ApplicationManager::ExitCode_t
-ApplicationManager::StopApplication(AppPid_t pid) {
+ApplicationManager::DestroyEXC(AppPid_t pid) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMapVec_t::iterator vit;
 	AppsMapVec_t::iterator end;
 	AppsMap_t::iterator ait;
-
-	logger->Debug("Stopping all EXCs for application [%d] ...", pid);
-	range = apps.equal_range(pid);
-	ait = range.first;
-	for ( ; ait!=range.second; ++ait) {
-		((*ait).second)->StopExecution();
-	 }
 
 	// Remove application (EXCs) descriptors from status map
 	logger->Debug("Releasing [%d] EXCs from status maps...", pid);
@@ -249,7 +242,6 @@ ApplicationManager::PriorityRemove(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 
-	// Remove execution context descriptor from priority map
 	logger->Debug("Releasing [%s] EXCs from priority maps...",
 			papp->StrId());
 	range = priority_vec[papp->Priority()].equal_range(papp->Pid());
@@ -296,22 +288,12 @@ ApplicationManager::StatusRemove(AppPtr_t papp) {
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::StopApplication(AppPtr_t papp) {
+ApplicationManager::AppsRemove(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
-	ExitCode_t result;
 
-	logger->Debug("Removing EXC [%s] ...", papp->StrId());
-
-	// Remove execution context form priority and status maps
-	result = PriorityRemove(papp);
-	if (result != AM_SUCCESS)
-		return result;
-
-	result = StatusRemove(papp);
-	if (result != AM_SUCCESS)
-		return result;
-
+	logger->Debug("Releasing [%s] EXCs from apps maps...",
+			papp->StrId());
 	range = apps.equal_range(papp->Pid());
 	it = range.first;
 	while (it != range.second &&
@@ -331,7 +313,29 @@ ApplicationManager::StopApplication(AppPtr_t papp) {
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
+ApplicationManager::DestroyEXC(AppPtr_t papp) {
+	ExitCode_t result;
+
+	logger->Debug("Removing EXC [%s] ...", papp->StrId());
+
+	// Remove execution context form priority and status maps
+	result = PriorityRemove(papp);
+	if (result != AM_SUCCESS)
+		return result;
+
+	result = StatusRemove(papp);
+	if (result != AM_SUCCESS)
+		return result;
+
+	result = AppsRemove(papp);
+	if (result != AM_SUCCESS)
+		return result;
+
+	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
@@ -343,7 +347,7 @@ ApplicationManager::StopApplication(AppPid_t pid, uint8_t exc_id) {
 		return AM_EXC_NOT_FOUND;
 	}
 
-	return StopApplication(papp);
+	return DestroyEXC(papp);
 }
 
 ApplicationManager::ExitCode_t

@@ -91,17 +91,17 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t StopApplication(AppPid_t pid);
+	ExitCode_t DestroyEXC(AppPid_t pid);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t StopApplication(AppPtr_t papp);
+	ExitCode_t DestroyEXC(AppPtr_t papp);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t StopApplication(AppPid_t pid, uint8_t exc_id);
+	ExitCode_t DestroyEXC(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF
@@ -289,6 +289,12 @@ private:
 	 */
 	ExitCode_t StatusRemove(AppPtr_t papp);
 	
+	/**
+	 * Remove the specified application from the apps maps
+	 */
+	ExitCode_t AppsRemove(AppPtr_t papp);
+
+
 	/**
 	 * @brief Move the application from state vectors
 	 *

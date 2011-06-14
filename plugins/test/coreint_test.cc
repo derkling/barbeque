@@ -512,7 +512,7 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 	PrintResourceAvailabilities(sv);
 
 	// Stop application
-	ApplicationManager::ExitCode_t result = am.StopApplication(3324);
+	ApplicationManager::ExitCode_t result = am.DestroyEXC(3324);
 	if (result == ApplicationManager::AM_SUCCESS)
 		logger->Info("Application correctly exited.");
 	else

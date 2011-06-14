@@ -84,18 +84,13 @@ Application::Application(std::string const & _name,
 			Pid(), Name().substr(0,6).c_str(), ExcId());
 
 	logger->Info("Built new EXC [%s]", StrId());
-}
 
+
+}
 
 Application::~Application() {
+
 	logger->Debug("Destroying EXC [%s]", StrId());
-	StopExecution();
-}
-
-
-Application::ExitCode_t Application::StopExecution() {
-
-	logger->Info("Stopping EXC [%s]", StrId());
 
 	// Release the resources
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
@@ -107,16 +102,12 @@ Application::ExitCode_t Application::StopExecution() {
 
 	// Reset scheduling info
 	curr_sched.awm.reset();
-	next_sched.awm.reset();
-	next_sched.state = FINISHED;
 
 	// Releasing AWMs and Constraints...
 	enabled_awms.clear();
 	constraints.clear();
 
-	return APP_SUCCESS;
 }
-
 
 void Application::SetPriority(AppPrio_t _prio) {
 

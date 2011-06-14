@@ -58,33 +58,33 @@ public:
 			std::string const & recipe, app::AppPrio_t prio, bool weak_load) = 0;
 
 	/**
-	 * @brief Exit point for applications
+	 * @brief Destroy all the EXCs of the specified application
 	 *
-	 * Stop the execution of an application scheduled with Barbeque RTRM.
+	 * All the EXCs of this application will not be anymore scheduled by the
+	 * Barbeque RTRM.
 	 *
 	 * @param pid The process ID of the application
 	 */
-	virtual ExitCode_t StopApplication(AppPid_t pid) = 0;
+	virtual ExitCode_t DestroyEXC(AppPid_t pid) = 0;
 
 	/**
-	 * @brief Exit point for applications
+	 * @brief Destroy the specified EXC
 	 *
-	 * Stop the execution of an application scheduled with Barbeque RTRM.
+	 * The specified EXC will not be anymore scheduled by the Barbeque RTRM.
 	 *
-	 * @param papp The pointer to the application to stop
+	 * @param papp The pointer to the EXC to stop
 	 */
-	virtual ExitCode_t StopApplication(AppPtr_t papp) = 0;
+	virtual ExitCode_t DestroyEXC(AppPtr_t papp) = 0;
 
 	/**
-	 * @brief Exit point for execution contexts of applications
+	 * @brief Destroy the specified EXC
 	 *
-	 * Stop the execution of an execution context, belonging to a given
-	 * application scheduled with Barbeque RTRM.
+	 * The specified EXC will not be anymore scheduled by the Barbeque RTRM.
 	 *
 	 * @param pid The process ID of the application
 	 * @param exc_id The internal ID of the execution context
 	 */
-	virtual ExitCode_t StopApplication(AppPid_t pid, uint8_t exc_id) = 0;
+	virtual ExitCode_t DestroyEXC(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
 	 * @brief Enable the application for resources scheduling
