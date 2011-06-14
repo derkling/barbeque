@@ -239,16 +239,6 @@ AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
 	return AwmPtr_t();
 }
 
-Application::ExitCode_t Application::SetNextSchedule(AwmPtr_t const & awm,
-		br::UsagesMapPtr_t & resource_set,
-		RViewToken_t vtok) {
-	// Silence "args" warning
-	(void) awm;
-	(void) resource_set;
-	(void) vtok;
-	return APP_SUCCESS;
-}
-
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		br::UsagesMapPtr_t & resource_set,
 		RViewToken_t vtok) {
@@ -267,20 +257,21 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	// Checking for resources availability
 	booking = ra.BookResources(papp, resource_set, vtok);
 
-	// If resourecs are available:
+	// If resources are available, bind the resource set into the working
+	// mode, and thus reschedule the application. Otherwise unschedule.
 	if (booking == br::ResourceAccounter::RA_SUCCESS) {
-		// reschedule the application within the specified working mode
+		awm->SetResourceBinding(resource_set);
 		result = Reschedule(awm, vtok);
 	} else {
-		// Otherwise: unschedule the application
 		result = Unschedule();
 	}
 
-	if (result == APP_SUCCESS)
-		return APP_WM_ACCEPTED;
+	if (result != APP_SUCCESS)
+		return APP_WM_REJECTED;
 
-	return APP_WM_REJECTED;
-
+	// Set next awm
+	schedule.next_awm = awm;
+	return APP_WM_ACCEPTED;
 }
 
 void Application::SetSyncState(SyncState_t sync) {
@@ -291,7 +282,6 @@ void Application::SetSyncState(SyncState_t sync) {
 			sync, SyncStateStr(sync));
 
 	schedule.syncState = sync;
-
 }
 
 void Application::SetState(State_t state, SyncState_t sync) {
@@ -312,7 +302,7 @@ void Application::SetState(State_t state, SyncState_t sync) {
 
 	// Update resources on disabled
 	if ((state == DISABLED) ||
-			(state == READY) )
+			(state == READY))
 		schedule.awm.reset();
 
 	// Update state
@@ -406,11 +396,18 @@ Application::SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
 
 	// This must be called only by running applications
 	assert(State() == RUNNING);
+	assert(CurrentAWM().get());
 
-	// Check if the assiged resources requires 
-	// TODO: add code to compare current vs assigned configuration
-	// In case of reconfgiuration required, should return:
-	// RECONF|MIGREC|MIGRATE
+	// Check if the assigned operating point implies RECONF|MIGREC|MIGRATE
+	if ((CurrentAWM()->GetClusterSet() != awm->GetClusterSet()) &&
+			(CurrentAWM()->Id() != awm->Id()))
+		return MIGREC;
+
+	if (CurrentAWM()->GetClusterSet() != awm->GetClusterSet())
+		return MIGRATE;
+
+	if (CurrentAWM()->Id() != awm->Id())
+		return RECONF;
 
 	// NOTE: By default no reconfiguration is assumed to be required, thus we
 	// return the SYNC_STATE_COUNT which must be read as false values

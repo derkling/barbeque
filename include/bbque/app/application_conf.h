@@ -94,10 +94,6 @@ public:
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
 			UsagesMapPtr_t & resource_set, RViewToken_t tok = 0) = 0;
 
-	// TODO: Remove this
-	virtual ExitCode_t SetNextSchedule(AwmPtr_t const & awm,
-			UsagesMapPtr_t & resource_set, RViewToken_t tok = 0) = 0;
-
 	/**
 	 * @brief Commit a previsously required re-scheduling request.
 	 *

@@ -458,6 +458,7 @@ void GetClusteredInfo(SystemView & sv,
 void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 		uint8_t wm_id,
 		double ov_time) {
+	(void) ov_time;
 
 	// Get working mode wm1
 	if (papp.get() == NULL) {
@@ -477,19 +478,17 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 	// Do a resource binding!
 	UsagesMapPtr_t rsrc_binds(new UsagesMap_t);
 	d_wm->BindResource("cluster", RSRC_ID_ANY, 1, rsrc_binds);
-	// TODO: Remove set binding once tested
-	d_wm->SetResourceBinding(rsrc_binds);
-	logger->Info("Cluster... %s", d_wm->GetClusterSet().to_string().c_str());
 	logger->Debug("Usages / Binds = %d / %d",
 			d_wm->ResourceUsages().size(),
 			rsrc_binds->size());
 
 	// Let's set next schedule for the application above
+	// the binding is set by ScheduleRequest.
 	papp->ScheduleRequest(d_wm, rsrc_binds);
 	PrintScheduleInfo(papp);
 
 	// Now switch!
-	am._ChangedSchedule(papp, ov_time);
+	am.SyncCommit(papp);
 	PrintScheduleInfo(papp);
 }
 
@@ -563,6 +562,8 @@ void CoreInteractionsTest::Test() {
 					(test_app->GetAttribute("YaMCa", "author")).get()));
 	if (auth)
 		logger->Info("Plugin YaMCa: <author> : %s", auth->c_str());
+
+	testApplicationLifecycle(test_app);
 
 /*
 	// Scheduler test

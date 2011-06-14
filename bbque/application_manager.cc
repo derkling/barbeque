@@ -528,6 +528,7 @@ ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
 	uint8_t ss = state;
 
 	logger->Debug("Remove sync request for EXC [%s]", papp->StrId());
+	assert(papp);
 
 	// Clean-up (eventaully) previous occurrence
 	for( ; ss < Application::SYNC_STATE_COUNT; ++ss) {
