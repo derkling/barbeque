@@ -83,7 +83,7 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	 AppPtr_t StartApplication(
+	 AppPtr_t CreateEXC(
 			std::string const & name, AppPid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio = BBQUE_APP_PRIO_MIN,
 			bool weak_load = false);

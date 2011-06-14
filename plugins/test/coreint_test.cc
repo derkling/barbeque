@@ -538,8 +538,8 @@ void CoreInteractionsTest::Test() {
 	testResourceSetSearch(sv, rsrcSearchPaths);
 	GetClusteredInfo(sv, rsrcSearchPaths);
 
-	// Start an application
-	am.StartApplication("mp3player", 3324, 0, "r1_platA", 0, true);
+	// Create an Execution Context
+	am.CreateEXC("mp3player", 3324, 0, "r1_platA", 0, true);
 	AppPtr_t test_app(am.GetApplication(3324));
 	if (!test_app) {
 		logger->Error("Application not started.");

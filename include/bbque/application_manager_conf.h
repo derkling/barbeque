@@ -53,7 +53,7 @@ public:
 	 *
 	 * @return A pointer to the newly allocated application, NULL otherwise.
 	 */
-	virtual AppPtr_t StartApplication(
+	virtual AppPtr_t CreateEXC(
 			std::string const & name, AppPid_t pid, uint8_t exc_id,
 			std::string const & recipe, app::AppPrio_t prio, bool weak_load) = 0;
 

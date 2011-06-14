@@ -165,7 +165,7 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 
 }
 
-AppPtr_t ApplicationManager::StartApplication(
+AppPtr_t ApplicationManager::CreateEXC(
 		std::string const & _name, AppPid_t _pid, uint8_t _exc_id,
 		std::string const & _rcp_name, app::AppPrio_t _prio,
 		bool _weak_load) {
@@ -177,13 +177,13 @@ AppPtr_t ApplicationManager::StartApplication(
 	papp = AppPtr_t(new ba::Application(_name, _pid, _exc_id));
 	papp->SetPriority(_prio);
 
-	logger->Info("Starting new EXC [%s], prio[%d]",
+	logger->Info("Create EXC [%s], prio[%d]",
 			papp->StrId(), papp->Priority());
 
 	// Load the required recipe
 	result = LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
 	if (!rcp_ptr) {
-		logger->Error("Starting EXC [%s] FAILED "
+		logger->Error("Create EXC [%s] FAILED "
 				"(Error: unable to load recipe [%s])",
 				papp->StrId(), _rcp_name.c_str());
 		return AppPtr_t();
@@ -200,7 +200,7 @@ AppPtr_t ApplicationManager::StartApplication(
 	status_vec[papp->CurrentState()].insert(
 			AppsMapEntry_t(papp->Pid(), papp));
 
-	logger->Debug("EXC [%s] start DONE",
+	logger->Debug("Create EXC [%s] DONE",
 			papp->StrId(), papp->ExcId());
 
 	return papp;
