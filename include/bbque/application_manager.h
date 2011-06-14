@@ -106,12 +106,12 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t EnableApplication(AppPtr_t papp);
+	ExitCode_t EnableEXC(AppPtr_t papp);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t EnableApplication(AppPid_t pid, uint8_t exc_id);
+	ExitCode_t EnableEXC(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF

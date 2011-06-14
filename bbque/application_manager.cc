@@ -351,7 +351,7 @@ ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::EnableApplication(AppPtr_t papp) {
+ApplicationManager::EnableEXC(AppPtr_t papp) {
 
 	// Enabling the execution context
 	logger->Debug("Enabling EXC [%s] ...", papp->StrId());
@@ -366,7 +366,7 @@ ApplicationManager::EnableApplication(AppPtr_t papp) {
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::EnableApplication(AppPid_t pid, uint8_t exc_id) {
+ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
@@ -378,7 +378,7 @@ ApplicationManager::EnableApplication(AppPid_t pid, uint8_t exc_id) {
 		return AM_EXC_NOT_FOUND;
 	}
 
-	return EnableApplication(papp);
+	return EnableEXC(papp);
 
 }
 

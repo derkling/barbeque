@@ -87,21 +87,21 @@ public:
 	virtual ExitCode_t DestroyEXC(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
-	 * @brief Enable the application for resources scheduling
+	 * @brief Enable the EXC for resources scheduling
 	 *
-	 * Enable assignment of resources to the specified application.
+	 * Enable assignment of resources to the specified EXC.
 	 * @param papp pointer to the application to enable
 	 */
-	virtual ExitCode_t EnableApplication(AppPtr_t papp) = 0;
+	virtual ExitCode_t EnableEXC(AppPtr_t papp) = 0;
 
 	/**
-	 * @brief Enable the application for resources scheduling
+	 * @brief Enable the EXC for resources scheduling
 	 *
-	 * Enable assignment of resources to the specified application.
+	 * Enable assignment of resources to the specified EXC.
 	 * @param pid the processi ID of the application
 	 * @param exc_id the Execution Context ID to enable
 	 */
-	virtual ExitCode_t EnableApplication(AppPid_t pid, uint8_t exc_id) = 0;
+	virtual ExitCode_t EnableEXC(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
 	 * @brief Disable the application for resources scheduling
