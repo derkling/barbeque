@@ -143,26 +143,30 @@ Application::ExitCode_t Application::Enable() {
 
 
 Application::ExitCode_t Application::Disable() {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 
 	logger->Debug("Disabling EXC [%s]...", StrId());
 
-	// Not disabled applications could not be marked as READY
-	if (State() == DISABLED) {
-		logger->Crit("Trying to disable already disabled application [%s] "
-				"(Error: possible data structure curruption?)",
+	// Disabling an application depends on its curren state
+	switch(State()) {
+	case READY:
+		// Ready applications could be directly disabled
+		SetState(DISABLED);
+		break;
+	case SYNC:
+		logger->Warn("TODO: disabling application in SYNC state");
+		assert(false);
+		break;
+	case RUNNING:
+		// Running applications must be blocked to release all resrouces.
+		RequestSync(BLOCKED);
+	default:
+		// Other cases should not happens
+		logger->Crit("Trying to disable EXC [%s] FAILED "
+				"(Error: unconsistent BBQ internal state?)",
 				StrId());
-		assert(State() != DISABLED);
+		assert(false);
 		return APP_ABORT;
 	}
-
-	// Release the resources
-	if (CurrentAWM())
-		ra.ReleaseUsageSet(CurrentAWM()->Owner());
-
-	// Reset scheduling info
-	SetState(DISABLED);
-	logger->Info("EXC [%s] DISABLED", StrId());
 
 	return APP_SUCCESS;
 }
@@ -338,6 +342,7 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 }
 
 Application::ExitCode_t Application::ScheduleCommit() {
+	//br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 
 	assert(State() == SYNC);
 
@@ -346,9 +351,13 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	case RECONF:
 	case MIGREC:
 	case MIGRATE:
+		logger->Warn("TODO: add resource acquistion from ResourceAccounter");
 		SetState(RUNNING);
 		break;
 	case BLOCKED:
+		// NOTE resources previously accounted to this application should have
+		// been already released implicitely at the beginning of the
+		// synchronizaiton
 		SetState(READY);
 		break;
 	case TERMINATE:
