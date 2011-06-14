@@ -383,7 +383,7 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::DisableApplication(AppPtr_t papp) {
+ApplicationManager::DisableEXC(AppPtr_t papp) {
 
 	// Disable the execution context
 	logger->Debug("Disabling EXC [%s] ...", papp->StrId());
@@ -397,7 +397,7 @@ ApplicationManager::DisableApplication(AppPtr_t papp) {
 }
 
 ApplicationManager::ExitCode_t
-ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
+ApplicationManager::DisableEXC(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
@@ -409,7 +409,7 @@ ApplicationManager::DisableApplication(AppPid_t pid, uint8_t exc_id) {
 		return AM_ABORT;
 	}
 
-	return DisableApplication(papp);
+	return DisableEXC(papp);
 }
 
 ApplicationManager::ExitCode_t

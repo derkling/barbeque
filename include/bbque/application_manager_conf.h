@@ -104,21 +104,21 @@ public:
 	virtual ExitCode_t EnableEXC(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
-	 * @brief Disable the application for resources scheduling
+	 * @brief Disable the specified EXC for resources scheduling
 	 *
-	 * Disble assignment of resources to the specified application.
+	 * Disble assignment of resources to the specified EXC.
 	 * @param papp pointer to the application to enable
 	 */
-	virtual ExitCode_t DisableApplication(AppPtr_t papp) = 0;
+	virtual ExitCode_t DisableEXC(AppPtr_t papp) = 0;
 
 	/**
-	 * @brief Disable the application for resources scheduling
+	 * @brief Disable the specified EXC for resources scheduling
 	 *
-	 * Disable assignment of resources to the specified application.
+	 * Disable assignment of resources to the specified EXC.
 	 * @param pid the processi ID of the application
 	 * @param exc_id the Execution Context ID to enable
 	 */
-	virtual ExitCode_t DisableApplication(AppPid_t pid, uint8_t exc_id) = 0;
+	virtual ExitCode_t DisableEXC(AppPid_t pid, uint8_t exc_id) = 0;
 };
 
 } // namespace bbque

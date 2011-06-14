@@ -116,12 +116,12 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t DisableApplication(AppPtr_t papp);
+	ExitCode_t DisableEXC(AppPtr_t papp);
 
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	ExitCode_t DisableApplication(AppPid_t pid, uint8_t exc_id);
+	ExitCode_t DisableEXC(AppPid_t pid, uint8_t exc_id);
 
 	/**
 	 * @see ApplicationManagerConfIF
