@@ -172,7 +172,7 @@ CoreInteractionsTest::CoreInteractionsTest():
 	am(ApplicationManager::GetInstance()) {
 
 	// Get a logger
-	std::string logger_name(COREINT_NAMESPACE);
+	std::string logger_name(TEST_NAMESPACE COREINT_NAMESPACE);
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
@@ -458,6 +458,7 @@ void GetClusteredInfo(SystemView & sv,
 void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 		uint8_t wm_id,
 		double ov_time) {
+	Application::ExitCode_t result;
 	(void) ov_time;
 
 	// Get working mode wm1
@@ -484,8 +485,14 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 
 	// Let's set next schedule for the application above
 	// the binding is set by ScheduleRequest.
-	papp->ScheduleRequest(d_wm, rsrc_binds);
+	result = papp->ScheduleRequest(d_wm, rsrc_binds);
+	if (result != Application::APP_WM_ACCEPTED) {
+		logger->Error("AWM Rejected");
+	}
 	PrintScheduleInfo(papp);
+
+	if (papp->State() != Application::SYNC)
+		return;
 
 	// Now switch!
 	am.SyncCommit(papp);
@@ -497,28 +504,28 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 
 	am.EnableEXC(papp);
 
-	// Print out working modes details
+	logger->Info("_____ Print out working modes details");
 	PrintWorkingModesInfo(papp);
 
-	// Get the application descriptor
+	logger->Info("_____  Get the application descriptor");
 	AppPtr_t app_conf(am.GetApplication(3324, 0));
 
-	// Simulate a schedulation 1
+	logger->Info("_____ Simulate a schedulation 1");
 	testScheduleSwitch(app_conf, 1, 0.381);
 	PrintResourceAvailabilities(sv);
 
-	// Set a constraint
+	logger->Info("_____ Set a constraint");
 	app_conf->RemoveConstraint("cacheL3", Constraint::UPPER_BOUND);
 
-	// Simulate a schedulation 2
+	logger->Info("_____ Simulate a schedulation 2...");
 	testScheduleSwitch(app_conf, 2, 0.445);
 	PrintResourceAvailabilities(sv);
 
-	// Come back to awm  1
+	logger->Info("_____ Come back to awm  1");
 	testScheduleSwitch(app_conf, 1, 0.409);
 	PrintResourceAvailabilities(sv);
 
-	// Stop application
+	logger->Info("_____ Stop application");
 	ApplicationManager::ExitCode_t result = am.DestroyEXC(3324);
 	if (result == ApplicationManager::AM_SUCCESS)
 		logger->Info("Application correctly exited.");
