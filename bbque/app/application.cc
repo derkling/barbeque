@@ -84,8 +84,9 @@ Application::Application(std::string const & _name,
 	logger->Info("Built new EXC [%s]", StrId());
 
 	// Scheduling state
-	SetState(DISABLED);
-
+	schedule.state = DISABLED;
+	schedule.preSyncState = DISABLED;
+	schedule.syncState = SYNC_NONE;
 }
 
 Application::~Application() {
