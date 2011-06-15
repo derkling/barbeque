@@ -576,10 +576,21 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 	logger->Debug("Requesting sync for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
 
+	// The state at this point should be either READY or RUNNING
+	if ((papp->State() != Application::READY) &&
+			(papp->State() != Application::RUNNING)) {
+		logger->Crit("Sync request for EXC [%s] FAILED "
+				"(Error: invalid EXC state [%d]",
+				papp->StrId(), papp->State());
+		assert((papp->State() == Application::READY) ||
+			(papp->State() == Application::RUNNING));
+		return AM_ABORT;
+	}
+
 	// Check valid state has beed required
 	if (state >= Application::SYNC_STATE_COUNT) {
 		logger->Crit("Sync request for EXC [%s] FAILED "
-				"(Error: invalid state [%d]",
+				"(Error: invalid sync state required [%d]",
 				papp->StrId(), state);
 		assert(state<Application::SYNC_STATE_COUNT);
 		return AM_ABORT;
@@ -593,6 +604,7 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 	syncMap->insert(UidsMapEntry_t(papp->Uid(), papp));
 
 	// Move into synchronization status
+	UpdateStatusMaps(papp, papp->State(), Application::SYNC);
 
 	logger->Info("Sync request for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
