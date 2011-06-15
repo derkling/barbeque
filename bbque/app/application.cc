@@ -247,6 +247,9 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	AppPtr_t papp(awm->Owner());
 	ExitCode_t result;
 
+	logger->Debug("Schedule request for [%s] into AWM [%02d:%s]",
+			papp->StrId(), awm->Id(), awm->Name().c_str());
+
 	// Get the working mode pointer
 	if (!awm) {
 		logger->Crit("Working mode selection FAILED (Error: AWM not existing)");
@@ -259,12 +262,16 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 
 	// If resources are available, bind the resource set into the working
 	// mode, and thus reschedule the application. Otherwise unschedule.
-	if (booking == br::ResourceAccounter::RA_SUCCESS) {
-		awm->SetResourceBinding(resource_set);
-		result = Reschedule(awm, vtok);
-	} else {
-		result = Unschedule();
+	if (booking != br::ResourceAccounter::RA_SUCCESS) {
+		logger->Debug("Unscheduling [%s]...", papp->StrId());
+		Unschedule();
+		return APP_WM_REJECTED;
 	}
+	
+	logger->Debug("Rescheduling [%s] into AWM [%d:%s]...",
+			papp->StrId(), awm->Id(), awm->Name().c_str());
+	awm->SetResourceBinding(resource_set);
+	result = Reschedule(awm, vtok);
 
 	if (result != APP_SUCCESS)
 		return APP_WM_REJECTED;
