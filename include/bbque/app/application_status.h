@@ -31,6 +31,11 @@
 /** The application identifier */
 typedef uint32_t AppPid_t;
 
+/** The application UID */
+typedef uint32_t AppUid_t;
+
+#define BBQUE_UID_SHIFT 5
+#define BBQUE_UID_MASK 0x1F
 
 namespace bbque { namespace app {
 
@@ -163,6 +168,34 @@ public:
 	 * @return PID value
 	 */
 	virtual uint8_t ExcId() const = 0;
+
+	/**
+	 * @brief Get the UID of the current application
+	 */
+	inline AppUid_t Uid() const {
+		return (Pid() << BBQUE_UID_SHIFT) + ExcId();
+	};
+
+	/**
+	 * @brief Get the UID of an application given its PID and EXC
+	 */
+	static inline AppUid_t Uid(AppPid_t pid, uint8_t exc_id) {
+		return (pid << BBQUE_UID_SHIFT) + exc_id;
+	};
+
+	/**
+	 * @brief Get the PID of an application given its UID
+	 */
+	static inline AppPid_t Pid(AppUid_t uid) {
+		return (uid >> BBQUE_UID_SHIFT);
+	};
+
+	/**
+	 * @brief Get the EID of an application given its UID
+	 */
+	static inline uint8_t Eid(AppUid_t uid) {
+		return (uid & BBQUE_UID_MASK);
+	};
 
 	/**
 	 * @brief Get a string ID for this Execution Context
