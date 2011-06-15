@@ -30,13 +30,13 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+//#include "bbque/app/application_status.h"
 #include "bbque/app/application.h"
 
 /** @see WorkingMode BindResource */
 #define RSRC_ID_ANY 	-1
 #define RSRC_ID_NONE 	-2
 
-using bbque::app::Application;
 using bbque::app::AppPtr_t;
 
 namespace bbque { namespace res {
@@ -52,14 +52,12 @@ typedef std::shared_ptr<Resource> ResourcePtr_t;
 typedef std::list<ResourcePtr_t> ResourcePtrList_t;
 /** Shared pointer to ResourceState object */
 typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
-/** Map of amounts of resource used by applications. Key: Application PID */
-typedef std::map<pid_t, uint64_t> AppUseQtyMap_t;
+/** Map of amounts of resource used by applications. Key: Application UID */
+typedef std::map<AppUid_t, uint64_t> AppUseQtyMap_t;
 /** Numeric value used as token for the resource views */
 typedef size_t RViewToken_t;
 /** Hash map collecting the state views of a resource */
 typedef std::unordered_map<RViewToken_t, ResourceStatePtr_t> RSHashMap_t;
-/** Map of Application descriptor pointers. Key: application name */
-typedef std::map<std::string, Application const *> AppMap_t;
 
 
 /**
@@ -279,7 +277,7 @@ public:
 			return 0;
 		// Set new used value and application that requested the resource
 		view->used = fut_used;
-		view->apps[app_ptr->Pid()] = amount;
+		view->apps[app_ptr->Uid()] = amount;
 		return amount;
 	}
 
@@ -307,7 +305,7 @@ public:
 			view = it->second;
 		}
 		// Lookup the application amount and subtract to used
-		AppUseQtyMap_t::iterator lkp = view->apps.find(app_ptr->Pid());
+		AppUseQtyMap_t::iterator lkp = view->apps.find(app_ptr->Uid());
 		if (lkp == view->apps.end())
 			return 0;
 		view->used -= lkp->second;
