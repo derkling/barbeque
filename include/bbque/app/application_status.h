@@ -23,6 +23,7 @@
 #ifndef BBQUE_APPLICATION_STATUS_IF_H_
 #define BBQUE_APPLICATION_STATUS_IF_H_
 
+#include <cassert>
 #include <list>
 #include <string>
 
