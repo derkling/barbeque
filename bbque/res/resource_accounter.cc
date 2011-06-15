@@ -48,7 +48,6 @@ ResourceAccounter & ResourceAccounter::GetInstance() {
 	return instance;
 }
 
-
 ResourceAccounter::ResourceAccounter():
 	clustering_factor(0) {
 
@@ -65,32 +64,34 @@ ResourceAccounter::ResourceAccounter():
 	rsrc_per_views[sys_view_token] = ResourceSetPtr_t(new ResourceSet_t);
 }
 
-
 ResourceAccounter::~ResourceAccounter() {
 	resources.clear();
 	usages_per_views.clear();
 	rsrc_per_views.clear();
 }
 
-
 ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 		std::string const & _path,
 		std::string const & _units,
 		uint64_t _amount) {
 	// Check arguments
-	if(_path.empty())
+	if(_path.empty()) {
+		logger->Fatal("Registering: Invalid resource path");
 		return RA_ERR_MISS_PATH;
+	}
 
 	// Insert a new resource in the tree
 	ResourcePtr_t res_ptr = resources.insert(_path);
-	if (!res_ptr)
+	if (!res_ptr) {
+		logger->Crit("Registering: Unable to allocate a new resource"
+				"descriptor");
 		return RA_ERR_MEM;
+	}
 
 	// Set the amount of resource considering the units
 	res_ptr->SetTotal(ConvertValue(_amount, _units));
 	return RA_SUCCESS;
 }
-
 
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 		QueryOption_t _att,
@@ -122,16 +123,19 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 	return val;
 }
 
-
 ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		UsagesMapPtr_t const & resource_set,
 		RViewToken_t vtok) {
 	// Check to avoid null pointer segmentation fault
-	if (!papp)
+	if (!papp) {
+		logger->Fatal("Booking: Null pointer to the application descriptor");
 		return RA_ERR_MISS_APP;
+	}
 	// Check that the next working mode has been set
-	if ((!resource_set) || (resource_set->empty()))
+	if ((!resource_set) || (resource_set->empty())) {
+		logger->Fatal("Booking: Missing a valid resource usages set");
 		return RA_ERR_MISS_USAGES;
+	}
 
 	// Get the map of resources used by the application (from the state view
 	// referenced by 'vtok'). A missing view implies that the token is not
@@ -147,7 +151,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 
 	// Try booking required resources for the specified application and view
 	if (CheckAvailability(resource_set, vtok) == RA_ERR_USAGE_EXC) {
-		logger->Debug("Cannot allocate the resource set");
+		logger->Debug("Booking: Cannot allocate the resource set");
 		return RA_ERR_USAGE_EXC;
 	}
 
@@ -158,28 +162,33 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	return RA_SUCCESS;
 }
 
-
 void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 	// Check to avoid null pointer seg-fault
-	if (!_app)
+	if (!_app) {
+		logger->Fatal("Release: Null pointer to the application descriptor");
 		return;
+	}
 
 	// Get the map of applications resource usages related to the state view
 	// referenced by 'vtok'
 	AppUsagesMapPtr_t apps_usages;
-	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW)
+	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW) {
+		logger->Fatal("Release: Resource view unavailable");
 		return;
+	}
 
 	// Get the map of resource usages of the application
 	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app));
-	if (usemap_it == apps_usages->end())
+	if (usemap_it == apps_usages->end()) {
+		logger->Fatal("Release: Application referenced misses a resource set."
+				"Possible data corruption occurred.");
 		return;
+	}
 
 	// Decrement resources counts and remove the usages map
 	DecBookingCounts(usemap_it->second, _app, vtok);
 	apps_usages->erase(_app);
 }
-
 
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		UsagesMapPtr_t const & usages,
@@ -187,17 +196,20 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	UsagesMap_t::const_iterator usages_it(usages->begin());
 	UsagesMap_t::const_iterator usages_end(usages->end());
 	for (; usages_it != usages_end; ++usages_it)
-		if (Available(usages_it->second, vtok) < usages_it->second->value)
+		if (Available(usages_it->second, vtok) < usages_it->second->value) {
+			logger->Warn("CheckAvail: Exceeding resource request"
+					" [usage = %llu]", usages_it->second->value);
 			return RA_ERR_USAGE_EXC;
-
+		}
 	return RA_SUCCESS;
 }
 
-
 RViewToken_t ResourceAccounter::GetNewView(const char * req_path) {
 	// Null-string check
-	if (req_path == NULL)
+	if (req_path == NULL) {
+		logger->Error("NewView: Missing a valid string");
 		return -1;
+	}
 
 	// Token
 	RViewToken_t _token = std::hash<const char *>()(req_path);
@@ -212,16 +224,20 @@ RViewToken_t ResourceAccounter::GetNewView(const char * req_path) {
 	return _token;
 }
 
-
 void ResourceAccounter::PutView(RViewToken_t vtok) {
 	// Do nothing if the token references the system state view
-	if (vtok == sys_view_token)
+	if (vtok == sys_view_token) {
+		logger->Warn("PutView: Cannot release the system resources view");
 		return;
+	}
 
 	// Get the resource set using the referenced view
 	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
-	if (rviews_it == rsrc_per_views.end())
+	if (rviews_it == rsrc_per_views.end()) {
+		logger->Error("PutView: Cannot find the resource view referenced by"
+				"%llu", vtok);
 		return;
+	}
 
 	// For each resource delete the view
 	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
@@ -233,7 +249,6 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	// Remove the map of applications resource usages of this view
 	usages_per_views.erase(vtok);
 }
-
 
 RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
 	// Do nothing if the token references the system state view
@@ -264,7 +279,6 @@ RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
 	return sys_view_token;
 }
 
-
 ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 		RViewToken_t vtok,
 		AppUsagesMapPtr_t & apps_usages) {
@@ -272,8 +286,12 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 	if (vtok != 0) {
 		// "Alternate" view case
 		view = usages_per_views.find(vtok);
-		if (view == usages_per_views.end())
+		if (view == usages_per_views.end()) {
+			logger->Error("Application usages:"
+					"Cannot find the resource view referenced by %llu",
+					vtok);
 			return RA_ERR_MISS_VIEW;
+		}
 		apps_usages = view->second;
 	}
 	else {
@@ -284,7 +302,6 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 
 	return RA_SUCCESS;
 }
-
 
 inline ResourceAccounter::ExitCode_t ResourceAccounter::IncBookingCounts(
 		UsagesMapPtr_t const & app_usages,
@@ -326,7 +343,6 @@ inline ResourceAccounter::ExitCode_t ResourceAccounter::IncBookingCounts(
 	}
 	return RA_SUCCESS;
 }
-
 
 inline void ResourceAccounter::DecBookingCounts(
 		UsagesMapPtr_t const & app_usages,
