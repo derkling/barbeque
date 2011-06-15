@@ -312,6 +312,7 @@ void Application::SetState(State_t state, SyncState_t sync) {
 Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ApplicationManager::ExitCode_t result;
+	AppPtr_t papp = am.GetApplication(Uid());
 
 	if ( (State() != READY) && 
 			(State() != RUNNING) ) {
@@ -324,8 +325,17 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	logger->Debug("Request synchronization [%s, %d:%s]",
 			StrId(), sync, SyncStateStr(sync));
 
+	// Ensuring the AM has an hander for this application
+	if (!papp) {
+		logger->Crit("Request synchronization [%s, %d:%s] FAILED "
+				"(Error: unable to get an application handler",
+				StrId(), sync, SyncStateStr(sync));
+		assert(papp);
+		return APP_ABORT;
+	}
+
 	// Request the application manager to synchronization this application
-	result = am.SyncRequest(AppPtr_t(this), sync);
+	result = am.SyncRequest(papp, sync);
 	if (result != ApplicationManager::AM_SUCCESS) {
 		logger->Error("Request synchronization FAILED (Error: %d)", result);
 		return APP_ABORT;
