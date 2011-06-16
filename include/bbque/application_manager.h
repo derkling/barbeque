@@ -270,20 +270,20 @@ private:
 	AppsMapVec_t priority_vec;
 
 	/**
-	 * Vector grouping the applications by status (@see ScheduleFlag).
+	 * Array grouping the applications by status (@see ScheduleFlag).
 	 * Each position points to a set of maps pointing applications
 	 */
-	AppsMapVec_t status_vec;
+	AppsUidMap_t status_vec[Application::STATE_COUNT];
 
 	/**
 	 * @brief Applications grouping based on next state to be scheduled.
 	 *
-	 * Vector grouping the applicaitons by the value of theis next_sched.state
+	 * Array grouping the applicaitons by the value of theis next_sched.state
 	 * (@see ScheduleFlag). Each entry is a vector of applications on the
 	 * correposnding scheduled status. This view on applicaitons could be
 	 * exploited by the synchronization module to update applications.
 	 */
-	AppsMapVec_t sync_vec;
+	AppsUidMap_t sync_vec[Application::SYNC_STATE_COUNT];
 
 	/** The constructor */
 	ApplicationManager();

@@ -74,14 +74,12 @@ ApplicationManager::ApplicationManager() {
 
 	// Pre-allocate priority and status vectors
 	priority_vec = std::vector<AppsUidMap_t>(lowest_prio + 1);
-	status_vec = std::vector<AppsUidMap_t>(ba::Application::STATE_COUNT);
-	sync_vec = std::vector<AppsUidMap_t>(ba::Application::SYNC_STATE_COUNT);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
-	logger->Debug("Priority vector size = %d", priority_vec.size());
-	logger->Debug("Status vector size = %d", status_vec.size());
-	logger->Debug("Sync vector size = %d", sync_vec.size());
+	logger->Debug("Priority vector [size: %d, capacity: %d]",
+			priority_vec.size(), priority_vec.capacity());
+
 }
 
 
@@ -95,13 +93,10 @@ ApplicationManager::~ApplicationManager() {
 	logger->Debug("Clearing priority vector...");
 	priority_vec.clear();
 
-	// Clear the status vector
-	logger->Debug("Clearing states vector...");
-	status_vec.clear();
-
 	// Clear the applications map
+	logger->Debug("Clearing apps...");
 	apps.clear();
-	logger->Debug("Cleared applications");
+	uids.clear();
 }
 
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
