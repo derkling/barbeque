@@ -27,7 +27,7 @@
 #include "bbque/app/plugin_data.h"
 #include "bbque/res/resource_accounter.h"
 
-#define MAX_NUM_CLUSTERS	32
+#define MAX_NUM_CLUSTERS 8
 
 using bbque::res::ResID_t;
 using bbque::res::ResourceUsage;
