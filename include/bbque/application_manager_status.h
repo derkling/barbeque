@@ -36,6 +36,12 @@ typedef std::shared_ptr<app::Application> AppPtr_t;
  * Map containing shared pointers to Application descriptors, where the key is
  * the application PID
  */
+typedef std::map<AppUid_t, AppPtr_t > AppsUidMap_t;
+
+/**
+ * Map containing shared pointers to Application descriptors, where the key is
+ * the application PID
+ */
 typedef std::multimap<AppPid_t, AppPtr_t > AppsMap_t;
 
 /**
@@ -43,6 +49,10 @@ typedef std::multimap<AppPid_t, AppPtr_t > AppsMap_t;
  */
 typedef std::pair<AppPid_t, AppPtr_t> AppsMapEntry_t;
 
+/**
+ * An entry of the UIDS Map
+ */
+typedef std::pair<AppUid_t, AppPtr_t> UidsMapEntry_t;
 
 /**
  * @class ApplicationManagerStatusIF
@@ -72,7 +82,7 @@ public:
 	 *
 	 * @return A pointer to the Map of all applications registered to the RTRM
 	 */
-	virtual AppsMap_t const * Applications() const = 0;
+	virtual AppsUidMap_t const * Applications() const = 0;
 
 	/**
 	 * @brief Retrieve registered applications with the specified priority
@@ -80,7 +90,7 @@ public:
 	 * @param prio The priority value
 	 * @return A pointer to the map of applications with the request priority
 	 */
-	virtual AppsMap_t const * Applications(app::AppPrio_t prio) const = 0;
+	virtual AppsUidMap_t const * Applications(app::AppPrio_t prio) const = 0;
 
 	/**
 	 * @brief Retrieve applications with the specified scheduling state
@@ -94,7 +104,7 @@ public:
 	 *
 	 * @return A pointer to the map of applications with the requested schedule status
 	 */
-	virtual AppsMap_t const * Applications(
+	virtual AppsUidMap_t const * Applications(
 			app::Application::State_t sched_state,
 			bool current = true) const = 0;
 
@@ -105,7 +115,14 @@ public:
 	 * @param exc_id Execution Contetx ID
 	 */
 	virtual AppPtr_t const GetApplication(AppPid_t pid,
-			uint8_t exc_id = 0) = 0;
+			uint8_t exc_id) = 0;
+
+	/**
+	 * @brief Retrieve an application descriptor (shared pointer) by UID
+	 *
+	 * @param uid Application UID
+	 */
+	virtual AppPtr_t const GetApplication(AppUid_t uid) const = 0;
 
 	/**
 	 * @brief Lowest application priority

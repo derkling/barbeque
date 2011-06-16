@@ -126,14 +126,14 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
-	inline AppsMap_t const * Applications() const {
-		return &apps;
+	inline AppsUidMap_t const * Applications() const {
+		return &uids;
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	AppsMap_t const * Applications(app::AppPrio_t prio) const {
+	AppsUidMap_t const * Applications(app::AppPrio_t prio) const {
 		assert(prio<=lowest_prio);
 		if (prio>lowest_prio)
 			prio=lowest_prio;
@@ -143,7 +143,7 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	AppsMap_t const * Applications (
+	AppsUidMap_t const * Applications (
 			Application::State_t sched_state, bool current = true) const {
 		if (current)
 			return &(status_vec[sched_state]);
@@ -153,7 +153,12 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	AppPtr_t const GetApplication(AppPid_t pid, uint8_t exc_id = 0);
+	AppPtr_t const GetApplication(AppPid_t pid, uint8_t exc_id);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t const GetApplication(AppUid_t uid) const;
 
 	/**
 	 * @see ApplicationManagerStatusIF
@@ -224,12 +229,20 @@ private:
 	app::AppPrio_t lowest_prio;
 
 	/**
-	 * List of all the applications instances which entered the
+	 * MultiMap of all the applications instances which entered the
 	 * resource manager starting from its boot. The map key is the PID of the
 	 * application instance. The value is the application descriptor of the
 	 * instance.
 	 */
 	AppsMap_t apps;
+
+	/**
+	 * Map of all the applications instances which entered the
+	 * resource manager starting from its boot. The map key is the UID of the
+	 * application instance. The value is the application descriptor of the
+	 * instance.
+	 */
+	AppsUidMap_t uids;
 
 	/**
 	 * Store all the application recipes. More than one application
@@ -245,7 +258,7 @@ private:
 	 * These vectors are used to classify applications, e.g. based on their
 	 * priority or current status.
 	 */
-	typedef std::vector<AppsMap_t> AppsMapVec_t;
+	typedef std::vector<AppsUidMap_t> AppsMapVec_t;
 
 	/**
 	 * Priority vector of currently scheduled applications (actives).

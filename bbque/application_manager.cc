@@ -73,9 +73,9 @@ ApplicationManager::ApplicationManager() {
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	// Pre-allocate priority and status vectors
-	priority_vec = std::vector<AppsMap_t>(lowest_prio + 1);
-	status_vec = std::vector<AppsMap_t>(ba::Application::STATE_COUNT);
-	sync_vec = std::vector<AppsMap_t>(ba::Application::SYNC_STATE_COUNT);
+	priority_vec = std::vector<AppsUidMap_t>(lowest_prio + 1);
+	status_vec = std::vector<AppsUidMap_t>(ba::Application::STATE_COUNT);
+	sync_vec = std::vector<AppsUidMap_t>(ba::Application::SYNC_STATE_COUNT);
 
 	// Debug logging
 	logger->Debug("Min priority = %d", lowest_prio);
@@ -192,13 +192,15 @@ AppPtr_t ApplicationManager::CreateEXC(
 
 	// Save application descriptors
 	apps.insert(AppsMapEntry_t(papp->Pid(), papp));
+	uids.insert(UidsMapEntry_t(papp->Uid(), papp));
 	priority_vec[papp->Priority()].insert(
-			AppsMapEntry_t(papp->Pid(), papp));
+			UidsMapEntry_t(papp->Uid(), papp));
+
 
 	// All new EXC are initialli disabled
 	assert(papp->State() == Application::DISABLED);
 	status_vec[papp->State()].insert(
-			AppsMapEntry_t(papp->Pid(), papp));
+			UidsMapEntry_t(papp->Uid(), papp));
 
 	logger->Debug("Create EXC [%s] DONE",
 			papp->StrId(), papp->ExcId());
@@ -208,81 +210,21 @@ AppPtr_t ApplicationManager::CreateEXC(
 
 
 ApplicationManager::ExitCode_t
-ApplicationManager::DestroyEXC(AppPid_t pid) {
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
-	AppsMapVec_t::iterator vit;
-	AppsMapVec_t::iterator end;
-	AppsMap_t::iterator ait;
-
-	// Remove application (EXCs) descriptors from status map
-	logger->Debug("Releasing [%d] EXCs from status maps...", pid);
-	vit  = status_vec.begin();
-	end = status_vec.end();
-	for ( ; vit!=end; ++vit) {
-		(*vit).erase(pid);
-	}
-
-	// Remove application (EXCs) descriptors from priority map
-	logger->Debug("Releasing [%d] EXCs from priority maps...", pid);
-	vit  = priority_vec.begin();
-	end = priority_vec.end();
-	for ( ; vit!=end; ++vit) {
-		(*vit).erase(pid);
-	}
-
-	// Remove application (EXCs) descriptors from applications map
-	logger->Debug("Releasing [%d] EXCs from applications maps...", pid);
-	apps.erase(pid);
-
-	return AM_SUCCESS;
-}
-
-ApplicationManager::ExitCode_t
 ApplicationManager::PriorityRemove(AppPtr_t papp) {
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
-	AppsMap_t::iterator it;
 
-	logger->Debug("Releasing [%s] EXCs from priority maps...",
+	logger->Debug("Releasing [%s] EXCs from PRIORITY map...",
 			papp->StrId());
-	range = priority_vec[papp->Priority()].equal_range(papp->Pid());
-	it = range.first;
-	while (it != range.second &&
-		((*it).second)->ExcId() != papp->ExcId()) {
-		++it;
-	}
-	assert(it != range.second);
-	if (it == range.second) {
-		logger->Crit("EXCs [%s] not found in priority maps "
-				"(Error: possible data structure corruption?)",
-			papp->StrId());
-		return AM_DATA_CORRUPT;
-	}
-	priority_vec[papp->Priority()].erase(it);
+	priority_vec[papp->Priority()].erase(papp->Uid());
 
 	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
 ApplicationManager::StatusRemove(AppPtr_t papp) {
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
-	AppsMap_t::iterator it;
 
-	logger->Debug("Releasing [%s] EXCs from status maps...",
+	logger->Debug("Releasing [%s] EXCs from STATUS map...",
 			papp->StrId());
-	range = status_vec[papp->State()].equal_range(papp->Pid());
-	it = range.first;
-	while (it != range.second &&
-		((*it).second)->ExcId() != papp->ExcId()) {
-		++it;
-	}
-	assert(it != range.second);
-	if (it == range.second) {
-		logger->Crit("EXCs [%s] not found in status maps "
-				"(Error: possible data structure corruption)",
-			papp->StrId());
-		return AM_DATA_CORRUPT;
-	}
-	status_vec[papp->State()].erase(it);
+	status_vec[papp->State()].erase(papp->Uid());
 
 	return AM_SUCCESS;
 }
@@ -292,7 +234,7 @@ ApplicationManager::AppsRemove(AppPtr_t papp) {
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 
-	logger->Debug("Releasing [%s] EXCs from apps maps...",
+	logger->Debug("Releasing [%s] EXC from APPs map...",
 			papp->StrId());
 	range = apps.equal_range(papp->Pid());
 	it = range.first;
@@ -331,6 +273,10 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	if (result != AM_SUCCESS)
 		return result;
 
+	logger->Debug("Releasing [%s] EXC from UIDs map...",
+			papp->StrId());
+	uids.erase(papp->Uid());
+
 	return AM_SUCCESS;
 }
 
@@ -339,7 +285,7 @@ ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
-	papp = GetApplication(pid, exc_id);
+	papp = GetApplication(Application::Uid(pid, exc_id));
 	assert(papp);
 	if (!papp) {
 		logger->Warn("Stop EXC [%d:*:%d] FAILED "
@@ -348,6 +294,25 @@ ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
 	}
 
 	return DestroyEXC(papp);
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::DestroyEXC(AppPid_t pid) {
+	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
+	AppsMap_t::iterator it;
+	ExitCode_t result;
+	AppPtr_t papp;
+
+	range = apps.equal_range(pid);
+	it = range.first;
+	for ( ; it != range.second; ++it) {
+		papp = (*it).second;
+		result = DestroyEXC(papp);
+		if (result != AM_SUCCESS)
+			return result;
+	}
+
+	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
@@ -370,7 +335,7 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
-	papp = GetApplication(pid, exc_id);
+	papp = GetApplication(Application::Uid(pid, exc_id));
 	assert(papp);
 	if (!papp) {
 		logger->Warn("Enable EXC [%d:*:%d] FAILED "
@@ -401,7 +366,7 @@ ApplicationManager::DisableEXC(AppPid_t pid, uint8_t exc_id) {
 	AppPtr_t papp;
 
 	// Find the required EXC
-	papp = GetApplication(pid, exc_id);
+	papp = GetApplication(Application::Uid(pid, exc_id));
 	assert(papp);
 	if (!papp) {
 		logger->Warn("Disable EXC [%d:*:%d] FAILED "
@@ -531,59 +496,49 @@ ApplicationManager::_ChangedSchedule(AppPtr_t papp, double time) {
 	return AM_SUCCESS;
 }
 
-
-AppPtr_t const ApplicationManager::GetApplication(AppPid_t pid,
-		uint8_t exc_id) {
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
-	AppsMap_t::iterator it;
+AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) const {
+	AppsUidMap_t::const_iterator it = uids.find(uid);
 	AppPtr_t papp;
 
-	logger->Debug("Looking for EXC [%05d:*:%02d]...",
-			pid, exc_id);
+	logger->Debug("Looking for UID [%07d]...", uid);
 
 	//----- Find the required EXC
-	range = apps.equal_range(pid);
-	it = range.first;
-	while (it != range.second &&
-			((*it).second)->ExcId() != exc_id ) {
-		++it;
-	}
-	if (it == range.second) {
-		logger->Debug("EXC [%05d:*:%02d] NOT FOUND", pid, exc_id);
+	if (it == uids.end()) {
+		logger->Error("Lookup UID [%07d] FAILED "
+				"(Error: UID not registered)", uid);
+		assert(it != uids.end());
 		return AppPtr_t();
 	}
+
 	papp = (*it).second;
 
-	logger->Debug("EXC [%s] FOUND", papp->StrId());
-
+	logger->Debug("Found UID [%07d] => [%s]", uid, papp->StrId());
 	return papp;
 }
 
+AppPtr_t const
+ApplicationManager::GetApplication(AppPid_t pid, uint8_t exc_id) {
+	logger->Debug("Looking for EXC [%05d:*:%02d]...", pid, exc_id);
+	return GetApplication(Application::Uid(pid, exc_id));
+}
 
 void
 ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
-	AppsMap_t::iterator app_it;
-	AppsMap_t *scheduleMap;
+	AppsUidMap_t *syncMap;
 	uint8_t ss = state;
 
 	logger->Debug("Remove sync request for EXC [%s]", papp->StrId());
 
 	// Clean-up (eventaully) previous occurrence
 	for( ; ss < Application::SYNC_STATE_COUNT; ++ss) {
+
 		// Get the applications map
-		scheduleMap = &(sync_vec[ss]);
-		range = scheduleMap->equal_range(papp->Pid());
-		for( ; range.first != range.second; ++range.first) {
-			app_it = range.first;
-			if (((*app_it).second)->ExcId() == papp->ExcId()) {
-				scheduleMap->erase(app_it);
-				logger->Info("Removed sync request for EXC [%s, %s]",
-						papp->StrId(),
-						Application::SyncStateStr(
-							(Application::SyncState_t)ss));
-				break;
-			}
+		syncMap = &(sync_vec[ss]);
+		if (syncMap->erase(papp->Uid())) {
+			logger->Info("Removed sync request for EXC [%s, %s]",
+					papp->StrId(),
+					Application::SyncStateStr(
+						(Application::SyncState_t)ss));
 		}
 	}
 
@@ -592,8 +547,6 @@ ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
 ApplicationManager::ExitCode_t
 ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 		Application::State_t prev, Application::State_t next) {
-	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
-	AppsMap_t::iterator it;
 
 	assert(papp);
 
@@ -604,39 +557,20 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	}
 
 	// Retrieve the runtime map from the status vector
-	AppsMap_t *curr_state_map = &(status_vec[prev]);
-	AppsMap_t *next_state_map = &(status_vec[next]);
-	assert(curr_state_map != next_state_map);
-	
-	// Find the application descriptor the current status map
-	range = curr_state_map->equal_range(papp->Pid());
-	assert(range.first != range.second);
-	it = range.first;
-	while (it != range.second &&
-		((*it).second)->ExcId() != papp->ExcId()) {
-		++it;
-	}
-	// The required application should be found, otherwise a data
-	// structure corruption has occurred
-	assert(it != range.second);
-	if (it == range.second) {
-		logger->Crit("unexpected state for EXC [%s] "
-				"(Error: possible currupted data structures)",
-				papp->StrId());
-		return AM_ABORT;
-	}
+	AppsUidMap_t *currStateMap = &(status_vec[prev]);
+	AppsUidMap_t *nextStateMap = &(status_vec[next]);
+	assert(currStateMap != nextStateMap);
 
 	// Move it from the current to the next status map
-	next_state_map->insert(next_state_map->begin(),
-			AppsMapEntry_t(papp->Pid(), papp));
-	curr_state_map->erase(it);
+	nextStateMap->insert(UidsMapEntry_t(papp->Uid(), papp));
+	currStateMap->erase(papp->Uid());
 
 	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
 ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
-	AppsMap_t *scheduleMap;
+	AppsUidMap_t *syncMap;
 
 	logger->Debug("Requesting sync for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
@@ -654,8 +588,8 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 	SyncRemove(papp);
 
 	// Mark the application for scheduling into the next state
-	scheduleMap = &(sync_vec[state]);
-	scheduleMap->insert(AppsMapEntry_t(papp->Pid(), papp));
+	syncMap = &(sync_vec[state]);
+	syncMap->insert(UidsMapEntry_t(papp->Uid(), papp));
 
 	// Move into synchronization status
 
@@ -664,7 +598,6 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 
 	return AM_SUCCESS;
 }
-
 
 ApplicationManager::ExitCode_t
 ApplicationManager::SyncCommit(AppPtr_t papp) {

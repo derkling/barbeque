@@ -58,35 +58,35 @@ public:
 	/**
 	 * @brief Return the map containing all the ready applications
 	 */
-	inline AppsMap_t const * ApplicationsReady() const {
+	inline AppsUidMap_t const * ApplicationsReady() const {
 		return am.Applications(ApplicationStatusIF::READY);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
-	inline AppsMap_t const * ApplicationsRunning() const {
+	inline AppsUidMap_t const * ApplicationsRunning() const {
 		return am.Applications(ApplicationStatusIF::RUNNING);
 	}
 
 	/**
 	 * @brief Map of blocked applications (descriptors)
 	 */
-	inline AppsMap_t const * ApplicationsBlocked() const {
+	inline AppsUidMap_t const * ApplicationsBlocked() const {
 		return am.Applications(ApplicationStatusIF::BLOCKED);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	inline AppsMap_t const * Applications(app::AppPrio_t prio) const {
+	inline AppsUidMap_t const * Applications(app::AppPrio_t prio) const {
 		return am.Applications(prio);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	inline AppsMap_t const * Applications (
+	inline AppsUidMap_t const * Applications (
 			Application::State_t sched_state, bool current = true) const {
 		return am.Applications(sched_state, current);
 	}
@@ -140,8 +140,8 @@ public:
 	 * @param path Resource template path
 	 * @return A list of resource descriptors
 	 */
-	inline res::ResourcePtrList_t GetResources(std::string const & temp_path)
-		const {
+	inline res::ResourcePtrList_t
+	GetResources(std::string const & temp_path) const {
 			return ra.GetResources(temp_path);
 	}
 

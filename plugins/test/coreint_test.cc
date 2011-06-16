@@ -493,7 +493,7 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 	PrintWorkingModesInfo(papp);
 
 	// Get the application descriptor
-	AppPtr_t app_conf(am.GetApplication(3324));
+	AppPtr_t app_conf(am.GetApplication(3324, 0));
 
 	// Simulate a schedulation 1
 	testScheduleSwitch(app_conf, 1, 0.381);
@@ -539,7 +539,7 @@ void CoreInteractionsTest::Test() {
 
 	// Create an Execution Context
 	am.CreateEXC("mp3player", 3324, 0, "r1_platA", 0, true);
-	AppPtr_t test_app(am.GetApplication(3324));
+	AppPtr_t test_app(am.GetApplication(3324, 0));
 	if (!test_app) {
 		logger->Error("Application not started.");
 		return;
