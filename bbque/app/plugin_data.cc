@@ -62,24 +62,9 @@ VoidPtr_t PluginsData::GetAttribute(std::string const & _plugin,
 void PluginsData::SetAttribute(std::string const & _plugin,
 		std::string const & _key, VoidPtr_t _value) {
 
-	// Find the plugin set of pairs
-	std::pair<PlugDataMap_t::iterator, PlugDataMap_t::iterator> range =
-		plugins_data.equal_range(_plugin);
-
-	// Find the attribute
-	PlugDataMap_t::iterator it = range.first;
-	while (it != range.second &&
-		it->second.first.compare(_key) != 0) {
-		++it;
-	}
-
-	// Set the attribute
-	if (it != range.second)
-		it->second.second = VoidPtr_t(_value);
-	else
-		plugins_data.insert(plugins_data.begin(),
-						std::pair<std::string, DataPair_t>(_plugin,
-								DataPair_t(_key, _value)));
+	plugins_data.insert(plugins_data.begin(),
+			std::pair<std::string, DataPair_t>(_plugin,
+				DataPair_t(_key, _value)));
 }
 
 } // namespace app
