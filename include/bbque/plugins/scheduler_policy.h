@@ -43,9 +43,19 @@ class SchedulerPolicyIF {
 
 public:
 
+	/**
+	 * @enum ExitCode_t
+	 * @brief Scheduling result
+	 */
 	typedef enum ExitCode {
-		DONE = 0,
-		ERROR
+		/** Scheduling done */
+		SCHED_DONE = 0,
+		/** Successful return */
+		SCHED_OK,
+		/** Resource availability */
+		SCHED_RSRC_UNAV,
+		/** Error */
+		SCHED_ERROR
 	} ExitCode_t;
 
 	/**
