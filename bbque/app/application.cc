@@ -53,7 +53,6 @@ char const *ApplicationStatusIF::syncStateStr[] = {
 	"MIGREC",
 	"MIGRATE",
 	"BLOCKED",
-	"TERMINATE",
 	"NONE"
 };
 
@@ -374,13 +373,6 @@ Application::ExitCode_t Application::ScheduleCommit() {
 		SetState(RUNNING);
 		break;
 	case BLOCKED:
-		// NOTE resources previously accounted to this application should have
-		// been already released implicitely at the beginning of the
-		// synchronizaiton
-		SetState(READY);
-		break;
-	case TERMINATE:
-		SetState(FINISHED);
 		break;
 	default:
 		logger->Crit("Sync for EXC [%s] FAILED"

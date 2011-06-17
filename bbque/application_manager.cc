@@ -539,9 +539,6 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 	case Application::BLOCKED:
 		UpdateStatusMaps(papp, Application::SYNC, Application::READY);
 		break;
-	case Application::TERMINATE:
-		UpdateStatusMaps(papp, Application::SYNC, Application::FINISHED);
-		break;
 	default:
 		logger->Crit("Sync for EXC [%s] FAILED"
 				"(Error: invalid synchronization state)");

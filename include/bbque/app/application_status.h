@@ -114,8 +114,6 @@ public:
 		MIGRATE,
 		/** Must be blocked becaus of resource are not more available */
 		BLOCKED,
-		/** The applications is exiting the system */
-		TERMINATE,
 
 		/** This must alwasy be the last entry */
 		SYNC_STATE_COUNT
