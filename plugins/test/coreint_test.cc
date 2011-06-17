@@ -24,8 +24,9 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
-#include <vector>
+#include <random>
 #include <sstream>
+#include <vector>
 
 #include "bbque/modules_factory.h"
 #include "bbque/app/recipe.h"
@@ -33,6 +34,12 @@
 #include "bbque/app/plugin_data.h"
 #include "bbque/res/resources.h"
 #include "bbque/utils/timer.h"
+
+#define NUM_RECIPES 5
+
+// Enabling test macros
+#define SINGLE_APP_TEST_ENABLED	0
+#define SCHEDU_APP_TEST_ENABLED	1
 
 namespace ba = bbque::app;
 namespace bp = bbque::plugins;
@@ -43,6 +50,9 @@ namespace bbque { namespace plugins {
 
 /** Map of application descriptor shared pointers */
 typedef std::map<uint32_t, AppPtr_t> AppsMap_t;
+
+ /** The RNG used for testcase initialization. */
+std::mt19937 rng_engine(time(0));
 
 // Test set
 std::vector<std::string> res_names = {
@@ -67,6 +77,8 @@ std::vector<std::string> res_names = {
 	"arch.tile0.cluster0.pe1",
 	"arch.tile0.cluster0.pe2",
 	"arch.tile0.cluster0.pe3",
+	"arch.tile0.cluster0.pe4",
+	"arch.tile0.cluster0.pe5",
 	"arch.tile0.cluster1.pe0",
 	"arch.tile0.cluster1.pe1",
 	"arch.tile0.cluster1.pe2",
@@ -79,11 +91,6 @@ std::vector<std::string> res_names = {
 	"arch.tile0.cluster3.pe1",
 	"arch.tile0.cluster3.pe2",
 	"arch.tile0.cluster3.pe3",
-/*	"arch.tile0.cluster2.pe0.mem0",
-	"arch.tile0.cluster0.pe1.mem1",
-	"arch.tile0.cluster0.pe1.mem0",
-	"arch.tile0.cluster1.pe2.mem0"
- */
 };
 
 std::vector<std::string> res_units = {
@@ -103,6 +110,8 @@ std::vector<std::string> res_units = {
 	"Mbps",
 	"Mbps",
 
+	"1",
+	"1",
 	"1",
 	"1",
 	"1",
@@ -139,6 +148,8 @@ std::vector<uint64_t> res_totals = {
 	50,
 
 	1, 	// Number of processing elements
+	1,
+	1,
 	1,
 	1,
 	1,
@@ -310,7 +321,8 @@ int PrintWorkingModesInfo(AppPtr_t papp) {
 	AwmPtrList_t::const_iterator endm = awms->end();
 	for (; wm_it != endm; ++wm_it) {
 
-		fprintf(stderr, "\n\n *** AWM%d [ %s ] (value = %d) %d resource usages ***\n",
+		fprintf(stderr, "\n\n *** AWM%d [ %s ] (value = %d)"
+				"%d resource usages ***\n",
 				(*wm_it)->Id(),
 				(*wm_it)->Name().c_str(),
 				(*wm_it)->Value(),
@@ -536,12 +548,83 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 }
 
 
+void CoreInteractionsTest::testScheduling() {
+
+	// Is there a Scheduling Policy ?
+	plugins::SchedulerPolicyIF * scheduler =
+		ModulesFactory::GetSchedulerPolicyModule();
+
+	if (!scheduler) {
+		logger->Error("SchedulerPolicy not found");
+		getchar();
+		return;
+	}
+
+	logger->Info("~~~~~~~~~~~~~ Scheduling in progress ~~~~~~~~~~~~");
+	bu::Timer _t(true);
+
+	// Schedule
+	scheduler->Schedule(sv);
+	_t.stop();
+
+	// Print scheduling report
+	AppsMap_t::const_iterator  app_it(am.Applications()->begin());
+	AppsMap_t::const_iterator  app_end(am.Applications()->end());
+	for (; app_it != app_end; ++app_it) {
+
+		AwmPtr_t sched_awm(app_it->second->NextAWM());
+		if (!sched_awm) {
+			logger->Warn("%s not scheduled", app_it->second->StrId());
+			continue;
+		}
+
+		logger->Info("[%s] scheduled in AWM{%d} clusters = %s",
+				app_it->second->StrId(),
+				sched_awm->Id(),
+				sched_awm->GetClusterSet().to_string().c_str());
+	}
+
+	logger->Info("~~~~~~~~~~~~~ Scheduling finishd ~~~~~~~~~~~~");
+	logger->Info("time = %4.4f ms", _t.getElapsedTime());
+	getchar();
+}
+
+
+void CoreInteractionsTest::testStartApplications(uint16_t num) {
+
+	logger->Info("______ Simulate the start of %d applications _____", num);
+	std::string recipe_name("r1_platA");
+
+	for (int i = 0; i < num; ++i) {
+	    // Recipe index
+		std::uniform_int_distribution<uint16_t> dist_pt(1, NUM_RECIPES);
+		uint16_t recipe_idx = dist_pt(rng_engine);
+
+		// Recipe name
+		std::stringstream ss;
+		ss << recipe_idx;
+		size_t pos = recipe_name.find_first_of("0123456789", 0);
+		recipe_name.replace(pos, pos, ss.str());
+
+		// Application name
+		std::string app_name("app");
+		std::stringstream ss2;
+		ss2 << i;
+		app_name += ss2.str();
+
+		// Start!
+		AppPtr_t papp(am.CreateEXC(app_name, 1000+i, 0, recipe_name));
+		if (papp)
+			am.EnableEXC(papp);
+	}
+	logger->Info("READY Execution context: %d",
+			am.Applications(Application::READY)->size());
+}
+
 // =======================================[ Start the test ]==================
 
 void CoreInteractionsTest::Test() {
-
 	logger->Debug("....: CoreInteractions Test starting :.....\n");
-
 
 	// Resources
 	RegisterSomeResources();
@@ -550,8 +633,11 @@ void CoreInteractionsTest::Test() {
 	// Some resource search test
 	testPathTemplateSearch(sv, rsrcSearchPaths);
 	testResourceSetSearch(sv, rsrcSearchPaths);
+
+	// TODO: Feature to fix or drop...
 	GetClusteredInfo(sv, rsrcSearchPaths);
 
+#if SINGLE_APP_TEST_ENABLED
 	// Create an Execution Context
 	am.CreateEXC("mp3player", 3324, 0, "r1_platA", 0, true);
 	AppPtr_t test_app(am.GetApplication(3324, 0));
@@ -559,10 +645,15 @@ void CoreInteractionsTest::Test() {
 		logger->Error("Application not started.");
 		return;
 	}
+	testApplicationLifecycle(test_app);
 
-	logger->Debug("Applications loaded = %d",
-			sv.ApplicationsReady()->size());
-
+	// Stop application
+	ApplicationManager::ExitCode_t result = am.DestroyEXC(3324);
+	if (result == ApplicationManager::AM_SUCCESS)
+		logger->Info("Application correctly exited.");
+	else
+		logger->Info("Error: Application didn't exit correctly"
+				" [ExitCode = %d]", result);
 	// Plugin specific data
 	std::string * auth =
 		(static_cast<std::string *>(
@@ -570,9 +661,16 @@ void CoreInteractionsTest::Test() {
 	if (auth)
 		logger->Info("Plugin YaMCa: <author> : %s", auth->c_str());
 
-	testApplicationLifecycle(test_app);
+	PrintResourceAvailabilities(sv);
+#endif
 
-/*
+#if SCHEDU_APP_TEST_ENABLED
+	// Start N applications
+	testStartApplications(10);
+	logger->Debug("Applications loaded = %d",
+			sv.ApplicationsReady()->size());
+	getchar();
+
 	// Scheduler test
 	testScheduling();
 	PrintResourceAvailabilities(sv);
@@ -581,8 +679,8 @@ void CoreInteractionsTest::Test() {
 	AppsMap_t::const_iterator apps_it(sv.ApplicationsRunning()->begin());
 	AppsMap_t::const_iterator end_apps(sv.ApplicationsRunning()->end());
 	for (; apps_it != end_apps; ++apps_it)
-		am.StopApplication(apps_it->second);
-*/
+		am.DestroyEXC(apps_it->second);
+#endif
 }
 
 }   // namespace test

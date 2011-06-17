@@ -120,6 +120,17 @@ private:
 	 */
 	void testApplicationLifecycle(AppPtr_t & test_app);
 
+	/**
+	 * @brief Simulate a start of "num" applications
+	 * @param num The number of applications to start
+	 */
+	void testStartApplications(uint16_t num);
+
+	/**
+	 * @brief Test the scheduling policy
+	 */
+	void testScheduling();
+
 };
 
 } // namespace plugins
