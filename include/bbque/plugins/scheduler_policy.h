@@ -54,6 +54,8 @@ public:
 		SCHED_OK,
 		/** Resource availability */
 		SCHED_RSRC_UNAV,
+		/** Application must be skipped due to a Disable/Stop event */
+		SCHED_SKIP_APP,
 		/** Error */
 		SCHED_ERROR
 	} ExitCode_t;

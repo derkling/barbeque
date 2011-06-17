@@ -146,20 +146,22 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 	AppsMap_t::const_iterator apps_it(apps->begin());
 	AppsMap_t::const_iterator end_apps(apps->end());
 	for (; apps_it != end_apps; ++apps_it) {
+		AppPtr_t const & papp = apps_it->second;
 
-		// Check if the application has been scheduled yet
-		assert(apps_it->second);
-		if (apps_it->second->NextAWM()) {
-			logger->Debug("[%d] ""%s"" scheduled yet on %d",
-						(apps_it->second)->Pid(),
-						(apps_it->second)->Name().c_str(),
-						(apps_it->second)->NextAWM()->Id());
+		// Skip if the application has been scheduled yet
+		assert(papp);
+		if (papp->NextAWM()) {
+			logger->Debug("[%d] scheduled yet into AWM{%d}",
+						papp->StrId(),
+						papp->NextAWM()->Id());
 			continue;
 		}
 
-		// Compute the metrics for all the working modes
-		ExitCode_t result =
-			InsertWorkingModes(sched_map, apps_it->second, cl_id);
+		// Compute the metrics for all the working modes. If the application
+		// is disabled/stopped in the meanwhile, it must be skipped.
+		ExitCode_t result = InsertWorkingModes(sched_map, papp, cl_id);
+		if (result == SCHED_SKIP_APP)
+			continue;
 		if (result == SCHED_ERROR) {
 			logger->Error("Ordering: Error [ret %d]", result);
 			return result;
@@ -184,6 +186,15 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 		AppPtr_t & app = (se_it->second).first;
 		AwmPtr_t const & curr_awm = (se_it->second).first->NextAWM();
 		AwmPtr_t & eval_awm = (se_it->second).second;
+
+		// Skip if the application has been disabled or stopped in the
+		// meanwhile
+		if ((app->State() == Application::DISABLED) ||
+				(app->State() == Application::FINISHED)) {
+			logger->Debug("[%s] disabled/stopped during scheduling [Ord]",
+					app->StrId());
+			continue;
+		}
 
 		// Get the metrics of the AWM to schedule
 		eval_metrics = *(static_cast<double *>
@@ -243,6 +254,15 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 	for (; awm_it != end_awm; ++awm_it) {
 		logger->Debug("[%s] AWM{%d} metrics computing...", papp->StrId(),
 				(*awm_it)->Id());
+
+		// Skip if the application has been disabled or stopped in the
+		// meanwhile
+		if ((papp->State() == Application::DISABLED) ||
+				(papp->State() == Application::FINISHED)) {
+			logger->Debug("[%s] disabled/stopped during scheduling [Ord]",
+					papp->StrId());
+			return SCHED_SKIP_APP;
+		}
 
 		// Metrics computation
 		double * metrics = new double;
