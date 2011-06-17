@@ -160,6 +160,65 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 
 }
 
+
+/*******************************************************************************
+ *  Get EXC handlers
+ ******************************************************************************/
+
+AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) const {
+	AppsUidMap_t::const_iterator it = uids.find(uid);
+	AppPtr_t papp;
+
+	logger->Debug("Looking for UID [%07d]...", uid);
+
+	//----- Find the required EXC
+	if (it == uids.end()) {
+		logger->Error("Lookup UID [%07d] FAILED "
+				"(Error: UID not registered)", uid);
+		assert(it != uids.end());
+		return AppPtr_t();
+	}
+
+	papp = (*it).second;
+	logger->Debug("Found UID [%07d] => [%s]", uid, papp->StrId());
+
+	return papp;
+}
+
+AppPtr_t const
+ApplicationManager::GetApplication(AppPid_t pid, uint8_t exc_id) {
+	logger->Debug("Looking for EXC [%05d:*:%02d]...", pid, exc_id);
+	return GetApplication(Application::Uid(pid, exc_id));
+}
+
+/*******************************************************************************
+ *  EXC state handling
+ ******************************************************************************/
+
+ApplicationManager::ExitCode_t
+ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
+		Application::State_t prev, Application::State_t next) {
+
+	assert(papp);
+	assert(prev != next);
+
+	// Retrieve the runtime map from the status vector
+	AppsUidMap_t *currStateMap = &(status_vec[prev]);
+	AppsUidMap_t *nextStateMap = &(status_vec[next]);
+	assert(currStateMap != nextStateMap);
+
+	// Move it from the current to the next status map
+	nextStateMap->insert(UidsMapEntry_t(papp->Uid(), papp));
+	currStateMap->erase(papp->Uid());
+
+	return AM_SUCCESS;
+}
+
+
+/*******************************************************************************
+ *  EXC Creation
+ ******************************************************************************/
+
 AppPtr_t ApplicationManager::CreateEXC(
 		std::string const & _name, AppPid_t _pid, uint8_t _exc_id,
 		std::string const & _rcp_name, app::AppPrio_t _prio,
@@ -203,6 +262,10 @@ AppPtr_t ApplicationManager::CreateEXC(
 	return papp;
 }
 
+
+/*******************************************************************************
+ *  EXC Destruction
+ ******************************************************************************/
 
 ApplicationManager::ExitCode_t
 ApplicationManager::PriorityRemove(AppPtr_t papp) {
@@ -310,6 +373,11 @@ ApplicationManager::DestroyEXC(AppPid_t pid) {
 	return AM_SUCCESS;
 }
 
+
+/*******************************************************************************
+ *  EXC Enabling
+ ******************************************************************************/
+
 ApplicationManager::ExitCode_t
 ApplicationManager::EnableEXC(AppPtr_t papp) {
 
@@ -342,6 +410,11 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 
 }
 
+
+/*******************************************************************************
+ *  EXC Disabling
+ ******************************************************************************/
+
 ApplicationManager::ExitCode_t
 ApplicationManager::DisableEXC(AppPtr_t papp) {
 
@@ -372,31 +445,10 @@ ApplicationManager::DisableEXC(AppPid_t pid, uint8_t exc_id) {
 	return DisableEXC(papp);
 }
 
-AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) const {
-	AppsUidMap_t::const_iterator it = uids.find(uid);
-	AppPtr_t papp;
 
-	logger->Debug("Looking for UID [%07d]...", uid);
-
-	//----- Find the required EXC
-	if (it == uids.end()) {
-		logger->Error("Lookup UID [%07d] FAILED "
-				"(Error: UID not registered)", uid);
-		assert(it != uids.end());
-		return AppPtr_t();
-	}
-
-	papp = (*it).second;
-
-	logger->Debug("Found UID [%07d] => [%s]", uid, papp->StrId());
-	return papp;
-}
-
-AppPtr_t const
-ApplicationManager::GetApplication(AppPid_t pid, uint8_t exc_id) {
-	logger->Debug("Looking for EXC [%05d:*:%02d]...", pid, exc_id);
-	return GetApplication(Application::Uid(pid, exc_id));
-}
+/*******************************************************************************
+ *  EXC Synchronization
+ ******************************************************************************/
 
 void
 ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
@@ -419,30 +471,6 @@ ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
 		}
 	}
 
-}
-
-ApplicationManager::ExitCode_t
-ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
-		Application::State_t prev, Application::State_t next) {
-
-	assert(papp);
-
-	if (prev == next) {
-		// This should never happen
-		assert(prev != next);
-		return AM_SUCCESS;
-	}
-
-	// Retrieve the runtime map from the status vector
-	AppsUidMap_t *currStateMap = &(status_vec[prev]);
-	AppsUidMap_t *nextStateMap = &(status_vec[next]);
-	assert(currStateMap != nextStateMap);
-
-	// Move it from the current to the next status map
-	nextStateMap->insert(UidsMapEntry_t(papp->Uid(), papp));
-	currStateMap->erase(papp->Uid());
-
-	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
