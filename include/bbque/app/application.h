@@ -368,7 +368,7 @@ private:
 	/**
 	 * @brief Configure this application to switch to the specified AWM
 	 */
-	ExitCode_t Reschedule(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	ExitCode_t Reschedule(AwmPtr_t const & awm);
 
 	/**
 	 * @brief Configure this application to release resources.
@@ -387,7 +387,6 @@ private:
 	 * clusters used in the previous execution step.
 	 *
 	 * @param awm the target working mode
-	 * @param vtok the view (on resources) to consider for the evaluation
  	 *
 	 * @return One of the following values:
 	 * - RECONF: Application is being scheduled for using PEs from the same
@@ -400,7 +399,8 @@ private:
 	 *   operating point.
 	 *
 	 */
-	SyncState_t SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok = 0);
+	SyncState_t SyncRequired(AwmPtr_t const & awm);
+
 
 };
 

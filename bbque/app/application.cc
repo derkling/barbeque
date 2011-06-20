@@ -62,14 +62,11 @@ bool CompareAWMsByValue(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
 		return wm1->Value() < wm2->Value();
 }
 
-
-Application::Application(std::string const & _name,
-		AppPid_t _pid,
+Application::Application(std::string const & _name, AppPid_t _pid,
 		uint8_t _exc_id) :
 	name(_name),
 	pid(_pid),
 	exc_id(_exc_id) {
-
 
 	// Get a logger
 	std::string logger_name(APPLICATION_NAMESPACE"." + _name);
@@ -77,23 +74,24 @@ Application::Application(std::string const & _name,
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
 
+	// Format the EXC string identifier
 	::snprintf(str_id, 16, "%05d:%6s:%02d",
 			Pid(), Name().substr(0,6).c_str(), ExcId());
 
-	logger->Info("Built new EXC [%s]", StrId());
-
-	// Scheduling state
+	// Initialized scheduling state
 	schedule.state = DISABLED;
 	schedule.preSyncState = DISABLED;
 	schedule.syncState = SYNC_NONE;
+
+	logger->Info("Built new EXC [%s]", StrId());
 }
 
 Application::~Application() {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 
 	logger->Debug("Destroying EXC [%s]", StrId());
 
 	// Release the resources
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	if (CurrentAWM())
 		ra.ReleaseResources(CurrentAWM()->Owner());
 
@@ -271,7 +269,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	logger->Debug("Rescheduling [%s] into AWM [%d:%s]...",
 			papp->StrId(), awm->Id(), awm->Name().c_str());
 	awm->SetResourceBinding(resource_set);
-	result = Reschedule(awm, vtok);
+	result = Reschedule(awm);
 
 	if (result != APP_SUCCESS)
 		return APP_WM_REJECTED;
@@ -390,9 +388,7 @@ Application::ExitCode_t Application::ScheduleCommit() {
 
 
 Application::SyncState_t
-Application::SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
-	(void)awm;
-	(void)vtok;
+Application::SyncRequired(AwmPtr_t const & awm) {
 
 	// This must be called only by running applications
 	assert(State() == RUNNING);
@@ -415,7 +411,7 @@ Application::SyncRequired(AwmPtr_t const & awm, RViewToken_t vtok) {
 }
 
 Application::ExitCode_t
-Application::Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
+Application::Reschedule(AwmPtr_t const & awm) {
 	SyncState_t sync;
 
 	// Ready application could be synchronized to start
@@ -430,7 +426,7 @@ Application::Reschedule(AwmPtr_t const & awm, RViewToken_t vtok) {
 	}
 
 	// Checking if a synchronization is required
-	sync = SyncRequired(awm, vtok);
+	sync = SyncRequired(awm);
 	if (sync == SYNC_NONE)
 		return APP_SUCCESS;
 
