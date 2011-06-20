@@ -179,6 +179,13 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
+	inline State_t PreSyncState() const {
+		return schedule.preSyncState;
+	}
+
+	/**
+	 * @see ApplicationStatusIF
+	 */
 	inline SyncState_t SyncState() const {
 		return schedule.syncState;
 	}

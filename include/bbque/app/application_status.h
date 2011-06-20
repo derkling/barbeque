@@ -65,6 +65,8 @@ public:
 	enum ExitCode_t {
 		/** Success */
 		APP_SUCCESS = 0,
+		/** Application being DISABLED */
+		APP_DISABLED,
 		/** Application working mode not found */
 		APP_WM_NOT_FOUND,
 		/** Resource not found */
@@ -214,7 +216,6 @@ public:
 		return syncStateStr[state];
 	}
 
-
 	/**
 	 * @brief Get the priority associated to
 	 * @return The priority value
@@ -228,9 +229,32 @@ public:
 	virtual State_t State() const = 0;
 
 	/**
+	 * @brief Get the pre-synchronization state
+	 */
+	virtual State_t PreSyncState() const = 0;
+
+	inline bool Disabled() const {
+		return ((State() == DISABLED) ||
+				(State() == FINISHED));
+	}
+
+	inline bool Active() const {
+		return ((State() == READY) ||
+				(State() == RUNNING));
+	}
+
+	inline bool Synching() const {
+		return (State() == SYNC);
+	}
+
+	/**
 	 * @brief Get the synchronization state
 	 */
 	virtual SyncState_t SyncState() const = 0;
+
+	inline char const *SyncStateStr() const {
+		return syncStateStr[SyncState()];
+	}
 
 	/**
 	 * @brief Get the current working mode
