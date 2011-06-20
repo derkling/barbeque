@@ -218,6 +218,7 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	assert(currStateMap != nextStateMap);
 
 	// Move it from the current to the next status map
+	// FIXME: maybe we could avoid to enqueue FINISHED EXCs
 	nextStateMap->insert(UidsMapEntry_t(papp->Uid(), papp));
 	currStateMap->erase(papp->Uid());
 
@@ -299,14 +300,12 @@ AppPtr_t ApplicationManager::CreateEXC(
 	priority_vec[papp->Priority()].insert(
 			UidsMapEntry_t(papp->Uid(), papp));
 
-
-	// All new EXC are initialli disabled
+	// All new EXC are initially disabled
 	assert(papp->State() == Application::DISABLED);
 	status_vec[papp->State()].insert(
 			UidsMapEntry_t(papp->Uid(), papp));
 
-	logger->Debug("Create EXC [%s] DONE",
-			papp->StrId(), papp->ExcId());
+	logger->Debug("Create EXC [%s] DONE", papp->StrId());
 
 	return papp;
 }
@@ -431,7 +430,8 @@ ApplicationManager::ExitCode_t
 ApplicationManager::EnableEXC(AppPtr_t papp) {
 
 	// Enabling the execution context
-	logger->Debug("Enabling EXC [%s] ...", papp->StrId());
+	logger->Debug("Enabling EXC [%s]...", papp->StrId());
+
 	if (papp->Enable() != Application::APP_SUCCESS) {
 		return AM_ABORT;
 	}
@@ -448,10 +448,10 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 
 	// Find the required EXC
 	papp = GetApplication(Application::Uid(pid, exc_id));
-	assert(papp);
 	if (!papp) {
 		logger->Warn("Enable EXC [%d:*:%d] FAILED "
 				"(Error: EXC not found)");
+		assert(papp);
 		return AM_EXC_NOT_FOUND;
 	}
 
@@ -467,8 +467,8 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 ApplicationManager::ExitCode_t
 ApplicationManager::DisableEXC(AppPtr_t papp) {
 
-	// Disable the execution context
-	logger->Debug("Disabling EXC [%s] ...", papp->StrId());
+	logger->Debug("Disabling EXC [%s]...", papp->StrId());
+
 	if (papp->Disable() != Application::APP_SUCCESS) {
 		return AM_ABORT;
 	}
@@ -484,10 +484,10 @@ ApplicationManager::DisableEXC(AppPid_t pid, uint8_t exc_id) {
 
 	// Find the required EXC
 	papp = GetApplication(Application::Uid(pid, exc_id));
-	assert(papp);
 	if (!papp) {
 		logger->Warn("Disable EXC [%d:*:%d] FAILED "
 				"(Error: EXC not found)");
+		assert(papp);
 		return AM_ABORT;
 	}
 
@@ -561,13 +561,11 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 			Application::SyncStateStr(state));
 
 	// The state at this point should be either READY or RUNNING
-	if ((papp->State() != Application::READY) &&
-			(papp->State() != Application::RUNNING)) {
+	if (!papp->Active()) {
 		logger->Crit("Sync request for EXC [%s] FAILED "
 				"(Error: invalid EXC state [%d]",
 				papp->StrId(), papp->State());
-		assert((papp->State() == Application::READY) ||
-			(papp->State() == Application::RUNNING));
+		assert(papp->Active());
 		return AM_ABORT;
 	}
 
@@ -576,7 +574,7 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 		logger->Crit("Sync request for EXC [%s] FAILED "
 				"(Error: invalid sync state required [%d]",
 				papp->StrId(), state);
-		assert(state<Application::SYNC_STATE_COUNT);
+		assert(state < Application::SYNC_STATE_COUNT);
 		return AM_ABORT;
 	}
 
