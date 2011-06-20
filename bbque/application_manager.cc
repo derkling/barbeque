@@ -195,6 +195,16 @@ ApplicationManager::GetApplication(AppPid_t pid, uint8_t exc_id) {
  *  EXC state handling
  ******************************************************************************/
 
+#define DOUBLE_LOCK(cur, next)\
+	if (cur > next) {\
+		currState_ul.lock();\
+		nextState_ul.lock();\
+	} else {\
+		nextState_ul.lock();\
+		currState_ul.lock();\
+	}\
+
+
 ApplicationManager::ExitCode_t
 ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 		Application::State_t prev, Application::State_t next) {
@@ -212,6 +222,45 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	currStateMap->erase(papp->Uid());
 
 	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::NotifyNewState(AppPtr_t papp, Application::State_t next) {
+	std::unique_lock<std::mutex> currState_ul(
+			status_mtx[papp->State()], std::defer_lock);
+	std::unique_lock<std::mutex> nextState_ul(
+			status_mtx[next], std::defer_lock);
+
+	logger->Debug("Updating EXC [%s] state queue [%d:%s => %d:%s]",
+			papp->StrId(),
+			papp->State(), Application::StateStr(papp->State()),
+			next, Application::StateStr(next));
+
+	if (papp->State() == next) {
+		// This should never happen
+		assert(papp->State() != next);
+		return AM_SUCCESS;
+	}
+
+	// Lock curr and next queue
+	// FIXME: unfortunately g++ seem not yet to support the C++0x standard
+	// double locking mechnism provided by std::lock(). Thus we emulate it
+	// there by ensuring to acquire locks alwasy starting from the higher
+	// queue to the lower one.
+	//std::lock(currState_ul, nextState_ul);
+	DOUBLE_LOCK(papp->State(), next);
+
+	// If next state is not SYNC
+	if (next != Application::SYNC) {
+		// try to remove the app from the sync map
+		SyncRemove(papp);
+	} else {
+		// otherwise add to the proper sync map
+		SyncAdd(papp);
+	}
+
+	return UpdateStatusMaps(papp, papp->State(), next);
+
 }
 
 

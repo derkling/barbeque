@@ -188,6 +188,23 @@ public:
 	 */
 	ExitCode_t SyncCommit(AppPtr_t papp);
 
+	/**
+	 * @brief Notify an application is changin state
+	 *
+	 * This method should be called by the Application once it is changing its
+	 * scheduling state so that the ApplicationManager could update its
+	 * internal maps.
+	 *
+	 * @param papp a pointer to the interested application
+	 * @param next the new state the application is entering
+	 *
+	 * @note this method must acquire the mutex of both current and next state
+	 * queues.
+	 *
+	 * @return AM_SUCCESS on internal maps update success, AM_ABORT on
+	 * failure.
+	 */
+	ExitCode_t NotifyNewState(AppPtr_t papp, Application::State_t next);
 
 private:
 
@@ -246,6 +263,11 @@ private:
 	 * Each position points to a set of maps pointing applications
 	 */
 	AppsUidMap_t status_vec[Application::STATE_COUNT];
+
+	/**
+	 * Array of mutexes protecting the status queues.
+	 */
+	std::mutex status_mtx[Application::STATE_COUNT];
 
 	/**
 	 * @brief Applications grouping based on next state to be scheduled.
