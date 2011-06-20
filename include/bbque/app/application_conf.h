@@ -89,7 +89,8 @@ public:
 	 * @return The method return an exit code representing the decision taken:
 	 * APP_WM_ACCEPTED if the specified working mode could be scheduled for
 	 * this application, APP_WM_REJECTED if the working mode could not beed
-	 * scheduled.
+	 * scheduled. If the application is currently disabled this call returns
+	 * always APP_DISABLED.
 	 */
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
 			UsagesMapPtr_t & resource_set, RViewToken_t tok = 0) = 0;
@@ -101,6 +102,18 @@ public:
 	 * APP_ABORT on errors.
 	 */
 	virtual ExitCode_t ScheduleCommit() = 0;
+
+	/**
+	 * @brief Terminate this EXC by releasing all resources.
+	 *
+	 * This method requires to mark the EXC as terminated and to prepare the
+	 * ground for releasing all resources as soon as possible. Due to
+	 * asynchronous nature of this event and the activation of Optimized and
+	 * Synchronizer, a valid reference to the object is granted to be keept
+	 * alive until all of its users have terminated.
+	 */
+	virtual ExitCode_t Terminate() = 0;
+
 
 };
 

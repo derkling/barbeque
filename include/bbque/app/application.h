@@ -268,6 +268,18 @@ public:
 	ExitCode_t RemoveConstraint(std::string const & res_path,
 			Constraint::BoundType_t type);
 
+	/**
+	 * @brief Terminate this EXC by releasing all resources.
+	 *
+	 * This method requires to mark the EXC as terminated and to prepare the
+	 * ground for releasing all resources as soon as possible. Due to
+	 * asynchronous nature of this event and the activation of Optimized and
+	 * Synchronizer, a valid reference to the object is granted to be keept
+	 * alive until all of its users have terminated.
+	 */
+	ExitCode_t Terminate();
+
+
 private:
 
 
@@ -294,6 +306,9 @@ private:
 
 	/** Current scheduling informations */
 	SchedulingInfo_t schedule;
+
+	/** The mutex to serialize access to scheduling info */
+	std::mutex schedule_mtx;
 
 	/**
 	 * Recipe pointer for the current application instance.
@@ -346,6 +361,11 @@ private:
 	void SetState(State_t state, SyncState_t sync = SYNC_NONE);
 
 	/**
+	 * @brief Reset the state to the pre-synchronization state
+	 */
+	void ResetState();
+
+	/**
 	 * @brief Update the application synchronization state
 	 */
 	void SetSyncState(SyncState_t sync);
@@ -394,6 +414,24 @@ private:
 	 */
 	SyncState_t SyncRequired(AwmPtr_t const & awm);
 
+	/**
+	 * @brief Notify the EXC being run
+	 *
+	 * This method is called by ScheduleCommit once an EXC has been
+	 * synchronized to the RUNNING state. It update the current EXC state to
+	 * RUNNING
+	 */
+	ExitCode_t SetRunning();
+
+	/**
+	 * @brief Notify the EXC being blocked
+	 *
+	 * This method is called by ScheduleCommit once an EXC has been
+	 * synchronized to the BLOCKED state. It update the current EXC state to
+	 * either READY or FINISHED according to what happened meanwhile. If the
+	 * EXC has been simply disabled, it becomes READY, while insted
+	 */
+	ExitCode_t SetBlocked();
 
 };
 

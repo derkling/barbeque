@@ -185,6 +185,7 @@ AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
  *  EXC State and SyncState Management
  ******************************************************************************/
 
+// NOTE: this requires a lock on schedule_mtx
 void Application::SetSyncState(SyncState_t sync) {
 
 	logger->Debug("Changing sync state [%s, %d:%s => %d:%s]",
@@ -195,6 +196,7 @@ void Application::SetSyncState(SyncState_t sync) {
 	schedule.syncState = sync;
 }
 
+// NOTE: this requires a lock on schedule_mtx
 void Application::SetState(State_t state, SyncState_t sync) {
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
@@ -221,12 +223,50 @@ void Application::SetState(State_t state, SyncState_t sync) {
 	SetSyncState(sync);
 }
 
+// NOTE: this requires a lock on schedule_mtx
+void Application::ResetState() {
+
+	assert(Synching());
+
+	logger->Debug("Resetting to pre-sync state for [%s]",
+			StrId(),
+			State(), StateStr(State()),
+			PreSyncState(), StateStr(PreSyncState()));
+	
+	SetState(PreSyncState());
+}
+
+/*******************************************************************************
+ *  EXC Destruction
+ ******************************************************************************/
+
+Application::ExitCode_t Application::Terminate() {
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	std::unique_lock<std::mutex> state_ul(schedule_mtx);
+	AppPtr_t papp = am.GetApplication(Uid());
+
+	// Notify state update
+	am.NotifyNewState(papp, FINISHED);
+
+	// Mark the application has finished
+	SetState(FINISHED);
+	state_ul.unlock();
+
+	logger->Info("EXC [%s] FINISHED", StrId());
+
+	return APP_SUCCESS;
+	
+}
+
 
 /*******************************************************************************
  *  EXC Enabling
  ******************************************************************************/
 
 Application::ExitCode_t Application::Enable() {
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
+	AppPtr_t papp = am.GetApplication(Uid());
 
 	// Not disabled applications could not be marked as READY
 	if (!Disabled()) {
@@ -237,7 +277,16 @@ Application::ExitCode_t Application::Enable() {
 		return APP_ABORT;
 	}
 
+	state_ul.lock();
+
+	// Notify state update
+	am.NotifyNewState(papp, READY);
+
+	// Mark the application has ready to run
 	SetState(READY);
+
+	state_ul.unlock();
+
 	logger->Info("EXC [%s] ENABLED", StrId());
 
 	return APP_SUCCESS;
@@ -249,6 +298,9 @@ Application::ExitCode_t Application::Enable() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Disable() {
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
+	AppPtr_t papp = am.GetApplication(Uid());
 
 	// Not disabled applications could not be marked as READY
 	if (Disabled()) {
@@ -258,6 +310,19 @@ Application::ExitCode_t Application::Disable() {
 		assert(!Disabled());
 		return APP_ABORT;
 	}
+
+	state_ul.lock();
+
+	// Notify state update
+	am.NotifyNewState(papp, DISABLED);
+
+	// Mark the application has ready to run
+	SetState(DISABLED);
+
+	state_ul.unlock();
+
+	logger->Info("EXC [%s] DISABLED", StrId());
+
 	return APP_SUCCESS;
 }
 
@@ -266,6 +331,7 @@ Application::ExitCode_t Application::Disable() {
  *  EXC Optimization
  ******************************************************************************/
 
+// NOTE: this requires a lock on schedule_mtx
 Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	AppPtr_t papp = am.GetApplication(Uid());
@@ -289,15 +355,20 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 		return APP_ABORT;
 	}
 
+	// Update our state
+	SetState(SYNC, sync);
+
+	// Schedule the sync request
+	am.NotifyNewState(papp, Application::SYNC);
+
 	// Request the application manager to synchronization this application
+	// accorting to our new state
 	result = am.SyncRequest(papp, sync);
 	if (result != ApplicationManager::AM_SUCCESS) {
 		logger->Error("Request synchronization FAILED (Error: %d)", result);
+		ResetState();
 		return APP_ABORT;
 	}
-
-	// If the request has been accepted: update our state
-	SetState(SYNC, sync);
 
 	logger->Info("Sync scheduled [%s, %d:%s]",
 			StrId(), sync, SyncStateStr(sync));
@@ -373,6 +444,7 @@ Application::ExitCode_t Application::Unschedule() {
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		br::UsagesMapPtr_t & resource_set,
 		RViewToken_t vtok) {
+	std::unique_lock<std::mutex> schedule_ul(schedule_mtx);
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
 	AppPtr_t papp(awm->Owner());
@@ -387,6 +459,12 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 				"(Error: AWM not existing)", papp->StrId());
 		assert(awm);
 		return APP_WM_NOT_FOUND;
+	}
+
+	if (Disabled()) {
+		logger->Debug("Schedule request for [%s] FAILED "
+				"(Error: EXC being disabled)", papp->StrId());
+		return APP_DISABLED;
 	}
 
 	// Checking for resources availability
@@ -419,7 +497,44 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
  *  EXC Synchronization
  ******************************************************************************/
 
+Application::ExitCode_t Application::SetRunning() {
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	AppPtr_t papp = am.GetApplication(Uid());
+
+	am.NotifyNewState(papp, RUNNING);
+	SetState(RUNNING);
+
+	return APP_SUCCESS;
+
+}
+
+Application::ExitCode_t Application::SetBlocked() {
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	AppPtr_t papp = am.GetApplication(Uid());
+
+	// If the application as been marked FINISHED, than it is going to be
+	// released
+	if (State() == FINISHED)
+		return APP_SUCCESS;
+
+	// Otherwise mark it as READY to be re-scheduled when possible
+	am.NotifyNewState(papp, READY);
+	SetState(READY);
+	return APP_SUCCESS;
+
+}
+
 Application::ExitCode_t Application::ScheduleCommit() {
+	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
+
+	// Ignoring applications disabled during a SYNC
+	if (Disabled()) {
+		logger->Info("Sync completed (on disabled EXC) [%s, %d:%s]",
+				StrId(), State(), StateStr(State()));
+		return APP_SUCCESS;
+	}
+
+	state_ul.lock();
 
 	assert(State() == SYNC);
 
@@ -428,8 +543,10 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	case RECONF:
 	case MIGREC:
 	case MIGRATE:
+		SetRunning();
 		break;
 	case BLOCKED:
+		SetBlocked();
 		break;
 	default:
 		logger->Crit("Sync for EXC [%s] FAILED"

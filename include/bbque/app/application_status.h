@@ -29,6 +29,8 @@
 
 #include "bbque/app/plugin_data.h"
 
+#include <mutex>
+
 /** The application identifier */
 typedef uint32_t AppPid_t;
 
