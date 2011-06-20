@@ -246,13 +246,6 @@ public:
 	ExitCode_t ScheduleCommit();
 
 	/**
-	 * @brief Stop the application execution
-	 *
-	 * Finalize the end of the execution.
-	 */
-	ExitCode_t StopExecution();
-
-	/**
 	 * @brief Define a specific resource constraint. If exists yet it
 	 * is overwritten. This could bring to have some AWM disabled.
 	 *
