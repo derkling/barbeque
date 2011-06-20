@@ -673,7 +673,7 @@ void CoreInteractionsTest::Test() {
 
 	// Scheduler test
 	testScheduling();
-	PrintResourceAvailabilities(sv);
+	//PrintResourceAvailabilities(sv);
 
 	// Stop applications
 	AppsMap_t::const_iterator apps_it(sv.ApplicationsRunning()->begin());

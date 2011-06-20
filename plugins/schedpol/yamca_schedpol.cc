@@ -57,7 +57,6 @@ YamcaSchedPol::YamcaSchedPol():
 
 
 YamcaSchedPol::~YamcaSchedPol() {
-	rsrc_acct.PutView(rsrc_view_token);
 }
 
 
@@ -106,14 +105,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 	logger->Debug(">>>>>>>>>>>>>>> Scheduling policy exiting...");
 
-	/**
-	 * TODO:
-	 * This call should be removed once the synchronized resource acquisition is
-	 * implemeted in ResourceAccounter.
-	 * Right now this call is a way to make visible the resource acquisition
-	 * that the current scheduling has determined.
-	 */
-	rsrc_acct.SetAsSystemState(rsrc_view_token);
+	// Release the resource view
+	rsrc_acct.PutView(rsrc_view_token);
 	return SCHED_DONE;
 }
 
