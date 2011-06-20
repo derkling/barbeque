@@ -248,6 +248,23 @@ public:
 	}
 
 	/**
+	 * @brief Count of applications using the resource
+	 * @param vtok The token referencing the resource view
+	 * @return Number of applications
+	 */
+	inline uint16_t ApplicationsCount(RViewToken_t vtok = 0) {
+		// Default view if token = 0
+		if (vtok == 0)
+			return default_view->apps.size();
+
+		// Retrieve the view from hash map otherwise
+		RSHashMap_t::iterator it = state_views.find(vtok);
+		if (it == state_views.end())
+			return 0;
+		return it->second->apps.size();
+	}
+
+	/**
 	 * @brief Acquire a given amount of resource
 	 * @param amount How much resource is required
 	 * @param app_ptr The application requiring the resource
