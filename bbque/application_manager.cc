@@ -273,6 +273,8 @@ AppPtr_t ApplicationManager::CreateEXC(
 		std::string const & _name, AppPid_t _pid, uint8_t _exc_id,
 		std::string const & _rcp_name, app::AppPrio_t _prio,
 		bool _weak_load) {
+	std::unique_lock<std::mutex> statusMtx_ul(
+			status_mtx[Application::DISABLED], std::defer_lock);
 	RecipeLoaderIF::ExitCode_t result;
 	RecipePtr_t rcp_ptr;
 	AppPtr_t papp;
@@ -302,8 +304,10 @@ AppPtr_t ApplicationManager::CreateEXC(
 
 	// All new EXC are initially disabled
 	assert(papp->State() == Application::DISABLED);
+	statusMtx_ul.lock();
 	status_vec[papp->State()].insert(
 			UidsMapEntry_t(papp->Uid(), papp));
+	statusMtx_ul.unlock();
 
 	logger->Debug("Create EXC [%s] DONE", papp->StrId());
 
@@ -327,6 +331,8 @@ ApplicationManager::PriorityRemove(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::StatusRemove(AppPtr_t papp) {
+	std::unique_lock<std::mutex> statusMtx_ul(
+			status_mtx[papp->State()]);
 
 	logger->Debug("Releasing [%s] EXCs from STATUS map...",
 			papp->StrId());
@@ -366,6 +372,9 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 
 	logger->Debug("Removing EXC [%s] ...", papp->StrId());
 
+	// Mark the EXC as finished
+	papp->Terminate();
+	
 	// Remove execution context form priority and status maps
 	result = PriorityRemove(papp);
 	if (result != AM_SUCCESS)
@@ -382,6 +391,9 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	logger->Debug("Releasing [%s] EXC from UIDs map...",
 			papp->StrId());
 	uids.erase(papp->Uid());
+
+	// TODO notify the Resource Manager about a termination event if this
+	// EXC was using some resources.
 
 	return AM_SUCCESS;
 }
@@ -436,10 +448,7 @@ ApplicationManager::EnableEXC(AppPtr_t papp) {
 		return AM_ABORT;
 	}
 
-	// Update internal maps
-	return UpdateStatusMaps(papp,
-			Application::DISABLED, Application::READY);
-
+	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
@@ -466,6 +475,9 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DisableEXC(AppPtr_t papp) {
+	// A disabled EXC is moved (as soon as possible) into the DISABLED queue
+	// NOTE: other code-path should check wheter an application is still
+	// !DISABLED to _assume_ a normal operation
 
 	logger->Debug("Disabling EXC [%s]...", papp->StrId());
 
@@ -473,9 +485,7 @@ ApplicationManager::DisableEXC(AppPtr_t papp) {
 		return AM_ABORT;
 	}
 
-	// Update status map
-	return UpdateStatusMaps(papp,
-			Application::READY, Application::DISABLED);
+	return AM_SUCCESS;
 }
 
 ApplicationManager::ExitCode_t
@@ -555,7 +565,6 @@ ApplicationManager::SyncAdd(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
-	AppsUidMap_t *syncMap;
 
 	logger->Debug("Requesting sync for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
@@ -578,15 +587,7 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 		return AM_ABORT;
 	}
 
-	// Releasing any previous sync request
-	SyncRemove(papp);
-
-	// Mark the application for scheduling into the next state
-	syncMap = &(sync_vec[state]);
-	syncMap->insert(UidsMapEntry_t(papp->Uid(), papp));
-
-	// Move into synchronization status
-	UpdateStatusMaps(papp, papp->State(), Application::SYNC);
+	// TODO notify the Resource Manager
 
 	logger->Info("Sync request for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
@@ -601,28 +602,7 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 	assert(syncState != Application::SYNC_NONE);
 
 	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
-			Application::SyncStateStr(syncState));
-
-	// Releasing previous sync request
-	SyncRemove(papp);
-
-	// Updating status maps
-	switch(syncState) {
-	case Application::STARTING:
-	case Application::RECONF:
-	case Application::MIGREC:
-	case Application::MIGRATE:
-		UpdateStatusMaps(papp, Application::SYNC, Application::RUNNING);
-		break;
-	case Application::BLOCKED:
-		UpdateStatusMaps(papp, Application::SYNC, Application::READY);
-		break;
-	default:
-		logger->Crit("Sync for EXC [%s] FAILED"
-				"(Error: invalid synchronization state)");
-		assert(syncState < Application::SYNC_NONE);
-		return AM_ABORT;
-	};
+			papp->SyncStateStr());
 
 	// Notify application
 	papp->ScheduleCommit();
