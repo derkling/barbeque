@@ -485,6 +485,8 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	result = Reschedule(awm);
 
 	if (result != APP_SUCCESS) {
+		ra.ReleaseResources(papp, vtok);
+		awm->ClearResourceBinding();
 		return APP_WM_REJECTED;
 	}
 
