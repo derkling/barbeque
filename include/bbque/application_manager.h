@@ -29,6 +29,7 @@
 
 #include <map>
 #include <vector>
+#include <mutex>
 
 #include "bbque/application_manager_conf.h"
 #include "bbque/app/application.h"
@@ -256,6 +257,12 @@ private:
 	 */
 	AppsUidMap_t sync_vec[Application::SYNC_STATE_COUNT];
 
+	/**
+	 * Array of mutexes protecting the synchronization queues.
+	 */
+	std::mutex sync_mtx[Application::SYNC_STATE_COUNT];
+
+
 	/** The constructor */
 	ApplicationManager();
 
@@ -293,11 +300,33 @@ private:
 	 * @brief Release a synchronization request for the specified application
 	 *
 	 * @param papp the application to release
-	 * @param state the synchronization state to remo
+	 * @param state the synchronization state to remove
 	 */
-	void SyncRemove(AppPtr_t papp,
-			Application::SyncState_t state = Application::STARTING);
+	void SyncRemove(AppPtr_t papp, Application::SyncState_t state);
 
+	/**
+	 * @brief Release any synchronization request for the specified
+	 * application
+	 *
+	 * @param papp the application to release
+	 */
+	void SyncRemove(AppPtr_t papp);
+
+	/**
+	 * @brief Add a synchronization request for the specified application
+	 *
+	 * @param papp the application to synchronize
+	 * @param state the synchronization state to add
+	 */
+	void SyncAdd(AppPtr_t papp, Application::SyncState_t state);
+
+	/**
+	 * @brief Add the configured synchronization request for the specified
+	 * application
+	 *
+	 * @param papp the application to synchronize
+	 */
+	void SyncAdd(AppPtr_t papp);
 };
 
 } // namespace bbque

@@ -452,24 +452,55 @@ ApplicationManager::DisableEXC(AppPid_t pid, uint8_t exc_id) {
 
 void
 ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
-	AppsUidMap_t *syncMap;
-	uint8_t ss = state;
+	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
 
-	logger->Debug("Remove sync request for EXC [%s]", papp->StrId());
 	assert(papp);
 
-	// Clean-up (eventaully) previous occurrence
-	for( ; ss < Application::SYNC_STATE_COUNT; ++ss) {
-
-		// Get the applications map
-		syncMap = &(sync_vec[ss]);
-		if (syncMap->erase(papp->Uid())) {
-			logger->Info("Removed sync request for EXC [%s, %s]",
-					papp->StrId(),
-					Application::SyncStateStr(
-						(Application::SyncState_t)ss));
-		}
+	// Get the applications map
+	if (sync_vec[state].erase(papp->Uid())) {
+		logger->Info("Removed sync request for EXC [%s, %s]",
+				papp->StrId(),
+				papp->SyncStateStr());
+		return;
 	}
+
+	// We should never got there
+	assert(false);
+
+}
+
+void
+ApplicationManager::SyncRemove(AppPtr_t papp) {
+
+	assert(papp);
+	logger->Debug("Removing sync request for EXC [%s]...", papp->StrId());
+
+	// Disregard EXCs which are not in SYNC state
+	if (!papp->Synching())
+		return;
+
+	SyncRemove(papp, papp->SyncState());
+
+}
+
+void
+ApplicationManager::SyncAdd(AppPtr_t papp, Application::SyncState_t state) {
+	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
+	assert(papp);
+	sync_vec[state].insert(UidsMapEntry_t(papp->Uid(), papp));
+}
+
+void
+ApplicationManager::SyncAdd(AppPtr_t papp) {
+
+	assert(papp);
+	logger->Debug("Adding sync request for EXC [%s]...", papp->StrId());
+
+	// Disregard EXCs which are not in SYNC state
+	if (!papp->Synching())
+		return;
+
+	SyncAdd(papp, papp->SyncState());
 
 }
 
