@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<BarbequeRTRM version="0.1">
+	<application priority="4">
+		<awms>
+			<awm id="0" name="wm0" value="3">
+				<resources>
+					<mem id="0" type="memory" units="Mb" amount="1"/>
+					<dma id="0" type="bus" units="Mbps" amount="50"/>
+					<arch name="P2012">
+						<mem id="0" type="memory" units="Kb" amount="32"/>
+						<clusters>
+							<mem id="0" type="memory" units="Kb" amount="16"/>
+							<cluster id="0">
+								<pe id="0" type="cpu" amount="1">
+									<mem id="0" type="memory" units="Kb" amount="2"/>
+								</pe>
+								<mem id="0" type="memory" units="Kb" amount="3"/>
+								<dma id="0" type="bus" units="Mbps" amount="30"/>
+							</cluster>
+							<cluster id="1">
+								<pe id="0" type="cpu" amount="1">
+									<mem id="0" type="memory" units="Kb" amount="2"/>
+								</pe>
+								<mem id="0" type="memory" units="Kb" amount="3"/>
+							</cluster>
+						</clusters>
+					</arch>
+				</resources>
+				<plugins>
+					<plugin name="YaMCa" type="optimizer" required="y">
+						<!-- Add here some plugin specific data requirements -->
+					</plugin>
+				</plugins>
+			</awm>
+			<awm id="1" name="wm1" value="2">
+				<resources>
+					<mem id="0" type="memory" units="Mb" amount="4"/>
+					<dma id="0" units="Mbps" amount="20"/>
+					<arch name="P2012">
+						<mem id="0" type="memory" units="Kb" amount="1"/>
+						<clusters>
+							<cluster id="0">
+								<pe id="0" type="cpu" amount="1">
+									<mem id="0" type="memory" units="Kb" amount="1"/>
+								</pe>
+								<pe id="1" type="cpu" amount="1">
+									<mem id="0" type="memory" units="Kb" amount="2"/>
+								</pe>
+								<mem id="0" type="memory" units="Kb" amount="2"/>
+								<dma id="0" units="Mbps" amount="10"/>
+							</cluster>
+						</clusters>
+					</arch>
+				</resources>
+			</awm>
+			<awm id="2" name="wm2" value="1">
+				<resources>
+					<mem id="0" type="memory" units="Mb" amount="2"/>
+					<arch name="P2012">
+						<mem id="0" type="memory" units="Kb" amount="1"/>
+						<clusters>
+							<mem id="0" type="memory"  units="Kb" amount="1"/>
+							<cluster id="0">
+								<pe id="0" type="cpu" amount="1">
+									<mem id="0" type="memory" units="Kb" amount="1"/>
+								</pe>
+								<mem id="0" type="memory" units="Kb" amount="2"/>
+							</cluster>
+							<cluster id="1">
+								<pe id="1" type="cpu" amount="1">
+									<mem id="0" type="memory" units="Kb" amount="2"/>
+								</pe>
+								<mem id="0" type="memory" units="Kb" amount="2"/>
+							</cluster>
+						</clusters>
+					</arch>
+				</resources>
+			</awm>
+		</awms>
+		<constraints>
+			<constraint resource="dma" type="L" bound="10"/>
+			<constraint resource="arch.clusters.cluster.pe" type="L" bound="1"/>
+			<constraint resource="arch.mem" type="L" bound="32"/>
+			<constraint resource="arch.clusters.mem" type="U" bound="64"/>
+		</constraints>
+		<plugins>
+			<plugin name="YaMCa" type="optimizer" required="y">
+				<author>"Davide Zoni"</author>
+				<bbque-min-ver>0.1</bbque-min-ver>
+			</plugin>
+			<plugin name="synch3" type="synch_protocol" required="y">
+				<bbque-min-ver>0.1</bbque-min-ver>
+			</plugin>
+		</plugins>
+	</application>
+</BarbequeRTRM>

@@ -162,8 +162,8 @@ ApplicationProxy::resp_ftr_t ApplicationProxy::StopExecution(AppPtr_t papp) {
 	ApplicationProxy::pcmdSn_t psn;
 
 	// Ensure the application is still active
-	assert(papp->CurrentState()<Application::KILLED);
-	if (papp->CurrentState()>=Application::KILLED) {
+	assert(papp->State() < Application::FINISHED);
+	if (papp->State() >= Application::FINISHED) {
 		logger->Warn("Multiple stopping the same application [%s]",
 				papp->Name().c_str());
 		return resp_ftr_t();
