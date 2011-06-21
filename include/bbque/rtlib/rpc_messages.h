@@ -66,14 +66,14 @@ typedef struct rpc_msg_header {
 /**
  * @brief Command to register a new execution context.
  */
-typedef struct rpc_msg_exc_pair {
+typedef struct rpc_msg_app_pair {
 	/** The RPC fifo command header */
 	rpc_msg_header_t header;
 	/** The RPC protocol major version */
 	uint8_t mjr_version;
 	/** The RPC protocol minor version */
 	uint8_t mnr_version;
-} rpc_msg_exc_pair_t;
+} rpc_msg_app_pair_t;
 
 /**
  * @brief Command to register a new execution context.
