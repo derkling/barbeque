@@ -42,6 +42,7 @@ ResourceManager & ResourceManager::GetInstance() {
 ResourceManager::ResourceManager() :
 	ps(PlatformServices::GetInstance()),
 	pm(plugins::PluginManager::GetInstance()),
+	rs(ResourceScheduler::GetInstance()),
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()) {
 
@@ -85,15 +86,34 @@ void ResourceManager::NotifyEvent(controlEvent_t evt) {
 	pendingEvts_cv.notify_one();
 }
 
+void ResourceManager::EvtExcStart() {
+	ResourceScheduler::ExitCode_t result;
 
+	logger->Info("EXC Started: Running Optimization...");
 
+	result = rs.Schedule();
+	switch(result) {
+	case ResourceScheduler::MISSING_POLICY:
+	case ResourceScheduler::FAILED:
+		logger->Error("EXC start FAILED (Error: scheduling policy failed)");
+		return;
+	case ResourceScheduler::DELAYED:
+		logger->Error("EXC start DELAYED");
+		return;
+	default:
+		assert(result==ResourceScheduler::DONE);
+	}
+
+	logger->Warn("TODO: run the synchronization protocol");
+
+}
 
 void ResourceManager::EvtBbqExit() {
 	ApplicationManager & am = ApplicationManager::GetInstance();
 	//ApplicationProxy & ap = ApplicationProxy::GetInstance();
-	AppsMap_t const * apps = am.Applications();
-	AppsMap_t::const_iterator it = apps->begin();
-	AppsMap_t::const_iterator end = apps->end();
+	AppsUidMap_t const * apps = am.Applications();
+	AppsUidMap_t::const_iterator it = apps->begin();
+	AppsUidMap_t::const_iterator end = apps->end();
 	ApplicationProxy::resp_ftr_t ftr;
 	AppPtr_t papp;
 
@@ -106,10 +126,10 @@ void ResourceManager::EvtBbqExit() {
 		// Terminating the application
 		logger->Warn("TODO: Send application STOP command");
 		// Removing internal data structures
-		am.StopApplication(papp);
+		am.DestroyEXC(papp);
 	}
 
-} 
+}
 
 void ResourceManager::ControlLoop() {
 	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx);
@@ -131,6 +151,7 @@ void ResourceManager::ControlLoop() {
 		switch(evt-1) {
 		case EXC_START:
 			logger->Debug("Event [EXC_START]");
+			EvtExcStart();
 			break;
 		case EXC_STOP:
 			logger->Debug("Event [EXC_STOP");
@@ -150,8 +171,7 @@ void ResourceManager::ControlLoop() {
 		// Resetting event
 		pendingEvts.reset(evt-1);
 
-	}	
-		
+	}
 
 }
 

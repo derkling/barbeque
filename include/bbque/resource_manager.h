@@ -27,6 +27,7 @@
 #include "bbque/application_proxy.h"
 #include "bbque/platform_services.h"
 #include "bbque/plugin_manager.h"
+#include "bbque/resource_scheduler.h"
 
 #include "bbque/plugins/logger.h"
 
@@ -122,6 +123,11 @@ private:
 	plugins::PluginManager & pm;
 
 	/**
+	 * @brief The Resource Scheduler module
+	 */
+	ResourceScheduler & rs;
+
+	/**
 	 * @brief The Application Proxy module
 	 */
 	ApplicationManager & am;
@@ -160,6 +166,7 @@ private:
 	/**
 	 * @brief Process a EXC_START event
 	 */
+	void EvtExcStart();
 
 	/**
 	 * @brief Process a BBQ_EXIT event
