@@ -569,12 +569,12 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 	logger->Debug("Requesting sync for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
 
-	// The state at this point should be either READY or RUNNING
-	if (!papp->Active()) {
+	// The state at this point should be SYNC
+	if (!papp->Synching()) {
 		logger->Crit("Sync request for EXC [%s] FAILED "
 				"(Error: invalid EXC state [%d]",
 				papp->StrId(), papp->State());
-		assert(papp->Active());
+		assert(papp->Synching());
 		return AM_ABORT;
 	}
 
