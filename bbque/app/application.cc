@@ -355,11 +355,11 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 		return APP_ABORT;
 	}
 
-	// Update our state
-	SetState(SYNC, sync);
-
 	// Schedule the sync request
 	am.NotifyNewState(papp, Application::SYNC);
+
+	// Update our state
+	SetState(SYNC, sync);
 
 	// Request the application manager to synchronization this application
 	// accorting to our new state
