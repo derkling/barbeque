@@ -72,7 +72,10 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 	logger->Debug("<<<<<<<<<<<<<<<< Scheduling policy starting...");
 
 	// Get a resources view from Resource Accounter
-	InitResourceView();
+	if (InitResourceView() == SCHED_ERROR) {
+		logger->Fatal("Schedule: Aborted due to resource state view missing");
+		return SCHED_ERROR;
+	}
 
 	// Get the number of clusters
 	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
@@ -111,7 +114,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 }
 
 
-RViewToken_t YamcaSchedPol::InitResourceView() {
+SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 	tok_counter == std::numeric_limits<uint32_t>::max() ?
 		tok_counter = 0:
 		++tok_counter;
@@ -123,10 +126,16 @@ RViewToken_t YamcaSchedPol::InitResourceView() {
 			SCHEDULER_POLICY_NAME);
 	strView += tkss.str();
 
-	rsrc_view_token = rsrc_acct.GetNewView(strView.c_str());
+	ResourceAccounter::ExitCode_t view_result;
+	view_result = rsrc_acct.GetView(strView.c_str(), rsrc_view_token);
+	if (view_result != ResourceAccounter::RA_SUCCESS) {
+		logger->Fatal("Init: Cannot get a resource state view");
+		return SCHED_ERROR;
+	}
+
 	logger->Debug("%s", strView.c_str());
-	logger->Debug("Resources view token assigned: %d",	rsrc_view_token);
-	return rsrc_view_token;
+	logger->Debug("Resources state view token assigned: %d", rsrc_view_token);
+	return SCHED_OK;
 }
 
 

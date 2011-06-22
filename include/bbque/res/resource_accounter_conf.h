@@ -132,10 +132,11 @@ public:
 	 * resources view. Note that a requiring component can manage more than
 	 * one view.
 	 *
-	 * @param who_req A string identifying who requires the view
-	 * @return A token to use with ResourceAccounter calls
+	 * @param who_req A string identifying who requires the resource view
+	 * @param tok The token to return for future references to the view
+	 * @return @see ExitCode_t
 	 */
-	virtual RViewToken_t GetNewView(const char * who_req) = 0;
+	virtual ExitCode_t GetView(const char * who_req, RViewToken_t & tok) = 0;
 
 	/**
 	 * @brief Release a resources state view
@@ -157,7 +158,7 @@ public:
 	 * @param tok The token used as reference to the resources view.
 	 * @return The token referencing the system state view.
 	 */
-	virtual RViewToken_t SetAsSystemState(RViewToken_t vtok) = 0;
+	virtual RViewToken_t SetView(RViewToken_t vtok) = 0;
 
 };
 

@@ -125,7 +125,7 @@ private:
 	 * @brief Get a token for accessing a clean resource view
 	 * @return The token returned by ResourceAccounter.
 	 */
-	RViewToken_t InitResourceView();
+	ExitCode_t InitResourceView();
 
 	/**
 	 * @brief Scheduling entities ordering

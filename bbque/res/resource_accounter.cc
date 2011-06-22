@@ -204,24 +204,26 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	return RA_SUCCESS;
 }
 
-RViewToken_t ResourceAccounter::GetNewView(const char * req_path) {
+ResourceAccounter::ExitCode_t ResourceAccounter::GetView(const char * req_path,
+		RViewToken_t & token) {
 	// Null-string check
 	if (req_path == NULL) {
-		logger->Error("NewView: Missing a valid string");
-		return -1;
+		logger->Error("GetView: Missing a valid string");
+		return RA_ERR_MISS_PATH;
 	}
 
 	// Token
-	RViewToken_t _token = std::hash<const char *>()(req_path);
+	token = std::hash<const char *>()(req_path);
+	logger->Debug("GetView: New resource state view. Token = %d", token);
 
 	// Allocate a new view for the applications resource usages and the
 	// set fo resources allocated
-	usages_per_views.insert(std::pair<RViewToken_t, AppUsagesMapPtr_t>(_token,
+	usages_per_views.insert(std::pair<RViewToken_t, AppUsagesMapPtr_t>(token,
 				AppUsagesMapPtr_t(new AppUsagesMap_t)));
-	rsrc_per_views.insert(std::pair<RViewToken_t, ResourceSetPtr_t>(_token,
+	rsrc_per_views.insert(std::pair<RViewToken_t, ResourceSetPtr_t>(token,
 				ResourceSetPtr_t(new ResourceSet_t)));
 
-	return _token;
+	return RA_SUCCESS;
 }
 
 void ResourceAccounter::PutView(RViewToken_t vtok) {
@@ -242,15 +244,14 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	// For each resource delete the view
 	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
 	ResourceSet_t::iterator rsrc_set_end(rviews_it->second->end());
-	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it) {
+	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it)
 		(*rsrc_set_it)->DeleteView(vtok);
-	}
 
 	// Remove the map of applications resource usages of this view
 	usages_per_views.erase(vtok);
 }
 
-RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
+RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token)
 		return sys_view_token;
@@ -272,9 +273,8 @@ RViewToken_t ResourceAccounter::SetAsSystemState(RViewToken_t vtok) {
 	// For each resource set the view as default
 	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
 	ResourceSet_t::iterator rsrc_set_end(rviews_it->second->end());
-	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it) {
+	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it)
 		(*rsrc_set_it)->SetAsDefaultView(vtok);
-	}
 
 	return sys_view_token;
 }

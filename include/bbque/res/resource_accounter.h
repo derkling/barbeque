@@ -211,7 +211,7 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	RViewToken_t GetNewView(const char * who_req);
+	ExitCode_t GetView(const char * who_req, RViewToken_t & tok);
 
 	/**
 	 * @see ResourceAccounterConfIF
@@ -221,7 +221,7 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	RViewToken_t SetAsSystemState(RViewToken_t vtok);
+	RViewToken_t SetView(RViewToken_t vtok);
 
 	/**
 	 * @brief Print the resource hierarchy in a tree-like form
