@@ -91,6 +91,23 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	inline uint64_t Total(std::string const & path) const {
+		ResourcePtrList_t matches = GetResources(path);
+		return QueryStatus(matches, RA_TOTAL, 0);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	inline uint64_t Total(UsagePtr_t const & usage_ptr) const {
+		if (usage_ptr->binds.empty())
+			return 0;
+		return QueryStatus(usage_ptr->binds, RA_TOTAL, 0);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	inline uint64_t Available(std::string const & path,
 			RViewToken_t vtok = 0) const {
 		ResourcePtrList_t matches = GetResources(path);
@@ -105,25 +122,6 @@ public:
 		if (usage_ptr->binds.empty())
 			return 0;
 		return QueryStatus(usage_ptr->binds, RA_AVAIL, vtok);
-	}
-
-	/**
-	 * @see ResourceAccounterStatusIF
-	 */
-	inline uint64_t Total(std::string const & path,
-			RViewToken_t vtok = 0) const {
-		ResourcePtrList_t matches = GetResources(path);
-		return QueryStatus(matches, RA_TOTAL, vtok);
-	}
-
-	/**
-	 * @see ResourceAccounterStatusIF
-	 */
-	inline uint64_t Total(UsagePtr_t const & usage_ptr,
-			RViewToken_t vtok = 0) const {
-		if (usage_ptr->binds.empty())
-			return 0;
-		return QueryStatus(usage_ptr->binds, RA_TOTAL, vtok);
 	}
 
 	/**

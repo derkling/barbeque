@@ -85,6 +85,20 @@ class ResourceAccounterStatusIF {
 public:
 
 	/**
+	 * @brief Total amount of resources
+	 * @param path Resource path
+	 * @return The total amount of resource
+	 */
+	virtual uint64_t Total(std::string const & path) const = 0;
+
+	/**
+	 * @brief Total amount of resources
+	 * @param usage A pointer to ResourceUsage
+	 * @return The total amount of resource
+	 */
+	virtual uint64_t Total(UsagePtr_t const & usage) const = 0;
+
+	/**
 	 * @brief Amount of resource available
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
@@ -101,24 +115,6 @@ public:
 	 */
 	virtual uint64_t Available(UsagePtr_t const & usage,
 			RViewToken_t vtok = 0) const = 0;
-
-	/**
-	 * @brief Total amount of resources
-	 * @param path Resource path
-	 * @param vtok The token referencing the resource state view
-	 * @return The total amount of resource
-	 */
-	virtual uint64_t Total(std::string const & path, RViewToken_t vtok = 0)
-		const = 0;
-
-	/**
-	 * @brief Total amount of resources
-	 * @param usage A pointer to ResourceUsage
-	 * @param vtok The token referencing the resource state view
-	 * @return The total amount of resource
-	 */
-	virtual uint64_t Total(UsagePtr_t const & usage, RViewToken_t vtok = 0)
-		const = 0;
 
 	/**
 	 * @brief Amount of resources used
