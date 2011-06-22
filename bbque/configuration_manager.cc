@@ -38,6 +38,9 @@ ConfigurationManager::ConfigurationManager() :
 #ifdef BBQUE_DEBUG
 	dbg_opts_desc("Debugging Options"),
 #endif
+#ifdef BBQUE_TEST_PLATFORM_DATA
+	tpd_opts_desc("TEST Platform Data Options"),
+#endif // BBQUE_TEST_PLATFORM_DATA
 	cmd_opts_desc("") {
 
 	core_opts_desc.add_options()
@@ -62,6 +65,22 @@ ConfigurationManager::ConfigurationManager() :
 	all_opts_desc.add(dbg_opts_desc);
 	cmd_opts_desc.add(dbg_opts_desc);
 #endif
+
+#ifdef BBQUE_TEST_PLATFORM_DATA
+	tpd_opts_desc.add_options()
+		("tpd.clusters", po::value<unsigned short>(&tpd_clusters_count)->
+			default_value(3),
+			"number of clusters (1..256, default: 3)")
+		("tpd.cmem", po::value<uint16_t>(&tpd_cluster_mem_mb)->
+			default_value(8120),
+			"amount [MB] of cluster-shared memory (1..65536, default: 8120MB)")
+		("tpd.pes", po::value<unsigned short>(&tpd_pes_count)->
+			default_value(4),
+			"number of PEs per cluster (1..256, default: 4)")
+		;
+	all_opts_desc.add(tpd_opts_desc);
+	cmd_opts_desc.add(tpd_opts_desc);
+#endif // BBQUE_TEST_PLATFORM_DATA
 
 }
 

@@ -97,6 +97,18 @@ public:
 		return plugins_dir;
 	}
 
+#ifdef BBQUE_TEST_PLATFORM_DATA
+	inline uint8_t  TPD_ClusterCount() const {
+		return tpd_clusters_count;
+	}
+	inline uint16_t TPD_ClusterMem() const {
+		return tpd_cluster_mem_mb;
+	}
+	inline uint8_t  TPD_PEsCount() const {
+		return tpd_pes_count;
+	}
+#endif
+
 private:
 
 	/**
@@ -120,6 +132,16 @@ private:
 	 */
 	options_description dbg_opts_desc;
 	uint16_t test_run;
+#endif
+
+#ifdef BBQUE_TEST_PLATFORM_DATA
+	/**
+	 * The description of TEST platform data parameters
+	 */
+	options_description tpd_opts_desc;
+	unsigned short tpd_clusters_count;
+	uint16_t tpd_cluster_mem_mb;
+	unsigned short  tpd_pes_count;
 #endif
 
 	/**

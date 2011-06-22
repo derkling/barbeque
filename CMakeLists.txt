@@ -40,6 +40,12 @@ set (CMAKE_CXX_FLAGS_RELEASE "-O3")
 set (CMAKE_CXX_FLAGS_MINSIZEREL "-Os")
 
 
+# Define user-selectable configuration options
+OPTION(BBQUE_RPC_FIFO "Build RTLib with FIFO channel support" ON)
+
+# Define user-selectable configuration options
+OPTION(BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
+ResourceAbstraction module" ON)
 
 # Defines documentation files
 set (DOC_FILES

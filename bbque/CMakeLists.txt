@@ -38,6 +38,12 @@ add_subdirectory(res)
 set (BARBEQUE_SRC barbeque version object resource_manager configuration_manager)
 set (BARBEQUE_SRC platform_services dynamic_library plugin_manager modules_factory ${BARBEQUE_SRC})
 set (BARBEQUE_SRC application_manager utils/timer console_logger ${BARBEQUE_SRC})
+if(BBQUE_TEST_PLATFORM_DATA)
+	# This is just a temporary replacement for the still missing
+	# ResourceAbstraction module
+	set (BARBEQUE_SRC test_platform_data ${BARBEQUE_SRC})
+	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBQUE_TEST_PLATFORM_DATA")
+endif(BBQUE_TEST_PLATFORM_DATA)
 
 add_executable (barbeque ${BARBEQUE_SRC})
 
