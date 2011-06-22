@@ -87,8 +87,16 @@ public:
 	 * @see ApplicationManagerStatusIF
 	 */
 	inline AppsUidMap_t const * Applications (
-			Application::State_t sched_state, bool current = true) const {
-		return am.Applications(sched_state, current);
+			Application::State_t state) const {
+		return am.Applications(state);
+	}
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	inline AppsUidMap_t const * Applications (
+			Application::SyncState_t sync_state) const {
+		return am.Applications(sync_state);
 	}
 
 	/**

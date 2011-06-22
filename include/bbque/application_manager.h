@@ -144,11 +144,16 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	AppsUidMap_t const * Applications (
-			Application::State_t sched_state, bool current = true) const {
-		if (current)
-			return &(status_vec[sched_state]);
-		return &(sync_vec[sched_state]);
+	AppsUidMap_t const * Applications(Application::State_t state) const {
+		return &(status_vec[state]);
+	}
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppsUidMap_t const * Applications(
+			Application::SyncState_t sync_state) const {
+		return &(sync_vec[sync_state]);
 	}
 
 	/**

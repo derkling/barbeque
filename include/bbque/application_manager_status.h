@@ -93,20 +93,31 @@ public:
 	virtual AppsUidMap_t const * Applications(app::AppPrio_t prio) const = 0;
 
 	/**
-	 * @brief Retrieve applications with the specified scheduling state
+	 * @brief Retrieve applications with the specified state
 	 *
 	 * This method allows to retrive a map of applications into a specified
-	 * state. The status of applications retrived is either the current one,
-	 * or this selected by the optimization policy for next scheduling.
+	 * state.
 	 *
 	 * @param sched_state The scheduling state
-	 * @param sched_state The status to return: current vs scheduled
 	 *
-	 * @return A pointer to the map of applications with the requested schedule status
+	 * @return A pointer to the map of applications with the requested state
 	 */
 	virtual AppsUidMap_t const * Applications(
-			app::Application::State_t sched_state,
-			bool current = true) const = 0;
+			app::Application::State_t state) const = 0;
+
+	/**
+	 * @brief Retrieve applications with the specified synchronization state
+	 *
+	 * This method allows to retrive a map of applications into a specified
+	 * synchronization state
+	 *
+	 * @param sched_state The synchronization state
+	 *
+	 * @return A pointer to the map of applications with the requested
+	 * synchronization state
+	 */
+	virtual AppsUidMap_t const * Applications(
+			app::Application::SyncState_t sync_state) const = 0;
 
 	/**
 	 * @brief Retrieve an application descriptor (shared pointer) by PID and
