@@ -301,10 +301,23 @@ private:
 	 * @param app_usages Map of next resource usages
 	 * @param app The application acquiring the resources
 	 * @param vtok The token referencing the resource state view
-	 * @return An exit code (@see ExitCode_t)
 	 */
-	ExitCode_t IncBookingCounts(UsagesMapPtr_t const & app_usages,
+	void IncBookingCounts(UsagesMapPtr_t const & app_usages,
 			AppPtr_t const & papp, RViewToken_t vtok = 0);
+
+	/**
+	 * @brief Book a single resource
+	 *
+	 * Divide the usage amount between the resources referenced in the "binds"
+	 * list.
+	 *
+	 * @param papp The Application/ExC using the resource
+	 * @param rsrc_usage ResourceUsage object
+	 * @param vtok The token referencing the resource state view
+	 * @param rsrcs_pèr_view Set of resources used in the view specified
+	 */
+	void DoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
+			RViewToken_t vtok, ResourceSetPtr_t & rsrcs_per_view);
 
 	/**
 	 * @brief Decrement the resource usages counts
@@ -318,6 +331,20 @@ private:
 	 */
 	void DecBookingCounts(UsagesMapPtr_t const & app_usages,
 			AppPtr_t const & app, RViewToken_t vtok = 0);
+
+	/**
+	 * @brief Unbook a single resource
+	 *
+	 * Remove the amount of usage from the resources referenced in the "binds"
+	 * list.
+	 *
+	 * @param papp The Application/ExC using the resource
+	 * @param rsrc_usage ResourceUsage object
+	 * @param vtok The token referencing the resource state view
+	 * @param rsrcs_pèr_view Set of resources used in the view specified
+	 */
+	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
+			RViewToken_t vtok, ResourceSetPtr_t & rsrcs_per_view);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;

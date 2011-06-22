@@ -303,69 +303,94 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 	return RA_SUCCESS;
 }
 
-inline ResourceAccounter::ExitCode_t ResourceAccounter::IncBookingCounts(
-		UsagesMapPtr_t const & app_usages,
-		AppPtr_t const & _app,
+void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
+		AppPtr_t const & papp,
 		RViewToken_t vtok) {
-	// Acquire resources for the application
+	// Get the set of resources referenced in the view
+	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
+	assert(rviews_it != rsrc_per_views.end());
+
+	// Book resources for the application
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
-	for (usages_it = app_usages->begin(); usages_it != usages_end;
-			++usages_it) {
-		// Current usage value to reserve
-		UsagePtr_t curr_usage = usages_it->second;
-		uint64_t usage_value = curr_usage->value;
+	for (; usages_it != usages_end;	++usages_it) {
+		UsagePtr_t rsrc_usage(usages_it->second);
 
-		// Allocate the usage request to the resources binds
-		ResourcePtrList_t::iterator it_bind(curr_usage->binds.begin());
-		ResourcePtrList_t::iterator end_it(curr_usage->binds.end());
-		while ((usage_value > 0) && (it_bind != end_it)) {
-
-			// If the current bind has enough availability, reserve the whole
-			// quantity requested here.
-			// Otherwise split it in more "sibling" resource binds.
-			if (usage_value < (*it_bind)->Availability(vtok))
-				usage_value -= (*it_bind)->Acquire(usage_value, _app, vtok);
-			else
-				usage_value -=
-					(*it_bind)->Acquire((*it_bind)->Availability(vtok), _app,
-							vtok);
-
-			// Get the resource set using the referenced view and insert the
-			// pointer to the resource bind
-			ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
-			assert(rviews_it != rsrc_per_views.end());
-			rviews_it->second->insert(*it_bind);
-
-			// Next resource bind
-			++it_bind;
-		}
+		// Do booking for this resource (usages_it->second)
+		DoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
 	}
-	return RA_SUCCESS;
 }
 
-inline void ResourceAccounter::DecBookingCounts(
-		UsagesMapPtr_t const & app_usages,
-		AppPtr_t const & _app,
+void ResourceAccounter::DoResourceBooking(AppPtr_t const & papp,
+		UsagePtr_t & rsrc_usage,
+		RViewToken_t vtok,
+		ResourceSetPtr_t & rsrcs_per_view) {
+	// Amount of resource to book
+	uint64_t usage_value = rsrc_usage->value;
+
+	// Get the list of resource binds
+	ResourcePtrList_t::iterator it_bind(rsrc_usage->binds.begin());
+	ResourcePtrList_t::iterator end_it(rsrc_usage->binds.end());
+	while ((usage_value > 0) && (it_bind != end_it)) {
+		// If the current resource bind has enough availability, reserve the
+		// whole quantity requested here. Otherwise split it in more "sibling"
+		// resource binds.
+		if (usage_value < (*it_bind)->Availability(vtok))
+			usage_value -= (*it_bind)->Acquire(usage_value, papp, vtok);
+		else
+			usage_value -=
+				(*it_bind)->Acquire((*it_bind)->Availability(vtok), papp,
+						vtok);
+
+		// Add the resource to the set of resources used in the view
+		// referenced by 'vtok'
+		rsrcs_per_view->insert(*it_bind);
+
+		++it_bind;
+	}
+}
+
+void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
+		AppPtr_t const & papp,
 		RViewToken_t vtok) {
+	// Get the set of resources referenced in the view
+	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
+	assert(rviews_it != rsrc_per_views.end());
+
 	// Release the amount of resource hold by each application
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end; ++usages_it) {
-		// Resource usage to release / released
-		UsagePtr_t curr_usage = usages_it->second;
-		uint64_t usage_freed = 0;
+		UsagePtr_t rsrc_usage(usages_it->second);
 
-		// For each resource bind release the quantity held
-		ResourcePtrList_t::iterator it_bind(curr_usage->binds.begin());
-		ResourcePtrList_t::iterator end_it(curr_usage->binds.end());
-		while (usage_freed < curr_usage->value) {
-			assert(it_bind != end_it);
-			usage_freed += (*it_bind)->Release(_app, vtok);
-			++it_bind;
-		}
+		// Undo booking for this resource (usages_it->second)
+		UndoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
 	}
 }
+
+void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
+		UsagePtr_t & rsrc_usage,
+		RViewToken_t vtok,
+		ResourceSetPtr_t & rsrcs_per_view) {
+	// Keep track of the amount of resource freed
+	uint64_t usage_freed = 0;
+
+	// For each resource bind release the quantity held
+	ResourcePtrList_t::iterator it_bind(rsrc_usage->binds.begin());
+	ResourcePtrList_t::iterator end_it(rsrc_usage->binds.end());
+	while (usage_freed < rsrc_usage->value) {
+		assert(it_bind != end_it);
+		usage_freed += (*it_bind)->Release(papp, vtok);
+
+		// If there are no more applications using the resource remove it
+		// from the set of resources referenced in the view
+		if ((*it_bind)->ApplicationsCount() == 0)
+			rsrcs_per_view->erase(*it_bind);
+
+		++it_bind;
+	}
+}
+
 
 }   // namespace res
 
