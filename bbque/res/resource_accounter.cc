@@ -145,7 +145,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		return RA_ERR_MISS_VIEW;
 
 	// Each application can hold just one resource usages set
-	AppUsagesMap_t::iterator usemap_it(apps_usages->find(papp));
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(papp->Uid()));
 	if (usemap_it != apps_usages->end())
 		return RA_ERR_APP_USAGES;
 
@@ -158,7 +158,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	// Increment the booking counts and save the reference to the resource set
 	// used by the application
 	IncBookingCounts(resource_set, papp, vtok);
-	apps_usages->insert(std::pair<AppPtr_t, UsagesMapPtr_t>(papp, resource_set));
+	apps_usages->insert(std::pair<AppUid_t, UsagesMapPtr_t>(papp->Uid(),
+				resource_set));
+
 	return RA_SUCCESS;
 }
 
@@ -178,7 +180,7 @@ void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 	}
 
 	// Get the map of resource usages of the application
-	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app));
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Uid()));
 	if (usemap_it == apps_usages->end()) {
 		logger->Fatal("Release: Application referenced misses a resource set."
 				"Possible data corruption occurred.");
@@ -187,7 +189,7 @@ void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 
 	// Decrement resources counts and remove the usages map
 	DecBookingCounts(usemap_it->second, _app, vtok);
-	apps_usages->erase(_app);
+	apps_usages->erase(_app->Uid());
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(

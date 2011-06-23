@@ -40,8 +40,8 @@ using bbque::app::AppPtr_t;
 
 namespace bbque { namespace res {
 
-/** Map of map of ResourceUsage descriptors. Key: application */
-typedef std::map<AppPtr_t, UsagesMapPtr_t> AppUsagesMap_t;
+/** Map of map of ResourceUsage descriptors. Key: Application UID*/
+typedef std::map<AppUid_t, UsagesMapPtr_t> AppUsagesMap_t;
 /** Shared pointer to a map of pair Application/ResourceUsages */
 typedef std::shared_ptr<AppUsagesMap_t> AppUsagesMapPtr_t;
 /** Map of AppUsagesMap_t having the resource state view token as key */
