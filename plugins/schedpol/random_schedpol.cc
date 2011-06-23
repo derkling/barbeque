@@ -123,6 +123,9 @@ RandomSchedPol::Schedule(bbque::SystemView const & sv) {
 	AppsUidMap_t::const_iterator it;
 	AppsUidMap_t::const_iterator end;
 
+	AppsUidMap_t myMap;
+
+	
 	if (!logger) {
 		assert(logger);
 		return SCHED_ERROR;
@@ -139,19 +142,34 @@ RandomSchedPol::Schedule(bbque::SystemView const & sv) {
 
 	logger->Info("Random scheduling RUNNING applications...");
 	am = sv.ApplicationsRunning();
-	it = am->begin();
-	end = am->end();
-	for ( ; it!=end; ++it) {
+
+	// Copy RUNNING applications locally
+	// FIXME this is due to avoid a segfault if a ScheduleRequest is done
+	// while we are still looping on the map iterators.
+	myMap.insert(am->begin(), am->end());
+
+	it = myMap.begin();
+	end = myMap.end();
+	for ( ; it != end; ++it) {
 		ScheduleApp((*it).second);
 	}
+	myMap.clear();
+
 
 	logger->Info("Random scheduling READY applications...");
 	am = sv.ApplicationsReady();
-	it = am->begin();
-	end = am->end();
-	for ( ; it!=end; ++it) {
+
+	// Copy READY applications locally
+	// FIXME this is due to avoid a segfault if a ScheduleRequest is done
+	// while we are still looping on the map iterators.
+	myMap.insert(am->begin(), am->end());
+
+	it = myMap.begin();
+	end = myMap.end();
+	for ( ; it != end; ++it) {
 		ScheduleApp((*it).second);
 	}
+	myMap.clear();
 
 	// Release the ResourceAccounter view
 	ra.PutView(ra_view);
