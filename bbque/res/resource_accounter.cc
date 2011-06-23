@@ -35,6 +35,7 @@
 #include <map>
 #include <string>
 
+#include "bbque/system_view.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/platform_services.h"
@@ -62,6 +63,9 @@ ResourceAccounter::ResourceAccounter():
 	sys_view_token = 0;
 	usages_per_views[sys_view_token] = sys_usages_view;
 	rsrc_per_views[sys_view_token] = ResourceSetPtr_t(new ResourceSet_t);
+
+	// Init sync session info
+	sync_ssn.count = 0;
 }
 
 ResourceAccounter::~ResourceAccounter() {
@@ -125,7 +129,8 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 
 ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		UsagesMapPtr_t const & resource_set,
-		RViewToken_t vtok) {
+		RViewToken_t vtok,
+		bool do_check) {
 	// Check to avoid null pointer segmentation fault
 	if (!papp) {
 		logger->Fatal("Booking: Null pointer to the application descriptor");
@@ -154,10 +159,12 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		return RA_ERR_APP_USAGES;
 	}
 
-	// Try booking required resources for the specified application and view
-	if (CheckAvailability(resource_set, vtok) == RA_ERR_USAGE_EXC) {
-		logger->Debug("Booking: Cannot allocate the resource set");
-		return RA_ERR_USAGE_EXC;
+	// Check resource availability (if this is not a sync session)
+	if ((do_check) && !(sync_ssn.started)) {
+		if (CheckAvailability(resource_set, vtok) == RA_ERR_USAGE_EXC) {
+			logger->Debug("Booking: Cannot allocate the resource set");
+			return RA_ERR_USAGE_EXC;
+		}
 	}
 
 	// Increment the booking counts and save the reference to the resource set
@@ -202,12 +209,19 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		RViewToken_t vtok) const {
 	UsagesMap_t::const_iterator usages_it(usages->begin());
 	UsagesMap_t::const_iterator usages_end(usages->end());
-	for (; usages_it != usages_end; ++usages_it)
-		if (Available(usages_it->second, vtok) < usages_it->second->value) {
-			logger->Warn("CheckAvail: Exceeding resource request"
-					" [usage = %llu]", usages_it->second->value);
+
+	// Check availability for each ResourceUsage object
+	for (; usages_it != usages_end; ++usages_it) {
+		uint64_t avail = Available(usages_it->second, vtok);
+		if (avail < usages_it->second->value) {
+			logger->Debug("ChkAvail: Exceeding request for {%s} [us= %llu /"
+					" av=%llu]",
+					usages_it->first.c_str(),
+					usages_it->second->value,
+					avail);
 			return RA_ERR_USAGE_EXC;
 		}
+	}
 	return RA_SUCCESS;
 }
 
@@ -292,6 +306,101 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 
 	logger->Info("SetView: View %d is the new system state view");
 	return sys_view_token;
+}
+
+ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
+	logger->Info("SyncMode: Start");
+	std::unique_lock<std::mutex>(sync_ssn.mtx);
+	// If the counter has reached the maximum, reset
+	if (sync_ssn.count == std::numeric_limits<uint32_t>::max()) {
+		logger->Debug("SyncMode: Session counter reset");
+		sync_ssn.count = 0;
+	}
+
+	// Build the path for getting the resource view token
+	char token_path[30];
+	std::stringstream ss;
+	ss << ++sync_ssn.count;
+	std::string count_str(ss.str());
+	strncpy(token_path, SYNC_RVIEW_PATH, strlen(SYNC_RVIEW_PATH));
+	strncat(token_path, count_str.c_str(), strlen(count_str.c_str()));
+	logger->Debug("SyncMode [%d]: Requiring resource state view for %s",
+			sync_ssn.count,	token_path);
+
+	// Set the flag and get the resources sync view
+	sync_ssn.started = true;
+	if (GetView(token_path, sync_ssn.view) != RA_SUCCESS) {
+		logger->Fatal("SyncMode [%d]: Cannot get a resource state view",
+				sync_ssn.count);
+		SyncFinalize();
+		return RA_ERR_SYNC_VIEW;
+	}
+
+	logger->Debug("SyncMode [%d]: Resource state view token = %d", sync_ssn.count,
+			sync_ssn.view);
+
+	// Init the view with the resource accounting of running applications
+	return SyncInit();
+}
+
+ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
+	ResourceAccounter::ExitCode_t result;
+	SystemView & sv(SystemView::GetInstance());
+	AppsUidMap_t::const_iterator rapp_it(sv.ApplicationsRunning()->begin());
+	AppsUidMap_t::const_iterator end_rapp(sv.ApplicationsRunning()->end());
+
+	// Running Applications/ExC
+	for (; rapp_it != end_rapp; ++rapp_it) {
+		AppPtr_t const & papp = rapp_it->second;
+		assert(papp->NextAWM());
+		assert(papp->NextAWM()->GetResourceBinding());
+
+		// Acquire the resources
+		result = BookResources(papp, papp->NextAWM()->GetResourceBinding(),
+						sync_ssn.view, false);
+		if (result != RA_SUCCESS) {
+			logger->Error("SyncMode [%s]: Resource booking failed for %s",
+					sync_ssn.count,
+					papp->StrId());
+
+			return RA_ERR_SYNC_INIT;
+		}
+	}
+
+	logger->Debug("SyncMode [%d]: Initialization finished", sync_ssn.count);
+	return RA_SUCCESS;
+}
+
+ResourceAccounter::ExitCode_t ResourceAccounter::SyncAcquireResources(
+		AppPtr_t const & papp, UsagesMapPtr_t const & usages) {
+	// Check that we are in a synchronized session
+	if (!sync_ssn.started) {
+		logger->Error("SyncMode [%d]: Session not open", sync_ssn.count);
+		return RA_ERR_SYNC_START;
+	}
+
+	return BookResources(papp, usages, sync_ssn.view, false);
+}
+
+void ResourceAccounter::SyncAbort() {
+	PutView(sync_ssn.view);
+	SyncFinalize();
+	logger->Info("SyncMode [%d]: Session aborted", sync_ssn.count);
+}
+
+ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
+	ResourceAccounter::ExitCode_t result = RA_SUCCESS;
+	if (SetView(sync_ssn.view) != sync_ssn.view) {
+		logger->Fatal("SyncMode [%d]: Unable to set the new system resource"
+				"state view", sync_ssn.count);
+		result = RA_ERR_SYNC_VIEW;
+	}
+
+	SyncFinalize();
+	if (result == RA_SUCCESS)
+		logger->Info("SyncMode [%d]: Session committed", sync_ssn.count);
+
+	return result;
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(

@@ -64,7 +64,16 @@ public:
 		/** Application uses yet another resource set */
 		RA_ERR_APP_USAGES,
 		/** Resource usage required exceeds the availabilities */
-		RA_ERR_USAGE_EXC
+		RA_ERR_USAGE_EXC,
+
+		// --- Synchronization mode ---
+
+		/** Initialization failed */
+		RA_ERR_SYNC_INIT,
+		/** Error occured in using/getting the resource view  */
+		RA_ERR_SYNC_VIEW,
+		/** Synchronization session has not been started */
+		RA_ERR_SYNC_START
 	};
 
 	/**
@@ -92,19 +101,22 @@ public:
 			std::string const & units, uint64_t amount) = 0;
 
 	/**
-	 * @brief Acquire a set of resources
+	 * @brief Book e a set of resources
 	 *
 	 * The method first check that the application doesn't hold another
-	 * resource set. If so such resources are released. Then it reserves, for
+	 * resource set, then check thier availability, and finally reserves, for
 	 * each resource in the usages map specified, the required quantity.
 	 *
 	 * @param app The application requiring resource usages
-	 * @oparam usages Map of ResourceUsage objects
+	 * @param usages Map of ResourceUsage objects
 	 * @param vtok The token referencing the resource state view
+	 * @param do_check If true the controls upon set validity and resources
+	 * availability are enabled
 	 * @return An exit code (@see ExitCode_t)
 	 */
 	virtual ExitCode_t BookResources(AppPtr_t app,
-			UsagesMapPtr_t const & usages, RViewToken_t vtok = 0) = 0;
+			UsagesMapPtr_t const & usages, RViewToken_t vtok = 0,
+			bool do_check = true) = 0;
 
 	/**
 	 * @brief Release the resources
@@ -148,17 +160,51 @@ public:
 	virtual void PutView(RViewToken_t tok) = 0;
 
 	/**
-	 * @see Set a view as the new resources state of the system
+	 * @brief Start a synchronized mode session
 	 *
-	 * Set a new system state view means that for each resource used in that
-	 * view, such view becomes the default one.
-	 * This is how the Scheduler/Optimizer has defined the resource assignment
-	 * to the running applications.
+	 * Once a scheduling/resource allocation has been performed we need to
+	 * make the changes effective, by updating the system resources state.
+	 * For doing that a "synchronized mode session" must be started. This
+	 * method open the session and init a new resource view by computing the
+	 * resource accounting info of the Applications/ExC having a "RUNNING"
+	 * scheduling state (the ones that continue running without
+	 * reconfiguration or migrations).
 	 *
-	 * @param tok The token used as reference to the resources view.
-	 * @return The token referencing the system state view.
+	 * @return @see ExitCode_t
 	 */
-	virtual RViewToken_t SetView(RViewToken_t vtok) = 0;
+	virtual ExitCode_t SyncStart() = 0;
+
+	/**
+	 * @brief Acquire resources for an Application/ExC
+	 *
+	 * If the sync session is not open does nothing. Otherwise it does
+	 * resource booking using the state view allocated for the session.
+	 *
+	 * @param papp Application/ExC acquiring the resources
+	 * @param usages The set of resources to acquire
+	 *
+	 * @return @see ExitCode_t
+	 */
+	virtual ExitCode_t SyncAcquireResources(AppPtr_t const & papp,
+			UsagesMapPtr_t const & usages) = 0;
+
+	/**
+	 * @brief Abort a synchronized mode session
+	 *
+	 * Changes are trashed away. The resource bookings performed in the
+	 * session are canceled.
+	 */
+	virtual void SyncAbort() = 0;
+
+	/**
+	 * @brief Commit a synchronized mode session
+	 *
+	 * Changes are made effective. Resources must be allocated accordingly to
+	 * the state view built during in the session.
+	 *
+	 * @return @see ExitCode_t
+	 */
+	virtual ExitCode_t SyncCommit() = 0;
 
 };
 

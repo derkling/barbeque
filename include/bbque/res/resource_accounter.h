@@ -28,6 +28,7 @@
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
 #include <set>
+#include <thread>
 #include "bbque/res/resource_accounter_conf.h"
 #include "bbque/res/resource_tree.h"
 #include "bbque/plugins/logger.h"
@@ -37,6 +38,7 @@ using bbque::plugins::LoggerIF;
 using bbque::app::AppPtr_t;
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
+#define SYNC_RVIEW_PATH "ra.sync."
 
 namespace bbque { namespace res {
 
@@ -201,7 +203,7 @@ public:
 	 * @see ResourceAccounterConfIF
 	 */
 	ExitCode_t BookResources(AppPtr_t papp, UsagesMapPtr_t const & usages,
-			RViewToken_t vtok = 0);
+			RViewToken_t vtok = 0, bool do_check = true);
 
 	/**
 	 * @see ResourceAccounterConfIF
@@ -218,10 +220,6 @@ public:
 	 */
 	void PutView(RViewToken_t tok);
 
-	/**
-	 * @see ResourceAccounterConfIF
-	 */
-	RViewToken_t SetView(RViewToken_t vtok);
 
 	/**
 	 * @brief Print the resource hierarchy in a tree-like form
@@ -229,6 +227,28 @@ public:
 	inline void TreeView() {
 		resources.printTree();
 	}
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	ExitCode_t SyncStart();
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	ExitCode_t SyncAcquireResources(AppPtr_t const & papp,
+			UsagesMapPtr_t const & usages);
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	void SyncAbort();
+
+	/**
+	 * @see ResourceAccounterConfIF
+	 */
+	ExitCode_t SyncCommit();
+
 
 private:
 
@@ -244,6 +264,22 @@ private:
 		/** Total amount of resource */
 		RA_TOTAL
 	};
+
+	/**
+	 * @struct SyncSession_t
+	 * @brief Store info about a synchronization session
+	 */
+	struct SyncSession_t {
+		/** Mutex for protecting the session */
+		std::mutex mtx;
+		/** If true a synchronization session has started */
+		bool started;
+		/** Token for the temporary resource view */
+		RViewToken_t view;
+		/** Count the number of session elapsed */
+		uint32_t count;
+
+	} sync_ssn;
 
 	/** The logger used by the resource accounter */
 	LoggerIF  *logger;
@@ -345,6 +381,41 @@ private:
 	 */
 	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
 			RViewToken_t vtok, ResourceSetPtr_t & rsrcs_per_view);
+
+	/**
+	 * @brief Init the synchronized mode session
+	 *
+	 * This inititalizes the sync session view by adding the resource usages
+	 * of the RUNNING Applications/ExC. Thus the ones that will not be
+	 * reconfigured or migrated.
+	 *
+	 * @return @see ExiTCode_t
+	 */
+	ExitCode_t SyncInit();
+
+	/**
+	 * @brief Finalize the synchronized mode
+	 *
+	 * Safely close the sync session by releasing the mutex and unsetting the
+	 * "started" flag.
+	 */
+	inline void SyncFinalize() {
+		sync_ssn.started = false;
+		sync_ssn.mtx.unlock();
+	}
+
+	/**
+	 * @brief Set a view as the new resources state of the system
+	 *
+	 * Set a new system state view means that for each resource used in that
+	 * view, such view becomes the default one.
+	 * This is called once a new scheduling has performed, Applications/ExC
+	 * must be syncronized, and thus system resources state  must be update
+	 *
+	 * @param tok The token used as reference to the resources view.
+	 * @return The token referencing the system state view.
+	 */
+	RViewToken_t SetView(RViewToken_t vtok);
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;
