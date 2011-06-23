@@ -49,7 +49,15 @@ FifoRPC::FifoRPC(std::string const & fifo_dir) :
 }
 
 FifoRPC::~FifoRPC() {
+	fs::path fifo_path(conf_fifo_dir);
+	fifo_path /= "/"BBQUE_PUBLIC_FIFO;
 
+	logger->Debug("FIFO RPC: cleaning up FIFO [%s]...",
+			fifo_path.string().c_str());
+
+	::close(rpc_fifo_fd);
+	// Remove the server side pipe
+	::unlink(fifo_path.string().c_str());
 }
 
 //----- RPCChannelIF module interface
@@ -67,29 +75,42 @@ int FifoRPC::Init() {
 	fifo_path /= "/"BBQUE_PUBLIC_FIFO;
 	logger->Debug("FIFO RPC: checking FIFO [%s]...",
 			fifo_path.string().c_str());
-	if (!fs::exists(fifo_path, ec)) {
 
-		// Make dir if not already present
-		logger->Debug("FIFO RPC: create dir [%s]...",
-			fifo_path.parent_path().c_str());
-		fs::create_directories(fifo_path.parent_path(), ec);
-
-		// Create the server side pipe (if not already existing)
-		logger->Debug("FIFO RPC: create FIFO [%s]...",
-				fifo_path.string().c_str());
-		error = ::mkfifo(fifo_path.string().c_str(), 0666);
+	// If the FIFO already exists: destroy it and rebuild a new one
+	if (fs::exists(fifo_path, ec)) {
+		logger->Debug("FIFO RPC: destroying old FIFO [%s]...",
+			fifo_path.string().c_str());
+		error = ::unlink(fifo_path.string().c_str());
 		if (error) {
-			logger->Error("FIFO RPC: RPC FIFO [%s] cration FAILED",
-					fifo_path.string().c_str());
+			logger->Crit("FIFO RPC: cleanup old FIFO [%s] FAILED "
+					"(Error: %s)",
+					fifo_path.string().c_str(),
+					strerror(error));
+			assert(error == 0);
 			return -1;
 		}
+	}
+
+	// Make dir (if not already present)
+	logger->Debug("FIFO RPC: create dir [%s]...",
+			fifo_path.parent_path().c_str());
+	fs::create_directories(fifo_path.parent_path(), ec);
+
+	// Create the server side pipe (if not already existing)
+	logger->Debug("FIFO RPC: create FIFO [%s]...",
+			fifo_path.string().c_str());
+	error = ::mkfifo(fifo_path.string().c_str(), 0666);
+	if (error) {
+		logger->Error("FIFO RPC: RPC FIFO [%s] cration FAILED",
+				fifo_path.string().c_str());
+		return -2;
 	}
 
 	// Ensuring we have a pipe
 	if (fs::status(fifo_path, ec).type() != fs::fifo_file) {
 		logger->Error("ERROR, RPC FIFO [%s] already in use",
 				fifo_path.string().c_str());
-		return -2;
+		return -3;
 	}
 
 	// Opening the server side pipe (R/W to keep it opened)
@@ -101,7 +122,7 @@ int FifoRPC::Init() {
 					fifo_path.string().c_str());
 		rpc_fifo_fd = 0;
 		::unlink(fifo_path.string().c_str());
-		return -3;
+		return -4;
 	}
 
 	// Marking channel al already initialized
