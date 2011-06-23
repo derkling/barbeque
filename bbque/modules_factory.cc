@@ -120,5 +120,18 @@ plugins::SchedulerPolicyIF * ModulesFactory::GetSchedulerPolicyModule(
 	return (plugins::SchedulerPolicyIF *) module;
 }
 
+plugins::SynchronizationPolicyIF * ModulesFactory::GetSynchronizationPolicyModule(
+		std::string const & id) {
+
+	// Ensure ModulesFactory initialization
+	ModulesFactory::GetInstance();
+
+	// SchedulerPolicy is just implemented in C++ thus it doesn't
+	// require a real ObjectAdapter
+	void * module = bp::PluginManager::GetInstance().
+						CreateObject(id);
+
+	return (plugins::SynchronizationPolicyIF *) module;
+}
 } // namespace bbque
 

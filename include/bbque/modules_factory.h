@@ -30,6 +30,7 @@
 #include "bbque/plugins/recipe_loader.h"
 //----- Supported C++ only plugin interfaces
 #include "bbque/plugins/scheduler_policy.h"
+#include "bbque/plugins/synchronization_policy.h"
 #include "bbque/rpc_proxy.h"
 
 #include <string>
@@ -87,6 +88,11 @@ public:
 	static plugins::SchedulerPolicyIF * GetSchedulerPolicyModule(
 		std::string const & id = SCHEDULER_POLICY_NAMESPACE);
 
+	/**
+	 * Get a reference to a module implementing the SynchronizationPolicyIF interface
+	 */
+	static plugins::SynchronizationPolicyIF * GetSynchronizationPolicyModule(
+		std::string const & id = SYNCHRONIZATION_POLICY_NAMESPACE);
 private:
 
 	/**
