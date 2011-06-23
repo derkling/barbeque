@@ -79,23 +79,21 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 	// Get the number of clusters
 	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
-	logger->Debug("There are %d clusters on the platform.", num_clusters);
+	logger->Debug("Schedule: Found %d clusters on the platform.", num_clusters);
 
 	// Order scheduling entities from READY and RUNNING applications
 	for (uint16_t cl_id = 0; cl_id < num_clusters; ++cl_id) {
 		SchedEntityMap_t sched_map;
-		logger->Debug("----------------------------------------------");
-		logger->Debug("------------------ Cluster %d -----------------",
+		logger->Debug("Schedule: ------------- Cluster %d ---------------",
 				cl_id);
-		logger->Debug("----------------------------------------------");
 
-		logger->Debug("Applications RUNNING = %d",
+		logger->Debug("Schedule: --- %d ExC in the RUNNING queue --------",
 				system.ApplicationsRunning()->size());
 		if (OrderSchedEntity(sched_map, system.ApplicationsRunning(), cl_id)
 				== SCHED_ERROR)
 			return SCHED_ERROR;
 
-		logger->Debug("Applications READY = %d",
+		logger->Debug("Schedule: --- %d ExC in the READY queue ----------",
 				system.ApplicationsReady()->size());
 		if (OrderSchedEntity(sched_map, system.ApplicationsReady(), cl_id)
 				== SCHED_ERROR)
@@ -133,8 +131,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 		return SCHED_ERROR;
 	}
 
-	logger->Debug("%s", strView.c_str());
-	logger->Debug("Resources state view token assigned: %d", rsrc_view_token);
+	logger->Debug("Init: Requiring view token for %s", strView.c_str());
+	logger->Debug("Init: Resources state view token = %d", rsrc_view_token);
 	return SCHED_OK;
 }
 
@@ -153,7 +151,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		// Skip if the application has been scheduled yet
 		assert(papp);
 		if (papp->NextAWM()) {
-			logger->Debug("[%d] scheduled yet into AWM{%d}",
+			logger->Debug("Ordering: [%d] scheduled yet into AWM{%d}",
 						papp->StrId(),
 						papp->NextAWM()->Id());
 			continue;
@@ -175,7 +173,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 
 
 inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
-	logger->Debug("..... Picking the scheduling entities (App + AWM) .....");
+	logger->Debug(".....: Picking scheduling entities (App + AWM) :.....");
 
 	// The scheduling entities should be picked in a descending order of
 	// metrics value
@@ -193,7 +191,8 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 		// meanwhile
 		if ((app->State() == Application::DISABLED) ||
 				(app->State() == Application::FINISHED)) {
-			logger->Debug("[%s] disabled/stopped during scheduling [Ord]",
+			logger->Debug("Selecting: [%s] disabled/stopped during"
+					"scheduling",
 					app->StrId());
 			continue;
 		}
@@ -213,7 +212,8 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 			continue;
 		}
 
-		logger->Debug("[%s] schedule request for AWM{%d}...", app->StrId(),
+		logger->Debug("Selecting: [%s] schedule request for AWM{%d}...",
+				app->StrId(),
 				eval_awm->Id());
 
 		// Get the resource binding of the current AWM
@@ -228,7 +228,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Debugging messages
 		if (result != Application::APP_WM_ACCEPTED) {
-			logger->Debug("[%s] AWM{%d} rejected ! [code = %d]",
+			logger->Debug("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
 							app->StrId(),
 							eval_awm->Id(),
 							result);
@@ -237,7 +237,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		assert(app->NextAWM());
 		AwmPtr_t const & new_awm = app->NextAWM();
-		logger->Info("[%s] set to AWM{%d} on clusters map [%s]",
+		logger->Info("Selecting: [%s] set to AWM{%d} on clusters map [%s]",
 					app->StrId(),
 					new_awm->Id(),
 					new_awm->GetClusterSet().to_string().c_str());
@@ -254,14 +254,14 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 	AwmPtrList_t::const_iterator awm_it(awms->begin());
 	AwmPtrList_t::const_iterator end_awm(awms->end());
 	for (; awm_it != end_awm; ++awm_it) {
-		logger->Debug("[%s] AWM{%d} metrics computing...", papp->StrId(),
+		logger->Debug("Insert: [%s] AWM{%d} metrics computing...", papp->StrId(),
 				(*awm_it)->Id());
 
 		// Skip if the application has been disabled or stopped in the
 		// meanwhile
 		if ((papp->State() == Application::DISABLED) ||
 				(papp->State() == Application::FINISHED)) {
-			logger->Debug("[%s] disabled/stopped during scheduling [Ord]",
+			logger->Debug("Insert: [%s] disabled/stopped during scheduling [Ord]",
 					papp->StrId());
 			return SCHED_SKIP_APP;
 		}
@@ -272,10 +272,10 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 			MetricsComputation(papp, (*awm_it), cl_id, *metrics);
 		switch (result) {
 		case SCHED_RSRC_UNAV:
-			logger->Debug("Resources unavailables [ret %d]", result);
+			logger->Debug("Insert: Resources unavailables [ret %d]", result);
 			continue;
 		case SCHED_ERROR:
-			logger->Error("An error occurred [ret %d]", result);
+			logger->Error("Insert: An error occurred [ret %d]", result);
 			return result;
 		default:
 			break;
@@ -288,7 +288,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 					static_cast<double>(*metrics),
 					SchedEntity_t(papp, (*awm_it))));
 
-		logger->Debug("\tmetrics = %4.4f", *metrics);
+		logger->Debug("Metrics = %.4f", *metrics);
 	}
 
 	return SCHED_OK;
@@ -324,12 +324,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 		return result;
 
 	// Metrics
+	logger->Debug("AWM value: %d", wm->Value());
 	metrics = ((double) wm->Value() - reconf_cost - migr_cost) / cont_level;
-	logger->Debug("\t{ Val = %d Rec = %4.2f Migr = %4.2f ContLv = %4.4f }",
-				wm->Value(),
-				reconf_cost,
-				migr_cost,
-				cont_level);
 
 	return SCHED_OK;
 }
@@ -344,6 +340,7 @@ inline double GetMigrationOverhead(AppPtr_t const & papp,
 	(void) cl_id;
 
 	//TODO:  To implement
+	//logger->Debug("Migration overhead: 0.0");
 	return 0.0;
 }
 
@@ -354,10 +351,15 @@ inline double GetReconfigOverhead(AppPtr_t const & papp,
 	if (papp->CurrentAWM() && (papp->CurrentAWM() != wm)) {
 		OverheadPtr_t reconf_over(
 				papp->CurrentAWM()->OverheadInfo(wm->Id()));
-		if (reconf_over)
+		if (reconf_over){
+
+//			logger->Debug("Reconfiguration overhead : %.4f",
+//					reconf_over->MaxTime());
 			return reconf_over->MaxTime();
+		}
 	}
 
+//	logger->Debug("Reconfiguration overhead : 0.0");
 	return 0.0;
 }
 
@@ -368,8 +370,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		double & cont_level) {
 	// Safety data check
 	if (!wm) {
-		logger->Crit("Missing working mode.\n"
-				"Error: possibile data corruption in %s",
+		logger->Crit("Contention level: Missing working mode.\n"
+				"Possibile data corruption in %s",
 				SCHEDULER_POLICY_NAMESPACE"yamca");
 		assert(!wm);
 		return SCHED_ERROR;
@@ -377,14 +379,14 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 
 	// Bind the clustered resources request into the current cluster.
 	// Note: The current policy doesn't support multi-cluster resources
-	logger->Debug("\tBinding on cluster %d", cl_id);
+	logger->Debug("Contention level: Binding into cluster %d", cl_id);
 	UsagesMapPtr_t rsrc_usages = UsagesMapPtr_t(new UsagesMap_t());
 	WorkingMode::ExitCode_t result =
 		wm->BindResource("cluster", RSRC_ID_ANY, cl_id, rsrc_usages);
 
 	if (result == WorkingMode::WM_RSRC_MISS_BIND)
-		logger->Error("{AWM %d} [cluster = %d] Incomplete resources binding."
-						"%d / %d resources bind.",
+		logger->Error("Contention level: {AWM %d} [cluster = %d]"
+				"Incomplete resources binding. %d / %d resources bound.",
 						wm->Id(),cl_id,	rsrc_usages->size(),
 						wm->ResourceUsages().size());
 
@@ -403,7 +405,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		// Query resource availability
 		rsrc_avail = rsrc_acct.Available(usage_it->second, rsrc_view_token);
 		if (rsrc_avail < usage_it->second->value) {
-			logger->Debug("[%s] Requested = %d | Available %d in cluster %d",
+			logger->Debug("Contention level: [%s] R=%d / A=%d (cluster %d)",
 					usage_it->first.c_str(),
 					usage_it->second->value,
 					rsrc_avail,
@@ -421,6 +423,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 	if (cont_level == 0)
 		++cont_level;
 
+	logger->Debug("Contention level: %.4f", cont_level);
 	return SCHED_OK;
 }
 
