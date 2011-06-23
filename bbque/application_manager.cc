@@ -555,10 +555,6 @@ ApplicationManager::SyncAdd(AppPtr_t papp) {
 	assert(papp);
 	logger->Debug("Adding sync request for EXC [%s]...", papp->StrId());
 
-	// Disregard EXCs which are not in SYNC state
-	if (!papp->Synching())
-		return;
-
 	SyncAdd(papp, papp->SyncState());
 
 }
