@@ -133,7 +133,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	}
 	// Check that the next working mode has been set
 	if ((!resource_set) || (resource_set->empty())) {
-		logger->Fatal("Booking: Missing a valid resource usages set");
+		logger->Fatal("Booking: Empty resource usages set");
 		return RA_ERR_MISS_USAGES;
 	}
 
@@ -141,13 +141,18 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	// referenced by 'vtok'). A missing view implies that the token is not
 	// valid.
 	AppUsagesMapPtr_t apps_usages;
-	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW)
+	if (GetAppUsagesByView(vtok, apps_usages) == RA_ERR_MISS_VIEW) {
+		logger->Fatal("Booking: Invalid resource state view token");
 		return RA_ERR_MISS_VIEW;
+	}
 
 	// Each application can hold just one resource usages set
 	AppUsagesMap_t::iterator usemap_it(apps_usages->find(papp->Uid()));
-	if (usemap_it != apps_usages->end())
+	if (usemap_it != apps_usages->end()) {
+		logger->Debug("Booking: [%s] currently using a resource set yet",
+				papp->StrId());
 		return RA_ERR_APP_USAGES;
+	}
 
 	// Try booking required resources for the specified application and view
 	if (CheckAvailability(resource_set, vtok) == RA_ERR_USAGE_EXC) {
@@ -239,7 +244,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 	if (rviews_it == rsrc_per_views.end()) {
 		logger->Error("PutView: Cannot find the resource view referenced by"
-				"%llu", vtok);
+				"%d", vtok);
 		return;
 	}
 
@@ -251,26 +256,33 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 
 	// Remove the map of applications resource usages of this view
 	usages_per_views.erase(vtok);
+	logger->Debug("PutView: view %d cleared", vtok);
 }
 
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 	// Do nothing if the token references the system state view
-	if (vtok == sys_view_token)
+	if (vtok == sys_view_token) {
+		logger->Warn("SetView: View %d is the system state view yet!");
 		return sys_view_token;
+	}
 
 	// Set the system state view pointer to the map of applications resource
 	// usages of this view and point to
 	AppUsagesViewsMap_t::iterator us_view_it(usages_per_views.find(vtok));
-	if (us_view_it == usages_per_views.end())
+	if (us_view_it == usages_per_views.end()) {
+		logger->Fatal("SetView: View %d unknown", vtok);
 		return sys_view_token;
+	}
 
 	sys_usages_view = us_view_it->second;
 	sys_view_token = vtok;
 
 	// Get the resource set using the referenced view
 	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
-	if (rviews_it == rsrc_per_views.end())
+	if (rviews_it == rsrc_per_views.end()) {
+		logger->Warn("SetView: No resources used in view %d", vtok);
 		return sys_view_token;
+	}
 
 	// For each resource set the view as default
 	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
@@ -278,6 +290,7 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it)
 		(*rsrc_set_it)->SetAsDefaultView(vtok);
 
+	logger->Info("SetView: View %d is the new system state view");
 	return sys_view_token;
 }
 
@@ -290,7 +303,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 		view = usages_per_views.find(vtok);
 		if (view == usages_per_views.end()) {
 			logger->Error("Application usages:"
-					"Cannot find the resource view referenced by %llu",
+					"Cannot find the resource state view referenced by %d",
 					vtok);
 			return RA_ERR_MISS_VIEW;
 		}
@@ -320,6 +333,9 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		// Do booking for this resource (usages_it->second)
 		DoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
+		logger->Debug("[%s] booked {%s}: usage = %llu", papp->StrId(),
+				usages_it->first.c_str(),
+				rsrc_usage->value);
 	}
 }
 
@@ -350,6 +366,7 @@ void ResourceAccounter::DoResourceBooking(AppPtr_t const & papp,
 
 		++it_bind;
 	}
+	assert (usage_value == 0);
 }
 
 void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
@@ -367,6 +384,9 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		// Undo booking for this resource (usages_it->second)
 		UndoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
+		logger->Debug("[%s] releases {%s}: usage = %llu", papp->StrId(),
+				usages_it->first.c_str(),
+				rsrc_usage->value);
 	}
 }
 
@@ -391,6 +411,7 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 
 		++it_bind;
 	}
+	assert(usage_freed == rsrc_usage->value);
 }
 
 

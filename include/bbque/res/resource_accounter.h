@@ -234,7 +234,7 @@ private:
 
 	/**
 	 * @enum This is used for selecting the state attribute to return from
-	 * <tt>queryState()</tt>
+	 * <tt>QueryStatus()</tt>
 	 */
 	enum QueryOption_t {
 		/** Amount of resource available */

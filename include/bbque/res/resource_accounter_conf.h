@@ -49,7 +49,7 @@ public:
 	 * @enum Exit codes
 	 */
 	enum ExitCode_t {
-		/** Resource registered successfully */
+		/** Successful return  */
 		RA_SUCCESS = 0,
 		/** Argument "path" missing */
 		RA_ERR_MISS_PATH,
