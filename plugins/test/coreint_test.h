@@ -38,6 +38,7 @@
 
 using namespace bbque::app;
 using bbque::ApplicationManager;
+using bbque::res::ResourceAccounter;
 
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
@@ -97,6 +98,9 @@ private:
 	/** Application manager instance */
 	ApplicationManager & am;
 
+	/** Resource Accounter instance */
+	ResourceAccounter & ra;
+
 	/**
 	 * @brief Constructor
 	 */
@@ -130,6 +134,11 @@ private:
 	 * @brief Test the scheduling policy
 	 */
 	void testScheduling();
+
+	/**
+	 * @brief Test the syncronized acquisition of the resources
+	 */
+	void testSyncResourcesUpdate();
 
 };
 

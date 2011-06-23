@@ -180,7 +180,8 @@ std::vector<std::string> rsrcSearchPaths = {
 
 CoreInteractionsTest::CoreInteractionsTest():
 	sv(SystemView::GetInstance()),
-	am(ApplicationManager::GetInstance()) {
+	am(ApplicationManager::GetInstance()),
+	ra(ResourceAccounter::GetInstance()){
 
 	// Get a logger
 	std::string logger_name(TEST_NAMESPACE COREINT_NAMESPACE);
@@ -213,10 +214,7 @@ int32_t CoreInteractionsTest::Destroy(void * plugin) {
 
 
 void RegisterSomeResources() {
-
-	// Get ResourceAccounter instance
-	br::ResourceAccounter & ra = br::ResourceAccounter::GetInstance();
-
+	ResourceAccounter & ra(ResourceAccounter::GetInstance());
 	std::cout << "names=" << res_names.size()
 		<< " units=" << res_units.size()
 		<< " totals=" << res_totals.size()
@@ -589,6 +587,35 @@ void CoreInteractionsTest::testScheduling() {
 	getchar();
 }
 
+void CoreInteractionsTest::testSyncResourcesUpdate() {
+
+	// Start a sync session for resources acquisition
+	ra.SyncStart();
+
+	AppsUidMap_t::const_iterator sync_app_it(
+			sv.Applications(ApplicationStatusIF::SYNC)->begin());
+	AppsUidMap_t::const_iterator end_sync_app(
+			sv.Applications(ApplicationStatusIF::SYNC)->end());
+
+	// Get all the applications to syncronize
+	for (; sync_app_it != end_sync_app; ++sync_app_it) {
+		if (sync_app_it->second->SyncState() == ApplicationStatusIF::BLOCKED)
+			continue;
+
+		// Acquire resources for the application/ExC
+		ra.SyncAcquireResources(sync_app_it->second,
+				sync_app_it->second->NextAWM()->GetResourceBinding());
+
+		// TODO: Bug to fix on am.SyncCommit().
+		// Beware: ithout this call we cannot perform other runs
+		// ---------------------------------------------------------
+		// Commit the change of state + AWM to the ApplicationManager
+//		am.SyncCommit(sync_app_it->second);
+	}
+
+	// Commit the session
+	ra.SyncCommit();
+}
 
 void CoreInteractionsTest::testStartApplications(uint16_t num) {
 
@@ -673,7 +700,8 @@ void CoreInteractionsTest::Test() {
 
 	// Scheduler test
 	testScheduling();
-	//PrintResourceAvailabilities(sv);
+	testSyncResourcesUpdate();
+	PrintResourceAvailabilities(sv);
 
 	// Stop applications
 	AppsMap_t::const_iterator apps_it(sv.ApplicationsRunning()->begin());
