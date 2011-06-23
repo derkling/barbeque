@@ -553,9 +553,13 @@ void
 ApplicationManager::SyncAdd(AppPtr_t papp) {
 
 	assert(papp);
-	logger->Debug("Adding sync request for EXC [%s]...", papp->StrId());
 
 	SyncAdd(papp, papp->SyncState());
+
+	logger->Info("Added sync request for EXC [%s, %d:%s]",
+				papp->StrId(),
+				papp->SyncState(),
+				papp->SyncStateStr());
 
 }
 
@@ -597,11 +601,11 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 
 	assert(syncState != Application::SYNC_NONE);
 
-	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
-			papp->SyncStateStr());
-
 	// Notify application
 	papp->ScheduleCommit();
+
+	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
+			papp->SyncStateStr());
 
 	return AM_SUCCESS;
 }
