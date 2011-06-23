@@ -43,6 +43,7 @@ ResourceManager::ResourceManager() :
 	ps(PlatformServices::GetInstance()),
 	pm(plugins::PluginManager::GetInstance()),
 	rs(ResourceScheduler::GetInstance()),
+	sm(SynchronizationManager::GetInstance()),
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()) {
 
@@ -87,12 +88,13 @@ void ResourceManager::NotifyEvent(controlEvent_t evt) {
 }
 
 void ResourceManager::EvtExcStart() {
-	ResourceScheduler::ExitCode_t result;
+	SynchronizationManager::ExitCode_t syncResult;
+	ResourceScheduler::ExitCode_t schedResult;
 
 	logger->Info("EXC Started: Running Optimization...");
 
-	result = rs.Schedule();
-	switch(result) {
+	schedResult = rs.Schedule();
+	switch(schedResult) {
 	case ResourceScheduler::MISSING_POLICY:
 	case ResourceScheduler::FAILED:
 		logger->Error("EXC start FAILED (Error: scheduling policy failed)");
@@ -101,10 +103,10 @@ void ResourceManager::EvtExcStart() {
 		logger->Error("EXC start DELAYED");
 		return;
 	default:
-		assert(result==ResourceScheduler::DONE);
+		assert(schedResult == ResourceScheduler::DONE);
 	}
 
-	logger->Warn("TODO: run the synchronization protocol");
+	syncResult = sm.SyncSchedule();
 
 }
 
