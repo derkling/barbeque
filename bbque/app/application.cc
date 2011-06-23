@@ -198,29 +198,52 @@ void Application::SetSyncState(SyncState_t sync) {
 
 // NOTE: this requires a lock on schedule_mtx
 void Application::SetState(State_t state, SyncState_t sync) {
+	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
+	AppPtr_t papp = am.GetApplication(Uid());
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
 			StrId(),
 			State(), StateStr(State()),
 			state, StateStr(state));
 
-	// Update pre-sync state
+	// Entering a Synchronization state
 	if (state == SYNC) {
 		assert(sync != SYNC_NONE);
+
+		// Save a copy of the pre-synchronization state
 		schedule.preSyncState = State();
-	} else {
-		assert(sync == SYNC_NONE);
-		schedule.preSyncState = state;
+
+		// Update synchronization state
+		SetSyncState(sync);
+
+		// Update queue based on current application state
+		am.NotifyNewState(papp, Application::SYNC);
+
+		// Updating state
+		schedule.state = Application::SYNC;
+
+		return;
 	}
 
-	// Update resources on disabled
+
+	// Entering a statble state
+	assert(sync == SYNC_NONE);
+
+	// Update queue based on current application state
+	am.NotifyNewState(papp, state);
+
+	// Updating state
+	schedule.preSyncState = state;
+	schedule.state = state;
+
+	// Update synchronization state
+	SetSyncState(sync);
+
+	// Release current selected AWM
 	if ((state == DISABLED) ||
 			(state == READY))
 		schedule.awm.reset();
 
-	// Update state
-	schedule.state = state;
-	SetSyncState(sync);
 }
 
 // NOTE: this requires a lock on schedule_mtx
@@ -232,7 +255,7 @@ void Application::ResetState() {
 			StrId(),
 			State(), StateStr(State()),
 			PreSyncState(), StateStr(PreSyncState()));
-	
+
 	SetState(PreSyncState());
 }
 
@@ -241,12 +264,7 @@ void Application::ResetState() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Terminate() {
-	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	std::unique_lock<std::mutex> state_ul(schedule_mtx);
-	AppPtr_t papp = am.GetApplication(Uid());
-
-	// Notify state update
-	am.NotifyNewState(papp, FINISHED);
 
 	// Mark the application has finished
 	SetState(FINISHED);
@@ -255,7 +273,7 @@ Application::ExitCode_t Application::Terminate() {
 	logger->Info("EXC [%s] FINISHED", StrId());
 
 	return APP_SUCCESS;
-	
+
 }
 
 
@@ -264,9 +282,7 @@ Application::ExitCode_t Application::Terminate() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Enable() {
-	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
-	AppPtr_t papp = am.GetApplication(Uid());
 
 	// Not disabled applications could not be marked as READY
 	if (!Disabled()) {
@@ -278,9 +294,6 @@ Application::ExitCode_t Application::Enable() {
 	}
 
 	state_ul.lock();
-
-	// Notify state update
-	am.NotifyNewState(papp, READY);
 
 	// Mark the application has ready to run
 	SetState(READY);
@@ -298,9 +311,7 @@ Application::ExitCode_t Application::Enable() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Disable() {
-	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
-	AppPtr_t papp = am.GetApplication(Uid());
 
 	// Not disabled applications could not be marked as READY
 	if (Disabled()) {
@@ -312,9 +323,6 @@ Application::ExitCode_t Application::Disable() {
 	}
 
 	state_ul.lock();
-
-	// Notify state update
-	am.NotifyNewState(papp, DISABLED);
 
 	// Mark the application has ready to run
 	SetState(DISABLED);
@@ -354,9 +362,6 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 		assert(papp);
 		return APP_ABORT;
 	}
-
-	// Schedule the sync request
-	am.NotifyNewState(papp, Application::SYNC);
 
 	// Update our state
 	SetState(SYNC, sync);
@@ -500,30 +505,17 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
  ******************************************************************************/
 
 Application::ExitCode_t Application::SetRunning() {
-	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
-	AppPtr_t papp = am.GetApplication(Uid());
-
-	am.NotifyNewState(papp, RUNNING);
 	SetState(RUNNING);
-
 	return APP_SUCCESS;
-
 }
 
 Application::ExitCode_t Application::SetBlocked() {
-	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
-	AppPtr_t papp = am.GetApplication(Uid());
-
-	// If the application as been marked FINISHED, than it is going to be
-	// released
+	// If the application as been marked FINISHED, than it is released
 	if (State() == FINISHED)
 		return APP_SUCCESS;
-
 	// Otherwise mark it as READY to be re-scheduled when possible
-	am.NotifyNewState(papp, READY);
 	SetState(READY);
 	return APP_SUCCESS;
-
 }
 
 Application::ExitCode_t Application::ScheduleCommit() {
