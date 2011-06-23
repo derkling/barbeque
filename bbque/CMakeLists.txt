@@ -42,6 +42,7 @@ set (BARBEQUE_SRC plugin_manager modules_factory ${BARBEQUE_SRC})
 set (BARBEQUE_SRC resource_manager application_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC application_proxy rpc_proxy ${BARBEQUE_SRC})
 set (BARBEQUE_SRC signals_manager resource_scheduler ${BARBEQUE_SRC})
+set (BARBEQUE_SRC synchronization_manager ${BARBEQUE_SRC})
 if(BBQUE_TEST_PLATFORM_DATA)
 	# This is just a temporary replacement for the still missing
 	# ResourceAbstraction module
