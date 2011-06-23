@@ -78,8 +78,16 @@ void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
 	br::UsagesMapPtr_t pum;
 	uint32_t selected_awm;
 	uint32_t selected_cluster;
+	uint8_t cluster_count;
 
 	assert(papp);
+
+	// Check for a valid cluster count
+	cluster_count = ra.Total(RSRC_CLUSTER);
+	if (cluster_count == 0) {
+		assert(cluster_count != 0);
+		return;
+	}
 
 	// Select a random AWM for this EXC
 	awms = papp->WorkingModes();
@@ -92,7 +100,7 @@ void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
 	assert(it!=end);
 
 	// Bind to a random virtual cluster
-	selected_cluster = dist(rng_engine) % ra.Total(RSRC_CLUSTER);
+	selected_cluster = dist(rng_engine) % cluster_count;
 	logger->Debug("Scheduling EXC [%s] on Cluster [%d of %d]",
 			papp->StrId(), selected_cluster, ra.Total(RSRC_CLUSTER));
 	bindResult = (*it)->BindResource("cluster", RSRC_ID_ANY, selected_cluster, pum);
