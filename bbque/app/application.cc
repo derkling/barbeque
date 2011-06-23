@@ -246,19 +246,6 @@ void Application::SetState(State_t state, SyncState_t sync) {
 
 }
 
-// NOTE: this requires a lock on schedule_mtx
-void Application::ResetState() {
-
-	assert(Synching());
-
-	logger->Debug("Resetting to pre-sync state for [%s]",
-			StrId(),
-			State(), StateStr(State()),
-			PreSyncState(), StateStr(PreSyncState()));
-
-	SetState(PreSyncState());
-}
-
 /*******************************************************************************
  *  EXC Destruction
  ******************************************************************************/
@@ -370,9 +357,10 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	// accorting to our new state
 	result = am.SyncRequest(papp, sync);
 	if (result != ApplicationManager::AM_SUCCESS) {
-		logger->Error("Request synchronization FAILED (Error: %d)", result);
-		ResetState();
-		return APP_ABORT;
+		logger->Error("Synchronization request FAILED (Error: %d)", result);
+		// This is not an error on AWM scheduling but only on the notification
+		// of the SynchronizationManager module. The AWM could still be
+		// accepted.
 	}
 
 	logger->Info("Sync scheduled [%s, %d:%s]",
@@ -412,7 +400,7 @@ Application::Reschedule(AwmPtr_t const & awm) {
 	// Ready application could be synchronized to start
 	if (State() == READY)
 		return RequestSync(STARTING);
-	
+
 	// Otherwise, the application should be running...
 	if (State() != RUNNING) {
 		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
@@ -482,7 +470,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		Unschedule();
 		return APP_WM_REJECTED;
 	}
-	
+
 	logger->Debug("Rescheduling [%s] into AWM [%d:%s]...",
 			papp->StrId(), awm->Id(), awm->Name().c_str());
 
