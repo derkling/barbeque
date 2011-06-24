@@ -52,8 +52,12 @@ WorkingMode::WorkingMode(uint16_t _id,
 	name(_name),
 	value(_value) {
 
+	std::stringstream ss;
+	ss << id;
+
 	// Get a logger
 	std::string logger_name(AWM_NAMESPACE ".");
+	logger_name += ss.str();
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 }
@@ -74,14 +78,14 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 
 	// Does the resource exist ?
 	if (rsrc_total_qty == 0) {
-		logger->Warn("Resource '%s' not found.", _res_path.c_str());
+		logger->Warn("AddResUsage: {%s} not found.", _res_path.c_str());
 		return WM_RSRC_NOT_FOUND;
 	}
 
 	// Is the usage value acceptable ? (below the total availability)
 	if (rsrc_total_qty < _value) {
-		logger->Warn("Resource '%s' usage value exceeds \n"
-				"(total = %d)", _res_path.c_str(), rsrc_total_qty);
+		logger->Warn("AddResUsage: {%s} usage value exceeds total (%d)",
+				_res_path.c_str(), rsrc_total_qty);
 		return WM_RSRC_USAGE_EXCEEDS;
 	}
 
@@ -90,6 +94,8 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	rsrc_usages.insert(std::pair<std::string, br::UsagePtr_t>(
 				_res_path, res_usage));
 
+	logger->Debug("AddResUsage: added {%s}\t[usage: %llu]",
+			_res_path.c_str(), _value);
 	return WM_SUCCESS;
 }
 
@@ -110,8 +116,8 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
 	// Check the existance of the destination AWM
 	assert(owner->GetRecipe().get() != NULL);
 	if (!(owner->GetRecipe()->WorkingMode(_dest_awm_id))) {
-		logger->Warn("Working mode ID=%d not found in %s",
-		             _dest_awm_id, owner->Name().c_str());
+		logger->Warn("AddOvhead: AWM{%d} not found in {%s}",
+		             _dest_awm_id, owner->StrId());
 		return WM_NOT_FOUND;
 	}
 
@@ -128,7 +134,7 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
 	}
 
 	// Debug messages
-	logger->Debug("AWM %d -> AWM%d  overhead [t] :\n", id, _dest_awm_id);
+	logger->Debug("AWM{%d} -> AWM{%d}  overhead [t] :\n", id, _dest_awm_id);
 	logger->Debug("\tlast : %.4f", OverheadInfo(_dest_awm_id)->LastTime());
 	logger->Debug("\tmin  : %.4f", OverheadInfo(_dest_awm_id)->MinTime());
 	logger->Debug("\tmax  : %.4f", OverheadInfo(_dest_awm_id)->MaxTime());
@@ -172,7 +178,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string bind_rsrc_path =
 				ReplaceResourceID(usage_it->first, rsrc_name, src_ID, dst_ID);
 
-		logger->Debug("Recipe path [%s] => binded to [%s]",
+		logger->Debug("Binding: 'recipe' [%s] => 'bbque' [%s]",
 				usage_it->first.c_str(), bind_rsrc_path.c_str());
 
 		// Create a new ResourceUsage object, fill "binds" attribute with the
@@ -181,7 +187,8 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			UsagePtr_t(new ResourceUsage(usage_it->second->value));
 		bind_rsrc_map->binds = ra.GetResources(bind_rsrc_path);
 
-		logger->Debug("Binded resources count [%d]", bind_rsrc_map->binds.size());
+		logger->Debug("Binding: resources count [%d]",
+				bind_rsrc_map->binds.size());
 
 		usages_bind->insert(std::pair<std::string,
 						UsagePtr_t>(bind_rsrc_path, bind_rsrc_map));
@@ -192,7 +199,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			if (rsrc_path_unb)
 				strncpy(rsrc_path_unb, usage_it->first.c_str(),
 						(usage_it->first).size());
-			logger->Error("Not bound: %s", bind_rsrc_path.c_str());
+			logger->Error("Binding: Not bound: %s", bind_rsrc_path.c_str());
 			continue;
 		}
 	}
@@ -200,9 +207,8 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	// Debug messages
 	usage_it = usages_bind->begin();
 	it_end = usages_bind->end();
-	logger->Debug("Binding resources...");
 	for (; usage_it != it_end; ++usage_it) {
-		logger->Debug("\t%s [value = %llu #binds = %d]",
+		logger->Debug("Binding: {%s} [value = %llu #binds = %d]",
 				usage_it->first.c_str(),
 				usage_it->second->value,
 				usage_it->second->binds.size());
@@ -231,8 +237,10 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 	// If there's a path template mismatch returns
 	while ((bind_it != end_bind) && (rsrc_it != end_rsrc)) {
 		if (PathTemplate(bind_it->first).compare(
-					PathTemplate(rsrc_it->first)) != 0)
+					PathTemplate(rsrc_it->first)) != 0) {
+			logger->Error("SetBinding: %s resource path mismatch");
 			return WM_RSRC_MISS_BIND;
+		}
 
 		++rsrc_it;
 		++bind_it;
@@ -246,7 +254,7 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 		// If this is a clustered resource mark the cluster bit in the set
 		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
 		if (cl_id != RSRC_ID_NONE) {
-			logger->Debug("Binding in CLUSTER %d", cl_id);
+			logger->Debug("SetBinding: Bound into cluster %d", cl_id);
 			cluster_set.set(cl_id);
 		}
 	}
