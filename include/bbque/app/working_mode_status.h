@@ -158,8 +158,7 @@ public:
 	 */
 	virtual ExitCode_t BindResource(std::string const & rsrc_name,
 			ResID_t src_ID,	ResID_t dst_ID,
-			UsagesMapPtr_t & usages_bind,
-			char * rsrc_path_unb = NULL) = 0;
+			UsagesMapPtr_t & usages_bind) = 0;
 
 	/**
 	 * @brief Current resource usages bound with the system resources

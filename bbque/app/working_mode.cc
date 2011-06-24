@@ -158,20 +158,22 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string const & rsrc_name,
 		ResID_t src_ID,
 		ResID_t dst_ID,
-		UsagesMapPtr_t & usages_bind,
-		char * rsrc_path_unb) {
+		UsagesMapPtr_t & usages_bind) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-
-	// Null name check
-	if (rsrc_name.empty())
-		return WM_RSRC_ERR_NAME;
-
-	// Init a new Resource Usage maps
-	usages_bind = UsagesMapPtr_t(new UsagesMap_t());
-
-	// Resource usages
 	UsagesMap_t::iterator usage_it(rsrc_usages.begin());
 	UsagesMap_t::iterator it_end(rsrc_usages.end());
+
+	// Null name check
+	if (rsrc_name.empty()) {
+		logger->Error("Binding: Missing resource name");
+		return WM_RSRC_ERR_NAME;
+	}
+
+	// If the pointer to the UsagesMap_t is null allocate a new map
+	if (!usages_bind)
+		usages_bind = UsagesMapPtr_t(new UsagesMap_t());
+
+	// Resource usages loaded from the recipe
 	for (; usage_it != it_end; ++usage_it) {
 		// Replace resource name+src_ID with resource_name+dst_ID in the
 		// resource path
@@ -182,26 +184,18 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 				usage_it->first.c_str(), bind_rsrc_path.c_str());
 
 		// Create a new ResourceUsage object, fill "binds" attribute with the
-		// list of resource descriptors and insert it into the binding map
-		UsagePtr_t bind_rsrc_map =
+		// list of resource descriptors
+		UsagePtr_t bind_rsrc_usage =
 			UsagePtr_t(new ResourceUsage(usage_it->second->value));
-		bind_rsrc_map->binds = ra.GetResources(bind_rsrc_path);
+		bind_rsrc_usage->binds = ra.GetResources(bind_rsrc_path);
 
+		assert(!bind_rsrc_usage->binds.empty());
 		logger->Debug("Binding: resources count [%d]",
-				bind_rsrc_map->binds.size());
+				bind_rsrc_usage->binds.size());
 
+		// Insert the bound resource into the usages map to return
 		usages_bind->insert(std::pair<std::string,
-						UsagePtr_t>(bind_rsrc_path, bind_rsrc_map));
-
-		// If the current resource binding has not be solved, save the path of
-		// the last unbound resource
-		if (bind_rsrc_map->binds.empty()) {
-			if (rsrc_path_unb)
-				strncpy(rsrc_path_unb, usage_it->first.c_str(),
-						(usage_it->first).size());
-			logger->Error("Binding: Not bound: %s", bind_rsrc_path.c_str());
-			continue;
-		}
+					UsagePtr_t>(bind_rsrc_path, bind_rsrc_usage));
 	}
 
 	// Debug messages

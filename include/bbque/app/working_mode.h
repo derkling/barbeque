@@ -163,8 +163,7 @@ public:
 	 * @see WorkingModeStatusIF
 	 */
 	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
-			ResID_t dst_ID, UsagesMapPtr_t & usages_bind,
-			char * rsrc_path_unb = NULL);
+			ResID_t dst_ID, UsagesMapPtr_t & usages_bind);
 
 	/**
 	 * @see WorkingModeStatusIF
