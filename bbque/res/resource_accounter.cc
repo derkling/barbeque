@@ -49,8 +49,7 @@ ResourceAccounter & ResourceAccounter::GetInstance() {
 	return instance;
 }
 
-ResourceAccounter::ResourceAccounter():
-	clustering_factor(0) {
+ResourceAccounter::ResourceAccounter() {
 
 	// Get a logger
 	std::string logger_name(RESOURCE_ACCOUNTER_NAMESPACE);
@@ -72,6 +71,26 @@ ResourceAccounter::~ResourceAccounter() {
 	resources.clear();
 	usages_per_views.clear();
 	rsrc_per_views.clear();
+}
+
+uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
+	uint16_t clustering_factor;
+
+	// Check if the resource exists
+	if (!ExistResource(path))
+		return 0;
+
+	// Check if the resource is clustered
+	int16_t clust_patt_pos = path.find(RSRC_CLUSTER);
+	if (clust_patt_pos < 0)
+		return 1;
+
+	// Compute the clustering factor
+	clustering_factor = Total(RSRC_CLUSTER);
+	if (clustering_factor == 0)
+		++clustering_factor;
+
+	return clustering_factor;
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(

@@ -170,7 +170,7 @@ public:
 	 *
 	 * @param path Resource path
 	 * @return The number of clusters in the platform if the resource is a
-	 * clustered one, 1 otherwise.
+	 * clustered one, 1 if there are no clusters, 0 otherwise.
 	 */
 	virtual uint16_t ClusteringFactor(std::string const & path) = 0;
 

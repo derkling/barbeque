@@ -174,24 +174,7 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint16_t ClusteringFactor(std::string const & path) {
-		// Check if the resource exists
-		if (GetResource(path).get() == 0)
-			return 0;
-		// Check if the resource is clustered
-		int16_t clust_patt_pos = path.find(RSRC_CLUSTER);
-		if (clust_patt_pos < 0)
-			return 1;
-		// Compute the factor only if not done yet
-		if (clustering_factor == 0) {
-			clustering_factor = Total(RSRC_CLUSTER);
-			// If the query returns 0 the plaform is not cluster-based.
-			// Thus we must set clustering factor to 1.
-			if (clustering_factor == 0)
-				clustering_factor = 1;
-		}
-		return clustering_factor;
-	}
+	uint16_t ClusteringFactor(std::string const & path);
 
 	/**
 	 * @see ResourceAccounterConfIF
@@ -445,12 +428,6 @@ private:
 	 * as the new system state.
 	 */
 	ResourceViewsMap_t rsrc_per_views;
-
-	/**
-	 * Clustering factor. This is equal to the number of clusters in the
-	 * platform.
-	 */
-	uint16_t clustering_factor;
 
 };
 
