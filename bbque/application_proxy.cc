@@ -25,7 +25,9 @@
 #include "bbque/application_proxy.h"
 
 #include "bbque/application_manager.h"
+#include "bbque/resource_manager.h"
 #include "bbque/modules_factory.h"
+#include "bbque/app/working_mode.h"
 #include "bbque/utils/utility.h"
 
 namespace bbque {
@@ -200,9 +202,54 @@ ApplicationProxy::StopExecution(AppPtr_t papp) {
 }
 
 
-void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
-	logger->Debug("APPs PRX: processing transaction response...");
-	(void)msg;
+ApplicationProxy::pcmdSn_t
+ApplicationProxy::GetCommandSession(rpc_msg_header_t *pmsg_hdr)  {
+	std::unique_lock<std::mutex> cmdSnMap_ul(cmdSnMap_mtx);
+	cmdSnMap_t::iterator it;
+	pcmdSn_t pcs;
+
+	// Looking for a valid command session
+	it = cmdSnMap.find(pmsg_hdr->token);
+	if (it == cmdSnMap.end()) {
+		cmdSnMap_ul.unlock();
+		logger->Warn("APPs PRX [%5d]: Command transation completion FAILED",
+			"(Error: command session not found)", pmsg_hdr->token);
+		assert(it != cmdSnMap.end());
+		return pcmdSn_t();
+	}
+	return (*it).second;
+
+}
+
+void ApplicationProxy::CompleteTransaction(pchMsg_t & pmsg) {
+	rpc_msg_header_t * pmsg_hdr = pmsg;
+	pcmdSn_t pcs;
+
+	assert(pmsg_hdr);
+
+	logger->Debug("APPs PRX: dispatching command response "
+			"[typ: %d, pid: %d] to [%5d]...",
+			pmsg_hdr->typ,
+			pmsg_hdr->app_pid,
+			pmsg_hdr->token);
+
+	// Looking for a valid command session
+	pcs = GetCommandSession(pmsg_hdr);
+	if (!pcs) {
+		logger->Crit("APPs PRX: dispatching command response FAILED "
+				"(Error: cmd session not found for token [%d])",
+				pmsg_hdr->token);
+		assert(pcs);
+		return;
+	}
+
+	// Setup command session response buffer
+	pcs->pmsg = pmsg;
+
+	// Notify command session
+	//std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
+	(pcs->resp_cv).notify_one();
+
 }
 
 

@@ -30,6 +30,7 @@
 
 #include "bbque/config.h"
 #include "bbque/plugin_manager.h"
+#include "bbque/application_proxy.h"
 
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/synchronization_policy.h"

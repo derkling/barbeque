@@ -52,24 +52,45 @@ private:
 
 	plugins::RPCChannelIF *rpc;
 
+
+	typedef struct snCtx {
+		std::thread exe;
+		AppPid_t pid;
+	} snCtx_t;
+
+	typedef std::promise<RTLIB_ExitCode> resp_prm_t;
+
+	typedef std::future<RTLIB_ExitCode> resp_ftr_t;
+
+	typedef std::shared_ptr<resp_ftr_t> prespFtr_t;
+
+	typedef RPCChannelIF::rpc_msg_ptr_t pchMsg_t;
+
+	typedef struct cmdSn : public snCtx_t {
+		AppPtr_t papp;
+		resp_prm_t resp_prm;
+		resp_ftr_t resp_ftr;
+		std::mutex resp_mtx;
+		std::condition_variable resp_cv;
+		pchMsg_t pmsg;
+	} cmdSn_t;
+
+	typedef std::shared_ptr<cmdSn_t> pcmdSn_t;
+
+	typedef struct cmdRsp {
+		RTLIB_ExitCode result;
+		// The comand session to handler this command
+		pcmdSn_t pcs;
+	} cmdRsp_t;
+
+
+
+
 public:
 
 	static ApplicationProxy & GetInstance();
 
 	void Start();
-
-	typedef struct cmdRsp {
-		RTLIB_ExitCode result;
-	} cmdRsp_t;
-
-	typedef std::shared_ptr<cmdRsp_t> pcmdRsp_t;
-
-	typedef std::promise<pcmdRsp_t> resp_prm_t;
-
-	typedef std::future<pcmdRsp_t> resp_ftr_t;
-
-	typedef std::shared_ptr<resp_ftr_t> prespFtr_t;
-
 
 
 	~ApplicationProxy();
@@ -84,12 +105,7 @@ public:
 
 private:
 
-	typedef RPCChannelIF::rpc_msg_ptr_t pchMsg_t;
 
-	typedef struct snCtx {
-		std::thread exe;
-		AppPid_t pid;
-	} snCtx_t;
 
 	typedef std::shared_ptr<snCtx_t> psnCtx_t;
 
@@ -127,16 +143,6 @@ private:
 
 	typedef std::shared_ptr<rqsSn_t> prqsSn_t;
 
-	typedef struct cmdSn : public snCtx_t {
-		AppPtr_t papp;
-		resp_prm_t resp_prm;
-		std::mutex resp_mtx;
-		std::condition_variable resp_cv;
-		pchMsg_t pmsg;
-	} cmdSn_t;
-
-	typedef std::shared_ptr<cmdSn_t> pcmdSn_t;
-
 
 	/**
 	 * @brief	A multimap to track active Command Sessions.
@@ -150,6 +156,11 @@ private:
 	cmdSnMap_t cmdSnMap;
 
 	std::mutex cmdSnMap_mtx;
+
+
+
+	typedef std::shared_ptr<cmdRsp_t> pcmdRsp_t;
+
 
 	ApplicationProxy();
 
@@ -178,7 +189,9 @@ private:
 	 */
 	inline void EnqueueHandler(pcmdSn_t pcs);
 
-	void StopExecutionTrd(pcmdSn_t snHdr);
+	void StopExecutionTrd(pcmdSn_t pcs);
+
+	pcmdSn_t GetCommandSession(rpc_msg_header_t *pmsg_hdr);
 
 	void CompleteTransaction(pchMsg_t & pmsg);
 

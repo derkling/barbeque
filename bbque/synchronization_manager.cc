@@ -95,19 +95,70 @@ SynchronizationManager::~SynchronizationManager() {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
-	AppsMap_t::const_iterator it(apps->begin());
+	ApplicationProxy &ap(ApplicationProxy::GetInstance());
+	AppsMap_t::const_iterator apps_it(apps->begin());
+
+	//ApplicationProxy::prespFtr_t prespFtr;
+
+	typedef std::map<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMap_t;
+	typedef std::pair<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMapEntry_t;
+
+	ApplicationProxy::pPreChangeRsp_t presp;
+	RspMap_t::iterator resp_it;
+	RTLIB_ExitCode result;
+	RspMap_t rsp_map;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 1: preChange() START");
 
-	for ( ; it != apps->end(); ++it) {
-		papp = (*it).second;
+	for ( ; apps_it != apps->end(); ++apps_it) {
+		papp = (*apps_it).second;
+		assert(papp);
 
 		if (!policy->DoSync(papp))
 			continue;
 
 		logger->Debug("STEP 1: preChange() ===> [%s]", papp->StrId());
 
+		// Start an Async Pre-Change
+		presp = ApplicationProxy::pPreChangeRsp_t(
+				new ApplicationProxy::preChangeRsp_t());
+		result = ap.SyncP_PreChange_Async(papp, presp);
+		if (result != RTLIB_OK)
+			continue;
+
+		// Mapping the response future for responses collection
+		rsp_map.insert(RspMapEntry_t(papp, presp));
+
+	}
+
+	// Collecting EXC responses
+	for (resp_it = rsp_map.begin();
+			resp_it != rsp_map.end();
+			++resp_it) {
+
+		presp = (*resp_it).second;
+		papp  = (*resp_it).first;
+
+		logger->Debug("STEP 1: (wait resp from) [%s]", papp->StrId());
+		result = ap.SyncP_PreChange_GetResult(presp);
+		if (result != RTLIB_OK) {
+			logger->Warn("STEP 1: <----- FAILED -- [%s]", papp->StrId());
+			// FIXME This case should be handled
+			assert(false);
+		}
+
+		logger->Debug("STEP 1: <--------- OK -- [%s]", papp->StrId());
+		logger->Debug("STEP1: [%s] declared syncLatency %d[ms]",
+				papp->StrId(), presp->syncLatency);
+
+		// TODO Here the synchronization policy should be queryed to
+		// decide if the synchronization latency is compliant with the
+		// RTRM optimization goals.
+		logger->Warn("TODO: Check sync policy for syncLatency compliance");
+
+		// Remove the respose future
+		rsp_map.erase(resp_it);
 	}
 
 	logger->Debug("STEP 1: preChange() DONE");
