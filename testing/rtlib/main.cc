@@ -97,6 +97,13 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, FMT_INF("starting application processing...\n"));
 	app.Start(0, num_exc);
 
+
+	fprintf(stderr, FMT_INF("Getting an AWM for each registered EXC...\n"));
+	for (uint8_t i = 0; i<num_exc; i++) {
+		::snprintf(exc_name, 8, "exc_%03d", i);
+		app.GetWorkingMode(exc_name);
+	}
+
 	fprintf(stderr, FMT_INF("running simulation for [%d]s\n"),
 			simulation_time);
 

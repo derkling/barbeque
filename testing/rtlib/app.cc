@@ -106,7 +106,7 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 	RTLIB_ExecutionContextHandler exc_hdl;
 	RTLIB_ExitCode result;
 
-	fprintf(stderr, FMT_INF("Starting [%d] EXCs...\n"), last-first+1);
+	fprintf(stderr, FMT_INF("Starting [%d] EXCs...\n"), last-first);
 
 	for (uint8_t idx=0; it!=end; ++it) {
 		// Starting only the selected EXCs
@@ -131,6 +131,36 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 	}
 
 	return RTLIB_OK;
+}
+
+int BbqueApp::GetWorkingMode(std::string const & name) {
+	excMap_t::iterator it = exc_map.find(name);
+	RTLIB_WorkingModeParams wmp;
+	RTLIB_ExitCode result;
+
+	fprintf(stderr, FMT_INF("Get AWM for EXC [%s]...\n"),
+			name.c_str());
+
+	if (it==exc_map.end()) {
+		fprintf(stderr, FMT_ERR("FAILED: EXC [%s] not registered\n"),
+				name.c_str());
+		return -1;
+	}
+
+	assert(rtlib && rtlib->GetWorkingMode);
+
+	RTLIB_ExecutionContextHandler ech = (*it).second;
+	result = rtlib->GetWorkingMode(ech, &wmp);
+	if (result != RTLIB_OK) {
+		fprintf(stderr, FMT_ERR("FAILED: get AWM for EXC [%s]\n"),
+				name.c_str());
+		return -2;
+	}
+
+	fprintf(stderr, FMT_INF("EXC [%s] assigned AWM [%d]\n"),
+			name.c_str(), wmp.awm_id);
+
+	return 0;
 }
 
 RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {

@@ -37,6 +37,8 @@ public:
 
 	RTLIB_ExitCode Start(uint8_t first, uint8_t last);
 
+	int GetWorkingMode(std::string const & name);
+
 	RTLIB_ExitCode Stop(uint8_t first, uint8_t last);
 
 	static RTLIB_ExitCode Stop(
