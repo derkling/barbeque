@@ -103,6 +103,31 @@ public:
 
 	RTLIB_ExitCode StopExecutionSync(AppPtr_t papp);
 
+/*******************************************************************************
+ * Synchronization Protocol
+ ******************************************************************************/
+
+	typedef struct preChangeRsp : public cmdRsp_t {
+		uint32_t syncLatency; ///> [ms] estimation of next sync point
+	} preChangeRsp_t;
+
+	typedef std::shared_ptr<preChangeRsp_t> pPreChangeRsp_t;
+
+	/**
+	 * @brief Synchronous PreChange
+	 */
+	RTLIB_ExitCode SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp);
+
+	/**
+	 * @brief Start an Asynchronous PreChange
+	 */
+	RTLIB_ExitCode SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp);
+
+	/**
+	 * @brief Get the result of an issued Asynchronous PreChange
+	 */
+	RTLIB_ExitCode SyncP_PreChange_GetResult(pPreChangeRsp_t &presp);
+
 private:
 
 
@@ -194,6 +219,18 @@ private:
 	pcmdSn_t GetCommandSession(rpc_msg_header_t *pmsg_hdr);
 
 	void CompleteTransaction(pchMsg_t & pmsg);
+
+/*******************************************************************************
+ * Synchronization Protocol
+ ******************************************************************************/
+
+	RTLIB_ExitCode SyncP_PreChangeSend(pcmdSn_t pcs);
+
+	RTLIB_ExitCode SyncP_PreChangeRecv(pcmdSn_t pcs, pPreChangeRsp_t &preps);
+
+	RTLIB_ExitCode SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t &presp);
+
+	void SyncP_PreChangeTrd(pPreChangeRsp_t &presp);
 
 /*******************************************************************************
  * Request Sessions

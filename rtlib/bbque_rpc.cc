@@ -383,6 +383,12 @@ exit_gwm_failed:
 
 }
 
+RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	// Setting current AWM as invalid
+	setAwmInvalid(prec);
+	return RTLIB_OK;
+}
 
 uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
 	(void)prec;
@@ -390,6 +396,35 @@ uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
 	// By default now we return a 100[ms] synchronization latency value
 	return 100;
 }
+
+RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
+		rpc_msg_token_t token,
+		uint8_t exc_id) {
+	RTLIB_ExitCode result;
+	uint32_t syncLatency;
+	pregExCtx_t prec;
+
+	prec = getRegistered(exc_id);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("SyncP_1 (Pre-Change) EXC [%d] FAILED "
+				"(Error: Execution Context not registered)\n"),
+				exc_id);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	result = SyncP_PreChangeNotify(prec);
+
+	// Update the Synchronziation Latency
+	syncLatency = GetSyncLatency(prec);
+	DB(fprintf(stderr, FMT_DBG("SyncP_1 (Pre-Change) EXC [%d], "
+				"SyncLatency [%u]\n"),
+				exc_id, syncLatency));
+
+	_SyncpPrechangeResp(token, prec, syncLatency);
+
+	return RTLIB_OK;
+}
+
 
 RTLIB_ExitCode BbqueRPC::Set(
 		const RTLIB_ExecutionContextHandler ech,

@@ -63,6 +63,12 @@ typedef enum rpc_msg_type {
 
 //--- Barbeque Originated Messages
 	RPC_BBQ_STOP_EXECUTION,
+
+	RPC_BBQ_SYNCP_PRECHANGE,
+	RPC_BBQ_SYNCP_SYNCCHANGE,
+	RPC_BBQ_SYNCP_DOCHANGE,
+	RPC_BBQ_SYNCP_POSTCHANGE,
+
 	RPC_BBQ_RESP, ///< Response to a BBQ command
 	RPC_BBQ_MSGS_COUNT ///< The number of EXC originated messages
 
@@ -186,7 +192,25 @@ typedef struct rpc_msg_exc_schedule {
  * Synchronization Protocol Messages
  ******************************************************************************/
 
+/**
+ * @brief Synchronization Protocol PreChange command
+ */
+typedef struct rpc_msg_bbq_syncp_prechange {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+	/** The selected AWM */
+	uint16_t awm;
+} rpc_msg_bbq_syncp_prechange_t;
 
+/**
+ * @brief Synchronization Protocol PreChange response
+ */
+typedef struct rpc_msg_bbq_syncp_prechange_resp {
+	/** The RPC fifo command header */
+	rpc_msg_header_t header;
+	/** An extimation of the Synchronization Latency */
+	uint32_t syncLatency;
+} rpc_msg_bbq_syncp_prechange_resp_t;
 
 /******************************************************************************
  * Barbeque Commands

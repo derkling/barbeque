@@ -191,6 +191,23 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
 		break;
 
+	case RPC_BBQ_SYNCP_PRECHANGE:
+		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_PRECHANGE\n")));
+		RpcBbqSyncpPrechange();
+		break;
+	case RPC_BBQ_SYNCP_SYNCCHANGE:
+		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_SYNCCHANGE\n")));
+		//RpcBbqSyncpPostcYhange();
+		break;
+	case RPC_BBQ_SYNCP_DOCHANGE:
+		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_DOCHANGE\n")));
+		//RpcBbqSyncpDochange();
+		break;
+	case RPC_BBQ_SYNCP_POSTCHANGE:
+		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_POSTCHANGE\n")));
+		//RpcBbqSyncpPostchange();
+		break;
+
 	default:
 		fprintf(stderr, FMT_ERR("Unknown BBQ response/command [%d]\n"),
 				hdr.rpc_msg_type);
@@ -707,10 +724,84 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 }
 
 
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPrechangeResp(
+		rpc_msg_token_t token, pregExCtx_t prec, uint32_t syncLatency) {
+	rpc_fifo_undef_t fifo_spcr = {
+		{
+			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(bbq_syncp_prechange_resp),
+			FIFO_PKT_SIZE(undef),
+			RPC_BBQ_RESP
+		}
+	};
+	rpc_msg_bbq_syncp_prechange_resp_t msg_spcr = {
+		{RPC_BBQ_RESP, token, chTrdPid, prec->exc_id},
+		syncLatency
+	};
+	size_t bytes;
+
+	DB(fprintf(stderr, FMT_DBG("PreChange response EXC [%d:%d] "
+					"latency [%d]...\n"),
+				msg_spcr.header.app_pid,
+				msg_spcr.header.exc_id,
+				msg_spcr.syncLatency));
+
+	// Send FIFO header
+	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
+		"[sze: %hd, off: %hd, typ: %hd]...\n"),
+		fifo_spcr.header.fifo_msg_size,
+		fifo_spcr.header.rpc_msg_offset,
+		fifo_spcr.header.rpc_msg_type
+	));
+	bytes = ::write(server_fifo_fd, (void*)&fifo_spcr,
+			FIFO_PKT_SIZE(undef));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
+					"(Error %d: %s)\n"),
+				bbque_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
+
+	// Send RPC header
+	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
+		"[typ: %d, pid: %d, eid: %hd]...\n"),
+		msg_spcr.header.typ,
+		msg_spcr.header.app_pid,
+		msg_spcr.header.exc_id
+	));
+	bytes = ::write(server_fifo_fd, (void*)&msg_spcr,
+			RPC_PKT_SIZE(bbq_syncp_prechange_resp));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
+					"(Error %d: %s)\n"),
+				bbque_fifo_path.c_str(),
+				errno, strerror(errno));
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
 
 	return RTLIB_OK;
+}
+
+void BbqueRPC_FIFO_Client::RpcBbqSyncpPrechange() {
+	rpc_msg_bbq_syncp_prechange_t msg;
+	size_t bytes;
+
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&msg,
+			RPC_PKT_SIZE(bbq_syncp_prechange));
+	if (bytes <= 0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		chResp.result = RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	// Notify the Pre-Change
+	SyncP_PreChangeNotify(msg.header.token, msg.header.exc_id);
 
 }
+
 
 void BbqueRPC_FIFO_Client::_Exit() {
 	ChannelRelease();

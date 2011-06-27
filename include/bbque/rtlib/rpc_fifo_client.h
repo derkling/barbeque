@@ -63,7 +63,10 @@ protected:
 
 	RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec);
 
+	RTLIB_ExitCode _SyncpPrechangeResp(
+			rpc_msg_token_t token,
 			pregExCtx_t prec,
+			uint32_t syncLatency);
 
 	RTLIB_ExitCode _Set(
 			const RTLIB_ExecutionContextHandler ech,
@@ -147,6 +150,16 @@ private:
 	void ChannelTrd();
 
 	void RpcBbqResp();
+
+
+
+	void RpcBbqSyncpPrechange();
+
+	//void RpcBbqSyncpPrechange();
+	//void RpcBbqSyncpDochange();
+	//void RpcBbqSyncpPostchange();
+
+	void RpcBbqCmd_SetWorkingMode();
 };
 
 } // namespace rtlib

@@ -169,7 +169,19 @@ protected:
 			const RTLIB_ExecutionContextHandler ech) = 0;
 
 	virtual RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec) = 0;
+
+	virtual RTLIB_ExitCode _SyncpPrechangeResp(
+			rpc_msg_token_t token,
 			pregExCtx_t prec,
+			uint32_t syncLatency) = 0;
+
+	/**
+	 * @brief A synchronization protocol Pre-Change for the EXC with the
+	 * specified ID.
+	 */
+	RTLIB_ExitCode SyncP_PreChangeNotify(
+			rpc_msg_token_t token,
+			uint8_t exc_id);
 
 
 	/**
@@ -224,6 +236,10 @@ private:
 	RTLIB_ExitCode WaitForWorkingMode(pregExCtx_t prec,
 			RTLIB_WorkingModeParams *wm);
 
+	/**
+	 * @brief A synchronization protocol Pre-Change for the specified EXC.
+	 */
+	RTLIB_ExitCode SyncP_PreChangeNotify(pregExCtx_t prec);
 
 	/**
 	 * @brief Get an extimation of the Synchronization Latency

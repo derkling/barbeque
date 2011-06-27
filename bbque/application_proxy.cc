@@ -198,9 +198,150 @@ ApplicationProxy::StopExecution(AppPtr_t papp) {
 	return RTLIB_OK;
 }
 
+/*******************************************************************************
+ * Synchronization Protocol
+ ******************************************************************************/
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
+			std::defer_lock);
+	conCtxMap_t::iterator it;
+	AppPtr_t papp = pcs->papp;
+	pconCtx_t pcon;
+	rpc_msg_bbq_syncp_prechange_t syncp_prechange_msg = {
+		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid, papp->Pid(), papp->ExcId()},
+		papp->NextAWM()->Id()
+	};
+
+	// Send the stop command
+	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_PRECHANGE] to "
+			"EXC [%s]", papp->StrId());
+
+	assert(rpc);
+
+	// Recover the communication context for this application
+	conCtxMap_ul.lock();
+	it = conCtxMap.find(papp->Pid());
+	conCtxMap_ul.unlock();
+
+	// Check we have a connection context already configured
+	if (it == conCtxMap.end()) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_PRECHANGE] "
+				"to EXC [%s] FAILED (Error: connection context not found)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_UNAVAILABLE;
+	}
+
+	// Sending message on the application connection context
+	pcon = (*it).second;
+	rpc->SendMessage(pcon->pd, &syncp_prechange_msg.header,
+			(size_t)RPC_PKT_SIZE(bbq_syncp_prechange));
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
+		pPreChangeRsp_t &presp) {
+	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
+	rpc_msg_bbq_syncp_prechange_resp_t *pmsg_pyl;
+	rpc_msg_header_t *pmsg_hdr;
+	pchMsg_t pchMsg;
+
+	// Wait for a response being available
+	(pcs->resp_cv).wait(resp_ul);
+
+	// Getting command response
+	pchMsg = pcs->pmsg;
+	pmsg_hdr = pchMsg;
+	pmsg_pyl = (rpc_msg_bbq_syncp_prechange_resp_t*)pmsg_hdr;
+
+	logger->Debug("APPs PRX: command response [typ: %d, pid: %d]",
+			pmsg_hdr->typ,
+			pmsg_hdr->app_pid);
+
+	assert(pmsg_hdr->typ == RPC_BBQ_RESP);
+
+	// Build a new communication context
+	logger->Debug("APPs PRX: PreChangeResp [pid: %d, latency: %u]",
+			pmsg_hdr->app_pid, pmsg_pyl->syncLatency);
+
+	// Processing response
+	presp->syncLatency = pmsg_pyl->syncLatency;
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t &presp) {
+
+	// Send the Command
+	presp->result = SyncP_PreChangeSend(pcs);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	// Get back the response
+	presp->result = SyncP_PreChangeRecv(pcs, presp);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	return RTLIB_OK;
 
 }
 
+void
+ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t &presp) {
+
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
+
+	logger->Debug("APPs PRX [%5d]: SyncP_PreChangeTrd(%s) START",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+
+	// Run the Command Executor
+	SyncP_PreChange(presp->pcs, presp);
+
+	// Give back the result to the calling thread
+	(presp->pcs->resp_prm).set_value(presp->result);
+
+	logger->Debug("APPs PRX [%5d]: SyncP_PreChangeTrd(%s) END",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
+	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
+	presp->pcs = SetupCmdSession(papp);
+
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
+
+	// Run the Command Executor
+	return SyncP_PreChange(presp->pcs, presp);
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp) {
+	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
+	presp->pcs = SetupCmdSession(papp);
+
+	// Spawn a new Command Executor (passing the future)
+	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_PreChangeTrd,
+			this, std::ref(presp));
+
+	// Setup the promise (thus unlocking the executor)
+	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t &presp) {
+	// Wait for the promise being returned
+	presp->pcs->resp_ftr.wait();
+	return presp->pcs->resp_ftr.get();
+}
 
 ApplicationProxy::pcmdSn_t
 ApplicationProxy::GetCommandSession(rpc_msg_header_t *pmsg_hdr)  {
