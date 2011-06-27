@@ -115,15 +115,13 @@ void ResourceManager::EvtBbqExit() {
 	//ApplicationProxy & ap = ApplicationProxy::GetInstance();
 	AppsUidMap_t const * apps = am.Applications();
 	AppsUidMap_t::const_iterator it = apps->begin();
-	AppsUidMap_t::const_iterator end = apps->end();
-	ApplicationProxy::resp_ftr_t ftr;
 	AppPtr_t papp;
 
 	logger->Info("Terminating Barbeque...");
 	done = true;
 
 	// Stop applications
-	for ( ; it!=end; ++it) {
+	for ( ; it != apps->end(); ++it) {
 		papp = (*it).second;
 		// Terminating the application
 		logger->Warn("TODO: Send application STOP command");
