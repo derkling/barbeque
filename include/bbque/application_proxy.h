@@ -190,7 +190,7 @@ private:
 	void RpcExcStop(prqsSn_t prqs);
 
 
-	void RpcExcGwm(prqsSn_t prqs);
+	void RpcExcSchedule(prqsSn_t prqs);
 
 
 	void RpcAppPair(prqsSn_t prqs);

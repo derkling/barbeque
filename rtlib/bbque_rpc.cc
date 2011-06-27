@@ -275,6 +275,23 @@ bool BbqueRPC::Sync(
 	return true;
 }
 
+RTLIB_ExitCode BbqueRPC::WaitForWorkingMode(
+		pregExCtx_t prec,
+		RTLIB_WorkingModeParams *wm) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+
+	// Notify we are going to be suspended waiting for an AWM
+	setAwmWaiting(prec);
+
+	while (!isAwmValid(prec))
+		prec->cv.wait(rec_ul);
+
+	clearAwmWaiting(prec);
+	wm->awm_id = prec->awm_id;
+
+	return RTLIB_OK;	
+}
+
 RTLIB_ExitCode BbqueRPC::GetWorkingMode(
 		const RTLIB_ExecutionContextHandler ech,
 		RTLIB_WorkingModeParams *wm) {
@@ -286,19 +303,38 @@ RTLIB_ExitCode BbqueRPC::GetWorkingMode(
 	prec = getRegistered(ech);
 	if (!prec) {
 		fprintf(stderr, FMT_ERR("Execution context [%p] GWM FAILED "
-					"(Execution Context not registered)\n"), (void*)ech);
+			"(Error: Execution Context not registered)\n"),
+			(void*)ech);
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
+	// Checking if a valid AWM has been assigned
+	DB(fprintf(stderr, FMT_DBG("Looking for assigned AWM...\n")));
+	result = GetAssignedWorkingMode(prec, wm);
+	if (result == RTLIB_OK)
+		return RTLIB_OK;
+
+	DB(fprintf(stderr, FMT_DBG("AWM not assigned: "
+					"Requesting Scheduling...\n")));
+
 	// Calling the low-level start
-	result = _GetWorkingMode(prec, wm);
-	if (result != RTLIB_OK) {
-		DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
-						"(Error %d)\n"), prec->name.c_str(), result));
-		return RTLIB_EXC_GWM_FAILED;
-	}
+	result = _ScheduleRequest(prec);
+	if (result != RTLIB_OK)
+		goto exit_gwm_failed;
+
+	// Waiting for an AWM being assigned
+	result = WaitForWorkingMode(prec, wm);
+	if (result != RTLIB_OK)
+		goto exit_gwm_failed;
 
 	return RTLIB_OK;
+
+exit_gwm_failed:
+
+	DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
+					"(Error: %d)\n"),
+				prec->name.c_str(), result));
+	return RTLIB_EXC_GWM_FAILED;
 
 }
 

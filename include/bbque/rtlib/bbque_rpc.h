@@ -101,10 +101,30 @@ protected:
 		std::string name;
 		/** The RTLIB assigned ID for this Execution Context */
 		uint8_t exc_id;
+#define EXC_FLAGS_AWM_VALID   0x01 ///< The EXC has been assigned a valid AWM
+#define EXC_FLAGS_AWM_WAITING 0x02 ///< The EXC is waiting for a valid AWM
+		/** A set of flags to define the state of this EXC */
+		uint8_t flags;
+		/** The ID of the assigned AWM (if valid) */
+		uint8_t awm_id;
+		/** The mutex protecting access to this structure */
+		std::mutex mtx;
+		/** The conditional variable to be notified on changes for this EXC */
+		std::condition_variable cv;
 	} RegisteredExecutionContext_t;
 
 	typedef std::shared_ptr<RegisteredExecutionContext_t> pregExCtx_t;
 
+	//--- AWM Wait
+	inline bool isAwmWaiting(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_AWM_WAITING);
+	}
+	inline void setAwmWaiting(pregExCtx_t prec) const {
+		prec->flags |= EXC_FLAGS_AWM_WAITING;
+	}
+	inline void clearAwmWaiting(pregExCtx_t prec) const {
+		prec->flags &= ~EXC_FLAGS_AWM_WAITING;
+	}
 
 	/**
 	 * @brief Build a new RTLib
@@ -134,9 +154,8 @@ protected:
 	virtual RTLIB_ExitCode _Clear(
 			const RTLIB_ExecutionContextHandler ech) = 0;
 
-	virtual RTLIB_ExitCode _GetWorkingMode(
+	virtual RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec) = 0;
 			pregExCtx_t prec,
-			RTLIB_WorkingModeParams *wm) = 0;
 
 	virtual void _Exit() = 0;
 

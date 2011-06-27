@@ -152,10 +152,8 @@ typedef enum RTLIB_ExitCode {
  * @brief The information passed to an application to set its new Working Mode.
  */
 typedef struct RTLIB_WorkingModeParams {
-	/** The identifier of the execution context */
-	const char* ec;
-	/** The name of the working mode to enable */
-	const char* id;
+	/** The ID of the working mode */
+	uint8_t awm_id;
 	/** The set of platform supported services */
 	const struct RTLIB_Services* services;
 } RTLIB_WorkingModeParams;

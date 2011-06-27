@@ -56,13 +56,12 @@ typedef enum rpc_msg_type {
 	RPC_EXC_CLEAR,
 	RPC_EXC_START,
 	RPC_EXC_STOP,
-	RPC_EXC_GWM,
+	RPC_EXC_SCHEDULE,
 
 	RPC_EXC_RESP, ///< Response to an EXC request
 	RPC_EXC_MSGS_COUNT, ///< The number of EXC originated messages
 
 //--- Barbeque Originated Messages
-	RPC_BBQ_SET_WORKING_MODE,
 	RPC_BBQ_STOP_EXECUTION,
 	RPC_BBQ_RESP, ///< Response to a BBQ command
 	RPC_BBQ_MSGS_COUNT ///< The number of EXC originated messages
@@ -156,12 +155,16 @@ typedef struct rpc_msg_exc_stop {
 } rpc_msg_exc_stop_t;
 
 /**
- * @brief Command to get assigned an AWM for an execution context.
+ * @brief Command to ask for being scheduled.
+ * 
+ * This message is send by the RTLIB once an EXC ask the RTRM to be scheduled
+ * (as soon as possible). The RTRM should identify the best AWM to be assigned
+ * for the requesting execution context.
  */
-typedef struct rpc_msg_exc_gwm {
+typedef struct rpc_msg_exc_schedule {
 	/** The RPC fifo command header */
 	rpc_msg_header_t header;
-} rpc_msg_exc_gwm_t;
+} rpc_msg_exc_schedule_t;
 
 
 

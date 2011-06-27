@@ -61,9 +61,8 @@ protected:
 
 	RTLIB_ExitCode _Stop(pregExCtx_t pregExCtx);
 
-	RTLIB_ExitCode _GetWorkingMode(
+	RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec);
 			pregExCtx_t prec,
-			RTLIB_WorkingModeParams *wm);
 
 	RTLIB_ExitCode _Set(
 			const RTLIB_ExecutionContextHandler ech,

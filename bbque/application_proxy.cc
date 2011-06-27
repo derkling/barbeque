@@ -393,12 +393,12 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 
 }
 
-void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
-	pchMsg_t pchMsg = prqs->pmsg;
-	rpc_msg_header_t * pmsg_hdr = pchMsg;
+void ApplicationProxy::RpcExcSchedule(prqsSn_t prqs) {
+	ResourceManager &rm(ResourceManager::GetInstance());
+	rpc_msg_header_t * pmsg_hdr = prqs->pmsg;
 	pconCtx_t pcon;
 
-	assert(pchMsg);
+	assert(pmsg_hdr);
 
 	// Looking for a valid connection context
 	pcon = GetConnectionContext(pmsg_hdr);
@@ -406,14 +406,13 @@ void ApplicationProxy::RpcExcGwm(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: GetWorkingMode for EXC "
+	logger->Info("APPs PRX: Schedule request for EXC "
 			"[app: %s, pid: %d, exc: %d]",
 			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
 
-	// Running the resource allocator if needed
-	// This return success if a scheduling has been started, false if EXC
-	// is not enabled or the scheduled could not be run.
-	logger->Warn("APPs PRX: TODO run optimizer");
+	// Notify the ResourceManager for a new application willing to start
+	logger->Debug("APPs PRX: Notifing ResourceManager...");
+	rm.NotifyEvent(ResourceManager::EXC_START);
 
 	// Sending ACK response to application
 	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
@@ -564,9 +563,9 @@ void ApplicationProxy::RequestExecutor(prqsSn_t prqs) {
 		RpcExcStop(prqs);
 		break;
 
-	case RPC_EXC_GWM:
-		logger->Debug("EXC_GWM");
-		RpcExcGwm(prqs);
+	case RPC_EXC_SCHEDULE:
+		logger->Debug("EXC_SCHEDULE");
+		RpcExcSchedule(prqs);
 		break;
 
 	case RPC_APP_PAIR:

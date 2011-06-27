@@ -160,9 +160,6 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		DB(fprintf(stderr, FMT_INF("EXC_RESP\n")));
 		RpcBbqResp();
 		break;
-	case RPC_BBQ_SET_WORKING_MODE:
-		DB(fprintf(stderr, FMT_INF("BBQ_SET_WORKING_MODE\n")));
-		break;
 	case RPC_BBQ_STOP_EXECUTION:
 		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
 		break;
@@ -623,25 +620,23 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Clear(
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_GetWorkingMode(
-		pregExCtx_t prec,
-		RTLIB_WorkingModeParams *wm) {
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_undef_t fifo_gwm = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_gwm),
+			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_schedule),
 			FIFO_PKT_SIZE(undef),
-			RPC_EXC_GWM
+			RPC_EXC_SCHEDULE
 		}
 	};
-	rpc_msg_exc_gwm_t msg_gwm = {
-		{RPC_EXC_GWM, RpcMsgToken(), chTrdPid, prec->exc_id}
+	rpc_msg_exc_schedule_t msg_schedule = {
+		{RPC_EXC_SCHEDULE, RpcMsgToken(), chTrdPid, prec->exc_id}
 	};
 	size_t bytes;
 
-	DB(fprintf(stderr, FMT_DBG("GetWorkingMode for EXC [%d:%d]...\n"),
-				msg_gwm.header.app_pid,
-				msg_gwm.header.exc_id));
+	DB(fprintf(stderr, FMT_DBG("Schedule request for EXC [%d:%d]...\n"),
+				msg_schedule.header.app_pid,
+				msg_schedule.header.exc_id));
 
 	// Send FIFO header
 	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
@@ -663,12 +658,12 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_GetWorkingMode(
 	// Send RPC header
 	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
 		"[typ: %d, pid: %d, eid: %hd]...\n"),
-		msg_gwm.header.typ,
-		msg_gwm.header.app_pid,
-		msg_gwm.header.exc_id
+		msg_schedule.header.typ,
+		msg_schedule.header.app_pid,
+		msg_schedule.header.exc_id
 	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_gwm,
-			RPC_PKT_SIZE(exc_gwm));
+	bytes = ::write(server_fifo_fd, (void*)&msg_schedule,
+			RPC_PKT_SIZE(exc_schedule));
 	if (bytes<=0) {
 		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
 					"(Error %d: %s)\n"),
@@ -680,12 +675,10 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_GetWorkingMode(
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return chResp.result;
+}
 
-	// NOTE the GWM is an asynchronous requres. It return as far as Barbeque
-	// as been notified about the application request to be scheduled.
-	// Then the application sit and wait for a working mode assignement.
 
-	(void)wm;
 
 	return RTLIB_OK;
 
