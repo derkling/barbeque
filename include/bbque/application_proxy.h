@@ -70,15 +70,18 @@ public:
 
 	typedef std::shared_ptr<resp_ftr_t> prespFtr_t;
 
-	resp_ftr_t StopExecution(AppPtr_t papp);
 
-	RTLIB_ExitCode StopExecutionSync(AppPtr_t papp);
 
 	~ApplicationProxy();
 
 /*******************************************************************************
  * Command Sessions
  ******************************************************************************/
+
+	RTLIB_ExitCode StopExecution(AppPtr_t papp);
+
+	RTLIB_ExitCode StopExecutionSync(AppPtr_t papp);
+
 private:
 
 	typedef RPCChannelIF::rpc_msg_ptr_t pchMsg_t;

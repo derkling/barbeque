@@ -149,30 +149,31 @@ RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 	return RTLIB_OK;
 }
 
-void ApplicationProxy::StopExecutionTrd(pcmdSn_t snHdr) {
+void ApplicationProxy::StopExecutionTrd(pcmdSn_t pcs) {
+	(void)pcs;
+#if 0
 	pcmdRsp_t pcmdRsp(new cmdRsp_t);
 
 	// Enqueuing the Command Session Handler
-	EnqueueHandler(snHdr);
+	EnqueueHandler(pcs);
 
-	logger->Debug("APPs PRX: StopExecutionTrd [pid: %5d] "
-			"START [app: %s, pid: %d, exc: %d]",
-			snHdr->pid, snHdr->papp->Name().c_str(),
-			snHdr->papp->Pid(), snHdr->papp->ExcId());
+	logger->Debug("APPs PRX [%5d]: StopExecutionTrd(%s) START",
+			pcs->pid, pcs->papp->StrId());
 
 	// Run the Command Synchronously
-	pcmdRsp->result = StopExecutionSync(snHdr->papp);
+	pcmdRsp->result = StopExecutionSync(pcs->papp);
 	// Give back the result to the calling thread
-	(snHdr->resp_prm).set_value(pcmdRsp);
+	(pcs->resp_prm).set_value(pcmdRsp);
 
-	logger->Debug("APPs PRX: StopExecutionTrd [pid: %5d] "
-			"END [app: %s, pid: %d, exc: %d]",
-			snHdr->pid, snHdr->papp->Name().c_str(),
-			snHdr->papp->Pid(), snHdr->papp->ExcId());
-
+	logger->Debug("APPs PRX [%5d]: StopExecutionTrd(%s) END",
+			pcs->pid, pcs->papp->StrId());
+#endif
 }
 
-ApplicationProxy::resp_ftr_t ApplicationProxy::StopExecution(AppPtr_t papp) {
+RTLIB_ExitCode
+ApplicationProxy::StopExecution(AppPtr_t papp) {
+	(void)papp;
+#if 0
 	ApplicationProxy::pcmdSn_t psn;
 
 	// Ensure the application is still active
@@ -191,6 +192,10 @@ ApplicationProxy::resp_ftr_t ApplicationProxy::StopExecution(AppPtr_t papp) {
 
 	// Return the promise (thus unlocking the executor)
 	return resp_ftr_t((psn->resp_prm).get_future());
+#endif
+	return RTLIB_OK;
+}
+
 
 }
 
