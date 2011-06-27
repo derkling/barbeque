@@ -1,60 +1,43 @@
 <?xml version="1.0"?>
 <BarbequeRTRM version="0.4">
-	<application priority="5">
+	<application priority="4">
 		<awms>
-			<awm id="0" name="maxperf" value="4">
+			<awm id="0" name="wm0" value="3">
 				<resources>
-					<mem qty="360" units="Kb"/>
 					<arch name="P2012">
-						<mem qty="64" units="Kb"/>
-						<tile id="0">
-							<cluster id="0">
-								<pe qty="4"/>
-								<mem qty="6" units="Kb"/>
-							</cluster>
-						</tile>
-					</arch>
-				</resources>
-				<plugins>
-				</plugins>
-			</awm>
-			<awm id="1" name="avgperf" value="2">
-				<resources>
-					<mem qty="260" units="Kb"/>
-					<arch name="P2012">
-						<mem qty="40" units="Kb"/>
-						<tile id="0">
-							<cluster id="0">
-								<pe qty="2"/>
-								<mem qty="2" units="Kb"/>
-							</cluster>
-						</tile>
-					</arch>
-				</resources>
-				<plugins>
-				</plugins>
-			</awm>
-			<awm id="2" name="lowperf" value="1">
-				<resources>
-					<mem qty="140" units="Kb"/>
-					<arch name="P2012">
-						<mem qty="10" units="Kb"/>
 						<tile id="0">
 							<cluster id="0">
 								<pe qty="1"/>
-								<mem qty="2" units="Kb"/>
+								<mem units="Kb" qty="3"/>
 							</cluster>
 						</tile>
 					</arch>
 				</resources>
-				<plugins>
-				</plugins>
+			</awm>
+			<awm id="1" name="wm1" value="2">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="2"/>
+								<mem units="Kb" qty="2"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+			<awm id="2" name="wm2" value="1">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="1"/>
+								<mem units="Kb" qty="2"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
 			</awm>
 		</awms>
-		<constraints>
-			<constraint resource="arch.mem" type="L" bound="4"/>
-		</constraints>
-		<plugins>
-		</plugins>
 	</application>
 </BarbequeRTRM>
