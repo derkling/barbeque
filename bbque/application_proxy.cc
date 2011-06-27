@@ -76,7 +76,7 @@ rpc_msg_type_t ApplicationProxy::GetNextMessage(pchMsg_t & pChMsg) {
 
 	rpc->RecvMessage(pChMsg);
 
-	logger->Debug("APRs PRX: rx [typ: %d, pid: %d]",
+	logger->Debug("APRs PRX: RX [typ: %d, pid: %d]",
 			pChMsg->typ, pChMsg->app_pid);
 
 	return pChMsg->typ;
@@ -204,6 +204,13 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & msg) {
 /*******************************************************************************
  * Request Sessions
  ******************************************************************************/
+
+#define APP_STRID "[%05d:%6s]"
+#define AppStrId(pcon) pcon->app_pid, pcon->app_name 
+
+#define EXC_STRID "[%05d:%6s:%02d]"
+#define ExcStrId(pcon, exc_id) pcon->app_pid, pcon->app_name, exc_id  
+
 ApplicationProxy::pconCtx_t ApplicationProxy::GetConnectionContext(
 		rpc_msg_header_t *pmsg_hdr)  {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx);
@@ -227,8 +234,7 @@ void ApplicationProxy::RpcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
-	logger->Debug("APPs PRX: Send RPC channel ACK [pid: %d, name: %s]",
-			pcon->app_pid, pcon->app_name);
+	logger->Debug("APPs PRX: Send RPC channel ACK "APP_STRID, AppStrId(pcon));
 	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
 	resp.header.typ = type;
 	resp.result = RTLIB_OK;
@@ -241,9 +247,8 @@ void ApplicationProxy::RpcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
-	logger->Debug("APPs PRX: Send RPC channel NAK "
-			"[pid: %d, name: %s, err: %d]",
-			pcon->app_pid, pcon->app_name, error);
+	logger->Debug("APPs PRX: Send RPC channel NAK "APP_STRID", error [%d]",
+			AppStrId(pcon), error);
 	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
 	resp.header.typ = type;
 	resp.result = error;
@@ -268,21 +273,17 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: Registering EXC "
-			"[app: %s, pid: %d, exc: %d, nme: %s]",
-			pcon->app_name, pcon->app_pid,
-			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
+	logger->Info("APPs PRX: Registering EXC "EXC_STRID", name [%s]",
+			ExcStrId(pcon, pmsg_hdr->exc_id), pmsg_pyl->exc_name);
 
 	// Register the EXC with the ApplicationManager
 	papp  = am.CreateEXC(pmsg_pyl->exc_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->recipe);
 	if (!papp) {
-		logger->Error("APPs PRX: EXC "
-			"[app: %s, pid: %d, exc: %d, nme: %s] "
+		logger->Error("APPs PRX: EXC "EXC_STRID", name [%s] "
 			"registration FAILED "
 			"(Error: missing recipe or recipe load failure)",
-			pcon->app_name, pcon->app_pid,
-			pmsg_hdr->exc_id, pmsg_pyl->exc_name);
+			ExcStrId(pcon, pmsg_hdr->exc_id), pmsg_pyl->exc_name);
 		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_MISSING_RECIPE);
 		return;
 	}

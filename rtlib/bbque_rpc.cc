@@ -230,7 +230,7 @@ RTLIB_ExitCode BbqueRPC::Start(
 	result = _Start(prec);
 	if (result != RTLIB_OK) {
 		DB(fprintf(stderr, FMT_ERR("Execution context [%s] START FAILED "
-						"(Error %d)\n"), prec->name.c_str(), result));
+				"(Error: %d)\n"), prec->name.c_str(), result));
 		return RTLIB_EXC_START_FAILED;
 	}
 
@@ -247,7 +247,8 @@ RTLIB_ExitCode BbqueRPC::Stop(
 	prec = getRegistered(ech);
 	if (!prec) {
 		fprintf(stderr, FMT_ERR("Execution context [%p] STOP FAILED "
-					"(Execution Context not registered)\n"), (void*)ech);
+				"(Error: Execution Context not registered)\n"),
+				(void*)ech);
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
@@ -255,7 +256,7 @@ RTLIB_ExitCode BbqueRPC::Stop(
 	result = _Stop(prec);
 	if (result != RTLIB_OK) {
 		DB(fprintf(stderr, FMT_ERR("Execution context [%s] STOP FAILED "
-						"(Error %d)\n"), prec->name.c_str(), result));
+				"(Error %d)\n"), prec->name.c_str(), result));
 		return RTLIB_EXC_STOP_FAILED;
 	}
 

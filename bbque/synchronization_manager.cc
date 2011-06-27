@@ -177,11 +177,11 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 
 		// Committing change to the ApplicationManager
 		am.SyncCommit(papp);
-		
+
 		// Get next app on the queue
 		it = apps->begin();
 	}
-	
+
 	logger->Debug("STEP 4: postChange() DONE");
 
 	return OK;

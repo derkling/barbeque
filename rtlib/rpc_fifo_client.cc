@@ -152,14 +152,20 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 
 	// Dispatching the received message
 	switch (hdr.rpc_msg_type) {
+		
+	//--- Application Originated Messages
 	case RPC_APP_RESP:
 		DB(fprintf(stderr, FMT_INF("APP_RESP\n")));
 		RpcBbqResp();
 		break;
+	
+	//--- Execution Context Originated Messages
 	case RPC_EXC_RESP:
 		DB(fprintf(stderr, FMT_INF("EXC_RESP\n")));
 		RpcBbqResp();
 		break;
+	
+	//--- Barbeque Originated Messages
 	case RPC_BBQ_STOP_EXECUTION:
 		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
 		break;

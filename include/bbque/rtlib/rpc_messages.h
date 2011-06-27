@@ -65,6 +65,7 @@ typedef enum rpc_msg_type {
 	RPC_BBQ_STOP_EXECUTION,
 	RPC_BBQ_RESP, ///< Response to a BBQ command
 	RPC_BBQ_MSGS_COUNT ///< The number of EXC originated messages
+
 } rpc_msg_type_t;
 
 typedef uint32_t rpc_msg_token_t;
@@ -101,6 +102,10 @@ typedef struct rpc_msg_resp {
 } rpc_msg_resp_t;
 
 
+/******************************************************************************
+ * Channel Management
+ ******************************************************************************/
+
 /**
  * @brief Command to register a new execution context.
  */
@@ -114,6 +119,16 @@ typedef struct rpc_msg_app_pair {
 	/** The name of the application */
 	char app_name[RTLIB_APP_NAME_LENGTH];
 } rpc_msg_app_pair_t;
+
+/**
+ * @brief Command to notify an application is exiting.
+ */
+typedef rpc_msg_header_t rpc_msg_app_exit_t;
+
+
+/******************************************************************************
+ * Execution Context Requests
+ ******************************************************************************/
 
 /**
  * @brief Command to register a new execution context.
@@ -167,9 +182,15 @@ typedef struct rpc_msg_exc_schedule {
 } rpc_msg_exc_schedule_t;
 
 
+/******************************************************************************
+ * Synchronization Protocol Messages
+ ******************************************************************************/
 
 
 
+/******************************************************************************
+ * Barbeque Commands
+ ******************************************************************************/
 
 /**
  * @brief Command to STOP an application execution context.
@@ -180,11 +201,6 @@ typedef struct rpc_msg_bbq_stop {
 	/** The Timeout for stopping the application */
 	struct timespec timeout;
 } rpc_msg_bbq_stop_t;
-
-/**
- * @brief Command to notify an application is exiting.
- */
-typedef rpc_msg_header_t rpc_msg_app_exit_t;
 
 
 } // namespace rtlib
