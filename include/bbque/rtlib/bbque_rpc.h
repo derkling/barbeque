@@ -28,10 +28,13 @@
 #define BBQUE_RPC_H_
 
 #include "bbque/rtlib.h"
+#include "bbque/rtlib/rpc_messages.h"
 
 #include <map>
 #include <memory>
 #include <string>
+#include <mutex>
+#include <thread>
 
 namespace bbque { namespace rtlib {
 
@@ -115,6 +118,17 @@ protected:
 
 	typedef std::shared_ptr<RegisteredExecutionContext_t> pregExCtx_t;
 
+	//--- AWM Validity
+	inline bool isAwmValid(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_AWM_VALID);
+	}
+	inline void setAwmValid(pregExCtx_t prec) const {
+		prec->flags |= EXC_FLAGS_AWM_VALID;
+	}
+	inline void setAwmInvalid(pregExCtx_t prec) const {
+		prec->flags &= ~EXC_FLAGS_AWM_VALID;
+	}
+
 	//--- AWM Wait
 	inline bool isAwmWaiting(pregExCtx_t prec) const {
 		return (prec->flags & EXC_FLAGS_AWM_WAITING);
@@ -157,8 +171,14 @@ protected:
 	virtual RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec) = 0;
 			pregExCtx_t prec,
 
-	virtual void _Exit() = 0;
 
+	/**
+	 * @brief Set a new AWM for the specified EXC
+	 */
+	RTLIB_ExitCode SetWorkingMode(pregExCtx_t prec,
+			RTLIB_WorkingModeParams *wm);
+
+	virtual void _Exit() = 0;
 
 private:
 
@@ -177,12 +197,38 @@ private:
 	typedef std::pair<uint8_t, pregExCtx_t> excMapEntry_t;
 
 
-
-
 	/**
 	 * @brief Get the next available (and unique) Execution Context ID
 	 */
 	uint8_t GetNextExcID();
+
+	/**
+	 * @brief Get the assigned AWM (if valid)
+	 *
+	 * @return RTLIB_OK if a valid AWM has been returned, RTLIB_EXC_GWM_FAILED
+	 * if the current AWM is not valid and thus a scheduling should be
+	 * required to the RTRM
+	 */
+	RTLIB_ExitCode GetAssignedWorkingMode(pregExCtx_t prec,
+			RTLIB_WorkingModeParams *wm);
+
+	/**
+	 * @brief Suspend caller waiting for an AWM being assigned
+	 *
+	 * When the EXC has notified a scheduling request to the RTRM, this
+	 * method put it to sleep waiting for an assignement.
+	 *
+	 * @return RTLIB_OK if a valid working mode has been assinged to the EXC,
+	 * RTLIB_EXC_GWM_FAILED otherwise
+	 */
+	RTLIB_ExitCode WaitForWorkingMode(pregExCtx_t prec,
+			RTLIB_WorkingModeParams *wm);
+
+
+	/**
+	 * @brief Get an extimation of the Synchronization Latency
+	 */
+	uint32_t GetSyncLatency(pregExCtx_t prec);
 
 /******************************************************************************
  * Application Callbacks Proxies
@@ -198,6 +244,11 @@ private:
 
 	pregExCtx_t getRegistered(
 			const RTLIB_ExecutionContextHandler ech);
+
+	/**
+	 * @brief Get an EXC handler for the give EXC ID
+	 */
+	pregExCtx_t getRegistered(uint8_t exc_id);
 
 };
 

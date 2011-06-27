@@ -183,6 +183,26 @@ BbqueRPC::pregExCtx_t BbqueRPC::getRegistered(
 	return prec;
 }
 
+BbqueRPC::pregExCtx_t BbqueRPC::getRegistered(uint8_t exc_id) {
+	excMap_t::iterator it(exc_map.find(exc_id));
+
+	// Checking for library initialization
+	if (!initialized) {
+		fprintf(stderr, FMT_ERR("Execution context lookup FAILED "
+					"(RTLIB not initialized)\n"));
+		assert(initialized);
+		return pregExCtx_t();
+	}
+
+	if (it == exc_map.end()) {
+		fprintf(stderr, FMT_ERR("Execution context [%d] "
+					"NOT registered\n"), exc_id);
+		assert(it != exc_map.end());
+		return pregExCtx_t();
+	}
+
+	return (*it).second;
+}
 
 void BbqueRPC::Unregister(
 		const RTLIB_ExecutionContextHandler ech) {
@@ -276,6 +296,18 @@ bool BbqueRPC::Sync(
 	return true;
 }
 
+RTLIB_ExitCode BbqueRPC::GetAssignedWorkingMode(
+		pregExCtx_t prec,
+		RTLIB_WorkingModeParams *wm) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+
+	if (!isAwmValid(prec))
+		return RTLIB_EXC_GWM_FAILED;
+
+	wm->awm_id = prec->awm_id;
+	return RTLIB_OK;	
+}
+
 RTLIB_ExitCode BbqueRPC::WaitForWorkingMode(
 		pregExCtx_t prec,
 		RTLIB_WorkingModeParams *wm) {
@@ -289,6 +321,18 @@ RTLIB_ExitCode BbqueRPC::WaitForWorkingMode(
 
 	clearAwmWaiting(prec);
 	wm->awm_id = prec->awm_id;
+
+	return RTLIB_OK;	
+}
+
+RTLIB_ExitCode BbqueRPC::SetWorkingMode(
+		pregExCtx_t prec,
+		RTLIB_WorkingModeParams *wm) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	(void)wm;
+
+	// TODO
+	assert(false);
 
 	return RTLIB_OK;	
 }
@@ -337,6 +381,14 @@ exit_gwm_failed:
 				prec->name.c_str(), result));
 	return RTLIB_EXC_GWM_FAILED;
 
+}
+
+
+uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
+	(void)prec;
+	// TODO added here the code for synchronization latency computation
+	// By default now we return a 100[ms] synchronization latency value
+	return 100;
 }
 
 RTLIB_ExitCode BbqueRPC::Set(

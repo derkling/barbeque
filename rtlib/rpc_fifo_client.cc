@@ -130,6 +130,27 @@ void BbqueRPC_FIFO_Client::RpcBbqResp() {
 
 }
 
+void BbqueRPC_FIFO_Client::RpcBbqCmd_SetWorkingMode() {
+	size_t bytes;
+
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&chResp, RPC_PKT_SIZE(resp));
+	if (bytes<=0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		chResp.result = RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	// Parse the assigned working mode
+
+	// Notify about reception of a new response
+	DB(fprintf(stderr, FMT_INF("Notify SWM [%d]\n"), chResp.result));
+	chResp_cv.notify_one();
+
+}
+
 void BbqueRPC_FIFO_Client::ChannelFetch() {
 	rpc_fifo_header_t hdr;
 	size_t bytes;
@@ -169,6 +190,7 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 	case RPC_BBQ_STOP_EXECUTION:
 		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
 		break;
+
 	default:
 		fprintf(stderr, FMT_ERR("Unknown BBQ response/command [%d]\n"),
 				hdr.rpc_msg_type);

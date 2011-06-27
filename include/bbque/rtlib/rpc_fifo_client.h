@@ -62,6 +62,7 @@ protected:
 	RTLIB_ExitCode _Stop(pregExCtx_t pregExCtx);
 
 	RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec);
+
 			pregExCtx_t prec,
 
 	RTLIB_ExitCode _Set(
@@ -78,6 +79,7 @@ protected:
 	inline uint32_t RpcMsgToken() {
 		return chTrdPid;
 	}
+
 
 private:
 
