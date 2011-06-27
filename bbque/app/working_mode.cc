@@ -160,6 +160,9 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	if (rsrc_name.empty())
 		return WM_RSRC_ERR_NAME;
 
+	// Init a new Resource Usage maps
+	usages_bind = UsagesMapPtr_t(new UsagesMap_t());
+
 	// Resource usages
 	UsagesMap_t::iterator usage_it(rsrc_usages.begin());
 	UsagesMap_t::iterator it_end(rsrc_usages.end());
@@ -169,11 +172,17 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string bind_rsrc_path =
 				ReplaceResourceID(usage_it->first, rsrc_name, src_ID, dst_ID);
 
+		logger->Debug("Recipe path [%s] => binded to [%s]",
+				usage_it->first.c_str(), bind_rsrc_path.c_str());
+
 		// Create a new ResourceUsage object, fill "binds" attribute with the
 		// list of resource descriptors and insert it into the binding map
 		UsagePtr_t bind_rsrc_map =
 			UsagePtr_t(new ResourceUsage(usage_it->second->value));
 		bind_rsrc_map->binds = ra.GetResources(bind_rsrc_path);
+
+		logger->Debug("Binded resources count [%d]", bind_rsrc_map->binds.size());
+
 		usages_bind->insert(std::pair<std::string,
 						UsagePtr_t>(bind_rsrc_path, bind_rsrc_map));
 
