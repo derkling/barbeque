@@ -106,7 +106,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelRelease() {
 				app_fifo_path.c_str(), errno, strerror(errno));
 		return RTLIB_BBQUE_CHANNEL_TEARDOWN_FAILED;
 	}
-
 	return RTLIB_OK;
 
 }
@@ -127,7 +126,6 @@ void BbqueRPC_FIFO_Client::RpcBbqResp() {
 	// Notify about reception of a new response
 	DB(fprintf(stderr, FMT_INF("Notify response [%d]\n"), chResp.result));
 	chResp_cv.notify_one();
-
 }
 
 void BbqueRPC_FIFO_Client::RpcBbqCmd_SetWorkingMode() {
@@ -148,7 +146,6 @@ void BbqueRPC_FIFO_Client::RpcBbqCmd_SetWorkingMode() {
 	// Notify about reception of a new response
 	DB(fprintf(stderr, FMT_INF("Notify SWM [%d]\n"), chResp.result));
 	chResp_cv.notify_one();
-
 }
 
 void BbqueRPC_FIFO_Client::ChannelFetch() {
@@ -173,24 +170,23 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 
 	// Dispatching the received message
 	switch (hdr.rpc_msg_type) {
-		
+
 	//--- Application Originated Messages
 	case RPC_APP_RESP:
 		DB(fprintf(stderr, FMT_INF("APP_RESP\n")));
 		RpcBbqResp();
 		break;
-	
+
 	//--- Execution Context Originated Messages
 	case RPC_EXC_RESP:
 		DB(fprintf(stderr, FMT_INF("EXC_RESP\n")));
 		RpcBbqResp();
 		break;
-	
+
 	//--- Barbeque Originated Messages
 	case RPC_BBQ_STOP_EXECUTION:
 		DB(fprintf(stderr, FMT_INF("BBQ_STOP_EXECUTION\n")));
 		break;
-
 	case RPC_BBQ_SYNCP_PRECHANGE:
 		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_PRECHANGE\n")));
 		RpcBbqSyncpPrechange();
@@ -214,7 +210,6 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		assert(false);
 		break;
 	}
-
 }
 
 void BbqueRPC_FIFO_Client::ChannelTrd() {
@@ -231,7 +226,6 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 
 	while (!done)
 		ChannelFetch();
-
 }
 
 
@@ -296,7 +290,6 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
 	return chResp.result;
-
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
@@ -801,7 +794,6 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPrechange() {
 	SyncP_PreChangeNotify(msg.header.token, msg.header.exc_id);
 
 }
-
 
 void BbqueRPC_FIFO_Client::_Exit() {
 	ChannelRelease();

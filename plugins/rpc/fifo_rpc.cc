@@ -194,7 +194,7 @@ RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 	assert(initialized);
 
 	// We should also have a valid RPC message
-	assert(msg->typ==br::RPC_APP_PAIR);
+	assert(msg->typ == br::RPC_APP_PAIR);
 
 	// Get a reference to FIFO header
 	hdr = (br::rpc_fifo_app_pair_t*)((int8_t*)msg-FIFO_PKT_SIZE(app_pair));

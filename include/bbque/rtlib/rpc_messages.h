@@ -43,7 +43,7 @@ namespace bbque { namespace rtlib {
 typedef enum rpc_msg_type {
 
 //--- Application Originated Messages
-	RPC_APP_PAIR,
+	RPC_APP_PAIR = 0,
 	RPC_APP_EXIT,
 
 	RPC_APP_RESP, ///< Response to an APP request

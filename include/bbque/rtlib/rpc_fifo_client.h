@@ -53,13 +53,13 @@ protected:
 	RTLIB_ExitCode _Init(
 			const char *name);
 
-	RTLIB_ExitCode _Register(pregExCtx_t pregExCtx);
+	RTLIB_ExitCode _Register(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Unregister(pregExCtx_t pregExCtx);
+	RTLIB_ExitCode _Unregister(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Start(pregExCtx_t pregExCtx);
+	RTLIB_ExitCode _Start(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Stop(pregExCtx_t pregExCtx);
+	RTLIB_ExitCode _Stop(pregExCtx_t prec);
 
 	RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec);
 

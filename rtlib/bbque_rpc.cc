@@ -305,7 +305,8 @@ RTLIB_ExitCode BbqueRPC::GetAssignedWorkingMode(
 		return RTLIB_EXC_GWM_FAILED;
 
 	wm->awm_id = prec->awm_id;
-	return RTLIB_OK;	
+
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC::WaitForWorkingMode(
@@ -322,7 +323,7 @@ RTLIB_ExitCode BbqueRPC::WaitForWorkingMode(
 	clearAwmWaiting(prec);
 	wm->awm_id = prec->awm_id;
 
-	return RTLIB_OK;	
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC::SetWorkingMode(
@@ -334,7 +335,7 @@ RTLIB_ExitCode BbqueRPC::SetWorkingMode(
 	// TODO
 	assert(false);
 
-	return RTLIB_OK;	
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC::GetWorkingMode(

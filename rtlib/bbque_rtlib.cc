@@ -110,6 +110,7 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	// Data structure initialization
 	rtlib_services.version.major = RTLIB_VERSION_MAJOR;
 	rtlib_services.version.minor = RTLIB_VERSION_MINOR;
+
 	rtlib_services.RegisterExecutionContext = rtlib_register;
 	rtlib_services.StartExecutionContext = rtlib_start;
 	rtlib_services.NotifySync = rtlib_sync;
