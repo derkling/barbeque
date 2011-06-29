@@ -40,6 +40,25 @@
 #define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_FIFO [WRN]", fmt)
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_FIFO [ERR]", fmt)
 
+
+#define RPC_FIFO_SEND(RPC_MSG)\
+DB(fprintf(stderr, FMT_DBG("Tx [" #RPC_MSG "] Request "\
+				"FIFO_HDR [sze: %hd, off: %hd, typ: %hd], "\
+				"RPC_HDR [typ: %d, pid: %d, eid: %hd]...\n"),\
+	rf_ ## RPC_MSG.hdr.fifo_msg_size,\
+	rf_ ## RPC_MSG.hdr.rpc_msg_offset,\
+	rf_ ## RPC_MSG.hdr.rpc_msg_type,\
+	rf_ ## RPC_MSG.pyl.hdr.typ,\
+	rf_ ## RPC_MSG.pyl.hdr.app_pid,\
+	rf_ ## RPC_MSG.pyl.hdr.exc_id\
+));\
+if(::write(server_fifo_fd, (void*)&rf_ ## RPC_MSG, FIFO_PKT_SIZE(RPC_MSG)) <= 0) {\
+	fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s]\n"),\
+		bbque_fifo_path.c_str());\
+	return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;\
+}
+
+
 namespace bbque { namespace rtlib {
 
 BbqueRPC_FIFO_Client::BbqueRPC_FIFO_Client() :
@@ -56,47 +75,27 @@ BbqueRPC_FIFO_Client::~BbqueRPC_FIFO_Client() {
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelRelease() {
-	rpc_fifo_undef_t fifo_undef = {
+	rpc_fifo_APP_EXIT_t rf_APP_EXIT = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(app_exit),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(APP_EXIT),
+			FIFO_PYL_OFFSET(APP_EXIT),
 			RPC_APP_EXIT
+		},
+		{
+			{
+				RPC_APP_EXIT,
+				RpcMsgToken(),
+				chTrdPid,
+				0
+			}
 		}
 	};
-	rpc_msg_app_exit_t msg_exit = {
-		RPC_APP_EXIT, RpcMsgToken(), chTrdPid, 0};
-	size_t bytes;
 	int error;
 
 	DB(fprintf(stderr, FMT_DBG("Releasing FIFO RPC channel\n")));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_undef.header.fifo_msg_size,
-		fifo_undef.header.rpc_msg_offset,
-		fifo_undef.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_undef, FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s]\n"),
-			bbque_fifo_path.c_str());
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd]...\n"),
-		msg_exit.typ,
-		msg_exit.app_pid,
-		msg_exit.exc_id
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_exit, RPC_PKT_SIZE(app_exit));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s]\n"),
-			bbque_fifo_path.c_str());
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(APP_EXIT);
 
 	// Closing the private FIFO
 	error = ::unlink(app_fifo_path.c_str());
@@ -231,60 +230,33 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
-	rpc_fifo_app_pair_t fifo_pair = {
+	rpc_fifo_APP_PAIR_t rf_APP_PAIR = {
 		{
-			FIFO_PKT_SIZE(app_pair)+RPC_PKT_SIZE(app_pair),
-			FIFO_PKT_SIZE(app_pair),
+			FIFO_PKT_SIZE(APP_PAIR),
+			FIFO_PYL_OFFSET(APP_PAIR),
 			RPC_APP_PAIR
 		},
-		"\0"
+		"\0",
+		{
+			{
+				RPC_APP_PAIR,
+				RpcMsgToken(),
+				chTrdPid,
+				0
+			},
+			BBQUE_RPC_FIFO_MAJOR_VERSION,
+			BBQUE_RPC_FIFO_MINOR_VERSION,
+			"\0"
+		}
 	};
-	rpc_msg_app_pair_t msg_pair = {
-		{RPC_APP_PAIR, RpcMsgToken(), chTrdPid, 0},
-		BBQUE_RPC_FIFO_MAJOR_VERSION,
-		BBQUE_RPC_FIFO_MINOR_VERSION,
-		"\0"};
-	size_t bytes;
+	::strncpy(rf_APP_PAIR.rpc_fifo, app_fifo_filename, BBQUE_FIFO_NAME_LENGTH);
+	::strncpy(rf_APP_PAIR.pyl.app_name, name, RTLIB_APP_NAME_LENGTH);
 
 	DB(fprintf(stderr, FMT_DBG("Pairing FIFO channels [app: %s, pid: %d]\n"),
 					name, chTrdPid));
 
-	// Setting up FIFO name
-	strncpy(fifo_pair.rpc_fifo, app_fifo_filename, BBQUE_FIFO_NAME_LENGTH);
-
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd, pipe: %s]...\n"),
-		fifo_pair.header.fifo_msg_size,
-		fifo_pair.header.rpc_msg_offset,
-		fifo_pair.header.rpc_msg_type,
-		fifo_pair.rpc_fifo
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_pair, FIFO_PKT_SIZE(app_pair));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s]\n"),
-			bbque_fifo_path.c_str());
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	::strncpy(msg_pair.app_name, name, RTLIB_APP_NAME_LENGTH);
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd, mjr: %d, mnr: %d, name: %s]...\n"),
-		msg_pair.header.typ,
-		msg_pair.header.app_pid,
-		msg_pair.header.exc_id,
-		msg_pair.mjr_version,
-		msg_pair.mnr_version,
-		msg_pair.app_name
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_pair, RPC_PKT_SIZE(app_pair));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s]\n"),
-				bbque_fifo_path.c_str());
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(APP_PAIR);
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
@@ -382,68 +354,37 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
-	rpc_fifo_undef_t fifo_register = {
+	rpc_fifo_EXC_REGISTER_t rf_EXC_REGISTER = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_register),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(EXC_REGISTER),
+			FIFO_PYL_OFFSET(EXC_REGISTER),
 			RPC_EXC_REGISTER
+		},
+		{
+			{
+				RPC_EXC_REGISTER,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
+			"\0",
+			"\0"
 		}
 	};
-	rpc_msg_exc_register_t msg_register = {
-		{RPC_EXC_REGISTER, RpcMsgToken(), chTrdPid, pregExCtx->exc_id},
-		"\0",
-		"\0"
-	};
-	size_t bytes;
-
-	// Initializing RPC message
-	::strncpy(msg_register.exc_name, pregExCtx->name.c_str(),
+	::strncpy(rf_EXC_REGISTER.pyl.exc_name, prec->name.c_str(),
 			RTLIB_EXC_NAME_LENGTH);
-	::strncpy(msg_register.recipe, pregExCtx->exc_params.recipe,
+	::strncpy(rf_EXC_REGISTER.pyl.recipe, prec->exc_params.recipe,
 			RTLIB_EXC_NAME_LENGTH);
 
 	DB(fprintf(stderr, FMT_DBG("Registering EXC [%d:%d:%s]...\n"),
-				msg_register.header.app_pid,
-				msg_register.header.exc_id,
-				msg_register.exc_name));
+				rf_EXC_REGISTER.pyl.hdr.app_pid,
+				rf_EXC_REGISTER.pyl.hdr.exc_id,
+				rf_EXC_REGISTER.pyl.exc_name));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_register.header.fifo_msg_size,
-		fifo_register.header.rpc_msg_offset,
-		fifo_register.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_register,
-			FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd, exc: %s, recipe: %s]...\n"),
-		msg_register.header.typ,
-		msg_register.header.app_pid,
-		msg_register.header.exc_id,
-		msg_register.exc_name,
-		msg_register.recipe
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_register,
-			RPC_PKT_SIZE(exc_register));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_REGISTER);
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
@@ -454,62 +395,32 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t pregExCtx) {
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
-	rpc_fifo_undef_t fifo_unregister = {
+	rpc_fifo_EXC_UNREGISTER_t rf_EXC_UNREGISTER = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_unregister),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(EXC_UNREGISTER),
+			FIFO_PYL_OFFSET(EXC_UNREGISTER),
 			RPC_EXC_UNREGISTER
+		},
+		{
+			{
+				RPC_EXC_UNREGISTER,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
+			"\0"
 		}
 	};
-	rpc_msg_exc_unregister_t msg_unregister = {
-		{RPC_EXC_UNREGISTER, RpcMsgToken(), chTrdPid, prec->exc_id},
-		"\0"
-	};
-	size_t bytes;
-
-	// Initializing RPC message
-	::strncpy(msg_unregister.exc_name, prec->name.c_str(),
+	::strncpy(rf_EXC_UNREGISTER.pyl.exc_name, prec->name.c_str(),
 			RTLIB_EXC_NAME_LENGTH);
 
 	DB(fprintf(stderr, FMT_DBG("Unregistering EXC [%d:%d:%s]...\n"),
-				msg_unregister.header.app_pid,
-				msg_unregister.header.exc_id,
-				msg_unregister.exc_name));
+				rf_EXC_UNREGISTER.pyl.hdr.app_pid,
+				rf_EXC_UNREGISTER.pyl.hdr.exc_id,
+				rf_EXC_UNREGISTER.pyl.exc_name));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_unregister.header.fifo_msg_size,
-		fifo_unregister.header.rpc_msg_offset,
-		fifo_unregister.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_unregister,
-			FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd, exc: %s]...\n"),
-		msg_unregister.header.typ,
-		msg_unregister.header.app_pid,
-		msg_unregister.header.exc_id,
-		msg_unregister.exc_name
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_unregister,
-			RPC_PKT_SIZE(exc_unregister));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_UNREGISTER);
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
@@ -520,55 +431,28 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
-	rpc_fifo_undef_t fifo_start = {
+	rpc_fifo_EXC_START_t rf_EXC_START = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_start),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(EXC_START),
+			FIFO_PYL_OFFSET(EXC_START),
 			RPC_EXC_START
+		},
+		{
+			{
+				RPC_EXC_START,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
 		}
 	};
-	rpc_msg_exc_start_t msg_start = {
-		{RPC_EXC_START, RpcMsgToken(), chTrdPid, prec->exc_id}
-	};
-	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("Starting EXC [%d:%d]...\n"),
-				msg_start.header.app_pid,
-				msg_start.header.exc_id));
+				rf_EXC_START.pyl.hdr.app_pid,
+				rf_EXC_START.pyl.hdr.exc_id));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_start.header.fifo_msg_size,
-		fifo_start.header.rpc_msg_offset,
-		fifo_start.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_start,
-			FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd]...\n"),
-		msg_start.header.typ,
-		msg_start.header.app_pid,
-		msg_start.header.exc_id
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_start,
-			RPC_PKT_SIZE(exc_start));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_START);
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
@@ -578,55 +462,28 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
-	rpc_fifo_undef_t fifo_stop = {
+	rpc_fifo_EXC_STOP_t rf_EXC_STOP = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_stop),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(EXC_STOP),
+			FIFO_PYL_OFFSET(EXC_STOP),
 			RPC_EXC_STOP
+		},
+		{
+			{
+				RPC_EXC_STOP,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
 		}
 	};
-	rpc_msg_exc_stop_t msg_stop = {
-		{RPC_EXC_STOP, RpcMsgToken(), chTrdPid, prec->exc_id}
-	};
-	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("Stopping EXC [%d:%d]...\n"),
-				msg_stop.header.app_pid,
-				msg_stop.header.exc_id));
+				rf_EXC_STOP.pyl.hdr.app_pid,
+				rf_EXC_STOP.pyl.hdr.exc_id));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_stop.header.fifo_msg_size,
-		fifo_stop.header.rpc_msg_offset,
-		fifo_stop.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_stop,
-			FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd]...\n"),
-		msg_stop.header.typ,
-		msg_stop.header.app_pid,
-		msg_stop.header.exc_id
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_stop,
-			RPC_PKT_SIZE(exc_stop));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_STOP);
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
@@ -660,55 +517,28 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Clear(
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
-	rpc_fifo_undef_t fifo_gwm = {
+	rpc_fifo_EXC_SCHEDULE_t rf_EXC_SCHEDULE = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(exc_schedule),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(EXC_SCHEDULE),
+			FIFO_PYL_OFFSET(EXC_SCHEDULE),
 			RPC_EXC_SCHEDULE
+		},
+		{
+			{
+				RPC_EXC_SCHEDULE,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
 		}
 	};
-	rpc_msg_exc_schedule_t msg_schedule = {
-		{RPC_EXC_SCHEDULE, RpcMsgToken(), chTrdPid, prec->exc_id}
-	};
-	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("Schedule request for EXC [%d:%d]...\n"),
-				msg_schedule.header.app_pid,
-				msg_schedule.header.exc_id));
+				rf_EXC_SCHEDULE.pyl.hdr.app_pid,
+				rf_EXC_SCHEDULE.pyl.hdr.exc_id));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_gwm.header.fifo_msg_size,
-		fifo_gwm.header.rpc_msg_offset,
-		fifo_gwm.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_gwm,
-			FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd]...\n"),
-		msg_schedule.header.typ,
-		msg_schedule.header.app_pid,
-		msg_schedule.header.exc_id
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_schedule,
-			RPC_PKT_SIZE(exc_schedule));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_SCHEDULE);
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
@@ -716,72 +546,45 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	return chResp.result;
 }
 
-
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPrechangeResp(
 		rpc_msg_token_t token, pregExCtx_t prec, uint32_t syncLatency) {
-	rpc_fifo_undef_t fifo_spcr = {
+
+	rpc_fifo_BBQ_SYNCP_PRECHANGE_RESP_t rf_BBQ_SYNCP_PRECHANGE_RESP = {
 		{
-			FIFO_PKT_SIZE(undef)+RPC_PKT_SIZE(bbq_syncp_prechange_resp),
-			FIFO_PKT_SIZE(undef),
+			FIFO_PKT_SIZE(BBQ_SYNCP_PRECHANGE_RESP),
+			FIFO_PYL_OFFSET(BBQ_SYNCP_PRECHANGE_RESP),
 			RPC_BBQ_RESP
+		},
+		{
+			{
+				RPC_BBQ_RESP,
+				token,
+				chTrdPid,
+				prec->exc_id
+			},
+			syncLatency
 		}
 	};
-	rpc_msg_bbq_syncp_prechange_resp_t msg_spcr = {
-		{RPC_BBQ_RESP, token, chTrdPid, prec->exc_id},
-		syncLatency
-	};
-	size_t bytes;
 
 	DB(fprintf(stderr, FMT_DBG("PreChange response EXC [%d:%d] "
 					"latency [%d]...\n"),
-				msg_spcr.header.app_pid,
-				msg_spcr.header.exc_id,
-				msg_spcr.syncLatency));
+				rf_BBQ_SYNCP_PRECHANGE_RESP.pyl.hdr.app_pid,
+				rf_BBQ_SYNCP_PRECHANGE_RESP.pyl.hdr.exc_id,
+				rf_BBQ_SYNCP_PRECHANGE_RESP.pyl.syncLatency));
 
-	// Send FIFO header
-	DB(fprintf(stderr, FMT_DBG("Sending FIFO header "
-		"[sze: %hd, off: %hd, typ: %hd]...\n"),
-		fifo_spcr.header.fifo_msg_size,
-		fifo_spcr.header.rpc_msg_offset,
-		fifo_spcr.header.rpc_msg_type
-	));
-	bytes = ::write(server_fifo_fd, (void*)&fifo_spcr,
-			FIFO_PKT_SIZE(undef));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
-
-	// Send RPC header
-	DB(fprintf(stderr, FMT_DBG("Sending RPC header "
-		"[typ: %d, pid: %d, eid: %hd]...\n"),
-		msg_spcr.header.typ,
-		msg_spcr.header.app_pid,
-		msg_spcr.header.exc_id
-	));
-	bytes = ::write(server_fifo_fd, (void*)&msg_spcr,
-			RPC_PKT_SIZE(bbq_syncp_prechange_resp));
-	if (bytes<=0) {
-		fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s] "
-					"(Error %d: %s)\n"),
-				bbque_fifo_path.c_str(),
-				errno, strerror(errno));
-		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
-	}
+	// Sending RPC Request
+	RPC_FIFO_SEND(BBQ_SYNCP_PRECHANGE_RESP);
 
 	return RTLIB_OK;
 }
 
 void BbqueRPC_FIFO_Client::RpcBbqSyncpPrechange() {
-	rpc_msg_bbq_syncp_prechange_t msg;
+	rpc_msg_BBQ_SYNCP_PRECHANGE_t msg;
 	size_t bytes;
 
 	// Read response RPC header
 	bytes = ::read(client_fifo_fd, (void*)&msg,
-			RPC_PKT_SIZE(bbq_syncp_prechange));
+			RPC_PKT_SIZE(BBQ_SYNCP_PRECHANGE));
 	if (bytes <= 0) {
 		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
 					"(Error %d: %s)\n"),
@@ -791,7 +594,7 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPrechange() {
 	}
 
 	// Notify the Pre-Change
-	SyncP_PreChangeNotify(msg.header.token, msg.header.exc_id);
+	SyncP_PreChangeNotify(msg.hdr.token, msg.hdr.exc_id);
 
 }
 
