@@ -31,8 +31,10 @@
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/system_view.h"
+#include "bbque/res/resource_accounter.h"
 
 #include "bbque/app/application.h"
+#include "bbque/app/working_mode.h"
 
 #include "bbque/utils/utility.h"
 
@@ -40,6 +42,7 @@
 
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
+namespace br = bbque::res;
 
 namespace bbque {
 
@@ -273,9 +276,11 @@ SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ApplicationProxy &ap(ApplicationProxy::GetInstance());
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	AppsUidMap_t::const_iterator apps_it(apps->begin());
 	ApplicationProxy::pPostChangeRsp_t presp;
 	RTLIB_ExitCode_t result;
+	br::ResourceAccounter::ExitCode_t raResult;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 4: postChange() START");
@@ -301,6 +306,15 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		// TODO Here we should collect reconfiguration statistics
 		logger->Warn("TODO: Collect reconf statistics");
 
+		// Acquiring the resources for the Application
+		raResult =
+			ra.SyncAcquireResources(papp, papp->NextAWM()->GetResourceBinding());
+
+		// TODO: Investigate a response action for error return code.
+		// 	Evaluate the implementation of a SyncAbort into the
+		// 	ApplicationManage
+		assert (raResult == br::ResourceAccounter::RA_SUCCESS);
+
 		// Committing change to the ApplicationManager
 		// NOTE: this should remove the current app from the queue,
 		// otherwise we enter an endless loop
@@ -322,7 +336,7 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
-	AppsMap_t::const_iterator it;
+	AppsUidMap_t::const_iterator it;
 	ExitCode_t result;
 
 	if (apps->size() == 0) {
@@ -356,8 +370,10 @@ SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
 	static SystemView &sv(SystemView::GetInstance());
 	static ApplicationManager &am(ApplicationManager::GetInstance());
+	static ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	AppsUidMap_t const *apps = NULL;
 	ExitCode_t result;
+	br::ResourceAccounter::ExitCode_t raResult;
 
 	// TODO add here proper tracing/monitoring events for statistics
 	// collection
@@ -384,16 +400,33 @@ SynchronizationManager::SyncSchedule() {
 		return OK;
 	}
 
+	// Start the resource accounter synchronized session
+	raResult = ra.SyncStart();
+	if (raResult != ResourceAccounter::RA_SUCCESS) {
+		logger->Fatal("SynchSchedule: Unable to start resource accounting "
+				"sync session");
+		return ABORTED;
+	}
+
 	while (apps) {
 
 		// Synchronize these policy selected apps
 		result = SyncApps(apps);
-		if (result!=OK)
+		if (result != OK) {
+			ra.SyncAbort();
 			return result;
+		}
 
 		// Select next set of apps to synchronize (if any)
 		apps = policy->GetApplicationsQueue(sv);
+	}
 
+	// Commit the resource accounter synchronized session
+	raResult = ra.SyncCommit();
+	if (raResult != ResourceAccounter::RA_SUCCESS) {
+		logger->Fatal("SynchSchedule: Resource accounting sync session commit"
+				"failed");
+		return ABORTED;
 	}
 
 	logger->Info("Synchronization [%d] DONE", sync_count);
