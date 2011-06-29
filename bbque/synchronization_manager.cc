@@ -96,9 +96,7 @@ SynchronizationManager::~SynchronizationManager() {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 	ApplicationProxy &ap(ApplicationProxy::GetInstance());
-	AppsMap_t::const_iterator apps_it(apps->begin());
-
-	//ApplicationProxy::prespFtr_t prespFtr;
+	AppsUidMap_t::const_iterator apps_it(apps->begin());
 
 	typedef std::map<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMap_t;
 	typedef std::pair<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMapEntry_t;
@@ -155,7 +153,9 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 		// TODO Here the synchronization policy should be queryed to
 		// decide if the synchronization latency is compliant with the
 		// RTRM optimization goals.
-		logger->Warn("TODO: Check sync policy for syncLatency compliance");
+		logger->Warn("TODO: Check sync policy for "
+				"(%d[ms]) syncLatency compliance",
+				presp->syncLatency);
 
 		// Remove the respose future
 		rsp_map.erase(resp_it);
@@ -168,21 +168,69 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
-	AppsMap_t::const_iterator it(apps->begin());
+	ApplicationProxy &ap(ApplicationProxy::GetInstance());
+	AppsUidMap_t::const_iterator apps_it(apps->begin());
+
+	typedef std::map<AppPtr_t, ApplicationProxy::pSyncChangeRsp_t> RspMap_t;
+	typedef std::pair<AppPtr_t, ApplicationProxy::pSyncChangeRsp_t> RspMapEntry_t;
+
+	ApplicationProxy::pSyncChangeRsp_t presp;
+	RspMap_t::iterator resp_it;
+	RTLIB_ExitCode result;
+	RspMap_t rsp_map;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 2: syncChange() START");
 
-	for ( ; it != apps->end(); ++it) {
-		papp = (*it).second;
+	for ( ; apps_it != apps->end(); ++apps_it) {
+		papp = (*apps_it).second;
+		assert(papp);
 
 		if (!policy->DoSync(papp))
 			continue;
 
 		logger->Debug("STEP 2: syncChange() ===> [%s]", papp->StrId());
 
+		// Start an Async Sync-Change
+		presp = ApplicationProxy::pSyncChangeRsp_t(
+				new ApplicationProxy::syncChangeRsp_t());
+		result = ap.SyncP_SyncChange_Async(papp, presp);
+		if (result != RTLIB_OK)
+			continue;
+
+		// Mapping the response future for responses collection
+		rsp_map.insert(RspMapEntry_t(papp, presp));
+
 	}
 
+	// Collecting EXC responses
+	for (resp_it = rsp_map.begin();
+			resp_it != rsp_map.end();
+			++resp_it) {
+
+		presp = (*resp_it).second;
+		papp  = (*resp_it).first;
+
+		logger->Debug("STEP 2: (wait resp from) [%s]", papp->StrId());
+		result = ap.SyncP_SyncChange_GetResult(presp);
+		if (result != RTLIB_OK) {
+			logger->Warn("STEP 2: <----- FAILED -- [%s]", papp->StrId());
+			// TODO Here the synchronization policy should be queryed to
+			// decide if the synchronization latency is compliant with the
+			// RTRM optimization goals.
+			//
+			logger->Warn("TODO: Check sync policy for sync miss reaction");
+
+			// FIXME This case should be handled
+			assert(false);
+		}
+
+		logger->Debug("STEP 2: <--------- OK -- [%s]", papp->StrId());
+
+		// Remove the respose future
+		rsp_map.erase(resp_it);
+	}
+	
 	logger->Debug("STEP 2: syncChange() DONE");
 
 	return OK;
@@ -190,18 +238,26 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
-	AppsMap_t::const_iterator it(apps->begin());
+	ApplicationProxy &ap(ApplicationProxy::GetInstance());
+	AppsUidMap_t::const_iterator apps_it(apps->begin());
+	RTLIB_ExitCode result;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 3: doChange() START");
 
-	for ( ; it != apps->end(); ++it) {
-		papp = (*it).second;
+	for ( ; apps_it != apps->end(); ++apps_it) {
+		papp = (*apps_it).second;
+		assert(papp);
 
 		if (!policy->DoSync(papp))
 			continue;
 
 		logger->Debug("STEP 3: doChange() ===> [%s]", papp->StrId());
+
+		// Send a Do-Change
+		result = ap.SyncP_DoChange(papp);
+		if (result != RTLIB_OK)
+			continue;
 
 	}
 
@@ -213,30 +269,52 @@ SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
-	AppsMap_t::const_iterator it(apps->begin());
+	ApplicationProxy &ap(ApplicationProxy::GetInstance());
+	AppsUidMap_t::const_iterator apps_it(apps->begin());
+	ApplicationProxy::pPostChangeRsp_t presp;
+	RTLIB_ExitCode result;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 4: postChange() START");
 
-	while (it != apps->end()) {
-		papp = (*it).second;
+	while (apps_it != apps->end()) {
+		papp = (*apps_it).second;
+		assert(papp);
 
 		if (!policy->DoSync(papp))
 			continue;
 
 		logger->Debug("STEP 4: postChange() ===> [%s]", papp->StrId());
 
+		// Send a Post-Change (blocking on apps being reconfigured)
+		presp = ApplicationProxy::pPostChangeRsp_t(
+				new ApplicationProxy::postChangeRsp_t());
+		result = ap.SyncP_PostChange(papp, presp);
+		if (result != RTLIB_OK)
+			continue;
+
+		// TODO Here we should collect reconfiguration statistics
+		logger->Warn("TODO: Collect reconf statistics");
+
 		// Committing change to the ApplicationManager
+		// NOTE: this should remove the current app from the queue,
+		// otherwise we enter an endless loop
 		am.SyncCommit(papp);
 
 		// Get next app on the queue
-		it = apps->begin();
+		apps_it = apps->begin();
+
+		// FIXME: ensure the current app has been removed from the queue
+		// otherwise we enter an endless loop
+		// This loop solution is used since it is safer to loop on
+		// queues which elemenbts could be modified
 	}
 
 	logger->Debug("STEP 4: postChange() DONE");
 
 	return OK;
 }
+
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
 	AppsMap_t::const_iterator it;
@@ -252,9 +330,13 @@ SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
 	if (result != OK)
 		return result;
 
-	logger->Debug("STEP 2: syncChange()");
+	result = Sync_SyncChange(apps);
+	if (result != OK)
+		return result;
 
-	logger->Debug("STEP 3: doChange()");
+	result = Sync_DoChange(apps);
+	if (result != OK)
+		return result;
 
 	result = Sync_PostChange(apps);
 	if (result != OK)
