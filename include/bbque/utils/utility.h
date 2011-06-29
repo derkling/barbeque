@@ -71,6 +71,9 @@ extern bbque::utils::Timer bbque_tmr;
 #define POW_2_20 0x100000
 #define POW_2_30 0x40000000
 
+/** Get the pointer to the containing structure */
+#define container_of(ptr, type, member)\
+	(type*)((char*)(ptr) - offsetof(type, member))
 
 /** Type for ID used in resource path */
 typedef int16_t ResID_t;
