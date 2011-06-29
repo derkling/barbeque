@@ -34,7 +34,7 @@
 #include "bbque/utils/utility.h"
 
 #include <cstdio>
-
+#include <cstddef>
 #include <cstdlib>
 #include <cstring>
 
@@ -50,7 +50,10 @@
 #define BBQUE_RPC_FIFO_MAJOR_VERSION 1
 #define BBQUE_RPC_FIFO_MINOR_VERSION 0
 
-#define FIFO_PKT_SIZE(type) sizeof(bbque::rtlib::rpc_fifo_##type##_t)
+#define FIFO_PKT_SIZE(RPC_TYPE)\
+	sizeof(bbque::rtlib::rpc_fifo_ ## RPC_TYPE ## _t)
+#define FIFO_PYL_OFFSET(RPC_TYPE)\
+	offsetof(bbque::rtlib::rpc_fifo_ ## RPC_TYPE ## _t, pyl)
 
 namespace bbque { namespace rtlib {
 
@@ -65,6 +68,24 @@ typedef struct rpc_fifo_header {
 	/** The type of the RPC message */
 	uint8_t rpc_msg_type;
 } rpc_fifo_header_t;
+
+typedef struct rpc_fifo_GENERIC {
+	/** The RPC fifo command header */
+	rpc_fifo_header_t hdr;
+	/** The RPC message payload */
+	rpc_msg_header_t pyl;
+} rpc_fifo_GENERIC_t;
+
+#define RPC_FIFO_DEFINE_MESSAGE(RPC_TYPE)\
+typedef struct rpc_fifo_ ## RPC_TYPE {\
+	rpc_fifo_header_t hdr;\
+	rpc_msg_ ## RPC_TYPE ## _t pyl;\
+} rpc_fifo_ ## RPC_TYPE ## _t
+
+
+/******************************************************************************
+ * Channel Management
+ ******************************************************************************/
 
 /**
  * @brief An RPC_APP_PAIR FIFO command.
