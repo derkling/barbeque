@@ -604,7 +604,7 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPreChange() {
 	}
 
 	// Notify the Pre-Change
-	SyncP_PreChangeNotify(msg.hdr.token, msg.hdr.exc_id);
+	SyncP_PreChangeNotify(msg);
 
 }
 
@@ -662,7 +662,7 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpSyncChange() {
 	}
 
 	// Notify the Sync-Change
-	SyncP_SyncChangeNotify(msg.hdr.token, msg.hdr.exc_id);
+	SyncP_SyncChangeNotify(msg);
 
 }
 
@@ -687,7 +687,7 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpDoChange() {
 	}
 
 	// Notify the Sync-Change
-	SyncP_DoChangeNotify(msg.hdr.exc_id);
+	SyncP_DoChangeNotify(msg);
 
 }
 
@@ -745,7 +745,7 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPostChange() {
 	}
 
 	// Notify the Sync-Change
-	SyncP_PostChangeNotify(msg.hdr.token, msg.hdr.exc_id);
+	SyncP_PostChangeNotify(msg);
 
 }
 

@@ -404,17 +404,16 @@ RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
 }
 
 RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
-		rpc_msg_token_t token,
-		uint8_t exc_id) {
+		rpc_msg_BBQ_SYNCP_PRECHANGE_t &msg) {
 	RTLIB_ExitCode result;
 	uint32_t syncLatency;
 	pregExCtx_t prec;
 
-	prec = getRegistered(exc_id);
+	prec = getRegistered(msg.hdr.exc_id);
 	if (!prec) {
 		fprintf(stderr, FMT_ERR("SyncP_1 (Pre-Change) EXC [%d] FAILED "
 				"(Error: Execution Context not registered)\n"),
-				exc_id);
+				msg.hdr.exc_id);
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
@@ -424,9 +423,9 @@ RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
 	syncLatency = GetSyncLatency(prec);
 	DB(fprintf(stderr, FMT_DBG("SyncP_1 (Pre-Change) EXC [%d], "
 				"SyncLatency [%u]\n"),
-				exc_id, syncLatency));
+				msg.hdr.exc_id, syncLatency));
 
-	_SyncpPreChangeResp(token, prec, syncLatency);
+	_SyncpPreChangeResp(msg.hdr.token, prec, syncLatency);
 
 	return RTLIB_OK;
 }
@@ -439,16 +438,15 @@ RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(pregExCtx_t prec) {
 }
 
 RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(
-		rpc_msg_token_t token,
-		uint8_t exc_id) {
+		rpc_msg_BBQ_SYNCP_SYNCCHANGE_t &msg) {
 	RTLIB_ExitCode result;
 	pregExCtx_t prec;
 
-	prec = getRegistered(exc_id);
+	prec = getRegistered(msg.hdr.exc_id);
 	if (!prec) {
 		fprintf(stderr, FMT_ERR("SyncP_2 (Sync-Change) EXC [%d] FAILED "
 				"(Error: Execution Context not registered)\n"),
-				exc_id);
+				msg.hdr.exc_id);
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
@@ -456,10 +454,10 @@ RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(
 	if (result != RTLIB_OK) {
 		fprintf(stderr, FMT_WRN("SyncP_2 (Sync-Change) EXC [%d] CRITICAL "
 				"(Warning: Overpassing Synchronization time)\n"),
-				exc_id);
+				msg.hdr.exc_id);
 	}
 
-	_SyncpSyncChangeResp(token, prec, result);
+	_SyncpSyncChangeResp(msg.hdr.token, prec, result);
 
 	return RTLIB_OK;
 }
@@ -472,15 +470,16 @@ RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(pregExCtx_t prec) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(uint8_t exc_id) {
+RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(
+		rpc_msg_BBQ_SYNCP_DOCHANGE_t &msg) {
 	RTLIB_ExitCode result;
 	pregExCtx_t prec;
 
-	prec = getRegistered(exc_id);
+	prec = getRegistered(msg.hdr.exc_id);
 	if (!prec) {
 		fprintf(stderr, FMT_ERR("SyncP_3 (Do-Change) EXC [%d] FAILED "
 				"(Error: Execution Context not registered)\n"),
-				exc_id);
+				msg.hdr.exc_id);
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
@@ -500,16 +499,15 @@ RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(pregExCtx_t prec) {
 }
 
 RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(
-		rpc_msg_token_t token,
-		uint8_t exc_id) {
+		rpc_msg_BBQ_SYNCP_POSTCHANGE_t &msg) {
 	RTLIB_ExitCode result;
 	pregExCtx_t prec;
 
-	prec = getRegistered(exc_id);
+	prec = getRegistered(msg.hdr.exc_id);
 	if (!prec) {
 		fprintf(stderr, FMT_ERR("SyncP_4 (Post-Change) EXC [%d] FAILED "
 				"(Error: Execution Context not registered)\n"),
-				exc_id);
+				msg.hdr.exc_id);
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
@@ -517,10 +515,10 @@ RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(
 	if (result != RTLIB_OK) {
 		fprintf(stderr, FMT_WRN("SyncP_4 (Post-Change) EXC [%d] CRITICAL "
 				"(Warning: Reconfiguration timeout)\n"),
-				exc_id);
+				msg.hdr.exc_id);
 	}
 
-	_SyncpPostChangeResp(token, prec, result);
+	_SyncpPostChangeResp(msg.hdr.token, prec, result);
 
 	return RTLIB_OK;
 }

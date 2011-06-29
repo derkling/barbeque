@@ -198,8 +198,7 @@ protected:
 	 * specified ID.
 	 */
 	RTLIB_ExitCode SyncP_PreChangeNotify(
-			rpc_msg_token_t token,
-			uint8_t exc_id);
+			rpc_msg_BBQ_SYNCP_PRECHANGE_t &msg);
 
 //----- SyncChange
 
@@ -215,8 +214,7 @@ protected:
 	 * specified ID.
 	 */
 	RTLIB_ExitCode SyncP_SyncChangeNotify(
-			rpc_msg_token_t token,
-			uint8_t exc_id);
+			rpc_msg_BBQ_SYNCP_SYNCCHANGE_t &msg);
 
 //----- DoChange
 
@@ -224,7 +222,8 @@ protected:
 	 * @brief A synchronization protocol Do-Change for the EXC with the
 	 * specified ID.
 	 */
-	RTLIB_ExitCode SyncP_DoChangeNotify(uint8_t exc_id);
+	RTLIB_ExitCode SyncP_DoChangeNotify(
+			rpc_msg_BBQ_SYNCP_DOCHANGE_t &msg);
 
 //----- PostChange
 
@@ -241,8 +240,7 @@ protected:
 	 * specified ID.
 	 */
 	RTLIB_ExitCode SyncP_PostChangeNotify(
-			rpc_msg_token_t token,
-			uint8_t exc_id);
+			rpc_msg_BBQ_SYNCP_POSTCHANGE_t &msg);
 
 
 
