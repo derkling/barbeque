@@ -134,7 +134,7 @@ int FifoRPC::Init() {
 
 size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	br::rpc_fifo_header_t hdr;
-	int8_t *fifo_buff_ptr;
+	void *fifo_buff_ptr;
 	size_t bytes;
 
 	logger->Debug("FIFO RPC: waiting message...");
@@ -150,11 +150,8 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 		return bytes;
 	}
 
-	logger->Debug("FIFO RPC: RX HDR [sze: %hd, off: %hhd, typ: %hhd]",
-			hdr.fifo_msg_size, hdr.rpc_msg_offset, hdr.rpc_msg_type);
-
 	// Allocate a new message buffer
-	fifo_buff_ptr = (int8_t*)::malloc(hdr.fifo_msg_size);
+	fifo_buff_ptr = ::malloc(hdr.fifo_msg_size);
 	if (!fifo_buff_ptr) {
 		char c;
 		logger->Error("FIFO RPC: message buffer creation FAILED");
@@ -166,19 +163,54 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	}
 
 	// Save header into new buffer
-	::memcpy((void*)fifo_buff_ptr, &hdr, FIFO_PKT_SIZE(header));
+	::memcpy(fifo_buff_ptr, &hdr, FIFO_PKT_SIZE(header));
 
-	// Copy the remaining RPC message on the FIFO message buffer
-	::read(rpc_fifo_fd,
-			((fifo_buff_ptr)+FIFO_PKT_SIZE(header)),
-			hdr.fifo_msg_size-FIFO_PKT_SIZE(header));
+	// Recover the payload start pointer
+	switch (hdr.rpc_msg_type) {
+	case br::RPC_APP_PAIR:
+
+		::read(rpc_fifo_fd, &(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->rpc_fifo),
+			hdr.fifo_msg_size - FIFO_PKT_SIZE(header));
+
+		msg = (rpc_msg_ptr_t)&(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->pyl);
+		logger->Debug("FIFO RPC: Rx FIFO_HDR [sze: %hd, off: %hd, typ: %hd] "
+				"RPC_HDR [typ: %d, pid: %d, eid: %hd]",
+			((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->hdr.fifo_msg_size,
+			((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->hdr.rpc_msg_offset,
+			((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->hdr.rpc_msg_type,
+			((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->pyl.hdr.typ,
+			((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->pyl.hdr.app_pid,
+			((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->pyl.hdr.exc_id
+		     );
+		break;
+	default:
+		::read(rpc_fifo_fd, &(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl),
+			hdr.fifo_msg_size - FIFO_PKT_SIZE(header));
+
+		msg = &(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl);
+		logger->Debug("FIFO RPC: Rx FIFO_HDR [sze: %hd, off: %hd, typ: %hd] "
+				"RPC_HDR [typ: %d, pid: %d, eid: %hd]",
+			((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->hdr.fifo_msg_size,
+			((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->hdr.rpc_msg_offset,
+			((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->hdr.rpc_msg_type,
+			((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl.typ,
+			((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl.app_pid,
+			((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl.exc_id
+		     );
+	}
+	// Recovery the payload size to be returned
+	bytes = hdr.fifo_msg_size - hdr.rpc_msg_offset;
+
+	//logger->Debug("Rx Buffer FIFO_HDR [@%p] RPC_HDR [@%p] => Offset: %hd",
+	//		fifo_buff_ptr, msg,
+	//		(size_t)msg-(size_t)fifo_buff_ptr);
 
 	// Return a pointer to the new message
 	msg = (rpc_msg_ptr_t)(fifo_buff_ptr+hdr.rpc_msg_offset);
 	// TODO provide a HEXDUMP logging routine
 	//logger->Debug("FIFO RPC: RX[buff: %s]", (char*)msg);
 
-	return (hdr.fifo_msg_size-hdr.rpc_msg_offset);
+	return bytes;
 }
 
 RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
@@ -186,7 +218,7 @@ RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 	fifo_data_t * pd;
 	fs::path fifo_path(conf_fifo_dir);
 	boost::system::error_code ec;
-	br::rpc_fifo_app_pair_t * hdr;
+	br::rpc_fifo_APP_PAIR_t * hdr;
 	int fd;
 
 
@@ -197,7 +229,7 @@ RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
 	assert(msg->typ == br::RPC_APP_PAIR);
 
 	// Get a reference to FIFO header
-	hdr = (br::rpc_fifo_app_pair_t*)((int8_t*)msg-FIFO_PKT_SIZE(app_pair));
+	hdr = container_of(msg, br::rpc_fifo_APP_PAIR_t, pyl);
 	logger->Debug("FIFO RPC: plugin data initialization...");
 
 	// Build fifo path
@@ -272,58 +304,60 @@ void FifoRPC::ReleasePluginData(plugin_data_t & pd) {
 size_t FifoRPC::SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 		size_t count) {
 	fifo_data_t * ppd = (fifo_data_t*)pd.get();
-	br::rpc_fifo_header_t hdr;
+	br::rpc_fifo_GENERIC_t *fifo_msg;
 	ssize_t error;
 
 	assert(rpc_fifo_fd);
 	assert(ppd && ppd->app_fifo_fd);
 
-	logger->Debug("FIFO RPC: message send [typ: %d, sze: %d] "
+	// FIXME copying the RPC message into the FIFO one is not efficient at all,
+	// but this it the less intrusive patch to use a single write on the PIPE.
+	// A better solution, e.g. pre-allocating a channel message, should be
+	// provided by a future patch
+
+	// Build a new message of the required type
+	// NOTE all BBQ generated command have the sam FIFO layout
+	fifo_msg = (br::rpc_fifo_GENERIC_t*)::malloc(
+			offsetof(br::rpc_fifo_GENERIC_t, pyl) + count);
+
+	// Copy the RPC message into the FIFO msg
+	::memcpy(&(fifo_msg->pyl), msg, count);
+
+	logger->Debug("FIFO RPC: TX [typ: %d, sze: %d] "
 			"using app channel [%d:%s]...",
 			msg->typ, count,
 			ppd->app_fifo_fd,
 			ppd->app_fifo_filename);
 
-	// Send the RPC FIFO header
-	hdr.fifo_msg_size = count + FIFO_PKT_SIZE(header);
-	hdr.rpc_msg_offset = count;
-	hdr.rpc_msg_type = msg->typ;
-	error = ::write(ppd->app_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
-	if (error==-1) {
+	// Send the RPC FIFO message
+	fifo_msg->hdr.fifo_msg_size = offsetof(br::rpc_fifo_GENERIC_t, pyl) + count;
+	fifo_msg->hdr.rpc_msg_offset = offsetof(br::rpc_fifo_GENERIC_t, pyl);
+	fifo_msg->hdr.rpc_msg_type = msg->typ;
+	error = ::write(ppd->app_fifo_fd, fifo_msg, fifo_msg->hdr.fifo_msg_size);
+	if (error == -1) {
 		logger->Error("FIFO RPC: send massage (header) FAILED (Error %d: %s)",
 				errno, strerror(errno));
 		return -1;
 	}
 
-	// FIXME rollback or handle partially send (only header) messages
-
-	// Send the RPC FIFO message payload
-	error = ::write(ppd->app_fifo_fd, (void*)msg, count);
-	if (error==-1) {
-		logger->Error("FIFO RPC: send massage (payload) FAILED (Error %d: %s)",
-				errno, strerror(errno));
-		return -2;
-	}
-
-	return hdr.fifo_msg_size;
+	return fifo_msg->hdr.fifo_msg_size;
 }
 
 void FifoRPC::FreeMessage(rpc_msg_ptr_t & msg) {
-	size_t hdr_size;
+	void* fifo_msg;
 
 	// Recover the beginning of the FIFO message
 	switch (msg->typ) {
 	case br::RPC_APP_PAIR:
-		hdr_size = FIFO_PKT_SIZE(app_pair);
+		fifo_msg = (void*)container_of(msg, br::rpc_fifo_APP_PAIR_t, pyl);
 		break;
 	default:
-		hdr_size = FIFO_PKT_SIZE(undef);
+		fifo_msg = (void*)container_of(msg, br::rpc_fifo_GENERIC_t, pyl);
 		break;
 	}
-	msg -= hdr_size;
 
 	// Releaseing the FIFO message buffer
-	::free(msg);
+	::free(fifo_msg);
 }
 
 //----- static plugin interface
