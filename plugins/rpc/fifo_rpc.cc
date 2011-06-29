@@ -205,10 +205,8 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	//		fifo_buff_ptr, msg,
 	//		(size_t)msg-(size_t)fifo_buff_ptr);
 
-	// Return a pointer to the new message
-	msg = (rpc_msg_ptr_t)(fifo_buff_ptr+hdr.rpc_msg_offset);
-	// TODO provide a HEXDUMP logging routine
-	//logger->Debug("FIFO RPC: RX[buff: %s]", (char*)msg);
+	// HEXDUMP the received buffer
+	//RPC_FIFO_HEX_DUMP_BUFFER(fifo_buff_ptr, hdr.fifo_msg_size);
 
 	return bytes;
 }

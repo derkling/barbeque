@@ -132,6 +132,22 @@ RPC_FIFO_DEFINE_MESSAGE(BBQ_SYNCP_PRECHANGE_RESP);
 RPC_FIFO_DEFINE_MESSAGE(BBQ_STOP);
 
 
+/******************************************************************************
+ * Utility Commands
+ ******************************************************************************/
+#define RPC_FIFO_HEX_DUMP_BUFFER(PBUFF, SIZE)\
+do {\
+fprintf(stderr, "\nRPC_FIFO_HEX_DUMP_BUFFER(@%p, %d):", PBUFF, SIZE);\
+for (uint32_t i = 0; i < (SIZE); ++i) {\
+	if (!(i % 16))\
+		fprintf(stderr, "\n");\
+	fprintf(stderr, "%02X ", ((uint8_t*)PBUFF)[i]);\
+}\
+fprintf(stderr, "\n");\
+} while(0);
+
+#define RPC_FIFO_HEX_DUMP_MESSAGE(RPC_TYPE)\
+	RPC_FIFO_HEX_DUMP_BUFFER((void*)&rf_ ## RPC_TYPE, (int)FIFO_PKT_SIZE(RPC_TYPE))
 
 } // namespace rtlib
 
