@@ -140,6 +140,11 @@ private:
 	 */
 	void testSyncResourcesUpdate();
 
+	/**
+	 * @brief Test constraint assertions
+	 */
+	void testConstraints(AppPtr_t & app);
+
 };
 
 } // namespace plugins

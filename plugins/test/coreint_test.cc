@@ -29,6 +29,7 @@
 #include <vector>
 
 #include "bbque/modules_factory.h"
+#include "bbque/rtlib.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/app/plugin_data.h"
@@ -38,7 +39,7 @@
 #define NUM_RECIPES 5
 
 // Enabling test macros
-#define SINGLE_APP_TEST_ENABLED	0
+#define SINGLE_APP_TEST_ENABLED	1
 #define SCHEDU_APP_TEST_ENABLED	1
 
 namespace ba = bbque::app;
@@ -591,11 +592,11 @@ void CoreInteractionsTest::testSyncResourcesUpdate() {
 
 	AppsUidMap_t::const_iterator sync_app_it(
 			sv.Applications(ApplicationStatusIF::SYNC)->begin());
-	AppsUidMap_t::const_iterator end_sync_app(
-			sv.Applications(ApplicationStatusIF::SYNC)->end());
 
 	// Get all the applications to syncronize
-	for (; sync_app_it != end_sync_app; ++sync_app_it) {
+	for (; sync_app_it != sv.Applications(ApplicationStatusIF::SYNC)->end();
+			++sync_app_it) {
+
 		if (sync_app_it->second->SyncState() == ApplicationStatusIF::BLOCKED)
 			continue;
 
@@ -607,7 +608,7 @@ void CoreInteractionsTest::testSyncResourcesUpdate() {
 		// Beware: ithout this call we cannot perform other runs
 		// ---------------------------------------------------------
 		// Commit the change of state + AWM to the ApplicationManager
-//		am.SyncCommit(sync_app_it->second);
+		//am.SyncCommit(sync_app_it->second);
 	}
 
 	// Commit the session
@@ -645,6 +646,47 @@ void CoreInteractionsTest::testStartApplications(uint16_t num) {
 			am.Applications(Application::READY)->size());
 }
 
+
+void CoreInteractionsTest::testConstraints(AppPtr_t & papp) {
+	RTLIB_Constraint cstr;
+
+	// Upper bound to AWM 2
+	cstr.awm = 2;
+	cstr.add = true;
+	cstr.type = RTLIB_ConstraintType::LOW_BOUND;
+
+	PrintWorkingModesInfo(papp);
+	logger->Info("Constraint: ADD Awm = %d Bound = %d", cstr.awm, cstr.type);
+	papp->SetWorkingModeConstraint(cstr);
+	PrintWorkingModesInfo(papp);
+
+	// Shrink... upper bound to AWM 1
+	cstr.awm = 1;
+	cstr.type = RTLIB_ConstraintType::UPPER_BOUND;
+	logger->Info("Constraint: ADD Awm = %d Bound = %d", cstr.awm, cstr.type);
+	papp->SetWorkingModeConstraint(cstr);
+	PrintWorkingModesInfo(papp);
+
+	// Remove the last constraint
+	papp->ClearWorkingModeConstraint(cstr.type);
+	logger->Info("Constraint: REMOVED");
+	PrintWorkingModesInfo(papp);
+	getchar();
+
+	// Exact value
+	cstr.awm = 1;
+	cstr.type = RTLIB_ConstraintType::EXACT_VALUE;
+	logger->Info("Constraint: ADD Awm = %d  = %d", cstr.awm, cstr.type);
+	papp->SetWorkingModeConstraint(cstr);
+	PrintWorkingModesInfo(papp);
+
+	// Remove the last constraint
+	papp->ClearWorkingModeConstraint(cstr.type);
+	logger->Info("Constraint: REMOVED");
+	PrintWorkingModesInfo(papp);
+}
+
+
 // =======================================[ Start the test ]==================
 
 void CoreInteractionsTest::Test() {
@@ -669,15 +711,17 @@ void CoreInteractionsTest::Test() {
 		logger->Error("Application not started.");
 		return;
 	}
-	testApplicationLifecycle(test_app);
+//	testApplicationLifecycle(test_app);
+	testConstraints(test_app);
 
 	// Stop application
-	ApplicationManager::ExitCode_t result = am.DestroyEXC(3324);
+/*	ApplicationManager::ExitCode_t result = am.DestroyEXC(3324);
 	if (result == ApplicationManager::AM_SUCCESS)
 		logger->Info("Application correctly exited.");
 	else
 		logger->Info("Error: Application didn't exit correctly"
 				" [ExitCode = %d]", result);
+*/
 	// Plugin specific data
 	std::string * auth =
 		(static_cast<std::string *>(
