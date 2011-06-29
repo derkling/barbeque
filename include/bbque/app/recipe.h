@@ -47,7 +47,7 @@ typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 /** Map of shared pointers to WorkingMode */
 typedef std::map<uint16_t, AwmPtr_t> AwmMap_t;
 /** Shared pointer to Constraint object */
-typedef std::shared_ptr<Constraint> ConstrPtr_t;
+typedef std::shared_ptr<ResourceConstraint> ConstrPtr_t;
 /** Map of Constraints pointers, with the resource path as key*/
 typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
 

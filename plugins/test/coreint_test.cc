@@ -524,9 +524,6 @@ void CoreInteractionsTest::testApplicationLifecycle(AppPtr_t & papp) {
 	testScheduleSwitch(app_conf, 1, 0.381);
 	PrintResourceAvailabilities(sv);
 
-	logger->Info("_____ Set a constraint");
-	app_conf->RemoveConstraint("cacheL3", Constraint::UPPER_BOUND);
-
 	logger->Info("_____ Simulate a schedulation 2...");
 	testScheduleSwitch(app_conf, 2, 0.445);
 	PrintResourceAvailabilities(sv);

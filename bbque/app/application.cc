@@ -58,9 +58,23 @@ char const *ApplicationStatusIF::syncStateStr[] = {
 
 // Compare two working mode values.
 // This is used to sort the list of enabled working modes.
-bool CompareAWMsByValue(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
+bool AwmValueLesser(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
 		return wm1->Value() < wm2->Value();
 }
+
+bool AwmIdLesser(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
+		return wm1->Id() < wm2->Id();
+}
+
+
+/**
+ * The following map keeps track of the constraints on resources.
+ * It is used by function UsageOutOfBounds() (see below) to check if a working
+ * mode includes a resource usages that violates a bounds contained in this
+ * map.
+ **/
+static ConstrMap_t rsrc_constraints;
+
 
 Application::Application(std::string const & _name, AppPid_t _pid,
 		uint8_t _exc_id) :
@@ -101,9 +115,9 @@ Application::~Application() {
 	// Reset scheduling info
 	schedule.awm.reset();
 
-	// Releasing AWMs and Constraints...
+	// Releasing AWMs and ResourceConstraints...
 	enabled_awms.clear();
-	constraints.clear();
+	rsrc_constraints.clear();
 
 }
 
@@ -116,38 +130,49 @@ void Application::SetPriority(AppPrio_t _prio) {
 }
 
 void Application::InitWorkingModes(AppPtr_t & papp) {
-	// Copy the working modes and set the owner
 	AwmMap_t const & wms(recipe->WorkingModesAll());
 	AwmMap_t::const_iterator it(wms.begin());
 	AwmMap_t::const_iterator end(wms.end());
+
+	// Copy the working modes and set the owner
 	for (; it != end; ++it) {
 		AwmPtr_t app_awm(new WorkingMode((*(it->second).get())));
 		app_awm->SetOwner(papp);
-		working_modes.insert(std::pair<uint16_t, AwmPtr_t>(app_awm->Id(),
-								app_awm));
+		working_modes.push_back(app_awm);
 		enabled_awms.push_back(app_awm);
 	}
 
 	// Sort the enabled list by "value"
-	enabled_awms.sort(CompareAWMsByValue);
+	enabled_awms.sort(AwmValueLesser);
+
+	// Sort the global list by Id
+	working_modes.sort(AwmIdLesser);
+
+	// Init the bounds to begin/end.
+	awm_bounds.low = working_modes.begin();
+	awm_bounds.upp = working_modes.end();
 }
 
-void Application::InitConstraints() {
-	// For each static constraint make an assertion
-	logger->Debug("%d constraints in the recipe",
-			recipe->ConstraintsAll().size());
+void Application::InitResourceConstraints() {
 	ConstrMap_t::const_iterator cons_it(recipe->ConstraintsAll().begin());
 	ConstrMap_t::const_iterator end_cons(recipe->ConstraintsAll().end());
+
+	// For each static constraint on a resource make an assertion
 	for (; cons_it != end_cons; ++cons_it) {
 		// Lower bound
 		if ((cons_it->second)->lower > 0)
-				SetConstraint(cons_it->first, Constraint::LOWER_BOUND,
-								(cons_it->second)->lower);
+				SetResourceConstraint(cons_it->first,
+						ResourceConstraint::LOWER_BOUND,
+						(cons_it->second)->lower);
 		// Upper bound
 		if ((cons_it->second)->upper > 0)
-				SetConstraint(cons_it->first, Constraint::UPPER_BOUND,
-								(cons_it->second)->upper);
+				SetResourceConstraint(cons_it->first,
+						ResourceConstraint::UPPER_BOUND,
+						(cons_it->second)->upper);
 	}
+
+	logger->Debug("%d resource constraints from the recipe",
+			rsrc_constraints.size());
 }
 
 void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
@@ -157,27 +182,29 @@ void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
 
 	// Init information got from the recipe
 	InitWorkingModes(papp);
-	InitConstraints();
+	InitResourceConstraints();
 	plugins_data = PlugDataMap_t(recipe->plugins_data);
 
 	// Debug messages
 	logger->Info("%d working modes (enabled = %d).", working_modes.size(),
-					enabled_awms.size());
-	logger->Info("%d constraints in the application.", constraints.size());
+			enabled_awms.size());
+	logger->Info("%d constraints in the application.",
+			rsrc_constraints.size());
 	logger->Info("%d plugins specific attributes.", plugins_data.size());
 }
 
-AwmPtr_t Application::GetWorkingMode(uint16_t wmId) {
-	AwmPtrList_t::iterator awm_it(enabled_awms.begin());
-	AwmPtrList_t::iterator end_awm(enabled_awms.end());
+AwmPtrList_t::iterator Application::FindWorkingModeIter(
+		AwmPtrList_t & awm_list,
+		uint16_t wmId) {
+	AwmPtrList_t::iterator awm_it(awm_list.begin());
+	AwmPtrList_t::iterator end_awm(awm_list.end());
 
-	while(awm_it != end_awm) {
+	for (; awm_it != end_awm; ++awm_it) {
 		if ((*awm_it)->Id() == wmId)
-			return (*awm_it);
-		++awm_it;
+			break;
 	}
 
-	return AwmPtr_t();
+	return awm_it;
 }
 
 
@@ -545,120 +572,203 @@ Application::ExitCode_t Application::ScheduleCommit() {
 
 }
 
-
 /*******************************************************************************
  *  EXC Constraints Management
  ******************************************************************************/
 
-void Application::WorkingModesEnabling(std::string const & _res_name,
-				Constraint::BoundType_t _type,
-				uint64_t _constr_value) {
-	// Iterate over all the working modes to check the resource usage value
-	AwmMap_t::const_iterator it_awm(recipe->WorkingModesAll().begin());
-	AwmMap_t::const_iterator awms_end(recipe->WorkingModesAll().end());
-	for (; it_awm != awms_end; ++it_awm) {
+Application::ExitCode_t Application::SetWorkingModeConstraint(
+		RTLIB_Constraint & constraint) {
+	assert(working_modes.size() > 0);
 
-		// If a resource usage is below an upper bound constraint or
-		// above a lower bound one disable the working mode, by removing it
-		// from the enabled list
-		uint64_t usage_value = (it_awm->second)->ResourceUsageValue(_res_name);
-		if (((_type == Constraint::LOWER_BOUND) &&
-				(usage_value < _constr_value)) ||
-						((_type == Constraint::UPPER_BOUND) &&
-							(usage_value > _constr_value))) {
-			enabled_awms.remove(it_awm->second);
-			logger->Debug("Disabled : %s", (it_awm->second)->Name().c_str());
-		}
-		else {
-			// The working mode is enabled yet ?
-			AwmPtrList_t::iterator it_enabl(enabled_awms.begin());
-			AwmPtrList_t::iterator enabl_end(enabled_awms.end());
-			for (; it_enabl != enabl_end; ++it_awm)
-				if ((*it_enabl)->Name().compare((it_awm->second)->Name()) == 0)
-					break;
-
-			// If no, enable it
-			if (it_enabl == enabl_end) {
-				enabled_awms.push_back(it_awm->second);
-				logger->Debug("Enabled : %s", (it_awm->second)->Name().c_str());
-			}
-		}
+	// 'add' field must be true
+	if (!constraint.add) {
+		logger->Error("SetConstraint (AWMs): Expected 'add' == true");
+		return APP_ABORT;
 	}
 
-	// Sort by "value"
-	enabled_awms.sort(CompareAWMsByValue);
-	logger->Debug("%d working modes enabled", enabled_awms.size());
-}
-
-Application::ExitCode_t Application::SetConstraint(
-				std::string const & _res_name,
-				Constraint::BoundType_t _type,
-				uint32_t _value) {
-	// Check if the resource exists, and get the descriptor.
-	// If doesn't, return.
-	ConstrMap_t::iterator it_con(constraints.find(_res_name));
-	if (it_con == constraints.end()) {
-		br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-		br::ResourcePtr_t rsrc_ptr(ra.GetResource(_res_name));
-		if (!rsrc_ptr) {
-			logger->Warn("Constraint rejected: unknown resource path");
-			return APP_RSRC_NOT_FOUND;
-		}
-
-		// Create a constraint object, set its resource reference
-		// and insert it into the constraints map
-		constraints.insert(std::pair<std::string, ConstrPtr_t>(
-								_res_name,
-								ConstrPtr_t(new Constraint(rsrc_ptr))));
+	// Find the working mode in the constraint assertion
+	AwmPtrList_t::iterator
+		wm_it(FindWorkingModeIter(working_modes, constraint.awm));
+	if (wm_it == working_modes.end()) {
+		logger->Error("SetConstraint (AWMs): No AWM {%d} found",
+				constraint.awm);
+		return APP_WM_NOT_FOUND;
 	}
 
-	// Set the constraint bound value
-	switch(_type) {
-	case Constraint::LOWER_BOUND:
-		constraints[_res_name]->lower = _value;
+	switch (constraint.type) {
+	case RTLIB_ConstraintType::LOW_BOUND:
+		// If the lower > upper: upper = end
+		if ((awm_bounds.upp != working_modes.end()) &&
+				((constraint.awm > (*awm_bounds.upp)->Id())))
+			awm_bounds.upp = working_modes.end();
+
+		awm_bounds.low = wm_it;
+		logger->Debug("SetConstraint (AWMs): Set lower bound AWM {%d}",
+				(*awm_bounds.low)->Id());
 		break;
-	case Constraint::UPPER_BOUND:
-		constraints[_res_name]->upper = _value;
+
+	case RTLIB_ConstraintType::UPPER_BOUND:
+		// If the upper < lower: lower = begin
+		if (constraint.awm < (*awm_bounds.low)->Id())
+			awm_bounds.low = working_modes.begin();
+
+		awm_bounds.upp = wm_it;
+		++awm_bounds.upp; // This is needed to include the range upper bound
+		logger->Debug("SetConstraint (AWMs): Set upper bound AWM {%d}",
+				(*awm_bounds.upp)->Id());
 		break;
+
+	case RTLIB_ConstraintType::EXACT_VALUE:
+		awm_bounds.low = wm_it;
+		awm_bounds.upp = ++wm_it;
+		logger->Debug("SetConstraint (AWMs): Set exact value AWM{%d,%d}",
+				(*awm_bounds.low)->Id(),
+				(*awm_bounds.upp)->Id());
 	}
-	// Check if there are some awms to disable
-	WorkingModesEnabling(_res_name, _type, _value);
+
+	// Rebuild the list of enabled working modes
+	enabled_awms.assign(awm_bounds.low, awm_bounds.upp);
+	UpdateEnabledWorkingModes();
+
+	logger->Debug("SetConstraint (AWMs): %d total working modes",
+			working_modes.size());
+	logger->Debug("SetConstraint (AWMs): %d enabled working modes",
+			enabled_awms.size());
 
 	return APP_SUCCESS;
 }
 
-Application::ExitCode_t Application::RemoveConstraint(
-				std::string const & _res_name,
-				Constraint::BoundType_t _type) {
+void Application::ClearWorkingModeConstraint(RTLIB_ConstraintType & cstr_type) {
+	assert(working_modes.size() > 0);
+
+	switch (cstr_type) {
+	case RTLIB_ConstraintType::LOW_BOUND:
+		awm_bounds.low = working_modes.begin();
+		break;
+
+	case RTLIB_ConstraintType::UPPER_BOUND:
+		awm_bounds.upp = working_modes.end();
+		break;
+
+	case RTLIB_ConstraintType::EXACT_VALUE:
+		awm_bounds.low = working_modes.begin();
+		awm_bounds.upp = working_modes.end();
+	}
+
+	// Rebuild the list of enabled working modes
+	enabled_awms.assign(awm_bounds.low, awm_bounds.upp);
+	UpdateEnabledWorkingModes();
+
+	logger->Debug("ClearConstraint (AWMs): %d total working modes",
+			working_modes.size());
+	logger->Debug("ClearConstraint (AWMs): %d enabled working modes",
+			enabled_awms.size());
+}
+
+
+/************************** Resource Constraints ****************************/
+
+bool UsageOutOfBounds(const AwmPtr_t & awm) {
+	ConstrMap_t::iterator rsrc_cstr_it;
+	ConstrMap_t::iterator end_cstr(rsrc_constraints.end());
+	UsagesMap_t::const_iterator usage_it = awm->ResourceUsages().begin();
+	UsagesMap_t::const_iterator end_usage = awm->ResourceUsages().end();
+
+	for (; usage_it != end_usage; ++usage_it) {
+		// Check if there are constraints on the resource
+		rsrc_cstr_it = rsrc_constraints.find(usage_it->first);
+		if (rsrc_cstr_it == end_cstr)
+			continue;
+
+		// Check if the usage value is out of constraint bounds
+		UsagePtr_t const & rsrc_usage(usage_it->second);
+		if ((rsrc_usage->value < rsrc_cstr_it->second->lower) ||
+				(rsrc_usage->value > rsrc_cstr_it->second->upper))
+			return true;
+	}
+
+	return false;
+}
+
+void Application::UpdateEnabledWorkingModes() {
+	// Remove working modes that violate resources constraints
+	enabled_awms.remove_if(UsageOutOfBounds);
+
+	// Sort by working mode "value
+	enabled_awms.sort(AwmValueLesser);
+}
+
+Application::ExitCode_t Application::SetResourceConstraint(
+				std::string const & _rsrc_path,
+				ResourceConstraint::BoundType_t _type,
+				uint64_t _value) {
+	// Check if there is a constraint on this resource yet
+	ConstrMap_t::iterator it_con(rsrc_constraints.find(_rsrc_path));
+	if (it_con == rsrc_constraints.end()) {
+		// Insert a new constraint structure
+		rsrc_constraints.insert(ConstrPair_t(_rsrc_path,
+					ConstrPtr_t(new ResourceConstraint)));
+	}
+
+	// Set the constraint bound value (if value was existing overwrite it)
+	switch(_type) {
+	case ResourceConstraint::LOWER_BOUND:
+		rsrc_constraints[_rsrc_path]->lower = _value;
+		if (rsrc_constraints[_rsrc_path]->upper < _value)
+			rsrc_constraints[_rsrc_path]->upper =
+				std::numeric_limits<uint64_t>::max();
+		logger->Debug("SetConstraint (Resources): Set on {%s} LB = %llu",
+				_rsrc_path.c_str(), _value);
+		break;
+
+	case ResourceConstraint::UPPER_BOUND:
+		rsrc_constraints[_rsrc_path]->upper = _value;
+		if (rsrc_constraints[_rsrc_path]->lower > _value)
+			rsrc_constraints[_rsrc_path]->lower = 0;
+		logger->Debug("SetConstraint (Resources): Set on {%s} UB = %llu",
+				_rsrc_path.c_str(), _value);
+		break;
+	}
+
+	// Check if there are some awms to disable
+	UpdateEnabledWorkingModes();
+
+	return APP_SUCCESS;
+}
+
+Application::ExitCode_t Application::ClearResourceConstraint(
+				std::string const & _rsrc_path,
+				ResourceConstraint::BoundType_t _type) {
+
 	// Lookup the constraint by resource pathname
-	ConstrMap_t::iterator it_con(constraints.find(_res_name));
-	if (it_con == constraints.end()) {
-		logger->Warn("Constraint removing failed: unknown resource path");
+	ConstrMap_t::iterator it_con(rsrc_constraints.find(_rsrc_path));
+	if (it_con == rsrc_constraints.end()) {
+		logger->Warn("ClearConstraint (Resources): failed due to unknown "
+				"resource path");
 		return APP_CONS_NOT_FOUND;
 	}
 
 	// Reset the constraint and check for AWM to enable
 	switch (_type) {
-	case Constraint::LOWER_BOUND :
+	case ResourceConstraint::LOWER_BOUND :
 		it_con->second->lower = 0;
-		WorkingModesEnabling(_res_name, _type, it_con->second->lower);
 		// If there isn't an upper bound value, remove the constraint object
 		if (it_con->second->upper == std::numeric_limits<uint64_t>::max())
-			constraints.erase(it_con);
+			rsrc_constraints.erase(it_con);
 		break;
 
-	case Constraint::UPPER_BOUND :
+	case ResourceConstraint::UPPER_BOUND :
 		it_con->second->upper = std::numeric_limits<uint64_t>::max();
-		WorkingModesEnabling(_res_name, _type, it_con->second->upper);
 		// If there isn't a lower bound value, remove the constraint object
 		if (it_con->second->lower == 0)
-			constraints.erase(it_con);
+			rsrc_constraints.erase(it_con);
 		break;
 	}
 
+	UpdateEnabledWorkingModes();
+
 	return APP_SUCCESS;
 }
-
 
 } // namespace app
 

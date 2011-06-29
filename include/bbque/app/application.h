@@ -51,10 +51,12 @@ class Application;
 typedef std::shared_ptr<Application> AppPtr_t;
 /** Shared pointer to Recipe object */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
-/** Shared pointer to Constraint object */
-typedef std::shared_ptr<Constraint> ConstrPtr_t;
-/** Map of Constraints pointers, with the resource path as key*/
+/** Shared pointer to ResourceConstraint object */
+typedef std::shared_ptr<ResourceConstraint> ConstrPtr_t;
+/** Map of Resource constraints pointers, with the resource path as key*/
 typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
+/** Pair contained in the resource constraints map  */
+typedef std::pair<std::string, ConstrPtr_t> ConstrPair_t;
 
 
 /**
@@ -226,15 +228,6 @@ public:
 	}
 
 	/**
-	 * @brief Get a working mode descriptor
-	 * @param wmId Working mode ID
-	 * @return The (enabled) working mode descriptor
-	 *
-	 * @note The working mode must come from the enabled list
-	 */
-	AwmPtr_t GetWorkingMode(uint16_t wmId);
-
-	/**
 	 * @see ApplicationConfIF
 	 */
 	ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
@@ -246,27 +239,29 @@ public:
 	ExitCode_t ScheduleCommit();
 
 	/**
-	 * @brief Define a specific resource constraint. If exists yet it
-	 * is overwritten. This could bring to have some AWM disabled.
-	 *
-	 * @param res_path Resource path
-	 * @param type The constraint type (@see ContraintType)
-	 * @param value The constraint value
-	 * @return An error code (@see ExitCode_t)
+	 * @see ApplicationConfIF
 	 */
-	ExitCode_t SetConstraint(std::string const & res_path,
-			Constraint::BoundType_t type, uint32_t value);
+	ExitCode_t SetWorkingModeConstraint(RTLIB_Constraint & constraint);
 
 	/**
-	 * @brief Remove a constraint upon a specific resource.
-	 * This could bring to have some AWM re-enabled.
-	 *
-	 * @param res_path A pointer to the resource object
-	 * @param type The constraint type (@see ContraintType)
-	 * @return An error code (@see ExitCode)
+	 * @see ApplicationConfIF
 	 */
-	ExitCode_t RemoveConstraint(std::string const & res_path,
-			Constraint::BoundType_t type);
+	void ClearWorkingModeConstraint(RTLIB_ConstraintType & cstr_type);
+
+	/**
+	 * @brief Get a working mode descriptor
+	 *
+	 * @param wmId Working mode ID
+	 * @return The (enabled) working mode descriptor
+	 *
+	 * @note The working mode must come from the enabled list
+	 */
+	inline AwmPtr_t GetWorkingMode(uint16_t wmId) {
+		AwmPtrList_t::iterator wm_it(FindWorkingModeIter(enabled_awms, wmId));
+		if (wm_it == enabled_awms.end())
+			return AwmPtr_t();
+		return (*wm_it);
+	}
 
 	/**
 	 * @brief Terminate this EXC by releasing all resources.
@@ -279,9 +274,7 @@ public:
 	 */
 	ExitCode_t Terminate();
 
-
 private:
-
 
 	/** The logger used by the application */
 	LoggerIF  *logger;
@@ -317,14 +310,19 @@ private:
 	 */
 	RecipePtr_t recipe;
 
-	/** Map containing all the working modes */
-	AwmMap_t working_modes;
+	/** List of all the working modes */
+	AwmPtrList_t working_modes;
 
 	/** List of pointers to enabled working modes */
 	AwmPtrList_t enabled_awms;
 
-	/** Resource contraints asserted */
-	ConstrMap_t constraints;
+	/** Iterators pointing to the enabled working modes boundaries */
+	struct WorkingModesBoundaries {
+		/** Iterator pointing the lower bound AWM*/
+		AwmPtrList_t::iterator low;
+		/** Iterator pointing the upper bound AWM*/
+		AwmPtrList_t::iterator upp;
+	} awm_bounds;
 
 	/**
 	 * @brief Init working modes by reading the recipe
@@ -338,19 +336,60 @@ private:
 	 *
 	 * The method reads the "static" constraints on resources.
 	 */
-	void InitConstraints();
+	void InitResourceConstraints();
 
 	/**
-	 * @brief Whenever a constraint is set or removed, the method is called in
-	 * order to check if there are some working mode to disable or re-enable.
+	 * @brief Assert a specific resource constraint.
 	 *
-	 * @param res_path Resource path upon which the constraint has been
-	 * asserted or from which has been removed
-	 * @param type Constraint type (lower or upper bound)
-	 * @param value The value of the constraint
+	 * If exists yet it is overwritten. This could disable some working modes.
+	 *
+	 * @param res_path Resource path
+	 * @param type The constraint type (@see ContraintType)
+	 * @param value The constraint value
+	 * @return An error code (@see ExitCode_t)
 	 */
-	void WorkingModesEnabling(std::string const & res_path,
-			Constraint::BoundType_t type, uint64_t value);
+	ExitCode_t SetResourceConstraint(std::string const & res_path,
+			ResourceConstraint::BoundType_t type, uint64_t value);
+
+	/**
+	 * @brief Remove a constraint upon a specific resource.
+	 *
+	 * This could re-enable some working modes.
+	 *
+	 * @param res_path A pointer to the resource object
+	 * @param type The constraint type (@see ContraintType)
+	 * @return An error code (@see ExitCode)
+	 */
+	ExitCode_t ClearResourceConstraint(std::string const & res_path,
+			ResourceConstraint::BoundType_t type);
+
+	/**
+	 * @brief Find a working mode from a list
+	 *
+	 * The method allow to hande two cases:
+	 * First, the search between the enabled working modes, which is the
+	 * exposed by the public API GetWorkingMode().
+	 * Second, the search between all the working modes loaded from the
+	 * recipes. This function should not be publicly available, but it is
+	 * provided for class internal purposes.
+	 *
+	 * @param awm_list Working modes list
+	 * @param wmId The working mode ID
+	 * @return A shared pointer to WorkingMode descriptor
+	 */
+	AwmPtrList_t::iterator FindWorkingModeIter(AwmPtrList_t & awm_list,
+			uint16_t wmId);
+
+	/**
+	 * @brief Update enabled working modes list
+	 *
+	 * Whenever a constraint is set or removed, the method is called in
+	 * order to check if there are some working mode to disable or re-enable.
+	 * The method rebuilds the list of enabled working modes by checking if
+	 * there are some working modes requiring a resource usage which is out of
+	 * the bounds set by a resource constraint assertion.
+	 */
+	void UpdateEnabledWorkingModes();
 
 	/**
 	 * @brief Update the application state and sync state

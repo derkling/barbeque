@@ -20,6 +20,8 @@
  * ============================================================================
  */
 
+#include <limits>
+
 #ifndef BBQUE_CONSTRAINTS_H_
 #define BBQUE_CONSTRAINTS_H_
 
@@ -34,13 +36,14 @@ namespace bbque { namespace app {
 typedef std::shared_ptr<res::Resource> ResourcePtr_t;
 
 /**
- * @struct Constraint
+ * @struct ResourceConstraint
  *
- * It defines constraints for the application execution. When an application
- * asserts a constraint some working modes could became unactive. This means
- * that they cannot be considered by the optimizer in a new scheduling phase.
+ * This defines resource constraints for the application execution.
+ * A constraint assertion could disable some working modes due to an "out of
+ * bounds" resource usage. From the scheduer view, only enabled application
+ * working modes are taken into account.
  */
-struct Constraint {
+struct ResourceConstraint {
 
 	/**
 	 * @enum Type of constraint bounds
@@ -52,12 +55,18 @@ struct Constraint {
 		UPPER_BOUND
 	};
 
+	ResourceConstraint():
+		lower(0),
+		upper(std::numeric_limits<uint64_t>::max()) {
+	}
 	/**
 	 * @brief Constructor with resource descriptor
 	 * @param rsrc_ptr Resource descriptor pointer
 	 */
-	Constraint(ResourcePtr_t const & rsrc_ptr):
-		resource(rsrc_ptr) {
+	ResourceConstraint(ResourcePtr_t const & rsrc_ptr):
+		resource(rsrc_ptr),
+		lower(0),
+		upper(std::numeric_limits<uint64_t>::max()) {
 	}
 
 	/**
@@ -65,12 +74,15 @@ struct Constraint {
 	 * @param lb Lower bound value
 	 * @param ub Upper bound value
 	 */
-	Constraint(uint64_t lb, uint64_t ub):
+	ResourceConstraint(uint64_t lb, uint64_t ub):
 		lower(lb),
 		upper(ub) {
 	}
 
-	/** Resource to constraint (shared pointer) */
+	/**
+	 * Resource to constraint (shared pointer)
+	 * NOTE: This attribute is not used in the current version (0.6)
+	 */
 	ResourcePtr_t resource;
 
 	/** Resource usage lower bound   */
