@@ -496,10 +496,13 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 
 	// Let's set next schedule for the application above
 	// the binding is set by ScheduleRequest.
-	result = papp->ScheduleRequest(d_wm, rsrc_binds);
+	RViewToken_t vtok;
+	ra.GetView("sched.pol.fake", vtok);
+	result = papp->ScheduleRequest(d_wm, rsrc_binds, vtok);
 	if (result != Application::APP_WM_ACCEPTED) {
 		logger->Error("AWM Rejected");
 	}
+
 	PrintScheduleInfo(papp);
 
 	if (papp->State() != Application::SYNC)
@@ -508,6 +511,7 @@ void CoreInteractionsTest::testScheduleSwitch(AppPtr_t & papp,
 	// Now switch!
 	am.SyncCommit(papp);
 	PrintScheduleInfo(papp);
+	ra.PutView(vtok);
 }
 
 

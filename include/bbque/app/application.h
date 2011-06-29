@@ -231,7 +231,7 @@ public:
 	 * @see ApplicationConfIF
 	 */
 	ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
-			UsagesMapPtr_t & resource_set, RViewToken_t vtok = 0);
+			UsagesMapPtr_t & resource_set, RViewToken_t vtok);
 
 	/**
 	 * @see ApplicationConfIF

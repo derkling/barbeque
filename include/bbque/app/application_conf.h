@@ -94,7 +94,7 @@ public:
 	 * always APP_DISABLED.
 	 */
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
-			UsagesMapPtr_t & resource_set, RViewToken_t tok = 0) = 0;
+			UsagesMapPtr_t & resource_set, RViewToken_t tok) = 0;
 
 	/**
 	 * @brief Commit a previsously required re-scheduling request.
