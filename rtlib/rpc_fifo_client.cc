@@ -192,15 +192,15 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		break;
 	case RPC_BBQ_SYNCP_SYNCCHANGE:
 		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_SYNCCHANGE\n")));
-		//RpcBbqSyncpPostcYhange();
+		RpcBbqSyncpSyncChange();
 		break;
 	case RPC_BBQ_SYNCP_DOCHANGE:
 		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_DOCHANGE\n")));
-		//RpcBbqSyncpDochange();
+		RpcBbqSyncpDoChange();
 		break;
 	case RPC_BBQ_SYNCP_POSTCHANGE:
 		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_POSTCHANGE\n")));
-		//RpcBbqSyncpPostchange();
+		RpcBbqSyncpPostChange();
 		break;
 
 	default:
@@ -608,7 +608,148 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPreChange() {
 
 }
 
+
+/******************************************************************************
+ * Synchronization Protocol Messages - SyncChange
+ ******************************************************************************/
+
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpSyncChangeResp(
+		rpc_msg_token_t token, pregExCtx_t prec, RTLIB_ExitCode sync) {
+
+	rpc_fifo_BBQ_SYNCP_SYNCCHANGE_RESP_t rf_BBQ_SYNCP_SYNCCHANGE_RESP = {
+		{
+			FIFO_PKT_SIZE(BBQ_SYNCP_SYNCCHANGE_RESP),
+			FIFO_PYL_OFFSET(BBQ_SYNCP_SYNCCHANGE_RESP),
+			RPC_BBQ_RESP
+		},
+		{
+			{
+				RPC_BBQ_RESP,
+				token,
+				chTrdPid,
+				prec->exc_id
+			},
+			(uint8_t)sync
+		}
+	};
+
+	// Check that the ExitCode can be represented by the response message
+	assert(sync < 256);
+
+	DB(fprintf(stderr, FMT_DBG("SyncChange response EXC [%d:%d]...\n"),
+				rf_BBQ_SYNCP_SYNCCHANGE_RESP.pyl.hdr.app_pid,
+				rf_BBQ_SYNCP_SYNCCHANGE_RESP.pyl.hdr.exc_id));
+
+	// Sending RPC Request
+	RPC_FIFO_SEND(BBQ_SYNCP_SYNCCHANGE_RESP);
+
+	return RTLIB_OK;
 }
+
+void BbqueRPC_FIFO_Client::RpcBbqSyncpSyncChange() {
+	rpc_msg_BBQ_SYNCP_SYNCCHANGE_t msg;
+	size_t bytes;
+
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&msg,
+			RPC_PKT_SIZE(BBQ_SYNCP_SYNCCHANGE));
+	if (bytes <= 0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		chResp.result = RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	// Notify the Sync-Change
+	SyncP_SyncChangeNotify(msg.hdr.token, msg.hdr.exc_id);
+
+}
+
+
+/******************************************************************************
+ * Synchronization Protocol Messages - SyncChange
+ ******************************************************************************/
+
+void BbqueRPC_FIFO_Client::RpcBbqSyncpDoChange() {
+	rpc_msg_BBQ_SYNCP_DOCHANGE_t msg;
+	size_t bytes;
+
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&msg,
+			RPC_PKT_SIZE(BBQ_SYNCP_DOCHANGE));
+	if (bytes <= 0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		chResp.result = RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	// Notify the Sync-Change
+	SyncP_DoChangeNotify(msg.hdr.exc_id);
+
+}
+
+
+/******************************************************************************
+ * Synchronization Protocol Messages - PostChange
+ ******************************************************************************/
+
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPostChangeResp(
+		rpc_msg_token_t token, pregExCtx_t prec, RTLIB_ExitCode result) {
+
+	rpc_fifo_BBQ_SYNCP_POSTCHANGE_RESP_t rf_BBQ_SYNCP_POSTCHANGE_RESP = {
+		{
+			FIFO_PKT_SIZE(BBQ_SYNCP_POSTCHANGE_RESP),
+			FIFO_PYL_OFFSET(BBQ_SYNCP_POSTCHANGE_RESP),
+			RPC_BBQ_RESP
+		},
+		{
+			{
+				RPC_BBQ_RESP,
+				token,
+				chTrdPid,
+				prec->exc_id
+			},
+			(uint8_t)result
+		}
+	};
+
+	// Check that the ExitCode can be represented by the response message
+	assert(result < 256);
+
+	DB(fprintf(stderr, FMT_DBG("PostChange response EXC [%d:%d]...\n"),
+				rf_BBQ_SYNCP_POSTCHANGE_RESP.pyl.hdr.app_pid,
+				rf_BBQ_SYNCP_POSTCHANGE_RESP.pyl.hdr.exc_id));
+
+	// Sending RPC Request
+	RPC_FIFO_SEND(BBQ_SYNCP_POSTCHANGE_RESP);
+
+	return RTLIB_OK;
+}
+
+void BbqueRPC_FIFO_Client::RpcBbqSyncpPostChange() {
+	rpc_msg_BBQ_SYNCP_POSTCHANGE_t msg;
+	size_t bytes;
+
+	// Read response RPC header
+	bytes = ::read(client_fifo_fd, (void*)&msg,
+			RPC_PKT_SIZE(BBQ_SYNCP_POSTCHANGE));
+	if (bytes <= 0) {
+		fprintf(stderr, FMT_ERR("FAILED read from app fifo [%s] "
+					"(Error %d: %s)\n"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		chResp.result = RTLIB_BBQUE_CHANNEL_READ_FAILED;
+	}
+
+	// Notify the Sync-Change
+	SyncP_PostChangeNotify(msg.hdr.token, msg.hdr.exc_id);
+
+}
+
+
 
 } // namespace rtlib
 

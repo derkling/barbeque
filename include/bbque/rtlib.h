@@ -144,7 +144,12 @@ typedef enum RTLIB_ExitCode {
 	/** The Execution Context Stop Failed */
 	RTLIB_EXC_STOP_FAILED,
 	/** Failed to get a working mode */
-	RTLIB_EXC_GWM_FAILED
+	RTLIB_EXC_GWM_FAILED,
+
+//---- Internal values not exposed to applications
+
+	/** A step of the synchronization protocol has failed */
+	RTLIB_EXC_SYNCP_FAILED
 
 // NOTE The last entry should not overflow a uint8_t, otherwise some of the RPC
 // channel messages should be updated

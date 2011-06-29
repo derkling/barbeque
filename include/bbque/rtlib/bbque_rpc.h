@@ -201,9 +201,49 @@ protected:
 			rpc_msg_token_t token,
 			uint8_t exc_id);
 
+//----- SyncChange
 
 	/**
+	 * @brief Send response to a Sync-Change command
 	 */
+	virtual RTLIB_ExitCode _SyncpSyncChangeResp(
+			rpc_msg_token_t token,
+			pregExCtx_t prec, RTLIB_ExitCode sync) = 0;
+
+	/**
+	 * @brief A synchronization protocol Sync-Change for the EXC with the
+	 * specified ID.
+	 */
+	RTLIB_ExitCode SyncP_SyncChangeNotify(
+			rpc_msg_token_t token,
+			uint8_t exc_id);
+
+//----- DoChange
+
+	/**
+	 * @brief A synchronization protocol Do-Change for the EXC with the
+	 * specified ID.
+	 */
+	RTLIB_ExitCode SyncP_DoChangeNotify(uint8_t exc_id);
+
+//----- PostChange
+
+	/**
+	 * @brief Send response to a Post-Change command
+	 */
+	virtual RTLIB_ExitCode _SyncpPostChangeResp(
+			rpc_msg_token_t token,
+			pregExCtx_t prec,
+			RTLIB_ExitCode result) = 0;
+
+	/**
+	 * @brief A synchronization protocol Post-Change for the EXC with the
+	 * specified ID.
+	 */
+	RTLIB_ExitCode SyncP_PostChangeNotify(
+			rpc_msg_token_t token,
+			uint8_t exc_id);
+
 
 
 private:
@@ -255,12 +295,30 @@ private:
 	 */
 	uint32_t GetSyncLatency(pregExCtx_t prec);
 
+/******************************************************************************
+ * Synchronization Protocol Messages
+ ******************************************************************************/
+
+	/**
 	 * @brief A synchronization protocol Pre-Change for the specified EXC.
 	 */
 	RTLIB_ExitCode SyncP_PreChangeNotify(pregExCtx_t prec);
 
 	/**
+	 * @brief A synchronization protocol Sync-Change for the specified EXC.
 	 */
+	RTLIB_ExitCode SyncP_SyncChangeNotify(pregExCtx_t prec);
+
+	/**
+	 * @brief A synchronization protocol Do-Change for the specified EXC.
+	 */
+	RTLIB_ExitCode SyncP_DoChangeNotify(pregExCtx_t prec);
+
+	/**
+	 * @brief A synchronization protocol Post-Change for the specified EXC.
+	 */
+	RTLIB_ExitCode SyncP_PostChangeNotify(pregExCtx_t prec);
+
 
 /******************************************************************************
  * Application Callbacks Proxies

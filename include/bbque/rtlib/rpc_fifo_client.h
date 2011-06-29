@@ -86,6 +86,16 @@ protected:
 			pregExCtx_t prec,
 			uint32_t syncLatency);
 
+	RTLIB_ExitCode _SyncpSyncChangeResp(
+			rpc_msg_token_t token,
+			pregExCtx_t prec,
+			RTLIB_ExitCode sync);
+
+	RTLIB_ExitCode _SyncpPostChangeResp(
+			rpc_msg_token_t token,
+			pregExCtx_t prec,
+			RTLIB_ExitCode result);
+
 private:
 
 	char app_fifo_filename[BBQUE_FIFO_NAME_LENGTH];
@@ -158,11 +168,20 @@ private:
 	 */
 	void RpcBbqSyncpPreChange();
 
+	/**
+	 * @brief Get from FIFO a SyncChange RPC message
+	 */
+	void RpcBbqSyncpSyncChange();
 
+	/**
+	 * @brief Get from FIFO a DoChange RPC message
+	 */
+	void RpcBbqSyncpDoChange();
 
-	//void RpcBbqSyncpPrechange();
-	//void RpcBbqSyncpDochange();
-	//void RpcBbqSyncpPostchange();
+	/**
+	 * @brief Get from FIFO a PostChange RPC message
+	 */
+	void RpcBbqSyncpPostChange();
 
 	void RpcBbqCmd_SetWorkingMode();
 };

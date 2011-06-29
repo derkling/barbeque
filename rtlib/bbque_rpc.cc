@@ -431,6 +431,99 @@ RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
 	return RTLIB_OK;
 }
 
+RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	// TODO Checking if the apps in in Sync Status
+	
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(
+		rpc_msg_token_t token,
+		uint8_t exc_id) {
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	prec = getRegistered(exc_id);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("SyncP_2 (Sync-Change) EXC [%d] FAILED "
+				"(Error: Execution Context not registered)\n"),
+				exc_id);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	result = SyncP_SyncChangeNotify(prec);
+	if (result != RTLIB_OK) {
+		fprintf(stderr, FMT_WRN("SyncP_2 (Sync-Change) EXC [%d] CRITICAL "
+				"(Warning: Overpassing Synchronization time)\n"),
+				exc_id);
+	}
+
+	_SyncpSyncChangeResp(token, prec, result);
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	// TODO Setup the ground for reconfiguraiton statistics collection
+	// TODO Start the re-configuration
+	
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(uint8_t exc_id) {
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	prec = getRegistered(exc_id);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("SyncP_3 (Do-Change) EXC [%d] FAILED "
+				"(Error: Execution Context not registered)\n"),
+				exc_id);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	result = SyncP_DoChangeNotify(prec);
+
+	// NOTE this command should not generate a response, it is just a notification
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	// TODO Wait for the apps to end its reconfiguration
+	// TODO Collect stats on reconfiguraiton time
+	
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(
+		rpc_msg_token_t token,
+		uint8_t exc_id) {
+	RTLIB_ExitCode result;
+	pregExCtx_t prec;
+
+	prec = getRegistered(exc_id);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("SyncP_4 (Post-Change) EXC [%d] FAILED "
+				"(Error: Execution Context not registered)\n"),
+				exc_id);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	result = SyncP_PostChangeNotify(prec);
+	if (result != RTLIB_OK) {
+		fprintf(stderr, FMT_WRN("SyncP_4 (Post-Change) EXC [%d] CRITICAL "
+				"(Warning: Reconfiguration timeout)\n"),
+				exc_id);
+	}
+
+	_SyncpPostChangeResp(token, prec, result);
+
+	return RTLIB_OK;
+}
 
 /******************************************************************************
  * Channel Independant interface
