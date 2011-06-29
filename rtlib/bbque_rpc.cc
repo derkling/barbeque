@@ -384,18 +384,23 @@ exit_gwm_failed:
 
 }
 
-RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
-	std::unique_lock<std::mutex> rec_ul(prec->mtx);
-	// Setting current AWM as invalid
-	setAwmInvalid(prec);
-	return RTLIB_OK;
-}
-
 uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
 	(void)prec;
 	// TODO added here the code for synchronization latency computation
 	// By default now we return a 100[ms] synchronization latency value
 	return 100;
+}
+
+
+/******************************************************************************
+ * Synchronization Protocol Messages
+ ******************************************************************************/
+
+RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	// Setting current AWM as invalid
+	setAwmInvalid(prec);
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
@@ -421,11 +426,15 @@ RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
 				"SyncLatency [%u]\n"),
 				exc_id, syncLatency));
 
-	_SyncpPrechangeResp(token, prec, syncLatency);
+	_SyncpPreChangeResp(token, prec, syncLatency);
 
 	return RTLIB_OK;
 }
 
+
+/******************************************************************************
+ * Channel Independant interface
+ ******************************************************************************/
 
 RTLIB_ExitCode BbqueRPC::Set(
 		const RTLIB_ExecutionContextHandler ech,

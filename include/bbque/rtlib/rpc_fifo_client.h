@@ -63,11 +63,6 @@ protected:
 
 	RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec);
 
-	RTLIB_ExitCode _SyncpPrechangeResp(
-			rpc_msg_token_t token,
-			pregExCtx_t prec,
-			uint32_t syncLatency);
-
 	RTLIB_ExitCode _Set(
 			const RTLIB_ExecutionContextHandler ech,
 			RTLIB_Constraint* constraints,
@@ -76,13 +71,20 @@ protected:
 	RTLIB_ExitCode _Clear(
 			const RTLIB_ExecutionContextHandler ech);
 
-
 	void _Exit();
 
 	inline uint32_t RpcMsgToken() {
 		return chTrdPid;
 	}
 
+/******************************************************************************
+ * Synchronization Protocol Messages
+ ******************************************************************************/
+	
+	RTLIB_ExitCode _SyncpPreChangeResp(
+			rpc_msg_token_t token,
+			pregExCtx_t prec,
+			uint32_t syncLatency);
 
 private:
 
@@ -151,9 +153,12 @@ private:
 
 	void RpcBbqResp();
 
+	/**
+	 * @brief Get from FIFO a PreChange RPC message
+	 */
+	void RpcBbqSyncpPreChange();
 
 
-	void RpcBbqSyncpPrechange();
 
 	//void RpcBbqSyncpPrechange();
 	//void RpcBbqSyncpDochange();

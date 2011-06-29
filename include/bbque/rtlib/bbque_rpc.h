@@ -170,7 +170,25 @@ protected:
 
 	virtual RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec) = 0;
 
-	virtual RTLIB_ExitCode _SyncpPrechangeResp(
+	/**
+	 * @brief Set a new AWM for the specified EXC
+	 */
+	RTLIB_ExitCode SetWorkingMode(pregExCtx_t prec,
+			RTLIB_WorkingModeParams *wm);
+
+	virtual void _Exit() = 0;
+
+
+/******************************************************************************
+ * Synchronization Protocol Messages
+ ******************************************************************************/
+
+//----- PreChange
+
+	/**
+	 * @brief Send response to a Pre-Change command
+	 */
+	virtual RTLIB_ExitCode _SyncpPreChangeResp(
 			rpc_msg_token_t token,
 			pregExCtx_t prec,
 			uint32_t syncLatency) = 0;
@@ -185,12 +203,8 @@ protected:
 
 
 	/**
-	 * @brief Set a new AWM for the specified EXC
 	 */
-	RTLIB_ExitCode SetWorkingMode(pregExCtx_t prec,
-			RTLIB_WorkingModeParams *wm);
 
-	virtual void _Exit() = 0;
 
 private:
 
@@ -237,14 +251,16 @@ private:
 			RTLIB_WorkingModeParams *wm);
 
 	/**
+	 * @brief Get an extimation of the Synchronization Latency
+	 */
+	uint32_t GetSyncLatency(pregExCtx_t prec);
+
 	 * @brief A synchronization protocol Pre-Change for the specified EXC.
 	 */
 	RTLIB_ExitCode SyncP_PreChangeNotify(pregExCtx_t prec);
 
 	/**
-	 * @brief Get an extimation of the Synchronization Latency
 	 */
-	uint32_t GetSyncLatency(pregExCtx_t prec);
 
 /******************************************************************************
  * Application Callbacks Proxies

@@ -188,7 +188,7 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		break;
 	case RPC_BBQ_SYNCP_PRECHANGE:
 		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_PRECHANGE\n")));
-		RpcBbqSyncpPrechange();
+		RpcBbqSyncpPreChange();
 		break;
 	case RPC_BBQ_SYNCP_SYNCCHANGE:
 		DB(fprintf(stderr, FMT_INF("BBQ_SYNCP_SYNCCHANGE\n")));
@@ -546,7 +546,16 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	return (RTLIB_ExitCode)chResp.result;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPrechangeResp(
+void BbqueRPC_FIFO_Client::_Exit() {
+	ChannelRelease();
+}
+
+
+/******************************************************************************
+ * Synchronization Protocol Messages - PreChange
+ ******************************************************************************/
+
+RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPreChangeResp(
 		rpc_msg_token_t token, pregExCtx_t prec, uint32_t syncLatency) {
 
 	rpc_fifo_BBQ_SYNCP_PRECHANGE_RESP_t rf_BBQ_SYNCP_PRECHANGE_RESP = {
@@ -579,7 +588,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPrechangeResp(
 	return RTLIB_OK;
 }
 
-void BbqueRPC_FIFO_Client::RpcBbqSyncpPrechange() {
+void BbqueRPC_FIFO_Client::RpcBbqSyncpPreChange() {
 	rpc_msg_BBQ_SYNCP_PRECHANGE_t msg;
 	size_t bytes;
 
@@ -599,8 +608,6 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPrechange() {
 
 }
 
-void BbqueRPC_FIFO_Client::_Exit() {
-	ChannelRelease();
 }
 
 } // namespace rtlib
