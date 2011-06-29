@@ -117,6 +117,27 @@ typedef struct rpc_fifo_undef {
 	rpc_fifo_header_t header;
 } rpc_fifo_undef_t;
 
+/******************************************************************************
+ * Execution Context Requests
+ ******************************************************************************/
+
+RPC_FIFO_DEFINE_MESSAGE(EXC_REGISTER);
+RPC_FIFO_DEFINE_MESSAGE(EXC_UNREGISTER);
+RPC_FIFO_DEFINE_MESSAGE(EXC_START);
+RPC_FIFO_DEFINE_MESSAGE(EXC_STOP);
+RPC_FIFO_DEFINE_MESSAGE(EXC_SCHEDULE);
+
+RPC_FIFO_DEFINE_MESSAGE(BBQ_SYNCP_PRECHANGE);
+RPC_FIFO_DEFINE_MESSAGE(BBQ_SYNCP_PRECHANGE_RESP);
+
+
+/******************************************************************************
+ * Barbeque Commands
+ ******************************************************************************/
+
+RPC_FIFO_DEFINE_MESSAGE(BBQ_STOP);
+
+
 
 } // namespace rtlib
 
