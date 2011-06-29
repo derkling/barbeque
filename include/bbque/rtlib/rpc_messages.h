@@ -195,6 +195,8 @@ typedef struct rpc_msg_EXC_SCHEDULE {
  * Synchronization Protocol Messages
  ******************************************************************************/
 
+//----- PreChange
+
 /**
  * @brief Synchronization Protocol PreChange command
  */
@@ -214,6 +216,56 @@ typedef struct rpc_msg_BBQ_SYNCP_PRECHANGE_RESP {
 	/** An extimation of the Synchronization Latency */
 	uint32_t syncLatency;
 } rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t;
+
+
+//----- SyncChange
+
+/**
+ * @brief Synchronization Protocol SyncChange command
+ */
+typedef struct rpc_msg_BBQ_SYNCP_SYNCCHANGE {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_BBQ_SYNCP_SYNCCHANGE_t;
+
+/**
+ * @brief Synchronization Protocol SyncChange response
+ */
+typedef struct rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t;
+
+
+//----- DoChange
+
+/**
+ * @brief Synchronization Protocol DoChange command
+ */
+typedef struct rpc_msg_BBQ_SYNCP_DOCHANGE {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_BBQ_SYNCP_DOCHANGE_t;
+
+
+//----- PostChange
+
+/**
+ * @brief Synchronization Protocol PostChange command
+ */
+typedef struct rpc_msg_BBQ_SYNCP_POSTCHANGE {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_BBQ_SYNCP_POSTCHANGE_t;
+
+/**
+ * @brief Synchronization Protocol PostChange response
+ */
+typedef struct rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t;
+
 
 /******************************************************************************
  * Barbeque Commands
