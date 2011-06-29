@@ -115,7 +115,7 @@ typedef struct rpc_msg_resp {
 /**
  * @brief Command to register a new execution context.
  */
-typedef struct rpc_msg_app_pair {
+typedef struct rpc_msg_APP_PAIR {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** The RPC protocol major version */
@@ -124,12 +124,15 @@ typedef struct rpc_msg_app_pair {
 	uint8_t mnr_version;
 	/** The name of the application */
 	char app_name[RTLIB_APP_NAME_LENGTH];
-} rpc_msg_app_pair_t;
+} rpc_msg_APP_PAIR_t;
 
 /**
  * @brief Command to notify an application is exiting.
  */
-typedef rpc_msg_header_t rpc_msg_app_exit_t;
+typedef struct rpc_msg_APP_EXIT {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_APP_EXIT_t;
 
 
 /******************************************************************************
@@ -139,41 +142,41 @@ typedef rpc_msg_header_t rpc_msg_app_exit_t;
 /**
  * @brief Command to register a new execution context.
  */
-typedef struct rpc_msg_exc_register {
+typedef struct rpc_msg_EXC_REGISTER {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** The name of the registered execution context */
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
 	/** The name of the required recipe */
 	char recipe[RTLIB_RECIPE_NAME_LENGTH];
-} rpc_msg_exc_register_t;
+} rpc_msg_EXC_REGISTER_t;
 
 /**
  * @brief Command to unregister an execution context.
  */
-typedef struct rpc_msg_exc_unregister {
+typedef struct rpc_msg_EXC_UNREGISTER {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** The name of the execution context */
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
-} rpc_msg_exc_unregister_t;
+} rpc_msg_EXC_UNREGISTER_t;
 
 
 /**
  * @brief Command to start an execution context.
  */
-typedef struct rpc_msg_exc_start {
+typedef struct rpc_msg_EXC_START {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
-} rpc_msg_exc_start_t;
+} rpc_msg_EXC_START_t;
 
 /**
  * @brief Command to stop an execution context.
  */
-typedef struct rpc_msg_exc_stop {
+typedef struct rpc_msg_EXC_STOP {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
-} rpc_msg_exc_stop_t;
+} rpc_msg_EXC_STOP_t;
 
 /**
  * @brief Command to ask for being scheduled.
@@ -182,10 +185,10 @@ typedef struct rpc_msg_exc_stop {
  * (as soon as possible). The RTRM should identify the best AWM to be assigned
  * for the requesting execution context.
  */
-typedef struct rpc_msg_exc_schedule {
+typedef struct rpc_msg_EXC_SCHEDULE {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
-} rpc_msg_exc_schedule_t;
+} rpc_msg_EXC_SCHEDULE_t;
 
 
 /******************************************************************************
@@ -195,22 +198,22 @@ typedef struct rpc_msg_exc_schedule {
 /**
  * @brief Synchronization Protocol PreChange command
  */
-typedef struct rpc_msg_bbq_syncp_prechange {
+typedef struct rpc_msg_BBQ_SYNCP_PRECHANGE {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** The selected AWM */
 	uint16_t awm;
-} rpc_msg_bbq_syncp_prechange_t;
+} rpc_msg_BBQ_SYNCP_PRECHANGE_t;
 
 /**
  * @brief Synchronization Protocol PreChange response
  */
-typedef struct rpc_msg_bbq_syncp_prechange_resp {
+typedef struct rpc_msg_BBQ_SYNCP_PRECHANGE_RESP {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** An extimation of the Synchronization Latency */
 	uint32_t syncLatency;
-} rpc_msg_bbq_syncp_prechange_resp_t;
+} rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t;
 
 /******************************************************************************
  * Barbeque Commands
@@ -219,12 +222,12 @@ typedef struct rpc_msg_bbq_syncp_prechange_resp {
 /**
  * @brief Command to STOP an application execution context.
  */
-typedef struct rpc_msg_bbq_stop {
+typedef struct rpc_msg_BBQ_STOP {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** The Timeout for stopping the application */
 	struct timespec timeout;
-} rpc_msg_bbq_stop_t;
+} rpc_msg_BBQ_STOP_t;
 
 
 } // namespace rtlib

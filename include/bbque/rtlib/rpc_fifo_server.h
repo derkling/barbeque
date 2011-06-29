@@ -99,23 +99,17 @@ typedef struct rpc_fifo_ ## RPC_TYPE {\
  * inforamtion is the RPC_EXC_PARI. All other commands maps on the
  * rpc_fifo_undef_t type.
  */
-typedef struct rpc_fifo_app_pair {
+typedef struct rpc_fifo_APP_PAIR {
 	/** The RPC fifo command header */
 	rpc_fifo_header_t hdr;
 	/** The name of the application private fifo */
 	char rpc_fifo[BBQUE_FIFO_NAME_LENGTH];
-} rpc_fifo_app_pair_t;
+	/** The RPC message payload */
+	rpc_msg_APP_PAIR_t pyl;
+} rpc_fifo_APP_PAIR_t;
 
-/**
- * @brief An undefined FIFO message.
- *
- * All the RPC commands that does not carry channel specific information, are
- * mapped with this data structure.
- */
-typedef struct rpc_fifo_undef {
-	/** The RPC fifo command header */
-	rpc_fifo_header_t header;
-} rpc_fifo_undef_t;
+RPC_FIFO_DEFINE_MESSAGE(APP_EXIT);
+
 
 /******************************************************************************
  * Execution Context Requests

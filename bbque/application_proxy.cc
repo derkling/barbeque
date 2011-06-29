@@ -116,7 +116,7 @@ RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 			std::defer_lock);
 	conCtxMap_t::iterator it;
 	pconCtx_t pcon;
-	rpc_msg_bbq_stop_t stop_msg = {
+	rpc_msg_BBQ_STOP_t stop_msg = {
 		// FIXME The token should be defined as the thread id
 		{RPC_BBQ_STOP_EXECUTION, 1234, papp->Pid(), papp->ExcId()},
 		{0, 100} // FIXME get a timeout parameter
@@ -146,7 +146,7 @@ RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 	// Sending message on the application connection context
 	pcon = (*it).second;
 	rpc->SendMessage(pcon->pd, &stop_msg.hdr,
-			(size_t)RPC_PKT_SIZE(bbq_stop));
+			(size_t)RPC_PKT_SIZE(BBQ_STOP));
 
 	return RTLIB_OK;
 }
@@ -209,7 +209,7 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	conCtxMap_t::iterator it;
 	AppPtr_t papp = pcs->papp;
 	pconCtx_t pcon;
-	rpc_msg_bbq_syncp_prechange_t syncp_prechange_msg = {
+	rpc_msg_BBQ_SYNCP_PRECHANGE_t syncp_prechange_msg = {
 		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid, papp->Pid(), papp->ExcId()},
 		papp->NextAWM()->Id()
 	};
@@ -236,7 +236,7 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	// Sending message on the application connection context
 	pcon = (*it).second;
 	rpc->SendMessage(pcon->pd, &syncp_prechange_msg.hdr,
-			(size_t)RPC_PKT_SIZE(bbq_syncp_prechange));
+			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_PRECHANGE));
 
 	return RTLIB_OK;
 }
@@ -245,7 +245,7 @@ RTLIB_ExitCode
 ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 		pPreChangeRsp_t &presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
-	rpc_msg_bbq_syncp_prechange_resp_t *pmsg_pyl;
+	rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
 	pchMsg_t pchMsg;
 
@@ -255,7 +255,7 @@ ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 	// Getting command response
 	pchMsg = pcs->pmsg;
 	pmsg_hdr = pchMsg;
-	pmsg_pyl = (rpc_msg_bbq_syncp_prechange_resp_t*)pmsg_hdr;
+	pmsg_pyl = (rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t*)pmsg_hdr;
 
 	logger->Debug("APPs PRX: command response [typ: %d, pid: %d]",
 			pmsg_hdr->typ,
@@ -454,7 +454,7 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
-	rpc_msg_exc_register_t * pmsg_pyl = (rpc_msg_exc_register_t*)pmsg_hdr;
+	rpc_msg_EXC_REGISTER_t * pmsg_pyl = (rpc_msg_EXC_REGISTER_t*)pmsg_hdr;
 	pconCtx_t pcon;
 	AppPtr_t papp;
 
@@ -490,8 +490,8 @@ void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
-	rpc_msg_exc_unregister_t * pmsg_pyl =
-		(rpc_msg_exc_unregister_t*)pmsg_hdr;
+	rpc_msg_EXC_UNREGISTER_t * pmsg_pyl =
+		(rpc_msg_EXC_UNREGISTER_t*)pmsg_hdr;
 	pconCtx_t pcon;
 
 	assert(pchMsg);
@@ -618,7 +618,7 @@ void ApplicationProxy::RpcAppPair(prqsSn_t prqs) {
 			conCtxMap_mtx, std::defer_lock);
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
-	rpc_msg_app_pair_t * pmsg_pyl = (rpc_msg_app_pair_t*)pmsg_hdr;
+	rpc_msg_APP_PAIR_t * pmsg_pyl = (rpc_msg_APP_PAIR_t*)pmsg_hdr;
 	pconCtx_t pcon;
 
 	// Ensure this application has not yet registerd
