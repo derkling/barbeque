@@ -104,7 +104,7 @@ typedef struct rpc_msg_resp {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 	/** The RTLIB command exit code */
-	RTLIB_ExitCode result;
+	uint8_t result;
 } rpc_msg_resp_t;
 
 
@@ -215,6 +215,8 @@ typedef struct rpc_msg_BBQ_SYNCP_PRECHANGE_RESP {
 	rpc_msg_header_t hdr;
 	/** An extimation of the Synchronization Latency */
 	uint32_t syncLatency;
+	/** The RTLIB command exit code */
+	uint8_t result;
 } rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t;
 
 
@@ -234,6 +236,8 @@ typedef struct rpc_msg_BBQ_SYNCP_SYNCCHANGE {
 typedef struct rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
+	/** The RTLIB command exit code */
+	uint8_t result;
 } rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t;
 
 
@@ -264,6 +268,8 @@ typedef struct rpc_msg_BBQ_SYNCP_POSTCHANGE {
 typedef struct rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
+	/** The RTLIB command exit code */
+	uint8_t result;
 } rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t;
 
 

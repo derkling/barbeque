@@ -145,6 +145,10 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_EXC_STOP_FAILED,
 	/** Failed to get a working mode */
 	RTLIB_EXC_GWM_FAILED
+
+// NOTE The last entry should not overflow a uint8_t, otherwise some of the RPC
+// channel messages should be updated
+
 } RTLIB_ExitCode;
 
 

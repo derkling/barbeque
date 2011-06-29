@@ -261,7 +261,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return chResp.result;
+	return (RTLIB_ExitCode)chResp.result;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
@@ -389,7 +389,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return chResp.result;
+	return (RTLIB_ExitCode)chResp.result;
 
 }
 
@@ -425,7 +425,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return chResp.result;
+	return (RTLIB_ExitCode)chResp.result;
 
 }
 
@@ -457,7 +457,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return chResp.result;
+	return (RTLIB_ExitCode)chResp.result;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
@@ -488,7 +488,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return chResp.result;
+	return (RTLIB_ExitCode)chResp.result;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_Set(
@@ -543,7 +543,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return chResp.result;
+	return (RTLIB_ExitCode)chResp.result;
 }
 
 RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPrechangeResp(
@@ -562,7 +562,8 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPrechangeResp(
 				chTrdPid,
 				prec->exc_id
 			},
-			syncLatency
+			syncLatency,
+			RTLIB_OK
 		}
 	};
 
