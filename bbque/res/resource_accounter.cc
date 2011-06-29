@@ -378,10 +378,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 		result = BookResources(papp, papp->NextAWM()->GetResourceBinding(),
 						sync_ssn.view, false);
 		if (result != RA_SUCCESS) {
-			logger->Error("SyncMode [%s]: Resource booking failed for %s",
+			logger->Error("SyncMode [%d]: Resource booking failed for %s",
 					sync_ssn.count,
 					papp->StrId());
 
+			SyncAbort();
 			return RA_ERR_SYNC_INIT;
 		}
 	}
