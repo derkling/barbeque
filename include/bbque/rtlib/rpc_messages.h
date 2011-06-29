@@ -81,7 +81,7 @@ typedef uint32_t rpc_msg_token_t;
  */
 typedef struct rpc_msg_header {
 	/** The command to execute (defines the message "payload" type) */
-	rpc_msg_type_t typ;
+	uint8_t typ;
 
 	/** A token used by the message sender to match responses */
 	rpc_msg_token_t token;

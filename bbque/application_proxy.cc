@@ -81,7 +81,7 @@ rpc_msg_type_t ApplicationProxy::GetNextMessage(pchMsg_t & pChMsg) {
 	logger->Debug("APRs PRX: RX [typ: %d, pid: %d]",
 			pChMsg->typ, pChMsg->app_pid);
 
-	return pChMsg->typ;
+	return (rpc_msg_type_t)pChMsg->typ;
 }
 
 
@@ -813,7 +813,7 @@ void ApplicationProxy::ProcessRequest(pchMsg_t & pmsg) {
 	logger->Debug("APPs PRX: Processing NEW REQUEST...");
 
 	// Add a new threaded command executor
-	snCtxMap.insert(std::pair<rpc_msg_type_t, psnCtx_t>(
+	snCtxMap.insert(std::pair<uint8_t, psnCtx_t>(
 				pmsg->typ, prqsSn));
 
 }
