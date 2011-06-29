@@ -145,7 +145,7 @@ RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &stop_msg.header,
+	rpc->SendMessage(pcon->pd, &stop_msg.hdr,
 			(size_t)RPC_PKT_SIZE(bbq_stop));
 
 	return RTLIB_OK;
@@ -235,7 +235,7 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &syncp_prechange_msg.header,
+	rpc->SendMessage(pcon->pd, &syncp_prechange_msg.hdr,
 			(size_t)RPC_PKT_SIZE(bbq_syncp_prechange));
 
 	return RTLIB_OK;
@@ -428,10 +428,10 @@ void ApplicationProxy::RpcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 
 	// Sending response to application
 	logger->Debug("APPs PRX: Send RPC channel ACK "APP_STRID, AppStrId(pcon));
-	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
-	resp.header.typ = type;
+	::memcpy(&resp.hdr, pmsg_hdr, RPC_PKT_SIZE(header));
+	resp.hdr.typ = type;
 	resp.result = RTLIB_OK;
-	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
+	rpc->SendMessage(pcon->pd, &resp.hdr, (size_t)RPC_PKT_SIZE(resp));
 
 }
 
@@ -442,10 +442,10 @@ void ApplicationProxy::RpcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 	// Sending response to application
 	logger->Debug("APPs PRX: Send RPC channel NAK "APP_STRID", error [%d]",
 			AppStrId(pcon), error);
-	::memcpy(&resp.header, pmsg_hdr, RPC_PKT_SIZE(header));
-	resp.header.typ = type;
+	::memcpy(&resp.hdr, pmsg_hdr, RPC_PKT_SIZE(header));
+	resp.hdr.typ = type;
 	resp.result = error;
-	rpc->SendMessage(pcon->pd, &resp.header, (size_t)RPC_PKT_SIZE(resp));
+	rpc->SendMessage(pcon->pd, &resp.hdr, (size_t)RPC_PKT_SIZE(resp));
 
 }
 

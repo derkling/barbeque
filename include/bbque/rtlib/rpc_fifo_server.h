@@ -101,7 +101,7 @@ typedef struct rpc_fifo_ ## RPC_TYPE {\
  */
 typedef struct rpc_fifo_app_pair {
 	/** The RPC fifo command header */
-	rpc_fifo_header_t header;
+	rpc_fifo_header_t hdr;
 	/** The name of the application private fifo */
 	char rpc_fifo[BBQUE_FIFO_NAME_LENGTH];
 } rpc_fifo_app_pair_t;

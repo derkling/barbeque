@@ -102,7 +102,7 @@ typedef struct rpc_msg_header {
  */
 typedef struct rpc_msg_resp {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** The RTLIB command exit code */
 	RTLIB_ExitCode result;
 } rpc_msg_resp_t;
@@ -117,7 +117,7 @@ typedef struct rpc_msg_resp {
  */
 typedef struct rpc_msg_app_pair {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** The RPC protocol major version */
 	uint8_t mjr_version;
 	/** The RPC protocol minor version */
@@ -141,7 +141,7 @@ typedef rpc_msg_header_t rpc_msg_app_exit_t;
  */
 typedef struct rpc_msg_exc_register {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** The name of the registered execution context */
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
 	/** The name of the required recipe */
@@ -153,7 +153,7 @@ typedef struct rpc_msg_exc_register {
  */
 typedef struct rpc_msg_exc_unregister {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** The name of the execution context */
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
 } rpc_msg_exc_unregister_t;
@@ -164,7 +164,7 @@ typedef struct rpc_msg_exc_unregister {
  */
 typedef struct rpc_msg_exc_start {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 } rpc_msg_exc_start_t;
 
 /**
@@ -172,7 +172,7 @@ typedef struct rpc_msg_exc_start {
  */
 typedef struct rpc_msg_exc_stop {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 } rpc_msg_exc_stop_t;
 
 /**
@@ -184,7 +184,7 @@ typedef struct rpc_msg_exc_stop {
  */
 typedef struct rpc_msg_exc_schedule {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 } rpc_msg_exc_schedule_t;
 
 
@@ -197,7 +197,7 @@ typedef struct rpc_msg_exc_schedule {
  */
 typedef struct rpc_msg_bbq_syncp_prechange {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** The selected AWM */
 	uint16_t awm;
 } rpc_msg_bbq_syncp_prechange_t;
@@ -207,7 +207,7 @@ typedef struct rpc_msg_bbq_syncp_prechange {
  */
 typedef struct rpc_msg_bbq_syncp_prechange_resp {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** An extimation of the Synchronization Latency */
 	uint32_t syncLatency;
 } rpc_msg_bbq_syncp_prechange_resp_t;
@@ -221,7 +221,7 @@ typedef struct rpc_msg_bbq_syncp_prechange_resp {
  */
 typedef struct rpc_msg_bbq_stop {
 	/** The RPC fifo command header */
-	rpc_msg_header_t header;
+	rpc_msg_header_t hdr;
 	/** The Timeout for stopping the application */
 	struct timespec timeout;
 } rpc_msg_bbq_stop_t;
