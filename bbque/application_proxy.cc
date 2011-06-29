@@ -199,7 +199,7 @@ ApplicationProxy::StopExecution(AppPtr_t papp) {
 }
 
 /*******************************************************************************
- * Synchronization Protocol
+ * Synchronization Protocol - PreChange
  ******************************************************************************/
 
 RTLIB_ExitCode
@@ -311,7 +311,6 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t &presp) {
 
 RTLIB_ExitCode
 ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
-	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
 	presp->pcs = SetupCmdSession(papp);
 
 	// Enqueuing the Command Session Handler
@@ -323,7 +322,6 @@ ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
 
 RTLIB_ExitCode
 ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp) {
-	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
 	presp->pcs = SetupCmdSession(papp);
 
 	// Spawn a new Command Executor (passing the future)
@@ -342,6 +340,322 @@ ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t &presp) {
 	presp->pcs->resp_ftr.wait();
 	return presp->pcs->resp_ftr.get();
 }
+
+/*******************************************************************************
+ * Synchronization Protocol - SyncChange
+ ******************************************************************************/
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
+			std::defer_lock);
+	conCtxMap_t::iterator it;
+	AppPtr_t papp = pcs->papp;
+	pconCtx_t pcon;
+	rpc_msg_BBQ_SYNCP_SYNCCHANGE_t syncp_syncchange_msg = {
+		{RPC_BBQ_SYNCP_SYNCCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
+	};
+
+	// Send the stop command
+	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_SYNCCHANGE] to "
+			"EXC [%s]", papp->StrId());
+
+	assert(rpc);
+
+	// Recover the communication context for this application
+	conCtxMap_ul.lock();
+	it = conCtxMap.find(papp->Pid());
+	conCtxMap_ul.unlock();
+
+	// Check we have a connection context already configured
+	if (it == conCtxMap.end()) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_SYNCCHANGE] "
+				"to EXC [%s] FAILED (Error: connection context not found)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_UNAVAILABLE;
+	}
+
+	// Sending message on the application connection context
+	pcon = (*it).second;
+	rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
+			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_SYNCCHANGE));
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
+		pSyncChangeRsp_t &presp) {
+	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
+	rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t *pmsg_pyl;
+	rpc_msg_header_t *pmsg_hdr;
+	pchMsg_t pchMsg;
+
+	// Wait for a response being available
+	(pcs->resp_cv).wait(resp_ul);
+
+	// Getting command response
+	pchMsg = pcs->pmsg;
+	pmsg_hdr = pchMsg;
+	pmsg_pyl = (rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t*)pmsg_hdr;
+
+	logger->Debug("APPs PRX: command response [typ: %d, pid: %d]",
+			pmsg_hdr->typ,
+			pmsg_hdr->app_pid);
+
+	assert(pmsg_hdr->typ == RPC_BBQ_RESP);
+
+	// Build a new communication context
+	logger->Debug("APPs PRX: SyncChangeResp [pid: %d]", pmsg_hdr->app_pid);
+
+	// Processing response (nothing to process right now)
+	(void)presp;
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t &presp) {
+
+	// Send the Command
+	presp->result = SyncP_SyncChangeSend(pcs);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	// Get back the response
+	presp->result = SyncP_SyncChangeRecv(pcs, presp);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	return RTLIB_OK;
+
+}
+
+void
+ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t &presp) {
+
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
+
+	logger->Debug("APPs PRX [%5d]: SyncP_SyncChangeTrd(%s) START",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+
+	// Run the Command Executor
+	SyncP_SyncChange(presp->pcs, presp);
+
+	// Give back the result to the calling thread
+	(presp->pcs->resp_prm).set_value(presp->result);
+
+	logger->Debug("APPs PRX [%5d]: SyncP_SyncChangeTrd(%s) END",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t &presp) {
+	presp->pcs = SetupCmdSession(papp);
+
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
+
+	// Run the Command Executor
+	return SyncP_SyncChange(presp->pcs, presp);
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t &presp) {
+	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
+	presp->pcs = SetupCmdSession(papp);
+
+	// Spawn a new Command Executor (passing the future)
+	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_SyncChangeTrd,
+			this, std::ref(presp));
+
+	// Setup the promise (thus unlocking the executor)
+	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t &presp) {
+	// Wait for the promise being returned
+	presp->pcs->resp_ftr.wait();
+	return presp->pcs->resp_ftr.get();
+}
+
+
+/*******************************************************************************
+ * Synchronization Protocol - DoChange
+ ******************************************************************************/
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
+			std::defer_lock);
+	conCtxMap_t::iterator it;
+	AppPtr_t papp = pcs->papp;
+	pconCtx_t pcon;
+	rpc_msg_BBQ_SYNCP_DOCHANGE_t syncp_syncchange_msg = {
+		{RPC_BBQ_SYNCP_DOCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
+	};
+
+	// Send the stop command
+	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_DOCHANGE] to "
+			"EXC [%s]", papp->StrId());
+
+	assert(rpc);
+
+	// Recover the communication context for this application
+	conCtxMap_ul.lock();
+	it = conCtxMap.find(papp->Pid());
+	conCtxMap_ul.unlock();
+
+	// Check we have a connection context already configured
+	if (it == conCtxMap.end()) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_DOCHANGE] "
+				"to EXC [%s] FAILED (Error: connection context not found)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_UNAVAILABLE;
+	}
+
+	// Sending message on the application connection context
+	pcon = (*it).second;
+	rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
+			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_DOCHANGE));
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t &presp) {
+
+	// Send the Command
+	presp->result = SyncP_DoChangeSend(pcs);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	return RTLIB_OK;
+
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_DoChange(AppPtr_t papp) {
+	pDoChangeRsp_t presp = ApplicationProxy::pDoChangeRsp_t(
+			new ApplicationProxy::doChangeRsp_t());
+
+	presp->pcs = SetupCmdSession(papp);
+
+	// Run the Command Executor
+	return SyncP_DoChange(presp->pcs, presp);
+}
+
+
+/*******************************************************************************
+ * Synchronization Protocol - PostChange
+ ******************************************************************************/
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
+	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
+			std::defer_lock);
+	conCtxMap_t::iterator it;
+	AppPtr_t papp = pcs->papp;
+	pconCtx_t pcon;
+	rpc_msg_BBQ_SYNCP_POSTCHANGE_t syncp_syncchange_msg = {
+		{RPC_BBQ_SYNCP_POSTCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
+	};
+
+	// Send the stop command
+	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_POSTCHANGE] to "
+			"EXC [%s]", papp->StrId());
+
+	assert(rpc);
+
+	// Recover the communication context for this application
+	conCtxMap_ul.lock();
+	it = conCtxMap.find(papp->Pid());
+	conCtxMap_ul.unlock();
+
+	// Check we have a connection context already configured
+	if (it == conCtxMap.end()) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_POSTCHANGE] "
+				"to EXC [%s] FAILED (Error: connection context not found)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_UNAVAILABLE;
+	}
+
+	// Sending message on the application connection context
+	pcon = (*it).second;
+	rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
+			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_POSTCHANGE));
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
+		pPostChangeRsp_t &presp) {
+	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
+	rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t *pmsg_pyl;
+	rpc_msg_header_t *pmsg_hdr;
+	pchMsg_t pchMsg;
+
+	// Wait for a response being available
+	(pcs->resp_cv).wait(resp_ul);
+
+	// Getting command response
+	pchMsg = pcs->pmsg;
+	pmsg_hdr = pchMsg;
+	pmsg_pyl = (rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t*)pmsg_hdr;
+
+	logger->Debug("APPs PRX: command response [typ: %d, pid: %d]",
+			pmsg_hdr->typ,
+			pmsg_hdr->app_pid);
+
+	assert(pmsg_hdr->typ == RPC_BBQ_RESP);
+
+	// Build a new communication context
+	logger->Debug("APPs PRX: PostChangeResp [pid: %d]", pmsg_hdr->app_pid);
+
+	// Processing response (nothing to process right now)
+	(void)presp;
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t &presp) {
+
+	// Send the Command
+	presp->result = SyncP_PostChangeSend(pcs);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	// Get back the response
+	presp->result = SyncP_PostChangeRecv(pcs, presp);
+	if (presp->result != RTLIB_OK)
+		return presp->result;
+
+	return RTLIB_OK;
+
+}
+
+RTLIB_ExitCode
+ApplicationProxy::SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t &presp) {
+	presp->pcs = SetupCmdSession(papp);
+
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
+
+	// Run the Command Executor
+	return SyncP_PostChange(presp->pcs, presp);
+}
+
+
+
+/*******************************************************************************
+ * Command Sessions Helpers
+ ******************************************************************************/
 
 ApplicationProxy::pcmdSn_t
 ApplicationProxy::GetCommandSession(rpc_msg_header_t *pmsg_hdr)  {
