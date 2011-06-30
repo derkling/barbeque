@@ -37,6 +37,15 @@ public:
 
 	RTLIB_ExitCode Start(uint8_t first, uint8_t last);
 
+	void SwitchConfiguration(std::string const & name,
+			RTLIB_WorkingModeParams & wmp);
+
+	void BlockExecution(std::string const & name);
+	
+	RTLIB_ExitCode CheckForReconfiguration(std::string const & name,
+			RTLIB_ExitCode result,
+			RTLIB_WorkingModeParams & wmp);
+
 	int GetWorkingMode(std::string const & name);
 
 	RTLIB_ExitCode Stop(uint8_t first, uint8_t last);

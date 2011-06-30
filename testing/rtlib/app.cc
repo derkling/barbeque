@@ -133,6 +133,57 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 	return RTLIB_OK;
 }
 
+void BbqueApp::SwitchConfiguration(std::string const & name,
+		RTLIB_WorkingModeParams & wmp) {
+	fprintf(stderr, FMT_INF("Switching to new assigned AWM [%d] "
+				"for EXC [%s] START\n"),
+			wmp.awm_id, name.c_str());
+	::usleep(100000);
+	fprintf(stderr, FMT_INF("Switching to new assigned AWM [%d] "
+				"for EXC [%s] END\n"),
+			wmp.awm_id, name.c_str());
+
+}
+
+void BbqueApp::BlockExecution(std::string const & name) {
+	fprintf(stderr, FMT_INF("Bloked execution for EXC [%s]\n"),
+			name.c_str());
+
+}
+
+RTLIB_ExitCode BbqueApp::CheckForReconfiguration(std::string const & name,
+		RTLIB_ExitCode result,
+		RTLIB_WorkingModeParams & wmp) {
+
+	switch (result) {
+	case RTLIB_OK:
+		fprintf(stderr, FMT_INF("Continue to run on the assigned AWM [%d] "
+					"for EXC [%s]\n"),
+				wmp.awm_id, name.c_str());
+		return result;
+
+	case RTLIB_EXC_GWM_START:
+	case RTLIB_EXC_GWM_RECONF:
+	case RTLIB_EXC_GWM_MIGREC:
+	case RTLIB_EXC_GWM_MIGRATE:
+		SwitchConfiguration(name, wmp);
+		return result;
+
+	case RTLIB_EXC_GWM_BLOCKED:
+		BlockExecution(name);
+		return result;
+
+	default:
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
+						"(Error: Invalid event [%d])\n"),
+					prec->name.c_str(), result));
+		assert(result >= RTLIB_EXC_GWM_START);
+		assert(result <= RTLIB_EXC_GWM_BLOCKED);
+	}
+
+	return RTLIB_EXC_GWM_FAILED;
+}
+
 int BbqueApp::GetWorkingMode(std::string const & name) {
 	excMap_t::iterator it = exc_map.find(name);
 	RTLIB_WorkingModeParams wmp;
@@ -141,7 +192,7 @@ int BbqueApp::GetWorkingMode(std::string const & name) {
 	fprintf(stderr, FMT_INF("Get AWM for EXC [%s]...\n"),
 			name.c_str());
 
-	if (it==exc_map.end()) {
+	if (it == exc_map.end()) {
 		fprintf(stderr, FMT_ERR("FAILED: EXC [%s] not registered\n"),
 				name.c_str());
 		return -1;
@@ -150,17 +201,15 @@ int BbqueApp::GetWorkingMode(std::string const & name) {
 	assert(rtlib && rtlib->GetWorkingMode);
 
 	RTLIB_ExecutionContextHandler ech = (*it).second;
-	result = rtlib->GetWorkingMode(ech, &wmp);
-	if (result != RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("FAILED: get AWM for EXC [%s]\n"),
-				name.c_str());
-		return -2;
-	}
 
-	fprintf(stderr, FMT_INF("EXC [%s] assigned AWM [%d]\n"),
-			name.c_str(), wmp.awm_id);
+	// Looping until a valid AWM has been assinged
+	do {
+		result = rtlib->GetWorkingMode(ech, &wmp);
+		result = CheckForReconfiguration(name, result, wmp);
+	} while ((result != RTLIB_OK) &&
+			(result != RTLIB_EXC_GWM_FAILED));
 
-	return 0;
+	return result;
 }
 
 RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {
