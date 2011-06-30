@@ -526,6 +526,7 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	case MIGREC:
 	case MIGRATE:
 		SetRunning();
+		schedule.awm = schedule.next_awm;
 		break;
 	case BLOCKED:
 		SetBlocked();
