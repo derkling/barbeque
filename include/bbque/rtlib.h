@@ -146,8 +146,25 @@ typedef enum RTLIB_ExitCode {
 	/** Failed to get a working mode */
 	RTLIB_EXC_GWM_FAILED,
 
+//---- Reconfiguration actions required for an EXC
+// NOTE these values should match (in number and order) those defined by the
+//	    ApplicationStatusIF::SyncState_t
+
+	/** Start running on the assigned AWM */
+	RTLIB_EXC_GWM_START,
+	/** Reconfiguration into a different AWM */
+	RTLIB_EXC_GWM_RECONF,
+	/** Migration and reconfiguration into a different AWM */
+	RTLIB_EXC_GWM_MIGREC,
+	/** Migration (still running on the same AWM) */
+	RTLIB_EXC_GWM_MIGRATE,
+	/** EXC suspended (resources not available) */
+	RTLIB_EXC_GWM_BLOCKED,
+
 //---- Internal values not exposed to applications
 
+	/** The EXC is in sync mode */
+	RTLIB_EXC_SYNC_MODE,
 	/** A step of the synchronization protocol has failed */
 	RTLIB_EXC_SYNCP_FAILED
 

@@ -107,7 +107,17 @@ public:
 		STATE_COUNT
 	} State_t;
 
+	/**
+	 * @brief Required synchronization action
+	 *
+	 * Once a reconfiguration for an EXC has been scheduled, one of these
+	 * synchronization state is entered. Vice versa, if no reconfiguration are
+	 * required, the SYNC_NONE (alias SYNC_STATE_COUNT) is assigned to the
+	 * EXC.
+	 */
 	typedef enum SyncState {
+	// NOTE These values should be reported to match (in number and order)
+	//      those defined by the RTLIB::RTLIB_ExitCode.
 		/** The application is entering the system */
 		STARTING = 0,
 		/** Must change working mode */
