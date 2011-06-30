@@ -30,6 +30,8 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/utils/utility.h"
 
+namespace ba = bbque::app;
+
 namespace bbque {
 
 ApplicationProxy::ApplicationProxy() {
@@ -211,12 +213,14 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	pconCtx_t pcon;
 	rpc_msg_BBQ_SYNCP_PRECHANGE_t syncp_prechange_msg = {
 		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid, papp->Pid(), papp->ExcId()},
+		(uint8_t)papp->SyncState(),
 		papp->NextAWM()->Id()
 	};
 
-	// Send the stop command
+	// Send the required synchronization action
 	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_PRECHANGE] to "
-			"EXC [%s]", papp->StrId());
+			"EXC [%s], Action [%d:%s]", papp->StrId(), papp->SyncState(),
+			ApplicationStatusIF::SyncStateStr(papp->SyncState()));
 
 	assert(rpc);
 

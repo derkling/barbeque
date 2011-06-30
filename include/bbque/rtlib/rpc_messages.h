@@ -203,6 +203,8 @@ typedef struct rpc_msg_EXC_SCHEDULE {
 typedef struct rpc_msg_BBQ_SYNCP_PRECHANGE {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
+	/** Synchronization Action required */
+	uint8_t event;
 	/** The selected AWM */
 	uint16_t awm;
 } rpc_msg_BBQ_SYNCP_PRECHANGE_t;
