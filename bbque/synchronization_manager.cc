@@ -116,7 +116,7 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 		if (!policy->DoSync(papp))
 			continue;
 
-		logger->Debug("STEP 1: preChange() ===> [%s]", papp->StrId());
+		logger->Info("STEP 1: preChange() ===> [%s]", papp->StrId());
 
 		// Start an Async Pre-Change
 		presp = ApplicationProxy::pPreChangeRsp_t(
@@ -146,8 +146,8 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 			assert(false);
 		}
 
-		logger->Debug("STEP 1: <--------- OK -- [%s]", papp->StrId());
-		logger->Debug("STEP1: [%s] declared syncLatency %d[ms]",
+		logger->Info("STEP 1: <--------- OK -- [%s]", papp->StrId());
+		logger->Info("STEP1: [%s] declared syncLatency %d[ms]",
 				papp->StrId(), presp->syncLatency);
 
 		// TODO Here the synchronization policy should be queryed to
@@ -189,7 +189,7 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 		if (!policy->DoSync(papp))
 			continue;
 
-		logger->Debug("STEP 2: syncChange() ===> [%s]", papp->StrId());
+		logger->Info("STEP 2: syncChange() ===> [%s]", papp->StrId());
 
 		// Start an Async Sync-Change
 		presp = ApplicationProxy::pSyncChangeRsp_t(
@@ -225,12 +225,12 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 			assert(false);
 		}
 
-		logger->Debug("STEP 2: <--------- OK -- [%s]", papp->StrId());
+		logger->Info("STEP 2: <--------- OK -- [%s]", papp->StrId());
 
 		// Remove the respose future
 		rsp_map.erase(resp_it);
 	}
-	
+
 	logger->Debug("STEP 2: syncChange() DONE");
 
 	return OK;
@@ -252,12 +252,14 @@ SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
 		if (!policy->DoSync(papp))
 			continue;
 
-		logger->Debug("STEP 3: doChange() ===> [%s]", papp->StrId());
+		logger->Info("STEP 3: doChange() ===> [%s]", papp->StrId());
 
 		// Send a Do-Change
 		result = ap.SyncP_DoChange(papp);
 		if (result != RTLIB_OK)
 			continue;
+
+		logger->Info("STEP 3: <--------- OK -- [%s]", papp->StrId());
 
 	}
 
@@ -284,7 +286,7 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		if (!policy->DoSync(papp))
 			continue;
 
-		logger->Debug("STEP 4: postChange() ===> [%s]", papp->StrId());
+		logger->Info("STEP 4: postChange() ===> [%s]", papp->StrId());
 
 		// Send a Post-Change (blocking on apps being reconfigured)
 		presp = ApplicationProxy::pPostChangeRsp_t(
@@ -292,6 +294,8 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		result = ap.SyncP_PostChange(papp, presp);
 		if (result != RTLIB_OK)
 			continue;
+
+		logger->Info("STEP 4: <--------- OK -- [%s]", papp->StrId());
 
 		// TODO Here we should collect reconfiguration statistics
 		logger->Warn("TODO: Collect reconf statistics");
