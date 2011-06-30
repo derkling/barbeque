@@ -104,10 +104,14 @@ protected:
 		std::string name;
 		/** The RTLIB assigned ID for this Execution Context */
 		uint8_t exc_id;
-#define EXC_FLAGS_AWM_VALID   0x01 ///< The EXC has been assigned a valid AWM
-#define EXC_FLAGS_AWM_WAITING 0x02 ///< The EXC is waiting for a valid AWM
+#define EXC_FLAGS_AWM_VALID     0x01 ///< The EXC has been assigned a valid AWM
+#define EXC_FLAGS_AWM_WAITING   0x02 ///< The EXC is waiting for a valid AWM
+#define EXC_FLAGS_EXC_SYNC      0x03 ///< The EXC entered Sync Mode
+#define EXC_FLAGS_EXC_SYNC_DONE 0x04 ///< The EXC exited Sync Mode
 		/** A set of flags to define the state of this EXC */
 		uint8_t flags;
+		/** The last required synchronization action */
+		RTLIB_ExitCode event;
 		/** The ID of the assigned AWM (if valid) */
 		uint8_t awm_id;
 		/** The mutex protecting access to this structure */
@@ -138,6 +142,28 @@ protected:
 	}
 	inline void clearAwmWaiting(pregExCtx_t prec) const {
 		prec->flags &= ~EXC_FLAGS_AWM_WAITING;
+	}
+
+	//--- Sync Mode Status
+	inline bool isSyncMode(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_EXC_SYNC);
+	}
+	inline void setSyncMode(pregExCtx_t prec) const {
+		prec->flags |= EXC_FLAGS_EXC_SYNC;
+	}
+	inline void clearSyncMode(pregExCtx_t prec) const {
+		prec->flags &= ~EXC_FLAGS_EXC_SYNC;
+	}
+
+	//--- Sync Done
+	inline bool isSyncDone(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_EXC_SYNC_DONE);
+	}
+	inline void setSyncDone(pregExCtx_t prec) const {
+		prec->flags |= EXC_FLAGS_EXC_SYNC_DONE;
+	}
+	inline void clearSyncDone(pregExCtx_t prec) const {
+		prec->flags &= ~EXC_FLAGS_EXC_SYNC_DONE;
 	}
 
 	/**
@@ -287,6 +313,20 @@ private:
 	 */
 	RTLIB_ExitCode WaitForWorkingMode(pregExCtx_t prec,
 			RTLIB_WorkingModeParams *wm);
+
+	/**
+	 * @brief Suspend caller waiting for a reconfiguration to complete
+	 *
+	 * When the EXC has notified to switch into a different AWM by the RTRM,
+	 * this method put the RTLIB PostChange to sleep waiting for the
+	 * completion of such reconfiguration.
+	 *
+	 * @param prec the regidstered EXC to wait reconfiguration for
+	 *
+	 * @return RTLIB_OK if the reconfigutation complete successfully,
+	 * RTLIB_EXC_SYNCP_FAILED otherwise
+	 */
+	RTLIB_ExitCode WaitForSyncDone(pregExCtx_t prec);
 
 	/**
 	 * @brief Get an extimation of the Synchronization Latency

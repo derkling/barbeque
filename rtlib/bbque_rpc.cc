@@ -37,6 +37,8 @@
 #define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_RPC  [WRN]", fmt)
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_RPC  [ERR]", fmt)
 
+namespace ba = bbque::app;
+
 namespace bbque { namespace rtlib {
 
 BbqueRPC * BbqueRPC::GetInstance() {
@@ -301,6 +303,9 @@ RTLIB_ExitCode BbqueRPC::GetAssignedWorkingMode(
 		RTLIB_WorkingModeParams *wm) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 
+	if (isSyncMode(prec) && !isAwmValid(prec))
+		return RTLIB_EXC_SYNC_MODE;
+
 	if (!isAwmValid(prec))
 		return RTLIB_EXC_GWM_FAILED;
 
@@ -325,6 +330,21 @@ RTLIB_ExitCode BbqueRPC::WaitForWorkingMode(
 
 	return RTLIB_OK;
 }
+
+
+RTLIB_ExitCode BbqueRPC::WaitForSyncDone(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+
+	while (!isSyncDone(prec))
+		prec->cv.wait(rec_ul);
+
+	// TODO add a timeout wait to limit the maximum reconfiguration time
+	// before notifying an anomaly to the RTRM
+
+	clearSyncMode(prec);
+	return RTLIB_OK;
+}
+
 
 RTLIB_ExitCode BbqueRPC::SetWorkingMode(
 		pregExCtx_t prec,
@@ -357,23 +377,55 @@ RTLIB_ExitCode BbqueRPC::GetWorkingMode(
 	// Checking if a valid AWM has been assigned
 	DB(fprintf(stderr, FMT_DBG("Looking for assigned AWM...\n")));
 	result = GetAssignedWorkingMode(prec, wm);
-	if (result == RTLIB_OK)
+	if (result == RTLIB_OK) {
+		setSyncDone(prec);
+		// Notify about synchronization completed
+		prec->cv.notify_one();
 		return RTLIB_OK;
+	}
 
-	DB(fprintf(stderr, FMT_DBG("AWM not assigned: "
+
+	if (result == RTLIB_EXC_GWM_FAILED) {
+		DB(fprintf(stderr, FMT_DBG("AWM not assigned: "
 					"Requesting Scheduling...\n")));
+		// Calling the low-level start
+		result = _ScheduleRequest(prec);
+		if (result != RTLIB_OK)
+			goto exit_gwm_failed;
+	} else {
+		// At this point, the EXC should be in Synchronization Mode
+		// and thus it should wait for an EXC being assigned by the RTRM
+		assert(result == RTLIB_EXC_SYNC_MODE);
+	}
 
-	// Calling the low-level start
-	result = _ScheduleRequest(prec);
-	if (result != RTLIB_OK)
-		goto exit_gwm_failed;
+	DB(fprintf(stderr, FMT_DBG("Waiting for assigned AWM...\n")));
 
 	// Waiting for an AWM being assigned
 	result = WaitForWorkingMode(prec, wm);
 	if (result != RTLIB_OK)
 		goto exit_gwm_failed;
 
-	return RTLIB_OK;
+	// Processing the required reconfiguration action
+	switch(prec->event) {
+	case RTLIB_EXC_GWM_START:
+	case RTLIB_EXC_GWM_RECONF:
+	case RTLIB_EXC_GWM_MIGREC:
+	case RTLIB_EXC_GWM_MIGRATE:
+	case RTLIB_EXC_GWM_BLOCKED:
+		fprintf(stderr, FMT_INF("EXC [%s], Switching to AWM [%d]\n"),
+				prec->name.c_str(), prec->awm_id);
+		break;
+	default:
+		DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
+					"(Error: Invalid event [%d])\n"),
+				prec->name.c_str(), prec->event));
+		assert(prec->event >= RTLIB_EXC_GWM_START);
+		assert(prec->event <= RTLIB_EXC_GWM_BLOCKED);
+		break;
+	}
+
+	wm->awm_id = prec->awm_id;
+	return prec->event;
 
 exit_gwm_failed:
 
@@ -398,6 +450,10 @@ uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
 
 RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+	// Entering Synchronization mode
+	setSyncMode(prec);
+	// Resetting Sync Done
+	clearSyncDone(prec);
 	// Setting current AWM as invalid
 	setAwmInvalid(prec);
 	return RTLIB_OK;
@@ -419,6 +475,18 @@ RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
 
 	result = SyncP_PreChangeNotify(prec);
 
+	// Keep copy of the required synchronization action
+	assert(msg.event < ba::ApplicationStatusIF::SYNC_STATE_COUNT);
+	prec->event = (RTLIB_ExitCode)(RTLIB_EXC_GWM_START + msg.event);
+
+	// Set the new required AWM
+	prec->awm_id = msg.awm;
+
+	fprintf(stderr, FMT_INF("SyncP_1 (Pre-Change) EXC [%d], "
+			"Action [%d], Assigned AWM [%d]\n"), msg.hdr.exc_id,
+			msg.event, msg.awm);
+	// FIXME add a string representation of the required action
+
 	// Update the Synchronziation Latency
 	syncLatency = GetSyncLatency(prec);
 	DB(fprintf(stderr, FMT_DBG("SyncP_1 (Pre-Change) EXC [%d], "
@@ -432,7 +500,9 @@ RTLIB_ExitCode BbqueRPC::SyncP_PreChangeNotify(
 
 RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
-	// TODO Checking if the apps in in Sync Status
+	// Checking if the apps is in Sync Status
+	if (!isAwmWaiting(prec))
+		return RTLIB_EXC_SYNCP_FAILED;
 	
 	return RTLIB_OK;
 }
@@ -464,8 +534,13 @@ RTLIB_ExitCode BbqueRPC::SyncP_SyncChangeNotify(
 
 RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
-	// TODO Setup the ground for reconfiguraiton statistics collection
-	// TODO Start the re-configuration
+
+	// Setting current AWM as valid
+	setAwmValid(prec);
+
+	// TODO Setup the ground for reconfiguration statistics collection
+	// TODO Start the re-configuration by notifying the waiting thread
+	prec->cv.notify_one();
 	
 	return RTLIB_OK;
 }
@@ -491,11 +566,12 @@ RTLIB_ExitCode BbqueRPC::SyncP_DoChangeNotify(
 }
 
 RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(pregExCtx_t prec) {
-	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 	// TODO Wait for the apps to end its reconfiguration
 	// TODO Collect stats on reconfiguraiton time
-	
-	return RTLIB_OK;
+
+	DB(fprintf(stderr, FMT_DBG("Waiting for reconfiguration to complete...\n")));
+
+	return WaitForSyncDone(prec);	
 }
 
 RTLIB_ExitCode BbqueRPC::SyncP_PostChangeNotify(
