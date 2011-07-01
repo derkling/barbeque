@@ -113,7 +113,7 @@ inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
 	cmdSnMap.insert(std::pair<pid_t, pcmdSn_t>(pcs->pid, pcs));
 }
 
-RTLIB_ExitCode ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
+RTLIB_ExitCode_t ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
 			std::defer_lock);
 	conCtxMap_t::iterator it;
@@ -174,7 +174,7 @@ void ApplicationProxy::StopExecutionTrd(pcmdSn_t pcs) {
 #endif
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::StopExecution(AppPtr_t papp) {
 	(void)papp;
 #if 0
@@ -204,7 +204,7 @@ ApplicationProxy::StopExecution(AppPtr_t papp) {
  * Synchronization Protocol - PreChange
  ******************************************************************************/
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
 			std::defer_lock);
@@ -245,7 +245,7 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 		pPreChangeRsp_t &presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
@@ -277,7 +277,7 @@ ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t &presp) {
 
 	// Send the Command
@@ -313,7 +313,7 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t &presp) {
 			presp->pcs->pid, presp->pcs->papp->StrId());
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
 	presp->pcs = SetupCmdSession(papp);
 
@@ -324,7 +324,7 @@ ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
 	return SyncP_PreChange(presp->pcs, presp);
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp) {
 	presp->pcs = SetupCmdSession(papp);
 
@@ -338,7 +338,7 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t &presp) {
 	// Wait for the promise being returned
 	presp->pcs->resp_ftr.wait();
@@ -349,7 +349,7 @@ ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t &presp) {
  * Synchronization Protocol - SyncChange
  ******************************************************************************/
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
 			std::defer_lock);
@@ -387,7 +387,7 @@ ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 		pSyncChangeRsp_t &presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
@@ -418,7 +418,7 @@ ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t &presp) {
 
 	// Send the Command
@@ -454,7 +454,7 @@ ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t &presp) {
 			presp->pcs->pid, presp->pcs->papp->StrId());
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t &presp) {
 	presp->pcs = SetupCmdSession(papp);
 
@@ -465,7 +465,7 @@ ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t &presp) {
 	return SyncP_SyncChange(presp->pcs, presp);
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t &presp) {
 	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
 	presp->pcs = SetupCmdSession(papp);
@@ -480,7 +480,7 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t &presp)
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t &presp) {
 	// Wait for the promise being returned
 	presp->pcs->resp_ftr.wait();
@@ -492,7 +492,7 @@ ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t &presp) {
  * Synchronization Protocol - DoChange
  ******************************************************************************/
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
 			std::defer_lock);
@@ -530,7 +530,7 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t &presp) {
 
 	// Send the Command
@@ -542,7 +542,7 @@ ApplicationProxy::SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t &presp) {
 
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_DoChange(AppPtr_t papp) {
 	pDoChangeRsp_t presp = ApplicationProxy::pDoChangeRsp_t(
 			new ApplicationProxy::doChangeRsp_t());
@@ -558,7 +558,7 @@ ApplicationProxy::SyncP_DoChange(AppPtr_t papp) {
  * Synchronization Protocol - PostChange
  ******************************************************************************/
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 	std::unique_lock<std::mutex> conCtxMap_ul(conCtxMap_mtx,
 			std::defer_lock);
@@ -596,7 +596,7 @@ ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 		pPostChangeRsp_t &presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
@@ -627,7 +627,7 @@ ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t &presp) {
 
 	// Send the Command
@@ -644,7 +644,7 @@ ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t &presp) {
 
 }
 
-RTLIB_ExitCode
+RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t &presp) {
 	presp->pcs = SetupCmdSession(papp);
 
@@ -754,7 +754,7 @@ void ApplicationProxy::RpcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 }
 
 void ApplicationProxy::RpcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
-		rpc_msg_type_t type, RTLIB_ExitCode error) {
+		rpc_msg_type_t type, RTLIB_ExitCode_t error) {
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
@@ -861,7 +861,7 @@ void ApplicationProxy::RpcExcStart(prqsSn_t prqs) {
 			"[pid: %d, exc: %d] "
 			"start FAILED",
 			pcon->app_pid, pmsg_hdr->exc_id);
-		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_START_FAILED);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_ENABLE_FAILED);
 		return;
 	}
 
@@ -896,7 +896,7 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 			"[pid: %d, exc: %d] "
 			"stop FAILED",
 			pcon->app_pid, pmsg_hdr->exc_id);
-		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_STOP_FAILED);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_DISABLE_FAILED);
 		return;
 	}
 
