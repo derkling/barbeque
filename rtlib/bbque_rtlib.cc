@@ -50,56 +50,52 @@ static br::BbqueRPC *rpc = NULL;
 /**
  * The collection of RTLib services accessible from applications.
  */
-static RTLIB_Services rtlib_services;
+static RTLIB_Services_t rtlib_services;
 
-static RTLIB_ExecutionContextHandler rtlib_register(const char *name,
-		const RTLIB_ExecutionContextParams *params) {
+static RTLIB_ExecutionContextHandler_t rtlib_register(const char *name,
+		const RTLIB_ExecutionContextParams_t *params) {
 	return rpc->Register(name, params);
 }
 
 static void rtlib_unregister(
-		const RTLIB_ExecutionContextHandler ech) {
+		const RTLIB_ExecutionContextHandler_t ech) {
 	return rpc->Unregister(ech);
 }
 
-static RTLIB_ExitCode rtlib_start(
-		const RTLIB_ExecutionContextHandler ech) {
-	return rpc->Start(ech);
+static RTLIB_ExitCode_t rtlib_enable(
+		const RTLIB_ExecutionContextHandler_t ech) {
+	return rpc->Enable(ech);
 }
 
-static RTLIB_ExitCode rtlib_stop(
-		const RTLIB_ExecutionContextHandler ech) {
-	return rpc->Stop(ech);
+static RTLIB_ExitCode_t rtlib_disable(
+		const RTLIB_ExecutionContextHandler_t ech) {
+	return rpc->Disable(ech);
 }
 
-static bool rtlib_sync(
-		const RTLIB_ExecutionContextHandler ech,
-		const char *name, RTLIB_SyncType type) {
-	return rpc->Sync(ech, name, type);
+static RTLIB_ExitCode_t rtlib_getwm(
+		const RTLIB_ExecutionContextHandler_t ech,
+		RTLIB_WorkingModeParams_t *wm,
+		RTLIB_SyncType_t st) {
+	return rpc->GetWorkingMode(ech, wm, st);
 }
 
-static RTLIB_ExitCode rtlib_getwm(
-		const RTLIB_ExecutionContextHandler ech,
-		RTLIB_WorkingModeParams *wm) {
-	return rpc->GetWorkingMode(ech, wm);
-}
-
-static RTLIB_ExitCode rtlib_set(
-		RTLIB_ExecutionContextHandler ech,
-		RTLIB_Constraint *constraints, uint8_t count) {
+static RTLIB_ExitCode_t rtlib_set(
+		RTLIB_ExecutionContextHandler_t ech,
+		RTLIB_Constraint_t *constraints, uint8_t count) {
 	return rpc->Set(ech, constraints, count);
 }
 
-static RTLIB_ExitCode rtlib_clear(
-		RTLIB_ExecutionContextHandler ech) {
+static RTLIB_ExitCode_t rtlib_clear(
+		RTLIB_ExecutionContextHandler_t ech) {
 	return rpc->Clear(ech);
 }
 
 static const char *rtlib_app_name;
 static uint8_t rtlib_initialized = 0;
 
-RTLIB_Services *RTLIB_Init(const char *name) {
-	RTLIB_ExitCode result;
+RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
+	RTLIB_ExitCode_t result;
+	(*rtlib) = NULL;
 
 	assert(rtlib_initialized==0);
 
@@ -111,20 +107,19 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	rtlib_services.version.major = RTLIB_VERSION_MAJOR;
 	rtlib_services.version.minor = RTLIB_VERSION_MINOR;
 
-	rtlib_services.RegisterExecutionContext = rtlib_register;
-	rtlib_services.StartExecutionContext = rtlib_start;
-	rtlib_services.NotifySync = rtlib_sync;
+	rtlib_services.Register = rtlib_register;
+	rtlib_services.Enable = rtlib_enable;
 	rtlib_services.GetWorkingMode = rtlib_getwm;
 	rtlib_services.SetConstraints = rtlib_set;
 	rtlib_services.ClearConstraints = rtlib_clear;
-	rtlib_services.StopExecutionContext = rtlib_stop;
-	rtlib_services.UnregisterExecutionContext = rtlib_unregister;
+	rtlib_services.Disable = rtlib_disable;
+	rtlib_services.Unregister = rtlib_unregister;
 
 	// Building a communication channel
 	rpc = br::BbqueRPC::GetInstance();
 	if (!rpc) {
 		fprintf(stderr, FMT_ERR("RPC communication channel build FAILED\n"));
-		return NULL;
+		return RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
 	}
 
 	// Initializing the RPC communication channel
@@ -132,20 +127,21 @@ RTLIB_Services *RTLIB_Init(const char *name) {
 	if (result!=RTLIB_OK) {
 		fprintf(stderr, FMT_ERR("RPC communication channel "
 					"initialization FAILED\n"));
-		return NULL;
+		return RTLIB_BBQUE_UNREACHABLE;
 	}
 
 	// Marking library as intialized
 	rtlib_initialized = 1;
 	rtlib_app_name = name;
 
-	return &rtlib_services;
+	(*rtlib) = &rtlib_services;
+	return RTLIB_OK;
 }
 
 __attribute__((destructor))
 static void RTLIB_Exit(void) {
 
-	DB(fprintf(stderr, FMT_DBG("Barbeque RTLIB Destructor\n")));
+	DB(fprintf(stderr, FMT_DBG("Barbeque RTLIB, Cleanup and release\n")));
 
 	if (!rtlib_initialized)
 		return;

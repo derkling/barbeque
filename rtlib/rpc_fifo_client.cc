@@ -74,7 +74,7 @@ BbqueRPC_FIFO_Client::~BbqueRPC_FIFO_Client() {
 	ChannelRelease();
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelRelease() {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelRelease() {
 	rpc_fifo_APP_EXIT_t rf_APP_EXIT = {
 		{
 			FIFO_PKT_SIZE(APP_EXIT),
@@ -228,7 +228,7 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 }
 
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_APP_PAIR_t rf_APP_PAIR = {
 		{
@@ -261,11 +261,11 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return (RTLIB_ExitCode)chResp.result;
+	return (RTLIB_ExitCode_t)chResp.result;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::ChannelSetup() {
-	RTLIB_ExitCode result = RTLIB_OK;
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelSetup() {
+	RTLIB_ExitCode_t result = RTLIB_OK;
 	int error;
 
 	DB(fprintf(stderr, FMT_INF("Initializing channel\n")));
@@ -321,10 +321,10 @@ err_create:
 
 
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Init(
 			const char *name) {
 	std::unique_lock<std::mutex> trdStatus_ul(trdStatus_mtx);
-	RTLIB_ExitCode result;
+	RTLIB_ExitCode_t result;
 
 	// Starting the communication thread
 	done = false;
@@ -354,7 +354,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Init(
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t prec) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Register(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_EXC_REGISTER_t rf_EXC_REGISTER = {
 		{
@@ -389,11 +389,11 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Register(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return (RTLIB_ExitCode)chResp.result;
+	return (RTLIB_ExitCode_t)chResp.result;
 
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_EXC_UNREGISTER_t rf_EXC_UNREGISTER = {
 		{
@@ -425,11 +425,11 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return (RTLIB_ExitCode)chResp.result;
+	return (RTLIB_ExitCode_t)chResp.result;
 
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Enable(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_EXC_START_t rf_EXC_START = {
 		{
@@ -447,7 +447,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 		}
 	};
 
-	DB(fprintf(stderr, FMT_DBG("Starting EXC [%d:%d]...\n"),
+	DB(fprintf(stderr, FMT_DBG("Enabling EXC [%d:%d]...\n"),
 				rf_EXC_START.pyl.hdr.app_pid,
 				rf_EXC_START.pyl.hdr.exc_id));
 
@@ -457,10 +457,10 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Start(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return (RTLIB_ExitCode)chResp.result;
+	return (RTLIB_ExitCode_t)chResp.result;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Disable(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_EXC_STOP_t rf_EXC_STOP = {
 		{
@@ -478,7 +478,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 		}
 	};
 
-	DB(fprintf(stderr, FMT_DBG("Stopping EXC [%d:%d]...\n"),
+	DB(fprintf(stderr, FMT_DBG("Disabling EXC [%d:%d]...\n"),
 				rf_EXC_STOP.pyl.hdr.app_pid,
 				rf_EXC_STOP.pyl.hdr.exc_id));
 
@@ -488,12 +488,12 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Stop(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return (RTLIB_ExitCode)chResp.result;
+	return (RTLIB_ExitCode_t)chResp.result;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Set(
-			const RTLIB_ExecutionContextHandler ech,
-			RTLIB_Constraint* constraints,
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(
+			const RTLIB_ExecutionContextHandler_t ech,
+			RTLIB_Constraint_t* constraints,
 			uint8_t count) {
 	//Silence "args not used" warning.
 	(void)ech;
@@ -505,8 +505,8 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Set(
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_Clear(
-			const RTLIB_ExecutionContextHandler ech) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Clear(
+			const RTLIB_ExecutionContextHandler_t ech) {
 	//Silence "args not used" warning.
 	(void)ech;
 
@@ -515,7 +515,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_Clear(
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_EXC_SCHEDULE_t rf_EXC_SCHEDULE = {
 		{
@@ -543,7 +543,7 @@ RTLIB_ExitCode BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
 	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
-	return (RTLIB_ExitCode)chResp.result;
+	return (RTLIB_ExitCode_t)chResp.result;
 }
 
 void BbqueRPC_FIFO_Client::_Exit() {
@@ -555,7 +555,7 @@ void BbqueRPC_FIFO_Client::_Exit() {
  * Synchronization Protocol Messages - PreChange
  ******************************************************************************/
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPreChangeResp(
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_SyncpPreChangeResp(
 		rpc_msg_token_t token, pregExCtx_t prec, uint32_t syncLatency) {
 
 	rpc_fifo_BBQ_SYNCP_PRECHANGE_RESP_t rf_BBQ_SYNCP_PRECHANGE_RESP = {
@@ -613,8 +613,8 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpPreChange() {
  * Synchronization Protocol Messages - SyncChange
  ******************************************************************************/
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpSyncChangeResp(
-		rpc_msg_token_t token, pregExCtx_t prec, RTLIB_ExitCode sync) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_SyncpSyncChangeResp(
+		rpc_msg_token_t token, pregExCtx_t prec, RTLIB_ExitCode_t sync) {
 
 	rpc_fifo_BBQ_SYNCP_SYNCCHANGE_RESP_t rf_BBQ_SYNCP_SYNCCHANGE_RESP = {
 		{
@@ -696,8 +696,8 @@ void BbqueRPC_FIFO_Client::RpcBbqSyncpDoChange() {
  * Synchronization Protocol Messages - PostChange
  ******************************************************************************/
 
-RTLIB_ExitCode BbqueRPC_FIFO_Client::_SyncpPostChangeResp(
-		rpc_msg_token_t token, pregExCtx_t prec, RTLIB_ExitCode result) {
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_SyncpPostChangeResp(
+		rpc_msg_token_t token, pregExCtx_t prec, RTLIB_ExitCode_t result) {
 
 	rpc_fifo_BBQ_SYNCP_POSTCHANGE_RESP_t rf_BBQ_SYNCP_POSTCHANGE_RESP = {
 		{

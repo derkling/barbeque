@@ -50,26 +50,26 @@ public:
 
 protected:
 
-	RTLIB_ExitCode _Init(
+	RTLIB_ExitCode_t _Init(
 			const char *name);
 
-	RTLIB_ExitCode _Register(pregExCtx_t prec);
+	RTLIB_ExitCode_t _Register(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Unregister(pregExCtx_t prec);
+	RTLIB_ExitCode_t _Unregister(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Start(pregExCtx_t prec);
+	RTLIB_ExitCode_t _Enable(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Stop(pregExCtx_t prec);
+	RTLIB_ExitCode_t _Disable(pregExCtx_t prec);
 
-	RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec);
+	RTLIB_ExitCode_t _ScheduleRequest(pregExCtx_t prec);
 
-	RTLIB_ExitCode _Set(
-			const RTLIB_ExecutionContextHandler ech,
+	RTLIB_ExitCode_t _Set(
+			const RTLIB_ExecutionContextHandler_t ech,
 			RTLIB_Constraint* constraints,
 			uint8_t count);
 
-	RTLIB_ExitCode _Clear(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode_t _Clear(
+			const RTLIB_ExecutionContextHandler_t ech);
 
 	void _Exit();
 
@@ -81,20 +81,20 @@ protected:
  * Synchronization Protocol Messages
  ******************************************************************************/
 	
-	RTLIB_ExitCode _SyncpPreChangeResp(
+	RTLIB_ExitCode_t _SyncpPreChangeResp(
 			rpc_msg_token_t token,
 			pregExCtx_t prec,
 			uint32_t syncLatency);
 
-	RTLIB_ExitCode _SyncpSyncChangeResp(
+	RTLIB_ExitCode_t _SyncpSyncChangeResp(
 			rpc_msg_token_t token,
 			pregExCtx_t prec,
-			RTLIB_ExitCode sync);
+			RTLIB_ExitCode_t sync);
 
-	RTLIB_ExitCode _SyncpPostChangeResp(
+	RTLIB_ExitCode_t _SyncpPostChangeResp(
 			rpc_msg_token_t token,
 			pregExCtx_t prec,
-			RTLIB_ExitCode result);
+			RTLIB_ExitCode_t result);
 
 private:
 
@@ -151,11 +151,11 @@ private:
 	 */
 	rpc_msg_resp_t chResp;
 
-	RTLIB_ExitCode ChannelRelease();
+	RTLIB_ExitCode_t ChannelRelease();
 
-	RTLIB_ExitCode ChannelSetup();
+	RTLIB_ExitCode_t ChannelSetup();
 
-	RTLIB_ExitCode ChannelPair(const char *name);
+	RTLIB_ExitCode_t ChannelPair(const char *name);
 
 	void ChannelFetch();
 

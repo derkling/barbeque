@@ -63,43 +63,39 @@ public:
  * Channel Independant interface
  ******************************************************************************/
 
-	RTLIB_ExitCode Init(const char *name);
+	RTLIB_ExitCode_t Init(const char *name);
 
-	RTLIB_ExecutionContextHandler Register(
+	RTLIB_ExecutionContextHandler_t Register(
 			const char* name,
-			const RTLIB_ExecutionContextParams* params);
+			const RTLIB_ExecutionContextParams_t* params);
 
 	void Unregister(
-			const RTLIB_ExecutionContextHandler ech);
+			const RTLIB_ExecutionContextHandler_t ech);
 
-	RTLIB_ExitCode Start(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode_t Enable(
+			const RTLIB_ExecutionContextHandler_t ech);
 
-	RTLIB_ExitCode Stop(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode_t Disable(
+			const RTLIB_ExecutionContextHandler_t ech);
 
-	bool Sync(
-			const RTLIB_ExecutionContextHandler ech,
-			const char *name,
-			RTLIB_SyncType type);
-
-	RTLIB_ExitCode Set(
-			const RTLIB_ExecutionContextHandler ech,
-			RTLIB_Constraint* constraints,
+	RTLIB_ExitCode_t Set(
+			const RTLIB_ExecutionContextHandler_t ech,
+			RTLIB_Constraint_t* constraints,
 			uint8_t count);
 
-	RTLIB_ExitCode Clear(
-			const RTLIB_ExecutionContextHandler ech);
+	RTLIB_ExitCode_t Clear(
+			const RTLIB_ExecutionContextHandler_t ech);
 
-	RTLIB_ExitCode GetWorkingMode(
-			RTLIB_ExecutionContextHandler ech,
-			RTLIB_WorkingModeParams *wm);
+	RTLIB_ExitCode_t GetWorkingMode(
+			RTLIB_ExecutionContextHandler_t ech,
+			RTLIB_WorkingModeParams_t *wm,
+			RTLIB_SyncType_t st);
 
 protected:
 
 	typedef struct RegisteredExecutionContext {
 		/** The Execution Context data */
-		RTLIB_ExecutionContextParams exc_params;
+		RTLIB_ExecutionContextParams_t exc_params;
 		/** The name of this Execuion Context */
 		std::string name;
 		/** The RTLIB assigned ID for this Execution Context */
@@ -111,7 +107,7 @@ protected:
 		/** A set of flags to define the state of this EXC */
 		uint8_t flags;
 		/** The last required synchronization action */
-		RTLIB_ExitCode event;
+		RTLIB_ExitCode_t event;
 		/** The ID of the assigned AWM (if valid) */
 		uint8_t awm_id;
 		/** The mutex protecting access to this structure */
@@ -175,32 +171,26 @@ protected:
  * Channel Dependant interface
  ******************************************************************************/
 
-	virtual RTLIB_ExitCode _Init(
+	virtual RTLIB_ExitCode_t _Init(
 			const char *name) = 0;
 
-	virtual RTLIB_ExitCode _Register(pregExCtx_t pregExCtx) = 0;
+	virtual RTLIB_ExitCode_t _Register(pregExCtx_t prec) = 0;
 
-	virtual RTLIB_ExitCode _Unregister(pregExCtx_t pregExCtx) = 0;
+	virtual RTLIB_ExitCode_t _Unregister(pregExCtx_t prec) = 0;
 
-	virtual RTLIB_ExitCode _Start(pregExCtx_t pregExCtx) = 0;
+	virtual RTLIB_ExitCode_t _Enable(pregExCtx_t prec) = 0;
 
-	virtual RTLIB_ExitCode _Stop(pregExCtx_t pregExCtx) = 0;
+	virtual RTLIB_ExitCode_t _Disable(pregExCtx_t prec) = 0;
 
-	virtual RTLIB_ExitCode _Set(
-		const RTLIB_ExecutionContextHandler ech,
-			RTLIB_Constraint* constraints,
+	virtual RTLIB_ExitCode_t _Set(
+		const RTLIB_ExecutionContextHandler_t ech,
+			RTLIB_Constraint_t* constraints,
 			uint8_t count) = 0;
 
-	virtual RTLIB_ExitCode _Clear(
-			const RTLIB_ExecutionContextHandler ech) = 0;
+	virtual RTLIB_ExitCode_t _Clear(
+			const RTLIB_ExecutionContextHandler_t ech) = 0;
 
-	virtual RTLIB_ExitCode _ScheduleRequest(pregExCtx_t prec) = 0;
-
-	/**
-	 * @brief Set a new AWM for the specified EXC
-	 */
-	RTLIB_ExitCode SetWorkingMode(pregExCtx_t prec,
-			RTLIB_WorkingModeParams *wm);
+	virtual RTLIB_ExitCode_t _ScheduleRequest(pregExCtx_t prec) = 0;
 
 	virtual void _Exit() = 0;
 
@@ -214,7 +204,7 @@ protected:
 	/**
 	 * @brief Send response to a Pre-Change command
 	 */
-	virtual RTLIB_ExitCode _SyncpPreChangeResp(
+	virtual RTLIB_ExitCode_t _SyncpPreChangeResp(
 			rpc_msg_token_t token,
 			pregExCtx_t prec,
 			uint32_t syncLatency) = 0;
@@ -223,7 +213,7 @@ protected:
 	 * @brief A synchronization protocol Pre-Change for the EXC with the
 	 * specified ID.
 	 */
-	RTLIB_ExitCode SyncP_PreChangeNotify(
+	RTLIB_ExitCode_t SyncP_PreChangeNotify(
 			rpc_msg_BBQ_SYNCP_PRECHANGE_t &msg);
 
 //----- SyncChange
@@ -231,15 +221,15 @@ protected:
 	/**
 	 * @brief Send response to a Sync-Change command
 	 */
-	virtual RTLIB_ExitCode _SyncpSyncChangeResp(
+	virtual RTLIB_ExitCode_t _SyncpSyncChangeResp(
 			rpc_msg_token_t token,
-			pregExCtx_t prec, RTLIB_ExitCode sync) = 0;
+			pregExCtx_t prec, RTLIB_ExitCode_t sync) = 0;
 
 	/**
 	 * @brief A synchronization protocol Sync-Change for the EXC with the
 	 * specified ID.
 	 */
-	RTLIB_ExitCode SyncP_SyncChangeNotify(
+	RTLIB_ExitCode_t SyncP_SyncChangeNotify(
 			rpc_msg_BBQ_SYNCP_SYNCCHANGE_t &msg);
 
 //----- DoChange
@@ -248,7 +238,7 @@ protected:
 	 * @brief A synchronization protocol Do-Change for the EXC with the
 	 * specified ID.
 	 */
-	RTLIB_ExitCode SyncP_DoChangeNotify(
+	RTLIB_ExitCode_t SyncP_DoChangeNotify(
 			rpc_msg_BBQ_SYNCP_DOCHANGE_t &msg);
 
 //----- PostChange
@@ -256,16 +246,16 @@ protected:
 	/**
 	 * @brief Send response to a Post-Change command
 	 */
-	virtual RTLIB_ExitCode _SyncpPostChangeResp(
+	virtual RTLIB_ExitCode_t _SyncpPostChangeResp(
 			rpc_msg_token_t token,
 			pregExCtx_t prec,
-			RTLIB_ExitCode result) = 0;
+			RTLIB_ExitCode_t result) = 0;
 
 	/**
 	 * @brief A synchronization protocol Post-Change for the EXC with the
 	 * specified ID.
 	 */
-	RTLIB_ExitCode SyncP_PostChangeNotify(
+	RTLIB_ExitCode_t SyncP_PostChangeNotify(
 			rpc_msg_BBQ_SYNCP_POSTCHANGE_t &msg);
 
 
@@ -299,8 +289,8 @@ private:
 	 * if the current AWM is not valid and thus a scheduling should be
 	 * required to the RTRM
 	 */
-	RTLIB_ExitCode GetAssignedWorkingMode(pregExCtx_t prec,
-			RTLIB_WorkingModeParams *wm);
+	RTLIB_ExitCode_t GetAssignedWorkingMode(pregExCtx_t prec,
+			RTLIB_WorkingModeParams_t *wm);
 
 	/**
 	 * @brief Suspend caller waiting for an AWM being assigned
@@ -311,7 +301,7 @@ private:
 	 * @return RTLIB_OK if a valid working mode has been assinged to the EXC,
 	 * RTLIB_EXC_GWM_FAILED otherwise
 	 */
-	RTLIB_ExitCode WaitForWorkingMode(pregExCtx_t prec,
+	RTLIB_ExitCode_t WaitForWorkingMode(pregExCtx_t prec,
 			RTLIB_WorkingModeParams *wm);
 
 	/**
@@ -326,7 +316,7 @@ private:
 	 * @return RTLIB_OK if the reconfigutation complete successfully,
 	 * RTLIB_EXC_SYNCP_FAILED otherwise
 	 */
-	RTLIB_ExitCode WaitForSyncDone(pregExCtx_t prec);
+	RTLIB_ExitCode_t WaitForSyncDone(pregExCtx_t prec);
 
 	/**
 	 * @brief Get an extimation of the Synchronization Latency
@@ -340,30 +330,30 @@ private:
 	/**
 	 * @brief A synchronization protocol Pre-Change for the specified EXC.
 	 */
-	RTLIB_ExitCode SyncP_PreChangeNotify(pregExCtx_t prec);
+	RTLIB_ExitCode_t SyncP_PreChangeNotify(pregExCtx_t prec);
 
 	/**
 	 * @brief A synchronization protocol Sync-Change for the specified EXC.
 	 */
-	RTLIB_ExitCode SyncP_SyncChangeNotify(pregExCtx_t prec);
+	RTLIB_ExitCode_t SyncP_SyncChangeNotify(pregExCtx_t prec);
 
 	/**
 	 * @brief A synchronization protocol Do-Change for the specified EXC.
 	 */
-	RTLIB_ExitCode SyncP_DoChangeNotify(pregExCtx_t prec);
+	RTLIB_ExitCode_t SyncP_DoChangeNotify(pregExCtx_t prec);
 
 	/**
 	 * @brief A synchronization protocol Post-Change for the specified EXC.
 	 */
-	RTLIB_ExitCode SyncP_PostChangeNotify(pregExCtx_t prec);
+	RTLIB_ExitCode_t SyncP_PostChangeNotify(pregExCtx_t prec);
 
 
 /******************************************************************************
  * Application Callbacks Proxies
  ******************************************************************************/
 
-	RTLIB_ExitCode StopExecution(
-			RTLIB_ExecutionContextHandler ech,
+	RTLIB_ExitCode_t StopExecution(
+			RTLIB_ExecutionContextHandler_t ech,
 			struct timespec timeout);
 
 /******************************************************************************
@@ -371,7 +361,7 @@ private:
  ******************************************************************************/
 
 	pregExCtx_t getRegistered(
-			const RTLIB_ExecutionContextHandler ech);
+			const RTLIB_ExecutionContextHandler_t ech);
 
 	/**
 	 * @brief Get an EXC handler for the give EXC ID
