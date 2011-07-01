@@ -103,7 +103,7 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 
 	ApplicationProxy::pPreChangeRsp_t presp;
 	RspMap_t::iterator resp_it;
-	RTLIB_ExitCode result;
+	RTLIB_ExitCode_t result;
 	RspMap_t rsp_map;
 	AppPtr_t papp;
 
@@ -176,7 +176,7 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 
 	ApplicationProxy::pSyncChangeRsp_t presp;
 	RspMap_t::iterator resp_it;
-	RTLIB_ExitCode result;
+	RTLIB_ExitCode_t result;
 	RspMap_t rsp_map;
 	AppPtr_t papp;
 
@@ -240,7 +240,7 @@ SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
 	ApplicationProxy &ap(ApplicationProxy::GetInstance());
 	AppsUidMap_t::const_iterator apps_it(apps->begin());
-	RTLIB_ExitCode result;
+	RTLIB_ExitCode_t result;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 3: doChange() START");
@@ -274,7 +274,7 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 	ApplicationProxy &ap(ApplicationProxy::GetInstance());
 	AppsUidMap_t::const_iterator apps_it(apps->begin());
 	ApplicationProxy::pPostChangeRsp_t presp;
-	RTLIB_ExitCode result;
+	RTLIB_ExitCode_t result;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 4: postChange() START");
