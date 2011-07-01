@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	fprintf(stderr, FMT_INF("starting application processing...\n"));
-	app.Start(0, num_exc);
+	app.Enable(0, num_exc);
 
 
 	fprintf(stderr, FMT_INF("Getting an AWM for each registered EXC...\n"));
@@ -110,12 +110,12 @@ int main(int argc, char *argv[]) {
 	sleep(simulation_time);
 
 	fprintf(stderr, FMT_INF("stopping application processing...\n"));
-	app.Stop(0, num_exc);
+	app.Disable(0, num_exc);
 
 
 	fprintf(stderr, FMT_INF("unregistering [%03d] execution contexts...\n"),
 			num_exc);
-	app.UnregisterAllEXC();
+	app.UnregisterAll();
 
 
 	std::cout << "\n\n" << std::endl;

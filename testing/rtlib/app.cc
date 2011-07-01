@@ -35,20 +35,20 @@ BbqueApp::BbqueApp(std::string const & name) {
 
 	fprintf(stderr, FMT_INF("Initializing RPC library...\n"));
 
-	rtlib = RTLIB_Init(name.c_str());
+	RTLIB_Init(name.c_str(), &rtlib);
 	assert(rtlib);
 
 }
 
 int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 	char recipe_name[] = "exRecipe_000";
-	RTLIB_ExecutionContextParams exc_params = {
+	RTLIB_ExecutionContextParams_t exc_params = {
 		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
 		RTLIB_LANG_CPP,
 		recipe_name,
 		BbqueApp::Stop
 	};
-	RTLIB_ExecutionContextHandler exc_hdl;
+	RTLIB_ExecutionContextHandler_t exc_hdl;
 	excMap_t::iterator it = exc_map.find(name);
 
 	fprintf(stderr, FMT_INF("Registering EXC [%s:exRecipe_%03d]...\n"),
@@ -63,8 +63,8 @@ int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 
 	::snprintf(recipe_name, 13, "exRecipe_%03d", recipe_id%999);
 
-	assert(rtlib && rtlib->RegisterExecutionContext);
-	exc_hdl = rtlib->RegisterExecutionContext(name.c_str(), &exc_params);
+	assert(rtlib && rtlib->Register);
+	exc_hdl = rtlib->Register(name.c_str(), &exc_params);
 	if (!exc_hdl) {
 		fprintf(stderr, FMT_ERR("FAILED: registering EXC "
 					"[%s:exRecipe_%03d]\n"),
@@ -80,10 +80,10 @@ int BbqueApp::RegisterEXC(std::string const & name, uint8_t recipe_id) {
 	return 0;
 }
 
-void BbqueApp::UnregisterAllEXC() {
+void BbqueApp::UnregisterAll() {
 	excMap_t::iterator it(exc_map.begin());
 	excMap_t::iterator end(exc_map.end());
-	RTLIB_ExecutionContextHandler exc_hdl;
+	RTLIB_ExecutionContextHandler_t exc_hdl;
 
 	fprintf(stderr, FMT_INF("Unregistering all EXC...\n"));
 
@@ -93,20 +93,20 @@ void BbqueApp::UnregisterAllEXC() {
 		fprintf(stderr, FMT_INF("Unregistering EXC [%s] (@%p)...\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 
-		assert(rtlib && rtlib->UnregisterExecutionContext);
-		rtlib->UnregisterExecutionContext(exc_hdl);
+		assert(rtlib && rtlib->Unregister);
+		rtlib->Unregister(exc_hdl);
 		exc_map.erase(it);
 	}
 
 }
 
-RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
+RTLIB_ExitCode_t BbqueApp::Enable(uint8_t first, uint8_t last) {
 	excMap_t::iterator it(exc_map.begin());
 	excMap_t::iterator end(exc_map.end());
-	RTLIB_ExecutionContextHandler exc_hdl;
-	RTLIB_ExitCode result;
+	RTLIB_ExecutionContextHandler_t exc_hdl;
+	RTLIB_ExitCode_t result;
 
-	fprintf(stderr, FMT_INF("Starting [%d] EXCs...\n"), last-first);
+	fprintf(stderr, FMT_INF("Enabling [%d] EXCs...\n"), last-first);
 
 	for (uint8_t idx=0; it!=end; ++it) {
 		// Starting only the selected EXCs
@@ -117,14 +117,14 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 
 		exc_hdl = (*it).second;
 		assert(exc_hdl);
-		fprintf(stderr, FMT_INF("Starting EXC [%s] (@%p)...\n"),
+		fprintf(stderr, FMT_INF("Enable EXC [%s] (@%p)...\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 
-		assert(rtlib && rtlib->UnregisterExecutionContext);
-		result = rtlib->StartExecutionContext(exc_hdl);
+		assert(rtlib && rtlib->Enable);
+		result = rtlib->Enable(exc_hdl);
 		if (result!=RTLIB_OK) {
-			fprintf(stderr, FMT_INF("EXC [%s] (@%p) "
-						"START FAILED\n"),
+			fprintf(stderr, FMT_INF("Enabling EXC [%s] (@%p) "
+						"FAILED\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 			return result;
 		}
@@ -134,7 +134,7 @@ RTLIB_ExitCode BbqueApp::Start(uint8_t first, uint8_t last) {
 }
 
 void BbqueApp::SwitchConfiguration(std::string const & name,
-		RTLIB_WorkingModeParams & wmp) {
+		RTLIB_WorkingModeParams_t & wmp) {
 	fprintf(stderr, FMT_INF("Switching to new assigned AWM [%d] "
 				"for EXC [%s] START\n"),
 			wmp.awm_id, name.c_str());
@@ -151,9 +151,9 @@ void BbqueApp::BlockExecution(std::string const & name) {
 
 }
 
-RTLIB_ExitCode BbqueApp::CheckForReconfiguration(std::string const & name,
-		RTLIB_ExitCode result,
-		RTLIB_WorkingModeParams & wmp) {
+RTLIB_ExitCode_t BbqueApp::CheckForReconfiguration(std::string const & name,
+		RTLIB_ExitCode_t result,
+		RTLIB_WorkingModeParams_t & wmp) {
 
 	switch (result) {
 	case RTLIB_OK:
@@ -186,8 +186,8 @@ RTLIB_ExitCode BbqueApp::CheckForReconfiguration(std::string const & name,
 
 int BbqueApp::GetWorkingMode(std::string const & name) {
 	excMap_t::iterator it = exc_map.find(name);
-	RTLIB_WorkingModeParams wmp;
-	RTLIB_ExitCode result;
+	RTLIB_WorkingModeParams_t wmp;
+	RTLIB_ExitCode_t result;
 
 	fprintf(stderr, FMT_INF("Get AWM for EXC [%s]...\n"),
 			name.c_str());
@@ -200,11 +200,11 @@ int BbqueApp::GetWorkingMode(std::string const & name) {
 
 	assert(rtlib && rtlib->GetWorkingMode);
 
-	RTLIB_ExecutionContextHandler ech = (*it).second;
+	RTLIB_ExecutionContextHandler_t ech = (*it).second;
 
 	// Looping until a valid AWM has been assinged
 	do {
-		result = rtlib->GetWorkingMode(ech, &wmp);
+		result = rtlib->GetWorkingMode(ech, &wmp, RTLIB_SYNC_STATELESS);
 		result = CheckForReconfiguration(name, result, wmp);
 	} while ((result != RTLIB_OK) &&
 			(result != RTLIB_EXC_GWM_FAILED));
@@ -212,13 +212,13 @@ int BbqueApp::GetWorkingMode(std::string const & name) {
 	return result;
 }
 
-RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {
+RTLIB_ExitCode_t BbqueApp::Disable(uint8_t first, uint8_t last) {
 	excMap_t::iterator it(exc_map.begin());
 	excMap_t::iterator end(exc_map.end());
-	RTLIB_ExecutionContextHandler exc_hdl;
-	RTLIB_ExitCode result;
+	RTLIB_ExecutionContextHandler_t exc_hdl;
+	RTLIB_ExitCode_t result;
 
-	fprintf(stderr, FMT_INF("Stopping [%d] EXCs...\n"), last-first+1);
+	fprintf(stderr, FMT_INF("Disabling [%d] EXCs...\n"), last-first+1);
 
 	for (uint8_t idx=0; it!=end; ++it) {
 		// Starting only the selected EXCs
@@ -232,8 +232,8 @@ RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {
 		fprintf(stderr, FMT_INF("Stopping EXC [%s] (@%p)...\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
 
-		assert(rtlib && rtlib->UnregisterExecutionContext);
-		result = rtlib->StopExecutionContext(exc_hdl);
+		assert(rtlib && rtlib->Disable);
+		result = rtlib->Disable(exc_hdl);
 		if (result!=RTLIB_OK) {
 			fprintf(stderr, FMT_INF("EXC [%s] (@%p) STOP FAILED\n"),
 				(*it).first.c_str(), (void*)exc_hdl);
@@ -244,8 +244,8 @@ RTLIB_ExitCode BbqueApp::Stop(uint8_t first, uint8_t last) {
 	return RTLIB_OK;
 }
 
-RTLIB_ExitCode BbqueApp::Stop(
-	RTLIB_ExecutionContextHandler ech,
+RTLIB_ExitCode_t BbqueApp::Stop(
+	RTLIB_ExecutionContextHandler_t ech,
 	struct timespec timeout) {
 	(void)ech;
 	(void)timeout;

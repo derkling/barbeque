@@ -35,34 +35,34 @@ public:
 
 	int RegisterEXC(std::string const & name, uint8_t recipe_id);
 
-	RTLIB_ExitCode Start(uint8_t first, uint8_t last);
+	RTLIB_ExitCode_t Enable(uint8_t first, uint8_t last);
 
 	void SwitchConfiguration(std::string const & name,
-			RTLIB_WorkingModeParams & wmp);
+			RTLIB_WorkingModeParams_t & wmp);
 
 	void BlockExecution(std::string const & name);
 	
-	RTLIB_ExitCode CheckForReconfiguration(std::string const & name,
-			RTLIB_ExitCode result,
-			RTLIB_WorkingModeParams & wmp);
+	RTLIB_ExitCode_t CheckForReconfiguration(std::string const & name,
+			RTLIB_ExitCode_t result,
+			RTLIB_WorkingModeParams_t & wmp);
 
 	int GetWorkingMode(std::string const & name);
 
-	RTLIB_ExitCode Stop(uint8_t first, uint8_t last);
+	RTLIB_ExitCode_t Disable(uint8_t first, uint8_t last);
 
-	static RTLIB_ExitCode Stop(
-			RTLIB_ExecutionContextHandler ech,
+	static RTLIB_ExitCode_t Stop(
+			RTLIB_ExecutionContextHandler_t ech,
 			struct timespec timeout);
 
-	void UnregisterAllEXC();
+	void UnregisterAll();
 
 private:
 
-	RTLIB_Services *rtlib;
+	RTLIB_Services_t *rtlib;
 
-	typedef std::pair<std::string, RTLIB_ExecutionContextHandler> excMapEntry_t;
+	typedef std::pair<std::string, RTLIB_ExecutionContextHandler_t> excMapEntry_t;
 
-	typedef std::map<std::string, RTLIB_ExecutionContextHandler> excMap_t;
+	typedef std::map<std::string, RTLIB_ExecutionContextHandler_t> excMap_t;
 
 	excMap_t exc_map;
 };
