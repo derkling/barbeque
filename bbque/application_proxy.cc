@@ -247,7 +247,7 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
-		pPreChangeRsp_t &presp) {
+		pPreChangeRsp_t presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
@@ -278,7 +278,7 @@ ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t presp) {
 
 	// Send the Command
 	presp->result = SyncP_PreChangeSend(pcs);
@@ -295,7 +295,7 @@ ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t &presp) {
 }
 
 void
-ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t presp) {
 
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
@@ -314,7 +314,7 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t &presp) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp) {
 	presp->pcs = SetupCmdSession(papp);
 
 	// Enqueuing the Command Session Handler
@@ -325,12 +325,12 @@ ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 	presp->pcs = SetupCmdSession(papp);
 
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_PreChangeTrd,
-			this, std::ref(presp));
+			this, presp);
 
 	// Setup the promise (thus unlocking the executor)
 	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
@@ -339,7 +339,7 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
 	// Wait for the promise being returned
 	presp->pcs->resp_ftr.wait();
 	return presp->pcs->resp_ftr.get();
@@ -389,7 +389,7 @@ ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
-		pSyncChangeRsp_t &presp) {
+		pSyncChangeRsp_t presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
@@ -419,7 +419,7 @@ ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t &presp) {
+ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t presp) {
 
 	// Send the Command
 	presp->result = SyncP_SyncChangeSend(pcs);
@@ -436,7 +436,7 @@ ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t &presp) {
 }
 
 void
-ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t &presp) {
+ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t presp) {
 
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
@@ -455,7 +455,7 @@ ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t &presp) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t &presp) {
+ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
 	presp->pcs = SetupCmdSession(papp);
 
 	// Enqueuing the Command Session Handler
@@ -466,13 +466,13 @@ ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t &presp) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t &presp) {
+ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) {
 	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
 	presp->pcs = SetupCmdSession(papp);
 
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_SyncChangeTrd,
-			this, std::ref(presp));
+			this, presp);
 
 	// Setup the promise (thus unlocking the executor)
 	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
@@ -481,7 +481,7 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t &presp)
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t &presp) {
+ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
 	// Wait for the promise being returned
 	presp->pcs->resp_ftr.wait();
 	return presp->pcs->resp_ftr.get();
@@ -531,7 +531,7 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t &presp) {
+ApplicationProxy::SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t presp) {
 
 	// Send the Command
 	presp->result = SyncP_DoChangeSend(pcs);
@@ -598,7 +598,7 @@ ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
-		pPostChangeRsp_t &presp) {
+		pPostChangeRsp_t presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
@@ -628,7 +628,7 @@ ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t presp) {
 
 	// Send the Command
 	presp->result = SyncP_PostChangeSend(pcs);
@@ -645,7 +645,7 @@ ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t &presp) {
 }
 
 RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t &presp) {
+ApplicationProxy::SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t presp) {
 	presp->pcs = SetupCmdSession(papp);
 
 	// Enqueuing the Command Session Handler

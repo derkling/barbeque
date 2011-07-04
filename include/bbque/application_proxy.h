@@ -120,17 +120,17 @@ public:
 	/**
 	 * @brief Synchronous PreChange
 	 */
-	RTLIB_ExitCode SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp);
 
 	/**
 	 * @brief Start an Asynchronous PreChange
 	 */
-	RTLIB_ExitCode SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp);
 
 	/**
 	 * @brief Get the result of an issued Asynchronous PreChange
 	 */
-	RTLIB_ExitCode SyncP_PreChange_GetResult(pPreChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_PreChange_GetResult(pPreChangeRsp_t presp);
 
 //----- SyncChange
 
@@ -144,17 +144,17 @@ public:
 	/**
 	 * @brief Synchronous SyncChange
 	 */
-	RTLIB_ExitCode SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp);
 
 	/**
 	 * @brief Start an Asynchronous PreChange
 	 */
-	RTLIB_ExitCode SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp);
 
 	/**
 	 * @brief Get the result of an issued Asynchronous PreChange
 	 */
-	RTLIB_ExitCode SyncP_SyncChange_GetResult(pSyncChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp);
 
 //----- DoChange
 
@@ -176,7 +176,7 @@ public:
 	/**
 	 * @brief Synchronous PostChange
 	 */
-	RTLIB_ExitCode SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t presp);
 
 
 private:
@@ -279,21 +279,21 @@ private:
 
 	RTLIB_ExitCode SyncP_PreChangeSend(pcmdSn_t pcs);
 
-	RTLIB_ExitCode SyncP_PreChangeRecv(pcmdSn_t pcs, pPreChangeRsp_t &preps);
+	RTLIB_ExitCode SyncP_PreChangeRecv(pcmdSn_t pcs, pPreChangeRsp_t preps);
 
-	RTLIB_ExitCode SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t presp);
 
-	void SyncP_PreChangeTrd(pPreChangeRsp_t &presp);
+	void SyncP_PreChangeTrd(pPreChangeRsp_t presp);
 
 //----- SyncChange
 
 	RTLIB_ExitCode SyncP_SyncChangeSend(pcmdSn_t pcs);
 
-	RTLIB_ExitCode SyncP_SyncChangeRecv(pcmdSn_t pcs, pSyncChangeRsp_t &preps);
+	RTLIB_ExitCode SyncP_SyncChangeRecv(pcmdSn_t pcs, pSyncChangeRsp_t preps);
 
-	RTLIB_ExitCode SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t presp);
 
-	void SyncP_SyncChangeTrd(pSyncChangeRsp_t &presp);
+	void SyncP_SyncChangeTrd(pSyncChangeRsp_t presp);
 
 //----- DoChange
 
@@ -306,15 +306,15 @@ private:
 
 	RTLIB_ExitCode SyncP_DoChangeSend(pcmdSn_t pcs);
 
-	RTLIB_ExitCode SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t presp);
 
 //----- PostChange
 
 	RTLIB_ExitCode SyncP_PostChangeSend(pcmdSn_t pcs);
 
-	RTLIB_ExitCode SyncP_PostChangeRecv(pcmdSn_t pcs, pPostChangeRsp_t &preps);
+	RTLIB_ExitCode SyncP_PostChangeRecv(pcmdSn_t pcs, pPostChangeRsp_t preps);
 
-	RTLIB_ExitCode SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t &presp);
+	RTLIB_ExitCode SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t presp);
 
 
 /*******************************************************************************
