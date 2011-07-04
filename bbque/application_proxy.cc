@@ -362,6 +362,10 @@ ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
 
 	// Wait for the promise being returned
 	result = presp->pcs->resp_ftr.get();
+
+	// Releasing the command session
+	ReleaseCommandSession(presp->pcs);
+
 	return result;
 }
 
@@ -523,6 +527,9 @@ ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
 	// Wait for the promise being returned
 	result = presp->pcs->resp_ftr.get();
 
+	// Releasing the command session
+	ReleaseCommandSession(presp->pcs);
+
 	return result;
 }
 
@@ -683,6 +690,9 @@ ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t presp) {
 	if (presp->result != RTLIB_OK)
 		return presp->result;
 
+	// Releasing the command session
+	ReleaseCommandSession(pcs);
+
 	return RTLIB_OK;
 
 }
@@ -724,6 +734,29 @@ ApplicationProxy::GetCommandSession(rpc_msg_header_t *pmsg_hdr)  {
 		return pcmdSn_t();
 	}
 	return (*it).second;
+}
+
+void
+ApplicationProxy::ReleaseCommandSession(pcmdSn_t pcs)  {
+	std::unique_lock<std::mutex> cmdSnMap_ul(cmdSnMap_mtx);
+	cmdSnMap_t::iterator it;
+
+	// Looking for a valid command session
+	it = cmdSnMap.find(pcs->pid);
+	if (it == cmdSnMap.end()) {
+		cmdSnMap_ul.unlock();
+		logger->Warn("APPs PRX [%5d]: Releasing session release FAILED",
+			"(Error: command session not found)", pcs->pid);
+		assert(it != cmdSnMap.end());
+		return;
+	}
+
+	// Remove the command session from the map of pending responses
+	// thus cleaning-up all of its data
+	cmdSnMap.erase(it);
+
+	logger->Warn("APPs PRX: dq command session [%05d] for [%s], "
+			"[size: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
 
 }
 

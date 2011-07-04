@@ -269,6 +269,8 @@ private:
 
 	pcmdSn_t GetCommandSession(rpc_msg_header_t *pmsg_hdr);
 
+	void ReleaseCommandSession(pcmdSn_t pcs);
+
 	void CompleteTransaction(pchMsg_t & pmsg);
 
 /*******************************************************************************
