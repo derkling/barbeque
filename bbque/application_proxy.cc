@@ -93,10 +93,12 @@ rpc_msg_type_t ApplicationProxy::GetNextMessage(pchMsg_t & pChMsg) {
 
 inline ApplicationProxy::pcmdSn_t ApplicationProxy::SetupCmdSession(
 		AppPtr_t papp) const {
-	pcmdSn_t psn = pcmdSn_t(new cmdSn_t);
-	psn->papp = papp;
-	psn->resp_prm = resp_prm_t();
-	return psn;
+	pcmdSn_t pcs(new cmdSn_t());
+	pcs->papp = papp;
+	pcs->resp_prm = resp_prm_t();
+	logger->Debug("APPs PRX: setup command session for [%s]",
+			pcs->papp->StrId());
+	return pcs;
 }
 
 inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
