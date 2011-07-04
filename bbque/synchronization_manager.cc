@@ -135,8 +135,8 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 			resp_it != rsp_map.end();
 			++resp_it) {
 
-		presp = (*resp_it).second;
 		papp  = (*resp_it).first;
+		presp = (*resp_it).second;
 
 		logger->Debug("STEP 1: (wait resp from) [%s]", papp->StrId());
 		result = ap.SyncP_PreChange_GetResult(presp);
@@ -208,8 +208,8 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 			resp_it != rsp_map.end();
 			++resp_it) {
 
-		presp = (*resp_it).second;
 		papp  = (*resp_it).first;
+		presp = (*resp_it).second;
 
 		logger->Debug("STEP 2: (wait resp from) [%s]", papp->StrId());
 		result = ap.SyncP_SyncChange_GetResult(presp);
