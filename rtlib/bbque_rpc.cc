@@ -115,7 +115,7 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 	assert(name && params);
 	assert(params->Stop);
 
-	fprintf(stderr, FMT_ERR("Registering EXC [%s]...\n"), name);
+	fprintf(stderr, FMT_INF("Registering EXC [%s]...\n"), name);
 
 	if (!initialized) {
 		fprintf(stderr, FMT_ERR("Registering EXC [%s] FAILED "
@@ -369,8 +369,8 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 
 
 	if (result == RTLIB_EXC_GWM_FAILED) {
-		DB(fprintf(stderr, FMT_DBG("AWM not assigned: "
-					"Requesting Scheduling...\n")));
+		DB(fprintf(stderr, FMT_DBG("AWM not assigned, "
+					"sending schedule request to RTRM...\n")));
 		// Calling the low-level start
 		result = _ScheduleRequest(prec);
 		if (result != RTLIB_OK)
