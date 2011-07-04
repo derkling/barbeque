@@ -116,6 +116,10 @@ inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
 	}
 
 	cmdSnMap.insert(std::pair<pid_t, pcmdSn_t>(pcs->pid, pcs));
+
+	logger->Debug("APPs PRX: eq command session [%05d] for [%s], "
+			"[size: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
+
 }
 
 RTLIB_ExitCode_t ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
@@ -306,16 +310,19 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t presp) {
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
 
-	logger->Debug("APPs PRX [%5d]: SyncP_PreChangeTrd(%s) START",
+	logger->Debug("APPs PRX [%05d]: SyncP_PreChangeTrd(%s) START",
 			presp->pcs->pid, presp->pcs->papp->StrId());
 
 	// Run the Command Executor
 	SyncP_PreChange(presp->pcs, presp);
 
+	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+
 	// Give back the result to the calling thread
 	(presp->pcs->resp_prm).set_value(presp->result);
 
-	logger->Debug("APPs PRX [%5d]: SyncP_PreChangeTrd(%s) END",
+	logger->Debug("APPs PRX [%05d]: SyncP_PreChangeTrd(%s) END",
 			presp->pcs->pid, presp->pcs->papp->StrId());
 }
 
@@ -468,16 +475,19 @@ ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t presp) {
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
 
-	logger->Debug("APPs PRX [%5d]: SyncP_SyncChangeTrd(%s) START",
+	logger->Debug("APPs PRX [%05d]: SyncP_SyncChangeTrd(%s) START",
 			presp->pcs->pid, presp->pcs->papp->StrId());
 
 	// Run the Command Executor
 	SyncP_SyncChange(presp->pcs, presp);
 
+	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+
 	// Give back the result to the calling thread
 	(presp->pcs->resp_prm).set_value(presp->result);
 
-	logger->Debug("APPs PRX [%5d]: SyncP_SyncChangeTrd(%s) END",
+	logger->Debug("APPs PRX [%05d]: SyncP_SyncChangeTrd(%s) END",
 			presp->pcs->pid, presp->pcs->papp->StrId());
 }
 
@@ -728,12 +738,19 @@ ApplicationProxy::GetCommandSession(rpc_msg_header_t *pmsg_hdr)  {
 	it = cmdSnMap.find(pmsg_hdr->token);
 	if (it == cmdSnMap.end()) {
 		cmdSnMap_ul.unlock();
-		logger->Warn("APPs PRX [%5d]: Command transation completion FAILED",
+		logger->Warn("APPs PRX [%5d]: Command session get FAILED",
 			"(Error: command session not found)", pmsg_hdr->token);
 		assert(it != cmdSnMap.end());
 		return pcmdSn_t();
 	}
-	return (*it).second;
+
+	pcs = (*it).second;
+
+	logger->Debug("APPs PRX: Command session get [%05d] for [%s]",
+			pcs->pid, pcs->papp->StrId());
+
+	return pcs;
+
 }
 
 void
@@ -755,7 +772,7 @@ ApplicationProxy::ReleaseCommandSession(pcmdSn_t pcs)  {
 	// thus cleaning-up all of its data
 	cmdSnMap.erase(it);
 
-	logger->Warn("APPs PRX: dq command session [%05d] for [%s], "
+	logger->Debug("APPs PRX: dq command session [%05d] for [%s], "
 			"[size: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
 
 }
