@@ -101,12 +101,15 @@ inline ApplicationProxy::pcmdSn_t ApplicationProxy::SetupCmdSession(
 
 inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
 	std::unique_lock<std::mutex> cmdSnMap_ul(cmdSnMap_mtx);
+
+	assert(pcs);
+
 	pcs->pid = gettid();
 
 	if (cmdSnMap.find(pcs->pid) != cmdSnMap.end()) {
 		logger->Crit("APPs PRX: handler enqueuing FAILED "
 				"(Error: possible data structure corruption)");
-		assert(cmdSnMap.find(pcs->pid)==cmdSnMap.end());
+		assert(cmdSnMap.find(pcs->pid) == cmdSnMap.end());
 		return;
 	}
 
@@ -222,8 +225,6 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 			"EXC [%s], Action [%d:%s]", papp->StrId(), papp->SyncState(),
 			ApplicationStatusIF::SyncStateStr(papp->SyncState()));
 
-	assert(rpc);
-
 	// Recover the communication context for this application
 	conCtxMap_ul.lock();
 	it = conCtxMap.find(papp->Pid());
@@ -280,6 +281,9 @@ ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t presp) {
 
+	assert(pcs);
+	assert(presp);
+
 	// Send the Command
 	presp->result = SyncP_PreChangeSend(pcs);
 	if (presp->result != RTLIB_OK)
@@ -315,6 +319,10 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp) {
+
+	assert(papp);
+	assert(presp);
+
 	presp->pcs = SetupCmdSession(papp);
 
 	// Enqueuing the Command Session Handler
@@ -326,7 +334,12 @@ ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
+
+	assert(papp);
+	assert(presp);
+
 	presp->pcs = SetupCmdSession(papp);
+	assert(presp->pcs);
 
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_PreChangeTrd,
@@ -341,6 +354,9 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
+
+	assert(presp);
+
 	// Wait for the promise being returned
 	presp->pcs->resp_ftr.wait();
 	return presp->pcs->resp_ftr.get();
@@ -364,8 +380,6 @@ ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 	// Send the stop command
 	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_SYNCCHANGE] to "
 			"EXC [%s]", papp->StrId());
-
-	assert(rpc);
 
 	// Recover the communication context for this application
 	conCtxMap_ul.lock();
@@ -422,6 +436,9 @@ ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t presp) {
 
+	assert(pcs);
+	assert(presp);
+
 	// Send the Command
 	presp->result = SyncP_SyncChangeSend(pcs);
 	if (presp->result != RTLIB_OK)
@@ -438,6 +455,8 @@ ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t presp) {
 
 void
 ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t presp) {
+
+	assert(presp);
 
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
@@ -457,7 +476,12 @@ ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
+
+	assert(papp);
+	assert(presp);
+
 	presp->pcs = SetupCmdSession(papp);
+	assert(presp->pcs);
 
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
@@ -468,8 +492,13 @@ ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) {
+
+	assert(papp);
+	assert(presp);
+
 	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
 	presp->pcs = SetupCmdSession(papp);
+	assert(presp->pcs);
 
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_SyncChangeTrd,
@@ -484,6 +513,9 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) 
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
+
+	assert(presp);
+
 	// Wait for the promise being returned
 	presp->pcs->resp_ftr.wait();
 	return presp->pcs->resp_ftr.get();
@@ -509,8 +541,6 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_DOCHANGE] to "
 			"EXC [%s]", papp->StrId());
 
-	assert(rpc);
-
 	// Recover the communication context for this application
 	conCtxMap_ul.lock();
 	it = conCtxMap.find(papp->Pid());
@@ -535,6 +565,9 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_DoChange(pcmdSn_t pcs, pDoChangeRsp_t presp) {
 
+	assert(pcs);
+	assert(presp);
+
 	// Send the Command
 	presp->result = SyncP_DoChangeSend(pcs);
 	if (presp->result != RTLIB_OK)
@@ -548,6 +581,8 @@ RTLIB_ExitCode_t
 ApplicationProxy::SyncP_DoChange(AppPtr_t papp) {
 	pDoChangeRsp_t presp = ApplicationProxy::pDoChangeRsp_t(
 			new ApplicationProxy::doChangeRsp_t());
+
+	assert(papp);
 
 	presp->pcs = SetupCmdSession(papp);
 
@@ -574,8 +609,6 @@ ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 	// Send the stop command
 	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_POSTCHANGE] to "
 			"EXC [%s]", papp->StrId());
-
-	assert(rpc);
 
 	// Recover the communication context for this application
 	conCtxMap_ul.lock();
@@ -632,6 +665,9 @@ ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t presp) {
 
+	assert(pcs);
+	assert(presp);
+
 	// Send the Command
 	presp->result = SyncP_PostChangeSend(pcs);
 	if (presp->result != RTLIB_OK)
@@ -648,6 +684,10 @@ ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChange(AppPtr_t papp, pPostChangeRsp_t presp) {
+
+	assert(papp);
+	assert(presp);
+
 	presp->pcs = SetupCmdSession(papp);
 
 	// Enqueuing the Command Session Handler
