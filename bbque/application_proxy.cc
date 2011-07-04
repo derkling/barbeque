@@ -331,6 +331,7 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_PreChangeTrd,
 			this, presp);
+	presp->pcs->exe.detach();
 
 	// Setup the promise (thus unlocking the executor)
 	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
@@ -473,6 +474,7 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) 
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_SyncChangeTrd,
 			this, presp);
+	presp->pcs->exe.detach();
 
 	// Setup the promise (thus unlocking the executor)
 	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
