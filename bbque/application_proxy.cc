@@ -354,12 +354,13 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
+	RTLIB_ExitCode_t result;
 
 	assert(presp);
 
 	// Wait for the promise being returned
-	presp->pcs->resp_ftr.wait();
-	return presp->pcs->resp_ftr.get();
+	result = presp->pcs->resp_ftr.get();
+	return result;
 }
 
 /*******************************************************************************
@@ -513,12 +514,14 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) 
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
+	RTLIB_ExitCode_t result;
 
 	assert(presp);
 
 	// Wait for the promise being returned
-	presp->pcs->resp_ftr.wait();
-	return presp->pcs->resp_ftr.get();
+	result = presp->pcs->resp_ftr.get();
+
+	return result;
 }
 
 
