@@ -102,12 +102,12 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 
 Application::~Application() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-
+	ApplicationManager &am(ApplicationManager::GetInstance());
 	logger->Debug("Destroying EXC [%s]", StrId());
 
-	// Release the resources
+	// Release resources
 	if (CurrentAWM())
-		ra.ReleaseResources(CurrentAWM()->Owner());
+		ra.ReleaseResources(am.GetApplication(Uid()));
 
 	// Release the recipe used
 	recipe.reset();
@@ -278,7 +278,12 @@ void Application::SetState(State_t state, SyncState_t sync) {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Terminate() {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::mutex> state_ul(schedule_mtx);
+
+	// Release resources
+	ra.ReleaseResources(am.GetApplication(Uid()));
 
 	// Mark the application has finished
 	SetState(FINISHED);
