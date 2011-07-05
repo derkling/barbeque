@@ -38,7 +38,12 @@ using bbque::plugins::LoggerIF;
 using bbque::app::AppPtr_t;
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
+
+// Base path for sync session resource view token
 #define SYNC_RVIEW_PATH "ra.sync."
+
+// Max length for the resource view token string
+#define TOKEN_PATH_MAX_LEN 30
 
 namespace bbque { namespace res {
 

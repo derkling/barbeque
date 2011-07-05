@@ -295,7 +295,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token) {
-		logger->Warn("SetView: View %d is the system state view yet!");
+		logger->Warn("SetView: View %d is the system state view yet!", vtok);
 		return sys_view_token;
 	}
 
@@ -323,7 +323,8 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it)
 		(*rsrc_set_it)->SetAsDefaultView(vtok);
 
-	logger->Info("SetView: View %d is the new system state view");
+	logger->Info("SetView: View %d is the new system state view",
+			sys_view_token);
 	return sys_view_token;
 }
 
@@ -337,12 +338,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 	}
 
 	// Build the path for getting the resource view token
-	char token_path[30];
-	std::stringstream ss;
-	ss << ++sync_ssn.count;
-	std::string count_str(ss.str());
-	strncpy(token_path, SYNC_RVIEW_PATH, strlen(SYNC_RVIEW_PATH));
-	strncat(token_path, count_str.c_str(), strlen(count_str.c_str()));
+	char token_path[TOKEN_PATH_MAX_LEN];
+	snprintf(token_path, TOKEN_PATH_MAX_LEN, SYNC_RVIEW_PATH"%d",
+			++sync_ssn.count);
 	logger->Debug("SyncMode [%d]: Requiring resource state view for %s",
 			sync_ssn.count,	token_path);
 
