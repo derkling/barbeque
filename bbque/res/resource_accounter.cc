@@ -197,9 +197,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	return RA_SUCCESS;
 }
 
-void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
+void ResourceAccounter::ReleaseResources(AppPtr_t papp, RViewToken_t vtok) {
 	// Check to avoid null pointer seg-fault
-	if (!_app) {
+	if (!papp) {
 		logger->Fatal("Release: Null pointer to the application descriptor");
 		return;
 	}
@@ -213,7 +213,7 @@ void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 	}
 
 	// Get the map of resource usages of the application
-	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Uid()));
+	AppUsagesMap_t::iterator usemap_it(apps_usages->find(papp->Uid()));
 	if (usemap_it == apps_usages->end()) {
 		logger->Fatal("Release: Application referenced misses a resource set."
 				" Possible data corruption occurred.");
@@ -221,9 +221,9 @@ void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 	}
 
 	// Decrement resources counts and remove the usages map
-	DecBookingCounts(usemap_it->second, _app, vtok);
-	apps_usages->erase(_app->Uid());
-	logger->Debug("Release: [%s] resource release terminated", _app->StrId());
+	DecBookingCounts(usemap_it->second, papp, vtok);
+	apps_usages->erase(papp->Uid());
+	logger->Debug("Release: [%s] resource release terminated", papp->StrId());
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
@@ -488,12 +488,12 @@ void ResourceAccounter::DoResourceBooking(AppPtr_t const & papp,
 		// If the current resource bind has enough availability, reserve the
 		// whole quantity requested here. Otherwise split it in more "sibling"
 		// resource binds.
-		if (usage_value < (*it_bind)->Availability(vtok))
+		uint64_t availab = (*it_bind)->Availability(vtok);
+		if (usage_value < availab)
 			usage_value -= (*it_bind)->Acquire(usage_value, papp, vtok);
 		else
 			usage_value -=
-				(*it_bind)->Acquire((*it_bind)->Availability(vtok), papp,
-						vtok);
+				(*it_bind)->Acquire(availab, papp, vtok);
 
 		// Add the resource to the set of resources used in the view
 		// referenced by 'vtok'

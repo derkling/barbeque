@@ -30,7 +30,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
-//#include "bbque/app/application_status.h"
+
 #include "bbque/app/application.h"
 
 /** @see WorkingMode BindResource */
