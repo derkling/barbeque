@@ -404,6 +404,9 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 
 		// Query resource availability
 		rsrc_avail = rsrc_acct.Available(usage_it->second, rsrc_view_token);
+		logger->Debug("{%s} availability = %llu", usage_it->first.c_str(),
+				rsrc_avail);
+
 		if (rsrc_avail < usage_it->second->value) {
 			logger->Debug("Contention level: [%s] R=%d / A=%d (cluster %d)",
 					usage_it->first.c_str(),

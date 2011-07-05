@@ -191,6 +191,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	IncBookingCounts(resource_set, papp, vtok);
 	apps_usages->insert(std::pair<AppUid_t, UsagesMapPtr_t>(papp->Uid(),
 				resource_set));
+	logger->Debug("Booking: [%s] now holds %d resources", papp->StrId(),
+			resource_set->size());
 
 	return RA_SUCCESS;
 }
@@ -214,13 +216,14 @@ void ResourceAccounter::ReleaseResources(AppPtr_t _app, RViewToken_t vtok) {
 	AppUsagesMap_t::iterator usemap_it(apps_usages->find(_app->Uid()));
 	if (usemap_it == apps_usages->end()) {
 		logger->Fatal("Release: Application referenced misses a resource set."
-				"Possible data corruption occurred.");
+				" Possible data corruption occurred.");
 		return;
 	}
 
 	// Decrement resources counts and remove the usages map
 	DecBookingCounts(usemap_it->second, _app, vtok);
 	apps_usages->erase(_app->Uid());
+	logger->Debug("Release: [%s] resource release terminated", _app->StrId());
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
@@ -233,11 +236,12 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	for (; usages_it != usages_end; ++usages_it) {
 		uint64_t avail = Available(usages_it->second, vtok);
 		if (avail < usages_it->second->value) {
-			logger->Debug("ChkAvail: Exceeding request for {%s} [us= %llu /"
-					" av=%llu]",
+			logger->Debug("ChkAvail: Exceeding request for {%s}"
+					"[USG:%llu | AV:%llu | TOT:%llu] ",
 					usages_it->first.c_str(),
 					usages_it->second->value,
-					avail);
+					avail,
+					Total(usages_it->second));
 			return RA_ERR_USAGE_EXC;
 		}
 	}
@@ -460,9 +464,13 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		// Do booking for this resource (usages_it->second)
 		DoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
-		logger->Debug("[%s] booked {%s}: usage = %llu", papp->StrId(),
+		logger->Debug("IncCount: [%s] booked {%s}:"
+				"[USG:%llu | AV:%llu | TOT:%llu]",
+				papp->StrId(),
 				usages_it->first.c_str(),
-				rsrc_usage->value);
+				rsrc_usage->value,
+				Available(usages_it->first),
+				Total(usages_it->first));
 	}
 }
 
@@ -506,12 +514,15 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 	// Release the amount of resource hold by each application
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
+	logger->Debug("DecCount: [%s] holds %d resources", papp->StrId(),
+			app_usages->size());
+
 	for (; usages_it != usages_end; ++usages_it) {
 		UsagePtr_t rsrc_usage(usages_it->second);
 
 		// Undo booking for this resource (usages_it->second)
 		UndoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
-		logger->Debug("[%s] releases {%s}: usage = %llu", papp->StrId(),
+		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
 				usages_it->first.c_str(),
 				rsrc_usage->value);
 	}
