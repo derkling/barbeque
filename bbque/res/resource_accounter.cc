@@ -244,16 +244,16 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	return RA_SUCCESS;
 }
 
-ResourceAccounter::ExitCode_t ResourceAccounter::GetView(const char * req_path,
+ResourceAccounter::ExitCode_t ResourceAccounter::GetView(std::string req_path,
 		RViewToken_t & token) {
 	// Null-string check
-	if (req_path == NULL) {
+	if (req_path.empty()) {
 		logger->Error("GetView: Missing a valid string");
 		return RA_ERR_MISS_PATH;
 	}
 
 	// Token
-	token = std::hash<const char *>()(req_path);
+	token = std::hash<std::string>()(req_path);
 	logger->Debug("GetView: New resource state view. Token = %d", token);
 
 	// Allocate a new view for the applications resource usages and the

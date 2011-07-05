@@ -148,7 +148,7 @@ public:
 	 * @param tok The token to return for future references to the view
 	 * @return @see ExitCode_t
 	 */
-	virtual ExitCode_t GetView(const char * who_req, RViewToken_t & tok) = 0;
+	virtual ExitCode_t GetView(std::string who_req, RViewToken_t & tok) = 0;
 
 	/**
 	 * @brief Release a resources state view

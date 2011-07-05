@@ -201,7 +201,7 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	ExitCode_t GetView(const char * who_req, RViewToken_t & tok);
+	ExitCode_t GetView(std::string who_req, RViewToken_t & tok);
 
 	/**
 	 * @see ResourceAccounterConfIF
