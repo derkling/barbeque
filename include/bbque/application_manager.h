@@ -211,6 +211,16 @@ public:
 	 */
 	ExitCode_t NotifyNewState(AppPtr_t papp, Application::State_t next);
 
+	/**
+	 * @breif Dump a logline to report on current Status queue counts
+	 */
+	void ReportStatusQ() const;
+
+	/**
+	 * @breif Dump a logline to report on current Status queue counts
+	 */
+	void ReportSyncQ() const;
+
 private:
 
 	/** The logger used by the application manager */

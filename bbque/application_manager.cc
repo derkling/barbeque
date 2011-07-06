@@ -205,6 +205,32 @@ ApplicationManager::GetApplication(AppPid_t pid, uint8_t exc_id) {
 	}\
 
 
+void ApplicationManager::ReportStatusQ() const {
+
+	// Report on current status queue
+	char report[] = "StateQ: [DIS: 000, RDY: 000, SYC: 000, RUN: 000, FIN: 000]";
+	for (uint8_t i = 0; i < Application::STATE_COUNT; ++i) {
+		::sprintf(report+14+i*10, "%03u", (unsigned)status_vec[i].size());
+		report[17+i*10] = ',';
+	}
+	report[17+10*(Application::STATE_COUNT-1)] = ']';
+	logger->Info(report);
+
+}
+
+void ApplicationManager::ReportSyncQ() const {
+
+	// Report on current status queue
+	char report[] = "SyncQ:  [STA: 000, REC: 000, M/R: 000, MIG: 000, BLK: 000]";
+	for (uint8_t i = 0; i < Application::SYNC_STATE_COUNT; ++i) {
+		::sprintf(report+14+i*10, "%03u", (unsigned)sync_vec[i].size());
+		report[17+i*10] = ',';
+	}
+	report[17+10*(Application::SYNC_STATE_COUNT-1)] = ']';
+	logger->Info(report);
+
+}
+
 ApplicationManager::ExitCode_t
 ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 		Application::State_t prev, Application::State_t next) {
@@ -221,6 +247,9 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	// FIXME: maybe we could avoid to enqueue FINISHED EXCs
 	nextStateMap->insert(UidsMapEntry_t(papp->Uid(), papp));
 	currStateMap->erase(papp->Uid());
+
+	ReportStatusQ();
+	ReportSyncQ();
 
 	return AM_SUCCESS;
 }
