@@ -147,7 +147,7 @@ extern "C" {
  * @note This name must never exceed the size specified by
  * RTLIB_RECIPE_NAME_LENGTH
  */
-typedef char* RTLIB_Recipe_t;
+typedef const char* RTLIB_Recipe_t;
 
 // Forward declaration
 typedef struct RTLIB_Services RTLIB_Services_t;
