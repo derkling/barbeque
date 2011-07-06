@@ -102,8 +102,8 @@ protected:
 		uint8_t exc_id;
 #define EXC_FLAGS_AWM_VALID     0x01 ///< The EXC has been assigned a valid AWM
 #define EXC_FLAGS_AWM_WAITING   0x02 ///< The EXC is waiting for a valid AWM
-#define EXC_FLAGS_EXC_SYNC      0x03 ///< The EXC entered Sync Mode
-#define EXC_FLAGS_EXC_SYNC_DONE 0x04 ///< The EXC exited Sync Mode
+#define EXC_FLAGS_EXC_SYNC      0x04 ///< The EXC entered Sync Mode
+#define EXC_FLAGS_EXC_SYNC_DONE 0x08 ///< The EXC exited Sync Mode
 		/** A set of flags to define the state of this EXC */
 		uint8_t flags;
 		/** The last required synchronization action */
