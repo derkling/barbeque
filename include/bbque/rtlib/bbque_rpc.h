@@ -29,6 +29,7 @@
 
 #include "bbque/rtlib.h"
 #include "bbque/rtlib/rpc_messages.h"
+#include "bbque/utils/utility.h"
 
 #include <map>
 #include <memory>
@@ -123,9 +124,11 @@ protected:
 		return (prec->flags & EXC_FLAGS_AWM_VALID);
 	}
 	inline void setAwmValid(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  AWM  <= Valid\n"));
 		prec->flags |= EXC_FLAGS_AWM_VALID;
 	}
 	inline void setAwmInvalid(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  AWM  <= Inalid\n"));
 		prec->flags &= ~EXC_FLAGS_AWM_VALID;
 	}
 
@@ -134,9 +137,11 @@ protected:
 		return (prec->flags & EXC_FLAGS_AWM_WAITING);
 	}
 	inline void setAwmWaiting(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  AWM  <= Waiting\n"));
 		prec->flags |= EXC_FLAGS_AWM_WAITING;
 	}
 	inline void clearAwmWaiting(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  AWM  <= NOT Waiting\n"));
 		prec->flags &= ~EXC_FLAGS_AWM_WAITING;
 	}
 
@@ -145,9 +150,11 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_SYNC);
 	}
 	inline void setSyncMode(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  SYNC <= Enter\n"));
 		prec->flags |= EXC_FLAGS_EXC_SYNC;
 	}
 	inline void clearSyncMode(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  SYNC <= Exit\n"));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC;
 	}
 
@@ -156,9 +163,11 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_SYNC_DONE);
 	}
 	inline void setSyncDone(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  SYNC <= Done\n"));
 		prec->flags |= EXC_FLAGS_EXC_SYNC_DONE;
 	}
 	inline void clearSyncDone(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  SYNC <= Pending\n"));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC_DONE;
 	}
 

@@ -27,7 +27,6 @@
 #include "bbque/rtlib/bbque_rpc.h"
 
 #include "bbque/rtlib/rpc_fifo_client.h"
-#include "bbque/utils/utility.h"
 
 #include <cstdio>
 
