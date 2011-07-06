@@ -144,8 +144,8 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 	result = _Register(prec);
 	if (result != RTLIB_OK) {
 		DB(fprintf(stderr, FMT_ERR("Registering EXC [%s] FAILED "
-			"(Error: RTRM failed with error %d)\n"),
-					name, result));
+			"(Error %d: %s)\n"),
+			name, result, RTLIB_ErrorStr(result)));
 		return NULL;
 	}
 
@@ -226,8 +226,9 @@ void BbqueRPC::Unregister(
 	result = _Unregister(prec);
 	if (result != RTLIB_OK) {
 		DB(fprintf(stderr, FMT_ERR("Unregister EXC [%p:%s] FAILED "
-				"(Error: RTRM failed with error %d)\n"),
-				(void*)ech, prec->name.c_str(), result));
+				"(Error %d: %s)\n"),
+				(void*)ech, prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
 		return;
 	}
 
@@ -254,8 +255,9 @@ RTLIB_ExitCode_t BbqueRPC::Enable(
 	result = _Enable(prec);
 	if (result != RTLIB_OK) {
 		DB(fprintf(stderr, FMT_ERR("Enabling EXC [%p:%s] FAILED "
-				"(Error: RTRM failed with error %d)\n"),
-				(void*)ech, prec->name.c_str(), result));
+				"(Error %d: %s)\n"),
+				(void*)ech, prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
 		return RTLIB_EXC_ENABLE_FAILED;
 	}
 
@@ -281,8 +283,9 @@ RTLIB_ExitCode_t BbqueRPC::Disable(
 	result = _Disable(prec);
 	if (result != RTLIB_OK) {
 		DB(fprintf(stderr, FMT_ERR("Disabling EXC [%p:%s] FAILED "
-				"(Error: RTRM failed with error %d)\n"),
-				(void*)ech, prec->name.c_str(), result));
+				"(Error %d: %s)\n"),
+				(void*)ech, prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
 		return RTLIB_EXC_DISABLE_FAILED;
 	}
 
@@ -294,12 +297,17 @@ RTLIB_ExitCode_t BbqueRPC::GetAssignedWorkingMode(
 		RTLIB_WorkingModeParams_t *wm) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 
-	if (isSyncMode(prec) && !isAwmValid(prec))
+	if (isSyncMode(prec) && !isAwmValid(prec)) {
+		DB(fprintf(stderr, FMT_DBG("SYNC Pending\n")));
 		return RTLIB_EXC_SYNC_MODE;
+	}
 
-	if (!isAwmValid(prec))
+	if (!isAwmValid(prec)) {
+		DB(fprintf(stderr, FMT_DBG("NOT valid AWM\n")));
 		return RTLIB_EXC_GWM_FAILED;
+	}
 
+	DB(fprintf(stderr, FMT_DBG("Valid AWM assigned\n")));
 	wm->awm_id = prec->awm_id;
 
 	return RTLIB_OK;
@@ -370,6 +378,9 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	if (result == RTLIB_EXC_GWM_FAILED) {
 		DB(fprintf(stderr, FMT_DBG("AWM not assigned, "
 					"sending schedule request to RTRM...\n")));
+		DB(fprintf(stderr, FMT_INF(
+				"[%s:%02hu] ===> BBQ::ScheduleRequest()\n"),
+				prec->name.c_str(), prec->exc_id));
 		// Calling the low-level start
 		result = _ScheduleRequest(prec);
 		if (result != RTLIB_OK)
@@ -394,8 +405,10 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	case RTLIB_EXC_GWM_MIGREC:
 	case RTLIB_EXC_GWM_MIGRATE:
 	case RTLIB_EXC_GWM_BLOCKED:
-		fprintf(stderr, FMT_INF("EXC [%s], Switching to AWM [%d]\n"),
-				prec->name.c_str(), prec->awm_id);
+		DB(fprintf(stderr, FMT_INF(
+				"[%s:%02hu] <------------- AWM [%02d] --\n"),
+				prec->name.c_str(), prec->exc_id,
+				prec->awm_id));
 		break;
 	default:
 		DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
@@ -412,8 +425,9 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 exit_gwm_failed:
 
 	DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
-					"(Error: %d)\n"),
-				prec->name.c_str(), result));
+					"(Error %d: %s)\n"),
+				prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
 	return RTLIB_EXC_GWM_FAILED;
 
 }
@@ -509,6 +523,9 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_SyncChangeNotify(
 				msg.hdr.exc_id);
 	}
 
+	fprintf(stderr, FMT_INF("SyncP_2 (Sync-Change) EXC [%d]\n"),
+			msg.hdr.exc_id);
+
 	_SyncpSyncChangeResp(msg.hdr.token, prec, result);
 
 	return RTLIB_OK;
@@ -544,6 +561,9 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_DoChangeNotify(
 
 	// NOTE this command should not generate a response, it is just a notification
 
+	fprintf(stderr, FMT_INF("SyncP_3 (Do-Change) EXC [%d]\n"),
+			msg.hdr.exc_id);
+
 	return RTLIB_OK;
 }
 
@@ -575,6 +595,9 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PostChangeNotify(
 				"(Warning: Reconfiguration timeout)\n"),
 				msg.hdr.exc_id);
 	}
+
+	fprintf(stderr, FMT_INF("SyncP_4 (Post-Change) EXC [%d]\n"),
+			msg.hdr.exc_id);
 
 	_SyncpPostChangeResp(msg.hdr.token, prec, result);
 
