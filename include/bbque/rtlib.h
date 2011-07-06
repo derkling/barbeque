@@ -79,6 +79,8 @@
 #include <cstdint>
 #include <ctime>
 
+#include "assert.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -224,6 +226,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_EXC_UNREGISTRATION_FAILED,
 	/** The Execution Context Start Failed */
 	RTLIB_EXC_ENABLE_FAILED,
+	/** The Execution Context is not currentyl enabled */
+	RTLIB_EXC_NOT_ENABLED,
 	/** The Execution Context Stop Failed */
 	RTLIB_EXC_DISABLE_FAILED,
 	/** Failed to get a working mode */
@@ -249,12 +253,21 @@ typedef enum RTLIB_ExitCode {
 	/** The EXC is in sync mode */
 	RTLIB_EXC_SYNC_MODE,
 	/** A step of the synchronization protocol has failed */
-	RTLIB_EXC_SYNCP_FAILED
+	RTLIB_EXC_SYNCP_FAILED,
 
 // NOTE The last entry should not overflow a uint8_t, otherwise some of the RPC
 // channel messages should be updated
+	
+	RTLIB_EXIT_CODE_COUNT
 
 } RTLIB_ExitCode_t;
+
+extern const char *RTLIB_errorStr[RTLIB_EXIT_CODE_COUNT];
+
+inline char const *RTLIB_ErrorStr(RTLIB_ExitCode_t result) {
+	assert(result < RTLIB_EXIT_CODE_COUNT);
+	return RTLIB_errorStr[result];
+}
 
 /**
  * @brief The RTLib library entry point.
