@@ -97,6 +97,14 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelRelease() {
 	// Sending RPC Request
 	RPC_FIFO_SEND(APP_EXIT);
 
+	// Sending the same message to the Fetch Thread
+	if (::write(client_fifo_fd, (void*)&rf_APP_EXIT, FIFO_PKT_SIZE(APP_EXIT)) <= 0) {
+		fprintf(stderr, FMT_ERR("Notify fetch thread FAILED, FORCED EXIT\n"));
+	} else {
+		// Joining fetch thread
+		ChTrd.join();
+	}
+
 	// Closing the private FIFO
 	error = ::unlink(app_fifo_path.c_str());
 	if (error) {
@@ -151,7 +159,7 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 	rpc_fifo_header_t hdr;
 	size_t bytes;
 
-	DB(fprintf(stderr, FMT_INF("Waiting for FIFO header...\n")));
+	DB(fprintf(stderr, FMT_DBG("Waiting for FIFO header...\n")));
 
 	// Read FIFO header
 	bytes = ::read(client_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
@@ -169,6 +177,10 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 
 	// Dispatching the received message
 	switch (hdr.rpc_msg_type) {
+
+	case RPC_APP_EXIT:
+		done = true;
+		break;
 
 	//--- Application Originated Messages
 	case RPC_APP_RESP:
@@ -215,7 +227,7 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 	std::unique_lock<std::mutex> chSetup_ul(chSetup_mtx);
 	// Getting client PID
 	chTrdPid = gettid();
-	DB(fprintf(stderr, FMT_INF("channel thread [PID: %d] started\n"),
+	DB(fprintf(stderr, FMT_INF("channel thread [PID: %d] START\n"),
 				chTrdPid));
 	// Notifying the thread has beed started
 	trdStarted_cv.notify_one();
@@ -225,6 +237,9 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 
 	while (!done)
 		ChannelFetch();
+
+	DB(fprintf(stderr, FMT_INF("channel thread [PID: %d] END\n"),
+				chTrdPid));
 }
 
 
