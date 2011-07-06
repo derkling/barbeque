@@ -48,7 +48,8 @@ SynchronizationManager & SynchronizationManager::GetInstance() {
 	return sm;
 }
 
-SynchronizationManager::SynchronizationManager() {
+SynchronizationManager::SynchronizationManager() :
+	sync_count(0) {
 	std::string sync_policy;
 
 	//---------- Get a logger module
@@ -360,7 +361,7 @@ SynchronizationManager::SyncSchedule() {
 	// TODO add here proper tracing/monitoring events for statistics
 	// collection
 
-	logger->Info("Synchronization START");
+	logger->Info("Synchronization [%d] START", ++sync_count);
 
 	// TODO here a synchronization decision policy is used
 	// to decide if a synchronization should be run or not, e.g. based on
@@ -385,7 +386,7 @@ SynchronizationManager::SyncSchedule() {
 
 	}
 
-	logger->Info("Synchronization DONE");
+	logger->Info("Synchronization [%d] DONE", sync_count);
 
 	return OK;
 

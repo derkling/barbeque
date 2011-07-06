@@ -91,6 +91,11 @@ private:
 	SynchronizationPolicyIF *policy;
 
 	/**
+	 * @brief The number of synchronization cycles
+	 */
+	uint32_t sync_count;
+
+	/**
 	 * @brief   Build a new instance of the synchronization manager
 	 */
 	SynchronizationManager();
