@@ -353,8 +353,6 @@ typedef struct RTLIB_ExecutionContextParams {
         RTLIB_ProgrammingLanguage_t language;
 		/** The identifier of the "execution context" recipe */
 		RTLIB_Recipe_t recipe;
-        /** The execution object destruction function */
-        RTLIB_Stop_t Stop;
 } RTLIB_ExecutionContextParams_t;
 
 /**

@@ -112,7 +112,6 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 
 	assert(initialized);
 	assert(name && params);
-	assert(params->Stop);
 
 	fprintf(stderr, FMT_INF("Registering EXC [%s]...\n"), name);
 
