@@ -258,6 +258,13 @@ private:
 	std::map<std::string, RecipePtr_t> recipes;
 
 	/**
+	 * A mutex for serializing recipe loading. This prevents unexpected
+	 * behaviors if more applications/EXC are loading the same recipe in
+	 * parallel.
+	 */
+	std::mutex recipes_mtx;
+
+	/**
 	 * A (generic) vector of application maps.
 	 * These vectors are used to classify applications, e.g. based on their
 	 * priority or current status.

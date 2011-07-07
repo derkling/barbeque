@@ -103,6 +103,7 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 		std::string const & recipe_name,
 		RecipePtr_t & recipe,
 		bool weak_load) {
+	std::unique_lock<std::mutex> recipes_ul(recipes_mtx);
 	bp::RecipeLoaderIF::ExitCode_t result;
 	logger->Debug("Loading recipe [%s]...", recipe_name.c_str());
 
