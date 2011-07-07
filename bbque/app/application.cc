@@ -282,7 +282,8 @@ Application::ExitCode_t Application::Terminate() {
 	std::unique_lock<std::mutex> state_ul(schedule_mtx);
 
 	// Release resources
-	ra.ReleaseResources(am.GetApplication(Uid()));
+	if (CurrentAWM())
+		ra.ReleaseResources(am.GetApplication(Uid()));
 
 	// Mark the application has finished
 	SetState(FINISHED);
