@@ -355,6 +355,7 @@ SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
 	static SystemView &sv(SystemView::GetInstance());
+	static ApplicationManager &am(ApplicationManager::GetInstance());
 	AppsUidMap_t const *apps = NULL;
 	ExitCode_t result;
 
@@ -362,6 +363,8 @@ SynchronizationManager::SyncSchedule() {
 	// collection
 
 	logger->Info("Synchronization [%d] START", ++sync_count);
+	am.ReportStatusQ();
+	am.ReportSyncQ();
 
 	// TODO here a synchronization decision policy is used
 	// to decide if a synchronization should be run or not, e.g. based on
@@ -387,6 +390,8 @@ SynchronizationManager::SyncSchedule() {
 	}
 
 	logger->Info("Synchronization [%d] DONE", sync_count);
+	am.ReportStatusQ();
+	am.ReportSyncQ();
 
 	return OK;
 
