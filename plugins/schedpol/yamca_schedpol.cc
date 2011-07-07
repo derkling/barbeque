@@ -187,10 +187,8 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 		AwmPtr_t const & curr_awm = (se_it->second).first->NextAWM();
 		AwmPtr_t & eval_awm = (se_it->second).second;
 
-		// Skip if the application has been disabled or stopped in the
-		// meanwhile
-		if ((app->State() == Application::DISABLED) ||
-				(app->State() == Application::FINISHED)) {
+		// Skip if the application has been disabled/stopped in the meanwhile
+		if (app->Disabled()) {
 			logger->Debug("Selecting: [%s] disabled/stopped during"
 					"scheduling",
 					app->StrId());
@@ -257,10 +255,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		logger->Debug("Insert: [%s] AWM{%d} metrics computing...", papp->StrId(),
 				(*awm_it)->Id());
 
-		// Skip if the application has been disabled or stopped in the
-		// meanwhile
-		if ((papp->State() == Application::DISABLED) ||
-				(papp->State() == Application::FINISHED)) {
+		// Skip if the application has been disabled/stopped in the meanwhile
+		if (papp->Disabled()) {
 			logger->Debug("Insert: [%s] disabled/stopped during scheduling [Ord]",
 					papp->StrId());
 			return SCHED_SKIP_APP;
