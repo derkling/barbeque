@@ -75,7 +75,7 @@ void ResourceManager::Setup() {
 }
 
 void ResourceManager::NotifyEvent(controlEvent_t evt) {
-	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx);
+	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx, std::defer_lock);
 
 	// Ensure we have a valid event
 	assert(evt<EVENTS_COUNT);
@@ -83,8 +83,9 @@ void ResourceManager::NotifyEvent(controlEvent_t evt) {
 	// Set the corresponding event flag
 	pendingEvts.set(evt);
 
-	// Notify (the control loop)
-	pendingEvts_cv.notify_one();
+	// Notify the control loop (just if it is sleeping)
+	if (pendingEvts_ul.try_lock())
+		pendingEvts_cv.notify_one();
 }
 
 void ResourceManager::EvtExcStart() {
@@ -135,7 +136,8 @@ void ResourceManager::ControlLoop() {
 	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx);
 
 	// Wait for a new event
-	pendingEvts_cv.wait(pendingEvts_ul);
+	if (!pendingEvts.any())
+		pendingEvts_cv.wait(pendingEvts_ul);
 
 	// Checking for pending events, starting from higer priority ones.
 	for(uint8_t evt=EVENTS_COUNT; evt; --evt) {
