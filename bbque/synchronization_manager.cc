@@ -377,6 +377,13 @@ SynchronizationManager::SyncSchedule() {
 	// the next synchronization event.
 	apps = policy->GetApplicationsQueue(sv, true);
 
+	if (!apps) {
+		logger->Info("Synchronization [%d] ABORTED", sync_count);
+		// Possibly this should never happens
+		assert(apps);
+		return OK;
+	}
+
 	while (apps) {
 
 		// Synchronize these policy selected apps
