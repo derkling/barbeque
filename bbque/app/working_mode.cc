@@ -52,13 +52,8 @@ WorkingMode::WorkingMode(uint16_t _id,
 	name(_name),
 	value(_value) {
 
-	std::stringstream ss;
-	ss << id;
-
 	// Get a logger
-	std::string logger_name(AWM_NAMESPACE ".");
-	logger_name += ss.str();
-	bp::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(AWM_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 }
 
