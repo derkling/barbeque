@@ -83,8 +83,7 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 	exc_id(_exc_id) {
 
 	// Get a logger
-	std::string logger_name(APPLICATION_NAMESPACE"." + _name);
-	bp::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(APPLICATION_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
 
