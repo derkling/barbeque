@@ -452,6 +452,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		AppPtr_t const & papp,
 		RViewToken_t vtok) {
+	ExitCode_t result;
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 	assert(rviews_it != rsrc_per_views.end());
@@ -462,19 +463,29 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 	for (; usages_it != usages_end;	++usages_it) {
 		UsagePtr_t rsrc_usage(usages_it->second);
 
-		// Do booking for this resource (usages_it->second)
-		DoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
-		logger->Debug("IncCount: [%s] booked {%s}:"
-				"[USG:%llu | AV:%llu | TOT:%llu]",
+		logger->Debug("Booking: [%s] requires resource {%s}",
 				papp->StrId(),
-				usages_it->first.c_str(),
+				usages_it->first.c_str());
+
+		// Do booking for this resource (usages_it->second)
+		result = DoResourceBooking(papp, rsrc_usage, vtok, rviews_it->second);
+		if (result != RA_SUCCESS)  {
+			logger->Crit("Booking: unexpected fail! [USG:%llu | AV:%llu | TOT:%llu]",
+				rsrc_usage->value,
+				Available(usages_it->first),
+				Total(usages_it->first));
+			assert(result == RA_SUCCESS);
+		}
+
+		logger->Debug("Booking: success [USG:%llu | AV:%llu | TOT:%llu]",
 				rsrc_usage->value,
 				Available(usages_it->first),
 				Total(usages_it->first));
 	}
 }
 
-void ResourceAccounter::DoResourceBooking(AppPtr_t const & papp,
+ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
+		AppPtr_t const & papp,
 		UsagePtr_t & rsrc_usage,
 		RViewToken_t vtok,
 		ResourceSetPtr_t & rsrcs_per_view) {
@@ -501,7 +512,13 @@ void ResourceAccounter::DoResourceBooking(AppPtr_t const & papp,
 
 		++it_bind;
 	}
-	assert (usage_value == 0);
+
+	// Critical error. This means that the availability of resources
+	// mismatches the one checked in the scheduling phase
+	if (usage_value != 0)
+		return RA_ERR_USAGE_EXC;
+
+	return RA_SUCCESS;
 }
 
 void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,

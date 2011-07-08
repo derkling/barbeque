@@ -340,8 +340,9 @@ private:
 	 * @param vtok The token referencing the resource state view
 	 * @param rsrcs_pèr_view Set of resources used in the view specified
 	 */
-	void DoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
-			RViewToken_t vtok, ResourceSetPtr_t & rsrcs_per_view);
+	ExitCode_t DoResourceBooking(AppPtr_t const & papp,
+			UsagePtr_t & rsrc_usage, RViewToken_t vtok,
+			ResourceSetPtr_t & rsrcs_per_view);
 
 	/**
 	 * @brief Decrement the resource usages counts
