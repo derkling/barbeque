@@ -161,27 +161,28 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		SchedEntityMap_t & sched_map,
 		AppsUidMap_t const * apps,
 		int cl_id) {
-
-	// Applications to be scheduled
 	AppsMap_t::const_iterator apps_it(apps->begin());
 	AppsMap_t::const_iterator end_apps(apps->end());
+
+	// Applications to be scheduled
 	for (; apps_it != end_apps; ++apps_it) {
 		AppPtr_t const & papp = apps_it->second;
-
-		// Skip if the application has been scheduled yet
 		assert(papp);
-		if (papp->NextAWM()) {
-			logger->Debug("Ordering: [%d] scheduled yet into AWM{%d}",
+
+		// Skip if the application has been scheduled yet or disabled in the
+		// meanwhile
+		if (!papp->Active()) {
+			logger->Debug("Ordering: skipping [%s]. State = {%d}",
 						papp->StrId(),
-						papp->NextAWM()->Id());
+						papp->State());
 			continue;
 		}
 
-		// Compute the metrics for all the working modes. If the application
-		// is disabled/stopped in the meanwhile, it must be skipped.
+		// Compute the metrics for all the working modes.
 		ExitCode_t result = InsertWorkingModes(sched_map, papp, cl_id);
 		if (result == SCHED_SKIP_APP)
 			continue;
+
 		if (result == SCHED_ERROR) {
 			logger->Error("Ordering: Error [ret %d]", result);
 			return result;
@@ -209,8 +210,8 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Skip if the application has been disabled/stopped in the meanwhile
 		if (app->Disabled()) {
-			logger->Debug("Selecting: [%s] disabled/stopped during"
-					"scheduling",
+			logger->Debug("Selecting: skipping [%s]."
+					"Disabled/stopped during scheduling",
 					app->StrId());
 			continue;
 		}
