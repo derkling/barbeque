@@ -118,7 +118,7 @@ RTLIB_ExitCode_t BbqueEXC::Enable() {
 		return result;
 	}
 
-	//--- Mark the application as RUNNING
+	//--- Mark the control loop as RUNNING
 	running = true;
 
 	return RTLIB_OK;
@@ -250,8 +250,8 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 
 	switch (result) {
 	case RTLIB_OK:
-		DB(fprintf(stderr, FMT_DBG("CL 2-1. Continue to run on the assigned AWM [%d] "
-					"for EXC [%s]\n"),
+		DB(fprintf(stderr, FMT_DBG("CL 2-1. Continue to run "
+				"on the assigned AWM [%d] for EXC [%s]\n"),
 				wmp.awm_id, exc_name.c_str()));
 		return result;
 
@@ -259,7 +259,8 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 	case RTLIB_EXC_GWM_RECONF:
 	case RTLIB_EXC_GWM_MIGREC:
 	case RTLIB_EXC_GWM_MIGRATE:
-		DB(fprintf(stderr, FMT_DBG("CL 2-2. Switching EXC [%s] to AWM [%d]...\n"),
+		DB(fprintf(stderr, FMT_DBG("CL 2-2. Switching EXC [%s] "
+				"to AWM [%d]...\n"),
 				exc_name.c_str(), wmp.awm_id));
 		onConfigure(wmp.awm_id);
 		return result;
@@ -272,7 +273,7 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 
 	default:
 		DB(fprintf(stderr, FMT_ERR("GetWorkingMode for EXC [%s] FAILED "
-						"(Error: Invalid event [%d])\n"),
+					"(Error: Invalid event [%d])\n"),
 					exc_name.c_str(), result));
 		assert(result >= RTLIB_EXC_GWM_START);
 		assert(result <= RTLIB_EXC_GWM_BLOCKED);
@@ -285,7 +286,8 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 RTLIB_ExitCode_t BbqueEXC::Run() {
 	RTLIB_ExitCode_t result;
 
-	DB(fprintf(stderr, FMT_DBG("CL 3. Run EXC [%s]...\n"), exc_name.c_str()));
+	DB(fprintf(stderr, FMT_DBG("CL 3. Run EXC [%s]...\n"),
+				exc_name.c_str()));
 
 	result = onRun();
 
@@ -295,7 +297,8 @@ RTLIB_ExitCode_t BbqueEXC::Run() {
 RTLIB_ExitCode_t BbqueEXC::Monitor() {
 	RTLIB_ExitCode_t result;
 
-	DB(fprintf(stderr, FMT_DBG("CL 4. Monitor EXC [%s]...\n"), exc_name.c_str()));
+	DB(fprintf(stderr, FMT_DBG("CL 4. Monitor EXC [%s]...\n"),
+				exc_name.c_str()));
 
 	result = onMonitor();
 
