@@ -404,7 +404,7 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 
 	// Mark the EXC as finished
 	papp->Terminate();
-	
+
 	// Remove execution context form priority and status maps
 	result = PriorityRemove(papp);
 	if (result != AM_SUCCESS)
@@ -420,10 +420,12 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 
 	logger->Debug("Releasing [%s] EXC from UIDs map...",
 			papp->StrId());
+
 	uids.erase(papp->Uid());
 
-	// TODO notify the Resource Manager about a termination event if this
-	// EXC was using some resources.
+	logger->Info("EXC Released [%s]", papp->StrId());
+	ReportStatusQ();
+	ReportSyncQ();
 
 	return AM_SUCCESS;
 }
