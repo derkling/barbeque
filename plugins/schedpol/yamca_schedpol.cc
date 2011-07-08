@@ -68,6 +68,7 @@ char const * YamcaSchedPol::Name() {
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 		bbque::SystemView const & system) {
+	ExitCode_t result;
 	logger->Debug("<<<<<<<<<<<<<<<< Scheduling policy starting...");
 
 	// Get a resources view from Resource Accounter
@@ -80,27 +81,22 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
 	logger->Debug("Schedule: Found %d clusters on the platform.", num_clusters);
 
-	// Order scheduling entities from READY and RUNNING applications
-	for (uint16_t cl_id = 0; cl_id < num_clusters; ++cl_id) {
-		SchedEntityMap_t sched_map;
-		logger->Debug("Schedule: ------------- Cluster %d ---------------",
-				cl_id);
+	logger->Info("lowest prio = %d", system.ApplicationLowestPriority());
 
-		logger->Debug("Schedule: --- %d ExC in the RUNNING queue --------",
-				system.ApplicationsRunning()->size());
-		if (OrderSchedEntity(sched_map, system.ApplicationsRunning(), cl_id)
-				== SCHED_ERROR)
-			return SCHED_ERROR;
+	// Iterate from the highest to the lowest priority applications queue
+	for (AppPrio_t prio = 0; prio <= system.ApplicationLowestPriority();
+			++prio) {
 
-		logger->Debug("Schedule: --- %d ExC in the READY queue ----------",
-				system.ApplicationsReady()->size());
-		if (OrderSchedEntity(sched_map, system.ApplicationsReady(), cl_id)
-				== SCHED_ERROR)
-			return SCHED_ERROR;
+		if (system.Applications(prio)->empty())
+			continue;
 
-		// For each application set a working mode
-		if (!sched_map.empty())
-			SelectWorkingModes(sched_map);
+		logger->Debug("Schedule: %d Applications/EXC with priority %d ",
+				system.Applications(prio)->size(),
+				prio);
+
+		result = SchedulePrioQueue(system.Applications(prio));
+		if (result != SCHED_OK)
+			return result;
 	}
 
 	logger->Debug(">>>>>>>>>>>>>>> Scheduling policy exiting...");
@@ -132,6 +128,31 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 
 	logger->Debug("Init: Requiring view token for %s", token_path);
 	logger->Debug("Init: Resources state view token = %d", rsrc_view_token);
+	return SCHED_OK;
+}
+
+
+SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
+		AppsUidMap_t const * apps) {
+	ExitCode_t result;
+
+	//Order scheduling entities
+	for (uint16_t cl_id = 0; cl_id < num_clusters; ++cl_id) {
+		SchedEntityMap_t sched_map;
+		logger->Debug("Schedule: ======================= Cluster%d :", cl_id);
+
+		// Order schedule entities by metrics
+		result = OrderSchedEntity(sched_map, apps, cl_id);
+		if (result != SCHED_OK)
+			return result;
+
+		if (sched_map.empty())
+			continue;
+
+		// For each application schedule a working mode
+		SelectWorkingModes(sched_map);
+	}
+
 	return SCHED_OK;
 }
 

@@ -128,6 +128,14 @@ private:
 	ExitCode_t InitResourceView();
 
 	/**
+	 * @brief Schedule applications from a priority queue
+	 * @param apps Map of applications having the same priority
+	 *
+	 * @return @see ExitCode_t
+	 */
+	ExitCode_t SchedulePrioQueue(AppsUidMap_t const * apps);
+
+	/**
 	 * @brief Scheduling entities ordering
 	 *
 	 * For each application create a scheduling entity made by the pair
