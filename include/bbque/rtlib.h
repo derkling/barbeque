@@ -209,6 +209,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_BBQUE_CHANNEL_PROTOCOL_MISMATCH,
 	/** The (expected) communicaiton channel is not available */
 	RTLIB_BBQUE_CHANNEL_UNAVAILABLE,
+	/** The (expected) response has gone in TIMEOUT */
+	RTLIB_BBQUE_CHANNEL_TIMEOUT,
 	/** The Barbeque RTRM is not available */
 	RTLIB_BBQUE_UNREACHABLE,
 

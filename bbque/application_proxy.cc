@@ -30,6 +30,8 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/utils/utility.h"
 
+#include <chrono>
+
 namespace ba = bbque::app;
 
 namespace bbque {
@@ -364,11 +366,16 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
 	RTLIB_ExitCode_t result;
+	bool ready;
 
 	assert(presp);
 
 	// Wait for the promise being returned
-	result = presp->pcs->resp_ftr.get();
+	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(200));
+	if (ready != true)
+		result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
+	else
+		result = presp->pcs->resp_ftr.get();
 
 	// Releasing the command session
 	ReleaseCommandSession(presp->pcs);
@@ -531,11 +538,16 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
 	RTLIB_ExitCode_t result;
+	bool ready;
 
 	assert(presp);
 
 	// Wait for the promise being returned
-	result = presp->pcs->resp_ftr.get();
+	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(200));
+	if (ready != true)
+		result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
+	else
+		result = presp->pcs->resp_ftr.get();
 
 	// Releasing the command session
 	ReleaseCommandSession(presp->pcs);
@@ -660,9 +672,12 @@ ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 	rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
 	pchMsg_t pchMsg;
+	std::cv_status ready;
 
 	// Wait for a response being available
-	(pcs->resp_cv).wait(resp_ul);
+	ready = (pcs->resp_cv).wait_for(resp_ul, std::chrono::milliseconds(200));
+	if (ready == std::cv_status::timeout)
+		return RTLIB_BBQUE_CHANNEL_TIMEOUT;
 
 	// Getting command response
 	pchMsg = pcs->pmsg;
@@ -693,17 +708,19 @@ ApplicationProxy::SyncP_PostChange(pcmdSn_t pcs, pPostChangeRsp_t presp) {
 	// Send the Command
 	presp->result = SyncP_PostChangeSend(pcs);
 	if (presp->result != RTLIB_OK)
-		return presp->result;
+		goto exit_error;
 
 	// Get back the response
 	presp->result = SyncP_PostChangeRecv(pcs, presp);
 	if (presp->result != RTLIB_OK)
-		return presp->result;
+		goto exit_error;
+
+exit_error:
 
 	// Releasing the command session
 	ReleaseCommandSession(pcs);
 
-	return RTLIB_OK;
+	return presp->result;
 
 }
 

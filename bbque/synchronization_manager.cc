@@ -122,6 +122,13 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 
 		logger->Info("STEP 1: preChange() ===> [%s]", papp->StrId());
 
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP 1: ignoring disabled EXC [%s]",
+					papp->StrId());
+			continue;
+		}
+
 		// Start an Async Pre-Change
 		presp = ApplicationProxy::pPreChangeRsp_t(
 				new ApplicationProxy::preChangeRsp_t());
@@ -142,8 +149,29 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 		papp  = (*resp_it).first;
 		presp = (*resp_it).second;
 
-		logger->Debug("STEP 1: (wait resp from) [%s]", papp->StrId());
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP 1: ignoring disabled EXC [%s]",
+					papp->StrId());
+			// Remove the respose future
+			rsp_map.erase(resp_it);
+			continue;
+		}
+
+		logger->Debug("STEP 1: .... (wait) .... [%s]", papp->StrId());
 		result = ap.SyncP_PreChange_GetResult(presp);
+
+
+		if (result == RTLIB_BBQUE_CHANNEL_TIMEOUT) {
+			logger->Warn("STEP 1: <---- TIMEOUT -- [%s]",
+					papp->StrId());
+			// Disabling not responding applications
+			papp->Disable();
+			// Remove the respose future
+			rsp_map.erase(resp_it);
+			continue;
+		}
+
 		if (result != RTLIB_OK) {
 			logger->Warn("STEP 1: <----- FAILED -- [%s]", papp->StrId());
 			// FIXME This case should be handled
@@ -151,7 +179,7 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 		}
 
 		logger->Info("STEP 1: <--------- OK -- [%s]", papp->StrId());
-		logger->Info("STEP1: [%s] declared syncLatency %d[ms]",
+		logger->Info("STEP 1: [%s] declared syncLatency %d[ms]",
 				papp->StrId(), presp->syncLatency);
 
 		// TODO Here the synchronization policy should be queryed to
@@ -195,6 +223,13 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 
 		logger->Info("STEP 2: syncChange() ===> [%s]", papp->StrId());
 
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP 2: ignoring disabled EXC [%s]",
+					papp->StrId());
+			continue;
+		}
+
 		// Start an Async Sync-Change
 		presp = ApplicationProxy::pSyncChangeRsp_t(
 				new ApplicationProxy::syncChangeRsp_t());
@@ -215,8 +250,28 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 		papp  = (*resp_it).first;
 		presp = (*resp_it).second;
 
-		logger->Debug("STEP 2: (wait resp from) [%s]", papp->StrId());
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP 2: ignoring disabled EXC [%s]",
+					papp->StrId());
+			// Remove the respose future
+			rsp_map.erase(resp_it);
+			continue;
+		}
+
+		logger->Debug("STEP 2: .... (wait) .... [%s]", papp->StrId());
 		result = ap.SyncP_SyncChange_GetResult(presp);
+
+		if (result == RTLIB_BBQUE_CHANNEL_TIMEOUT) {
+			logger->Warn("STEP 2: <---- TIMEOUT -- [%s]",
+					papp->StrId());
+			// Disabling not responding applications
+			papp->Disable();
+			// Remove the respose future
+			rsp_map.erase(resp_it);
+			continue;
+		}
+
 		if (result != RTLIB_OK) {
 			logger->Warn("STEP 2: <----- FAILED -- [%s]", papp->StrId());
 			// TODO Here the synchronization policy should be queryed to
@@ -258,6 +313,13 @@ SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
 
 		logger->Info("STEP 3: doChange() ===> [%s]", papp->StrId());
 
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP 3: ignoring disabled EXC [%s]",
+					papp->StrId());
+			continue;
+		}
+
 		// Send a Do-Change
 		result = ap.SyncP_DoChange(papp);
 		if (result != RTLIB_OK)
@@ -285,7 +347,13 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 
 	logger->Debug("STEP 4: postChange() START");
 
-	while (apps_it != apps->end()) {
+	// FIXME: ensure the current app has been removed from the queue
+	// otherwise we enter an endless loop
+	// This loop solution is used since it is safer to loop on
+	// queues which elemenbts could be modified
+	apps_it = apps->begin();
+	for ( ; apps_it != apps->end(); apps_it = apps->begin()) {
+
 		papp = (*apps_it).second;
 		assert(papp);
 
@@ -294,10 +362,26 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 
 		logger->Info("STEP 4: postChange() ===> [%s]", papp->StrId());
 
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP 4: ignoring disabled EXC [%s]",
+					papp->StrId());
+			continue;
+		}
+
 		// Send a Post-Change (blocking on apps being reconfigured)
 		presp = ApplicationProxy::pPostChangeRsp_t(
 				new ApplicationProxy::postChangeRsp_t());
 		result = ap.SyncP_PostChange(papp, presp);
+		
+		if (result == RTLIB_BBQUE_CHANNEL_TIMEOUT) {
+			logger->Warn("STEP 4: <---- TIMEOUT -- [%s]",
+					papp->StrId());
+			// Disabling not responding applications
+			papp->Disable();
+			continue;
+		}
+
 		if (result != RTLIB_OK)
 			continue;
 
@@ -307,8 +391,8 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		logger->Warn("TODO: Collect reconf statistics");
 
 		// Acquiring the resources for the Application
-		raResult =
-			ra.SyncAcquireResources(papp, papp->NextAWM()->GetResourceBinding());
+		raResult = ra.SyncAcquireResources(papp,
+				papp->NextAWM()->GetResourceBinding());
 
 		// TODO: Investigate a response action for error return code.
 		// 	Evaluate the implementation of a SyncAbort into the
@@ -320,13 +404,6 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		// otherwise we enter an endless loop
 		am.SyncCommit(papp);
 
-		// Get next app on the queue
-		apps_it = apps->begin();
-
-		// FIXME: ensure the current app has been removed from the queue
-		// otherwise we enter an endless loop
-		// This loop solution is used since it is safer to loop on
-		// queues which elemenbts could be modified
 	}
 
 	logger->Debug("STEP 4: postChange() DONE");

@@ -180,6 +180,8 @@ const char *RTLIB_errorStr[RTLIB_EXIT_CODE_COUNT] = {
 	"The bbque and application RPC protocol versions does not match",
 	//RTLIB_BBQUE_CHANNEL_UNAVAILABLE
 	"The (expected) communicaiton channel is not available",
+	//RTLIB_BBQUE_CHANNEL_TIMEOUT
+	"The (expected) response has gone in TIMEOUT",
 	//RTLIB_BBQUE_UNREACHABLE
 	"The Barbeque RTRM is not available",
 
