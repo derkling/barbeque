@@ -83,6 +83,8 @@ private:
 
 	bool registered;
 
+	bool started;
+
 	bool running;
 
 	bool done;

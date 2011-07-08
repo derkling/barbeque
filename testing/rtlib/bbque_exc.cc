@@ -39,7 +39,7 @@ BbqueEXC::BbqueEXC(std::string const & name,
 		RTLIB_Services_t * const rtl,
 		bool enabled) :
 	exc_name(name), rpc_name(recipe), rtlib(rtl),
-	registered(false), running(false), done(false) {
+	registered(false), started(false), running(false), done(false) {
 
 	RTLIB_ExecutionContextParams_t exc_params = {
 		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
@@ -154,7 +154,7 @@ RTLIB_ExitCode_t BbqueEXC::Terminate() {
 	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
 
 	// Check if we are already terminating
-	if (done)
+	if (done || !registered || !started)
 		return RTLIB_OK;
 
 	fprintf(stderr, FMT_INF("Terminating control loop for EXC [%s] (@%p)...\n"),
@@ -223,8 +223,10 @@ RTLIB_ExitCode_t BbqueEXC::onMonitor() {
 
 bool BbqueEXC::WaitEnable() {
 	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
-	while (!running && !done)
+
+	while (!done && !running)
 		ctrl_cv.wait(running_ul);
+
 	return done;
 }
 
@@ -301,12 +303,17 @@ RTLIB_ExitCode_t BbqueEXC::Monitor() {
 }
 
 void BbqueEXC::ControlLoop() {
+	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
 	RTLIB_ExitCode_t result;
 
 	assert(rtlib);
 
+	// Mark control loop as started
+	started = true;
+	running_ul.unlock();
+
 	// Endless loop
-	do {
+	while (!done) {
 
 		// Wait for the EXC being enabled
 		if (WaitEnable())
@@ -332,7 +339,7 @@ void BbqueEXC::ControlLoop() {
 		if (result != RTLIB_OK)
 			continue;
 
-	} while(!done);
+	};
 
 	DB(fprintf(stderr, FMT_DBG("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));
