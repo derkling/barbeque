@@ -25,7 +25,6 @@
 #include <cstdlib>
 #include <cstdint>
 #include <iostream>
-#include <sstream>
 
 #include "bbque/modules_factory.h"
 #include "bbque/app/working_mode.h"
@@ -117,21 +116,21 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 		tok_counter = 0:
 		++tok_counter;
 
-	std::stringstream tkss;
-	tkss << tok_counter;
-	std::string strView(
+	std::string schedpolname(
 			SCHEDULER_POLICY_NAMESPACE
 			SCHEDULER_POLICY_NAME);
-	strView += tkss.str();
+
+	char token_path[30];
+	snprintf(token_path, 30, "%s%d", schedpolname.c_str(), tok_counter);
 
 	ResourceAccounter::ExitCode_t view_result;
-	view_result = rsrc_acct.GetView(strView.c_str(), rsrc_view_token);
+	view_result = rsrc_acct.GetView(token_path, rsrc_view_token);
 	if (view_result != ResourceAccounter::RA_SUCCESS) {
 		logger->Fatal("Init: Cannot get a resource state view");
 		return SCHED_ERROR;
 	}
 
-	logger->Debug("Init: Requiring view token for %s", strView.c_str());
+	logger->Debug("Init: Requiring view token for %s", token_path);
 	logger->Debug("Init: Resources state view token = %d", rsrc_view_token);
 	return SCHED_OK;
 }
