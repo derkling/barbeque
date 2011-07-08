@@ -27,6 +27,7 @@
 #include <cstdint>
 #include <string>
 #include <unistd.h>
+#include <sys/syscall.h>
 
 #include "timer.h"
 
@@ -49,8 +50,14 @@
 
 extern rtrm::Timer simulation_tmr;
 
+/** Return the PID of the calling process/thread */
+inline pid_t gettid() {
+	        return syscall(SYS_gettid);
+}
+
 # define BBQUE_FMT(color, module, fmt) \
-	        color "[%11.6f] " module ": " fmt "\033[0m", \
+	        color "[%05d - %11.6f] " module ": " fmt "\033[0m", \
+			gettid(),\
 			simulation_tmr.getElapsedTime()
 
 #ifdef BBQUE_DEBUG
