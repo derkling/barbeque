@@ -238,33 +238,34 @@ public:
 	 * @brief Get the schedule state
 	 * @return The current scheduled state
 	 */
-	virtual State_t State() const = 0;
+	virtual State_t State() = 0;
 
 	/**
 	 * @brief Get the pre-synchronization state
 	 */
-	virtual State_t PreSyncState() const = 0;
+	virtual State_t PreSyncState()= 0;
+	
+	/**
+	 * @brief Check if this EXC is currently DISABLED
+	 */
+	virtual bool Disabled()= 0;
 
-	inline bool Disabled() const {
-		return ((State() == DISABLED) ||
-				(State() == FINISHED));
-	}
+	/**
+	 * @brief Check if this EXC is currently READY of RUNNING
+	 */
+	virtual bool Active()= 0;
 
-	inline bool Active() const {
-		return ((State() == READY) ||
-				(State() == RUNNING));
-	}
-
-	inline bool Synching() const {
-		return (State() == SYNC);
-	}
+	/**
+	 * @brief Check if this EXC is currently in SYNC state
+	 */
+	virtual bool Synching()= 0;
 
 	/**
 	 * @brief Get the synchronization state
 	 */
-	virtual SyncState_t SyncState() const = 0;
+	virtual SyncState_t SyncState() = 0;
 
-	inline char const *SyncStateStr() const {
+	inline char const *SyncStateStr() {
 		return syncStateStr[SyncState()];
 	}
 
@@ -272,7 +273,7 @@ public:
 	 * @brief Get the current working mode
 	 * @return A shared pointer to the current application working mode
 	 */
-	virtual AwmPtr_t const & CurrentAWM() const = 0;
+	virtual AwmPtr_t const & CurrentAWM() = 0;
 
 	/**
 	 * @brief Get next working mode to switch in when the application is
@@ -280,7 +281,7 @@ public:
 	 * @return A shared pointer to working mode descriptor (optimizer
 	 * interface)
 	 */
-	virtual AwmPtr_t const & NextAWM() const = 0;
+	virtual AwmPtr_t const & NextAWM() = 0;
 
 	/**
 	 * @brief The enabled working modes

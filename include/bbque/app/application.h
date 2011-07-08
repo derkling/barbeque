@@ -172,39 +172,44 @@ public:
 	void SetRecipe(RecipePtr_t & recipe, AppPtr_t & papp);
 
 	/**
-	 * @see ApplicationStatusIF
+	 * @see ApplicationStatuIF
 	 */
-	inline State_t State() const {
-		return schedule.state;
-	}
+	bool Disabled();
+
+	/**
+	 * @see ApplicationStatuIF
+	 */
+	bool Active();
+
+	/**
+	 * @see ApplicationStatuIF
+	 */
+	bool Synching();
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline State_t PreSyncState() const {
-		return schedule.preSyncState;
-	}
+	State_t State();
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline SyncState_t SyncState() const {
-		return schedule.syncState;
-	}
+	State_t PreSyncState();
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmPtr_t const & CurrentAWM() const {
-		return schedule.awm;
-	}
+	SyncState_t SyncState();
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
-	inline AwmPtr_t const & NextAWM() const {
-		return schedule.next_awm;
-	}
+	AwmPtr_t const & CurrentAWM();
+
+	/**
+	 * @see ApplicationStatusIF
+	 */
+	AwmPtr_t const & NextAWM();
 
 	/**
 	 * @see ApplicationStatusIF
@@ -301,7 +306,7 @@ private:
 	SchedulingInfo_t schedule;
 
 	/** The mutex to serialize access to scheduling info */
-	std::mutex schedule_mtx;
+	std::recursive_mutex schedule_mtx;
 
 	/**
 	 * Recipe pointer for the current application instance.
@@ -337,6 +342,23 @@ private:
 	 * The method reads the "static" constraints on resources.
 	 */
 	void InitResourceConstraints();
+
+	bool _Disabled() const;
+
+	bool _Active() const;
+
+	bool _Synching() const;
+
+	State_t _State() const;
+
+	State_t _PreSyncState() const;
+
+	SyncState_t _SyncState() const;
+
+	AwmPtr_t const & _CurrentAWM() const;
+
+	AwmPtr_t const & _NextAWM() const;
+
 
 	/**
 	 * @brief Assert a specific resource constraint.

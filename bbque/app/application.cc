@@ -211,12 +211,86 @@ AwmPtrList_t::iterator Application::FindWorkingModeIter(
  *  EXC State and SyncState Management
  ******************************************************************************/
 
+bool Application::_Disabled() const {
+	return ((_State() == DISABLED) ||
+			(_State() == FINISHED));
+}
+
+bool Application::Disabled() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _Disabled();
+}
+
+bool Application::_Active() const {
+	return ((schedule.state == READY) ||
+			(schedule.state == RUNNING));
+}
+
+bool Application::Active() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _Active();
+}
+
+bool Application::_Synching() const {
+	return (schedule.state == SYNC);
+}
+
+bool Application::Synching() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _Synching();
+}
+
+Application::State_t Application::_State() const {
+	return schedule.state;
+}
+
+Application::State_t Application::State() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _State();
+}
+
+Application::State_t Application::_PreSyncState() const {
+	return schedule.preSyncState;
+}
+
+Application::State_t Application::PreSyncState() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _PreSyncState();
+}
+
+Application::SyncState_t Application::_SyncState() const {
+	return schedule.syncState;
+}
+
+Application::SyncState_t Application::SyncState() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _SyncState();
+}
+
+AwmPtr_t const & Application::_CurrentAWM() const {
+	return schedule.awm;
+}
+
+AwmPtr_t const & Application::CurrentAWM() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _CurrentAWM();
+}
+
+AwmPtr_t const & Application::_NextAWM() const {
+	return schedule.next_awm;
+}
+
+AwmPtr_t const & Application::NextAWM() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _NextAWM();
+}
+
 // NOTE: this requires a lock on schedule_mtx
 void Application::SetSyncState(SyncState_t sync) {
 
 	logger->Debug("Changing sync state [%s, %d:%s => %d:%s]",
 			StrId(),
-			SyncState(), SyncStateStr(SyncState()),
+			_SyncState(), SyncStateStr(_SyncState()),
 			sync, SyncStateStr(sync));
 
 	schedule.syncState = sync;
@@ -229,7 +303,7 @@ void Application::SetState(State_t state, SyncState_t sync) {
 
 	logger->Debug("Changing state [%s, %d:%s => %d:%s]",
 			StrId(),
-			State(), StateStr(State()),
+			_State(), StateStr(_State()),
 			state, StateStr(state));
 
 	// Entering a Synchronization state
@@ -237,7 +311,7 @@ void Application::SetState(State_t state, SyncState_t sync) {
 		assert(sync != SYNC_NONE);
 
 		// Save a copy of the pre-synchronization state
-		schedule.preSyncState = State();
+		schedule.preSyncState = _State();
 
 		// Update synchronization state
 		SetSyncState(sync);
@@ -279,10 +353,10 @@ void Application::SetState(State_t state, SyncState_t sync) {
 Application::ExitCode_t Application::Terminate() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
-	std::unique_lock<std::mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
 
 	// Release resources
-	if (CurrentAWM())
+	if (_CurrentAWM())
 		ra.ReleaseResources(am.GetApplication(Uid()));
 
 	// Mark the application has finished
@@ -301,18 +375,21 @@ Application::ExitCode_t Application::Terminate() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Enable() {
-	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
+
+	// Enabling the execution context
+	logger->Debug("Enabling EXC [%s]...", StrId());
+
+	state_ul.lock();
 
 	// Not disabled applications could not be marked as READY
-	if (!Disabled()) {
+	if (!_Disabled()) {
 		logger->Crit("Trying to enable already enabled application [%s] "
 				"(Error: possible data structure curruption?)",
 				StrId());
-		assert(Disabled());
+		assert(_Disabled());
 		return APP_ABORT;
 	}
-
-	state_ul.lock();
 
 	// Mark the application has ready to run
 	SetState(READY);
@@ -330,10 +407,10 @@ Application::ExitCode_t Application::Enable() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Disable() {
-	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
 
 	// Not disabled applications could not be marked as READY
-	if (Disabled()) {
+	if (_Disabled()) {
 		logger->Warn("Trying to disable already disabled application [%s]",
 				StrId());
 		return APP_SUCCESS;
@@ -362,9 +439,9 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	AppPtr_t papp = am.GetApplication(Uid());
 	ApplicationManager::ExitCode_t result;
 
-	if (!Active()) {
+	if (!_Active()) {
 		logger->Crit("Sync request FAILED (Error: wrong application status)");
-		assert(Active());
+		assert(_Active());
 		return APP_ABORT;
 	}
 
@@ -404,18 +481,18 @@ Application::SyncState_t
 Application::SyncRequired(AwmPtr_t const & awm) {
 
 	// This must be called only by running applications
-	assert(State() == RUNNING);
-	assert(CurrentAWM().get());
+	assert(_State() == RUNNING);
+	assert(_CurrentAWM().get());
 
 	// Check if the assigned operating point implies RECONF|MIGREC|MIGRATE
-	if ((CurrentAWM()->GetClusterSet() != awm->GetClusterSet()) &&
-			(CurrentAWM()->Id() != awm->Id()))
+	if ((_CurrentAWM()->GetClusterSet() != awm->GetClusterSet()) &&
+			(_CurrentAWM()->Id() != awm->Id()))
 		return MIGREC;
 
-	if (CurrentAWM()->GetClusterSet() != awm->GetClusterSet())
+	if (_CurrentAWM()->GetClusterSet() != awm->GetClusterSet())
 		return MIGRATE;
 
-	if (CurrentAWM()->Id() != awm->Id())
+	if (_CurrentAWM()->Id() != awm->Id())
 		return RECONF;
 
 	// NOTE: By default no reconfiguration is assumed to be required, thus we
@@ -428,13 +505,13 @@ Application::Reschedule(AwmPtr_t const & awm) {
 	SyncState_t sync;
 
 	// Ready application could be synchronized to start
-	if (State() == READY)
+	if (_State() == READY)
 		return RequestSync(STARTING);
 
 	// Otherwise, the application should be running...
-	if (State() != RUNNING) {
+	if (_State() != RUNNING) {
 		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
-		assert(State() == RUNNING);
+		assert(_State() == RUNNING);
 		return APP_ABORT;
 	}
 
@@ -450,13 +527,13 @@ Application::Reschedule(AwmPtr_t const & awm) {
 Application::ExitCode_t Application::Unschedule() {
 
 	// Ready application remain into ready state
-	if (State() == READY)
+	if (_State() == READY)
 		return APP_ABORT;
 
 	// Otherwise, the application should be running...
-	if (State() != RUNNING) {
+	if (_State() != RUNNING) {
 		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
-		assert(State() == RUNNING);
+		assert(_State() == RUNNING);
 		return APP_ABORT;
 	}
 
@@ -467,7 +544,7 @@ Application::ExitCode_t Application::Unschedule() {
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		br::UsagesMapPtr_t & resource_set,
 		RViewToken_t vtok) {
-	std::unique_lock<std::mutex> schedule_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> schedule_ul(schedule_mtx);
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
 	AppPtr_t papp(awm->Owner());
@@ -484,7 +561,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		return APP_WM_NOT_FOUND;
 	}
 
-	if (Disabled()) {
+	if (_Disabled()) {
 		logger->Debug("Schedule request for [%s] FAILED "
 				"(Error: EXC being disabled)", papp->StrId());
 		return APP_DISABLED;
@@ -529,7 +606,7 @@ Application::ExitCode_t Application::SetRunning() {
 
 Application::ExitCode_t Application::SetBlocked() {
 	// If the application as been marked FINISHED, than it is released
-	if (State() == FINISHED)
+	if (_State() == FINISHED)
 		return APP_SUCCESS;
 	// Otherwise mark it as READY to be re-scheduled when possible
 	SetState(READY);
@@ -537,20 +614,20 @@ Application::ExitCode_t Application::SetBlocked() {
 }
 
 Application::ExitCode_t Application::ScheduleCommit() {
-	std::unique_lock<std::mutex> state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
 
 	// Ignoring applications disabled during a SYNC
-	if (Disabled()) {
+	if (_Disabled()) {
 		logger->Info("Sync completed (on disabled EXC) [%s, %d:%s]",
-				StrId(), State(), StateStr(State()));
+				StrId(), _State(), StateStr(_State()));
 		return APP_SUCCESS;
 	}
 
 	state_ul.lock();
 
-	assert(State() == SYNC);
+	assert(_State() == SYNC);
 
-	switch(SyncState()) {
+	switch(_SyncState()) {
 	case STARTING:
 	case RECONF:
 	case MIGREC:
@@ -564,12 +641,12 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	default:
 		logger->Crit("Sync for EXC [%s] FAILED"
 				"(Error: invalid synchronization state)");
-		assert(SyncState() < Application::SYNC_NONE);
+		assert(_SyncState() < Application::SYNC_NONE);
 		return APP_ABORT;
 	}
 
 	logger->Info("Sync completed [%s, %d:%s]",
-			StrId(), State(), StateStr(State()));
+			StrId(), _State(), StateStr(_State()));
 
 	return APP_SUCCESS;
 
