@@ -69,7 +69,6 @@ BbqueEXC::BbqueEXC(std::string const & name,
 
 	//--- Spawn the control thread
 	ctrl_trd = std::thread(&BbqueEXC::ControlLoop, this);
-	//ctrl_trd.detach();
 
 	registered = true;
 }
@@ -78,24 +77,26 @@ BbqueEXC::BbqueEXC(std::string const & name,
 BbqueEXC::~BbqueEXC() {
 	RTLIB_ExitCode_t result;
 
+	//--- Disable the EXC
+
 	fprintf(stderr, FMT_INF("Disabling EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
 
 	assert(rtlib->Disable);
 	result = rtlib->Disable(exc_hdl);
 
-	// Disable the control loop
-	Disable();
-
-	// Ensure the control loop thread has been terminated
-	Terminate();
+	//--- Unregister the EXC
 
 	fprintf(stderr, FMT_INF("Unregistering EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
 
 	assert(rtlib->Unregister);
 	rtlib->Unregister(exc_hdl);
+
+	//--- Terminate the control loop thread
 	
+	Terminate();
+
 }
 
 
