@@ -69,7 +69,8 @@ char const * YamcaSchedPol::Name() {
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 		bbque::SystemView const & system) {
 	ExitCode_t result;
-	logger->Debug("<<<<<<<<<<<<<<<< Scheduling policy starting...");
+	logger->Debug(
+			"<<<<<<<<<<<<<<<<< Scheduling policy starting >>>>>>>>>>>>>>>>>>");
 
 	// Get a resources view from Resource Accounter
 	if (InitResourceView() == SCHED_ERROR) {
@@ -99,7 +100,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 			return result;
 	}
 
-	logger->Debug(">>>>>>>>>>>>>>> Scheduling policy exiting...");
+	logger->Debug(
+			">>>>>>>>>>>>>>>>> Scheduling policy exiting <<<<<<<<<<<<<<<<<<<");
 
 	// Release the resource view
 	rsrc_acct.PutView(rsrc_view_token);
@@ -194,7 +196,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 
 
 inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
-	logger->Debug(".....: Picking scheduling entities (App + AWM) :.....");
+	logger->Debug(
+			"____________________| Scheduling entities |____________________");
 
 	// The scheduling entities should be picked in a descending order of
 	// metrics value
