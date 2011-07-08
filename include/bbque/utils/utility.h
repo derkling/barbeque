@@ -57,7 +57,8 @@
 extern bbque::utils::Timer bbque_tmr;
 
 # define BBQUE_FMT(color, module, fmt) \
-	        color "[%11.6f] " module ": " fmt "\033[0m", \
+	        color "[%05d - %11.6f] " module ": " fmt "\033[0m", \
+			gettid(),\
 			bbque_tmr.getElapsedTime()
 
 #ifdef BBQUE_DEBUG
