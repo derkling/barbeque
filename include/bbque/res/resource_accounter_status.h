@@ -174,6 +174,16 @@ public:
 	 */
 	virtual uint16_t ClusteringFactor(std::string const & path) = 0;
 
+	/**
+	 * @brief Show the system resources status
+	 *
+	 * This is an utility function for debug purpose that print out all the
+	 * resources path and values about usage and total amount.
+	 *
+	 * @param vtok Token of the resources state view
+	 */
+	virtual void PrintStatusReport(RViewToken_t vtok = 0) const = 0;
+
 };
 
 }   // namespace res

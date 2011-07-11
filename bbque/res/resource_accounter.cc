@@ -26,14 +26,17 @@
 
 #include "bbque/res/resource_accounter.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstring>
+#include <iomanip>
 #include <limits>
 #include <locale>
 #include <memory>
 #include <map>
 #include <string>
+#include <sstream>
 
 #include "bbque/system_view.h"
 #include "bbque/modules_factory.h"
@@ -113,7 +116,34 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 
 	// Set the amount of resource considering the units
 	res_ptr->SetTotal(ConvertValue(_amount, _units));
+
+	// Insert the path in the paths set
+	paths.insert(_path);
+	path_max_len = std::max((int) path_max_len, (int) _path.length());
+
 	return RA_SUCCESS;
+}
+
+void ResourceAccounter::PrintStatusReport(RViewToken_t vtok) const {
+	std::set<std::string>::const_iterator path_it(paths.begin());
+	std::set<std::string>::const_iterator end_path(paths.end());
+	char padded_path[50];
+	char pad[30];
+
+	logger->Debug("Report on state view: %d", vtok);
+	logger->Debug(
+			"------------- Resources --------------- Used ------ Total -");
+	for (; path_it != end_path; ++path_it) {
+		memset(pad, ' ', path_max_len + 8 - (*path_it).length());
+		snprintf(padded_path, path_max_len + 8, "%s%s",
+				(*path_it).c_str(), pad);
+
+		logger->Debug("%s : %10llu | %10llu |",
+				padded_path, Used(*path_it, vtok), Total(*path_it));
+	}
+
+	logger->Debug(
+			"-----------------------------------------------------------");
 }
 
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
@@ -421,6 +451,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
 	SyncFinalize();
 	if (result == RA_SUCCESS)
 		logger->Info("SyncMode [%d]: Session committed", sync_ssn.count);
+
+	PrintStatusReport();
 
 	return result;
 }

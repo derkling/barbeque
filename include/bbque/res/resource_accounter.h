@@ -182,6 +182,11 @@ public:
 	uint16_t ClusteringFactor(std::string const & path);
 
 	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	void PrintStatusReport(RViewToken_t vtok = 0) const;
+
+	/**
 	 * @see ResourceAccounterConfIF
 	 */
 	ExitCode_t RegisterResource(std::string const & path,
@@ -408,6 +413,12 @@ private:
 
 	/** The tree of all the resources in the system.*/
 	ResourceTree resources;
+
+	/** The set of all the resource paths registered */
+	std::set<std::string> paths;
+
+	/** Keep track of the max length between resources path string */
+	uint8_t path_max_len;
 
 	/**
 	 * Map containing the pointers to the map of resource usages specified in
