@@ -25,6 +25,7 @@
 #include "bbque/plugin_manager.h"
 
 #include "bbque/app/application.h"
+#include "bbque/app/working_mode.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/constraints.h"
 #include "bbque/plugins/recipe_loader.h"
@@ -253,6 +254,45 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	ReportSyncQ();
 
 	return AM_SUCCESS;
+}
+
+void ApplicationManager::ReportAppStatus() const {
+	AppsMap_t::const_iterator app_it(apps.begin());
+	AppsMap_t::const_iterator end_app(apps.end());
+	char line[80];
+	char curr_awm_cl[15];
+	char next_awm_cl[15];
+
+	logger->Info(
+			"---- App:EXC ---|---- State |----- Sync |"
+			"-- CurrentAWM |----- NextAWM |");
+
+	for (; app_it != end_app; ++app_it) {
+		ba::AwmPtr_t const & awm = app_it->second->CurrentAWM();
+		ba::AwmPtr_t const & next_awm = app_it->second->NextAWM();
+
+		if (awm)
+			snprintf(curr_awm_cl, 12, "%d:%s", awm->Id(),
+				awm->GetClusterSet().to_string().c_str());
+		else
+			snprintf(curr_awm_cl, 12, "------------");
+
+		if (next_awm)
+			snprintf(next_awm_cl, 12, "%d:%s", next_awm->Id(),
+				next_awm->GetClusterSet().to_string().c_str());
+		else
+			snprintf(next_awm_cl, 12, "------------");
+
+
+		snprintf(line, 80, "%12s | %9s | %9s | %12s | %12s |",
+				app_it->second->StrId(),
+				app_it->second->StateStr(app_it->second->State()),
+				app_it->second->SyncStateStr(app_it->second->SyncState()),
+				curr_awm_cl,
+				next_awm_cl);
+
+		logger->Info(line);
+	}
 }
 
 ApplicationManager::ExitCode_t
@@ -638,6 +678,8 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 
 	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
 			papp->SyncStateStr());
+
+	ReportAppStatus();
 
 	return AM_SUCCESS;
 }

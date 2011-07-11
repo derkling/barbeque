@@ -221,6 +221,11 @@ public:
 	 */
 	void ReportSyncQ() const;
 
+	/**
+	 * @brief Dump a logline to report all applications status
+	 */
+	void ReportAppStatus() const;
+
 private:
 
 	/** The logger used by the application manager */
