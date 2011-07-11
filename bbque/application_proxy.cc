@@ -84,7 +84,7 @@ rpc_msg_type_t ApplicationProxy::GetNextMessage(pchMsg_t & pChMsg) {
 
 	rpc->RecvMessage(pChMsg);
 
-	logger->Debug("APRs PRX: RX [typ: %d, pid: %d]",
+	logger->Debug("APPs PRX: RX [typ: %d, pid: %d]",
 			pChMsg->typ, pChMsg->app_pid);
 
 	return (rpc_msg_type_t)pChMsg->typ;
@@ -127,7 +127,7 @@ inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
 	cmdSnMap.insert(std::pair<pid_t, pcmdSn_t>(pcs->pid, pcs));
 
 	logger->Debug("APPs PRX: eq command session [%05d] for [%s], "
-			"[size: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
+			"[qcount: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
 
 }
 
@@ -832,7 +832,7 @@ ApplicationProxy::ReleaseCommandSession(pcmdSn_t pcs)  {
 	cmdSnMap.erase(it);
 
 	logger->Debug("APPs PRX: dq command session [%05d] for [%s], "
-			"[size: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
+			"[qcount: %d]", pcs->pid, pcs->papp->StrId(), cmdSnMap.size());
 
 }
 
