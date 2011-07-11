@@ -175,6 +175,12 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 		return;
 	}
 
+	DB(fprintf(stderr, FMT_DBG("Rx FIFO_HDR "
+					"[sze: %hd, off: %hd, typ: %hd]\n"),
+				hdr.fifo_msg_size,
+				hdr.rpc_msg_offset,
+				hdr.rpc_msg_type));
+
 	// Dispatching the received message
 	switch (hdr.rpc_msg_type) {
 
