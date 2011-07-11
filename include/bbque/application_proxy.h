@@ -191,6 +191,7 @@ private:
 
 	std::mutex snCtxMap_mtx;
 
+	bool trdRunning;
 
 	std::mutex trdStatus_mtx;
 

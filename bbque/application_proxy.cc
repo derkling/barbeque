@@ -36,7 +36,8 @@ namespace ba = bbque::app;
 
 namespace bbque {
 
-ApplicationProxy::ApplicationProxy() {
+ApplicationProxy::ApplicationProxy() :
+	trdRunning(false) {
 
 	//---------- Get a logger module
 	std::string logger_name("bq.ap");
@@ -74,7 +75,8 @@ ApplicationProxy & ApplicationProxy::GetInstance() {
 void ApplicationProxy::Start() {
 	std::unique_lock<std::mutex> ul(trdStatus_mtx);
 
-	logger->Debug("AAPRs PRX: service starting...");
+	logger->Debug("APPs PRX: service starting...");
+	trdRunning = true;
 	trdStatus_cv.notify_one();
 }
 
@@ -1255,12 +1257,14 @@ void ApplicationProxy::Dispatcher() {
 	pchMsg_t pmsg;
 
 	// Waiting for thread authorization to start
-	trdStatus_cv.wait(trdStatus_ul);
+	if (!trdRunning)
+		trdStatus_cv.wait(trdStatus_ul);
+
 	trdStatus_ul.unlock();
 
 	logger->Info("APPs PRX: Messages dispatcher STARTED");
 
-	while(1) {
+	while (trdRunning) {
 		if (GetNextMessage(pmsg)>RPC_EXC_MSGS_COUNT) {
 			CompleteTransaction(pmsg);
 			continue;
