@@ -100,6 +100,11 @@ inline ApplicationProxy::pcmdSn_t ApplicationProxy::SetupCmdSession(
 	pcmdSn_t pcs(new cmdSn_t());
 	pcs->papp = papp;
 	pcs->resp_prm = resp_prm_t();
+
+	// Resetting command session response message
+	// This is the condition verified by the reception thread
+	pcs->pmsg = NULL;
+
 	logger->Debug("APPs PRX: setup command session for [%s]",
 			pcs->papp->StrId());
 	return pcs;
@@ -262,10 +267,22 @@ ApplicationProxy::SyncP_PreChangeRecv(pcmdSn_t pcs,
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	rpc_msg_BBQ_SYNCP_PRECHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
+	std::cv_status ready;
 	pchMsg_t pchMsg;
 
-	// Wait for a response being available
-	(pcs->resp_cv).wait(resp_ul);
+	// Wait for a response (if not yet available)
+	if (!pcs->pmsg) {
+		logger->Debug("APPs PRX: waiting for PreChange response, "
+				"Timeout: %d[ms]", BBQUE_DEFAULT_SYNCP_TIMEOUT);
+		ready = (pcs->resp_cv).wait_for(resp_ul,
+				std::chrono::milliseconds(
+					BBQUE_DEFAULT_SYNCP_TIMEOUT));
+		if (ready == std::cv_status::timeout) {
+			logger->Warn("APPs PRX: PreChange response TIMEOUT");
+			pcs->pmsg = NULL;
+			return RTLIB_BBQUE_CHANNEL_TIMEOUT;
+		}
+	}
 
 	// Getting command response
 	pchMsg = pcs->pmsg;
@@ -431,10 +448,22 @@ ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
+	std::cv_status ready;
 	pchMsg_t pchMsg;
 
-	// Wait for a response being available
-	(pcs->resp_cv).wait(resp_ul);
+	// Wait for a response (if not yet available)
+	if (!pcs->pmsg) {
+		logger->Debug("APPs PRX: waiting for SyncChange response, "
+				"Timeout: %d[ms]", BBQUE_DEFAULT_SYNCP_TIMEOUT);
+		ready = (pcs->resp_cv).wait_for(resp_ul,
+				std::chrono::milliseconds(
+					BBQUE_DEFAULT_SYNCP_TIMEOUT));
+		if (ready == std::cv_status::timeout) {
+			logger->Warn("APPs PRX: SyncChange response TIMEOUT");
+			pcs->pmsg = NULL;
+			return RTLIB_BBQUE_CHANNEL_TIMEOUT;
+		}
+	}
 
 	// Getting command response
 	pchMsg = pcs->pmsg;
@@ -673,13 +702,22 @@ ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
-	pchMsg_t pchMsg;
 	std::cv_status ready;
+	pchMsg_t pchMsg;
 
-	// Wait for a response being available
-	ready = (pcs->resp_cv).wait_for(resp_ul, std::chrono::milliseconds(200));
-	if (ready == std::cv_status::timeout)
-		return RTLIB_BBQUE_CHANNEL_TIMEOUT;
+	// Wait for a response (if not yet available)
+	if (!pcs->pmsg) {
+		logger->Debug("APPs PRX: waiting for PostChange response, "
+				"Timeout: %d[ms]", BBQUE_DEFAULT_SYNCP_TIMEOUT);
+		ready = (pcs->resp_cv).wait_for(resp_ul,
+				std::chrono::milliseconds(
+					BBQUE_DEFAULT_SYNCP_TIMEOUT));
+		if (ready == std::cv_status::timeout) {
+			logger->Warn("APPs PRX: PostChange response TIMEOUT");
+			pcs->pmsg = NULL;
+			return RTLIB_BBQUE_CHANNEL_TIMEOUT;
+		}
+	}
 
 	// Getting command response
 	pchMsg = pcs->pmsg;

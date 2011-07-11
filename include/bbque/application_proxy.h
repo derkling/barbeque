@@ -36,6 +36,8 @@
 
 #include <map>
 
+#define BBQUE_DEFAULT_SYNCP_TIMEOUT 1000
+
 using namespace bbque::plugins;
 using namespace bbque::rtlib;
 using namespace bbque::app;
