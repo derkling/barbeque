@@ -110,17 +110,15 @@ private:
 
 	bool done;
 
+	bool running;
+
 	pid_t chTrdPid;
 
 	std::thread ChTrd;
 
 	std::mutex trdStatus_mtx;
 
-	std::condition_variable trdStarted_cv;
-
-	std::mutex chSetup_mtx;
-
-	std::condition_variable chSetup_cv;
+	std::condition_variable trdStatus_cv;
 
 	/**
 	 * @brief Serialize sending of command using the library
