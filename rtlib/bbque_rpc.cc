@@ -151,6 +151,9 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 	// Save the registered execution context
 	exc_map.insert(excMapEntry_t(prec->exc_id, prec));
 
+	// Mark the EXC as Registered
+	setRegistered(prec);
+
 	return (RTLIB_ExecutionContextHandler_t)&(prec->exc_params);
 }
 
@@ -221,6 +224,8 @@ void BbqueRPC::Unregister(
 		return;
 	}
 
+	assert(isRegistered(prec) == true);
+
 	// Calling the low-level unregistration
 	result = _Unregister(prec);
 	if (result != RTLIB_OK) {
@@ -233,6 +238,9 @@ void BbqueRPC::Unregister(
 
 	// Unegistered the execution context
 	exc_map.erase(prec->exc_id);
+
+	// Mark the EXC as Unregistered
+	clearRegistered(prec);
 
 }
 
@@ -250,6 +258,8 @@ RTLIB_ExitCode_t BbqueRPC::Enable(
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
+	assert(isEnabled(prec) == false);
+
 	// Calling the low-level enable function
 	result = _Enable(prec);
 	if (result != RTLIB_OK) {
@@ -259,6 +269,9 @@ RTLIB_ExitCode_t BbqueRPC::Enable(
 				RTLIB_ErrorStr(result)));
 		return RTLIB_EXC_ENABLE_FAILED;
 	}
+
+	// Mark the EXC as Enabled
+	setEnabled(prec);
 
 	return RTLIB_OK;
 }
@@ -278,6 +291,8 @@ RTLIB_ExitCode_t BbqueRPC::Disable(
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
+	assert(isEnabled(prec) == true);
+
 	// Calling the low-level disable function
 	result = _Disable(prec);
 	if (result != RTLIB_OK) {
@@ -288,6 +303,12 @@ RTLIB_ExitCode_t BbqueRPC::Disable(
 		return RTLIB_EXC_DISABLE_FAILED;
 	}
 
+	// Mark the EXC as Enabled
+	clearEnabled(prec);
+
+	// Unlocking eventually waiting GetWorkingMode
+	prec->cv.notify_one();
+
 	return RTLIB_OK;
 }
 
@@ -295,6 +316,12 @@ RTLIB_ExitCode_t BbqueRPC::GetAssignedWorkingMode(
 		pregExCtx_t prec,
 		RTLIB_WorkingModeParams_t *wm) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+
+	if (!isEnabled(prec)) {
+		DB(fprintf(stderr, FMT_DBG("Get AWM FAILED "
+				"(Error: EXC not enabled)\n")));
+		return RTLIB_EXC_GWM_FAILED;
+	}
 
 	if (isSyncMode(prec) && !isAwmValid(prec)) {
 		DB(fprintf(stderr, FMT_DBG("SYNC Pending\n")));
@@ -320,7 +347,7 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 	// Notify we are going to be suspended waiting for an AWM
 	setAwmWaiting(prec);
 
-	while (!isAwmValid(prec))
+	while (isEnabled(prec) && !isAwmValid(prec))
 		prec->cv.wait(rec_ul);
 
 	clearAwmWaiting(prec);
@@ -333,7 +360,7 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 RTLIB_ExitCode_t BbqueRPC::WaitForSyncDone(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 
-	while (!isSyncDone(prec))
+	while (isEnabled(prec) && !isSyncDone(prec))
 		prec->cv.wait(rec_ul);
 
 	// TODO add a timeout wait to limit the maximum reconfiguration time
@@ -373,6 +400,9 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 		return RTLIB_OK;
 	}
 
+	// Exit if the EXC has been disabled
+	if (!isEnabled(prec))
+		return RTLIB_EXC_GWM_FAILED;
 
 	if (result == RTLIB_EXC_GWM_FAILED) {
 		DB(fprintf(stderr, FMT_DBG("AWM not assigned, "
@@ -396,6 +426,10 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	result = WaitForWorkingMode(prec, wm);
 	if (result != RTLIB_OK)
 		goto exit_gwm_failed;
+
+	// Exit if the EXC has been disabled
+	if (!isEnabled(prec))
+		return RTLIB_EXC_GWM_FAILED;
 
 	// Processing the required reconfiguration action
 	switch(prec->event) {
