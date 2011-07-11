@@ -334,11 +334,9 @@ Application::ExitCode_t Application::Disable() {
 
 	// Not disabled applications could not be marked as READY
 	if (Disabled()) {
-		logger->Crit("Trying to enable already enabled application [%s] "
-				"(Error: possible data structure curruption?)",
+		logger->Warn("Trying to disable already disabled application [%s]",
 				StrId());
-		assert(!Disabled());
-		return APP_ABORT;
+		return APP_SUCCESS;
 	}
 
 	state_ul.lock();
