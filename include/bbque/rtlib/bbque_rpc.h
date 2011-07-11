@@ -101,10 +101,12 @@ protected:
 		std::string name;
 		/** The RTLIB assigned ID for this Execution Context */
 		uint8_t exc_id;
-#define EXC_FLAGS_AWM_VALID     0x01 ///< The EXC has been assigned a valid AWM
-#define EXC_FLAGS_AWM_WAITING   0x02 ///< The EXC is waiting for a valid AWM
-#define EXC_FLAGS_EXC_SYNC      0x04 ///< The EXC entered Sync Mode
-#define EXC_FLAGS_EXC_SYNC_DONE 0x08 ///< The EXC exited Sync Mode
+#define EXC_FLAGS_AWM_VALID      0x01 ///< The EXC has been assigned a valid AWM
+#define EXC_FLAGS_AWM_WAITING    0x02 ///< The EXC is waiting for a valid AWM
+#define EXC_FLAGS_EXC_SYNC       0x04 ///< The EXC entered Sync Mode
+#define EXC_FLAGS_EXC_SYNC_DONE  0x08 ///< The EXC exited Sync Mode
+#define EXC_FLAGS_EXC_REGISTERED 0x10 ///< The EXC is registered
+#define EXC_FLAGS_EXC_ENABLED    0x20 ///< The EXC is enabled
 		/** A set of flags to define the state of this EXC */
 		uint8_t flags;
 		/** The last required synchronization action */
@@ -169,6 +171,32 @@ protected:
 	inline void clearSyncDone(pregExCtx_t prec) const {
 		DB(fprintf(stderr, "  SYNC <= Pending\n"));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC_DONE;
+	}
+
+	//--- EXC Registration status
+	inline bool isRegistered(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_EXC_REGISTERED);
+	}
+	inline void setRegistered(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  EXC  <= Registered\n"));
+		prec->flags |= EXC_FLAGS_EXC_REGISTERED;
+	}
+	inline void clearRegistered(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  EXC  <= Unregistered\n"));
+		prec->flags &= ~EXC_FLAGS_EXC_REGISTERED;
+	}
+
+	//--- EXC Enable status
+	inline bool isEnabled(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_EXC_ENABLED);
+	}
+	inline void setEnabled(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  EXC  <= Enabled\n"));
+		prec->flags |= EXC_FLAGS_EXC_ENABLED;
+	}
+	inline void clearEnabled(pregExCtx_t prec) const {
+		DB(fprintf(stderr, "  EXC  <= Disabled\n"));
+		prec->flags &= ~EXC_FLAGS_EXC_ENABLED;
 	}
 
 	/**
