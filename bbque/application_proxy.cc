@@ -390,7 +390,8 @@ ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
 	assert(presp);
 
 	// Wait for the promise being returned
-	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(200));
+	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(
+				BBQUE_DEFAULT_SYNCP_TIMEOUT));
 	if (ready != true)
 		result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
 	else
@@ -574,7 +575,8 @@ ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
 	assert(presp);
 
 	// Wait for the promise being returned
-	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(200));
+	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(
+				BBQUE_DEFAULT_SYNCP_TIMEOUT));
 	if (ready != true)
 		result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
 	else
