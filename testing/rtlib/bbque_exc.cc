@@ -39,7 +39,7 @@ BbqueEXC::BbqueEXC(std::string const & name,
 		RTLIB_Services_t * const rtl,
 		bool enabled) :
 	exc_name(name), rpc_name(recipe), rtlib(rtl),
-	registered(false), started(false), running(false), done(false) {
+	registered(false), started(false), enabled(false), done(false) {
 
 	RTLIB_ExecutionContextParams_t exc_params = {
 		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
@@ -61,6 +61,7 @@ BbqueEXC::BbqueEXC(std::string const & name,
 		// TODO set initialization not completed
 		return;
 	}
+	registered = true;
 
 	//--- Enable the working mode (if required)
 	if (enabled) {
@@ -70,12 +71,15 @@ BbqueEXC::BbqueEXC(std::string const & name,
 	//--- Spawn the control thread
 	ctrl_trd = std::thread(&BbqueEXC::ControlLoop, this);
 
-	registered = true;
 }
 
 
 BbqueEXC::~BbqueEXC() {
 	RTLIB_ExitCode_t result;
+
+	//--- Disable the Control-Loop
+
+	Disable();
 
 	//--- Disable the EXC
 
@@ -105,8 +109,10 @@ BbqueEXC::~BbqueEXC() {
  ******************************************************************************/
 
 RTLIB_ExitCode_t BbqueEXC::Enable() {
-	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 	RTLIB_ExitCode_t result;
+
+	assert(registered == true);
 
 	fprintf(stderr, FMT_INF("Enabling EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
@@ -119,20 +125,27 @@ RTLIB_ExitCode_t BbqueEXC::Enable() {
 		return result;
 	}
 
-	//--- Mark the control loop as RUNNING
-	running = true;
+	//--- Mark the control loop as Enabled
+	// NOTE however, the thread should be started only with an actual call to
+	// the Start() method
+	enabled = true;
 
 	return RTLIB_OK;
 }
 
 RTLIB_ExitCode_t BbqueEXC::Disable() {
-	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+
+	assert(registered == true);
+
+	if (!enabled)
+		return RTLIB_OK;
 
 	fprintf(stderr, FMT_INF("Disabling control loop for EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
 
 	//--- Notify the control-thread we are STOPPED
-	running = false;
+	enabled = false;
 	ctrl_cv.notify_all();
 
 	return RTLIB_OK;
@@ -140,22 +153,26 @@ RTLIB_ExitCode_t BbqueEXC::Disable() {
 }
 
 RTLIB_ExitCode_t BbqueEXC::Start() {
-	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 
-	if (!running)
+	assert(registered == true);
+
+	if (!enabled)
 		return RTLIB_EXC_NOT_ENABLED;
 
-	//--- Notify the control thread
+	//--- Notify the control-thread we are STARTED
+
+	started = true;
 	ctrl_cv.notify_all();
 
 	return RTLIB_OK;
 }
 
 RTLIB_ExitCode_t BbqueEXC::Terminate() {
-	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 
 	// Check if we are already terminating
-	if (done || !registered || !started)
+	if (done || !registered)
 		return RTLIB_OK;
 
 	fprintf(stderr, FMT_INF("Terminating control loop for EXC [%s] (@%p)...\n"),
@@ -164,7 +181,7 @@ RTLIB_ExitCode_t BbqueEXC::Terminate() {
 	// Notify the control thread we are done
 	done = true;
 	ctrl_cv.notify_all();
-	running_ul.unlock();
+	ctrl_ul.unlock();
 
 	// Wait for the control thread to finish
 	ctrl_trd.join();
@@ -223,10 +240,10 @@ RTLIB_ExitCode_t BbqueEXC::onMonitor() {
  ******************************************************************************/
 
 bool BbqueEXC::WaitEnable() {
-	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 
-	while (!done && !running)
-		ctrl_cv.wait(running_ul);
+	while (!done && !enabled)
+		ctrl_cv.wait(ctrl_ul);
 
 	return done;
 }
@@ -307,14 +324,18 @@ RTLIB_ExitCode_t BbqueEXC::Monitor() {
 }
 
 void BbqueEXC::ControlLoop() {
-	std::unique_lock<std::mutex> running_ul(ctrl_mtx);
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 	RTLIB_ExitCode_t result;
 
 	assert(rtlib);
+	assert(registered == true);
 
-	// Mark control loop as started
-	started = true;
-	running_ul.unlock();
+	// Wait for the EXC being STARTED
+	while (!started)
+		ctrl_cv.wait(ctrl_ul);
+	ctrl_ul.unlock();
+
+	assert(enabled == true);
 
 	// Endless loop
 	while (!done) {

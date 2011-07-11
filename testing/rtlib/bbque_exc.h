@@ -85,7 +85,7 @@ private:
 
 	bool started;
 
-	bool running;
+	bool enabled;
 
 	bool done;
 
