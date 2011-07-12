@@ -180,6 +180,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		UsagesMapPtr_t const & resource_set,
 		RViewToken_t vtok,
 		bool do_check) {
+	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
+
 	// Check to avoid null pointer segmentation fault
 	if (!papp) {
 		logger->Fatal("Booking: Null pointer to the application descriptor");
@@ -228,6 +230,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 }
 
 void ResourceAccounter::ReleaseResources(AppPtr_t papp, RViewToken_t vtok) {
+	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
+
 	// Check to avoid null pointer seg-fault
 	if (!papp) {
 		logger->Fatal("Release: Null pointer to the application descriptor");
@@ -254,6 +258,10 @@ void ResourceAccounter::ReleaseResources(AppPtr_t papp, RViewToken_t vtok) {
 	DecBookingCounts(usemap_it->second, papp, vtok);
 	apps_usages->erase(papp->Uid());
 	logger->Debug("Release: [%s] resource release terminated", papp->StrId());
+
+	// Release resources from sync view
+	if ((sync_ssn.started) && (vtok != sync_ssn.view))
+		ReleaseResources(papp, sync_ssn.view);
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(

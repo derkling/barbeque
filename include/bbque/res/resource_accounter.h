@@ -277,6 +277,9 @@ private:
 	/** The logger used by the resource accounter */
 	LoggerIF  *logger;
 
+	/** Mutex protecting resource release and acquisition */
+	std::recursive_mutex status_mtx;
+
 	/**
 	 * Default constructor
 	 */
