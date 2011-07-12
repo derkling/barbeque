@@ -25,9 +25,12 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/signals_manager.h"
+#include "bbque/application_manager.h"
+#include "bbque/res/resource_accounter.h"
 
 #include "bbque/utils/utility.h"
 
+namespace br = bbque::res;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 
@@ -89,11 +92,17 @@ void ResourceManager::NotifyEvent(controlEvent_t evt) {
 }
 
 void ResourceManager::EvtExcStart() {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	SynchronizationManager::ExitCode_t syncResult;
 	ResourceScheduler::ExitCode_t schedResult;
 
-	logger->Info("EXC Started: Running Optimization...");
+	logger->Info("EXC Enabled: Running Optimization...");
 
+	am.ReportAppStatus();
+	ra.PrintStatusReport();
+
+	logger->Debug(">>>>> SCHEDULE START");
 	schedResult = rs.Schedule();
 	switch(schedResult) {
 	case ResourceScheduler::MISSING_POLICY:
@@ -106,8 +115,17 @@ void ResourceManager::EvtExcStart() {
 	default:
 		assert(schedResult == ResourceScheduler::DONE);
 	}
+	logger->Debug("<<<<< SCHEDULE ENDED");
+	
+	am.ReportAppStatus();
+	ra.PrintStatusReport();
 
+	logger->Debug(">>>>> SYNC START");
 	syncResult = sm.SyncSchedule();
+	logger->Debug("<<<<< SYNC ENDED");
+
+	am.ReportAppStatus();
+	ra.PrintStatusReport();
 
 }
 
