@@ -130,19 +130,19 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok) const {
 	char padded_path[50];
 	char pad[30];
 
-	logger->Debug("Report on state view: %d", vtok);
-	logger->Debug(
+	logger->Info("Report on state view: %d", vtok);
+	logger->Info(
 			"------------- Resources --------------- Used ------ Total -");
 	for (; path_it != end_path; ++path_it) {
 		memset(pad, ' ', path_max_len + 8 - (*path_it).length());
 		snprintf(padded_path, path_max_len + 8, "%s%s",
 				(*path_it).c_str(), pad);
 
-		logger->Debug("%s : %10llu | %10llu |",
+		logger->Info("%s : %10llu | %10llu |",
 				padded_path, Used(*path_it, vtok), Total(*path_it));
 	}
 
-	logger->Debug(
+	logger->Info(
 			"-----------------------------------------------------------");
 }
 
