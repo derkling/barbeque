@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <BarbequeRTRM version="0.6">
-	<application priority="4">
+	<application priority="1">
 		<awms>
 			<awm id="0" name="wm0" value="3">
 				<resources>
