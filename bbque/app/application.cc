@@ -407,6 +407,8 @@ Application::ExitCode_t Application::Enable() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Disable() {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
 
 	// Not disabled applications could not be marked as READY
@@ -418,9 +420,12 @@ Application::ExitCode_t Application::Disable() {
 
 	state_ul.lock();
 
+	// Release resources
+	if (_CurrentAWM())
+		ra.ReleaseResources(am.GetApplication(Uid()));
+
 	// Mark the application has ready to run
 	SetState(DISABLED);
-
 	state_ul.unlock();
 
 	logger->Info("EXC [%s] DISABLED", StrId());
