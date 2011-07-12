@@ -103,6 +103,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 	logger->Debug(
 			">>>>>>>>>>>>>>>>> Scheduling policy exiting <<<<<<<<<<<<<<<<<<<");
 
+	rsrc_acct.PrintStatusReport(rsrc_view_token);
+
 	// Release the resource view
 	rsrc_acct.PutView(rsrc_view_token);
 	return SCHED_DONE;
@@ -174,9 +176,9 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		// Skip if the application has been scheduled yet or disabled in the
 		// meanwhile
 		if (!papp->Active()) {
-			logger->Debug("Ordering: skipping [%s]. State = {%d}",
+			logger->Debug("Ordering: skipping [%s]. State = {%s}",
 						papp->StrId(),
-						papp->State());
+						Application::StateStr(papp->State()));
 			continue;
 		}
 
@@ -213,7 +215,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Skip if the application has been disabled/stopped in the meanwhile
 		if (app->Disabled()) {
-			logger->Debug("Selecting: skipping [%s]."
+			logger->Warn("Selecting: skipping [%s]."
 					"Disabled/stopped during scheduling",
 					app->StrId());
 			continue;
@@ -250,7 +252,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Debugging messages
 		if (result != Application::APP_WM_ACCEPTED) {
-			logger->Debug("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
+			logger->Warn("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
 							app->StrId(),
 							eval_awm->Id(),
 							result);
@@ -292,7 +294,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 			MetricsComputation(papp, (*awm_it), cl_id, *metrics);
 		switch (result) {
 		case SCHED_RSRC_UNAV:
-			logger->Debug("Insert: Resources unavailables [ret %d]", result);
+			logger->Warn("Insert: Resources unavailables [ret %d]", result);
 			continue;
 		case SCHED_ERROR:
 			logger->Error("Insert: An error occurred [ret %d]", result);
@@ -308,7 +310,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 					static_cast<double>(*metrics),
 					SchedEntity_t(papp, (*awm_it))));
 
-		logger->Debug("Metrics = %.4f", *metrics);
+		logger->Info("Insert: [%s] AWM{%d} metrics %.4f", papp->StrId(),
+				(*awm_it)->Id(), *metrics);
 	}
 
 	return SCHED_OK;
