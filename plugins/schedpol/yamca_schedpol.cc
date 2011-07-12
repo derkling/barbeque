@@ -210,7 +210,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
 		AppPtr_t & app = (se_it->second).first;
-		AwmPtr_t const & curr_awm = (se_it->second).first->NextAWM();
+		AwmPtr_t const & next_awm = (se_it->second).first->NextAWM();
 		AwmPtr_t & eval_awm = (se_it->second).second;
 
 		// Skip if the application has been disabled/stopped in the meanwhile
@@ -228,9 +228,9 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// If an AWM has been previously set it should have a greater metrics.
 		// Thus we can skip to the next scheduling entity
-		if (curr_awm) {
+		if (app->Synching() && next_awm) {
 			curr_metrics = *(static_cast<double *>
-					(curr_awm->GetAttribute(SCHEDULER_POLICY_NAME,
+					(next_awm->GetAttribute(SCHEDULER_POLICY_NAME,
 											"metrics").get()));
 			assert(eval_metrics <= curr_metrics);
 			continue;
