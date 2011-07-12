@@ -390,14 +390,16 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		// TODO Here we should collect reconfiguration statistics
 		logger->Warn("TODO: Collect reconf statistics");
 
-		// Acquiring the resources for the Application
-		raResult = ra.SyncAcquireResources(papp,
+		// Acquiring the resources for RUNNING Applications
+		if (!papp->Blocking()) {
+			raResult = ra.SyncAcquireResources(papp,
 				papp->NextAWM()->GetResourceBinding());
 
-		// TODO: Investigate a response action for error return code.
-		// 	Evaluate the implementation of a SyncAbort into the
-		// 	ApplicationManage
-		assert (raResult == br::ResourceAccounter::RA_SUCCESS);
+			// TODO: Investigate a response action for error return code.
+			// 	Evaluate the implementation of a SyncAbort into the
+			// 	ApplicationManage
+			assert (raResult == br::ResourceAccounter::RA_SUCCESS);
+		}
 
 		// Committing change to the ApplicationManager
 		// NOTE: this should remove the current app from the queue,
