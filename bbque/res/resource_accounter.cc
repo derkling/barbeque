@@ -260,7 +260,7 @@ void ResourceAccounter::ReleaseResources(AppPtr_t papp, RViewToken_t vtok) {
 	logger->Debug("Release: [%s] resource release terminated", papp->StrId());
 
 	// Release resources from sync view
-	if ((sync_ssn.started) && (vtok != sync_ssn.view))
+	if ((sync_ssn.started) && (papp->Active()) && (vtok != sync_ssn.view))
 		ReleaseResources(papp, sync_ssn.view);
 }
 
