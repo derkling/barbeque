@@ -261,6 +261,11 @@ public:
 	virtual bool Synching()= 0;
 
 	/**
+	 * @brief Check if this EXC is being CLOCKED
+	 */
+	virtual bool Blocking() = 0;
+
+	/**
 	 * @brief Get the synchronization state
 	 */
 	virtual SyncState_t SyncState() = 0;

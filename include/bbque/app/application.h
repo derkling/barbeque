@@ -187,6 +187,11 @@ public:
 	bool Synching();
 
 	/**
+	 * @see ApplicationStatuIF
+	 */
+	bool Blocking();
+
+	/**
 	 * @see ApplicationStatusIF
 	 */
 	State_t State();
@@ -348,6 +353,8 @@ private:
 	bool _Active() const;
 
 	bool _Synching() const;
+
+	bool _Blocking() const;
 
 	State_t _State() const;
 

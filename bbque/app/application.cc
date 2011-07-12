@@ -240,6 +240,15 @@ bool Application::Synching() {
 	return _Synching();
 }
 
+bool Application::_Blocking() const {
+	return (_Synching() && (_SyncState() == BLOCKED));
+}
+
+bool Application::Blocking() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	return _Blocking();
+}
+
 Application::State_t Application::_State() const {
 	return schedule.state;
 }
