@@ -519,7 +519,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		logger->Debug("Booking: success [USG:%llu | AV:%llu | TOT:%llu]",
 				rsrc_usage->value,
-				Available(usages_it->first),
+				Available(usages_it->first, vtok),
 				Total(usages_it->first));
 	}
 }
