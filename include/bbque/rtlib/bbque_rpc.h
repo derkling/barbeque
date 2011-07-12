@@ -37,6 +37,8 @@
 #include <mutex>
 #include <thread>
 
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LBLUE, "RTLIB_RPC  [DBG]", fmt)
+
 namespace bbque { namespace rtlib {
 
 class BbqueRPC {
@@ -126,11 +128,13 @@ protected:
 		return (prec->flags & EXC_FLAGS_AWM_VALID);
 	}
 	inline void setAwmValid(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  AWM  <= Valid\n"));
+		DB(fprintf(stderr, FMT_DBG("AWM  <= Valid [%d:%s:%d]\n"),
+					prec->exc_id, prec->name.c_str(), prec->awm_id));
 		prec->flags |= EXC_FLAGS_AWM_VALID;
 	}
 	inline void setAwmInvalid(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  AWM  <= Inalid\n"));
+		DB(fprintf(stderr, FMT_DBG("AWM  <= Inalid [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_AWM_VALID;
 	}
 
@@ -139,11 +143,13 @@ protected:
 		return (prec->flags & EXC_FLAGS_AWM_WAITING);
 	}
 	inline void setAwmWaiting(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  AWM  <= Waiting\n"));
+		DB(fprintf(stderr, FMT_DBG("AWM  <= Waiting [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_AWM_WAITING;
 	}
 	inline void clearAwmWaiting(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  AWM  <= NOT Waiting\n"));
+		DB(fprintf(stderr, FMT_DBG("AWM  <= NOT Waiting [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_AWM_WAITING;
 	}
 
@@ -152,11 +158,13 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_SYNC);
 	}
 	inline void setSyncMode(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  SYNC <= Enter\n"));
+		DB(fprintf(stderr, FMT_DBG("SYNC <= Enter [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_SYNC;
 	}
 	inline void clearSyncMode(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  SYNC <= Exit\n"));
+		DB(fprintf(stderr, FMT_DBG("SYNC <= Exit [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC;
 	}
 
@@ -165,11 +173,13 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_SYNC_DONE);
 	}
 	inline void setSyncDone(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  SYNC <= Done\n"));
+		DB(fprintf(stderr, FMT_DBG("SYNC <= Done [%d:%s:%d]\n"),
+					prec->exc_id, prec->name.c_str(), prec->awm_id));
 		prec->flags |= EXC_FLAGS_EXC_SYNC_DONE;
 	}
 	inline void clearSyncDone(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  SYNC <= Pending\n"));
+		DB(fprintf(stderr, FMT_DBG("SYNC <= Pending [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC_DONE;
 	}
 
@@ -178,11 +188,13 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_REGISTERED);
 	}
 	inline void setRegistered(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  EXC  <= Registered\n"));
+		DB(fprintf(stderr, FMT_DBG("EXC  <= Registered [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_REGISTERED;
 	}
 	inline void clearRegistered(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  EXC  <= Unregistered\n"));
+		DB(fprintf(stderr, FMT_DBG("EXC  <= Unregistered [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_REGISTERED;
 	}
 
@@ -191,11 +203,13 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_ENABLED);
 	}
 	inline void setEnabled(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  EXC  <= Enabled\n"));
+		DB(fprintf(stderr, FMT_DBG("EXC  <= Enabled [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_ENABLED;
 	}
 	inline void clearEnabled(pregExCtx_t prec) const {
-		DB(fprintf(stderr, "  EXC  <= Disabled\n"));
+		DB(fprintf(stderr, FMT_DBG("EXC  <= Disabled [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_ENABLED;
 	}
 
@@ -410,6 +424,9 @@ private:
 } // namespace rtlib
 
 } // namespace bbque
+
+// Clean-up locally used definitions
+#undef FMT_DBG
 
 #endif /* end of include guard: BBQUE_RPC_H_ */
 
