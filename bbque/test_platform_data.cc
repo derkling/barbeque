@@ -75,10 +75,6 @@ TestPlatformData::LoadPlatformData() {
 		// Registering Clusters, per-clusters memory and PEs
 		for (uint8_t c = 0; c < cm.TPD_ClusterCount(); ++c) {
 
-				snprintf(resourcePath+18, 8, "%d", c);
-				printf(" >>> Registering... :%s\n", resourcePath);
-				ra.RegisterResource(resourcePath, " ", 1);
-
 				snprintf(resourcePath+18, 8, "%d.mem0", c);
 				printf(" >>> Registering... :%s\n", resourcePath);
 				ra.RegisterResource(resourcePath, "MB", cm.TPD_ClusterMem());
