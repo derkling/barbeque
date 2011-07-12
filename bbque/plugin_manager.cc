@@ -28,6 +28,7 @@
 #include "bbque/dynamic_library.h"
 #include "bbque/plugins/object_adapter.h"
 
+#undef BBQUE_DEBUG
 #include "bbque/utils/utility.h"
 
 namespace fs = boost::filesystem;
