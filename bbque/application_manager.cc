@@ -31,10 +31,14 @@
 #include "bbque/plugins/recipe_loader.h"
 #include "bbque/res/resources.h"
 
+#include "bbque/application_manager.h"
+#include "bbque/res/resource_accounter.h"
+
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
 namespace ba = bbque::app;
+namespace br = bbque::res;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 
@@ -438,6 +442,8 @@ ApplicationManager::AppsRemove(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPtr_t papp) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ExitCode_t result;
 
 	logger->Debug("Removing EXC [%s] ...", papp->StrId());
@@ -466,6 +472,8 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	logger->Info("EXC Released [%s]", papp->StrId());
 	ReportStatusQ();
 	ReportSyncQ();
+	am.ReportAppStatus();
+	ra.PrintStatusReport();
 
 	return AM_SUCCESS;
 }
