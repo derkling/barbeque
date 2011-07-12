@@ -222,9 +222,9 @@ public:
 	void ReportSyncQ() const;
 
 	/**
-	 * @brief Dump a logline to report all applications status
+	 * @see ApplicationManagerStatusIF
 	 */
-	void ReportAppStatus() const;
+	void PrintStatusReport() const;
 
 private:
 

@@ -260,7 +260,7 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	return AM_SUCCESS;
 }
 
-void ApplicationManager::ReportAppStatus() const {
+void ApplicationManager::PrintStatusReport() const {
 	AppsMap_t::const_iterator app_it(apps.begin());
 	AppsMap_t::const_iterator end_app(apps.end());
 	char line[80];
@@ -279,13 +279,13 @@ void ApplicationManager::ReportAppStatus() const {
 			snprintf(curr_awm_cl, 12, "%d:%s", awm->Id(),
 				awm->GetClusterSet().to_string().c_str());
 		else
-			snprintf(curr_awm_cl, 12, "------------");
+			snprintf(curr_awm_cl, 12, "-");
 
 		if (next_awm)
 			snprintf(next_awm_cl, 12, "%d:%s", next_awm->Id(),
 				next_awm->GetClusterSet().to_string().c_str());
 		else
-			snprintf(next_awm_cl, 12, "------------");
+			snprintf(next_awm_cl, 12, "-");
 
 
 		snprintf(line, 80, "%12s | %9s | %9s | %12s | %12s |",
@@ -297,6 +297,10 @@ void ApplicationManager::ReportAppStatus() const {
 
 		logger->Info(line);
 	}
+
+	logger->Info(
+			"----------------------------------------------------------------"
+			"-------");
 }
 
 ApplicationManager::ExitCode_t
@@ -472,7 +476,7 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	logger->Info("EXC Released [%s]", papp->StrId());
 	ReportStatusQ();
 	ReportSyncQ();
-	am.ReportAppStatus();
+	am.PrintStatusReport();
 	ra.PrintStatusReport();
 
 	return AM_SUCCESS;
@@ -687,7 +691,7 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
 			papp->SyncStateStr());
 
-	ReportAppStatus();
+	PrintStatusReport();
 
 	return AM_SUCCESS;
 }

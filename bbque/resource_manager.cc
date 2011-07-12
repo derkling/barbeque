@@ -99,7 +99,7 @@ void ResourceManager::EvtExcStart() {
 
 	logger->Info("EXC Enabled: Running Optimization...");
 
-	am.ReportAppStatus();
+	am.PrintStatusReport();
 	ra.PrintStatusReport();
 
 	logger->Debug(">>>>> SCHEDULE START");
@@ -117,14 +117,14 @@ void ResourceManager::EvtExcStart() {
 	}
 	logger->Debug("<<<<< SCHEDULE ENDED");
 	
-	am.ReportAppStatus();
+	am.PrintStatusReport();
 	ra.PrintStatusReport();
 
 	logger->Debug(">>>>> SYNC START");
 	syncResult = sm.SyncSchedule();
 	logger->Debug("<<<<< SYNC ENDED");
 
-	am.ReportAppStatus();
+	am.PrintStatusReport();
 	ra.PrintStatusReport();
 
 }

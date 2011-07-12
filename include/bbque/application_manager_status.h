@@ -141,6 +141,11 @@ public:
 	 */
 	virtual app::AppPrio_t LowestPriority() const = 0;
 
+	/**
+	 * @brief Dump a logline to report all applications status
+	 */
+	virtual void PrintStatusReport() const = 0;
+
 };
 
 } // namespace bbque
