@@ -138,6 +138,7 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 			sizeof(RTLIB_ExecutionContextParams_t));
 	prec->name = name;
 	prec->exc_id = GetNextExcID();
+	prec->flags = 0x00;
 
 	// Calling the Low-level registration
 	result = _Register(prec);
