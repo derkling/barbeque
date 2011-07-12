@@ -1,0 +1,264 @@
+@_SPLASH_BANNER
+
+                                    )   )  ()
+                                    )   )   \
+                                  _____________
+                                  \           /
+                                   \  o   o  /
+                                    \_______/
+                                    /       \
+
+
+         __ )             |                             _ \__ __|  _ \   \  |
+         __ \   _` |  __| __ \   _ \  _` | |   |  _ \  |   |  |   |   | |\/ |
+         |   | (   | |    |   |  __/ (   | |   |  __/  __ <   |   __ <  |   |
+        ____/ \__,_|_|   _.__/ \___|\__, |\__,_|\___| _| \_\ _|  _| \_\_|  _|
+                                        _|
+               ___   ____   ___
+         _  __/ _ \ / __/  / _ | ___  ___ ___ _____
+        | |/ / // // _ \  / __ |/ _ \/ _ `/ // (_-<
+        |___/\___(_)___/ /_/ |_/_//_/\_, /\_,_/___/
+                                    /___/
+
+
+@@
+@_SPLASH_MSG_
+
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	Welcome to this tutorial on Barbeque RTRM framework (v0.6 "Angus") for
+	ManyCore SoC architectures.
+
+	This is a quick introduction to the application development exploiting
+	the Barbeque RunTime Library (RTLIB).
+
+	The tutorial will be run step by step, supported by code snippets of a
+	trivial "Hello World" application, in order to explain the RTLIB details
+	and to provide some guidelines to application developers.
+
+	Obviously the complete source code of the application is part of this
+	training stuff.
+
+	So, let's start!
+
+	~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+@@
+@_INTRO_INCLUDE_
+
+	By assuming that the framework is properly installed onto your system, the
+	very first step is to include the header file in your source code:
+
+@@
+@_PROG_INCLUDE_
+
+	#include <bbque/rtlib.h>
+
+@@
+@_INTRO_INIT_
+
+	Before starting, the application must setup the communication channel and
+	get information about the services provided by the RTRM.
+
+	This step is in charge of this simple call:
+
+@@
+@_PROG_INIT_
+
+	RTLIB_Services * rtlib;
+	RTLIB_Init("MyDemoApplication", &rtlib);
+
+@@
+@_OUTRO_INIT_
+
+	RTLIB_Services is the structure returned by Barbeque containing references
+	to all the services that the application can require to the RTRM.
+
+	A "NULL" return is a fatal error condition, meaning that the
+	initialization has gone wrong and thus that the application cannot
+	communicate with Barbeque.
+
+	Press a key to perform the initialization...
+
+@@
+@_INTRO_EXC_
+
+	A very basic concept in Barbeque is the Execution Context (EXC).
+
+	EXCs allow us to split the application into different functional blocks,
+	that we expect to schedule/allocate accordingly to different priorities
+	and resource usage levels.
+	
+	Basically each EXC should contain a specific task that we aim to boost by
+	executing multiple instances in parallel. For instance, if we are
+	developing a videoconference application, we may design the application by
+	splitting audio and video decoding tasks, because we have profiled very
+	different resource usage levels.
+
+	From a deployment point of view, an EXC is expected to use resources of a
+	single cluster of processing elements (other than the global ones
+	eventually). Keep in mind such detail for inter-task communication
+	optimizations.
+
+	Each EXC must be registered as follows:
+
+@@
+@_PROG_REGEXC_
+
+	char recipe_name[] = "recipeName"
+	RTLIB_ExecutionContextParams exc_params = {
+		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
+		RTLIB_LANG_CPP,
+		recipe_name,
+	};
+
+	RTLIB_ExecutionContextHandler exc_hdl;
+	exc_hdl = rtlib->Register("hello_world", &exc_params);
+
+@@
+@_OUTRO_REGEXC_
+
+	By using an RTLIB_ExecutionContextParams we specify information on the
+	library version used, the programming language and the "recipe" we intend
+	to use for the EXC.
+
+	The "recipe" describes all the different operating points (namely "Working
+	Modes") that Barbeque must consider in its scheduling / resource
+	allocation policy. More details about working modes can be found in the
+	framework documentation.
+
+	Once correctly set, the structure must be passed to the function
+	"Register()". Such call registers the execution context into the RTRM.
+	If everything goes fine, Barbeque returns an "handler" that we should use
+	to reference the EXC in next calls.
+
+	Note: reverse function "Unregister()" is provided too.
+
+@@
+@_INTRO_ENABLE_
+
+	Although the registration, Barbeque RTRM doesn't take the EXC into account
+	for scheduling until it is not enabled.
+
+	To enable an EXC or not is a feature that we could exploit to manage some
+	internal policies.
+
+	For instance, by considering the example above, if the EXC of the video
+	decoding cannot be scheduled to reach the desidered QoS. Then we could
+	react by forcing a better scheduling (see below) or stopping the video
+	trying to get the best for the audio.
+
+	Moreover we could consider the scenario regarding resources usage.
+	If at a certain point we don't need to execute some tasks, we could
+	disable their EXC. This leads the RTRM to ignore that tasks during the
+	next scheduling, and thus to explicitly save resources.
+
+	Think about this cooperative resource management programming approach!
+
+	To enable an EXC is just a matter of calling Enable().
+	Note: reverse function Disable() is provided too.
+
+@@
+@_PROG_ENABLE_
+
+	RTLIB_ExitCode result;
+
+	result = rtlib->Enable(exc_hdl);
+	if (result != RTLIB_OK)
+		cout << "Hello World ExC not enabled!" << endl;
+
+@@
+@_INTRO_AWM_
+
+	Now the application is almost ready to start. The only missing thing is
+	a "Working Mode" for each EXC.
+
+	As we told above, a Working mode represents an "operating point", basically
+	defined as a set resource requests. The key aspect is that accordingly to
+	the set assigned we could exploit different levels of parallelism for the
+	task associated to the EXC.
+
+	Note: The example is limited to one EXC.
+
+	Because the Barbeque RTRM expects that the applications must run accordingly
+	to a synchronized flow, what we need is a control loop.
+	In the loop body we should get the working mode, configure and execute the
+	task, evaluate the QoS and eventually react. All this until we have
+	something to compute.
+
+@@
+@_PROG_CLOOP
+
+		RTLIB_ExitCode_t result;
+		RTLIB_WorkingModeParams wmp;
+		int num_threads;
+
+		while (...) { 		// ...there is something to compute
+
+			// 1. Require the working mode
+			result = rtlib->GetWorkingMode(exc_hdl, &wmp, RTLIB_SYNC_STATELESS);
+
+			// 2. Check and manage the framework response
+			num_threads = CheckForReconfig(result, wmp);
+			if (result != RTLIB_OK)
+				continue;
+
+			// 3. Run the task
+			Run(task, num_threads, thrds);
+
+			// 4. QoS Monitoring
+			QoSMonitor(exc_hdl, result, wmp);
+
+		}
+
+@@
+@_TEXT_EXAMP_
+
+	In our dummy example the boody loop is a computational step of our "Hello
+	World" task. We are going to perform just a few iterations.
+
+	Once we obtain a working mode, CheckForReconfig() is called to determine the
+	number of threads we could spawn to "boost" our task. This is passed to the
+	method Run() along with the task (HelloWorld) and a list for keeping track
+	of the spawned threads.
+
+	At this point the task is executed. Once it has finished, threads are
+	joined and thus we can monitor the Quality of Service. A new computational
+	step can start.
+
+@@
+@_INFO_RECONF_
+
+	GetWorkingMode() returns a code describing an event that the EXC must
+	consider:
+
+	- START : EXC scheduled for the first time.
+	- RUNNING : Continue to run in the same Working Mode of the previous
+	  computational step.
+
+	The other codes express a change of configuration:
+	- RECONF : Change Working Mode. Resources from the same cluster of the
+	  previous computational step.
+	- MIGRATE: Moved resources into another cluster. Working mode unchanged.
+	- MIGREC : Both change of WorkingMode and migration occurred. 
+
+	- BLOCKED: EXC not scheduled (not enough resources available).
+
+	Note: All the codes start with prefix "RTLIB_EXC_GWM_".
+
+@@
+@_INFO_EXIT
+
+	It's almost all.
+	Let's disabled and unregister the EXC for a clean exit.
+
+@@
+@_BYE_
+
+	That's all folks!
+
+	Stay tuned ;-)
+
+@@
+
+	
