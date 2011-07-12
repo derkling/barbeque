@@ -9,7 +9,17 @@ endif(BBQUE_DEBUG)
 
 
 
-#----- Add "dummy_app" target application
+#----- Add "rtlib_example01" target application
+set(RTLIB_EXAMPLE01_SRC bbque_exc timer example01)
+add_executable(rtlib_example01 ${RTLIB_EXAMPLE01_SRC})
+
+# Linking dependencies
+target_link_libraries(
+	rtlib_example01
+	bbque_rtlib
+)
+
+#----- Add "rtlib_testapp" target application
 set(RTLIB_TESTAPP_SRC bbque_exc timer main)
 add_executable(rtlib_testapp ${RTLIB_TESTAPP_SRC})
 
