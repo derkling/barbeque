@@ -1028,6 +1028,7 @@ void ApplicationProxy::RpcExcStart(prqsSn_t prqs) {
 
 void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
+	ResourceManager &rm(ResourceManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
 	pconCtx_t pcon;
@@ -1055,6 +1056,10 @@ void ApplicationProxy::RpcExcStop(prqsSn_t prqs) {
 		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_DISABLE_FAILED);
 		return;
 	}
+
+	// Notify the ResourceManager for a new application willing to start
+	logger->Debug("APPs PRX: Notifing ResourceManager...");
+	rm.NotifyEvent(ResourceManager::EXC_STOP);
 
 	// Sending ACK response to application
 	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
