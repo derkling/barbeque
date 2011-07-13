@@ -140,9 +140,13 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		ticpp::Node * root_node = doc.FirstChild();
 		root_node = root_node->NextSibling("BarbequeRTRM", true);
 
-		// Application Working Modes
 		ticpp::Element * app_elem =
 				root_node->FirstChildElement("application", true);
+		uint16_t prio = 0;
+		app_elem->GetAttribute("priority", &prio, false);
+		recipe_ptr->SetPriority(prio);
+
+		// Application Working Modes
 		result = loadWorkingModes(app_elem);
 
 		// "Static" constraints and plugins specific data

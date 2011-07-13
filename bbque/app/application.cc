@@ -180,6 +180,7 @@ void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
 	recipe = _recipe;
 
 	// Init information got from the recipe
+	priority = recipe->GetPriority();
 	InitWorkingModes(papp);
 	InitResourceConstraints();
 	plugins_data = PlugDataMap_t(recipe->plugins_data);

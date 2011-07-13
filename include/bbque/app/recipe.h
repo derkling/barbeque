@@ -86,6 +86,21 @@ public:
 	}
 
 	/**
+	 * @brief Get the priority parsed from the recipe
+	 * @return Priority value
+	 */
+	inline uint8_t GetPriority() const {
+		return priority;
+	}
+
+	/**
+	 * @brief Set the priority value
+	 */
+	void SetPriority(uint8_t prio) {
+		priority = prio;
+	}
+
+	/**
 	 * @brief Insert an application working mode
 	 * @param app Application owning the working mode
 	 * @param id Working mode ID
@@ -155,6 +170,9 @@ private:
 	 * for retrieving the recipe.
 	 */
 	std::string pathname;
+
+	/** Priority */
+	uint8_t priority;
 
 	/** The complete set of working modes descriptors defined in the recipe */
 	AwmMap_t working_modes;
