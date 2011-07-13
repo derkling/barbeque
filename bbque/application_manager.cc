@@ -683,6 +683,8 @@ ApplicationManager::ExitCode_t
 ApplicationManager::SyncCommit(AppPtr_t papp) {
 	Application::SyncState_t syncState = papp->SyncState();
 
+	logger->Info("Synching EXC [%s, %s]...", papp->StrId(),
+			papp->SyncStateStr());
 	assert(syncState != Application::SYNC_NONE);
 
 	// Notify application
