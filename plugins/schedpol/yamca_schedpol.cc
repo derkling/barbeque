@@ -226,6 +226,11 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 				(eval_awm->GetAttribute(SCHEDULER_POLICY_NAME,
 										"metrics").get()));
 
+		// Avoid double AWM selection for RUNNING applications with an already
+		// assigned AWM.
+		if ((app->State() == Application::RUNNING) && app->NextAWM()) 
+			continue;
+
 		// If an AWM has been previously set it should have a greater metrics.
 		// Thus we can skip to the next scheduling entity
 		if (app->Synching() && next_awm) {
