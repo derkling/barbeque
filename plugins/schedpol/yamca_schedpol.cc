@@ -80,7 +80,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 	// Get the number of clusters
 	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
-	logger->Debug("Schedule: Found %d clusters on the platform.", num_clusters);
+	logger->Info("Schedule: Found %d clusters on the platform.", num_clusters);
 
 	logger->Info("lowest prio = %d", system.ApplicationLowestPriority());
 
@@ -91,7 +91,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 		if (system.Applications(prio)->empty())
 			continue;
 
-		logger->Debug("Schedule: %d Applications/EXC with priority %d ",
+		logger->Info("Schedule: %d Applications/EXC with priority %d ",
 				system.Applications(prio)->size(),
 				prio);
 
