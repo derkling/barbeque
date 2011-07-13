@@ -418,9 +418,9 @@ SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
 	AppsUidMap_t::const_iterator it;
 	ExitCode_t result;
 
-	if (apps->size() == 0) {
+	if (apps->empty()) {
 		logger->Warn("Synchronization FAILED (Error: empty EXCs list)");
-		assert(apps->size());
+		assert(!apps->empty());
 		return OK;
 	}
 
