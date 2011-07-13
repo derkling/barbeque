@@ -29,8 +29,10 @@
 #include "bbque/res/resource_accounter.h"
 
 #include "bbque/utils/utility.h"
+#include "bbque/utils/timer.h"
 
 namespace br = bbque::res;
+namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 
@@ -91,19 +93,29 @@ void ResourceManager::NotifyEvent(controlEvent_t evt) {
 		pendingEvts_cv.notify_one();
 }
 
-void ResourceManager::EvtExcStart() {
-	ApplicationManager &am(ApplicationManager::GetInstance());
+void ResourceManager::Optimize() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ApplicationManager &am(ApplicationManager::GetInstance());
 	SynchronizationManager::ExitCode_t syncResult;
 	ResourceScheduler::ExitCode_t schedResult;
+	bu::Timer optimization_tmr;
 
-	logger->Info("EXC Enabled: Running Optimization...");
+	// Check if there is at least one application to synchronize
+	if ((am.Applications(Application::READY)->empty()) &&
+			(am.Applications(Application::READY)->empty())) {
+		logger->Debug("NO active EXCs, re-scheduling not required");
+		return;
+	}
 
 	am.PrintStatusReport();
 	ra.PrintStatusReport();
+	logger->Info("Running Optimization...");
 
-	logger->Debug(">>>>> SCHEDULE START");
+	//--- Scheduling
+	logger->Debug("====================[ SCHEDULE START ]====================");
+	optimization_tmr.start();
 	schedResult = rs.Schedule();
+	optimization_tmr.stop();
 	switch(schedResult) {
 	case ResourceScheduler::MISSING_POLICY:
 	case ResourceScheduler::FAILED:
@@ -115,18 +127,50 @@ void ResourceManager::EvtExcStart() {
 	default:
 		assert(schedResult == ResourceScheduler::DONE);
 	}
-	logger->Debug("<<<<< SCHEDULE ENDED");
-	
+	logger->Debug("====================[ SCHEDULE ENDED ]====================");
+	logger->Debug("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 	am.PrintStatusReport();
 	ra.PrintStatusReport();
 
-	logger->Debug(">>>>> SYNC START");
+	// Check if there is at least one application to synchronize
+	if (am.Applications(Application::SYNC)->empty()) {
+		logger->Debug("NO EXC in SYNC state, synchronization not required");
+		return;
+	}
+
+	//--- Synchroniztion
+	logger->Debug("====================[ SYNC START ]====================");
+	optimization_tmr.start();
 	syncResult = sm.SyncSchedule();
-	logger->Debug("<<<<< SYNC ENDED");
-
+	optimization_tmr.stop();
+	logger->Debug("====================[ SYNC ENDED ]====================");
+	logger->Debug("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 	am.PrintStatusReport();
 	ra.PrintStatusReport();
 
+}
+
+void ResourceManager::EvtExcStart() {
+
+	logger->Info("EXC Enabled");
+
+	// TODO add here a suitable policy to trigger the optimization
+
+	Optimize();
+}
+
+void ResourceManager::EvtExcStop() {
+
+	logger->Info("EXC Disabled");
+
+	// TODO add here a suitable policy to trigger the optimization
+	
+	// FIXME right now we wait a small timeframe before to trigger a
+	// reschedule, in order to avoid a run while an Application is removing a
+	// certamin amount of EXC
+	::usleep(500000);
+
+	Optimize();
 }
 
 void ResourceManager::EvtBbqExit() {
@@ -174,7 +218,8 @@ void ResourceManager::ControlLoop() {
 			EvtExcStart();
 			break;
 		case EXC_STOP:
-			logger->Debug("Event [EXC_STOP");
+			logger->Debug("Event [EXC_STOP]");
+			EvtExcStop();
 			break;
 		case BBQ_EXIT:
 			logger->Debug("Event [BBQ_EXIT]");

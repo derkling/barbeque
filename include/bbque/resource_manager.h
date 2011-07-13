@@ -157,6 +157,16 @@ private:
 	ResourceManager();
 
 	/**
+	 * @brief   Run on optimization cycle (i.e. Schedule and Synchronization)
+	 * Once an event happens which impacts on resources usage or availability
+	 * an optimization cycle could be triggered by calling this method.
+	 * An optimization cycles involve a run of the resource scheduler policy
+	 * (e.g. YaMCA)  and an eventual Synchroniation of the active applications
+	 * according to the currently loaded synchronization policy (e.g. SASB).
+	 */
+	void Optimize();
+
+	/**
 	 * @brief   The run-time resource manager setup routine
 	 * This provides all the required playground setup to run the Barbeque RTRM.
 	 */
@@ -173,6 +183,11 @@ private:
 	 * @brief Process a EXC_START event
 	 */
 	void EvtExcStart();
+
+	/**
+	 * @brief Process a EXC_STOP event
+	 */
+	void EvtExcStop();
 
 	/**
 	 * @brief Process a BBQ_EXIT event
