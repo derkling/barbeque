@@ -1,0 +1,193 @@
+<?xml version="1.0"?>
+<BarbequeRTRM version="0.4">
+  <application priority="4">
+
+    <!-- This is the collection recipe-global RTM contratins -->
+    <runtime>
+    </runtime>
+
+    <!-- This is the collection recipe-global DMM contratins -->
+    <middleware>
+    </middleware>
+
+    <!-- This is the collection recipe-global BBQ contratins -->
+    <constraints>
+      <constraint resource="dma" type="L" bound="10"/>
+      <constraint resource="arch.clusters.cluster.pe" type="L" bound="1"/>
+      <constraint resource="arch.mem" type="L" bound="32"/>
+      <constraint resource="arch.clusters.mem" type="U" bound="64"/>
+    </constraints>
+
+    <!-- This is the collection recipe-global BBQ plugins data -->
+    <plugins>
+      <plugin name="YaMCa" type="optimizer" required="y">
+        <author>"Davide Zoni"</author>
+        <bbque-min-ver>0.1</bbque-min-ver>
+      </plugin>
+      <plugin name="sync3" type="synch_protocol" required="y">
+        <bbque-min-ver>0.1</bbque-min-ver>
+      </plugin>
+    </plugins>
+
+    <!-- This is the collection AWM specific parameters -->
+    <awms>
+
+      <!-- Each AWM has a dedicated entry with BBQ, RTM and DMM specific
+           parameters -->
+      <awm id="0" name="wm0" value="3">
+
+        <runtime name="IMEC-RTM">
+          <!-- This is the section devoted to the collection of IMEC RTM
+               parameters for this AWM (id=0, name="wm0").
+               Each model has a dedicated subsection which should provide the
+               list of required parameters with the corresponding value.
+          -->
+          <model name="Pareto">
+            <!-- This is an example of PARETO model parameters. -->
+            <param name="confidence" value="64"/>
+            <param name="hypo_step" value="3"/>
+            <param name="max_arm_length" value="3"/>
+            <param name="power" value="1.868712"/>
+            <param name="disper" value="27.987533"/>
+            <param name="throughput_kpix_s" value="247.974905"/>
+          </model>
+          <model name="First Order">
+            <!-- Put thereafter the list of "First Order" model parameters. -->
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </model>
+          <model name="Second Order">
+            <!-- Put thereafter the list of "Second Order" model parameters. -->
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </model>
+        </runtime>
+
+        <middleware name="ICCS-DMM">
+          <!-- This is the section devoted to the collection of ICCS DMM
+               parameters for this AWM (id=0, name="wm0").
+          -->
+          <param name="to_be_defined" value="64"/>
+          <param name="another_one" value="3"/>
+        </middleware>
+
+        <resources>
+          <!-- This is the section devoted to the collection of POLIMI BBQ
+               parameters for this AWM (id=0, name="wm0").
+               Each working mode defines the set of resources required to run
+               into this configuration. Resource requirement are platform
+               specific, thus each platform has a specific section with a
+               detailed list of resources required.
+          -->
+          <arch name="P2012">
+            <!-- This is the section devoted to P2012 related resource
+                 requirements, once running on this AWM (id=0, name="wm0")
+            -->
+            <tile id="0">
+              <cluster id="0">
+                <pe qty="1"/>
+                <mem units="Kb" qty="3"/>
+              </cluster>
+            </tile>
+          </arch>
+        </resources>
+        <plugins>
+          <!-- Plugins of the Barbeque RTRM could define a dedicated section
+               with plugins specific data referred to this
+               AWM (id=0, name="wm0")
+          -->
+          <plugin name="YaMCa" type="optimizer" required="y">
+            <!-- Add here some plugin specific data requirements -->
+          </plugin>
+        </plugins>
+      </awm>
+
+      <!-- The previous comments apply to any of the following AWM entries -->
+      <awm id="1" name="wm1" value="2">
+
+        <runtime>
+          <model name="Pareto">
+            <param name="confidence" value="64"/>
+            <param name="hypo_step" value="3"/>
+            <param name="max_arm_length" value="3"/>
+            <param name="power" value="1.868712"/>
+            <param name="disper" value="27.987533"/>
+            <param name="throughput_kpix_s" value="247.974905"/>
+          </model>
+          <model name="First Order">
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </model>
+          <model name="Second Order">
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </model>
+        </runtime>
+
+        <middleware>
+          <dmm>
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </dmm>
+        </middleware>
+
+        <resources>
+          <arch name="P2012">
+            <tile id="0">
+              <cluster id="0">
+                <pe qty="2"/>
+                <mem units="Kb" qty="2"/>
+              </cluster>
+            </tile>
+          </arch>
+        </resources>
+
+      </awm>
+
+      <awm id="2" name="wm2" value="1">
+
+        <runtime>
+          <model name="Pareto">
+            <param name="confidence" value="64"/>
+            <param name="hypo_step" value="3"/>
+            <param name="max_arm_length" value="3"/>
+            <param name="power" value="1.868712"/>
+            <param name="disper" value="27.987533"/>
+            <param name="throughput_kpix_s" value="247.974905"/>
+          </model>
+          <model name="First Order">
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </model>
+          <model name="Second Order">
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </model>
+        </runtime>
+
+        <middleware>
+          <dmm>
+            <param name="to_be_defined" value="64"/>
+            <param name="another_one" value="3"/>
+          </dmm>
+        </middleware>
+
+        <resources>
+          <arch name="P2012">
+            <tile id="0">
+              <cluster id="0">
+                <pe qty="1"/>
+                <mem units="Kb" qty="2"/>
+              </cluster>
+            </tile>
+          </arch>
+        </resources>
+      </awm>
+
+    </awms>
+
+  </application>
+</BarbequeRTRM>
+
+
+
