@@ -547,6 +547,11 @@ Application::ExitCode_t Application::Unschedule() {
 	if (_State() == READY)
 		return APP_ABORT;
 
+	// Check if the application has been already blocked by a previous failed
+	// schedule request
+	if (_Blocking())
+		return APP_ABORT;
+
 	// Otherwise, the application should be running...
 	if (_State() != RUNNING) {
 		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
