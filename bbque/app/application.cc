@@ -385,7 +385,8 @@ Application::ExitCode_t Application::Terminate() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Enable() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex>
+		state_ul(schedule_mtx, std::defer_lock);
 
 	// Enabling the execution context
 	logger->Debug("Enabling EXC [%s]...", StrId());
@@ -419,7 +420,8 @@ Application::ExitCode_t Application::Enable() {
 Application::ExitCode_t Application::Disable() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex>
+		state_ul(schedule_mtx, std::defer_lock);
 
 	// Not disabled applications could not be marked as READY
 	if (_Disabled()) {
@@ -629,7 +631,8 @@ Application::ExitCode_t Application::SetBlocked() {
 }
 
 Application::ExitCode_t Application::ScheduleCommit() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex>
+		state_ul(schedule_mtx, std::defer_lock);
 
 	// Ignoring applications disabled during a SYNC
 	if (_Disabled()) {
