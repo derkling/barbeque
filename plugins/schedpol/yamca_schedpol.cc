@@ -187,9 +187,14 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		AppPtr_t const & papp = apps_it->second;
 		assert(papp);
 
-		// Skip if the application has been scheduled yet or disabled in the
-		// meanwhile
-		if (!papp->Active()) {
+		// Skip if the application has a next AWM yet and doesn't need to be
+		// reconfigured
+		if ((papp->State() == Application::RUNNING) && (papp->NextAWM()))
+			continue;
+
+		// Skip if the application has been rescheduled yet (with success) or
+		// disabled in the meanwhile
+		if (!papp->Active() && !papp->Blocking()) {
 			logger->Debug("Ordering: skipping [%s]. State = {%s}",
 						papp->StrId(),
 						Application::StateStr(papp->State()));
@@ -278,7 +283,13 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 			continue;
 		}
 
-		assert(app->NextAWM());
+		if (!app->Synching() || app->Blocking()) {
+			logger->Debug("Selecting: [%s] in %s/%s", app->StrId(),
+					Application::StateStr(app->State()),
+					Application::SyncStateStr(app->SyncState()));
+			continue;
+		}
+
 		AwmPtr_t const & new_awm = app->NextAWM();
 		logger->Info("Selecting: [%s] set to AWM{%d} on clusters map [%s]",
 					app->StrId(),
