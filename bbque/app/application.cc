@@ -535,7 +535,8 @@ Application::Reschedule(AwmPtr_t const & awm) {
 
 	// Otherwise, the application should be running...
 	if (_State() != RUNNING) {
-		logger->Crit("Rescheduling FAILED (Error: wrong application status)");
+		logger->Crit("Rescheduling FAILED (Error: wrong application status "
+				"{%s/%s})", StateStr(_State()), SyncStateStr(_SyncState()));
 		assert(_State() == RUNNING);
 		return APP_ABORT;
 	}
