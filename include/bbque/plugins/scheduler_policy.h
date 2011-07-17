@@ -54,6 +54,8 @@ public:
 		SCHED_OK,
 		/** Resource availability */
 		SCHED_RSRC_UNAV,
+		/** No more PEs available in the cluster */
+		SCHED_CLUSTER_FULL,
 		/** Application must be skipped due to a Disable/Stop event */
 		SCHED_SKIP_APP,
 		/** Error */

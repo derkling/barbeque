@@ -113,6 +113,9 @@ private:
 	/** Number of clusters on the platform	 */
 	uint64_t num_clusters;
 
+	/** Keep track the clusters without available PEs */
+	std::vector<bool> clusters_full;
+
 	/**
 	 * @brief The plugins constructor
 	 *

@@ -81,6 +81,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 	// Get the number of clusters
 	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
 	logger->Info("Schedule: Found %d clusters on the platform.", num_clusters);
+	clusters_full.resize(num_clusters);
+	clusters_full = { false };
 
 	logger->Info("lowest prio = %d", system.ApplicationLowestPriority());
 
@@ -145,13 +147,25 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 		SchedEntityMap_t sched_map;
 		logger->Debug("Schedule: ======================= Cluster%d :", cl_id);
 
+		// Skip current cluster if full
+		if (clusters_full[cl_id]) {
+			logger->Warn("Schedule: cluster %d is full, skipping...", cl_id);
+			continue;
+		}
+
 		// Order schedule entities by metrics
 		result = OrderSchedEntity(sched_map, apps, cl_id);
-		if (result != SCHED_OK)
-			return result;
+		if (result == SCHED_CLUSTER_FULL) {
+			clusters_full[cl_id] = true;
+			continue;
+		}
 
+		// Nothing to schedule in this cluster
 		if (sched_map.empty())
 			continue;
+
+		if (result != SCHED_OK)
+			return result;
 
 		// For each application schedule a working mode
 		SelectWorkingModes(sched_map);
@@ -298,6 +312,10 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		ExitCode_t result =
 			MetricsComputation(papp, (*awm_it), cl_id, *metrics);
 		switch (result) {
+		case SCHED_CLUSTER_FULL:
+			logger->Warn("Insert: No more PEs in cluster %d", cl_id);
+			return result;
+
 		case SCHED_RSRC_UNAV:
 			logger->Warn("Insert: Resources unavailables [ret %d]", result);
 			continue;
@@ -443,6 +461,11 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		rsrc_avail = rsrc_acct.Available(usage_it->second, rsrc_view_token);
 		logger->Debug("{%s} availability = %llu", usage_it->first.c_str(),
 				rsrc_avail);
+
+		// If all the PEs have been booked return
+		if ((rsrc_avail == 0) &&
+				(PathTemplate(usage_it->first).compare(RSRC_CLUST_PE) == 0))
+			return SCHED_CLUSTER_FULL;
 
 		// If there is not enough resource return
 		if (rsrc_avail < usage_it->second->value) {
