@@ -396,6 +396,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		AwmPtr_t const & wm,
 		int cl_id,
 		double & cont_level) {
+
 	// Safety data check
 	if (!wm) {
 		logger->Crit("Contention level: Missing working mode.\n"
@@ -422,10 +423,18 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 	wm->SetAttribute(SCHEDULER_POLICY_NAME, "binding", VoidPtr_t(rsrc_usages));
 
 	// Contention level
+	return ComputeContentionLevel(rsrc_usages, cont_level);
+}
+
+
+SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
+		UsagesMapPtr_t const & rsrc_usages,
+		double & cont_level) {
+
+	uint64_t rsrc_avail;
 	cont_level = 0;
 
 	// Check the availability of the resources requested
-	uint64_t rsrc_avail;
 	UsagesMap_t::const_iterator usage_it(rsrc_usages->begin());
 	UsagesMap_t::const_iterator end_usage(rsrc_usages->end());
 	while (usage_it != end_usage) {
@@ -435,12 +444,12 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		logger->Debug("{%s} availability = %llu", usage_it->first.c_str(),
 				rsrc_avail);
 
+		// If there is not enough resource return
 		if (rsrc_avail < usage_it->second->value) {
-			logger->Debug("Contention level: [%s] R=%d / A=%d (cluster %d)",
+			logger->Debug("Contention level: [%s] R=%d / A=%d",
 					usage_it->first.c_str(),
 					usage_it->second->value,
-					rsrc_avail,
-					cl_id);
+					rsrc_avail);
 
 			return SCHED_RSRC_UNAV;
 		}
@@ -457,7 +466,6 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 	logger->Debug("Contention level: %.4f", cont_level);
 	return SCHED_OK;
 }
-
 
 //----- static plugin interface
 

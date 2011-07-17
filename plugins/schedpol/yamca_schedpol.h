@@ -184,9 +184,9 @@ private:
 			AwmPtr_t const & wm, int cl_id, double & metrics);
 
 	/**
-	 * @brief Resources contention level
+	 * @brief Get resources contention level
 	 *
-	 * Compute a parameter for the evaluation of the scheduling metrics. In
+	 * Return a parameter for the evaluation of the scheduling metrics. In
 	 * particuar it catches the impact of resource request on the total
 	 * availability.
 	 *
@@ -197,6 +197,17 @@ private:
 	 */
 	ExitCode_t GetContentionLevel(AwmPtr_t const & wm, int cl_id,
 			double & cont_level);
+
+	/**
+	 * @brief Compute the resource contention level
+	 *
+	 * @param rsrc_usages Map of resource usages to bind
+	 * @param cont_level The contention level value to return
+	 * @return @see ExitCode_t
+	 */
+	ExitCode_t ComputeContentionLevel(UsagesMapPtr_t const & rsrc_usages,
+			double & cont_level);
+
 };
 
 } // namespace plugins
