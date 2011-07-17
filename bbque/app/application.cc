@@ -580,6 +580,11 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	AppPtr_t papp(awm->Owner());
 	ExitCode_t result;
 
+	// App is SYNC/BLOCKED for a previously failed scheduling.
+	// Reset state and syncState for this new attempt.
+	if (_Blocking())
+		SetState(schedule.preSyncState, SYNC_NONE);
+
 	logger->Debug("Schedule request for [%s] into AWM [%02d:%s]",
 			papp->StrId(), awm->Id(), awm->Name().c_str());
 
