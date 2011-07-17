@@ -411,14 +411,25 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	// Running Applications/ExC
 	for (; rapp_it != end_rapp; ++rapp_it) {
 		AppPtr_t const & papp = rapp_it->second;
-		assert(papp->NextAWM());
-		assert(papp->NextAWM()->GetResourceBinding());
+
+		// Application/EXC must always have a next AWM here
+		if (!papp->NextAWM()) {
+			assert(papp->NextAWM());
+			logger->Fatal("SyncInit: [%s] missing next AWM.");
+			return RA_ERR_SYNC_INIT;
+		}
+
+		logger->Debug("SyncInit: [%s] AWM {curr = %d / next = %d}",
+				papp->StrId(),
+				papp->CurrentAWM()->Id(),
+				papp->NextAWM()->Id());
 
 		// Acquire the resources
 		result = BookResources(papp, papp->NextAWM()->GetResourceBinding(),
 						sync_ssn.view, false);
 		if (result != RA_SUCCESS) {
-			logger->Error("SyncMode [%d]: Resource booking failed for %s",
+			logger->Fatal("SyncInit [%d]: Resource booking failed for %s."
+					" Aborting sync session...",
 					sync_ssn.count,
 					papp->StrId());
 
@@ -514,6 +525,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 				rsrc_usage->value,
 				Available(usages_it->first),
 				Total(usages_it->first));
+			PrintStatusReport();
 			assert(result == RA_SUCCESS);
 		}
 
