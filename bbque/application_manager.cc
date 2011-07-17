@@ -277,13 +277,13 @@ void ApplicationManager::PrintStatusReport() const {
 
 		if (awm)
 			snprintf(curr_awm_cl, 12, "%d:%s", awm->Id(),
-				awm->GetClusterSet().to_string().c_str());
+				awm->PrevClusterSet().to_string().c_str());
 		else
 			snprintf(curr_awm_cl, 12, "-");
 
 		if (next_awm)
 			snprintf(next_awm_cl, 12, "%d:%s", next_awm->Id(),
-				next_awm->GetClusterSet().to_string().c_str());
+				next_awm->ClusterSet().to_string().c_str());
 		else
 			snprintf(next_awm_cl, 12, "-");
 

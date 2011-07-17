@@ -236,7 +236,9 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 	}
 
 	// Update the clusters bitset
-	cluster_set.reset();
+	cluster_set.prev = cluster_set.curr;
+	cluster_set.curr.reset();
+
 	bind_it = usages_bind->begin();
 	end_bind = usages_bind->end();
 	for (; bind_it != end_bind; ++bind_it) {
@@ -244,9 +246,12 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
 		if (cl_id != RSRC_ID_NONE) {
 			logger->Debug("SetBinding: Bound into cluster %d", cl_id);
-			cluster_set.set(cl_id);
+			cluster_set.curr.set(cl_id);
 		}
 	}
+
+	// Cluster set changed ?
+	cluster_set.changed = cluster_set.prev != cluster_set.curr;
 
 	// Set the bind map
 	sys_rsrc_usages = usages_bind;

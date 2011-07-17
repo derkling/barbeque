@@ -300,7 +300,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 		logger->Info("Selecting: [%s] set to AWM{%d} on clusters map [%s]",
 					app->StrId(),
 					new_awm->Id(),
-					new_awm->GetClusterSet().to_string().c_str());
+					new_awm->ClusterSet().to_string().c_str());
 	}
 }
 

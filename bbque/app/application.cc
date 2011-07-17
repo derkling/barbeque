@@ -502,16 +502,24 @@ Application::SyncRequired(AwmPtr_t const & awm) {
 	assert(_CurrentAWM().get());
 
 	// Check if the assigned operating point implies RECONF|MIGREC|MIGRATE
-	if ((_CurrentAWM()->GetClusterSet() != awm->GetClusterSet()) &&
-			(_CurrentAWM()->Id() != awm->Id()))
+	if ((_CurrentAWM()->Id() != awm->Id()) &&
+			(_CurrentAWM()->ClusterSet() != awm->ClusterSet())) {
+		logger->Debug("SynchRequired: [%s] to MIGREC", StrId());
 		return MIGREC;
+	}
 
-	if (_CurrentAWM()->GetClusterSet() != awm->GetClusterSet())
+	if ((_CurrentAWM()->Id() == awm->Id()) &&
+			(_CurrentAWM()->ClustersChanged())) {
+		logger->Debug("SynchRequired: [%s] to MIGRATE", StrId());
 		return MIGRATE;
+	}
 
-	if (_CurrentAWM()->Id() != awm->Id())
+	if (_CurrentAWM()->Id() != awm->Id()) {
+		logger->Debug("SynchRequired: [%s] to RECONF", StrId());
 		return RECONF;
+	}
 
+	logger->Debug("SynchRequired: [%s] SYNC_NONE", StrId());
 	// NOTE: By default no reconfiguration is assumed to be required, thus we
 	// return the SYNC_STATE_COUNT which must be read as false values
 	return SYNC_NONE;

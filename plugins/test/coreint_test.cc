@@ -581,7 +581,7 @@ void CoreInteractionsTest::testScheduling() {
 		logger->Info("[%s] scheduled in AWM{%d} clusters = %s",
 				app_it->second->StrId(),
 				sched_awm->Id(),
-				sched_awm->GetClusterSet().to_string().c_str());
+				sched_awm->ClusterSet().to_string().c_str());
 	}
 
 	logger->Info("~~~~~~~~~~~~~ Scheduling finishd ~~~~~~~~~~~~");

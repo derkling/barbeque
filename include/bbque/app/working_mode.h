@@ -182,18 +182,28 @@ public:
 	 */
 	inline void ClearResourceBinding() {
 		sys_rsrc_usages->clear();
+		cluster_set.curr = cluster_set.prev;
 	}
 
 	/**
-	 * @brief Get the bitmap of the clusters currently used.
-	 *
-	 * Eeach bit set represents a cluster in use. When SetResourceBinding() is
-	 * called the set of clusters is properly filled.
-	 *
-	 * @return A bitset data structure
+	 * @see WorkingModeStatusIF
 	 */
-	inline ClustersBitSet const & GetClusterSet() const {
-		return cluster_set;
+	inline ClustersBitSet const & ClusterSet() const {
+		return cluster_set.curr;
+	}
+
+	/**
+	 * @see WorkingModeStatusIF
+	 */
+	inline ClustersBitSet const & PrevClusterSet() const {
+		return cluster_set.prev;
+	}
+
+	/**
+	 * @see WorkingModeStatusIF
+	 */
+	inline bool ClustersChanged() const {
+		return cluster_set.changed;
 	}
 
 private:
@@ -228,8 +238,15 @@ private:
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;
 
-	/** The set of clusters currently used by this working mode */
-	ClustersBitSet cluster_set;
+	/** The set of clusters used by this working mode */
+	struct cluster_set {
+		/** Save the previous set of clusters bound */
+		ClustersBitSet prev;
+		/** The current set of clusters bound */
+		ClustersBitSet curr;
+		/** True if current set differs from previous */
+		bool changed;
+	} cluster_set;
 
 };
 

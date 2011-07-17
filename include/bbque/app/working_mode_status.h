@@ -174,7 +174,29 @@ public:
 	 *
 	 * @return A bitset data structure
 	 */
-	virtual ClustersBitSet const & GetClusterSet() const = 0;
+	virtual ClustersBitSet const & ClusterSet() const = 0;
+
+	/**
+	 * @brief Get the bitmap of the clusters previously used.
+	 *
+	 * When SetResourceBinding() is called the set of clusters is
+	 * saved as "prev".
+	 *
+	 * @return A bitset data structure
+	 */
+	virtual ClustersBitSet const & PrevClusterSet() const = 0;
+
+	/**
+	 * @brief Check if clusters used are changed
+	 *
+	 * When a new resource binding is set, if the clusters map has changed keep
+	 * track of the change by setting a boolean variable. When the method is
+	 * call it returns the value of such variale. This is more efficient than
+	 * checking if curr != prev every time.
+	 *
+	 * @return True if the AWM use a different map of clusters, false otherwise.
+	 */
+	virtual bool ClustersChanged() const = 0;
 
 };
 
