@@ -99,8 +99,10 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 		// Schedule applications with priority == prio
 		result = SchedulePrioQueue(system.Applications(prio));
-		if (result != SCHED_OK)
+		if (result != SCHED_OK) {
+			rsrc_acct.PutView(rsrc_view_token);
 			return result;
+		}
 	}
 
 	logger->Debug(
