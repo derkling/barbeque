@@ -671,13 +671,17 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	case RECONF:
 	case MIGREC:
 	case MIGRATE:
-		SetRunning();
 		schedule.awm = schedule.next_awm;
 		schedule.next_awm.reset();
+		SetRunning();
 		break;
+
 	case BLOCKED:
+		schedule.awm.reset();
+		schedule.next_awm.reset();
 		SetBlocked();
 		break;
+
 	default:
 		logger->Crit("Sync for EXC [%s] FAILED"
 				"(Error: invalid synchronization state)");
