@@ -97,6 +97,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 				system.Applications(prio)->size(),
 				prio);
 
+		// Schedule applications with priority == prio
 		result = SchedulePrioQueue(system.Applications(prio));
 		if (result != SCHED_OK)
 			return result;
@@ -114,17 +115,19 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
+	// Set the counter (avoiding overflow)
 	tok_counter == std::numeric_limits<uint32_t>::max() ?
 		tok_counter = 0:
 		++tok_counter;
 
+	// Build a string path for the resource state view
 	std::string schedpolname(
 			SCHEDULER_POLICY_NAMESPACE
 			SCHEDULER_POLICY_NAME);
-
 	char token_path[30];
 	snprintf(token_path, 30, "%s%d", schedpolname.c_str(), tok_counter);
 
+	// Get a resource state view
 	ResourceAccounter::ExitCode_t view_result;
 	view_result = rsrc_acct.GetView(token_path, rsrc_view_token);
 	if (view_result != ResourceAccounter::RA_SUCCESS) {
@@ -323,6 +326,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		double * metrics = new double;
 		ExitCode_t result =
 			MetricsComputation(papp, (*awm_it), cl_id, *metrics);
+
 		switch (result) {
 		case SCHED_CLUSTER_FULL:
 			logger->Warn("Insert: No more PEs in cluster %d", cl_id);
@@ -332,9 +336,11 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 			logger->Warn("Insert: [%s] AWM{%d} CL=%d unavailable resources "
 					"[RA:%d]", papp->StrId(), (*awm_it)->Id(), cl_id, result);
 			continue;
+
 		case SCHED_ERROR:
 			logger->Error("Insert: An error occurred [ret %d]", result);
 			return result;
+
 		default:
 			break;
 		}
