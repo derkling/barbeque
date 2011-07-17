@@ -392,6 +392,11 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 
 		// Acquiring the resources for RUNNING Applications
 		if (!papp->Blocking()) {
+
+			logger->Debug("SyncAcquire: %s is in %s/%s", papp->StrId(),
+					papp->StateStr(papp->State()),
+					papp->SyncStateStr(papp->SyncState()));
+
 			raResult = ra.SyncAcquireResources(papp,
 				papp->NextAWM()->GetResourceBinding());
 
@@ -405,7 +410,6 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 		// NOTE: this should remove the current app from the queue,
 		// otherwise we enter an endless loop
 		am.SyncCommit(papp);
-
 	}
 
 	logger->Debug("STEP 4: postChange() DONE");
