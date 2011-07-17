@@ -80,10 +80,10 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 	// Get the number of clusters
 	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
-	logger->Info("Schedule: Found %d clusters on the platform.", num_clusters);
 	clusters_full.resize(num_clusters);
 	clusters_full = { false };
 
+	logger->Info("Schedule: Found %d clusters on the platform.", num_clusters);
 	logger->Info("lowest prio = %d", system.ApplicationLowestPriority());
 
 	// Iterate from the highest to the lowest priority applications queue
@@ -206,10 +206,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		if (result == SCHED_SKIP_APP)
 			continue;
 
-		if (result == SCHED_ERROR) {
-			logger->Error("Ordering: Error [ret %d]", result);
+		if (result != SCHED_OK)
 			return result;
-		}
 	}
 
 	return SCHED_OK;
@@ -247,8 +245,11 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Avoid double AWM selection for RUNNING applications with an already
 		// assigned AWM.
-		if ((app->State() == Application::RUNNING) && app->NextAWM()) 
+		if ((app->State() == Application::RUNNING) && next_awm) {
+			logger->Debug("Selecting: [%s] doesn't need to reconfigure"
+					" (AWM=%d)", app->StrId(), app->CurrentAWM()->Id());
 			continue;
+		}
 
 		// If an AWM has been previously set it should have a greater metrics.
 		// Thus we can skip to the next scheduling entity
@@ -328,7 +329,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 			return result;
 
 		case SCHED_RSRC_UNAV:
-			logger->Warn("Insert: Resources unavailables [ret %d]", result);
+			logger->Warn("Insert: [%s] AWM{%d} CL=%d unavailable resources "
+					"[RA:%d]", papp->StrId(), (*awm_it)->Id(), cl_id, result);
 			continue;
 		case SCHED_ERROR:
 			logger->Error("Insert: An error occurred [ret %d]", result);
@@ -344,8 +346,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 					static_cast<double>(*metrics),
 					SchedEntity_t(papp, (*awm_it))));
 
-		logger->Info("Insert: [%s] AWM{%d} metrics %.4f", papp->StrId(),
-				(*awm_it)->Id(), *metrics);
+		logger->Info("Insert: [%s] AWM{%d} CL=%d metrics %.4f", papp->StrId(),
+				(*awm_it)->Id(), cl_id, *metrics);
 	}
 
 	return SCHED_OK;
