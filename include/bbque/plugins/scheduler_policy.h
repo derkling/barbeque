@@ -24,7 +24,7 @@
 #ifndef BBQUE_SCHEDULER_POLICY_H_
 #define BBQUE_SCHEDULER_POLICY_H_
 
-#define SCHEDULER_POLICY_NAMESPACE "sched.pol."
+#define SCHEDULER_POLICY_NAMESPACE "schp."
 
 namespace bbque {
 	class SystemView;
