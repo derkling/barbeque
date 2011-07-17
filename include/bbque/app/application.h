@@ -249,6 +249,18 @@ public:
 	ExitCode_t ScheduleCommit();
 
 	/**
+	 * @brief The application can continue to run
+	 *
+	 * This method must be called by ApplicationManager to signal that the
+	 * Application (previously RUNNING) doesn't need to be reconfigured or
+	 * migrated. This it can continue to run in the same AWM, using the same
+	 * resources.
+	 *
+	 * @return APP_SUCCESS for success, APP_ABORT for failed.
+	 */
+	ExitCode_t ScheduleContinue();
+
+	/**
 	 * @see ApplicationConfIF
 	 */
 	ExitCode_t SetWorkingModeConstraint(RTLIB_Constraint & constraint);

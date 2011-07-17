@@ -693,7 +693,16 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
 			papp->SyncStateStr());
 
-	PrintStatusReport();
+	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::RunningCommit(AppPtr_t papp) {
+	Application::ExitCode_t app_result;
+
+	app_result = papp->ScheduleContinue();
+	if (app_result != Application::APP_SUCCESS)
+		return AM_ABORT;
 
 	return AM_SUCCESS;
 }

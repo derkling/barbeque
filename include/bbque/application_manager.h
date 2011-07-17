@@ -212,6 +212,14 @@ public:
 	ExitCode_t NotifyNewState(AppPtr_t papp, Application::State_t next);
 
 	/**
+	 * @brief Commit the "continue to run" for the specified application
+	 *
+	 * @param papp a pointer to the interested application
+	 * @return AM_SUCCESS on success, AM_ABORT on failure
+	 */
+	ExitCode_t RunningCommit(AppPtr_t papp);
+
+	/**
 	 * @breif Dump a logline to report on current Status queue counts
 	 */
 	void ReportStatusQ() const;

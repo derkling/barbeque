@@ -404,7 +404,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	ResourceAccounter::ExitCode_t result;
+	ApplicationManager::ExitCode_t am_result;
 	SystemView & sv(SystemView::GetInstance());
+	ApplicationManager & am(ApplicationManager::GetInstance());
 	AppsUidMap_t::const_iterator rapp_it(sv.ApplicationsRunning()->begin());
 	AppsUidMap_t::const_iterator end_rapp(sv.ApplicationsRunning()->end());
 
@@ -436,6 +438,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 			SyncAbort();
 			return RA_ERR_SYNC_INIT;
 		}
+
+		// Continue to run...
+		am_result = am.RunningCommit(papp);
+		if (am_result != ApplicationManager::AM_SUCCESS)
+			return RA_ERR_SYNC_INIT;
 	}
 
 	logger->Debug("SyncMode [%d]: Initialization finished", sync_ssn.count);

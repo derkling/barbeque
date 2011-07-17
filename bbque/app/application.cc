@@ -694,7 +694,29 @@ Application::ExitCode_t Application::ScheduleCommit() {
 			StrId(), _State(), StateStr(_State()));
 
 	return APP_SUCCESS;
+}
 
+Application::ExitCode_t Application::ScheduleContinue() {
+	assert(schedule.awm);
+	assert(schedule.next_awm);
+
+	if (_State() != RUNNING) {
+		logger->Error("ScheduleRunning: [%s] is not running. State {%s/%s}",
+				StrId(), StateStr(_State()), SyncStateStr(_SyncState()));
+		assert(_State() == RUNNING);
+		return APP_ABORT;
+	}
+
+	if (schedule.awm->Id() != schedule.next_awm->Id()) {
+		logger->Error("ScheduleRunning: [%s] AWMs differs. "
+				"{curr=%d / next=%d}", StrId(),
+				schedule.awm->Id(), schedule.next_awm->Id());
+		assert(schedule.awm->Id() != schedule.next_awm->Id());
+		return APP_ABORT;
+	}
+
+	schedule.next_awm.reset();
+	return APP_SUCCESS;
 }
 
 /*******************************************************************************
