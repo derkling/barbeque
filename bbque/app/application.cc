@@ -605,20 +605,22 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	// Checking for resources availability
 	booking = ra.BookResources(papp, resource_set, vtok);
 
-	// If resources are available, bind the resource set into the working
-	// mode, and thus reschedule the application. Otherwise unschedule.
+	// If resources are not available, unschedule
 	if (booking != br::ResourceAccounter::RA_SUCCESS) {
 		logger->Debug("Unscheduling [%s]...", papp->StrId());
 		Unschedule();
 		return APP_WM_REJECTED;
 	}
 
+	// Bind the resource set to the working mode
+	awm->SetResourceBinding(resource_set);
+
+	// Reschedule accordingly to "awm"
 	logger->Debug("Rescheduling [%s] into AWM [%d:%s]...",
 			papp->StrId(), awm->Id(), awm->Name().c_str());
-
-	awm->SetResourceBinding(resource_set);
 	result = Reschedule(awm);
 
+	// Reschedule failed. Release resources and clear resource binding
 	if (result != APP_SUCCESS) {
 		ra.ReleaseResources(papp, vtok);
 		awm->ClearResourceBinding();
@@ -627,6 +629,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 
 	// Set next awm
 	schedule.next_awm = awm;
+
 	return APP_WM_ACCEPTED;
 }
 
