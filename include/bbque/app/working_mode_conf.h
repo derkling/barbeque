@@ -59,7 +59,7 @@ public:
 	 * @param time Time spent in switching to destination working mode
 	 * @return A reference to the TransitionOverheads just created
 	 */
-	virtual ExitCode_t AddOverheadInfo(uint16_t dest_awm_id, double time) = 0;
+	virtual ExitCode_t AddOverheadInfo(uint8_t dest_awm_id, double time) = 0;
 
 	/**
 	 * @brief Set a resource binding for the resource usages

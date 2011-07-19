@@ -45,7 +45,7 @@ WorkingMode::WorkingMode() {
 }
 
 
-WorkingMode::WorkingMode(uint16_t _id,
+WorkingMode::WorkingMode(uint8_t _id,
 		std::string const & _name,
 		uint16_t _value):
 	id(_id),
@@ -106,7 +106,7 @@ uint64_t WorkingMode::ResourceUsageValue(
 }
 
 
-WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
+WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint8_t _dest_awm_id,
 		double _time) {
 	// Check the existance of the destination AWM
 	assert(owner->GetRecipe().get() != NULL);
@@ -119,7 +119,7 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
 	// Update overhead info
 	OverheadsMap_t::iterator it(overheads.find(_dest_awm_id));
 	if (it == overheads.end()) {
-		overheads.insert(std::pair<uint16_t, OverheadPtr_t>(
+		overheads.insert(std::pair<uint8_t, OverheadPtr_t>(
 					_dest_awm_id, OverheadPtr_t(
 						new TransitionOverheads(_time))));
 	}
@@ -139,7 +139,7 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint16_t _dest_awm_id,
 }
 
 
-OverheadPtr_t WorkingMode::OverheadInfo(uint16_t _dest_awm_id) const {
+OverheadPtr_t WorkingMode::OverheadInfo(uint8_t _dest_awm_id) const {
 	// Overhead descriptor of the destination working mode
 	OverheadsMap_t::const_iterator it(overheads.find(_dest_awm_id));
 	if (it != overheads.end())
