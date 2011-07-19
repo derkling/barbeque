@@ -42,6 +42,7 @@ get_filename_component(_gitdescmoddir ${CMAKE_CURRENT_LIST_FILE} PATH)
 function(get_git_head_revision _refspecvar _hashvar)
 	set(GIT_DIR "${CMAKE_SOURCE_DIR}/.git")
 	if(NOT EXISTS "${GIT_DIR}")
+		message ( STATUS "Git tree NOT FOUND")
 		# not in git
 		set(${_refspecvar} "GITDIR-NOTFOUND" PARENT_SCOPE)
 		set(${_hashvar} "GITDIR-NOTFOUND" PARENT_SCOPE)
@@ -59,11 +60,12 @@ function(get_git_head_revision _refspecvar _hashvar)
 
 	set(${_refspecvar} "${HEAD_REF}" PARENT_SCOPE)
 	set(${_hashvar} "${HEAD_HASH}" PARENT_SCOPE)
+
 endfunction()
 
 function(git_describe _var)
 	if(NOT GIT_FOUND)
-		find_package(Git QUIET)
+		find_package(Git)
 	endif()
 	get_git_head_revision(refspec hash)
 	if(NOT GIT_FOUND)
@@ -75,6 +77,9 @@ function(git_describe _var)
 		return()
 	endif()
 
+	#message ( STATUS "Git Head... ${refspec}")
+	#message ( STATUS "Git Hash... ${hash}")
+
 	# TODO sanitize
 	#if((${ARGN}" MATCHES "&&") OR
 	#	(ARGN MATCHES "||") OR
@@ -85,7 +90,7 @@ function(git_describe _var)
 
 	#message(STATUS "Arguments to execute_process: ${ARGN}")
 
-	execute_process(COMMAND "${GIT_EXECUTABLE}" describe ${hash} ${ARGN}
+	execute_process(COMMAND "${GIT_EXECUTABLE}" describe --tags ${hash} ${ARGN}
 		WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 		RESULT_VARIABLE res
 		OUTPUT_VARIABLE out
