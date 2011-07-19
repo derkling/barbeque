@@ -8,29 +8,18 @@
 # LOG4CPP_LIBRARIES, the libraries to link against to use pwlib.
 # LOG4CPP_FOUND, If false, don't try to use pwlib.
 
-FIND_PATH(LOG4CPP_INCLUDE_DIR log4cpp/Category.hh
-  PATHS
-    "$ENV{LOG4CPP}/include"
-    /usr/local/include
-    /usr/include
-)
+find_path(LOG4CPP_INCLUDE_DIR log4cpp/Category.hh)
+find_library(LOG4CPP_LIBRARIES log4cpp)
 
-FIND_LIBRARY(LOG4CPP_LIBRARIES log4cpp
-  PATHS
-    "$ENV{LOG4CPP}/lib"
-    /usr/local/lib
-    /usr/lib
-)
+set(LOG4CPP_FOUND 0)
+if (LOG4CPP_INCLUDE_DIR)
+  if (LOG4CPP_LIBRARIES)
+    set(LOG4CPP_FOUND 1)
+    message(STATUS "Found Log4CPP: ${LOG4CPP_LIBRARIES}")
+  endif (LOG4CPP_LIBRARIES)
+endif (LOG4CPP_INCLUDE_DIR)
 
-SET(LOG4CPP_FOUND 0)
-IF(LOG4CPP_INCLUDE_DIR)
-  IF(LOG4CPP_LIBRARIES)
-    SET(LOG4CPP_FOUND 1)
-    MESSAGE(STATUS "Found Log4CPP")
-  ENDIF(LOG4CPP_LIBRARIES)
-ENDIF(LOG4CPP_INCLUDE_DIR)
-
-MARK_AS_ADVANCED(
+mark_as_advanced(
   LOG4CPP_INCLUDE_DIR
   LOG4CPP_LIBRARIES
 )
