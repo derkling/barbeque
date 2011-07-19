@@ -121,7 +121,7 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 
 			// Check if the current namespace to find is ID-based
 			std::string res_name = (*it_child)->data->Name();
-			size_t id_pos;
+			size_t id_pos = std::string::npos;
 			if (opt == RT_SET_MATCHES)
 				id_pos = curr_ns.find_first_of("0123456789");
 
