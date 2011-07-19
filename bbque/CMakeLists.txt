@@ -78,6 +78,9 @@ target_link_libraries(
 	-Wl,-whole-archive bbque_recipe_loader_xml -Wl,-no-whole-archive
 )
 
+# Use link path ad RPATH
+set_property(TARGET barbeque PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 # Install the Barbeque target
 install (TARGETS barbeque RUNTIME
 		DESTINATION ${BBQUE_PATH_BBQ}
