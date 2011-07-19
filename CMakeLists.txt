@@ -1,16 +1,33 @@
+################################################################################
+# The Barbeque RTRM Building Configuration
+################################################################################
 
-# The name of this project is "BARBEQUE".
-project (BARBEQUE)
+# Define CMake compatibility version
+cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 
-cmake_minimum_required (VERSION 2.6)
-if (UNIX)
-	add_definitions(-DUNIX)
-endif(UNIX)
+# The name of this project.
+project (BarbequeRTRM)
 
+################################################################################
+# Installation items
+################################################################################
+
+set (BBQUE_PATH_BBQ     "sbin")
+set (BBQUE_PATH_CONF    "etc/bbque")
+set (BBQUE_PATH_RECIPES "etc/bbque/recipes")
+set (BBQUE_PATH_HEADERS "usr/include/bbque")
+set (BBQUE_PATH_RTLIB   "usr/lib/bbque")
+set (BBQUE_PATH_PLUGINS "usr/lib/bbque/plugins")
+set (BBQUE_PATH_DOCS    "usr/share/bbque")
+set (BBQUE_PATH_VAR     "var/bbque")
+
+
+################################################################################
+# Common initialization settings
+################################################################################
 
 # Load additional CMake modules
-list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/.cmake/")
-
+list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/.cmake/")
 
 # Make sure the compiler can find include files
 include_directories (
@@ -18,79 +35,103 @@ include_directories (
 	${PROJECT_SOURCE_DIR}/include
 )
 
-# Select default release version
+message ( STATUS )
+message ( STATUS "Checking dependencies..." )
+
+# Setup the source tree versioning number
+include (GetGitRevisionDescription)
+git_describe(GIT_SHA1)
+set (VERSION "${GIT_SHA1}")
+
+# Check if running un UNIX like systems
+if (UNIX)
+	add_definitions(-DUNIX)
+endif(UNIX)
+
+
+################################################################################
+# Build version specific configurations
+################################################################################
+# Choose the type of build, options are:
+#    None Debug Release RelWithDebInfo MinSizeRel
+
+# Set default release version to RELEASE
 if (NOT CMAKE_BUILD_TYPE)
-	set (CMAKE_BUILD_TYPE Release CACHE STRING
-		"Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel."
-		FORCE)
+	set (CMAKE_BUILD_TYPE RelWithDebInfo)
 endif (NOT CMAKE_BUILD_TYPE)
 
-# Configure the building options for each release
-# Common
-set (CMAKE_CXX_FLAGS "-Wall")
-# DEBUGGING
+# Options common to all build version
+set (CMAKE_CXX_FLAGS "-std=c++0x -Wall")
+
+# Options for build version: DEBUG
 set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (BBQUE_DEBUG ON)
-	message ("-- Build type: DEBUG")
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
-# DESKTOP RELEASE
+
+# Options for build version: DESKTOP RELEASE
 set (CMAKE_CXX_FLAGS_RELEASE "-O3")
-# EMBEDDED RELEASE
+
+# Options for build version: EMBEDDED RELEASE
 set (CMAKE_CXX_FLAGS_MINSIZEREL "-Os")
 
 
-# Define user-selectable configuration options
-OPTION(BBQUE_RPC_FIFO "Build RTLib with FIFO channel support" ON)
+################################################################################
+# Installation locations
+################################################################################
 
-# Define user-selectable configuration options
-OPTION(BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
-ResourceAbstraction module" ON)
+# set default install prefix to project root directory
+if (CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
+	set (CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}/out" )
+endif (CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
 
-# Defines documentation files
-set (DOC_FILES
-	AUTHORS NEWS README)
-set (DOC_PATH
-	"share/doc/barbeque")
-install (FILES ${DOC_FILES}
-	DESTINATION ${DOC_PATH})
 
-# Setup the source tree versioning number
-include(GetGitRevisionDescription)
-git_describe(GIT_SHA1)
+################################################################################
+# User selectable options
+################################################################################
 
-# Setup packaging
-set (CPACK_PACKAGE_DESCRIPTION
-	"The Barbeque RTRM")
-set (CPACK_PACKAGE_DESCRIPTION_SUMMARY
-	"The RTRM protorype implementation for 2PARMA EU FP7 project")
-set (CPACK_PACKAGE_NAME "barbeue")
-set (CPACK_DEBIAN_PACKAGE_DEPENDS
-	"libc6 (>= 2.11), libgcc1 (>= 1:4.1), liblog4cpp (>= 1.0)")
+# RPC Channel abstraction: use FIFO implementation (defaulf: YES)
+option (BBQUE_RPC_FIFO "Build RTLib with FIFO channel support" ON)
 
-set (CPACK_PACKAGE_CONTACT "Patrick Bellasi <derkling@gmail.com>")
-set (CPACK_PACKAGE_VENDOR "Politecnico di Milano")
-set (CPACK_PACKAGE_VERSION_MAJOR "0")
-set (CPACK_PACKAGE_VERSION_MINOR "0")
-set (CPACK_PACKAGE_VERSION_PATCH "${GIT_SHA1}")
-set (VERSION "${GIT_SHA1}")
+# Platform data: use hard-coded TEST configuration (defaulf: YES)
+option (BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
+		ResourceAbstraction module" ON)
 
-set (CPACK_GENERATOR "DEB")
-set (CPACK_PACKAGE_FILE_NAME
-	"${CPACK_PACKAGE_NAME}-${VERSION}")
-include (CPack)
-
-# Check if doxygen is installed
-find_package(Doxygen)
-if (DOXYGEN_FOUND STREQUAL "NO")
-	message (WARNING "Doxygen not found!")
-	message ("To build documentation, please get a copy from http://www.doxygen.org")
-else (DOXYGEN_FOUND STREQUAL "NO")
-	include (BuildDoxygenDocumentation)
-endif (DOXYGEN_FOUND STREQUAL "NO")
+################################################################################
+# Subdirectories analysis
+################################################################################
 
 # Recurse into project subfolders
 add_subdirectory (rtlib)
 add_subdirectory (plugins)
 add_subdirectory (bbque)
 add_subdirectory (testing)
+
+
+################################################################################
+# Configuration resume
+################################################################################
+
+# display status message for important variables
+message ( STATUS )
+message ( STATUS "=====[ Barbeque RTRM - Building System Configuration ]"
+                 "==========================" )
+message ( STATUS "Barbeque Version...... ${VERSION}" )
+message ( STATUS "Build type............ ${CMAKE_BUILD_TYPE}" )
+message ( STATUS "Installation prefix... ${CMAKE_INSTALL_PREFIX}" )
+message ( STATUS "   Barbeuqe RTRM...... <prefix>/${BBQUE_PATH_BBQ}" )
+message ( STATUS "   Configuration...... <prefix>/${BBQUE_PATH_CONF}" )
+message ( STATUS "   Recipes............ <prefix>/${BBQUE_PATH_RECIPES}" )
+message ( STATUS "   Plugins............ <prefix>/${BBQUE_PATH_PLUGINS}" )
+message ( STATUS "   Var(RPC-Channel)... <prefix>/${BBQUE_PATH_VAR}" )
+message ( STATUS "   Headers............ <prefix>/${BBQUE_PATH_HEADERS}" )
+message ( STATUS "   RTLib library...... <prefix>/${BBQUE_PATH_RTLIB}" )
+message ( STATUS "   Documentation...... <prefix>/${BBQUE_PATH_DOCS}" )
+message ( STATUS )
+message ( STATUS "Default values could be changes at command line, with:")
+message ( STATUS "  cmake -D<Variable>=<Value>" )
+message ( STATUS "or use the '-i' cmake flag to run in interactive mode" )
+message ( STATUS "======================================================"
+                 "==========================" )
+message(STATUS)
+

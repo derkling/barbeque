@@ -16,19 +16,25 @@ test_time = 1
 # Recipes Loader Options
 ################################################################################
 [rloader]
-xml.recipe_dir = /etc/bbque/recipes
+xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
 
 ################################################################################
 # RPC Channel Options
 ################################################################################
 [rpc]
-fif.dir = /var/bbque
+fif.dir = ${CMAKE_INSTALL_PREFIX}/var/bbque
+
+################################################################################
+# Resource Scheduler Options
+################################################################################
+[ResourceScheduler]
+policy = yamca
 
 ################################################################################
 # Logger Options
 ################################################################################
 [logger]
-log4cpp.conf_file = /etc/bbque/bbque.conf
+log4cpp.conf_file = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/bbque.conf
 
 ################################################################################
 # Log4CPP Logger Configuration
@@ -38,34 +44,43 @@ log4cpp.conf_file = /etc/bbque/bbque.conf
 # Set root category priority and its appender
 # By default all logs are only from level greater than or equal to INFO
 ###
-#rootCategory = INFO, raFile
+rootCategory = INFO, raFile
+#rootCategory = INFO, raConsole
 #rootCategory = INFO, raSyslog
-rootCategory = INFO, raConsole
 #rootCategory = INFO, raRSyslog
 ###
 # Uncomment each of the following lines for subsystems you want
 # to redefine the category priority to a value diffent from that of
 # the rootCategory
 ###
-category.bq = 		DEBUG
-category.bq.Test =	DEBUG
-category.bq.pm =	DEBUG
-category.bq.rm = 	DEBUG
-category.bq.ap = 	DEBUG
-category.bq.sig = 	DEBUG
-category.rpc   = 	DEBUG
-category.rpc.fif  = 	DEBUG
-category.rpc.prx  = 	DEBUG
+#category.bq = 		DEBUG
+#category.bq.Test =	DEBUG
+#category.bq.pm =	DEBUG
+#category.bq.rm = 	DEBUG
+#category.bq.sm = 	DEBUG
+#category.bq.ra = 	DEBUG
+#category.bq.ap = 	DEBUG
+#category.bq.tpd = 	DEBUG
+#category.ap = 		DEBUG
+#category.ap.awm =	DEBUG
+#category.ap.exc =	DEBUG
+#category.rpc   = 	DEBUG
+#category.test   = 	DEBUG
+#category.rpc.fif  = 	DEBUG
+#category.rpc.prx  = 	DEBUG
+#category.rloader = 	DEBUG
+#category.sched.pol = 	DEBUG
+#category.sync.pol = 	DEBUG
 ###
 # Root Appender
 ###
 appender.raConsole = org.apache.log4j.ConsoleAppender
 appender.raConsole.layout = org.apache.log4j.PatternLayout
 appender.raConsole.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-10c : %m%n
-#appender.raFile = org.apache.log4j.FileAppender
-#appender.raFile.fileName = /var/log/bbque.log
-#appender.raFile.layout = org.apache.log4j.PatternLayout
-#appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n
+appender.raFile = org.apache.log4j.FileAppender
+appender.raFile.fileName = ${CMAKE_INSTALL_PREFIX}/var/log/bbque.log
+appender.raFile.layout = org.apache.log4j.PatternLayout
+appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n
 #appender.raSyslog = org.apache.log4j.SyslogAppender
 #appender.raSyslog.layout = org.apache.log4j.PatternLayout
 #appender.raSyslog.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n

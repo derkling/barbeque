@@ -30,6 +30,16 @@ configure_file (
 	"${PROJECT_BINARY_DIR}/include/bbque/config.h"
 )
 
+# Setup configuration files based on installation paths
+configure_file (
+	"${PROJECT_SOURCE_DIR}/config/bbque.conf.in"
+	"${PROJECT_BINARY_DIR}/config/bbque.conf"
+)
+configure_file (
+	"${PROJECT_SOURCE_DIR}/config/bbque.conf_dbg.in"
+	"${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
+)
+
 # Build subdirs
 add_subdirectory(utils)
 add_subdirectory(app)
@@ -64,8 +74,18 @@ target_link_libraries(
 # Linking static plugins
 target_link_libraries(
 	barbeque
-#	-Wl,-whole-archive plugin_test_dummy -Wl,-no-whole-archive
-	-Wl,-whole-archive plugin_logger_log4cpp -Wl,-no-whole-archive
-	-Wl,-whole-archive plugin_recipe_loader_xml -Wl,-no-whole-archive
+	-Wl,-whole-archive bbque_logger_log4cpp -Wl,-no-whole-archive
+	-Wl,-whole-archive bbque_recipe_loader_xml -Wl,-no-whole-archive
 )
+
+# Install the Barbeque target
+install (TARGETS barbeque RUNTIME
+		DESTINATION ${BBQUE_PATH_BBQ}
+		COMPONENT BarbequeRTRM)
+install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf"
+		DESTINATION ${BBQUE_PATH_CONF}
+		COMPONENT BarbequeRTRM)
+install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
+		DESTINATION ${BBQUE_PATH_CONF}
+		COMPONENT BarbequeRTRM)
 

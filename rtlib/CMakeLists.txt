@@ -40,3 +40,13 @@ target_link_libraries(
 	${Boost_LIBRARIES}
 )
 
+# Install the RTLib
+set_property (TARGET bbque_rtlib PROPERTY
+		FRAMEWORK ON)
+set_property (TARGET bbque_rtlib PROPERTY
+		PUBLIC_HEADER ${PROJECT_SOURCE_DIR}/include/bbque/rtlib.h)
+install (TARGETS bbque_rtlib LIBRARY
+		DESTINATION ${BBQUE_PATH_RTLIB}
+		PUBLIC_HEADER DESTINATION ${BBQUE_PATH_HEADERS}
+		COMPONENT BarbequeRTLib)
+

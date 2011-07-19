@@ -16,13 +16,13 @@ test_time = 1
 # Recipes Loader Options
 ################################################################################
 [rloader]
-xml.recipe_dir = tmp/recipes
+xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
 
 ################################################################################
 # RPC Channel Options
 ################################################################################
 [rpc]
-fif.dir = /tmp/bbque
+fif.dir = ${CMAKE_INSTALL_PREFIX}/var/bbque
 
 ################################################################################
 # Resource Scheduler Options
@@ -34,7 +34,7 @@ fif.dir = /tmp/bbque
 # Logger Options
 ################################################################################
 [logger]
-log4cpp.conf_file = tmp/bbque.conf_dbg
+log4cpp.conf_file = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/bbque.conf_dbg
 
 ################################################################################
 # Log4CPP Logger Configuration
@@ -45,8 +45,8 @@ log4cpp.conf_file = tmp/bbque.conf_dbg
 # By default all logs are only from level greater than or equal to INFO
 ###
 rootCategory = DEBUG, raFile
-#rootCategory = INFO,  raSyslog
 #rootCategory = DEBUG, raConsole
+#rootCategory = INFO,  raSyslog
 #rootCategory = INFO,  raRSyslog
 ###
 # Uncomment each of the following lines for subsystems you want
@@ -78,7 +78,7 @@ appender.raConsole = org.apache.log4j.ConsoleAppender
 appender.raConsole.layout = org.apache.log4j.PatternLayout
 appender.raConsole.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-10c : %m%n
 appender.raFile = org.apache.log4j.FileAppender
-appender.raFile.fileName = /tmp/bbque.log
+appender.raFile.fileName = ${CMAKE_INSTALL_PREFIX}/var/log/bbque.log
 appender.raFile.layout = org.apache.log4j.PatternLayout
 appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n
 #appender.raSyslog = org.apache.log4j.SyslogAppender
@@ -89,4 +89,4 @@ appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c
 #appender.raRSyslog.syslogHost = localhost
 #appender.raRSyslog.facility = -1
 #appender.raRSyslog.portNumber = -1
-#appender.raRSyslog.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %40c : %m%n
+#appender.raRSyslog.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %40c : %m%n	
