@@ -22,7 +22,7 @@
 #ifndef BBQUE_EXC_H_
 #define BBQUE_EXC_H_
 
-#include "bbque/rtlib.h"
+#include <bbque/rtlib.h>
 
 #include <map>
 #include <string>

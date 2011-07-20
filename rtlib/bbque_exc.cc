@@ -19,9 +19,9 @@
  * =============================================================================
  */
 
-#include "bbque_exc.h"
+#include "bbque/rtlib/bbque_exc.h"
 
-#include "utility.h"
+#include "bbque/utils/utility.h"
 
 #include <assert.h>
 
@@ -29,10 +29,10 @@
 # warning Debugging is enabled
 #endif
 
-#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "EXC        [DBG]", fmt)
-#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "EXC        [INF]", fmt)
-#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "EXC        [WRN]", fmt)
-#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "EXC        [ERR]", fmt)
+#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_EXC  [DBG]", fmt)
+#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_EXC  [INF]", fmt)
+#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_EXC  [WRN]", fmt)
+#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_EXC  [ERR]", fmt)
 
 BbqueEXC::BbqueEXC(std::string const & name,
 		std::string const & recipe,
