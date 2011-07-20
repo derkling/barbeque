@@ -105,7 +105,6 @@ option (BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
 add_subdirectory (rtlib)
 add_subdirectory (plugins)
 add_subdirectory (bbque)
-add_subdirectory (testing)
 
 
 ################################################################################
