@@ -86,7 +86,7 @@ public:
 	 * @return  true if all plugins should be loaded, false otherwise
 	 */
 	inline bool LoadPlugins() const {
-		return opts_vm.count("plugins");
+		return opts_vm.count("bbque.plugins");
 	}
 
 	/**

@@ -48,9 +48,9 @@ ConfigurationManager::ConfigurationManager() :
 		("config,c", po::value<std::string>(&conf_file_path)->
 			default_value("/etc/bbque.conf"),
 			"configuration file path")
-		("plugins,p", po::value<std::string>(&plugins_dir)->
-			implicit_value("/usr/lib/bbque/plugins"),
-			"load plugins (default: /usr/lib/bbque/plugins")
+		("bbque.plugins,p", po::value<std::string>(&plugins_dir)->
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_PLUGINS),
+			"plugins folder")
 		("version,v", "print program version")
 		;
 	all_opts_desc.add(core_opts_desc);
