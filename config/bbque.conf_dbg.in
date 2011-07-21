@@ -16,13 +16,13 @@
 # Recipes Loader Options
 ################################################################################
 [rloader]
-xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
+#xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
 
 ################################################################################
 # RPC Channel Options
 ################################################################################
 [rpc]
-fif.dir = ${CMAKE_INSTALL_PREFIX}/var/bbque
+#fif.dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}
 
 ################################################################################
 # Scheduler Manager Options
@@ -31,10 +31,16 @@ fif.dir = ${CMAKE_INSTALL_PREFIX}/var/bbque
 #policy = yamca
 
 ################################################################################
+# Synchronization Manager Options
+################################################################################
+[SynchronizationManager]
+#policy = sasb
+
+################################################################################
 # Logger Options
 ################################################################################
 [logger]
-log4cpp.conf_file = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/bbque.conf_dbg
+#log4cpp.conf_file = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/bbque.conf_dbg
 
 ################################################################################
 # Log4CPP Logger Configuration
@@ -44,8 +50,8 @@ log4cpp.conf_file = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/bbque.conf_dbg
 # Set root category priority and its appender
 # By default all logs are only from level greater than or equal to INFO
 ###
-rootCategory = DEBUG, raFile
-#rootCategory = DEBUG, raConsole
+#rootCategory = DEBUG, raFile
+rootCategory = DEBUG, raConsole
 #rootCategory = INFO,  raSyslog
 #rootCategory = INFO,  raRSyslog
 ###
@@ -53,21 +59,22 @@ rootCategory = DEBUG, raFile
 # to redefine the category priority to a value diffent from that of
 # the rootCategory
 ###
-#category.bq = 		INFO
-#category.bq.Test =	INFO
-#category.bq.pm =	INFO
-#category.bq.rm = 	INFO
-#category.bq.sm = 	INFO
-#category.bq.ra = 	INFO
-#category.bq.ap = 	INFO
-#category.bq.tpd = 	INFO
-#category.ap = 		INFO
-#category.ap.awm =	INFO
-#category.ap.exc =	INFO
-#category.rpc   = 	INFO
-#category.test   = 	INFO
-#category.rpc.fif  = 	INFO
-#category.rpc.prx  = 	INFO
+#category.bq = 			INFO
+#category.bq.Test =		INFO
+#category.bq.pm =		INFO
+#category.bq.rm = 		INFO
+#category.bq.sm = 		INFO
+#category.bq.ym = 		INFO
+#category.bq.ra = 		INFO
+#category.bq.ap = 		INFO
+#category.bq.tpd = 		INFO
+#category.ap = 			INFO
+#category.ap.awm =		INFO
+#category.ap.exc =		INFO
+#category.rpc = 		INFO
+#category.test = 		INFO
+#category.rpc.fif = 	INFO
+#category.rpc.prx = 	INFO
 #category.rloader = 	INFO
 #category.sched.pol = 	INFO
 #category.sync.pol = 	INFO
@@ -78,7 +85,7 @@ appender.raConsole = org.apache.log4j.ConsoleAppender
 appender.raConsole.layout = org.apache.log4j.PatternLayout
 appender.raConsole.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-10c : %m%n
 appender.raFile = org.apache.log4j.FileAppender
-appender.raFile.fileName = ${CMAKE_INSTALL_PREFIX}/var/log/bbque.log
+appender.raFile.fileName = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}/bbque_dbg.log
 appender.raFile.layout = org.apache.log4j.PatternLayout
 appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n
 #appender.raSyslog = org.apache.log4j.SyslogAppender
