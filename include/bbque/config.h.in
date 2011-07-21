@@ -27,5 +27,36 @@
 /** Enable debugging (if defined) */
 #cmakedefine BBQUE_DEBUG
 
+/*******************************************************************************
+ * Installation PATHs
+ ******************************************************************************/
+
+/** The installation path */
+#define BBQUE_PATH_PREFIX "${CMAKE_INSTALL_PREFIX}"
+
+/** The 'barbeque' installation path */
+#define BBQUE_PATH_BBQ "${BBQUE_PATH_BBQ}"
+
+/** The 'conf' installation path */
+#define BBQUE_PATH_CONF "${BBQUE_PATH_CONF}"
+
+/** The 'recipes' installation path */
+#define BBQUE_PATH_RECIPES "${BBQUE_PATH_RECIPES}"
+
+/** The 'headers' installation path */
+#define BBQUE_PATH_HEADERS "${BBQUE_PATH_HEADERS}"
+
+/** The 'rtlib' installation path */
+#define BBQUE_PATH_RTLIB "${BBQUE_PATH_RTLIB}"
+
+/** The 'plugins' installation path */
+#define BBQUE_PATH_PLUGINS "${BBQUE_PATH_PLUGINS}"
+
+/** The 'docs' installation path */
+#define BBQUE_PATH_DOCS "${BBQUE_PATH_DOCS}"
+
+/** The 'var' installation path */
+#define BBQUE_PATH_VAR "${BBQUE_PATH_VAR}"
+
 #endif // BBQUE_CONFIG_H_
 
