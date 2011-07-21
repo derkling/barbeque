@@ -192,19 +192,10 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		AppPtr_t const & papp = apps_it->second;
 		assert(papp);
 
-		// Skip if the application has a next AWM yet and doesn't need to be
-		// reconfigured
-		if ((papp->State() == Application::RUNNING) && (papp->NextAWM()))
+		// Check a set of conditions accordingly to skip current
+		// application/EXC
+		if (CheckSkipConditions(papp))
 			continue;
-
-		// Skip if the application has been rescheduled yet (with success) or
-		// disabled in the meanwhile
-		if (!papp->Active() && !papp->Blocking()) {
-			logger->Debug("Ordering: skipping [%s]. State = {%s}",
-						papp->StrId(),
-						Application::StateStr(papp->State()));
-			continue;
-		}
 
 		// Compute the metrics for all the working modes.
 		ExitCode_t result = InsertWorkingModes(sched_map, papp, cl_id);
@@ -219,7 +210,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 }
 
 
-inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
+void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 	logger->Debug(
 			"____________________| Scheduling entities |____________________");
 
@@ -227,7 +218,7 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 	// metrics value
 	SchedEntityMap_t::reverse_iterator se_it(sched_map.rbegin());
 	SchedEntityMap_t::reverse_iterator end_se(sched_map.rend());
-	double curr_metrics, eval_metrics;
+	double eval_metrics;
 
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
@@ -235,36 +226,15 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 		AwmPtr_t const & next_awm = (se_it->second).first->NextAWM();
 		AwmPtr_t & eval_awm = (se_it->second).second;
 
-		// Skip if the application has been disabled/stopped in the meanwhile
-		if (app->Disabled()) {
-			logger->Warn("Selecting: skipping [%s]."
-					"Disabled/stopped during scheduling",
-					app->StrId());
+		// Check a set of conditions accordingly to skip current
+		// application/EXC
+		if (CheckSkipConditions(papp))
 			continue;
-		}
 
 		// Get the metrics of the AWM to schedule
 		eval_metrics = *(static_cast<double *>
 				(eval_awm->GetAttribute(SCHEDULER_POLICY_NAME,
 										"metrics").get()));
-
-		// Avoid double AWM selection for RUNNING applications with an already
-		// assigned AWM.
-		if ((app->State() == Application::RUNNING) && next_awm) {
-			logger->Debug("Selecting: [%s] doesn't need to reconfigure"
-					" (AWM=%d)", app->StrId(), app->CurrentAWM()->Id());
-			continue;
-		}
-
-		// If an AWM has been previously set it should have a greater metrics.
-		// Thus we can skip to the next scheduling entity
-		if (app->Synching() && next_awm) {
-			curr_metrics = *(static_cast<double *>
-					(next_awm->GetAttribute(SCHEDULER_POLICY_NAME,
-											"metrics").get()));
-			assert(eval_metrics <= curr_metrics);
-			continue;
-		}
 
 		logger->Debug("Selecting: [%s] schedule request for AWM{%d}...",
 				app->StrId(),
@@ -289,10 +259,10 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 			continue;
 		}
 
-		if (!app->Synching() || app->Blocking()) {
-			logger->Debug("Selecting: [%s] in %s/%s", app->StrId(),
-					Application::StateStr(app->State()),
-					Application::SyncStateStr(app->SyncState()));
+		if (!papp->Synching() || papp->Blocking()) {
+			logger->Debug("Selecting: [%s] in %s/%s", papp->StrId(),
+					Application::StateStr(papp->State()),
+					Application::SyncStateStr(papp->SyncState()));
 			continue;
 		}
 
@@ -302,6 +272,30 @@ inline void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 					new_awm->Id(),
 					new_awm->ClusterSet().to_string().c_str());
 	}
+}
+
+
+inline bool YamcaSchedPol::CheckSkipConditions(AppPtr_t const & papp) {
+
+	// Skip if the application has been rescheduled yet (with success) or
+	// disabled in the meanwhile
+	if (!papp->Active() && !papp->Blocking()) {
+		logger->Debug("Skipping [%s]. State = {%s/%s}",
+					papp->StrId(),
+					Application::StateStr(papp->State()),
+					Application::SyncStateStr(papp->SyncState()));
+		return true;
+	}
+
+	// Avoid double AWM selection for RUNNING applications with an already
+	// assigned AWM.
+	if ((papp->State() == Application::RUNNING) && papp->NextAWM()) {
+		logger->Debug("Skipping [%s]. No reconfiguration needed. (AWM=%d)",
+				papp->StrId(), papp->CurrentAWM()->Id());
+		return true;
+	}
+
+	return false;
 }
 
 

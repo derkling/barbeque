@@ -165,11 +165,22 @@ private:
 	/**
 	 * @brief Schedule the entities
 	 *
-	 * Fore each application pick the next working mode to schedule
+	 * For each application pick the next working mode to schedule
 	 *
 	 * @param sched_map Multimap for scheduling entities ordering
 	 */
 	void SelectWorkingModes(SchedEntityMap_t & sched_map);
+
+	/**
+	 * @brief Check if an application/EXC must be skipped
+	 *
+	 * Whenever we are in the ordering or the selecting step, the
+	 * application/EXC must be skipped if some conditions are verified.
+	 *
+	 * @param papp Application/EXC pointer
+	 * @return true if the Application/EXC must be skipped, false otherwise
+	 */
+	bool CheckSkipConditions(AppPtr_t const & papp);
 
 	/**
 	 * @brief Metrics computation
