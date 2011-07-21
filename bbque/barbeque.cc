@@ -45,7 +45,7 @@ namespace po = boost::program_options;
 /* The global timer, this can be used to get the time since Barbeque start */
 bu::Timer bbque_tmr(true);
 
-bool runTests(bp::PluginManager & pm) {
+int Tests(bp::PluginManager & pm) {
 	const bp::PluginManager::RegistrationMap & rm = pm.GetRegistrationMap();
 	bp::PluginManager::RegistrationMap::const_iterator near_match =
 		rm.lower_bound(TEST_NAMESPACE);
@@ -79,7 +79,7 @@ bool runTests(bp::PluginManager & pm) {
 			((*near_match).first.compare(0,5,"test.")) == 0 );
 
 	fprintf(stdout, "\n\n"FMT(".:: All tests completed\n\n"));
-	return true;
+	return EXIT_SUCCESS;
 }
 
 int main(int argc, char *argv[]) {
@@ -116,10 +116,9 @@ int main(int argc, char *argv[]) {
 	// Initialize Signals Manager module
 	bb::SignalsManager::GetInstance();
 
-	// Check if we have tests to run (i.e. "test." objects have been
-	// registered)
-	if (runTests(pm))
-		return EXIT_SUCCESS;
+	// Check if we have tests to run
+	if (cm.RunTests())
+		return Tests(pm);
 
 	// Let's start baking applications...
 	bb::ResourceManager::GetInstance().Go();

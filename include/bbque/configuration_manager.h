@@ -90,6 +90,14 @@ public:
 	}
 
 	/**
+	 * @brief   Check if TESTs plugins should be run
+	 * @return  true if TESTs should be run, false otherwise
+	 */
+	inline bool RunTests() const {
+		return opts_vm.count("bbque.test");
+	}
+
+	/**
 	 * @brief  Get the patch of the plugins folder
 	 * @return  the folder containing plugins
 	 */

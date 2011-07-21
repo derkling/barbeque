@@ -51,6 +51,7 @@ ConfigurationManager::ConfigurationManager() :
 		("bbque.plugins,p", po::value<std::string>(&plugins_dir)->
 			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_PLUGINS),
 			"plugins folder")
+		("bbque.test,t", "Run TESTs plugins")
 		("version,v", "print program version")
 		;
 	all_opts_desc.add(core_opts_desc);
