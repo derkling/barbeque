@@ -46,7 +46,11 @@ ConfigurationManager::ConfigurationManager() :
 	core_opts_desc.add_options()
 		("help,h", "print this help message")
 		("config,c", po::value<std::string>(&conf_file_path)->
-			default_value("/etc/bbque.conf"),
+#ifdef BBQUE_DEBUG
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf_dbg"),
+#else
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf"),
+#endif
 			"configuration file path")
 		("bbque.plugins,p", po::value<std::string>(&plugins_dir)->
 			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_PLUGINS),
