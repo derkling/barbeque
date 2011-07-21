@@ -25,10 +25,10 @@ xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
 fif.dir = ${CMAKE_INSTALL_PREFIX}/var/bbque
 
 ################################################################################
-# Resource Scheduler Options
+# Scheduler Manager Options
 ################################################################################
-[ResourceScheduler]
-policy = yamca
+[SchedulerManager]
+#policy = yamca
 
 ################################################################################
 # Logger Options
@@ -58,6 +58,7 @@ rootCategory = INFO, raFile
 #category.bq.pm =	DEBUG
 #category.bq.rm = 	DEBUG
 #category.bq.sm = 	DEBUG
+#category.bq.ym = 	DEBUG
 #category.bq.ra = 	DEBUG
 #category.bq.ap = 	DEBUG
 #category.bq.tpd = 	DEBUG

@@ -27,7 +27,7 @@
 #include "bbque/application_proxy.h"
 #include "bbque/platform_services.h"
 #include "bbque/plugin_manager.h"
-#include "bbque/resource_scheduler.h"
+#include "bbque/scheduler_manager.h"
 #include "bbque/synchronization_manager.h"
 
 #include "bbque/plugins/logger.h"
@@ -126,12 +126,12 @@ private:
 	/**
 	 * @brief The Resource Scheduler module
 	 */
-	ResourceScheduler & rs;
+	SchedulerManager & sm;
 
 	/**
 	 * @brief The Synchronization Manager module
 	 */
-	SynchronizationManager & sm;
+	SynchronizationManager & ym;
 
 	/**
 	 * @brief The Application Proxy module

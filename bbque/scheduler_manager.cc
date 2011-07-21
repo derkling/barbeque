@@ -23,7 +23,7 @@
  * =====================================================================================
  */
 
-#include "bbque/resource_scheduler.h"
+#include "bbque/scheduler_manager.h"
 
 #include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"
@@ -39,12 +39,12 @@ namespace po = boost::program_options;
 
 namespace bbque {
 
-ResourceScheduler & ResourceScheduler::GetInstance() {
-	static ResourceScheduler rs;
+SchedulerManager & SchedulerManager::GetInstance() {
+	static SchedulerManager rs;
 	return rs;
 }
 
-ResourceScheduler::ResourceScheduler() {
+SchedulerManager::SchedulerManager() {
 	std::string opt_policy;
 
 	//---------- Get a logger module
@@ -61,9 +61,9 @@ ResourceScheduler::ResourceScheduler() {
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
 	po::options_description opts_desc("Resource Scheduler Options");
 	opts_desc.add_options()
-		("ResourceScheduler.policy",
+		("SchedulerManager.policy",
 		 po::value<std::string>
-		 (&opt_policy)->default_value(BBQUE_DEFAULT_RESOURCE_SCHEDULER_POLICY),
+		 (&opt_policy)->default_value(BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY),
 		 "The name of the optimization policy to use")
 		;
 	po::variables_map opts_vm;
@@ -85,11 +85,11 @@ ResourceScheduler::ResourceScheduler() {
 
 }
 
-ResourceScheduler::~ResourceScheduler() {
+SchedulerManager::~SchedulerManager() {
 }
 
-ResourceScheduler::ExitCode_t
-ResourceScheduler::Schedule() {
+SchedulerManager::ExitCode_t
+SchedulerManager::Schedule() {
 	SystemView &sv = SystemView::GetInstance();
 	SchedulerPolicyIF::ExitCode result;
 

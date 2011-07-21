@@ -25,9 +25,9 @@ xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
 fif.dir = ${CMAKE_INSTALL_PREFIX}/var/bbque
 
 ################################################################################
-# Resource Scheduler Options
+# Scheduler Manager Options
 ################################################################################
-[ResourceScheduler]
+[SchedulerManager]
 #policy = yamca
 
 ################################################################################

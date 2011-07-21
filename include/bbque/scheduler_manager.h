@@ -1,5 +1,5 @@
 /**
- *       @file  resource_scheduler.h
+ *       @file  schedule_manager.h
  *      @brief  The resource scheduler component of Barbque
  *
  * This module defines the Barbeque interface to resource scheduling policies.
@@ -23,8 +23,8 @@
  * =====================================================================================
  */
 
-#ifndef BBQUE_RESOURCE_SCHEDULER_H_
-#define BBQUE_RESOURCE_SCHEDULER_H_
+#ifndef BBQUE_SCHEDULER_MANAGER_H_
+#define BBQUE_SCHEDULER_MANAGER_H_
 
 #include "bbque/config.h"
 #include "bbque/plugin_manager.h"
@@ -36,20 +36,20 @@ using bbque::plugins::LoggerIF;
 using bbque::plugins::SchedulerPolicyIF;
 
 #ifdef BBQUE_DEBUG
-# define BBQUE_DEFAULT_RESOURCE_SCHEDULER_POLICY "random"
+# define BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY "random"
 #else
-# define BBQUE_DEFAULT_RESOURCE_SCHEDULER_POLICY ""
+# define BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY "yamca"
 #endif
 
 
 namespace bbque {
 
 /**
- * @class ResourceScheduler
+ * @class SchedulerManager
  * @brief The class implementing the glue code to bind Barbeque with resource
  * scheduling policies.
  */
-class ResourceScheduler {
+class SchedulerManager {
 
 public:
 
@@ -62,18 +62,18 @@ public:
 
 	/**
 	 * @brief Get a reference to the resource scheduler
-	 * The ResourceScheduler is a singleton class, an instance to this class
+	 * The SchedulerManager is a singleton class, an instance to this class
 	 * could be obtained by the resource manager in order to access the
 	 * optimization policy services.
-	 * @return  a reference to the ResourceScheduler singleton instance
+	 * @return  a reference to the SchedulerManager singleton instance
 	 */
-	static ResourceScheduler & GetInstance();
+	static SchedulerManager & GetInstance();
 
 	/**
 	 * @brief Clean-up the optimization policy and releasing current resource
 	 * scheduler
 	 */
-	~ResourceScheduler();
+	~SchedulerManager();
 
 	/**
 	 * @brief Run a new resource scheduling optimization
@@ -103,7 +103,7 @@ private:
 	/**
 	 * @brief Build a new instance of the resource scheduler
 	 */
-	ResourceScheduler();
+	SchedulerManager();
 
 
 
@@ -112,5 +112,5 @@ private:
 
 } // namespace bbque
 
-#endif // BBQUE_RESOURCE_SCHEDULER_H_
+#endif // BBQUE_SCHEDULER_MANAGER_H_
 

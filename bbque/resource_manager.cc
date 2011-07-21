@@ -47,8 +47,8 @@ ResourceManager & ResourceManager::GetInstance() {
 ResourceManager::ResourceManager() :
 	ps(PlatformServices::GetInstance()),
 	pm(plugins::PluginManager::GetInstance()),
-	rs(ResourceScheduler::GetInstance()),
-	sm(SynchronizationManager::GetInstance()),
+	sm(SchedulerManager::GetInstance()),
+	ym(SynchronizationManager::GetInstance()),
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()) {
 
@@ -97,7 +97,7 @@ void ResourceManager::Optimize() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	SynchronizationManager::ExitCode_t syncResult;
-	ResourceScheduler::ExitCode_t schedResult;
+	SchedulerManager::ExitCode_t schedResult;
 	bu::Timer optimization_tmr;
 
 	// Check if there is at least one application to synchronize
@@ -114,18 +114,18 @@ void ResourceManager::Optimize() {
 	//--- Scheduling
 	logger->Debug("====================[ SCHEDULE START ]====================");
 	optimization_tmr.start();
-	schedResult = rs.Schedule();
+	schedResult = sm.Schedule();
 	optimization_tmr.stop();
 	switch(schedResult) {
-	case ResourceScheduler::MISSING_POLICY:
-	case ResourceScheduler::FAILED:
+	case SchedulerManager::MISSING_POLICY:
+	case SchedulerManager::FAILED:
 		logger->Error("EXC start FAILED (Error: scheduling policy failed)");
 		return;
-	case ResourceScheduler::DELAYED:
+	case SchedulerManager::DELAYED:
 		logger->Error("EXC start DELAYED");
 		return;
 	default:
-		assert(schedResult == ResourceScheduler::DONE);
+		assert(schedResult == SchedulerManager::DONE);
 	}
 	logger->Debug("====================[ SCHEDULE ENDED ]====================");
 	logger->Debug("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
@@ -141,7 +141,7 @@ void ResourceManager::Optimize() {
 	//--- Synchroniztion
 	logger->Debug("====================[ SYNC START ]====================");
 	optimization_tmr.start();
-	syncResult = sm.SyncSchedule();
+	syncResult = ym.SyncSchedule();
 	optimization_tmr.stop();
 	logger->Debug("====================[ SYNC ENDED ]====================");
 	logger->Debug("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());

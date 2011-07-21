@@ -38,7 +38,7 @@
 
 #include "bbque/utils/utility.h"
 
-#define SYNCHRONIZATION_MANAGER_NAMESPACE "bq.sm"
+#define SYNCHRONIZATION_MANAGER_NAMESPACE "bq.ym"
 
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
@@ -47,8 +47,8 @@ namespace br = bbque::res;
 namespace bbque {
 
 SynchronizationManager & SynchronizationManager::GetInstance() {
-	static SynchronizationManager sm;
-	return sm;
+	static SynchronizationManager ym;
+	return ym;
 }
 
 SynchronizationManager::SynchronizationManager() :
@@ -59,7 +59,7 @@ SynchronizationManager::SynchronizationManager() :
 	bp::LoggerIF::Configuration conf(SYNCHRONIZATION_MANAGER_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
-		fprintf(stderr, "SM: Logger module creation FAILED\n");
+		fprintf(stderr, "YM: Logger module creation FAILED\n");
 		assert(logger);
 	}
 
