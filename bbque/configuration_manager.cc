@@ -36,7 +36,7 @@ ConfigurationManager::ConfigurationManager() :
 	core_opts_desc("Generic Options"),
 	all_opts_desc(""),
 #ifdef BBQUE_DEBUG
-	dbg_opts_desc("Debugging Options"),
+	//dbg_opts_desc("Debugging Options"),
 #endif
 #ifdef BBQUE_TEST_PLATFORM_DATA
 	tpd_opts_desc("TEST Platform Data Options"),
@@ -57,13 +57,13 @@ ConfigurationManager::ConfigurationManager() :
 	cmd_opts_desc.add(core_opts_desc);
 
 #ifdef BBQUE_DEBUG
-	dbg_opts_desc.add_options()
-		("debug.test_time", po::value<uint16_t>(&test_run)->
-			default_value(5),
-			"how long [s] to run")
-		;
-	all_opts_desc.add(dbg_opts_desc);
-	cmd_opts_desc.add(dbg_opts_desc);
+	//dbg_opts_desc.add_options()
+	//	("debug.test_time", po::value<uint16_t>(&test_run)->
+	//		default_value(5),
+	//		"how long [s] to run")
+	//	;
+	//all_opts_desc.add(dbg_opts_desc);
+	//cmd_opts_desc.add(dbg_opts_desc);
 #endif
 
 #ifdef BBQUE_TEST_PLATFORM_DATA

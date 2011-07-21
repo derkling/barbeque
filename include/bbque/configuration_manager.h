@@ -127,11 +127,11 @@ private:
 	options_description all_opts_desc;
 
 #ifdef BBQUE_DEBUG
-	/**
-	 * The description of debugging parameters
-	 */
-	options_description dbg_opts_desc;
-	uint16_t test_run;
+	///**
+	// * The description of debugging parameters
+	// */
+	//options_description dbg_opts_desc;
+	//uint16_t test_run;
 #endif
 
 #ifdef BBQUE_TEST_PLATFORM_DATA
