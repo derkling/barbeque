@@ -222,8 +222,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
-		AppPtr_t & app = (se_it->second).first;
-		AwmPtr_t const & next_awm = (se_it->second).first->NextAWM();
+		AppPtr_t & papp = (se_it->second).first;
 		AwmPtr_t & eval_awm = (se_it->second).second;
 
 		// Check a set of conditions accordingly to skip current
@@ -237,7 +236,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 										"metrics").get()));
 
 		logger->Debug("Selecting: [%s] schedule request for AWM{%d}...",
-				app->StrId(),
+				papp->StrId(),
 				eval_awm->Id());
 
 		// Get the resource binding of the current AWM
@@ -248,12 +247,12 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Schedule the application in the working mode just evaluated
 		Application::ExitCode_t result =
-			app->ScheduleRequest(eval_awm, rsrc_usages, rsrc_view_token);
+			papp->ScheduleRequest(eval_awm, rsrc_usages, rsrc_view_token);
 
 		// Debugging messages
 		if (result != Application::APP_WM_ACCEPTED) {
 			logger->Warn("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
-							app->StrId(),
+							papp->StrId(),
 							eval_awm->Id(),
 							result);
 			continue;
@@ -266,9 +265,9 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 			continue;
 		}
 
-		AwmPtr_t const & new_awm = app->NextAWM();
+		AwmPtr_t const & new_awm = papp->NextAWM();
 		logger->Info("Selecting: [%s] set to AWM{%d} on clusters map [%s]",
-					app->StrId(),
+					papp->StrId(),
 					new_awm->Id(),
 					new_awm->ClusterSet().to_string().c_str());
 	}
