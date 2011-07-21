@@ -28,6 +28,9 @@ set (BBQUE_PATH_VAR     "var/bbque")
 
 # Load additional CMake modules
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/.cmake/")
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/.cmake"
+			DESTINATION "${BBQUE_PATH_RTLIB}"
+			FILES_MATCHING PATTERN "*.cmake*")
 
 # Make sure the compiler can find include files
 include_directories (
