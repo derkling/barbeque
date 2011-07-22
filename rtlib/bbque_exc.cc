@@ -75,32 +75,10 @@ BbqueEXC::BbqueEXC(std::string const & name,
 
 
 BbqueEXC::~BbqueEXC() {
-	RTLIB_ExitCode_t result;
-
-	//--- Disable the Control-Loop
-
+	//--- Disable the EXC and the Control-Loop
 	Disable();
-
-	//--- Disable the EXC
-
-	fprintf(stderr, FMT_INF("Disabling EXC [%s] (@%p)...\n"),
-			exc_name.c_str(), (void*)exc_hdl);
-
-	assert(rtlib->Disable);
-	result = rtlib->Disable(exc_hdl);
-
-	//--- Unregister the EXC
-
-	fprintf(stderr, FMT_INF("Unregistering EXC [%s] (@%p)...\n"),
-			exc_name.c_str(), (void*)exc_hdl);
-
-	assert(rtlib->Unregister);
-	rtlib->Unregister(exc_hdl);
-
-	//--- Terminate the control loop thread
-	
+	//--- Unregister the EXC and Terminate the control loop thread
 	Terminate();
-
 }
 
 
@@ -135,6 +113,7 @@ RTLIB_ExitCode_t BbqueEXC::Enable() {
 
 RTLIB_ExitCode_t BbqueEXC::Disable() {
 	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+	RTLIB_ExitCode_t result;
 
 	assert(registered == true);
 
@@ -147,6 +126,13 @@ RTLIB_ExitCode_t BbqueEXC::Disable() {
 	//--- Notify the control-thread we are STOPPED
 	enabled = false;
 	ctrl_cv.notify_all();
+
+	//--- Disable the EXC
+	fprintf(stderr, FMT_INF("Disabling EXC [%s] (@%p)...\n"),
+			exc_name.c_str(), (void*)exc_hdl);
+
+	assert(rtlib->Disable);
+	result = rtlib->Disable(exc_hdl);
 
 	return RTLIB_OK;
 
@@ -174,6 +160,13 @@ RTLIB_ExitCode_t BbqueEXC::Terminate() {
 	// Check if we are already terminating
 	if (done || !registered)
 		return RTLIB_OK;
+
+	// Unregister the EXC
+	fprintf(stderr, FMT_INF("Unregistering EXC [%s] (@%p)...\n"),
+			exc_name.c_str(), (void*)exc_hdl);
+
+	assert(rtlib->Unregister);
+	rtlib->Unregister(exc_hdl);
 
 	fprintf(stderr, FMT_INF("Terminating control loop for EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
