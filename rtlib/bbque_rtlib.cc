@@ -227,6 +227,8 @@ const char *RTLIB_errorStr[RTLIB_EXIT_CODE_COUNT] = {
 	"The EXC is in sync mode",
 	//RTLIB_EXC_SYNCP_FAILED
 	"A step of the synchronization protocol has failed",
+	//RTLIB_EXC_WORKLOAD_NONE
+	"No more workload to process"
 
 };
 

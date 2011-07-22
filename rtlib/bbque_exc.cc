@@ -189,6 +189,17 @@ RTLIB_ExitCode_t BbqueEXC::Terminate() {
 	return RTLIB_OK;
 }
 
+RTLIB_ExitCode_t BbqueEXC::WaitCompletion() {
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+
+	fprintf(stderr, FMT_INF("Waiting for EXC [%s] control "
+				"loop termination...\n"), exc_name.c_str());
+
+	while(!done)
+		ctrl_cv.wait(ctrl_ul);
+
+	return RTLIB_OK;
+}
 
 /*******************************************************************************
  *    Default Events Handler
@@ -215,6 +226,10 @@ RTLIB_ExitCode_t BbqueEXC::onSuspend() {
 }
 
 RTLIB_ExitCode_t BbqueEXC::onRun() {
+	static uint8_t countdown = 5;
+
+	if (!--countdown)
+		return RTLIB_EXC_WORKLOAD_NONE;
 
 	DB(fprintf(stderr, FMT_WRN("<< Default running of EXC [%s],"
 					"latency 100[sm] >>\n"),
@@ -308,6 +323,8 @@ RTLIB_ExitCode_t BbqueEXC::Run() {
 				exc_name.c_str()));
 
 	result = onRun();
+	if (result == RTLIB_EXC_WORKLOAD_NONE)
+		done = true;
 
 	return result;
 }
@@ -319,6 +336,8 @@ RTLIB_ExitCode_t BbqueEXC::Monitor() {
 				exc_name.c_str()));
 
 	result = onMonitor();
+	if (result == RTLIB_EXC_WORKLOAD_NONE)
+		done = true;
 
 	return result;
 }
@@ -356,15 +375,20 @@ void BbqueEXC::ControlLoop() {
 
 		// Run the workload
 		result = Run();
-		if (result != RTLIB_OK)
+		if (done || result != RTLIB_OK)
 			continue;
 
 		// Monitor Quality-of-Services
 		result = Monitor();
-		if (result != RTLIB_OK)
+		if (done || result != RTLIB_OK)
 			continue;
 
 	};
+
+	// Notify the termination
+	ctrl_ul.lock();
+	ctrl_cv.notify_all();
+	ctrl_ul.unlock();
 
 	DB(fprintf(stderr, FMT_DBG("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));

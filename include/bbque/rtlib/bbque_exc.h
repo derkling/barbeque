@@ -47,8 +47,14 @@ public:
 
 	RTLIB_ExitCode_t Terminate();
 
+	RTLIB_ExitCode_t WaitCompletion();
+
 	inline bool isRegistered() const {
 		return registered;
+	}
+
+	inline bool Done() const {
+		return done;
 	}
 
 	virtual RTLIB_ExitCode_t onConfigure(uint8_t awm_id);

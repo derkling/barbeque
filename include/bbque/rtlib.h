@@ -256,6 +256,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_EXC_SYNC_MODE,
 	/** A step of the synchronization protocol has failed */
 	RTLIB_EXC_SYNCP_FAILED,
+	/** No more workload to process */
+	RTLIB_EXC_WORKLOAD_NONE,
 
 // NOTE The last entry should not overflow a uint8_t, otherwise some of the RPC
 // channel messages should be updated
