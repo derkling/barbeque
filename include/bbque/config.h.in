@@ -24,9 +24,6 @@
 /** Use Boost Filesyste library version 3 */
 #define BOOST_FILESYSTEM_VERSION 3
 
-/** Enable debugging (if defined) */
-#cmakedefine BBQUE_DEBUG
-
 /*******************************************************************************
  * Installation PATHs
  ******************************************************************************/

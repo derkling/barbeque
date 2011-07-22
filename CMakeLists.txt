@@ -67,7 +67,7 @@ endif (NOT CMAKE_BUILD_TYPE)
 set (CMAKE_CXX_FLAGS "-std=c++0x -Wall")
 
 # Options for build version: DEBUG
-set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic")
+set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic -DBBQUE_DEBUG")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (BBQUE_DEBUG ON)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
