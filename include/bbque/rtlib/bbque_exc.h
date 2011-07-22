@@ -38,7 +38,7 @@ public:
 			RTLIB_Services_t *rtlib,
 			bool enabled = true);
 
-	~BbqueEXC();
+	virtual ~BbqueEXC();
 
 	RTLIB_ExitCode_t Enable();
 
