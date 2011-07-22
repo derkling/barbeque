@@ -23,6 +23,7 @@
 #define BBQUE_EXC_H_
 
 #include <bbque/rtlib.h>
+#include <bbque/utils/timer.h>
 
 #include <map>
 #include <string>
@@ -70,7 +71,7 @@ protected:
 	virtual void ControlLoop();
 
 private:
-	
+
 	std::string const exc_name;
 
 	std::string const rpc_name;
