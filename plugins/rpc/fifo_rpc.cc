@@ -136,6 +136,7 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	br::rpc_fifo_header_t hdr;
 	void *fifo_buff_ptr;
 	size_t bytes;
+	size_t result;
 
 	logger->Debug("FIFO RPC: waiting message...");
 
@@ -157,7 +158,7 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 		logger->Error("FIFO RPC: message buffer creation FAILED");
 		// Remove the remaining message from the FIFO
 		for ( ; bytes<hdr.fifo_msg_size; bytes++) {
-			::read(rpc_fifo_fd, (void*)&c, sizeof(char));
+			result = ::read(rpc_fifo_fd, (void*)&c, sizeof(char));
 		}
 		return 0;
 	}
@@ -169,7 +170,8 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	switch (hdr.rpc_msg_type) {
 	case br::RPC_APP_PAIR:
 
-		::read(rpc_fifo_fd, &(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->rpc_fifo),
+		result = ::read(rpc_fifo_fd,
+			&(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->rpc_fifo),
 			hdr.fifo_msg_size - FIFO_PKT_SIZE(header));
 
 		msg = (rpc_msg_ptr_t)&(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->pyl);
@@ -184,7 +186,8 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 		     );
 		break;
 	default:
-		::read(rpc_fifo_fd, &(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl),
+		result = ::read(rpc_fifo_fd,
+			&(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl),
 			hdr.fifo_msg_size - FIFO_PKT_SIZE(header));
 
 		msg = &(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl);
