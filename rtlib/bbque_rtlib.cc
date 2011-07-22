@@ -149,6 +149,9 @@ static void RTLIB_Exit(void) {
 	// Close the RPC FIFO channel thus releasin all BBQUE resource used by
 	// this application
 	assert(rpc);
+
+	// Ensure all the EXCs are unregistered
+	rpc->UnregisterAll();
 	delete rpc;
 
 }
