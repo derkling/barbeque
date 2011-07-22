@@ -30,6 +30,7 @@
 #include <set>
 #include <thread>
 #include "bbque/res/resource_accounter_conf.h"
+#include "bbque/res/resource_utils.h"
 #include "bbque/res/resource_tree.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
