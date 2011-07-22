@@ -158,7 +158,7 @@ RTLIB_ExitCode_t BbqueEXC::Terminate() {
 	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 
 	// Check if we are already terminating
-	if (done || !registered)
+	if (!registered)
 		return RTLIB_OK;
 
 	// Unregister the EXC
@@ -167,6 +167,15 @@ RTLIB_ExitCode_t BbqueEXC::Terminate() {
 
 	assert(rtlib->Unregister);
 	rtlib->Unregister(exc_hdl);
+
+	// Check if the control loop has already terminated
+	if (done) {
+		// Notify the WaitCompletion before exiting
+		ctrl_trd.join();
+		// Joining the terminated thread (for a clean exit)
+		ctrl_cv.notify_all();
+		return RTLIB_OK;
+	}
 
 	fprintf(stderr, FMT_INF("Terminating control loop for EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
@@ -188,7 +197,7 @@ RTLIB_ExitCode_t BbqueEXC::WaitCompletion() {
 	fprintf(stderr, FMT_INF("Waiting for EXC [%s] control "
 				"loop termination...\n"), exc_name.c_str());
 
-	while(!done)
+	while (!done)
 		ctrl_cv.wait(ctrl_ul);
 
 	return RTLIB_OK;
