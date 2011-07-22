@@ -246,6 +246,44 @@ void BbqueRPC::Unregister(
 
 }
 
+void BbqueRPC::UnregisterAll() {
+	excMap_t::iterator it = exc_map.begin();
+	RTLIB_ExitCode_t result;
+	pregExCtx_t prec;
+
+	// Checking for library initialization
+	if (!initialized) {
+		fprintf(stderr, FMT_ERR("EXCs cleanup FAILED "
+			"(Error: RTLIB not initialized)\n"));
+		assert(initialized);
+		return;
+	}
+
+	// Unregistering all the registered EXCs
+	for ( ; it != exc_map.end(); ++it) {
+		prec = (*it).second;
+		assert(isRegistered(prec) == true);
+
+		// Calling the low-level unregistration
+		result = _Unregister(prec);
+		if (result != RTLIB_OK) {
+			DB(fprintf(stderr, FMT_ERR("Unregister EXC [%s] FAILED "
+							"(Error %d: %s)\n"),
+						prec->name.c_str(), result,
+						RTLIB_ErrorStr(result)));
+			return;
+		}
+
+		// Unegistered the execution context
+		exc_map.erase(prec->exc_id);
+
+		// Mark the EXC as Unregistered
+		clearRegistered(prec);
+	}
+
+}
+
+
 RTLIB_ExitCode_t BbqueRPC::Enable(
 		const RTLIB_ExecutionContextHandler_t ech) {
 	RTLIB_ExitCode_t result;

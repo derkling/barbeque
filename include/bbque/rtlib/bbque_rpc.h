@@ -75,6 +75,8 @@ public:
 	void Unregister(
 			const RTLIB_ExecutionContextHandler_t ech);
 
+	void UnregisterAll();
+
 	RTLIB_ExitCode_t Enable(
 			const RTLIB_ExecutionContextHandler_t ech);
 
