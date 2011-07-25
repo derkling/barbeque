@@ -116,6 +116,7 @@ public:
 	 */
 	inline void RemoveWorkingMode(uint8_t id) {
 		working_modes.erase(id);
+		norm_working_modes.erase(id);
 	}
 
 	/**
@@ -131,7 +132,8 @@ public:
 	 * @return A vector containing all the working modes
 	 */
 	inline AwmMap_t const & WorkingModesAll() {
-		return working_modes;
+		NormalizeValues();
+		return norm_working_modes;
 	}
 
 	/**
@@ -177,8 +179,47 @@ private:
 	/** The complete set of working modes descriptors defined in the recipe */
 	AwmMap_t working_modes;
 
+	/** The map of working modes after value normalization */
+	AwmMap_t norm_working_modes;
+
 	/** Static constraints included in the recipe */
 	ConstrMap_t constraints;
+
+	/** Store information to support the normalization of the AWM values */
+	struct AwmNormalInfo {
+		/** Maximum value parsed */
+		float max_value;
+		/** Minimum value parse */
+		float min_value;
+		/** Diff max - min.
+		 * If 0 the value will be set to 0. This is done in order to give a
+		 * penalty to recipes wherein all the AWMs have been set to the same
+		 * value
+		 */
+		float delta;
+		/** Set true means that normalization has been performed yet */
+		bool done;
+
+	} norm;
+
+	/**
+	 * @brief Update the normalization info
+	 *
+	 * This is called when a new AWM is added to the recipe
+	 *
+	 * @param last_value The value of the last AWM inserted
+	 */
+	void UpdateNormalInfo(float last_value);
+
+	/**
+	 * @brief Performe the AWM values normalization
+	 *
+	 *                    recipe_value - min
+	 * norm_value =  ------------------------------
+	 *                        (max - min)
+	 *
+	 */
+	void NormalizeValues();
 
 };
 

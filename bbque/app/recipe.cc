@@ -18,8 +18,11 @@
  * ============================================================================
  */
 
-#include "bbque/modules_factory.h"
 #include "bbque/app/recipe.h"
+
+#include <cstring>
+
+#include "bbque/modules_factory.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resource_accounter.h"
 
@@ -38,6 +41,9 @@ Recipe::Recipe(std::string const & name):
 	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
+
+	// Clear normalization info
+	memset(&norm, 0, sizeof(Recipe::AwmNormalInfo));
 }
 
 
@@ -50,16 +56,23 @@ Recipe::~Recipe() {
 AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
 				std::string const & _name,
 				float _value) {
+	// Update info for supporting normalization
+	UpdateNormalInfo(_value);
+
 	// Insert a new working mode descriptor into the map
-	AwmPtr_t new_awm(new class WorkingMode(_id, _name, _value));
-	working_modes.insert(std::pair<uint16_t, AwmPtr_t>(_id, new_awm));
+	AwmPtr_t new_awm(new app::WorkingMode(_id, _name, _value));
+	working_modes.insert(std::pair<uint8_t, AwmPtr_t>(_id, new_awm));
 	return working_modes[_id];
 }
 
 
 AwmPtr_t Recipe::WorkingMode(uint8_t _id) {
-	AwmMap_t::iterator it(working_modes.find(_id));
-	if (it == working_modes.end())
+	// Normalize values
+	NormalizeValues();
+
+	// Find the working mode
+	AwmMap_t::iterator it(norm_working_modes.find(_id));
+	if (it == norm_working_modes.end())
 		return AwmPtr_t();
 	return it->second;
 }
@@ -91,6 +104,64 @@ void Recipe::AddConstraint(std::string const & rsrc_path,
 	logger->Info("Constraint (new): %s L=%llu U=%llu", rsrc_path.c_str(),
 					constraints[rsrc_path]->lower,
 					constraints[rsrc_path]->upper);
+}
+
+
+void Recipe::UpdateNormalInfo(float last_value) {
+	// This reset the "normalization done" flag
+	norm.done = false;
+
+	// Update the max value
+	if ((last_value > 0) && (last_value > norm.max_value)) {
+		norm.max_value = last_value;
+		logger->Info("AWM max value = %.2f", norm.max_value);
+	}
+
+	// Update the min value
+	if ((last_value > 0) && (last_value < norm.min_value)) {
+		norm.min_value = last_value;
+		logger->Info("AWM min value = %.2f", norm.min_value);
+	}
+
+	// Delta
+	norm.delta = norm.max_value - norm.min_value;
+}
+
+
+void Recipe::NormalizeValues() {
+	float norm_value = 0.0;
+
+	// Return if performed yet
+	if (norm.done)
+		return;
+
+	AwmMap_t::iterator awm_it(working_modes.begin());
+	AwmMap_t::iterator end_awm(working_modes.end());
+
+	// Normalization
+	for (; awm_it != end_awm; ++awm_it) {
+		// Create a new AWM object by copy
+		AwmPtr_t nrm_awm(new app::WorkingMode((*(awm_it->second).get())));
+
+		// Normalize the value
+		if (norm.delta > 0.001)
+			norm_value = (nrm_awm->Value() - norm.min_value) / norm.delta;
+		else
+			norm_value = 0.0;
+
+		// Set the normalized value
+		nrm_awm->SetValue(norm_value);
+		logger->Info("AWM %d normalized valued = %.2f => %.2f",
+					nrm_awm->Id(),
+					norm_value, nrm_awm->Value());
+
+		// Insert into the normalized map
+		norm_working_modes.insert(std::pair<uint8_t, AwmPtr_t>(
+					awm_it->first, nrm_awm));
+	}
+
+	// Set the "normalization done" flag true
+	norm.done = true;
 }
 
 } // namespace app
