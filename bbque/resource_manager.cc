@@ -102,7 +102,7 @@ void ResourceManager::Optimize() {
 
 	// Check if there is at least one application to synchronize
 	if ((am.Applications(Application::READY)->empty()) &&
-			(am.Applications(Application::READY)->empty())) {
+			(am.Applications(Application::RUNNING)->empty())) {
 		logger->Debug("NO active EXCs, re-scheduling not required");
 		return;
 	}
