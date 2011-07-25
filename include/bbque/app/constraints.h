@@ -21,6 +21,7 @@
  */
 
 #include <limits>
+#include <memory>
 
 #ifndef BBQUE_CONSTRAINTS_H_
 #define BBQUE_CONSTRAINTS_H_
