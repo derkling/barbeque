@@ -216,7 +216,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 	// metrics value
 	SchedEntityMap_t::reverse_iterator se_it(sched_map.rbegin());
 	SchedEntityMap_t::reverse_iterator end_se(sched_map.rend());
-	double eval_metrics;
+	float eval_metrics;
 
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
@@ -229,7 +229,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 			continue;
 
 		// Get the metrics of the AWM to schedule
-		eval_metrics = *(static_cast<double *>
+		eval_metrics = *(static_cast<float *>
 				(eval_awm->GetAttribute(SCHEDULER_POLICY_NAME,
 										"metrics").get()));
 
@@ -316,7 +316,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		}
 
 		// Metrics computation
-		double * metrics = new double;
+		float * metrics = new float;
 		ExitCode_t result =
 			MetricsComputation(papp, (*awm_it), cl_id, *metrics);
 
@@ -341,8 +341,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		// Set the metrics value and insert the entity into the map
 		(*awm_it)->SetAttribute(
 				SCHEDULER_POLICY_NAME, "metrics", VoidPtr_t(metrics));
-		sched_map.insert(std::pair<double, SchedEntity_t>(
-					static_cast<double>(*metrics),
+		sched_map.insert(std::pair<float, SchedEntity_t>(
+					static_cast<float>(*metrics),
 					SchedEntity_t(papp, (*awm_it))));
 
 		logger->Info("Insert: [%s] AWM{%d} CL=%d metrics %.4f", papp->StrId(),
@@ -354,42 +354,42 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 
 // Functions used by MetricsComputation() to get the migration and
 // reconfiguration overhead
-double GetMigrationOverhead(AppPtr_t const & papp, AwmPtr_t const & wm,
+float GetMigrationOverhead(AppPtr_t const & papp, AwmPtr_t const & wm,
 		int cl_id);
-double GetReconfigOverhead(AppPtr_t const & papp, AwmPtr_t const & wm);
+float GetReconfigOverhead(AppPtr_t const & papp, AwmPtr_t const & wm);
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 		AppPtr_t const & papp,
 		AwmPtr_t const & wm,
 		int cl_id,
-		double & metrics) {
+		float & metrics) {
 	ExitCode_t result;
 	metrics = 0.0;
 
 	// If the resource binding implies migration from a cluster to another we
 	// have to evaluate the overheads
-	double migr_cost = GetMigrationOverhead(papp, wm, cl_id);
+	float migr_cost = GetMigrationOverhead(papp, wm, cl_id);
 
 	// If the working mode is different from the current one, the Execution
 	// Context should be reconfigured. Let's estimate the overhead.
-	double reconf_cost = GetReconfigOverhead(papp, wm);
+	float reconf_cost = GetReconfigOverhead(papp, wm);
 
 	// Contention level
-	double cont_level;
+	float cont_level;
 	result = GetContentionLevel(wm, cl_id, cont_level);
 	if (result != SCHED_OK)
 		return result;
 
 	// Metrics
-	logger->Debug("AWM value: %d", wm->Value());
-	metrics = ((double) wm->Value() - reconf_cost - migr_cost) / cont_level;
+	logger->Debug("AWM value: %.2f", wm->Value());
+	metrics = (wm->Value() - reconf_cost - migr_cost) / cont_level;
 
 	return SCHED_OK;
 }
 
 
-inline double GetMigrationOverhead(AppPtr_t const & papp,
+inline float GetMigrationOverhead(AppPtr_t const & papp,
 		AwmPtr_t const & wm,
 		int cl_id) {
 	// Silence args warnings
@@ -403,7 +403,7 @@ inline double GetMigrationOverhead(AppPtr_t const & papp,
 }
 
 
-inline double GetReconfigOverhead(AppPtr_t const & papp,
+inline float GetReconfigOverhead(AppPtr_t const & papp,
 		AwmPtr_t const & wm) {
 
 	if (papp->CurrentAWM() && (papp->CurrentAWM() != wm)) {
@@ -425,7 +425,7 @@ inline double GetReconfigOverhead(AppPtr_t const & papp,
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		AwmPtr_t const & wm,
 		int cl_id,
-		double & cont_level) {
+		float & cont_level) {
 
 	// Safety data check
 	if (!wm) {
@@ -459,7 +459,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		UsagesMapPtr_t const & rsrc_usages,
-		double & cont_level) {
+		float & cont_level) {
 
 	uint64_t rsrc_avail;
 	cont_level = 0;
@@ -490,7 +490,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		}
 
 		// Update the contention level (inverse)
-		cont_level += ((double) usage_it->second->value) / (double) rsrc_avail;
+		cont_level += ((float) usage_it->second->value) / (float) rsrc_avail;
 		++usage_it;
 	}
 

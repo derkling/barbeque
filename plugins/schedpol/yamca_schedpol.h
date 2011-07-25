@@ -49,7 +49,7 @@ namespace bbque { namespace plugins {
 /** The scheduling entity*/
 typedef std::pair<AppPtr_t, AwmPtr_t> SchedEntity_t;
 /** Map for ordering the scheduling entities */
-typedef std::multimap<double, SchedEntity_t> SchedEntityMap_t;
+typedef std::multimap<float, SchedEntity_t> SchedEntityMap_t;
 
 // Forward declaration
 class LoggerIF;
@@ -201,7 +201,7 @@ private:
 	 * @return @see ExitCode_t
 	 */
 	ExitCode_t MetricsComputation(AppPtr_t const & papp,
-			AwmPtr_t const & wm, int cl_id, double & metrics);
+			AwmPtr_t const & wm, int cl_id, float & metrics);
 
 	/**
 	 * @brief Get resources contention level
@@ -216,7 +216,7 @@ private:
 	 * @return @see ExitCode_t
 	 */
 	ExitCode_t GetContentionLevel(AwmPtr_t const & wm, int cl_id,
-			double & cont_level);
+			float & cont_level);
 
 	/**
 	 * @brief Compute the resource contention level
@@ -226,7 +226,7 @@ private:
 	 * @return @see ExitCode_t
 	 */
 	ExitCode_t ComputeContentionLevel(UsagesMapPtr_t const & rsrc_usages,
-			double & cont_level);
+			float & cont_level);
 
 };
 
