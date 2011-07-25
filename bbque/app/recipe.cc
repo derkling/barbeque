@@ -49,7 +49,7 @@ Recipe::~Recipe() {
 
 AwmPtr_t & Recipe::AddWorkingMode(uint16_t _id,
 				std::string const & _name,
-				uint16_t _value) {
+				float _value) {
 	// Insert a new working mode descriptor into the map
 	AwmPtr_t new_awm(new class WorkingMode(_id, _name, _value));
 	working_modes.insert(std::pair<uint16_t, AwmPtr_t>(_id, new_awm));

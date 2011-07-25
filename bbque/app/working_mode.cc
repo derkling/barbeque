@@ -47,10 +47,13 @@ WorkingMode::WorkingMode() {
 
 WorkingMode::WorkingMode(uint8_t _id,
 		std::string const & _name,
-		uint16_t _value):
+		float _value):
 	id(_id),
-	name(_name),
-	value(_value) {
+	name(_name) {
+
+	// Value must be positive
+	_value > 0 ?
+		value = _value: value = 0;
 
 	// Get a logger
 	bp::LoggerIF::Configuration conf(AWM_NAMESPACE);

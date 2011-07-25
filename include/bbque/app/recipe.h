@@ -108,7 +108,7 @@ public:
 	 * @param value The user QoS value of the working mode
 	 */
 	AwmPtr_t & AddWorkingMode(uint16_t id, std::string const & name,
-					uint16_t value);
+					float value);
 
 	/**
 	 * @brief Remove an application working mode inserted

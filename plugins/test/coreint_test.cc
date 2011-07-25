@@ -320,7 +320,7 @@ int PrintWorkingModesInfo(AppPtr_t papp) {
 	AwmPtrList_t::const_iterator endm = awms->end();
 	for (; wm_it != endm; ++wm_it) {
 
-		fprintf(stderr, "\n\n *** AWM%d [ %s ] (value = %d)"
+		fprintf(stderr, "\n\n *** AWM%d [ %s ] (value = %.2f)"
 				"%d resource usages ***\n",
 				(*wm_it)->Id(),
 				(*wm_it)->Name().c_str(),

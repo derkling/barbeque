@@ -47,7 +47,7 @@ public:
 	 *
 	 * @param value The QoS value of the working mode
 	 */
-	virtual void SetValue(uint16_t value) = 0;
+	virtual void SetValue(float value) = 0;
 
 	/**
 	 * @brief Init a new transition overheads descriptor

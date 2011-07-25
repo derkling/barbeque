@@ -97,7 +97,7 @@ public:
 	/**
 	 * @brief Get the QoS value associated to the working mode
 	 */
-	virtual uint16_t Value() const = 0;
+	virtual float Value() const = 0;
 
 	/**
 	 * @brief Get the usage value of a resource

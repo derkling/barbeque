@@ -57,7 +57,7 @@ public:
 	 * @param value The user QoS value of the working mode
 	 */
 	explicit WorkingMode(uint8_t id, std::string const & name,
-			uint16_t value);
+			float value);
 
 	/**
 	 * @brief Default destructor
@@ -104,15 +104,20 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline uint16_t Value() const {
+	inline float Value() const {
 		return value;
 	}
 
 	/**
 	 * @see WorkingModeConfIF
 	 */
-	inline void SetValue(uint16_t qos_value) {
-		value = qos_value;
+	inline void SetValue(float user_value) {
+		// Value must be positive
+		if (user_value > 0) {
+			value = user_value;
+			return;
+		}
+		value = 0.0;
 	}
 
 	/**
@@ -224,7 +229,7 @@ private:
 	std::string name;
 
 	/** The QoS value associated to the working mode */
-	uint16_t value;
+	float value;
 
 	/** The set of resources required (usages) */
 	UsagesMap_t rsrc_usages;
