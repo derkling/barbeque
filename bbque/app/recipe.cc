@@ -47,7 +47,7 @@ Recipe::~Recipe() {
 }
 
 
-AwmPtr_t & Recipe::AddWorkingMode(uint16_t _id,
+AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
 				std::string const & _name,
 				float _value) {
 	// Insert a new working mode descriptor into the map
@@ -57,7 +57,7 @@ AwmPtr_t & Recipe::AddWorkingMode(uint16_t _id,
 }
 
 
-AwmPtr_t Recipe::WorkingMode(uint16_t _id) {
+AwmPtr_t Recipe::WorkingMode(uint8_t _id) {
 	AwmMap_t::iterator it(working_modes.find(_id));
 	if (it == working_modes.end())
 		return AwmPtr_t();

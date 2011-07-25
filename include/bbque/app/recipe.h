@@ -45,7 +45,7 @@ typedef std::shared_ptr<Application> AppPtr_t;
 /** Shared pointer to Working Mode descriptor */
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 /** Map of shared pointers to WorkingMode */
-typedef std::map<uint16_t, AwmPtr_t> AwmMap_t;
+typedef std::map<uint8_t, AwmPtr_t> AwmMap_t;
 /** Shared pointer to Constraint object */
 typedef std::shared_ptr<ResourceConstraint> ConstrPtr_t;
 /** Map of Constraints pointers, with the resource path as key*/
@@ -107,14 +107,14 @@ public:
 	 * @param name Working mode descripting name
 	 * @param value The user QoS value of the working mode
 	 */
-	AwmPtr_t & AddWorkingMode(uint16_t id, std::string const & name,
+	AwmPtr_t & AddWorkingMode(uint8_t id, std::string const & name,
 					float value);
 
 	/**
 	 * @brief Remove an application working mode inserted
 	 * @param id Working mode ID
 	 */
-	inline void RemoveWorkingMode(uint16_t id) {
+	inline void RemoveWorkingMode(uint8_t id) {
 		working_modes.erase(id);
 	}
 
@@ -124,7 +124,7 @@ public:
 	 * @param id Working mode ID
 	 * @return A shared pointer to the application working mode searched
 	 */
-	AwmPtr_t WorkingMode(uint16_t id);
+	AwmPtr_t WorkingMode(uint8_t id);
 
 	/**
 	 * @brief All the working modes defined into the recipe
