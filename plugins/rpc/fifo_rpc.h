@@ -28,9 +28,6 @@
 #include "bbque/plugins/plugin.h"
 #include "bbque/plugins/logger.h"
 
-#include <boost/asio.hpp>
-namespace ba = boost::asio;
-
 #include <cstdint>
 
 #define MODULE_NAMESPACE RPC_CHANNEL_NAMESPACE"fif"
