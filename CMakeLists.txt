@@ -101,6 +101,23 @@ option (BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
 		ResourceAbstraction module" ON)
 
 ################################################################################
+# Lookup for library dependencies
+################################################################################
+
+# Check for required libs and packages (headers + lib)
+find_package(Boost 1.45.0 REQUIRED system program_options filesystem)
+
+# Add compilation dependencies
+include_directories(
+	${Boost_INCLUDE_DIRS}
+)
+
+# Add linking dependencies
+link_directories(
+	${Boost_LIBRARY_DIRS}
+)
+
+################################################################################
 # Subdirectories analysis
 ################################################################################
 
