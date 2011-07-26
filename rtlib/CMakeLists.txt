@@ -28,12 +28,18 @@ target_link_libraries(
 	${Boost_LIBRARIES}
 )
 
-# Install the RTLib
+# Use link path ad RPATH
+set_property (TARGET bbque_rtlib PROPERTY
+		INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 set_property (TARGET bbque_rtlib PROPERTY
 		FRAMEWORK ON)
+
 set_property (TARGET bbque_rtlib PROPERTY PUBLIC_HEADER
 		${PROJECT_SOURCE_DIR}/include/bbque/rtlib.h
 		${PROJECT_SOURCE_DIR}/include/bbque/rtlib/bbque_exc.h)
+
+# Install the RTLib
 install (TARGETS bbque_rtlib LIBRARY
 		DESTINATION ${BBQUE_PATH_RTLIB}
 		PUBLIC_HEADER DESTINATION ${BBQUE_PATH_HEADERS}
