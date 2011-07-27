@@ -954,6 +954,16 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 	return AM_SUCCESS;
 }
 
+void ApplicationManager::SyncAbort(AppPtr_t papp) {
+	Application::SyncState_t syncState = papp->SyncState();
+
+	logger->Info("Aborting sync for EXC [%s, %s]...", papp->StrId(),
+			papp->SyncStateStr(syncState));
+
+	// Notify application
+	papp->ScheduleAbort();
+}
+
 ApplicationManager::ExitCode_t
 ApplicationManager::RunningCommit(AppPtr_t papp) {
 	Application::ExitCode_t app_result;

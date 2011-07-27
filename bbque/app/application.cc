@@ -695,6 +695,24 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	return APP_SUCCESS;
 }
 
+void Application::ScheduleAbort() {
+	// The abort must be performed only for SYNC App/ExC
+	if (!Synching()) {
+		logger->Fatal("ScheduleAbort: [%s] in state [%s] (expected SYNC)",
+				StrId(), StateStr(State()));
+		assert(Synching());
+	}
+
+	// Set as READY;
+	SetState(READY);
+
+	// Reset working modes settings
+	schedule.awm.reset();
+	schedule.next_awm.reset();
+
+	logger->Info("ScheduleAbort completed ");
+}
+
 Application::ExitCode_t Application::ScheduleContinue() {
 	assert(schedule.awm);
 	assert(schedule.next_awm);

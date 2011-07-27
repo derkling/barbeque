@@ -252,6 +252,13 @@ public:
 	ExitCode_t ScheduleCommit();
 
 	/**
+	 * @brief Abort a scheduling
+	 *
+	 * This must be called only if the application is in a SYNC state
+	 */
+	void ScheduleAbort();
+
+	/**
 	 * @brief The application can continue to run
 	 *
 	 * This method must be called by ApplicationManager to signal that the

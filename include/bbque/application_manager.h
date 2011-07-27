@@ -229,6 +229,13 @@ public:
 	ExitCode_t SyncCommit(AppPtr_t papp);
 
 	/**
+	 * @brief Abort the synchronization for the specified application
+	 *
+	 * @param papp the application which has been synchronized
+	 */
+	void SyncAbort(AppPtr_t papp);
+
+	/**
 	 * @brief Notify an application is changin state
 	 *
 	 * This method should be called by the Application once it is changing its
