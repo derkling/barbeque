@@ -385,7 +385,6 @@ SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncState) {
 	ApplicationProxy::pPostChangeRsp_t presp;
 	RTLIB_ExitCode_t result;
-	br::ResourceAccounter::ExitCode_t raResult;
 	AppsUidMapIt apps_it;
 	AppPtr_t papp;
 	uint8_t excs = 0;
@@ -433,30 +432,12 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 		if (papp->Disabled())
 			continue;
 
-		// Acquiring the resources for RUNNING Applications
-		if (!papp->Blocking()) {
-
-			logger->Debug("SyncAcquire: %s is in %s/%s", papp->StrId(),
-					papp->StateStr(papp->State()),
-					papp->SyncStateStr(papp->SyncState()));
-
-			raResult = ra.SyncAcquireResources(papp);
-
-			// TODO: Investigate a response action for error return code.
-			// 	Evaluate the implementation of a SyncAbort into the
-			// 	ApplicationManage
-			assert (raResult == br::ResourceAccounter::RA_SUCCESS);
-		}
-
-		// Committing change to the ApplicationManager
-		// NOTE: this should remove the current app from the queue,
-		// otherwise we enter an endless loop
-		am.SyncCommit(papp);
+		// Perform resource acquisition for RUNNING App/ExC
+		DoAcquireResources(papp);
 
 		// Account for total reconfigured EXCs
 		SM_COUNT_EVENT(metrics, SM_SYNCP_EXCS);
 		excs++;
-
 	}
 
 	// Collecing execution metrics
@@ -467,6 +448,35 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 	SM_ADD_RECONF(metrics, SM_SYNCP_AVGE, excs);
 
 	return OK;
+}
+
+void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	br::ResourceAccounter::ExitCode_t raResult;
+
+	// Acquiring the resources for RUNNING Applications
+	if (!papp->Blocking()) {
+
+		logger->Debug("SyncAcquire: [%s] is in %s/%s", papp->StrId(),
+				papp->StateStr(papp->State()),
+				papp->SyncStateStr(papp->SyncState()));
+
+		// Resource acquisition
+		raResult = ra.SyncAcquireResources(papp);
+
+		// If failed abort the single App/ExC sync
+		if (raResult != br::ResourceAccounter::RA_SUCCESS) {
+			logger->Error("SyncAcquire: failed for [%s]. Returned %d",
+					papp->StrId(), raResult);
+			am.SyncAbort(papp);
+		}
+	}
+
+	// Committing change to the ApplicationManager
+	// NOTE: this should remove the current app from the queue,
+	// otherwise we enter an endless loop
+	am.SyncCommit(papp);
 }
 
 SynchronizationManager::ExitCode_t

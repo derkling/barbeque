@@ -158,6 +158,13 @@ private:
 	 */
 	ExitCode_t Sync_PostChange(ApplicationStatusIF::SyncState_t syncState);
 
+	/**
+	 * @brief Perform the synchronized resource acquisition
+	 *
+	 * @param The App/ExC that have to acquire resources
+	 */
+	void DoAcquireResources(AppPtr_t);
+
 };
 
 } // namespace bbque
