@@ -243,7 +243,8 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 }
 
 SynchronizationManager::ExitCode_t
-SynchronizationManager::Sync_SyncChange(ApplicationStatusIF::SyncState_t syncState) {
+SynchronizationManager::Sync_SyncChange(
+		ApplicationStatusIF::SyncState_t syncState) {
 	AppsUidMapIt apps_it;
 
 	typedef std::map<AppPtr_t, ApplicationProxy::pSyncChangeRsp_t> RspMap_t;
@@ -371,7 +372,6 @@ SynchronizationManager::Sync_DoChange(ApplicationStatusIF::SyncState_t syncState
 			continue;
 
 		logger->Info("STEP 3: <--------- OK -- [%s]", papp->StrId());
-
 	}
 
 	// Collecing execution metrics
@@ -520,7 +520,6 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	return OK;
 }
 
-
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
 	ApplicationStatusIF::SyncState_t syncState;
@@ -586,7 +585,6 @@ SynchronizationManager::SyncSchedule() {
 	am.ReportSyncQ();
 
 	return OK;
-
 }
 
 } // namespace bbque
