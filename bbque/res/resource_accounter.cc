@@ -208,6 +208,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		logger->Fatal("Booking: Null pointer to the application descriptor");
 		return RA_ERR_MISS_APP;
 	}
+
 	// Check that the next working mode has been set
 	if ((!resource_set) || (resource_set->empty())) {
 		logger->Fatal("Booking: Empty resource usages set");
@@ -470,13 +471,24 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncAcquireResources(
-		AppPtr_t const & papp, UsagesMapPtr_t const & usages) {
+		AppPtr_t const & papp) {
+	// Check next AWM
+	if (!papp->NextAWM()) {
+		logger->Fatal("SyncMode [%d]: [%s] missing the next AWM",
+				sync_ssn.count, papp->StrId());
+		return RA_ERR_MISS_AWM;
+	}
+
+	// Resource set to acquire
+	UsagesMapPtr_t const &usages(papp->NextAWM()->GetResourceBinding());
+
 	// Check that we are in a synchronized session
 	if (!sync_ssn.started) {
 		logger->Error("SyncMode [%d]: Session not open", sync_ssn.count);
 		return RA_ERR_SYNC_START;
 	}
 
+	// Acquire resources
 	return BookResources(papp, usages, sync_ssn.view, false);
 }
 

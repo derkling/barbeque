@@ -440,8 +440,7 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 					papp->StateStr(papp->State()),
 					papp->SyncStateStr(papp->SyncState()));
 
-			raResult = ra.SyncAcquireResources(papp,
-				papp->NextAWM()->GetResourceBinding());
+			raResult = ra.SyncAcquireResources(papp);
 
 			// TODO: Investigate a response action for error return code.
 			// 	Evaluate the implementation of a SyncAbort into the

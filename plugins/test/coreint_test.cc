@@ -605,8 +605,7 @@ void CoreInteractionsTest::testSyncResourcesUpdate() {
 			continue;
 
 		// Acquire resources for the application/ExC
-		ra.SyncAcquireResources(sync_app_it->second,
-				sync_app_it->second->NextAWM()->GetResourceBinding());
+		ra.SyncAcquireResources(sync_app_it->second);
 
 		// TODO: Bug to fix on am.SyncCommit().
 		// Beware: ithout this call we cannot perform other runs

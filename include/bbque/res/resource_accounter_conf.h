@@ -61,6 +61,8 @@ public:
 		RA_ERR_MISS_APP,
 		/** Resource usages map missing	 */
 		RA_ERR_MISS_USAGES,
+		/** Next AWM is missing */
+		RA_ERR_MISS_AWM,
 		/** Application uses yet another resource set */
 		RA_ERR_APP_USAGES,
 		/** Resource usage required exceeds the availabilities */
@@ -179,14 +181,13 @@ public:
 	 *
 	 * If the sync session is not open does nothing. Otherwise it does
 	 * resource booking using the state view allocated for the session.
+	 * The resource set is retrieved from the "next AWM".
 	 *
 	 * @param papp Application/ExC acquiring the resources
-	 * @param usages The set of resources to acquire
 	 *
 	 * @return @see ExitCode_t
 	 */
-	virtual ExitCode_t SyncAcquireResources(AppPtr_t const & papp,
-			UsagesMapPtr_t const & usages) = 0;
+	virtual ExitCode_t SyncAcquireResources(AppPtr_t const & papp) = 0;
 
 	/**
 	 * @brief Abort a synchronized mode session

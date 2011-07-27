@@ -216,7 +216,6 @@ public:
 	 */
 	void PutView(RViewToken_t tok);
 
-
 	/**
 	 * @brief Print the resource hierarchy in a tree-like form
 	 */
@@ -232,8 +231,7 @@ public:
 	/**
 	 * @see ResourceAccounterConfIF
 	 */
-	ExitCode_t SyncAcquireResources(AppPtr_t const & papp,
-			UsagesMapPtr_t const & usages);
+	ExitCode_t SyncAcquireResources(AppPtr_t const & papp);
 
 	/**
 	 * @see ResourceAccounterConfIF
