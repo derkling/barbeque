@@ -222,7 +222,7 @@ public:
 	/**
 	 * @brief Commit the synchronization for the specified application
 	 *
-	 * @brief papp the application which has been synchronized
+	 * @param papp the application which has been synchronized
 	 *
 	 * @return AM_SUCCESS on commit succesfull, AM_ABORT on errors.
 	 */
@@ -262,12 +262,12 @@ public:
 	ExitCode_t RunningCommit(AppPtr_t papp);
 
 	/**
-	 * @breif Dump a logline to report on current Status queue counts
+	 * @brief Dump a logline to report on current Status queue counts
 	 */
 	void ReportStatusQ() const;
 
 	/**
-	 * @breif Dump a logline to report on current Status queue counts
+	 * @brief Dump a logline to report on current Status queue counts
 	 */
 	void ReportSyncQ() const;
 
