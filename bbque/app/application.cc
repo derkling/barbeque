@@ -717,6 +717,7 @@ Application::ExitCode_t Application::ScheduleContinue() {
 	assert(schedule.awm);
 	assert(schedule.next_awm);
 
+	// This must be called only for RUNNING App/ExC
 	if (_State() != RUNNING) {
 		logger->Error("ScheduleRunning: [%s] is not running. State {%s/%s}",
 				StrId(), StateStr(_State()), SyncStateStr(_SyncState()));
@@ -724,6 +725,7 @@ Application::ExitCode_t Application::ScheduleContinue() {
 		return APP_ABORT;
 	}
 
+	// AWM current and next must match
 	if (schedule.awm->Id() != schedule.next_awm->Id()) {
 		logger->Error("ScheduleRunning: [%s] AWMs differs. "
 				"{curr=%d / next=%d}", StrId(),
@@ -732,7 +734,9 @@ Application::ExitCode_t Application::ScheduleContinue() {
 		return APP_ABORT;
 	}
 
+	// Reset next AWM (only current must be set)
 	schedule.next_awm.reset();
+
 	return APP_SUCCESS;
 }
 

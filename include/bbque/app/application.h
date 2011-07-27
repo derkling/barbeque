@@ -244,7 +244,7 @@ public:
 			UsagesMapPtr_t & resource_set, RViewToken_t vtok);
 
 	/**
-	 * @brief Commit a previsously required re-scheduling request.
+	 * @brief Commit a previously required re-scheduling request
 	 *
 	 * @return APP_SUCCESS on successful update of internal data structures,
 	 * APP_ABORT on errors.
@@ -254,7 +254,7 @@ public:
 	/**
 	 * @brief Abort a scheduling
 	 *
-	 * This must be called only if the application is in a SYNC state
+	 * This must be called only if the application is in a SYNC state.
 	 */
 	void ScheduleAbort();
 
@@ -370,6 +370,7 @@ private:
 	 */
 	void InitResourceConstraints();
 
+
 	bool _Disabled() const;
 
 	bool _Active() const;
@@ -387,7 +388,6 @@ private:
 	AwmPtr_t const & _CurrentAWM() const;
 
 	AwmPtr_t const & _NextAWM() const;
-
 
 	/**
 	 * @brief Assert a specific resource constraint.
@@ -460,16 +460,19 @@ private:
 	 * state.
 	 *
 	 * @param sync the new synchronization state (SYNC_NONE by default)
+	 * @return @see ExitCode_t
 	 */
 	ExitCode_t RequestSync(SyncState_t sync);
 
 	/**
 	 * @brief Configure this application to switch to the specified AWM
+	 * @return @see ExitCode_t
 	 */
 	ExitCode_t Reschedule(AwmPtr_t const & awm);
 
 	/**
 	 * @brief Configure this application to release resources.
+	 * @return @see ExitCode_t
 	 */
 	ExitCode_t Unschedule();
 
