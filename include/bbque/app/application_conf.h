@@ -97,14 +97,6 @@ public:
 			UsagesMapPtr_t & resource_set, RViewToken_t tok) = 0;
 
 	/**
-	 * @brief Commit a previsously required re-scheduling request.
-	 *
-	 * @return APP_SUCCESS on successful update of internal data structures,
-	 * APP_ABORT on errors.
-	 */
-	virtual ExitCode_t ScheduleCommit() = 0;
-
-	/**
 	 * @brief Set a constraint on the working modes
 	 *
 	 * It's important to clearly explain the behavior of the following API.

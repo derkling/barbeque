@@ -244,7 +244,10 @@ public:
 			UsagesMapPtr_t & resource_set, RViewToken_t vtok);
 
 	/**
-	 * @see ApplicationConfIF
+	 * @brief Commit a previsously required re-scheduling request.
+	 *
+	 * @return APP_SUCCESS on successful update of internal data structures,
+	 * APP_ABORT on errors.
 	 */
 	ExitCode_t ScheduleCommit();
 
