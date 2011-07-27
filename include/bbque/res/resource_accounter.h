@@ -224,25 +224,50 @@ public:
 	}
 
 	/**
-	 * @see ResourceAccounterConfIF
+	 * @brief Start a synchronized mode session
+	 *
+	 * Once a scheduling/resource allocation has been performed we need to
+	 * make the changes effective, by updating the system resources state.
+	 * For doing that a "synchronized mode session" must be started. This
+	 * method open the session and init a new resource view by computing the
+	 * resource accounting info of the Applications/ExC having a "RUNNING"
+	 * scheduling state (the ones that continue running without
+	 * reconfiguration or migrations).
+	 *
+	 * @return @see ExitCode_t
 	 */
 	ExitCode_t SyncStart();
 
 	/**
-	 * @see ResourceAccounterConfIF
+	 * @brief Acquire resources for an Application/ExC
+	 *
+	 * If the sync session is not open does nothing. Otherwise it does
+	 * resource booking using the state view allocated for the session.
+	 * The resource set is retrieved from the "next AWM".
+	 *
+	 * @param papp Application/ExC acquiring the resources
+	 *
+	 * @return @see ExitCode_t
 	 */
 	ExitCode_t SyncAcquireResources(AppPtr_t const & papp);
 
 	/**
-	 * @see ResourceAccounterConfIF
+	 * @brief Abort a synchronized mode session
+	 *
+	 * Changes are trashed away. The resource bookings performed in the
+	 * session are canceled.
 	 */
 	void SyncAbort();
 
 	/**
-	 * @see ResourceAccounterConfIF
+	 * @brief Commit a synchronized mode session
+	 *
+	 * Changes are made effective. Resources must be allocated accordingly to
+	 * the state view built during in the session.
+	 *
+	 * @return @see ExitCode_t
 	 */
 	ExitCode_t SyncCommit();
-
 
 private:
 
