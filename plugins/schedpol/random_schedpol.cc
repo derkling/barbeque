@@ -119,13 +119,9 @@ SchedulerPolicyIF::ExitCode_t
 RandomSchedPol::Schedule(bbque::SystemView & sv) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t viewResult;
-	AppsUidMap_t const *am;
-	AppsUidMap_t::const_iterator it;
-	AppsUidMap_t::const_iterator end;
+	AppsUidMapIt app_it;
+	AppPtr_t papp;
 
-	AppsUidMap_t myMap;
-
-	
 	if (!logger) {
 		assert(logger);
 		return SCHED_ERROR;
@@ -141,35 +137,20 @@ RandomSchedPol::Schedule(bbque::SystemView & sv) {
 	}
 
 	logger->Info("Random scheduling RUNNING applications...");
-	am = sv.ApplicationsRunning();
 
-	// Copy RUNNING applications locally
-	// FIXME this is due to avoid a segfault if a ScheduleRequest is done
-	// while we are still looping on the map iterators.
-	myMap.insert(am->begin(), am->end());
-
-	it = myMap.begin();
-	end = myMap.end();
-	for ( ; it != end; ++it) {
-		ScheduleApp((*it).second);
+	papp = sv.GetFirstRunning(app_it);
+	while (papp) {
+		ScheduleApp(papp);
+		papp = sv.GetNextRunning(app_it);
 	}
-	myMap.clear();
-
 
 	logger->Info("Random scheduling READY applications...");
-	am = sv.ApplicationsReady();
 
-	// Copy READY applications locally
-	// FIXME this is due to avoid a segfault if a ScheduleRequest is done
-	// while we are still looping on the map iterators.
-	myMap.insert(am->begin(), am->end());
-
-	it = myMap.begin();
-	end = myMap.end();
-	for ( ; it != end; ++it) {
-		ScheduleApp((*it).second);
+	papp = sv.GetFirstReady(app_it);
+	while (papp) {
+		ScheduleApp(papp);
+		papp = sv.GetNextReady(app_it);
 	}
-	myMap.clear();
 
 	// Release the ResourceAccounter view
 	ra.PutView(ra_view);
