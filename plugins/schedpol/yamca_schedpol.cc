@@ -67,8 +67,9 @@ char const * YamcaSchedPol::Name() {
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
-		bbque::SystemView & system) {
+		bbque::SystemView & sv) {
 	ExitCode_t result;
+
 	logger->Debug(
 			"<<<<<<<<<<<<<<<<< Scheduling policy starting >>>>>>>>>>>>>>>>>>");
 	// Get a resources view from Resource Accounter
@@ -78,26 +79,22 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 	}
 
 	// Get the number of clusters
-	num_clusters = system.ResourceTotal(RSRC_CLUSTER);
+	num_clusters = sv.ResourceTotal(RSRC_CLUSTER);
 	clusters_full.resize(num_clusters);
 	clusters_full = { false };
 
 	logger->Info("Schedule: Found %d clusters on the platform.", num_clusters);
-	logger->Info("lowest prio = %d", system.ApplicationLowestPriority());
+	logger->Info("lowest prio = %d", sv.ApplicationLowestPriority());
 
 	// Iterate from the highest to the lowest priority applications queue
-	for (AppPrio_t prio = 0; prio <= system.ApplicationLowestPriority();
+	for (AppPrio_t prio = 0; prio <= sv.ApplicationLowestPriority();
 			++prio) {
 
-		if (system.Applications(prio)->empty())
+		if (!sv.HasApplications(prio))
 			continue;
 
-		logger->Info("Schedule: %d Applications/EXC with priority %d ",
-				system.Applications(prio)->size(),
-				prio);
-
 		// Schedule applications with priority == prio
-		result = SchedulePrioQueue(system.Applications(prio));
+		result = SchedulePrioQueue(sv, prio);
 		if (result != SCHED_OK) {
 			rsrc_acct.PutView(rsrc_view_token);
 			return result;
@@ -144,7 +141,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
-		AppsUidMap_t const * apps) {
+		bbque::SystemView & sv,
+		AppPrio_t prio) {
 	ExitCode_t result;
 
 	//Order scheduling entities
@@ -159,7 +157,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 		}
 
 		// Order schedule entities by metrics
-		result = OrderSchedEntity(sched_map, apps, cl_id);
+		result = OrderSchedEntity(sched_map, sv, prio, cl_id);
 		if (result == SCHED_CLUSTER_FULL) {
 			clusters_full[cl_id] = true;
 			continue;
@@ -182,15 +180,15 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		SchedEntityMap_t & sched_map,
-		AppsUidMap_t const * apps,
+		bbque::SystemView & sv,
+		AppPrio_t prio,
 		int cl_id) {
-	AppsMap_t::const_iterator apps_it(apps->begin());
-	AppsMap_t::const_iterator end_apps(apps->end());
+	AppsUidMapIt app_it;
+	AppPtr_t papp;
 
 	// Applications to be scheduled
-	for (; apps_it != end_apps; ++apps_it) {
-		AppPtr_t const & papp = apps_it->second;
-		assert(papp);
+	papp = sv.GetFirstWithPrio(prio, app_it);
+	for ( ; papp; papp = sv.GetNextWithPrio(prio, app_it)) {
 
 		// Check a set of conditions accordingly to skip current
 		// application/EXC

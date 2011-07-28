@@ -35,6 +35,7 @@
 using namespace bbque::app;
 using namespace bbque::res;
 
+using bbque::app::AppPrio_t;
 using bbque::app::AppPtr_t;
 using bbque::app::AwmPtr_t;
 
@@ -94,7 +95,7 @@ public:
 	 * @see ScheduerPolicyIF
 	 */
 	SchedulerPolicyIF::ExitCode_t
-		Schedule(bbque::SystemView & system);
+		Schedule(bbque::SystemView & sv);
 
 private:
 
@@ -132,11 +133,14 @@ private:
 
 	/**
 	 * @brief Schedule applications from a priority queue
-	 * @param apps Map of applications having the same priority
+	 *
+	 * @param sv the SystemView
+	 * @param prio The priority queue to schedule
 	 *
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t SchedulePrioQueue(AppsUidMap_t const * apps);
+	ExitCode_t SchedulePrioQueue(bbque::SystemView & sv,
+			AppPrio_t prio);
 
 	/**
 	 * @brief Scheduling entities ordering
@@ -146,11 +150,13 @@ private:
 	 * value computed)
 	 *
 	 * @param sched_map Multimap for scheduling entities ordering
-	 * @param apps Map of applications to schedule
+	 * @param prio The priority queue to schedule
 	 * @param cl_id The current cluster for the clustered resources
 	 */
 	ExitCode_t OrderSchedEntity(SchedEntityMap_t & sched_map,
-			AppsUidMap_t const * apps, int cl_id);
+			bbque::SystemView & sv,
+			AppPrio_t prio,
+			int cl_id);
 
 	/**
 	 * @brief Metrics of all the AWMs of an Application
