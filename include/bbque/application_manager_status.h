@@ -133,7 +133,7 @@ public:
 	 *
 	 * @param uid Application UID
 	 */
-	virtual AppPtr_t const GetApplication(AppUid_t uid) const = 0;
+	virtual AppPtr_t const GetApplication(AppUid_t uid) = 0;
 
 	/**
 	 * @brief Lowest application priority
@@ -144,7 +144,7 @@ public:
 	/**
 	 * @brief Dump a logline to report all applications status
 	 */
-	virtual void PrintStatusReport() const = 0;
+	virtual void PrintStatusReport() = 0;
 
 };
 

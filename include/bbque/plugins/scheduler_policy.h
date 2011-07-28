@@ -74,7 +74,7 @@ public:
 	 * @param system a reference to the system view which exposes information
 	 * related to both resources and applications.
 	 */
-	virtual ExitCode_t Schedule(bbque::SystemView const & system) = 0;
+	virtual ExitCode_t Schedule(bbque::SystemView & system) = 0;
 
 };
 

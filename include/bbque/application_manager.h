@@ -164,7 +164,7 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	AppPtr_t const GetApplication(AppUid_t uid) const;
+	AppPtr_t const GetApplication(AppUid_t uid);
 
 	/**
 	 * @see ApplicationManagerStatusIF
@@ -232,7 +232,7 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	void PrintStatusReport() const;
+	void PrintStatusReport();
 
 private:
 

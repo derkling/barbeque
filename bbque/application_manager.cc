@@ -171,7 +171,7 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
  *  Get EXC handlers
  ******************************************************************************/
 
-AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) const {
+AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) {
 	AppsUidMap_t::const_iterator it = uids.find(uid);
 	AppPtr_t papp;
 
@@ -260,7 +260,7 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	return AM_SUCCESS;
 }
 
-void ApplicationManager::PrintStatusReport() const {
+void ApplicationManager::PrintStatusReport() {
 	AppsMap_t::const_iterator app_it(apps.begin());
 	AppsMap_t::const_iterator end_app(apps.end());
 	char line[80];

@@ -116,7 +116,7 @@ void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
 
 
 SchedulerPolicyIF::ExitCode_t
-RandomSchedPol::Schedule(bbque::SystemView const & sv) {
+RandomSchedPol::Schedule(bbque::SystemView & sv) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t viewResult;
 	AppsUidMap_t const *am;

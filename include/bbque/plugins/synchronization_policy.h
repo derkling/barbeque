@@ -75,8 +75,8 @@ public:
 	 *
 	 * @see DoSync
 	 */
-	virtual bbque::AppsUidMap_t const * GetApplicationsQueue(
-			bbque::SystemView const & system, bool restart = false) = 0;
+	virtual ApplicationStatusIF::SyncState_t GetApplicationsQueue(
+			bbque::SystemView & system, bool restart = false) = 0;
 
 	/**
 	 * @brief Check if the application should be synched

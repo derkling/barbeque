@@ -67,7 +67,7 @@ char const * YamcaSchedPol::Name() {
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
-		bbque::SystemView const & system) {
+		bbque::SystemView & system) {
 	ExitCode_t result;
 	logger->Debug(
 			"<<<<<<<<<<<<<<<<< Scheduling policy starting >>>>>>>>>>>>>>>>>>");

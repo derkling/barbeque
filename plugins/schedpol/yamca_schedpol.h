@@ -94,7 +94,7 @@ public:
 	 * @see ScheduerPolicyIF
 	 */
 	SchedulerPolicyIF::ExitCode_t
-		Schedule(bbque::SystemView const & system);
+		Schedule(bbque::SystemView & system);
 
 private:
 
