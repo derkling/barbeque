@@ -29,12 +29,14 @@
 
 #include <set>
 #include <thread>
+#include "bbque/application_manager.h"
 #include "bbque/res/resource_accounter_conf.h"
 #include "bbque/res/resource_utils.h"
 #include "bbque/res/resource_tree.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
 
+using bbque::ApplicationManager;
 using bbque::plugins::LoggerIF;
 using bbque::app::AppPtr_t;
 
@@ -278,6 +280,9 @@ private:
 	/** The logger used by the resource accounter */
 	LoggerIF  *logger;
 
+	/** The Application Manager component */
+	bbque::ApplicationManager & am;
+	
 	/** Mutex protecting resource release and acquisition */
 	std::recursive_mutex status_mtx;
 

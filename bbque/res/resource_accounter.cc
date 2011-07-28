@@ -52,7 +52,8 @@ ResourceAccounter & ResourceAccounter::GetInstance() {
 	return instance;
 }
 
-ResourceAccounter::ResourceAccounter() {
+ResourceAccounter::ResourceAccounter() :
+	am(ApplicationManager::GetInstance()) {
 
 	// Get a logger
 	std::string logger_name(RESOURCE_ACCOUNTER_NAMESPACE);
@@ -406,7 +407,6 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	ResourceAccounter::ExitCode_t result;
 	ApplicationManager::ExitCode_t am_result;
 	SystemView & sv(SystemView::GetInstance());
-	ApplicationManager & am(ApplicationManager::GetInstance());
 	AppsUidMap_t::const_iterator rapp_it(sv.ApplicationsRunning()->begin());
 	AppsUidMap_t::const_iterator end_rapp(sv.ApplicationsRunning()->end());
 
