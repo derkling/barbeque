@@ -37,19 +37,19 @@
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
 
-#ifndef BBQUE_APP_PRIO_MIN
+#ifndef BBQUE_APP_PRIO_LEVELS
 /**
   * @brief The (default) minimum priority for an Application
   *
   * Applicaitons are scheduled according to their priority which is a
   * value ranging from 0 (highest priority) to a Bbque defined minimum values.
-  * The default minimum value is defined by BBQUE_APP_PRIO_MIN, but it can be
+  * The default minimum value is defined by BBQUE_APP_PRIO_LEVELS, but it can be
   * tuned by a Barbeque configuration parameter.
   *
   * Recipies could define the priority of the corresponding Application.
   *
   */
-# define BBQUE_APP_PRIO_MIN 10
+# define BBQUE_APP_PRIO_LEVELS 10
 #endif
 
 using bbque::app::Application;
@@ -86,7 +86,8 @@ public:
 	 */
 	 AppPtr_t CreateEXC(
 			std::string const & name, AppPid_t pid, uint8_t exc_id,
-			std::string const & recipe, app::AppPrio_t prio = BBQUE_APP_PRIO_MIN,
+			std::string const & recipe,
+			AppPrio_t prio = BBQUE_APP_PRIO_LEVELS-1,
 			bool weak_load = false);
 
 	/**
@@ -170,7 +171,7 @@ public:
 	 * @see ApplicationManagerStatusIF
 	 */
 	inline app::AppPrio_t LowestPriority() const {
-		return lowest_prio;
+		return BBQUE_APP_PRIO_LEVELS-1;
 	};
 
 	/**
@@ -277,12 +278,6 @@ private:
 	 */
 	std::mutex recipes_mtx;
 
-	/**
-	 * A (generic) vector of application maps.
-	 * These vectors are used to classify applications, e.g. based on their
-	 * priority or current status.
-	 */
-	typedef std::vector<AppsUidMap_t> AppsMapVec_t;
 
 	/**
 	 * Priority vector of currently scheduled applications (actives).
@@ -291,7 +286,12 @@ private:
 	 * ones. Each position in the vector points to a set of maps grouping active
 	 * applications by priority.
 	 */
-	AppsMapVec_t priority_vec;
+	AppsUidMap_t prio_vec[BBQUE_APP_PRIO_LEVELS];
+
+	/**
+	 * Array of mutexes protecting the priority queues
+	 */
+	std::mutex prio_mtx[BBQUE_APP_PRIO_LEVELS];
 
 	/**
 	 * Array grouping the applications by status (@see ScheduleFlag).

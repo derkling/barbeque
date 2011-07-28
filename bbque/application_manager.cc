@@ -20,7 +20,6 @@
 
 #include "bbque/application_manager.h"
 
-#include "bbque/configuration_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 
@@ -64,26 +63,9 @@ ApplicationManager::ApplicationManager() {
 		assert(rloader);
 	}
 
-	// Read the lowest application priority from configuraiton file
-	ConfigurationManager & cm = ConfigurationManager::GetInstance();
-	po::options_description opts_desc("Application Manager Options");
-	opts_desc.add_options()
-		("app.lowest_prio",
-		 po::value<app::AppPrio_t>
-		 (&lowest_prio)->default_value(BBQUE_APP_PRIO_MIN),
-		 "Low application priority (the higher the value, "
-		 "the lower the prio")
-		;
-	po::variables_map opts_vm;
-	cm.ParseConfigurationFile(opts_desc, opts_vm);
-
-	// Pre-allocate priority and status vectors
-	priority_vec = std::vector<AppsUidMap_t>(lowest_prio + 1);
-
 	// Debug logging
-	logger->Debug("Min priority = %d", lowest_prio);
-	logger->Debug("Priority vector [size: %d, capacity: %d]",
-			priority_vec.size(), priority_vec.capacity());
+	logger->Debug("Priority levels: %d, (O = highest)",
+			BBQUE_APP_PRIO_LEVELS);
 
 }
 
@@ -95,8 +77,10 @@ ApplicationManager::~ApplicationManager() {
 	recipes.clear();
 
 	// Clear the priority vector
-	logger->Debug("Clearing priority vector...");
-	priority_vec.clear();
+	logger->Debug("Clearing PRIO vector...");
+	for (uint8_t level = 0; level < BBQUE_APP_PRIO_LEVELS; ++level) {
+		prio_vec[level].clear();
+	}
 
 	// Clear the applications map
 	logger->Debug("Clearing apps...");
@@ -377,7 +361,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 	// Save application descriptors
 	apps.insert(AppsMapEntry_t(papp->Pid(), papp));
 	uids.insert(UidsMapEntry_t(papp->Uid(), papp));
-	priority_vec[papp->Priority()].insert(
+	prio_vec[papp->Priority()].insert(
 			UidsMapEntry_t(papp->Uid(), papp));
 
 	// All new EXC are initially disabled
@@ -402,7 +386,8 @@ ApplicationManager::PriorityRemove(AppPtr_t papp) {
 
 	logger->Debug("Releasing [%s] EXCs from PRIORITY map...",
 			papp->StrId());
-	priority_vec[papp->Priority()].erase(papp->Uid());
+
+	prio_vec[papp->Priority()].erase(papp->Uid());
 
 	return AM_SUCCESS;
 }
