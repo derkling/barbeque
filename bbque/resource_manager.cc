@@ -172,16 +172,15 @@ void ResourceManager::EvtExcStop() {
 }
 
 void ResourceManager::EvtBbqExit() {
-	AppsUidMap_t const * apps = am.Applications();
-	AppsUidMap_t::const_iterator it = apps->begin();
+	AppsUidMapIt apps_it;
 	AppPtr_t papp;
 
 	logger->Info("Terminating Barbeque...");
 	done = true;
 
 	// Stop applications
-	for ( ; it != apps->end(); ++it) {
-		papp = (*it).second;
+	papp = am.GetFirst(apps_it);
+	for ( ; papp; papp = am.GetNext(apps_it)) {
 		// Terminating the application
 		logger->Warn("TODO: Send application STOP command");
 		// Removing internal data structures
