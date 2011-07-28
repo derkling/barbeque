@@ -55,19 +55,54 @@ public:
 		return instance;
 	}
 
+
+	/**
+	 * @brief Return the first app at the specified priority
+	 */
+	inline AppPtr_t GetFirstWithPrio(AppPrio_t prio, AppsUidMapIt & ait) {
+		return am.GetFirst(prio, ait);
+	}
+
+	/**
+	 * @brief Return the next app at the specified priority
+	 */
+	inline AppPtr_t GetNextWithPrio(AppPrio_t prio, AppsUidMapIt & ait) {
+		return am.GetNext(prio, ait);
+	}
+
+
 	/**
 	 * @brief Return the map containing all the ready applications
 	 */
+	inline AppPtr_t GetFirstReady(AppsUidMapIt & ait) {
+		return am.GetFirst(ApplicationStatusIF::READY, ait);
+	}
+
+	inline AppPtr_t GetNextReady(AppsUidMapIt & ait) {
+		return am.GetNext(ApplicationStatusIF::READY, ait);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
+	inline AppPtr_t GetFirstRunning(AppsUidMapIt & ait) {
+		return am.GetFirst(ApplicationStatusIF::RUNNING, ait);
+	}
+
+	inline AppPtr_t GetNextRunning(AppsUidMapIt & ait) {
+		return am.GetNext(ApplicationStatusIF::RUNNING, ait);
 	}
 
 	/**
 	 * @brief Map of blocked applications (descriptors)
 	 */
+
+	inline AppPtr_t GetFirstBlocked(AppsUidMapIt & ait) {
+		return am.GetFirst(ApplicationStatusIF::BLOCKED, ait);
+	}
+
+	inline AppPtr_t GetNextBlocked(AppsUidMapIt & ait) {
+		return am.GetNext(ApplicationStatusIF::BLOCKED, ait);
 	}
 
 	/**

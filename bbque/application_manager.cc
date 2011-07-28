@@ -77,6 +77,7 @@ ApplicationManager::~ApplicationManager() {
 	for (uint8_t state = 0;
 			state < Application::SYNC_STATE_COUNT; ++state) {
 		sync_vec[state].clear();
+		sync_ret[state].clear();
 	}
 
 	// Clear the status vector
@@ -84,12 +85,14 @@ ApplicationManager::~ApplicationManager() {
 	for (uint8_t state = 0;
 			state < Application::STATE_COUNT; ++state) {
 		status_vec[state].clear();
+		status_ret[state].clear();
 	}
 
 	// Clear the priority vector
 	logger->Debug("Clearing PRIO vector...");
 	for (uint8_t level = 0; level < BBQUE_APP_PRIO_LEVELS; ++level) {
 		prio_vec[level].clear();
+		prio_ret[level].clear();
 	}
 
 	// Clear the APPs map
@@ -99,6 +102,7 @@ ApplicationManager::~ApplicationManager() {
 	// Clear the applications map
 	logger->Debug("Clearing UIDs map...");
 	uids.clear();
+	uids_ret.clear();
 
 	// Clear the recipes
 	logger->Debug("Clearing RECIPES...");
@@ -166,6 +170,212 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 
 	return bp::RecipeLoaderIF::RL_SUCCESS;
 
+}
+
+
+/*******************************************************************************
+  *     Queued Access Functions
+  *****************************************************************************/
+
+void
+ApplicationManager::UpdateIterators(AppsUidMapItRetainer_t & ret,
+		AppPtr_t papp) {
+	AppsUidMapItRetainer_t::iterator it;
+	AppsUidMapIt* pati;
+
+	logger->Debug("Checking [%d] iterators...", ret.size());
+	// Lookup for iterators on the specified map which pointes to the
+	// specified apps
+	for (it = ret.begin(); it != ret.end(); ++it) {
+		pati = (*it);
+
+		// Ignore iterators not pointing to the application of interest
+		if (pati->it->first != papp->Uid())
+			continue;
+
+		// Update the iterator position one step backward
+		logger->Debug("~~~~~ Updating iterator [@%p => %d]",
+				pati->it, papp->Uid());
+
+		// Move the iterator forward
+		pati->Update();
+	}
+
+}
+
+AppPtr_t ApplicationManager::GetFirst(AppsUidMapIt & ait) {
+	std::unique_lock<std::mutex> uids_ul(uids_mtx);
+	AppPtr_t papp;
+
+	ait.Init(uids, uids_ret);
+	if (ait.End())
+		return AppPtr_t();
+
+	// Return the pointer application
+	papp = ait.Get();
+
+	// Add iterator to the retainers list
+	ait.Retain();
+	logger->Debug(">>>>> ADD retained UIDs iterator [@%p => %d]",
+			&(ait.it), papp->Uid());
+
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetNext(AppsUidMapIt & ait) {
+	std::unique_lock<std::mutex> uids_ul(uids_mtx);
+	AppPtr_t papp;
+
+	ait++;
+	if (ait.End()) {
+		// Release the iterator retainer
+		ait.Release();
+		logger->Debug("<<<<< DEL retained UIDs iterator [@%p => %d]",
+				&(ait.it));
+		return AppPtr_t();
+	}
+
+	papp = ait.Get();
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetFirst(AppPrio_t prio,
+		AppsUidMapIt & ait) {
+	assert(prio < BBQUE_APP_PRIO_LEVELS);
+	std::unique_lock<std::mutex> prio_ul(prio_mtx[prio]);
+	AppPtr_t papp;
+
+	ait.Init(prio_vec[prio], prio_ret[prio]);
+	if (ait.End())
+		return AppPtr_t();
+
+	papp = ait.Get();
+
+	// Add iterator to the retainers list
+	ait.Retain();
+	logger->Debug(">>>>> ADD retained PRIO[%d] iterator [@%p => %d]",
+			prio, &(ait.it), papp->Uid());
+
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetNext(AppPrio_t prio,
+		AppsUidMapIt & ait) {
+	assert(prio < BBQUE_APP_PRIO_LEVELS);
+	std::unique_lock<std::mutex> prio_ul(prio_mtx[prio]);
+	AppPtr_t papp;
+
+	ait++;
+	if (ait.End()) {
+		// Release the iterator retainer
+		ait.Release();
+		logger->Debug("<<<<< DEL retained PRIO[%d] iterator [@%p]",
+			prio, &(ait.it));
+		return AppPtr_t();
+	}
+
+	papp = ait.Get();
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetFirst(ApplicationStatusIF::State_t state,
+		AppsUidMapIt & ait) {
+	assert(state < Application::STATE_COUNT);
+	std::unique_lock<std::mutex> status_ul(status_mtx[state]);
+	AppPtr_t papp;
+
+	ait.Init(status_vec[state], status_ret[state]);
+	if (ait.End())
+		return AppPtr_t();
+
+	papp = ait.Get();
+
+	// Add iterator to the retainers list
+	ait.Retain();
+	logger->Debug(">>>>> ADD retained STATUS[%s] iterator [@%p => %d]",
+			Application::StateStr(state), &(ait.it), papp->Uid());
+
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetNext(ApplicationStatusIF::State_t state,
+		AppsUidMapIt & ait) {
+	assert(state < Application::STATE_COUNT);
+	std::unique_lock<std::mutex> status_ul(status_mtx[state]);
+	AppPtr_t papp;
+
+	ait++;
+	if (ait.End()) {
+		// Release the iterator retainer
+		ait.Release();
+		logger->Debug("<<<<< DEL retained STATUS[%s] iterator [@%p]",
+			Application::StateStr(state), &(ait.it));
+		return AppPtr_t();
+	}
+
+	papp = ait.Get();
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetFirst(ApplicationStatusIF::SyncState_t state,
+		AppsUidMapIt & ait) {
+	assert(state < Application::SYNC_STATE_COUNT);
+	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
+	AppPtr_t papp;
+
+	ait.Init(sync_vec[state], sync_ret[state]);
+	if (ait.End())
+		return AppPtr_t();
+
+	papp = ait.Get();
+
+	// Add iterator to the retainers list
+	ait.Retain();
+	logger->Debug(">>>>> ADD retained SYNCS[%s] iterator [@%p => %d]",
+			Application::SyncStateStr(state), &(ait.it),
+			papp->Uid());
+
+	return papp;
+}
+
+AppPtr_t ApplicationManager::GetNext(ApplicationStatusIF::SyncState_t state,
+		AppsUidMapIt & ait) {
+	assert(state < Application::SYNC_STATE_COUNT);
+	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
+	AppPtr_t papp;
+
+	ait++;
+	if (ait.End()) {
+		// Release the iterator retainer
+		ait.Release();
+		logger->Debug("<<<<< DEL retained SYNCS[%s] iterator [@%p]",
+			Application::SyncStateStr(state), &(ait.it));
+		return AppPtr_t();
+	}
+
+	papp = ait.Get();
+	return papp;
+}
+
+bool ApplicationManager::HasApplications (
+		AppPrio_t prio) {
+	assert(prio < BBQUE_APP_PRIO_LEVELS);
+	std::unique_lock<std::mutex> prio_ul(prio_mtx[prio]);
+	return !(prio_vec[prio].empty());
+}
+
+bool ApplicationManager::HasApplications (
+		ApplicationStatusIF::State_t state) {
+	assert(state < Application::STATE_COUNT);
+	std::unique_lock<std::mutex> status_ul(status_mtx[state]);
+	return !(status_vec[state].empty());
+}
+
+bool ApplicationManager::HasApplications (
+		ApplicationStatusIF::SyncState_t state) {
+	assert(state < Application::SYNC_STATE_COUNT);
+	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
+	return !(sync_vec[state].empty());
 }
 
 
@@ -255,6 +465,8 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	// Move it from the current to the next status map
 	// FIXME: maybe we could avoid to enqueue FINISHED EXCs
 	nextStateMap->insert(UidsMapEntry_t(papp->Uid(), papp));
+
+	UpdateIterators(status_ret[prev], papp);
 	currStateMap->erase(papp->Uid());
 
 	ReportStatusQ();
@@ -264,8 +476,8 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 }
 
 void ApplicationManager::PrintStatusReport() {
-	AppsMap_t::const_iterator app_it(apps.begin());
-	AppsMap_t::const_iterator end_app(apps.end());
+	AppsUidMapIt app_it;
+	AppPtr_t papp;
 	char line[80];
 	char curr_awm_cl[15];
 	char next_awm_cl[15];
@@ -274,9 +486,10 @@ void ApplicationManager::PrintStatusReport() {
 			"---- App:EXC ---|---- State |----- Sync |"
 			"-- CurrentAWM |----- NextAWM |");
 
-	for (; app_it != end_app; ++app_it) {
-		ba::AwmPtr_t const & awm = app_it->second->CurrentAWM();
-		ba::AwmPtr_t const & next_awm = app_it->second->NextAWM();
+	papp = GetFirst(app_it);
+	while (papp) {
+		ba::AwmPtr_t const & awm = papp->CurrentAWM();
+		ba::AwmPtr_t const & next_awm = papp->NextAWM();
 
 		if (awm)
 			snprintf(curr_awm_cl, 12, "%d:%s", awm->Id(),
@@ -292,13 +505,15 @@ void ApplicationManager::PrintStatusReport() {
 
 
 		snprintf(line, 80, "%12s | %9s | %9s | %12s | %12s |",
-				app_it->second->StrId(),
-				app_it->second->StateStr(app_it->second->State()),
-				app_it->second->SyncStateStr(app_it->second->SyncState()),
+				papp->StrId(),
+				papp->StateStr(papp->State()),
+				papp->SyncStateStr(papp->SyncState()),
 				curr_awm_cl,
 				next_awm_cl);
 
 		logger->Info(line);
+
+		papp = GetNext(app_it);
 	}
 
 	logger->Info(
@@ -416,6 +631,7 @@ ApplicationManager::PriorityRemove(AppPtr_t papp) {
 	logger->Debug("Releasing [%s] EXCs from PRIORITY map...",
 			papp->StrId());
 
+	UpdateIterators(prio_ret[papp->Priority()], papp);
 	prio_vec[papp->Priority()].erase(papp->Uid());
 
 	return AM_SUCCESS;
@@ -428,6 +644,8 @@ ApplicationManager::StatusRemove(AppPtr_t papp) {
 
 	logger->Debug("Releasing [%s] EXCs from STATUS map...",
 			papp->StrId());
+
+	UpdateIterators(status_ret[papp->State()], papp);
 	status_vec[papp->State()].erase(papp->Uid());
 
 	return AM_SUCCESS;
@@ -488,6 +706,7 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 			papp->StrId());
 
 	uids_ul.lock();
+	UpdateIterators(uids_ret, papp);
 	uids.erase(papp->Uid());
 	uids_ul.unlock();
 
@@ -616,6 +835,8 @@ ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
 	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
 
 	assert(papp);
+
+	UpdateIterators(sync_ret[state], papp);
 
 	// Get the applications map
 	if (sync_vec[state].erase(papp->Uid())) {

@@ -125,8 +125,70 @@ public:
 	 */
 	ExitCode_t DisableEXC(AppPid_t pid, uint8_t exc_id);
 
+/*******************************************************************************
+ *     Thread-Safe Queue Access Functions
+ ******************************************************************************/
 
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetFirst(AppsUidMapIt & it);
 
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetNext(AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetFirst(AppPrio_t prio,
+			AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetNext(AppPrio_t prio,
+			AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetFirst(ApplicationStatusIF::State_t state,
+			AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetNext(ApplicationStatusIF::State_t state,
+			AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetFirst(ApplicationStatusIF::SyncState_t state,
+			AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t GetNext(ApplicationStatusIF::SyncState_t state,
+			AppsUidMapIt & it);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	bool HasApplications (AppPrio_t prio);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	bool HasApplications (ApplicationStatusIF::State_t state);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	bool HasApplications (ApplicationStatusIF::SyncState_t state);
 
 
 	/**
@@ -247,6 +309,12 @@ private:
 	std::mutex uids_mtx;
 
 	/**
+	 * Array of iterator retainers for "in loop erase" support on UID map
+	 */
+	AppsUidMapItRetainer_t uids_ret;
+
+
+	/**
 	 * Store all the application recipes. More than one application
 	 * instance at once could run. Here we have tow cases :
 	 * 	1) Each instance use a different recipes
@@ -278,6 +346,13 @@ private:
 	std::mutex prio_mtx[BBQUE_APP_PRIO_LEVELS];
 
 	/**
+	 * Array of iterator retainers for "in loop erase" support on priority
+	 * queues
+	 */
+	AppsUidMapItRetainer_t prio_ret[BBQUE_APP_PRIO_LEVELS];
+
+
+	/**
 	 * Array grouping the applications by status (@see ScheduleFlag).
 	 * Each position points to a set of maps pointing applications
 	 */
@@ -287,6 +362,13 @@ private:
 	 * Array of mutexes protecting the status queues.
 	 */
 	std::mutex status_mtx[Application::STATE_COUNT];
+
+	/**
+	 * Array of iterator retainers for "in loop erase" support on STATUS
+	 * queues
+	 */
+	AppsUidMapItRetainer_t status_ret[Application::STATE_COUNT];
+
 
 	/**
 	 * @brief Applications grouping based on next state to be scheduled.
@@ -302,6 +384,12 @@ private:
 	 * Array of mutexes protecting the synchronization queues.
 	 */
 	std::mutex sync_mtx[Application::SYNC_STATE_COUNT];
+
+	/**
+	 * Array of iterator retainers for "in loop erase" support on SYNC
+	 * queues
+	 */
+	AppsUidMapItRetainer_t sync_ret[Application::SYNC_STATE_COUNT];
 
 
 	/** The constructor */
@@ -326,6 +414,11 @@ private:
 	 */
 	ExitCode_t AppsRemove(AppPtr_t papp);
 
+	/**
+	 * @brief In-Loop-Erase-Safe update of iterators on applications
+	 * containers
+	 */
+	void UpdateIterators(AppsUidMapItRetainer_t & ret, AppPtr_t papp);
 
 	/**
 	 * @brief Move the application from state vectors
