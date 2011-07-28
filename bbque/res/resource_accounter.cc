@@ -443,6 +443,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 		am_result = am.RunningCommit(papp);
 		if (am_result != ApplicationManager::AM_SUCCESS)
 			return RA_ERR_SYNC_INIT;
+
 	}
 
 	logger->Debug("SyncMode [%d]: Initialization finished", sync_ssn.count);

@@ -244,7 +244,7 @@ public:
 	 * @brief Get the pre-synchronization state
 	 */
 	virtual State_t PreSyncState()= 0;
-	
+
 	/**
 	 * @brief Check if this EXC is currently DISABLED
 	 */

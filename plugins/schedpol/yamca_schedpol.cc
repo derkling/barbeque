@@ -71,7 +71,6 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 	ExitCode_t result;
 	logger->Debug(
 			"<<<<<<<<<<<<<<<<< Scheduling policy starting >>>>>>>>>>>>>>>>>>");
-
 	// Get a resources view from Resource Accounter
 	if (InitResourceView() == SCHED_ERROR) {
 		logger->Fatal("Schedule: Aborted due to resource state view missing");
@@ -112,6 +111,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 	// Release the resource view
 	rsrc_acct.PutView(rsrc_view_token);
+
 	return SCHED_DONE;
 }
 

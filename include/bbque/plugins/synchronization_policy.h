@@ -62,7 +62,7 @@ public:
 	 * according to its internal decisions. Indeed, the SM component provides
 	 * just the raw mechanisms to carry on the synchronization of a pull of
 	 * selected applications: those returned by this call.  Moreover, for each
-	 * applicaiton returne, a condition is checked using the DoSyncmethod.
+	 * applicaiton returne, a condition is checked using the DoSync method.
 	 *
 	 * @param system a reference to the system view which exposes information
 	 * related to both resources and applications.

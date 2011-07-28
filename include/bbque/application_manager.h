@@ -246,6 +246,7 @@ private:
 	/** Lowest application priority value (maximum integer) */
 	app::AppPrio_t lowest_prio;
 
+
 	/**
 	 * MultiMap of all the applications instances which entered the
 	 * resource manager starting from its boot. The map key is the PID of the
