@@ -406,14 +406,13 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	ResourceAccounter::ExitCode_t result;
 	ApplicationManager::ExitCode_t am_result;
-	SystemView & sv(SystemView::GetInstance());
-	AppsUidMap_t::const_iterator rapp_it(sv.ApplicationsRunning()->begin());
-	AppsUidMap_t::const_iterator end_rapp(sv.ApplicationsRunning()->end());
+	AppsUidMapIt apps_it;
+	AppPtr_t papp;
 
 	// Running Applications/ExC
-	for (; rapp_it != end_rapp; ++rapp_it) {
-		AppPtr_t const & papp = rapp_it->second;
-
+	papp = am.GetFirst(ApplicationStatusIF::RUNNING, apps_it);
+	for ( ; papp; papp = am.GetNext(ApplicationStatusIF::RUNNING, apps_it)) {
+			
 		// Application/EXC must always have a next AWM here
 		if (!papp->NextAWM()) {
 			assert(papp->NextAWM());
