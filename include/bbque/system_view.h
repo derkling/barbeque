@@ -73,16 +73,22 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
+	inline bool HasApplications(AppPrio_t prio) {
+		return am.HasApplications(prio);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
+	inline bool HasApplications(ApplicationStatusIF::State_t state) {
+		return am.HasApplications(state);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
+	inline bool HasApplications(ApplicationStatusIF::SyncState_t sync_state) {
+		return am.HasApplications(sync_state);
 	}
 
 	/**

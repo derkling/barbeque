@@ -228,12 +228,23 @@ private:
 	AppsMap_t apps;
 
 	/**
+	 * Mutex to protect concurrent access to the map of applications.
+	 */
+	std::mutex apps_mtx;
+
+
+	/**
 	 * Map of all the applications instances which entered the
 	 * resource manager starting from its boot. The map key is the UID of the
 	 * application instance. The value is the application descriptor of the
 	 * instance.
 	 */
 	AppsUidMap_t uids;
+
+	/**
+	 * Mutex to protect concurrent access to the map of applications UIDs.
+	 */
+	std::mutex uids_mtx;
 
 	/**
 	 * Store all the application recipes. More than one application

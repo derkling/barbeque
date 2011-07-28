@@ -72,9 +72,19 @@ ApplicationManager::ApplicationManager() {
 
 ApplicationManager::~ApplicationManager() {
 
-	// Clear the recipes
-	logger->Debug("Clearing recipes...");
-	recipes.clear();
+	// Clear the sync vector
+	logger->Debug("Clearing SYNC vector...");
+	for (uint8_t state = 0;
+			state < Application::SYNC_STATE_COUNT; ++state) {
+		sync_vec[state].clear();
+	}
+
+	// Clear the status vector
+	logger->Debug("Clearing STATUS vector...");
+	for (uint8_t state = 0;
+			state < Application::STATE_COUNT; ++state) {
+		status_vec[state].clear();
+	}
 
 	// Clear the priority vector
 	logger->Debug("Clearing PRIO vector...");
@@ -82,10 +92,18 @@ ApplicationManager::~ApplicationManager() {
 		prio_vec[level].clear();
 	}
 
-	// Clear the applications map
-	logger->Debug("Clearing apps...");
+	// Clear the APPs map
+	logger->Debug("Clearing APPs map...");
 	apps.clear();
+
+	// Clear the applications map
+	logger->Debug("Clearing UIDs map...");
 	uids.clear();
+
+	// Clear the recipes
+	logger->Debug("Clearing RECIPES...");
+	recipes.clear();
+
 }
 
 bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
@@ -156,6 +174,7 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
  ******************************************************************************/
 
 AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) {
+	std::unique_lock<std::mutex> uids_ul(uids_mtx);
 	AppsUidMap_t::const_iterator it = uids.find(uid);
 	AppPtr_t papp;
 
@@ -335,7 +354,9 @@ AppPtr_t ApplicationManager::CreateEXC(
 		std::string const & _name, AppPid_t _pid, uint8_t _exc_id,
 		std::string const & _rcp_name, app::AppPrio_t _prio,
 		bool _weak_load) {
-	std::unique_lock<std::mutex> statusMtx_ul(
+	std::unique_lock<std::mutex> prio_ul(prio_mtx[_prio], std::defer_lock);
+	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
+	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
 	RecipeLoaderIF::ExitCode_t result;
 	RecipePtr_t rcp_ptr;
@@ -360,16 +381,22 @@ AppPtr_t ApplicationManager::CreateEXC(
 
 	// Save application descriptors
 	apps.insert(AppsMapEntry_t(papp->Pid(), papp));
+
+	uids_ul.lock();
 	uids.insert(UidsMapEntry_t(papp->Uid(), papp));
+	uids_ul.unlock();
+
+	prio_ul.lock();
 	prio_vec[papp->Priority()].insert(
 			UidsMapEntry_t(papp->Uid(), papp));
+	prio_ul.unlock();
 
 	// All new EXC are initially disabled
 	assert(papp->State() == Application::DISABLED);
-	statusMtx_ul.lock();
+	status_ul.lock();
 	status_vec[papp->State()].insert(
 			UidsMapEntry_t(papp->Uid(), papp));
-	statusMtx_ul.unlock();
+	status_ul.unlock();
 
 	logger->Debug("Create EXC [%s] DONE", papp->StrId());
 
@@ -383,6 +410,8 @@ AppPtr_t ApplicationManager::CreateEXC(
 
 ApplicationManager::ExitCode_t
 ApplicationManager::PriorityRemove(AppPtr_t papp) {
+	std::unique_lock<std::mutex> prio_ul(
+			prio_mtx[papp->Priority()], std::defer_lock);
 
 	logger->Debug("Releasing [%s] EXCs from PRIORITY map...",
 			papp->StrId());
@@ -394,7 +423,7 @@ ApplicationManager::PriorityRemove(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::StatusRemove(AppPtr_t papp) {
-	std::unique_lock<std::mutex> statusMtx_ul(
+	std::unique_lock<std::mutex> status_ul(
 			status_mtx[papp->State()]);
 
 	logger->Debug("Releasing [%s] EXCs from STATUS map...",
@@ -406,6 +435,7 @@ ApplicationManager::StatusRemove(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::AppsRemove(AppPtr_t papp) {
+	std::unique_lock<std::mutex> apps_ul(apps_mtx);
 	std::pair<AppsMap_t::iterator, AppsMap_t::iterator> range;
 	AppsMap_t::iterator it;
 
@@ -431,6 +461,7 @@ ApplicationManager::AppsRemove(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPtr_t papp) {
+	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ExitCode_t result;
@@ -456,7 +487,9 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	logger->Debug("Releasing [%s] EXC from UIDs map...",
 			papp->StrId());
 
+	uids_ul.lock();
 	uids.erase(papp->Uid());
+	uids_ul.unlock();
 
 	logger->Info("EXC Released [%s]", papp->StrId());
 	ReportStatusQ();
