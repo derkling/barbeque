@@ -99,8 +99,8 @@ void ResourceManager::Optimize() {
 	bu::Timer optimization_tmr;
 
 	// Check if there is at least one application to synchronize
-	if ((am.Applications(Application::READY)->empty()) &&
-			(am.Applications(Application::RUNNING)->empty())) {
+	if ((!am.HasApplications(Application::READY)) &&
+			(!am.HasApplications(Application::RUNNING))) {
 		logger->Debug("NO active EXCs, re-scheduling not required");
 		return;
 	}
@@ -131,7 +131,7 @@ void ResourceManager::Optimize() {
 	ra.PrintStatusReport();
 
 	// Check if there is at least one application to synchronize
-	if (am.Applications(Application::SYNC)->empty()) {
+	if (!am.HasApplications(Application::SYNC)) {
 		logger->Debug("NO EXC in SYNC state, synchronization not required");
 		return;
 	}
