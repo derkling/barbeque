@@ -26,7 +26,6 @@
 #include "bbque/modules_factory.h"
 #include "bbque/signals_manager.h"
 #include "bbque/application_manager.h"
-#include "bbque/res/resource_accounter.h"
 
 #include "bbque/utils/utility.h"
 #include "bbque/utils/timer.h"
@@ -46,11 +45,12 @@ ResourceManager & ResourceManager::GetInstance() {
 
 ResourceManager::ResourceManager() :
 	ps(PlatformServices::GetInstance()),
-	pm(plugins::PluginManager::GetInstance()),
 	sm(SchedulerManager::GetInstance()),
 	ym(SynchronizationManager::GetInstance()),
 	am(ApplicationManager::GetInstance()),
-	ap(ApplicationProxy::GetInstance()) {
+	ap(ApplicationProxy::GetInstance()),
+	pm(bp::PluginManager::GetInstance()),
+	ra(br::ResourceAccounter::GetInstance()) {
 
 }
 
@@ -61,7 +61,7 @@ void ResourceManager::Setup() {
 
 	//---------- Get a logger module
 	std::string logger_name("bq.rm");
-	plugins::LoggerIF::Configuration conf(logger_name.c_str());
+	bp::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
 		fprintf(stderr, "RM: Logger module creation FAILED\n");
@@ -94,8 +94,6 @@ void ResourceManager::NotifyEvent(controlEvent_t evt) {
 }
 
 void ResourceManager::Optimize() {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	ApplicationManager &am(ApplicationManager::GetInstance());
 	SynchronizationManager::ExitCode_t syncResult;
 	SchedulerManager::ExitCode_t schedResult;
 	bu::Timer optimization_tmr;
@@ -174,8 +172,6 @@ void ResourceManager::EvtExcStop() {
 }
 
 void ResourceManager::EvtBbqExit() {
-	ApplicationManager & am = ApplicationManager::GetInstance();
-	//ApplicationProxy & ap = ApplicationProxy::GetInstance();
 	AppsUidMap_t const * apps = am.Applications();
 	AppsUidMap_t::const_iterator it = apps->begin();
 	AppPtr_t papp;

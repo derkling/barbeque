@@ -29,10 +29,15 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/scheduler_manager.h"
 #include "bbque/synchronization_manager.h"
+#include "bbque/res/resource_accounter.h"
 
 #include "bbque/plugins/logger.h"
 
 #include <bitset>
+
+using bbque::res::ResourceAccounter;
+using bbque::plugins::PluginManager;
+using bbque::plugins::LoggerIF;
 
 namespace bbque {
 
@@ -105,7 +110,7 @@ private:
 	/**
 	 * @brief The logger used by the resource manager.
 	 */
-	plugins::LoggerIF *logger;
+	LoggerIF *logger;
 
 	/**
 	 * Reference to supported platform services class.
@@ -114,14 +119,6 @@ private:
 	 * initialization of this core module before starting to grill.
 	 */
 	PlatformServices & ps;
-
-	/**
-	 * Reference to the plugin manager module.
-	 * The plugin manager is the required interface to load other modules. The
-	 * resource manager ensure an initialization of this core module before
-	 * starting to grill.
-	 */
-	plugins::PluginManager & pm;
 
 	/**
 	 * @brief The Resource Scheduler module
@@ -142,6 +139,19 @@ private:
 	 * @brief The Application Proxy module
 	 */
 	ApplicationProxy & ap;
+	
+	/**
+	 * Reference to the plugin manager module.
+	 * The plugin manager is the required interface to load other modules. The
+	 * resource manager ensure an initialization of this core module before
+	 * starting to grill.
+	 */
+	PluginManager & pm;
+
+	/**
+	 * @brief The Resource Accounter module
+	 */
+	ResourceAccounter & ra;
 
 
 	std::bitset<EVENTS_COUNT> pendingEvts;
