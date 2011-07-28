@@ -27,6 +27,7 @@
 
 #include "bbque/synchronization_manager.h"
 
+#include "bbque/application_manager.h"
 #include "bbque/configuration_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
@@ -52,6 +53,10 @@ SynchronizationManager & SynchronizationManager::GetInstance() {
 }
 
 SynchronizationManager::SynchronizationManager() :
+	am(ApplicationManager::GetInstance()),
+	ap(ApplicationProxy::GetInstance()),
+	ra(br::ResourceAccounter::GetInstance()),
+	sv(SystemView::GetInstance()),
 	sync_count(0) {
 	std::string sync_policy;
 
@@ -200,7 +205,6 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
-	ApplicationProxy &ap(ApplicationProxy::GetInstance());
 	AppsUidMap_t::const_iterator apps_it(apps->begin());
 
 	typedef std::map<AppPtr_t, ApplicationProxy::pSyncChangeRsp_t> RspMap_t;
@@ -297,7 +301,6 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
-	ApplicationProxy &ap(ApplicationProxy::GetInstance());
 	AppsUidMap_t::const_iterator apps_it(apps->begin());
 	RTLIB_ExitCode_t result;
 	AppPtr_t papp;
@@ -336,9 +339,6 @@ SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
-	ApplicationManager &am(ApplicationManager::GetInstance());
-	ApplicationProxy &ap(ApplicationProxy::GetInstance());
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	AppsUidMap_t::const_iterator apps_it(apps->begin());
 	ApplicationProxy::pPostChangeRsp_t presp;
 	RTLIB_ExitCode_t result;
@@ -451,9 +451,6 @@ SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
-	static SystemView &sv(SystemView::GetInstance());
-	static ApplicationManager &am(ApplicationManager::GetInstance());
-	static ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	AppsUidMap_t const *apps = NULL;
 	ExitCode_t result;
 	br::ResourceAccounter::ExitCode_t raResult;

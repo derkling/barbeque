@@ -90,6 +90,11 @@ private:
 	 */
 	SynchronizationPolicyIF *policy;
 
+	ApplicationManager & am;
+	ApplicationProxy & ap;
+	ResourceAccounter & ra;
+	SystemView & sv;
+
 	/**
 	 * @brief The number of synchronization cycles
 	 */
