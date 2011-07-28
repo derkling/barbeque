@@ -31,6 +31,8 @@
 
 #define SYNCHRONIZATION_POLICY_NAMESPACE "sync.pol."
 
+using bbque::app::ApplicationStatusIF;
+
 namespace bbque { namespace plugins {
 
 /**
@@ -70,7 +72,7 @@ public:
 	 * state machine, thus requesting to restart from scratch the synchronization
 	 * of all the applications.
 	 *
-	 * @return A map of applications to sync, an empty map if not more
+	 * @return The synchronization state to sync, or SYNC_NONE if no more
 	 * applications require to be synched.
 	 *
 	 * @see DoSync

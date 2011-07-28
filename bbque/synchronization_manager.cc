@@ -103,9 +103,8 @@ SynchronizationManager::~SynchronizationManager() {
 
 
 SynchronizationManager::ExitCode_t
-SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
-	ApplicationProxy &ap(ApplicationProxy::GetInstance());
-	AppsUidMap_t::const_iterator apps_it(apps->begin());
+SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncState) {
+	AppsUidMapIt apps_it;
 
 	typedef std::map<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMap_t;
 	typedef std::pair<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMapEntry_t;
@@ -118,9 +117,8 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 
 	logger->Debug("STEP 1: preChange() START");
 
-	for ( ; apps_it != apps->end(); ++apps_it) {
-		papp = (*apps_it).second;
-		assert(papp);
+	papp = am.GetFirst(syncState, apps_it);
+	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
 
 		if (!policy->DoSync(papp))
 			continue;
@@ -204,8 +202,8 @@ SynchronizationManager::Sync_PreChange(AppsUidMap_t const *apps) {
 }
 
 SynchronizationManager::ExitCode_t
-SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
-	AppsUidMap_t::const_iterator apps_it(apps->begin());
+SynchronizationManager::Sync_SyncChange(ApplicationStatusIF::SyncState_t syncState) {
+	AppsUidMapIt apps_it;
 
 	typedef std::map<AppPtr_t, ApplicationProxy::pSyncChangeRsp_t> RspMap_t;
 	typedef std::pair<AppPtr_t, ApplicationProxy::pSyncChangeRsp_t> RspMapEntry_t;
@@ -218,9 +216,8 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 
 	logger->Debug("STEP 2: syncChange() START");
 
-	for ( ; apps_it != apps->end(); ++apps_it) {
-		papp = (*apps_it).second;
-		assert(papp);
+	papp = am.GetFirst(syncState, apps_it);
+	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
 
 		if (!policy->DoSync(papp))
 			continue;
@@ -300,16 +297,16 @@ SynchronizationManager::Sync_SyncChange(AppsUidMap_t const *apps) {
 }
 
 SynchronizationManager::ExitCode_t
-SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
-	AppsUidMap_t::const_iterator apps_it(apps->begin());
+SynchronizationManager::Sync_DoChange(ApplicationStatusIF::SyncState_t syncState) {
+	AppsUidMapIt apps_it;
+
 	RTLIB_ExitCode_t result;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 3: doChange() START");
 
-	for ( ; apps_it != apps->end(); ++apps_it) {
-		papp = (*apps_it).second;
-		assert(papp);
+	papp = am.GetFirst(syncState, apps_it);
+	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
 
 		if (!policy->DoSync(papp))
 			continue;
@@ -338,24 +335,17 @@ SynchronizationManager::Sync_DoChange(AppsUidMap_t const *apps) {
 }
 
 SynchronizationManager::ExitCode_t
-SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
-	AppsUidMap_t::const_iterator apps_it(apps->begin());
+SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncState) {
 	ApplicationProxy::pPostChangeRsp_t presp;
 	RTLIB_ExitCode_t result;
 	br::ResourceAccounter::ExitCode_t raResult;
+	AppsUidMapIt apps_it;
 	AppPtr_t papp;
 
 	logger->Debug("STEP 4: postChange() START");
 
-	// FIXME: ensure the current app has been removed from the queue
-	// otherwise we enter an endless loop
-	// This loop solution is used since it is safer to loop on
-	// queues which elemenbts could be modified
-	apps_it = apps->begin();
-	for ( ; apps_it != apps->end(); apps_it = apps->begin()) {
-
-		papp = (*apps_it).second;
-		assert(papp);
+	papp = am.GetFirst(syncState, apps_it);
+	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
 
 		if (!policy->DoSync(papp))
 			continue;
@@ -418,29 +408,28 @@ SynchronizationManager::Sync_PostChange(AppsUidMap_t const *apps) {
 }
 
 SynchronizationManager::ExitCode_t
-SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
-	AppsUidMap_t::const_iterator it;
+SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	ExitCode_t result;
 
-	if (apps->empty()) {
+	if (syncState == ApplicationStatusIF::SYNC_NONE) {
 		logger->Warn("Synchronization FAILED (Error: empty EXCs list)");
-		assert(!apps->empty());
+		assert(syncState != ApplicationStatusIF::SYNC_NONE);
 		return OK;
 	}
 
-	result = Sync_PreChange(apps);
+	result = Sync_PreChange(syncState);
 	if (result != OK)
 		return result;
 
-	result = Sync_SyncChange(apps);
+	result = Sync_SyncChange(syncState);
 	if (result != OK)
 		return result;
 
-	result = Sync_DoChange(apps);
+	result = Sync_DoChange(syncState);
 	if (result != OK)
 		return result;
 
-	result = Sync_PostChange(apps);
+	result = Sync_PostChange(syncState);
 	if (result != OK)
 		return result;
 
@@ -448,10 +437,9 @@ SynchronizationManager::SyncApps(AppsUidMap_t const *apps) {
 }
 
 
-
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
-	AppsUidMap_t const *apps = NULL;
+	ApplicationStatusIF::SyncState_t syncState;
 	ExitCode_t result;
 	br::ResourceAccounter::ExitCode_t raResult;
 
@@ -471,12 +459,12 @@ SynchronizationManager::SyncSchedule() {
 	// synched. As soon as the queue of apps to sync returned is empty, the
 	// syncronization is considered terminated and will start again only at
 	// the next synchronization event.
-	apps = policy->GetApplicationsQueue(sv, true);
+	syncState = policy->GetApplicationsQueue(sv, true);
 
-	if (!apps) {
+	if (syncState == ApplicationStatusIF::SYNC_NONE) {
 		logger->Info("Synchronization [%d] ABORTED", sync_count);
 		// Possibly this should never happens
-		assert(apps);
+		assert(syncState != ApplicationStatusIF::SYNC_NONE);
 		return OK;
 	}
 
@@ -488,17 +476,17 @@ SynchronizationManager::SyncSchedule() {
 		return ABORTED;
 	}
 
-	while (apps) {
+	while (syncState != ApplicationStatusIF::SYNC_NONE) {
 
 		// Synchronize these policy selected apps
-		result = SyncApps(apps);
+		result = SyncApps(syncState);
 		if (result != OK) {
 			ra.SyncAbort();
 			return result;
 		}
 
 		// Select next set of apps to synchronize (if any)
-		apps = policy->GetApplicationsQueue(sv);
+		syncState = policy->GetApplicationsQueue(sv);
 	}
 
 	// Commit the resource accounter synchronized session

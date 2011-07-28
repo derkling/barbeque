@@ -108,27 +108,27 @@ private:
 	/**
 	 * @brief Synchronize the specified EXCs
 	 */
-	ExitCode_t SyncApps(AppsUidMap_t const *apps);
+	ExitCode_t SyncApps(ApplicationStatusIF::SyncState_t syncState);
 
 	/**
 	 * @brief Notify a Pre-Change to the specified EXCs
 	 */
-	ExitCode_t Sync_PreChange(AppsUidMap_t const *apps);
+	ExitCode_t Sync_PreChange(ApplicationStatusIF::SyncState_t syncState);
 
 	/**
 	 * @brief Notify a Sync-Change to the specified EXCs
 	 */
-	ExitCode_t Sync_SyncChange(AppsUidMap_t const *apps);
+	ExitCode_t Sync_SyncChange(ApplicationStatusIF::SyncState_t syncState);
 
 	/**
 	 * @brief Notify a Do-Change to the specified EXCs
 	 */
-	ExitCode_t Sync_DoChange(AppsUidMap_t const *apps);
+	ExitCode_t Sync_DoChange(ApplicationStatusIF::SyncState_t syncState);
 
 	/**
 	 * @brief Notify a Post-Change to the specified EXCs
 	 */
-	ExitCode_t Sync_PostChange(AppsUidMap_t const *apps);
+	ExitCode_t Sync_PostChange(ApplicationStatusIF::SyncState_t syncState);
 
 };
 
