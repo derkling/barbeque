@@ -125,37 +125,9 @@ public:
 	 */
 	ExitCode_t DisableEXC(AppPid_t pid, uint8_t exc_id);
 
-	/**
-	 * @see ApplicationManagerConfIF
-	 */
-	inline AppsUidMap_t const * Applications() const {
-		return &uids;
-	}
 
-	/**
-	 * @see ApplicationManagerStatusIF
-	 */
-	AppsUidMap_t const * Applications(app::AppPrio_t prio) const {
-		assert(prio<=lowest_prio);
-		if (prio>lowest_prio)
-			prio=lowest_prio;
-		return &(priority_vec[prio]);
-	}
 
-	/**
-	 * @see ApplicationManagerStatusIF
-	 */
-	AppsUidMap_t const * Applications(Application::State_t state) const {
-		return &(status_vec[state]);
-	}
 
-	/**
-	 * @see ApplicationManagerStatusIF
-	 */
-	AppsUidMap_t const * Applications(
-			Application::SyncState_t sync_state) const {
-		return &(sync_vec[sync_state]);
-	}
 
 	/**
 	 * @see ApplicationManagerStatusIF

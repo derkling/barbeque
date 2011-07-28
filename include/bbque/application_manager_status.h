@@ -77,47 +77,9 @@ public:
 		AM_ABORT
 	};
 
-	/**
-	 * @brief Retrieve regietered applications map
-	 *
-	 * @return A pointer to the Map of all applications registered to the RTRM
-	 */
-	virtual AppsUidMap_t const * Applications() const = 0;
 
-	/**
-	 * @brief Retrieve registered applications with the specified priority
-	 *
-	 * @param prio The priority value
-	 * @return A pointer to the map of applications with the request priority
-	 */
-	virtual AppsUidMap_t const * Applications(app::AppPrio_t prio) const = 0;
 
-	/**
-	 * @brief Retrieve applications with the specified state
-	 *
-	 * This method allows to retrive a map of applications into a specified
-	 * state.
-	 *
-	 * @param sched_state The scheduling state
-	 *
-	 * @return A pointer to the map of applications with the requested state
-	 */
-	virtual AppsUidMap_t const * Applications(
-			app::Application::State_t state) const = 0;
 
-	/**
-	 * @brief Retrieve applications with the specified synchronization state
-	 *
-	 * This method allows to retrive a map of applications into a specified
-	 * synchronization state
-	 *
-	 * @param sched_state The synchronization state
-	 *
-	 * @return A pointer to the map of applications with the requested
-	 * synchronization state
-	 */
-	virtual AppsUidMap_t const * Applications(
-			app::Application::SyncState_t sync_state) const = 0;
 
 	/**
 	 * @brief Retrieve an application descriptor (shared pointer) by PID and

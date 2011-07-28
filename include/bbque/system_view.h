@@ -58,45 +58,31 @@ public:
 	/**
 	 * @brief Return the map containing all the ready applications
 	 */
-	inline AppsUidMap_t const * ApplicationsReady() const {
-		return am.Applications(ApplicationStatusIF::READY);
 	}
 
 	/**
 	 * @brief Map of running applications (descriptors)
 	 */
-	inline AppsUidMap_t const * ApplicationsRunning() const {
-		return am.Applications(ApplicationStatusIF::RUNNING);
 	}
 
 	/**
 	 * @brief Map of blocked applications (descriptors)
 	 */
-	inline AppsUidMap_t const * ApplicationsBlocked() const {
-		return am.Applications(ApplicationStatusIF::BLOCKED);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	inline AppsUidMap_t const * Applications(app::AppPrio_t prio) const {
-		return am.Applications(prio);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	inline AppsUidMap_t const * Applications (
-			Application::State_t state) const {
-		return am.Applications(state);
 	}
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	inline AppsUidMap_t const * Applications (
-			Application::SyncState_t sync_state) const {
-		return am.Applications(sync_state);
 	}
 
 	/**
