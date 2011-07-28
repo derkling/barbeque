@@ -56,40 +56,36 @@ char const *SasbSyncPol::Name() {
 }
 
 
-bbque::AppsUidMap_t const *SasbSyncPol::step1(
-			bbque::SystemView const & sv) {
-	AppsUidMap_t const *apps;
+ApplicationStatusIF::SyncState_t SasbSyncPol::step1(
+			bbque::SystemView & sv) {
 
 	logger->Debug("STEP 1.0: Running => Blocked");
-	apps = sv.Applications(ApplicationStatusIF::BLOCKED);
-
-	assert(apps);
-	if (!apps->empty())
-		return apps;
+	if (sv.HasApplications(ApplicationStatusIF::BLOCKED))
+		return ApplicationStatusIF::BLOCKED;
 
 	logger->Debug("STEP 1.0:            "
 			"No EXCs to be BLOCKED");
-	return NULL;
+	return ApplicationStatusIF::SYNC_NONE;
 }
 
-bbque::AppsUidMap_t const *SasbSyncPol::step2(
-			bbque::SystemView const & sv) {
-	AppsUidMap_t const *apps;
+ApplicationStatusIF::SyncState_t SasbSyncPol::step2(
+			bbque::SystemView & sv) {
+	ApplicationStatusIF::SyncState_t syncState;
 
 	switch(status) {
 	case STEP21:
 		logger->Debug("STEP 2.1: Running => Migration (lower prio)");
-		apps = sv.Applications(ApplicationStatusIF::MIGRATE);
+		syncState = ApplicationStatusIF::MIGRATE;
 		break;
 
 	case STEP22:
 		logger->Debug("STEP 2.2: Running => Migration/Reconf (lower prio)");
-		apps = sv.Applications(ApplicationStatusIF::MIGREC);
+		syncState = ApplicationStatusIF::MIGREC;
 		break;
 
 	case STEP23:
 		logger->Debug("STEP 2.3: Running => Reconf (lower prio)");
-		apps = sv.Applications(ApplicationStatusIF::RECONF);
+		syncState = ApplicationStatusIF::RECONF;
 		break;
 
 	default:
@@ -97,34 +93,33 @@ bbque::AppsUidMap_t const *SasbSyncPol::step2(
 		assert(false);
 	}
 
-	assert(apps);
-	if (!apps->empty())
-		return apps;
+	if (sv.HasApplications(syncState))
+		return syncState;
 
 	logger->Debug("STEP 2.0:            "
 			"No EXCs to be reschedule (lower prio)");
-	return NULL;
+	return ApplicationStatusIF::SYNC_NONE;
 }
 
 
-bbque::AppsUidMap_t const *SasbSyncPol::step3(
-			bbque::SystemView const & sv) {
-	AppsUidMap_t const *apps;
+ApplicationStatusIF::SyncState_t SasbSyncPol::step3(
+			bbque::SystemView & sv) {
+	ApplicationStatusIF::SyncState_t syncState;
 
 	switch(status) {
 	case STEP31:
 		logger->Debug("STEP 3.1: Running => Migration (higher prio)");
-		apps = sv.Applications(ApplicationStatusIF::MIGRATE);
+		syncState = ApplicationStatusIF::MIGRATE;
 		break;
 
 	case STEP32:
 		logger->Debug("STEP 3.2: Running => Migration/Reconf (higher prio)");
-		apps = sv.Applications(ApplicationStatusIF::MIGREC);
+		syncState = ApplicationStatusIF::MIGREC;
 		break;
 
 	case STEP33:
 		logger->Debug("STEP 3.3: Running => Reconf (higher prio)");
-		apps = sv.Applications(ApplicationStatusIF::RECONF);
+		syncState = ApplicationStatusIF::RECONF;
 		break;
 
 	default:
@@ -132,34 +127,29 @@ bbque::AppsUidMap_t const *SasbSyncPol::step3(
 		assert(false);
 	}
 
-	assert(apps);
-	if (!apps->empty())
-		return apps;
+	if (sv.HasApplications(syncState))
+		return syncState;
 
 	logger->Debug("STEP 3.0:            "
 			"No EXCs to be reschedule (higher prio)");
-	return NULL;
+	return ApplicationStatusIF::SYNC_NONE;
 }
 
-bbque::AppsUidMap_t const *SasbSyncPol::step4(
-			bbque::SystemView const & sv) {
-	AppsUidMap_t const *apps;
+ApplicationStatusIF::SyncState_t SasbSyncPol::step4(
+			bbque::SystemView & sv) {
 
 	logger->Debug("STEP 4.0: Ready   => Running");
-	apps = sv.Applications(ApplicationStatusIF::STARTING);
-
-	assert(apps);
-	if (!apps->empty())
-		return apps;
+	if (sv.HasApplications(ApplicationStatusIF::STARTING))
+		return ApplicationStatusIF::STARTING;
 
 	logger->Debug("STEP 4.0:            "
 			"No EXCs to be started");
-	return NULL;
+	return ApplicationStatusIF::SYNC_NONE;
 }
 
-bbque::AppsUidMap_t const *SasbSyncPol::GetApplicationsQueue(
-			bbque::SystemView const & sv, bool restart) {
-	bbque::AppsUidMap_t const *map;
+ApplicationStatusIF::SyncState_t SasbSyncPol::GetApplicationsQueue(
+			bbque::SystemView & sv, bool restart) {
+	ApplicationStatusIF::SyncState_t syncState;
 
 	if (restart) {
 		logger->Debug("Resetting sync status");
@@ -169,33 +159,33 @@ bbque::AppsUidMap_t const *SasbSyncPol::GetApplicationsQueue(
 	for( ; status<=STEP40; ++status) {
 		switch(status) {
 		case STEP10:
-			map = step1(sv);
-			if (map)
-				return map;
-			break;
+			syncState = step1(sv);
+			if (syncState != ApplicationStatusIF::SYNC_NONE)
+				return syncState;
+			continue;
 		case STEP21:
 		case STEP22:
 		case STEP23:
-			map = step2(sv);
-			if (map)
-				return map;
-			break;
+			syncState = step2(sv);
+			if (syncState != ApplicationStatusIF::SYNC_NONE)
+				return syncState;
+			continue;
 		case STEP31:
 		case STEP32:
 		case STEP33:
-			map = step3(sv);
-			if (map)
-				return map;
+			syncState = step3(sv);
+			if (syncState != ApplicationStatusIF::SYNC_NONE)
+				return syncState;
 			break;
 		case STEP40:
-			map = step4(sv);
-			if (map)
-				return map;
+			syncState = step4(sv);
+			if (syncState != ApplicationStatusIF::SYNC_NONE)
+				return syncState;
 			break;
 		};
 	}
 
-	return NULL;
+	return ApplicationStatusIF::SYNC_NONE;
 
 }
 

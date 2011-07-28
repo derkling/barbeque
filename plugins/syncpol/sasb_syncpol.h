@@ -66,8 +66,8 @@ public:
 
 	char const * Name();
 
-	bbque::AppsUidMap_t const * GetApplicationsQueue(
-			bbque::SystemView const & system, bool restart = false);
+	ApplicationStatusIF::SyncState_t GetApplicationsQueue(
+			bbque::SystemView & system, bool restart = false);
 
 	bool DoSync(AppPtr_t papp);
 
@@ -100,18 +100,13 @@ private:
 	 */
 	SasbSyncPol();
 
+	ApplicationStatusIF::SyncState_t step1(bbque::SystemView & system);
 
-	bbque::AppsUidMap_t const *step1(
-			bbque::SystemView const & system);
+	ApplicationStatusIF::SyncState_t step2(bbque::SystemView & system);
 
-	bbque::AppsUidMap_t const *step2(
-			bbque::SystemView const & system);
+	ApplicationStatusIF::SyncState_t step3(bbque::SystemView & system);
 
-	bbque::AppsUidMap_t const *step3(
-			bbque::SystemView const & system);
-
-	bbque::AppsUidMap_t const *step4(
-			bbque::SystemView const & system);
+	ApplicationStatusIF::SyncState_t step4(bbque::SystemView & system);
 
 };
 
