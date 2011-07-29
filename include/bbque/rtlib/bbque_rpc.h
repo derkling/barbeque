@@ -327,6 +327,15 @@ protected:
 
 private:
 
+	/**
+	 * @brief The PID of the application using the library
+	 *
+	 * This keep track of the application which initialize the library. This
+	 * PID could be exploited by the Barbeque RTRM to directly control
+	 * applications accessing its managed resources.
+	 */
+	pid_t appTrdPid;
+
 	bool initialized;
 
 	/**

@@ -70,12 +70,16 @@ RTLIB_ExitCode_t BbqueRPC::Init(const char *name) {
 	RTLIB_ExitCode_t exitCode;
 
 	if (initialized) {
-		fprintf(stderr, FMT_WRN("RTLIB already initialized for app [%s]\n"),
-				name);
+		fprintf(stderr, FMT_WRN("RTLIB already initialized for app [%d:%s]\n"),
+				appTrdPid, name);
 		return RTLIB_OK;
 	}
 
-	DB(fprintf(stderr, FMT_DBG("Initializing app [%s]\n"), name));
+	// Getting application PID
+	appTrdPid = gettid();
+
+	DB(fprintf(stderr, FMT_DBG("Initializing app [%d:%s]\n"),
+				appTrdPid, name));
 
 	exitCode = _Init(name);
 	if (exitCode != RTLIB_OK) {
