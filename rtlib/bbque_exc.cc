@@ -29,6 +29,10 @@
 # warning Debugging is enabled
 #endif
 
+#ifndef BBQUE_RTLIB_DEFAULT_CYCLES
+# define BBQUE_RTLIB_DEFAULT_CYCLES 8
+#endif
+
 #define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_EXC  [DBG]", fmt)
 #define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_EXC  [INF]", fmt)
 #define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_EXC  [WRN]", fmt)
@@ -38,7 +42,7 @@ BbqueEXC::BbqueEXC(std::string const & name,
 		std::string const & recipe,
 		RTLIB_Services_t * const rtl,
 		bool enabled) :
-	exc_name(name), rpc_name(recipe), rtlib(rtl),
+	exc_name(name), rpc_name(recipe), rtlib(rtl), cycles_count(0),
 	registered(false), started(false), enabled(false), done(false) {
 
 	RTLIB_ExecutionContextParams_t exc_params = {
@@ -228,15 +232,17 @@ RTLIB_ExitCode_t BbqueEXC::onSuspend() {
 }
 
 RTLIB_ExitCode_t BbqueEXC::onRun() {
-	static uint8_t countdown = 5;
 
-	if (!--countdown)
+	DB(fprintf(stderr, FMT_WRN("<< Default onRun: EXC [%s], AWM[%02d], "
+					"cycle [%d/%d], latency %d[sm] >>\n"),
+				exc_name.c_str(), wmp.awm_id,
+				cycles_count, BBQUE_RTLIB_DEFAULT_CYCLES,
+				100*(wmp.awm_id+1)));
+	DB(::usleep((wmp.awm_id+1)*100000));
+
+	// By default return after a pre-defined number of cycles
+	if (cycles_count >= BBQUE_RTLIB_DEFAULT_CYCLES)
 		return RTLIB_EXC_WORKLOAD_NONE;
-
-	DB(fprintf(stderr, FMT_WRN("<< Default running of EXC [%s],"
-					"latency 100[sm] >>\n"),
-				exc_name.c_str()));
-	DB(::usleep(100000));
 
 	return RTLIB_OK;
 }
@@ -279,7 +285,6 @@ RTLIB_ExitCode_t BbqueEXC::GetWorkingMode() {
 
 RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 
-	
 	DB(fprintf(stderr, FMT_DBG("CL 2. Reconfigure check for EXC [%s]...\n"),
 				exc_name.c_str()));
 
@@ -295,7 +300,7 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 	case RTLIB_EXC_GWM_MIGREC:
 	case RTLIB_EXC_GWM_MIGRATE:
 		DB(fprintf(stderr, FMT_DBG("CL 2-2. Switching EXC [%s] "
-				"to AWM [%d]...\n"),
+				"to AWM [%02d]...\n"),
 				exc_name.c_str(), wmp.awm_id));
 		onConfigure(wmp.awm_id);
 		return result;
@@ -321,8 +326,10 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 RTLIB_ExitCode_t BbqueEXC::Run() {
 	RTLIB_ExitCode_t result;
 
-	DB(fprintf(stderr, FMT_DBG("CL 3. Run EXC [%s]...\n"),
-				exc_name.c_str()));
+	cycles_count++;
+	DB(fprintf(stderr, FMT_DBG("CL 3. Run EXC [%s], cycle [%010d], "
+					"AWM[%02d]...\n"),
+				exc_name.c_str(), cycles_count, wmp.awm_id));
 
 	result = onRun();
 	if (result == RTLIB_EXC_WORKLOAD_NONE)

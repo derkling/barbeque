@@ -88,6 +88,16 @@ private:
 
 	std::condition_variable ctrl_cv;
 
+	/**
+	 * @brief The number of onRun executions
+	 * 
+	 * This counter is incremented at each onRun execution thus allowing to
+	 * keep track of the amount of workload processed.
+	 * Considering a 30fps video decoding, where an onRun is called for each
+	 * frame, a uint32 should allow for +4.5 years continous playback ;-)
+	 */
+	uint32_t cycles_count;
+
 	bool registered;
 
 	bool started;
