@@ -105,6 +105,8 @@ protected:
 		std::string name;
 		/** The RTLIB assigned ID for this Execution Context */
 		uint8_t exc_id;
+		/** The PID of the control thread managing this EXC */
+		pid_t ctrlTrdPid;
 #define EXC_FLAGS_AWM_VALID      0x01 ///< The EXC has been assigned a valid AWM
 #define EXC_FLAGS_AWM_WAITING    0x02 ///< The EXC is waiting for a valid AWM
 #define EXC_FLAGS_EXC_SYNC       0x04 ///< The EXC entered Sync Mode
@@ -121,6 +123,10 @@ protected:
 		std::mutex mtx;
 		/** The conditional variable to be notified on changes for this EXC */
 		std::condition_variable cv;
+		RegisteredExecutionContext(const char *_name) :
+			name(_name), ctrlTrdPid(0), flags(0x00) {
+				exc_id = GetNextExcID();
+		};
 	} RegisteredExecutionContext_t;
 
 	typedef std::shared_ptr<RegisteredExecutionContext_t> pregExCtx_t;
@@ -336,25 +342,33 @@ private:
 	 */
 	pid_t appTrdPid;
 
+	/**
+	 * @brief True if the library has been properly initialized
+	 */
 	bool initialized;
 
 	/**
-	 * @brief The map of Execution Context registered by the application
+	 * @brief A map of registered Execution Context
 	 *
 	 * This maps Execution Context ID (exc_id) into pointers to
 	 * RegisteredExecutionContext structures.
 	 */
 	typedef std::map<uint8_t, pregExCtx_t> excMap_t;
 
-	excMap_t exc_map;
+	/**
+	 * @brief The map of EXC (successfully) registered by this application
+	 */
+	static excMap_t exc_map;
 
+	/**
+	 * @brief An entry of the map of registered EXCs
+	 */
 	typedef std::pair<uint8_t, pregExCtx_t> excMapEntry_t;
-
 
 	/**
 	 * @brief Get the next available (and unique) Execution Context ID
 	 */
-	uint8_t GetNextExcID();
+	static uint8_t GetNextExcID();
 
 	/**
 	 * @brief Get the assigned AWM (if valid)

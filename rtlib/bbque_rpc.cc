@@ -41,6 +41,9 @@ namespace ba = bbque::app;
 
 namespace bbque { namespace rtlib {
 
+/** The map of EXC managed by this library instance */
+BbqueRPC::excMap_t BbqueRPC::exc_map;
+
 BbqueRPC * BbqueRPC::GetInstance() {
 	static BbqueRPC * instance = NULL;
 
@@ -138,12 +141,9 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 	}
 
 	// Build a new registered EXC
-	prec = pregExCtx_t(new RegisteredExecutionContext_t);
+	prec = pregExCtx_t(new RegisteredExecutionContext_t(name));
 	memcpy((void*)&(prec->exc_params), (void*)params,
 			sizeof(RTLIB_ExecutionContextParams_t));
-	prec->name = name;
-	prec->exc_id = GetNextExcID();
-	prec->flags = 0x00;
 
 	// Calling the Low-level registration
 	result = _Register(prec);
@@ -432,6 +432,14 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 			"(Error: EXC not registered)\n"),
 			(void*)ech);
 		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	if (unlikely(prec->ctrlTrdPid == 0)) {
+		// Keep track of the Control Thread PID
+		prec->ctrlTrdPid = gettid();
+		DB(fprintf(stderr, FMT_DBG("Keep control thread PID [%d] "
+						"for EXC [%d]...\n"),
+					prec->ctrlTrdPid, prec->exc_id));
 	}
 
 	// Checking if a valid AWM has been assigned
