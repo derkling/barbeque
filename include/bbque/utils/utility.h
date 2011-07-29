@@ -64,6 +64,11 @@
 #define container_of(ptr, type, member)\
 	(type*)((char*)(ptr) - offsetof(type, member))
 
+/** Optimize branch prediction for "taken" */
+#define likely(x)       __builtin_expect((x),1)
+/** Optimize branch prediction for "untaken" */
+#define unlikely(x)     __builtin_expect((x),0)
+
 /** Return the PID of the calling process/thread */
 inline pid_t gettid() {
 	return syscall(SYS_gettid);
