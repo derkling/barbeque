@@ -312,6 +312,18 @@ protected:
 			rpc_msg_BBQ_SYNCP_POSTCHANGE_t &msg);
 
 
+protected:
+
+
+	/**
+	 * @brief The PID of the Channel Thread
+	 *
+	 * The Channel Thread is the process/thread in charge to manage messages
+	 * exchange with the Barbeque RTRM. Usually, this thread is spawned by the
+	 * subcluss of this based class which provides the low-level channel
+	 * access methods.
+	 */
+	pid_t chTrdPid;
 
 private:
 

@@ -112,8 +112,6 @@ private:
 
 	bool running;
 
-	pid_t chTrdPid;
-
 	std::thread ChTrd;
 
 	std::mutex trdStatus_mtx;
