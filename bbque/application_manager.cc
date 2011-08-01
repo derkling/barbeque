@@ -475,16 +475,22 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	return AM_SUCCESS;
 }
 
-void ApplicationManager::PrintStatusReport() {
+void ApplicationManager::PrintStatusReport(bool verbose) {
 	AppsUidMapIt app_it;
 	AppPtr_t papp;
 	char line[80];
 	char curr_awm_cl[15];
 	char next_awm_cl[15];
 
-	logger->Info(
-			"---- App:EXC ---|---- State |----- Sync |"
-			"-- CurrentAWM |----- NextAWM |");
+	if (verbose) {
+		logger->Info(
+				"---- App:EXC ---|---- State |----- Sync |"
+				"-- CurrentAWM |----- NextAWM |");
+	} else {
+		DB(logger->Debug(
+				"---- App:EXC ---|---- State |----- Sync |"
+				"-- CurrentAWM |----- NextAWM |"));
+	}
 
 	papp = GetFirst(app_it);
 	while (papp) {
@@ -511,14 +517,22 @@ void ApplicationManager::PrintStatusReport() {
 				curr_awm_cl,
 				next_awm_cl);
 
-		logger->Info(line);
+		if (verbose) {
+			logger->Info(line);
+		} else {
+			DB(logger->Debug(line));
+		}
 
 		papp = GetNext(app_it);
 	}
 
-	logger->Info(
-			"----------------------------------------------------------------"
-			"-------");
+	if (verbose) {
+		logger->Info("---------------------------------------------"
+				 "--------------------------");
+	} else {
+		DB(logger->Debug("---------------------------------------------"
+				"--------------------------"));
+	}
 }
 
 ApplicationManager::ExitCode_t

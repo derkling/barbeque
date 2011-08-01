@@ -316,8 +316,10 @@ public:
 
 	/**
 	 * @brief Dump a logline to report all applications status
+	 *
+	 * @param verbose print in INFO logleve is ture, in DEBUG if false
 	 */
-	virtual void PrintStatusReport() = 0;
+	virtual void PrintStatusReport(bool verbose = false) = 0;
 
 };
 

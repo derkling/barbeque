@@ -267,7 +267,7 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	void PrintStatusReport();
+	void PrintStatusReport(bool verbose = false);
 
 private:
 
