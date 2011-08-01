@@ -181,8 +181,10 @@ public:
 	 * resources path and values about usage and total amount.
 	 *
 	 * @param vtok Token of the resources state view
+	 * @param verbose print in INFO logleve is ture, in DEBUG if false
 	 */
-	virtual void PrintStatusReport(RViewToken_t vtok = 0) const = 0;
+	virtual void PrintStatusReport(RViewToken_t vtok = 0,
+			bool verbose = false) const = 0;
 
 };
 

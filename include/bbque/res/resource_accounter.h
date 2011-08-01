@@ -187,7 +187,7 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	void PrintStatusReport(RViewToken_t vtok = 0) const;
+	void PrintStatusReport(RViewToken_t vtok = 0, bool verbose = false) const;
 
 	/**
 	 * @see ResourceAccounterConfIF
