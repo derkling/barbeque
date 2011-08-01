@@ -110,7 +110,7 @@ void ResourceManager::Optimize() {
 	logger->Info("Running Optimization...");
 
 	//--- Scheduling
-	logger->Debug("====================[ SCHEDULE START ]====================");
+	logger->Info("====================[ SCHEDULE START ]====================");
 	optimization_tmr.start();
 	schedResult = sm.Schedule();
 	optimization_tmr.stop();
@@ -127,7 +127,7 @@ void ResourceManager::Optimize() {
 	}
 	logger->Debug("====================[ SCHEDULE ENDED ]====================");
 	logger->Debug("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
-	am.PrintStatusReport();
+	am.PrintStatusReport(true);
 	ra.PrintStatusReport();
 
 	// Check if there is at least one application to synchronize
@@ -137,14 +137,14 @@ void ResourceManager::Optimize() {
 	}
 
 	//--- Synchroniztion
-	logger->Debug("====================[ SYNC START ]====================");
+	logger->Info("====================[ SYNC START ]====================");
 	optimization_tmr.start();
 	syncResult = ym.SyncSchedule();
 	optimization_tmr.stop();
 	logger->Debug("====================[ SYNC ENDED ]====================");
 	logger->Debug("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
-	am.PrintStatusReport();
-	ra.PrintStatusReport();
+	am.PrintStatusReport(true);
+	ra.PrintStatusReport(0, true);
 
 }
 
