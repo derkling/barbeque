@@ -58,6 +58,12 @@ public:
 		return done;
 	}
 
+protected:
+
+	std::string const exc_name;
+
+	std::string const rpc_name;
+
 	virtual RTLIB_ExitCode_t onConfigure(uint8_t awm_id);
 
 	virtual RTLIB_ExitCode_t onSuspend();
@@ -66,27 +72,27 @@ public:
 
 	virtual RTLIB_ExitCode_t onMonitor();
 
-protected:
+	inline uint32_t Cycles() const {
+		return cycles_count;
+	}
 
-	virtual void ControlLoop();
+	RTLIB_WorkingModeParams_t const & WorkingModeParams() const {
+		return wmp;
+	}
 
 private:
-
-	std::string const exc_name;
-
-	std::string const rpc_name;
 
 	RTLIB_Services_t * const rtlib;
 
 	RTLIB_ExecutionContextHandler_t exc_hdl;
-
-	RTLIB_WorkingModeParams_t wmp;
 
 	std::thread ctrl_trd;
 
 	std::mutex ctrl_mtx;
 
 	std::condition_variable ctrl_cv;
+
+	RTLIB_WorkingModeParams_t wmp;
 
 	/**
 	 * @brief The number of onRun executions
@@ -106,6 +112,7 @@ private:
 
 	bool done;
 
+
 	bool WaitEnable();
 
 	RTLIB_ExitCode_t Reconfigure(RTLIB_ExitCode_t result);
@@ -116,6 +123,7 @@ private:
 
 	RTLIB_ExitCode_t Monitor();
 
+	void ControlLoop();
 };
 
 #endif // BBQUE_EXC_H_
