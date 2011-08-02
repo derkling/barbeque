@@ -391,11 +391,17 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 	// Notify we are going to be suspended waiting for an AWM
 	setAwmWaiting(prec);
 
+	// TIMER: Start BLOCKED
+	prec->exc_tmr.start();
+
 	while (isEnabled(prec) && !isAwmValid(prec) && !isBlocked(prec))
 		prec->cv.wait(rec_ul);
 
 	clearAwmWaiting(prec);
 	wm->awm_id = prec->awm_id;
+
+	// TIMER: Get BLOCKED
+	prec->time_blocked += prec->exc_tmr.getElapsedTimeMs();
 
 	return RTLIB_OK;
 }

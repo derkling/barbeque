@@ -30,6 +30,7 @@
 #include "bbque/rtlib.h"
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
+#include "bbque/utils/timer.h"
 
 #include <map>
 #include <memory>
@@ -38,6 +39,8 @@
 #include <thread>
 
 #define FMT_DBG(fmt) BBQUE_FMT(COLOR_LBLUE, "RTLIB_RPC  [DBG]", fmt)
+
+using bbque::utils::Timer;
 
 namespace bbque { namespace rtlib {
 
@@ -124,10 +127,22 @@ protected:
 		std::mutex mtx;
 		/** The conditional variable to be notified on changes for this EXC */
 		std::condition_variable cv;
+
+		/** The High-Resolution timer used for profiling */
+		Timer exc_tmr;
+		/** The time [ms] spent on waiting for an AWM being assigned */
+		uint32_t time_blocked;
+		/** The time [ms] spent on reconfigurations */
+		uint32_t time_reconf;
+		/** The time [ms] spent on processing */
+		uint32_t time_processing;
+
 		RegisteredExecutionContext(const char *_name) :
-			name(_name), ctrlTrdPid(0), flags(0x00) {
+			name(_name), ctrlTrdPid(0), flags(0x00),
+			time_blocked(0), time_reconf(0), time_processing(0) {
 				exc_id = GetNextExcID();
 		};
+
 	} RegisteredExecutionContext_t;
 
 	typedef std::shared_ptr<RegisteredExecutionContext_t> pregExCtx_t;
