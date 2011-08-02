@@ -232,8 +232,14 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	rpc_msg_BBQ_SYNCP_PRECHANGE_t syncp_prechange_msg = {
 		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid, papp->Pid(), papp->ExcId()},
 		(uint8_t)papp->SyncState(),
-		papp->NextAWM()->Id()
+		// If the application is BLOCKING we don't have a NextAWM but we also
+		// don't care at RTLib side about the value of this parameter
+		0
 	};
+	
+	// Set the next AWM only if the application is not going to be blocked
+	if (likely(!papp->Blocking()))
+		syncp_prechange_msg.awm = papp->NextAWM()->Id();
 
 	// Send the required synchronization action
 	logger->Debug("APPs PRX: Send Command [RPC_BBQ_SYNCP_PRECHANGE] to "

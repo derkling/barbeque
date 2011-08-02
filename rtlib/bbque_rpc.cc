@@ -391,7 +391,7 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 	// Notify we are going to be suspended waiting for an AWM
 	setAwmWaiting(prec);
 
-	while (isEnabled(prec) && !isAwmValid(prec))
+	while (isEnabled(prec) && !isAwmValid(prec) && !isBlocked(prec))
 		prec->cv.wait(rec_ul);
 
 	clearAwmWaiting(prec);
@@ -489,11 +489,15 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	case RTLIB_EXC_GWM_RECONF:
 	case RTLIB_EXC_GWM_MIGREC:
 	case RTLIB_EXC_GWM_MIGRATE:
-	case RTLIB_EXC_GWM_BLOCKED:
 		DB(fprintf(stderr, FMT_INF(
 				"[%s:%02hu] <------------- AWM [%02d] --\n"),
 				prec->name.c_str(), prec->exc_id,
 				prec->awm_id));
+		break;
+	case RTLIB_EXC_GWM_BLOCKED:
+		DB(fprintf(stderr, FMT_INF(
+				"[%s:%02hu] <---------------- BLOCKED --\n"),
+				prec->name.c_str(), prec->exc_id));
 		break;
 	default:
 		DB(fprintf(stderr, FMT_ERR("Execution context [%s] GWM FAILED "
@@ -504,7 +508,6 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 		break;
 	}
 
-	wm->awm_id = prec->awm_id;
 	return prec->event;
 
 exit_gwm_failed:
@@ -537,6 +540,9 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
 	clearSyncDone(prec);
 	// Setting current AWM as invalid
 	setAwmInvalid(prec);
+	// Set application BLOCKED (if required)
+	if (prec->event == RTLIB_EXC_GWM_BLOCKED)
+		setBlocked(prec);
 	return RTLIB_OK;
 }
 
@@ -554,18 +560,23 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
-	result = SyncP_PreChangeNotify(prec);
-
 	// Keep copy of the required synchronization action
 	assert(msg.event < ba::ApplicationStatusIF::SYNC_STATE_COUNT);
 	prec->event = (RTLIB_ExitCode_t)(RTLIB_EXC_GWM_START + msg.event);
 
-	// Set the new required AWM
-	prec->awm_id = msg.awm;
+	result = SyncP_PreChangeNotify(prec);
 
-	fprintf(stderr, FMT_INF("SyncP_1 (Pre-Change) EXC [%d], "
-			"Action [%d], Assigned AWM [%d]\n"), msg.hdr.exc_id,
-			msg.event, msg.awm);
+	// Set the new required AWM (if not being blocked)
+	if (prec->event != RTLIB_EXC_GWM_BLOCKED) {
+		prec->awm_id = msg.awm;
+		fprintf(stderr, FMT_INF("SyncP_1 (Pre-Change) EXC [%d], "
+					"Action [%d], Assigned AWM [%d]\n"), msg.hdr.exc_id,
+				msg.event, msg.awm);
+	} else {
+		fprintf(stderr, FMT_INF("SyncP_1 (Pre-Change) EXC [%d], "
+					"Action [%d:BLOCKED]\n"), msg.hdr.exc_id, msg.event);
+	}
+
 	// FIXME add a string representation of the required action
 
 	// Update the Synchronziation Latency

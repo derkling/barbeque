@@ -261,7 +261,7 @@ public:
 	virtual bool Synching()= 0;
 
 	/**
-	 * @brief Check if this EXC is being CLOCKED
+	 * @brief Check if this EXC is being BLOCKED
 	 */
 	virtual bool Blocking() = 0;
 

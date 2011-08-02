@@ -113,6 +113,7 @@ protected:
 #define EXC_FLAGS_EXC_SYNC_DONE  0x08 ///< The EXC exited Sync Mode
 #define EXC_FLAGS_EXC_REGISTERED 0x10 ///< The EXC is registered
 #define EXC_FLAGS_EXC_ENABLED    0x20 ///< The EXC is enabled
+#define EXC_FLAGS_EXC_BLOCKED    0x40 ///< The EXC is blocked
 		/** A set of flags to define the state of this EXC */
 		uint8_t flags;
 		/** The last required synchronization action */
@@ -219,6 +220,21 @@ protected:
 		DB(fprintf(stderr, FMT_DBG("EXC  <= Disabled [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_ENABLED;
+	}
+
+	//--- EXC Blocked status
+	inline bool isBlocked(pregExCtx_t prec) const {
+		return (prec->flags & EXC_FLAGS_EXC_BLOCKED);
+	}
+	inline void setBlocked(pregExCtx_t prec) const {
+		DB(fprintf(stderr, FMT_DBG("EXC  <= Blocked [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
+		prec->flags |= EXC_FLAGS_EXC_BLOCKED;
+	}
+	inline void clearBlocked(pregExCtx_t prec) const {
+		DB(fprintf(stderr, FMT_DBG("EXC  <= UnBlocked [%d:%s]\n"),
+					prec->exc_id, prec->name.c_str()));
+		prec->flags &= ~EXC_FLAGS_EXC_BLOCKED;
 	}
 
 	/**
