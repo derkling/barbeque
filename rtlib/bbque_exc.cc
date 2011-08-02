@@ -394,10 +394,8 @@ void BbqueEXC::ControlLoop() {
 
 	};
 
-	// Notify the termination
-	ctrl_ul.lock();
-	ctrl_cv.notify_all();
-	ctrl_ul.unlock();
+	// Disable the EXC (thus notifying waiters)
+	Disable();
 
 	DB(fprintf(stderr, FMT_DBG("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));
