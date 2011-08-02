@@ -179,7 +179,6 @@ private:
 	 */
 	void RpcBbqSyncpPostChange();
 
-	void RpcBbqCmd_SetWorkingMode();
 };
 
 } // namespace rtlib
