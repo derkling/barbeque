@@ -233,16 +233,16 @@ RTLIB_ExitCode_t BbqueEXC::onSuspend() {
 
 RTLIB_ExitCode_t BbqueEXC::onRun() {
 
-	DB(fprintf(stderr, FMT_WRN("<< Default onRun: EXC [%s], AWM[%02d], "
-					"cycle [%d/%d], latency %d[sm] >>\n"),
-				exc_name.c_str(), wmp.awm_id,
-				cycles_count, BBQUE_RTLIB_DEFAULT_CYCLES,
-				100*(wmp.awm_id+1)));
-	DB(::usleep((wmp.awm_id+1)*100000));
-
 	// By default return after a pre-defined number of cycles
 	if (cycles_count >= BBQUE_RTLIB_DEFAULT_CYCLES)
 		return RTLIB_EXC_WORKLOAD_NONE;
+
+	DB(fprintf(stderr, FMT_WRN("<< Default onRun: EXC [%s], AWM[%02d], "
+					"cycle [%d/%d], latency %d[ms] >>\n"),
+				exc_name.c_str(), wmp.awm_id,
+				cycles_count+1, BBQUE_RTLIB_DEFAULT_CYCLES,
+				100*(wmp.awm_id+1)));
+	DB(::usleep((wmp.awm_id+1)*100000));
 
 	return RTLIB_OK;
 }
@@ -326,10 +326,9 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 RTLIB_ExitCode_t BbqueEXC::Run() {
 	RTLIB_ExitCode_t result;
 
-	cycles_count++;
 	DB(fprintf(stderr, FMT_DBG("CL 3. Run EXC [%s], cycle [%010d], "
 					"AWM[%02d]...\n"),
-				exc_name.c_str(), cycles_count, wmp.awm_id));
+				exc_name.c_str(), cycles_count+1, wmp.awm_id));
 
 	result = onRun();
 	if (result == RTLIB_EXC_WORKLOAD_NONE)
@@ -340,6 +339,9 @@ RTLIB_ExitCode_t BbqueEXC::Run() {
 
 RTLIB_ExitCode_t BbqueEXC::Monitor() {
 	RTLIB_ExitCode_t result;
+
+	// Account executed cycles
+	cycles_count++;
 
 	DB(fprintf(stderr, FMT_DBG("CL 4. Monitor EXC [%s]...\n"),
 				exc_name.c_str()));
