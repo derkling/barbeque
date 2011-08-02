@@ -242,6 +242,9 @@ void BbqueRPC::Unregister(
 		return;
 	}
 
+	// Dump (verbose) execution statistics
+	DumpStats(prec, true);
+
 	// Unegistered the execution context
 	exc_map.erase(prec->exc_id);
 
@@ -350,8 +353,130 @@ RTLIB_ExitCode_t BbqueRPC::Disable(
 	// Mark the EXC as Enabled
 	clearEnabled(prec);
 
+	// Dump statistics on EXC disabling
+	DB(DumpStats(prec));
+
 	// Unlocking eventually waiting GetWorkingMode
 	prec->cv.notify_one();
+
+	return RTLIB_OK;
+}
+
+RTLIB_ExitCode_t BbqueRPC::SetupStatistics(pregExCtx_t prec) {
+	assert(prec);
+	pAwmStats_t pstats(prec->stats[prec->awm_id]);
+
+	// Check if this is a newly selected AWM
+	if (!pstats) {
+		DB(fprintf(stderr, FMT_DBG("Setup stats for AWM [%d]\n"),
+					prec->awm_id));
+		pstats = prec->stats[prec->awm_id] =
+			pAwmStats_t(new AwmStats_t);
+		 
+	}
+
+	// Update usage count
+	pstats->count++;
+
+	// Configure current AWM stats
+	prec->pAwmStats = pstats;
+	
+	return RTLIB_OK;
+}
+
+void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
+	AwmStatsMap_t::iterator it;
+	pAwmStats_t pstats;
+	uint8_t awm_id;
+
+	if (verbose) {	
+		fprintf(stderr, FMT_INF("+--- EXC:AWM ---|-- Uses --|"
+				"-- Running [ms] --|-- Cycles --+\n"));
+	} else {
+		DB(fprintf(stderr, FMT_DBG("+--- EXC:AWM ---|-- Uses --|"
+				"-- Running [ms] --|-- Cycles --+\n")));
+	}
+	it = prec->stats.begin();
+	for ( ; it != prec->stats.end(); ++it) {
+		awm_id = (*it).first;
+		pstats = (*it).second;
+
+	if (verbose) {	
+		fprintf(stderr, FMT_INF("|%11s:%02hu | %8d | %16d | %10d |\n"),
+			prec->name.c_str(), awm_id,
+			pstats->count, pstats->time_processing, pstats->cycles);
+	} else {
+		DB(fprintf(stderr, FMT_DBG("|%11s:%02hu | %8d | %16d | %10d |\n"),
+			prec->name.c_str(), awm_id,
+			pstats->count, pstats->time_processing, pstats->cycles));
+	}
+	}
+
+	if (verbose) {	
+		fprintf(stderr, FMT_INF("+---------------+----------+"
+				"------------------+------------+\n"));
+	} else {
+		DB(fprintf(stderr, FMT_DBG("+---------------+----------+"
+				"------------------+------------+\n")));
+	}
+}
+
+void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
+	pAwmStats_t pstats(prec->pAwmStats);
+	// Use high resolution to avoid errors on next computations
+	double last_cycle_ms;
+	
+	// TIMER: Get RUNNING
+	last_cycle_ms = prec->exc_tmr.getElapsedTimeMs();
+
+	DB(fprintf(stderr, FMT_DBG("Last cycle time %10.3f[ms] for "
+					"EXC [%s:%02hu]\n"),
+				last_cycle_ms,
+				prec->name.c_str(), prec->exc_id));
+
+	// TIMER: Re-sart RUNNING
+	prec->exc_tmr.start();
+
+	// Update Cumulative Average:
+	//                    t(n+1) - CA(n)
+	// CA(n+1) = CA(n) + ----------------
+	//                        (n+1)
+	pstats->sync_time_ca = pstats->sync_time_ca + (
+		(last_cycle_ms - pstats->sync_time_ca) /
+		(pstats->cycles)
+		);
+
+	DB(fprintf(stderr, FMT_DBG("Estimated %d[ms] sync time for "
+					"EXC [%s:%02hu]\n"),
+				pstats->sync_time_ca,
+				prec->name.c_str(), prec->exc_id));
+
+	// Update running counters
+	pstats->time_processing += last_cycle_ms;
+	prec->time_processing += last_cycle_ms;
+
+}
+
+RTLIB_ExitCode_t BbqueRPC::UpdateStatistics(pregExCtx_t prec) {
+	pAwmStats_t pstats(prec->pAwmStats);
+
+	// Ensuring statistics have been properly setup
+	assert(pstats);
+
+	// Check if this is the first re-start on this AWM
+	if (!isSyncDone(prec)) {
+		// TIMER: Get RECONF
+		prec->time_reconf += prec->exc_tmr.getElapsedTimeMs();
+		// TIMER: Sart RUNNING
+		prec->exc_tmr.start();
+		return RTLIB_OK;
+	}
+
+	// Update CA for sync time estimation
+	pstats->cycles++;
+
+	// Update sync time estimation
+	SyncTimeEstimation(prec);
 
 	return RTLIB_OK;
 }
@@ -380,6 +505,9 @@ RTLIB_ExitCode_t BbqueRPC::GetAssignedWorkingMode(
 	DB(fprintf(stderr, FMT_DBG("Valid AWM assigned\n")));
 	wm->awm_id = prec->awm_id;
 
+	// Update AWM statistics
+	UpdateStatistics(prec);
+
 	return RTLIB_OK;
 }
 
@@ -400,8 +528,14 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 	clearAwmWaiting(prec);
 	wm->awm_id = prec->awm_id;
 
+	// Setup AWM statistics
+	SetupStatistics(prec);
+
 	// TIMER: Get BLOCKED
 	prec->time_blocked += prec->exc_tmr.getElapsedTimeMs();
+
+	// TIMER: Sart RECONF
+	prec->exc_tmr.start();
 
 	return RTLIB_OK;
 }

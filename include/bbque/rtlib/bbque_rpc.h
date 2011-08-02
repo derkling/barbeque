@@ -101,6 +101,34 @@ public:
 
 protected:
 
+	/**
+	 * @brief Statistics on AWM usage
+	 */
+	typedef struct AwmStats {
+		/** Count of times this AWM has been in used */
+		uint32_t count;
+		/** Count of cycles done within this AWM */
+		uint32_t cycles;
+		/** The Cumulative Average (CA) of the synchronization time [ms] */
+		uint32_t sync_time_ca;
+		/** The time [ms] spent on processing into this AWM */
+		uint32_t time_processing;
+
+		AwmStats() : count(0), cycles(0),
+			sync_time_ca(0), time_processing(0) {};
+
+	} AwmStats_t;
+
+	/**
+	 * @brief A pointer to AWM statistics
+	 */
+	typedef std::shared_ptr<AwmStats_t> pAwmStats_t;
+
+	/**
+	 * @brief Map AWMs ID into its statistics
+	 */
+	typedef std::map<uint8_t, pAwmStats_t> AwmStatsMap_t;
+
 	typedef struct RegisteredExecutionContext {
 		/** The Execution Context data */
 		RTLIB_ExecutionContextParams_t exc_params;
@@ -136,6 +164,11 @@ protected:
 		uint32_t time_reconf;
 		/** The time [ms] spent on processing */
 		uint32_t time_processing;
+
+		/** Statistics on AWM's of this EXC */
+		AwmStatsMap_t stats;
+		/** Statistics of currently selected AWM */
+		pAwmStats_t pAwmStats;
 
 		RegisteredExecutionContext(const char *_name) :
 			name(_name), ctrlTrdPid(0), flags(0x00),
@@ -400,6 +433,26 @@ private:
 	 * @brief Get the next available (and unique) Execution Context ID
 	 */
 	static uint8_t GetNextExcID();
+
+	/**
+	 * @brief Setup statistics for a new selecte AWM
+	 */
+	RTLIB_ExitCode_t SetupStatistics(pregExCtx_t prec);
+
+	/**
+	 * @brief Update statistics for the currently selected AWM
+	 */
+	RTLIB_ExitCode_t UpdateStatistics(pregExCtx_t prec);
+
+	/**
+	 * @brief Log execution statistics collected so far
+	 */
+	void DumpStats(pregExCtx_t prec, bool verbose = false);
+
+	/**
+	 * @brief Update sync time [ms] estimation for the currently AWM
+	 */
+	void SyncTimeEstimation(pregExCtx_t prec);
 
 	/**
 	 * @brief Get the assigned AWM (if valid)
