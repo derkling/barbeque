@@ -397,45 +397,62 @@ RTLIB_ExitCode_t BbqueRPC::SetupStatistics(pregExCtx_t prec) {
 	return RTLIB_OK;
 }
 
+#define STATS_HEADER \
+"#                _----------------=> Uses#\n"\
+"#               /    _------------=> Cycles#\n"\
+"#              |    /        _----=> Processing [ms]\n"\
+"#              |   |        /     |====== Sync Time [ms] ======|\n"\
+"#   EXC  AWM   |   |       |       _(min,max)_      _(avg,var)_\n"\
+"#     \\   /    |   |       |     /             \\  /             \\\n"\
+
+void BbqueRPC::DumpStatsHeader() {
+	fprintf(stderr, "\n");
+	fprintf(stderr, STATS_HEADER);
+}
+
 void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 	AwmStatsMap_t::iterator it;
 	pAwmStats_t pstats;
 	uint8_t awm_id;
 
-	if (verbose) {	
-		fprintf(stderr, FMT_INF("+--- EXC:AWM ---|-- Uses --|"
-				"-- Running [ms] --|-- Cycles --+\n"));
-	} else {
-		DB(fprintf(stderr, FMT_DBG("+--- EXC:AWM ---|-- Uses --|"
-				"-- Running [ms] --|-- Cycles --+\n")));
-	}
+	uint32_t _cycles;
+	double _min;
+	double _max;
+	double _avg;
+	double _var;
+
 	it = prec->stats.begin();
 	for ( ; it != prec->stats.end(); ++it) {
 		awm_id = (*it).first;
 		pstats = (*it).second;
 
-	if (verbose) {	
-		fprintf(stderr, FMT_INF("|%11s:%02hu | %8d | %16d | %10d |\n"),
-			prec->name.c_str(), awm_id,
-			pstats->count, pstats->time_processing, pstats->cycles);
-	} else {
-		DB(fprintf(stderr, FMT_DBG("|%11s:%02hu | %8d | %16d | %10d |\n"),
-			prec->name.c_str(), awm_id,
-			pstats->count, pstats->time_processing, pstats->cycles));
-	}
+		// Features extraction
+		_cycles = count(pstats->samples);
+		_min = min(pstats->samples);
+		_max = max(pstats->samples);
+		_avg = mean(pstats->samples);
+		_var = variance(pstats->samples);
+		
+		if (verbose) {
+			fprintf(stderr, "%8s-%d %5d %6d %7d "
+					"(%7.3f,%7.3f)(%7.3f,%7.3f)\n",
+				prec->name.c_str(), awm_id, pstats->count,
+				_cycles, pstats->time_processing,
+				_min, _max, _avg, _var);
+		} else {
+			DB(fprintf(stderr, FMT_DBG("%8s-%d %5d %6d %7d "
+					"(%7.3f,%7.3f)(%7.3f,%7.3f)\n"),
+				prec->name.c_str(), awm_id, pstats->count,
+				_cycles, pstats->time_processing,
+				_min, _max, _avg, _var));
+		}
 	}
 
-	if (verbose) {	
-		fprintf(stderr, FMT_INF("+---------------+----------+"
-				"------------------+------------+\n"));
-	} else {
-		DB(fprintf(stderr, FMT_DBG("+---------------+----------+"
-				"------------------+------------+\n")));
-	}
 }
 
 void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 	pAwmStats_t pstats(prec->pAwmStats);
+	std::unique_lock<std::mutex> stats_ul(pstats->stats_mtx);
 	// Use high resolution to avoid errors on next computations
 	double last_cycle_ms;
 	
@@ -450,24 +467,24 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 	// TIMER: Re-sart RUNNING
 	prec->exc_tmr.start();
 
-	// Update Cumulative Average:
-	//                    t(n+1) - CA(n)
-	// CA(n+1) = CA(n) + ----------------
-	//                        (n+1)
-	pstats->sync_time_ca = pstats->sync_time_ca + (
-		(last_cycle_ms - pstats->sync_time_ca) /
-		(pstats->cycles)
-		);
-
-	DB(fprintf(stderr, FMT_DBG("Estimated %d[ms] sync time for "
-					"EXC [%s:%02hu]\n"),
-				pstats->sync_time_ca,
-				prec->name.c_str(), prec->exc_id));
-
 	// Update running counters
 	pstats->time_processing += last_cycle_ms;
 	prec->time_processing += last_cycle_ms;
 
+	// Push sample into accumulator
+	pstats->samples(last_cycle_ms);
+
+	// Statistic features extraction for cycle time estimation:
+	DB(
+	uint32_t _count = count(pstats->samples);
+	double _min = min(pstats->samples);
+	double _max = max(pstats->samples);
+	double _avg = mean(pstats->samples);
+	double _var = variance(pstats->samples);
+	fprintf(stderr, FMT_ERR("#%08d: m: %.3f, M: %.3f, "
+			"a: %.3f, v: %.3f) [ms]\n"),
+		_count, _min, _max, _avg, _var);
+	)
 }
 
 RTLIB_ExitCode_t BbqueRPC::UpdateStatistics(pregExCtx_t prec) {
@@ -484,9 +501,6 @@ RTLIB_ExitCode_t BbqueRPC::UpdateStatistics(pregExCtx_t prec) {
 		prec->exc_tmr.start();
 		return RTLIB_OK;
 	}
-
-	// Update CA for sync time estimation
-	pstats->cycles++;
 
 	// Update sync time estimation
 	SyncTimeEstimation(prec);

@@ -38,9 +38,19 @@
 #include <mutex>
 #include <thread>
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/count.hpp>
+#include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/max.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/moment.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+
 #define FMT_DBG(fmt) BBQUE_FMT(COLOR_LBLUE, "RTLIB_RPC  [DBG]", fmt)
 
 using bbque::utils::Timer;
+using namespace boost::accumulators;
 
 namespace bbque { namespace rtlib {
 
@@ -107,15 +117,16 @@ protected:
 	typedef struct AwmStats {
 		/** Count of times this AWM has been in used */
 		uint32_t count;
-		/** Count of cycles done within this AWM */
-		uint32_t cycles;
-		/** The Cumulative Average (CA) of the synchronization time [ms] */
-		uint32_t sync_time_ca;
 		/** The time [ms] spent on processing into this AWM */
 		uint32_t time_processing;
 
-		AwmStats() : count(0), cycles(0),
-			sync_time_ca(0), time_processing(0) {};
+		/** Statistics on AWM cycles */
+		accumulator_set<double,
+			stats<tag::min, tag::max, tag::variance>> samples;
+		/** The mutex protecting concurrent access to statistical data */
+		std::mutex stats_mtx;
+
+		AwmStats() : count(0), time_processing(0) {};
 
 	} AwmStats_t;
 
@@ -175,6 +186,12 @@ protected:
 			time_blocked(0), time_reconf(0), time_processing(0) {
 				exc_id = id;
 		}
+
+		~RegisteredExecutionContext() {
+			stats.clear();
+			pAwmStats = pAwmStats_t();
+		}
+
 
 	} RegisteredExecutionContext_t;
 
@@ -443,6 +460,11 @@ private:
 	 * @brief Update statistics for the currently selected AWM
 	 */
 	RTLIB_ExitCode_t UpdateStatistics(pregExCtx_t prec);
+
+	/**
+	 * @brief Log the header for statistics collection
+	 */
+	void DumpStatsHeader();
 
 	/**
 	 * @brief Log execution statistics collected so far
