@@ -170,11 +170,11 @@ protected:
 		/** Statistics of currently selected AWM */
 		pAwmStats_t pAwmStats;
 
-		RegisteredExecutionContext(const char *_name) :
+		RegisteredExecutionContext(const char *_name, uint8_t id) :
 			name(_name), ctrlTrdPid(0), flags(0x00),
 			time_blocked(0), time_reconf(0), time_processing(0) {
-				exc_id = GetNextExcID();
-		};
+				exc_id = id;
+		}
 
 	} RegisteredExecutionContext_t;
 
@@ -422,7 +422,7 @@ private:
 	/**
 	 * @brief The map of EXC (successfully) registered by this application
 	 */
-	static excMap_t exc_map;
+	excMap_t exc_map;
 
 	/**
 	 * @brief An entry of the map of registered EXCs
@@ -432,7 +432,7 @@ private:
 	/**
 	 * @brief Get the next available (and unique) Execution Context ID
 	 */
-	static uint8_t GetNextExcID();
+	uint8_t GetNextExcID();
 
 	/**
 	 * @brief Setup statistics for a new selecte AWM

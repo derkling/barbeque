@@ -41,9 +41,6 @@ namespace ba = bbque::app;
 
 namespace bbque { namespace rtlib {
 
-/** The map of EXC managed by this library instance */
-BbqueRPC::excMap_t BbqueRPC::exc_map;
-
 BbqueRPC * BbqueRPC::GetInstance() {
 	static BbqueRPC * instance = NULL;
 
@@ -66,7 +63,25 @@ BbqueRPC::BbqueRPC(void) :
 }
 
 BbqueRPC::~BbqueRPC(void) {
+	excMap_t::iterator it;
+	pregExCtx_t prec;
+
 	DB(fprintf(stderr, FMT_DBG("BbqueRPC dtor\n")));
+
+	// Dump out execution statistics
+	it = exc_map.begin();
+	if (it != exc_map.end()) {
+
+		DumpStatsHeader();
+		for ( ; it != exc_map.end(); ++it) {
+			prec = (*it).second;
+			DumpStats(prec, true);
+		}
+
+	}
+
+	// Clean-up all the registered EXCs
+	exc_map.clear();
 }
 
 RTLIB_ExitCode_t BbqueRPC::Init(const char *name) {
@@ -141,7 +156,7 @@ RTLIB_ExecutionContextHandler_t BbqueRPC::Register(
 	}
 
 	// Build a new registered EXC
-	prec = pregExCtx_t(new RegisteredExecutionContext_t(name));
+	prec = pregExCtx_t(new RegisteredExecutionContext_t(name, GetNextExcID()));
 	memcpy((void*)&(prec->exc_params), (void*)params,
 			sizeof(RTLIB_ExecutionContextParams_t));
 
@@ -243,10 +258,7 @@ void BbqueRPC::Unregister(
 	}
 
 	// Dump (verbose) execution statistics
-	DumpStats(prec, true);
-
-	// Unegistered the execution context
-	exc_map.erase(prec->exc_id);
+	DumpStats(prec);
 
 	// Mark the EXC as Unregistered
 	clearRegistered(prec);
@@ -254,8 +266,8 @@ void BbqueRPC::Unregister(
 }
 
 void BbqueRPC::UnregisterAll() {
-	excMap_t::iterator it = exc_map.begin();
 	RTLIB_ExitCode_t result;
+	excMap_t::iterator it;
 	pregExCtx_t prec;
 
 	// Checking for library initialization
@@ -267,9 +279,13 @@ void BbqueRPC::UnregisterAll() {
 	}
 
 	// Unregistering all the registered EXCs
+	it = exc_map.begin();
 	for ( ; it != exc_map.end(); ++it) {
 		prec = (*it).second;
-		assert(isRegistered(prec) == true);
+
+		// Jumping already un-registered EXC
+		if (!isRegistered(prec))
+				continue;
 
 		// Calling the low-level unregistration
 		result = _Unregister(prec);
@@ -280,9 +296,6 @@ void BbqueRPC::UnregisterAll() {
 						RTLIB_ErrorStr(result)));
 			return;
 		}
-
-		// Unegistered the execution context
-		exc_map.erase(prec->exc_id);
 
 		// Mark the EXC as Unregistered
 		clearRegistered(prec);
