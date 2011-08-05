@@ -464,9 +464,6 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 				last_cycle_ms,
 				prec->name.c_str(), prec->exc_id));
 
-	// TIMER: Re-sart RUNNING
-	prec->exc_tmr.start();
-
 	// Update running counters
 	pstats->time_processing += last_cycle_ms;
 	prec->time_processing += last_cycle_ms;
@@ -485,6 +482,14 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 			"a: %.3f, v: %.3f) [ms]\n"),
 		_count, _min, _max, _avg, _var);
 	)
+
+	// TODO: here we can get the overhead for statistica analysis
+	// by re-reading the timer and comparing with the preivously readed
+	// value
+
+	// TIMER: Re-sart RUNNING
+	prec->exc_tmr.start();
+
 }
 
 RTLIB_ExitCode_t BbqueRPC::UpdateStatistics(pregExCtx_t prec) {
