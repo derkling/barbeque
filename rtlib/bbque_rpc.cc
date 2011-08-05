@@ -693,10 +693,36 @@ exit_gwm_failed:
 }
 
 uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
-	(void)prec;
-	// TODO added here the code for synchronization latency computation
-	// By default now we return a 100[ms] synchronization latency value
-	return 100;
+	pAwmStats_t pstats = prec->pAwmStats;
+	double elapsedTime;
+	double syncDelay;
+	double _avg;
+	double _var;
+
+	// Get the statistics for the current AWM
+	assert(pstats);
+	std::unique_lock<std::mutex> stats_ul(pstats->stats_mtx);
+	_avg = mean(pstats->samples);
+	_var = variance(pstats->samples);
+	stats_ul.unlock();
+
+	// Compute a reasonale sync point esimation
+	// we assume a NORMAL distribution of execution times
+	syncDelay = _avg + (2 * sqrt(_var));
+
+	// Discount the already passed time since lasy sync point
+	elapsedTime = prec->exc_tmr.getElapsedTimeMs();
+	if (elapsedTime < syncDelay)
+		syncDelay -= elapsedTime;
+	else
+		syncDelay = 0;
+
+	DB(fprintf(stderr, FMT_ERR("Expected sync time in %10.3f[ms] for "
+					"EXC [%s:%02hu]\n"),
+				syncDelay,
+				prec->name.c_str(), prec->exc_id));
+
+	return ceil(syncDelay);
 }
 
 
@@ -705,7 +731,6 @@ uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
  ******************************************************************************/
 
 RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
-	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 	// Entering Synchronization mode
 	setSyncMode(prec);
 	// Resetting Sync Done
@@ -732,8 +757,11 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(
 		return RTLIB_EXC_NOT_REGISTERED;
 	}
 
-	// Keep copy of the required synchronization action
 	assert(msg.event < ba::ApplicationStatusIF::SYNC_STATE_COUNT);
+
+	std::unique_lock<std::mutex> rec_ul(prec->mtx);
+
+	// Keep copy of the required synchronization action
 	prec->event = (RTLIB_ExitCode_t)(RTLIB_EXC_GWM_START + msg.event);
 
 	result = SyncP_PreChangeNotify(prec);
@@ -742,17 +770,25 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(
 	if (prec->event != RTLIB_EXC_GWM_BLOCKED) {
 		prec->awm_id = msg.awm;
 		fprintf(stderr, FMT_INF("SyncP_1 (Pre-Change) EXC [%d], "
-					"Action [%d], Assigned AWM [%d]\n"), msg.hdr.exc_id,
+					"Action [%d], Assigned AWM [%d]\n"),
+				msg.hdr.exc_id,
 				msg.event, msg.awm);
 	} else {
 		fprintf(stderr, FMT_INF("SyncP_1 (Pre-Change) EXC [%d], "
-					"Action [%d:BLOCKED]\n"), msg.hdr.exc_id, msg.event);
+					"Action [%d:BLOCKED]\n"),
+				msg.hdr.exc_id, msg.event);
 	}
 
 	// FIXME add a string representation of the required action
 
-	// Update the Synchronziation Latency
-	syncLatency = GetSyncLatency(prec);
+	syncLatency = 0;
+	if (!isAwmWaiting(prec) && prec->pAwmStats) {
+		// Update the Synchronziation Latency
+		syncLatency = GetSyncLatency(prec);
+	}
+
+	rec_ul.unlock();
+
 	DB(fprintf(stderr, FMT_DBG("SyncP_1 (Pre-Change) EXC [%d], "
 				"SyncLatency [%u]\n"),
 				msg.hdr.exc_id, syncLatency));
