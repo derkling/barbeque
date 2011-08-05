@@ -109,6 +109,7 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 	typedef std::map<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMap_t;
 	typedef std::pair<AppPtr_t, ApplicationProxy::pPreChangeRsp_t> RspMapEntry_t;
 
+	SynchronizationPolicyIF::ExitCode_t syncp_result;
 	ApplicationProxy::pPreChangeRsp_t presp;
 	RspMap_t::iterator resp_it;
 	RTLIB_ExitCode_t result;
@@ -185,12 +186,8 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 		logger->Info("STEP 1: [%s] declared syncLatency %d[ms]",
 				papp->StrId(), presp->syncLatency);
 
-		// TODO Here the synchronization policy should be queryed to
-		// decide if the synchronization latency is compliant with the
-		// RTRM optimization goals.
-		logger->Warn("TODO: Check sync policy for "
-				"(%d[ms]) syncLatency compliance",
-				presp->syncLatency);
+		syncp_result = policy->CheckLatency(papp, presp->syncLatency);
+		// TODO: check the POLICY required action	
 
 		// Remove the respose future
 		rsp_map.erase(resp_it);
@@ -420,6 +417,12 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	result = Sync_PreChange(syncState);
 	if (result != OK)
 		return result;
+
+	// Wait for the policy specified sync point
+	logger->Warn("Wait sync point for %d[ms]", policy->EstimatedSyncTime());
+	std::this_thread::sleep_for(
+			std::chrono::milliseconds(
+				policy->EstimatedSyncTime()));
 
 	result = Sync_SyncChange(syncState);
 	if (result != OK)
