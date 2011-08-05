@@ -47,6 +47,21 @@ class SynchronizationPolicyIF {
 public:
 
 	/**
+	 * @brief A synchronization latency [ms]
+	 */
+	typedef uint32_t SyncLatency_t;
+
+	/**
+	 * @brief Result codes reported by some of the methods of plugins
+	 * implementing this interface
+	 */
+	typedef enum ExitCode {
+		SYNCP_OK,
+		SYNCP_ABORT_SYNC,
+		SYNCP_FORCE_STOP
+	} ExitCode_t;
+
+	/**
 	 * @brief Return the name of the synchronization policy
 	 * @return The name of the synchronization policy
 	 */
@@ -96,6 +111,30 @@ public:
 	 * verified condition should (eventually) introduce a very low overhead.
 	 */
 	virtual bool DoSync(AppPtr_t papp) = 0;
+
+	/**
+	 * @brief Acknowledge a [ms] synch latency for the specified application
+	 *
+	 * In response to a PreChange message, the RTLib report ane estimation of
+	 * the next synchronization point for the corresponding EXC. This method
+	 * is used to validate the synchronization latency with respect to the
+	 * synchronization and optimization strategy defined by the policy.
+	 *
+	 * @return SYNCP_OK if the asserted latency could be accepted, one of the
+	 * other defined exit codes in case of errors. The exit code implicitely
+	 * defineds the required action.
+	 */
+	virtual ExitCode_t CheckLatency(AppPtr_t papp, SyncLatency_t latency) = 0;
+
+	/**
+	 * @brief Report the estimated [ms] synchronization interval
+	 *
+	 * This method returns the estimated synchronization time, in milliseconds,
+	 * which defines the time interval to wait before checking for a
+	 * synchronization point of the EXC notified since the last call to the
+	 * GetApplicationsQueue()
+	 */
+	virtual SyncLatency_t EstimatedSyncTime() = 0;
 
 };
 
