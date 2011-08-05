@@ -71,6 +71,10 @@ public:
 
 	bool DoSync(AppPtr_t papp);
 
+	ExitCode_t CheckLatency(AppPtr_t papp, SyncLatency_t latency);
+
+	SyncLatency_t EstimatedSyncTime();
+	
 private:
 
 	typedef enum syncState {
@@ -90,6 +94,11 @@ private:
 	 * @brief System logger instance
 	 */
 	LoggerIF *logger;
+
+	/**
+	 * @brief Keep track of the best estimation for the sync latency
+	 */
+	SyncLatency_t max_latency;
 
 	/**
 	 * @brief   The plugins constructor

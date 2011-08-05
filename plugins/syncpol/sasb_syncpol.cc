@@ -156,6 +156,10 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::GetApplicationsQueue(
 		status = STEP10;
 	}
 
+	// Resetting the maximum latency since a new queue is going to be served,
+	// thus a new SyncP is going to start
+	max_latency = 0;
+
 	for( ; status<=STEP40; ++status) {
 		switch(status) {
 		case STEP10:
@@ -193,6 +197,36 @@ bool SasbSyncPol::DoSync(AppPtr_t papp) {
 	(void)papp;
 	return true;
 }
+
+SasbSyncPol::ExitCode_t
+SasbSyncPol::CheckLatency(AppPtr_t papp, SyncLatency_t latency) {
+	// TODO: use a smarter latency validation, e.g. considering the
+	// application and the currently served queue
+	logger->Warn("TODO: Check for (%d[ms]) syncLatency compliance",
+			latency);
+
+	// Right now we use a dummy approach based on WORST CASE.
+	// Indeed, we keep the maximum required lantecy among all the applications
+	// since the last GetApplicationsQueue
+	if (max_latency < latency)
+		max_latency = latency;
+
+	return SYNCP_OK;
+}
+
+SasbSyncPol::SyncLatency_t
+SasbSyncPol::EstimatedSyncTime() {
+
+	// TODO use a smarter latency estimation, e.g. based on a timer which
+	// should be started at each first CheckLatency right after each new
+	// GetApplicationsQueue
+
+	// Right now we use a dummy approach based on WORT CASE.
+	// Indeet we alwasy return the maximum latency collected among all the
+	// applciations.
+	return max_latency;
+}
+
 
 //----- static plugin interface
 
