@@ -37,7 +37,8 @@ SignalsManager & SignalsManager::GetInstance() {
 }
 
 SignalsManager::SignalsManager() :
-	intrEn(SIGINT, ResourceManager::BBQ_EXIT),
+	usr1En(SIGUSR1, ResourceManager::BBQ_USR1),
+	intrEn(SIGINT,  ResourceManager::BBQ_EXIT),
 	quitEn(SIGQUIT, ResourceManager::BBQ_ABORT) {
 
 	//---------- Get a logger module
@@ -49,10 +50,12 @@ SignalsManager::SignalsManager() :
 	}
 
 	//---------- Registering handlers
-	RegisterHandler(SIGINT, &intrEn);
+	RegisterHandler(SIGUSR1, &usr1En);
+	RegisterHandler(SIGINT,  &intrEn);
 	RegisterHandler(SIGQUIT, &quitEn);
 
-	logger->Debug("System signals installed");
+	logger->Info("System signals installed, signal catcher thread [%d]",
+			gettid());
 
 }
 

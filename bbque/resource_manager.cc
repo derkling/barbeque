@@ -171,6 +171,39 @@ void ResourceManager::EvtExcStop() {
 	Optimize();
 }
 
+void ResourceManager::EvtBbqUsr1() {
+	logger->Info("");
+	logger->Info("==========[ Status Queues ]============"
+			"========================================");
+	logger->Info("");
+	am.ReportStatusQ();
+
+	logger->Info("");
+	logger->Info("");
+	logger->Info("==========[ Synchronization Queues ]==="
+			"========================================");
+	logger->Info("");
+	am.ReportSyncQ();
+
+	logger->Info("");
+	logger->Info("");
+	logger->Info("==========[ EXCs Status ]=============="
+			"========================================");
+	logger->Info("");
+	am.PrintStatusReport(true);
+
+	logger->Info("");
+	logger->Info("");
+	logger->Info("==========[ Resources Status ]========="
+			"========================================");
+	logger->Info("");
+	ra.PrintStatusReport(0, true);
+
+	// Clear the corresponding event flag
+	logger->Info("");
+	pendingEvts.reset(BBQ_USR1);
+}
+
 void ResourceManager::EvtBbqExit() {
 	AppsUidMapIt apps_it;
 	AppPtr_t papp;
@@ -216,6 +249,10 @@ void ResourceManager::ControlLoop() {
 			logger->Debug("Event [EXC_STOP]");
 			EvtExcStop();
 			break;
+		case BBQ_USR1:
+			logger->Debug("Event [BBQ_USR1]");
+			EvtBbqUsr1();
+			return;
 		case BBQ_EXIT:
 			logger->Debug("Event [BBQ_EXIT]");
 			EvtBbqExit();

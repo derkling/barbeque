@@ -58,6 +58,8 @@ public:
 		EXC_START = 0,
 		EXC_STOP,
 
+		BBQ_USR1,
+
 		BBQ_EXIT,
 		BBQ_ABORT,
 
@@ -193,6 +195,11 @@ private:
 	 * @brief Process a EXC_START event
 	 */
 	void EvtExcStart();
+
+	/**
+	 * @brief Process a BBQ_USR1 event
+	 */
+	void EvtBbqUsr1();
 
 	/**
 	 * @brief Process a EXC_STOP event

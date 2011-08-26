@@ -113,6 +113,11 @@ private:
 	  static SignalHandler *hdlrs[NSIG];
 
 	  /**
+	   * @brief Notify a USR1 system event
+	   */
+	  EventNotifier usr1En;
+
+	  /**
 	   * @brief Notify an INTR system event
 	   */
 	  EventNotifier intrEn;
