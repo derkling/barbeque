@@ -351,8 +351,10 @@ void Application::SetState(State_t state, SyncState_t sync) {
 
 	// Release current selected AWM
 	if ((state == DISABLED) ||
-			(state == READY))
+			(state == READY)) {
 		schedule.awm.reset();
+		schedule.next_awm.reset();
+	}
 
 }
 
