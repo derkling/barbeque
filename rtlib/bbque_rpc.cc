@@ -426,8 +426,12 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 		awm_id = (*it).first;
 		pstats = (*it).second;
 
-		// Features extraction
+		// Ignoring empty statistics
 		_cycles = count(pstats->samples);
+		if (!_cycles)
+			continue;
+
+		// Features extraction
 		_min = min(pstats->samples);
 		_max = max(pstats->samples);
 		_avg = mean(pstats->samples);
@@ -478,7 +482,7 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 	double _max = max(pstats->samples);
 	double _avg = mean(pstats->samples);
 	double _var = variance(pstats->samples);
-	fprintf(stderr, FMT_ERR("#%08d: m: %.3f, M: %.3f, "
+	fprintf(stderr, FMT_DBG("#%08d: m: %.3f, M: %.3f, "
 			"a: %.3f, v: %.3f) [ms]\n"),
 		_count, _min, _max, _avg, _var);
 	)
@@ -554,6 +558,7 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 	// TIMER: Start BLOCKED
 	prec->exc_tmr.start();
 
+	// Wait fot the EXC being assigned an AWM
 	while (isEnabled(prec) && !isAwmValid(prec) && !isBlocked(prec))
 		prec->cv.wait(rec_ul);
 
@@ -576,8 +581,10 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 RTLIB_ExitCode_t BbqueRPC::WaitForSyncDone(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 
-	while (isEnabled(prec) && !isSyncDone(prec))
+	while (isEnabled(prec) && !isSyncDone(prec)) {
+		DB(fprintf(stderr, FMT_DBG("Waiting for reconfiguration to complete...\n")));
 		prec->cv.wait(rec_ul);
+	}
 
 	// TODO add a timeout wait to limit the maximum reconfiguration time
 	// before notifying an anomaly to the RTRM
@@ -717,7 +724,7 @@ uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
 	else
 		syncDelay = 0;
 
-	DB(fprintf(stderr, FMT_ERR("Expected sync time in %10.3f[ms] for "
+	DB(fprintf(stderr, FMT_DBG("Expected sync time in %10.3f[ms] for "
 					"EXC [%s:%02hu]\n"),
 				syncDelay,
 				prec->name.c_str(), prec->exc_id));
@@ -874,10 +881,7 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_DoChangeNotify(
 RTLIB_ExitCode_t BbqueRPC::SyncP_PostChangeNotify(pregExCtx_t prec) {
 	// TODO Wait for the apps to end its reconfiguration
 	// TODO Collect stats on reconfiguraiton time
-
-	DB(fprintf(stderr, FMT_DBG("Waiting for reconfiguration to complete...\n")));
-
-	return WaitForSyncDone(prec);	
+	return WaitForSyncDone(prec);
 }
 
 RTLIB_ExitCode_t BbqueRPC::SyncP_PostChangeNotify(
