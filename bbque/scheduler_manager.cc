@@ -32,7 +32,7 @@
 
 #include "bbque/utils/utility.h"
 
-#define RESOURCE_SCHEDULER_NAMESPACE "bq.rs"
+#define SCHEDULER_MANAGER_NAMESPACE "bq.sm"
 
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
@@ -48,7 +48,7 @@ SchedulerManager::SchedulerManager() {
 	std::string opt_policy;
 
 	//---------- Get a logger module
-	bp::LoggerIF::Configuration conf(RESOURCE_SCHEDULER_NAMESPACE);
+	bp::LoggerIF::Configuration conf(SCHEDULER_MANAGER_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
 		fprintf(stderr, "RS: Logger module creation FAILED\n");
