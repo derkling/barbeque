@@ -118,6 +118,11 @@ private:
 	  EventNotifier usr1En;
 
 	  /**
+	   * @brief Notify a USR2 system event
+	   */
+	  EventNotifier usr2En;
+
+	  /**
 	   * @brief Notify an INTR system event
 	   */
 	  EventNotifier intrEn;

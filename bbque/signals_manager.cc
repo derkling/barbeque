@@ -38,6 +38,7 @@ SignalsManager & SignalsManager::GetInstance() {
 
 SignalsManager::SignalsManager() :
 	usr1En(SIGUSR1, ResourceManager::BBQ_USR1),
+	usr2En(SIGUSR2, ResourceManager::BBQ_USR2),
 	intrEn(SIGINT,  ResourceManager::BBQ_EXIT),
 	quitEn(SIGQUIT, ResourceManager::BBQ_ABORT) {
 
@@ -51,6 +52,7 @@ SignalsManager::SignalsManager() :
 
 	//---------- Registering handlers
 	RegisterHandler(SIGUSR1, &usr1En);
+	RegisterHandler(SIGUSR2, &usr2En);
 	RegisterHandler(SIGINT,  &intrEn);
 	RegisterHandler(SIGQUIT, &quitEn);
 

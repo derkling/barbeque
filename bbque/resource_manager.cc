@@ -50,7 +50,8 @@ ResourceManager::ResourceManager() :
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
 	pm(bp::PluginManager::GetInstance()),
-	ra(br::ResourceAccounter::GetInstance()) {
+	ra(br::ResourceAccounter::GetInstance()),
+	mc(bu::MetricsCollector::GetInstance()) {
 
 }
 
@@ -204,6 +205,14 @@ void ResourceManager::EvtBbqUsr1() {
 	pendingEvts.reset(BBQ_USR1);
 }
 
+void ResourceManager::EvtBbqUsr2() {
+	logger->Info("Dumping metrics collection...");
+	mc.DumpMetrics();
+
+	// Clear the corresponding event flag
+	pendingEvts.reset(BBQ_USR2);
+}
+
 void ResourceManager::EvtBbqExit() {
 	AppsUidMapIt apps_it;
 	AppPtr_t papp;
@@ -252,6 +261,10 @@ void ResourceManager::ControlLoop() {
 		case BBQ_USR1:
 			logger->Debug("Event [BBQ_USR1]");
 			EvtBbqUsr1();
+			return;
+		case BBQ_USR2:
+			logger->Debug("Event [BBQ_USR2]");
+			EvtBbqUsr2();
 			return;
 		case BBQ_EXIT:
 			logger->Debug("Event [BBQ_EXIT]");

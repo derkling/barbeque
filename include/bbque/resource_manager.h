@@ -32,12 +32,14 @@
 #include "bbque/res/resource_accounter.h"
 
 #include "bbque/plugins/logger.h"
+#include "bbque/utils/metrics_collector.h"
 
 #include <bitset>
 
 using bbque::res::ResourceAccounter;
 using bbque::plugins::PluginManager;
 using bbque::plugins::LoggerIF;
+using bbque::utils::MetricsCollector;
 
 namespace bbque {
 
@@ -59,6 +61,7 @@ public:
 		EXC_STOP,
 
 		BBQ_USR1,
+		BBQ_USR2,
 
 		BBQ_EXIT,
 		BBQ_ABORT,
@@ -155,6 +158,10 @@ private:
 	 */
 	ResourceAccounter & ra;
 
+	/**
+	 * @brief The collection of Barbeque metrics
+	 */
+	MetricsCollector & mc;
 
 	std::bitset<EVENTS_COUNT> pendingEvts;
 
@@ -200,6 +207,11 @@ private:
 	 * @brief Process a BBQ_USR1 event
 	 */
 	void EvtBbqUsr1();
+
+	/**
+	 * @brief Process a BBQ_USR1 event
+	 */
+	void EvtBbqUsr2();
 
 	/**
 	 * @brief Process a EXC_STOP event
