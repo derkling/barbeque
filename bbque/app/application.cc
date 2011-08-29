@@ -653,8 +653,7 @@ Application::ExitCode_t Application::SetBlocked() {
 }
 
 Application::ExitCode_t Application::ScheduleCommit() {
-	std::unique_lock<std::recursive_mutex>
-		state_ul(schedule_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
 
 	// Ignoring applications disabled during a SYNC
 	if (_Disabled()) {
@@ -662,8 +661,6 @@ Application::ExitCode_t Application::ScheduleCommit() {
 				StrId(), _State(), StateStr(_State()));
 		return APP_SUCCESS;
 	}
-
-	state_ul.lock();
 
 	assert(_State() == SYNC);
 
