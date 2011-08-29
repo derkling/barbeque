@@ -360,6 +360,9 @@ void BbqueEXC::ControlLoop() {
 	assert(rtlib);
 	assert(registered == true);
 
+	DB(fprintf(stderr, FMT_DBG("EXC [%s] control thread [%d] started...\n"),
+				exc_name.c_str(), gettid()));
+
 	// Wait for the EXC being STARTED
 	while (!started)
 		ctrl_cv.wait(ctrl_ul);
@@ -399,7 +402,7 @@ void BbqueEXC::ControlLoop() {
 	// Disable the EXC (thus notifying waiters)
 	Disable();
 
-	DB(fprintf(stderr, FMT_DBG("Control-loop for EXC [%s] TERMINATED\n"),
+	DB(fprintf(stderr, FMT_ERR("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));
 
 }
