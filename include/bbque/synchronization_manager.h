@@ -32,6 +32,9 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/application_proxy.h"
 
+#include "bbque/utils/timer.h"
+#include "bbque/utils/metrics_collector.h"
+
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/synchronization_policy.h"
 
@@ -39,6 +42,9 @@
 
 using bbque::plugins::LoggerIF;
 using bbque::plugins::SynchronizationPolicyIF;
+
+using bbque::utils::Timer;
+using bbque::utils::MetricsCollector;
 
 namespace bbque {
 
@@ -92,6 +98,7 @@ private:
 
 	ApplicationManager & am;
 	ApplicationProxy & ap;
+	MetricsCollector & mc;
 	ResourceAccounter & ra;
 	SystemView & sv;
 
@@ -99,6 +106,27 @@ private:
 	 * @brief The number of synchronization cycles
 	 */
 	uint32_t sync_count;
+
+	typedef enum SyncMgrMetrics {
+		//----- Event counting metrics
+		SM_SYNCP_RUNS = 0,
+		SM_SYNCP_COMP,
+		SM_SYNCP_EXCS,
+		//----- Timing metrics
+		SM_SYNCP_PRECHANGE,
+		SM_SYNCP_SYNCCHANGE,
+		SM_SYNCP_DOCHANGE,
+		SM_SYNCP_POSTCHANGE,
+		//----- Couting statistics
+		SM_SYNCP_AVGE,
+
+		SM_METRICS_COUNT
+	} SyncMgrMetrics_t;
+
+	/** The High-Resolution timer used for profiling */
+	Timer sm_tmr;
+
+	static MetricsCollector::MetricsCollection_t metrics[SM_METRICS_COUNT];
 
 	/**
 	 * @brief   Build a new instance of the synchronization manager

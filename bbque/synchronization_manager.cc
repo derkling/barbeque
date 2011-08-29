@@ -41,11 +41,49 @@
 
 #define SYNCHRONIZATION_MANAGER_NAMESPACE "bq.ym"
 
+/** Metrics (class COUNTER) declaration */
+#define SM_COUNTER_METRIC(NAME, DESC)\
+ {SYNCHRONIZATION_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::COUNTER, 0}
+/** Increase counter for the specified metric */
+#define SM_COUNT_EVENT(METRICS, INDEX) \
+	mc.Count(METRICS[INDEX].mh);
+
+/** Metrics (class SAMPLE) declaration */
+#define SM_SAMPLE_METRIC(NAME, DESC)\
+ {SYNCHRONIZATION_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::SAMPLE, 0}
+/** Reset the timer used to evaluate metrics */
+#define SM_RESET_TIMING(TIMER) \
+	TIMER.start();
+/** Acquire a new completion time sample */
+#define SM_GET_TIMING(METRICS, INDEX, TIMER) \
+	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());
+/** Acquire a new EXC reconfigured sample */
+#define SM_ADD_RECONF(METRICS, INDEX, COUNT) \
+	mc.AddSample(METRICS[INDEX].mh, COUNT);
+
+namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 namespace br = bbque::res;
 
 namespace bbque {
+
+/* Definition of metrics used by this module */
+MetricsCollector::MetricsCollection_t
+SynchronizationManager::metrics[SM_METRICS_COUNT] = {
+	//----- Event counting metrics
+	SM_COUNTER_METRIC("runs", "SyncP executions count"),
+	SM_COUNTER_METRIC("comp", "SyncP completion count"),
+	SM_COUNTER_METRIC("excs", "Total EXC reconf count"),
+	//----- Timing metrics
+	SM_SAMPLE_METRIC("pre",  "SyncP_PreChange  exe t[ms]"),
+	SM_SAMPLE_METRIC("sync", "SyncP_SyncChange exe t[ms]"),
+	SM_SAMPLE_METRIC("do",   "SyncP_DoChange   exe t[ms]"),
+	SM_SAMPLE_METRIC("post", "SyncP_PostChange exe t[ms]"),
+	//----- Couting statistics
+	SM_SAMPLE_METRIC("avge", "Average EXCs reconf"),
+
+};
 
 SynchronizationManager & SynchronizationManager::GetInstance() {
 	static SynchronizationManager ym;
@@ -55,6 +93,7 @@ SynchronizationManager & SynchronizationManager::GetInstance() {
 SynchronizationManager::SynchronizationManager() :
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
+	mc(bu::MetricsCollector::GetInstance()),
 	ra(br::ResourceAccounter::GetInstance()),
 	sv(SystemView::GetInstance()),
 	sync_count(0) {
@@ -96,11 +135,13 @@ SynchronizationManager::SynchronizationManager() :
 		assert(policy);
 	}
 
+	//---------- Setup all the module metrics
+	mc.Register(metrics, SM_METRICS_COUNT);
+
 }
 
 SynchronizationManager::~SynchronizationManager() {
 }
-
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncState) {
@@ -117,6 +158,7 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 	AppPtr_t papp;
 
 	logger->Debug("STEP 1: preChange() START");
+	SM_RESET_TIMING(sm_tmr);
 
 	papp = am.GetFirst(syncState, apps_it);
 	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
@@ -187,12 +229,14 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 				papp->StrId(), presp->syncLatency);
 
 		syncp_result = policy->CheckLatency(papp, presp->syncLatency);
-		// TODO: check the POLICY required action	
+		// TODO: check the POLICY required action
 
 		// Remove the respose future
 		rsp_map.erase(resp_it);
 	}
 
+	// Collecing execution metrics
+	SM_GET_TIMING(metrics, SM_SYNCP_PRECHANGE, sm_tmr);
 	logger->Debug("STEP 1: preChange() DONE");
 
 	return OK;
@@ -212,6 +256,7 @@ SynchronizationManager::Sync_SyncChange(ApplicationStatusIF::SyncState_t syncSta
 	AppPtr_t papp;
 
 	logger->Debug("STEP 2: syncChange() START");
+	SM_RESET_TIMING(sm_tmr);
 
 	papp = am.GetFirst(syncState, apps_it);
 	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
@@ -288,6 +333,8 @@ SynchronizationManager::Sync_SyncChange(ApplicationStatusIF::SyncState_t syncSta
 		rsp_map.erase(resp_it);
 	}
 
+	// Collecing execution metrics
+	SM_GET_TIMING(metrics, SM_SYNCP_SYNCCHANGE, sm_tmr);
 	logger->Debug("STEP 2: syncChange() DONE");
 
 	return OK;
@@ -301,6 +348,7 @@ SynchronizationManager::Sync_DoChange(ApplicationStatusIF::SyncState_t syncState
 	AppPtr_t papp;
 
 	logger->Debug("STEP 3: doChange() START");
+	SM_RESET_TIMING(sm_tmr);
 
 	papp = am.GetFirst(syncState, apps_it);
 	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
@@ -326,6 +374,8 @@ SynchronizationManager::Sync_DoChange(ApplicationStatusIF::SyncState_t syncState
 
 	}
 
+	// Collecing execution metrics
+	SM_GET_TIMING(metrics, SM_SYNCP_DOCHANGE, sm_tmr);
 	logger->Debug("STEP 3: doChange() DONE");
 
 	return OK;
@@ -338,8 +388,10 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 	br::ResourceAccounter::ExitCode_t raResult;
 	AppsUidMapIt apps_it;
 	AppPtr_t papp;
+	uint8_t excs = 0;
 
 	logger->Debug("STEP 4: postChange() START");
+	SM_RESET_TIMING(sm_tmr);
 
 	papp = am.GetFirst(syncState, apps_it);
 	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
@@ -360,7 +412,7 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 		presp = ApplicationProxy::pPostChangeRsp_t(
 				new ApplicationProxy::postChangeRsp_t());
 		result = ap.SyncP_PostChange(papp, presp);
-		
+
 		if (result == RTLIB_BBQUE_CHANNEL_TIMEOUT) {
 			logger->Warn("STEP 4: <---- TIMEOUT -- [%s]",
 					papp->StrId());
@@ -397,9 +449,19 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 		// NOTE: this should remove the current app from the queue,
 		// otherwise we enter an endless loop
 		am.SyncCommit(papp);
+
+		// Account for total reconfigured EXCs
+		SM_COUNT_EVENT(metrics, SM_SYNCP_EXCS);
+		excs++;
+
 	}
 
+	// Collecing execution metrics
+	SM_GET_TIMING(metrics, SM_SYNCP_POSTCHANGE, sm_tmr);
 	logger->Debug("STEP 4: postChange() DONE");
+
+	// Collect statistics on average EXCSs reconfigured.
+	SM_ADD_RECONF(metrics, SM_SYNCP_AVGE, excs);
 
 	return OK;
 }
@@ -413,6 +475,9 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 		assert(syncState != ApplicationStatusIF::SYNC_NONE);
 		return OK;
 	}
+
+	// Account for SyncP runs
+	SM_COUNT_EVENT(metrics, SM_SYNCP_RUNS);
 
 	result = Sync_PreChange(syncState);
 	if (result != OK)
@@ -435,6 +500,9 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	result = Sync_PostChange(syncState);
 	if (result != OK)
 		return result;
+
+	// Account for SyncP completed
+	SM_COUNT_EVENT(metrics, SM_SYNCP_COMP);
 
 	return OK;
 }
