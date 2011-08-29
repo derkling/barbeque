@@ -385,7 +385,6 @@ RTLIB_ExitCode_t BbqueRPC::SetupStatistics(pregExCtx_t prec) {
 					prec->awm_id));
 		pstats = prec->stats[prec->awm_id] =
 			pAwmStats_t(new AwmStats_t);
-		 
 	}
 
 	// Update usage count
@@ -393,7 +392,7 @@ RTLIB_ExitCode_t BbqueRPC::SetupStatistics(pregExCtx_t prec) {
 
 	// Configure current AWM stats
 	prec->pAwmStats = pstats;
-	
+
 	return RTLIB_OK;
 }
 
@@ -436,7 +435,7 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 		_max = max(pstats->samples);
 		_avg = mean(pstats->samples);
 		_var = variance(pstats->samples);
-		
+
 		if (verbose) {
 			fprintf(stderr, "%8s-%d %5d %6d %7d "
 					"(%7.3f,%7.3f)(%7.3f,%7.3f)\n",
@@ -459,7 +458,7 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> stats_ul(pstats->stats_mtx);
 	// Use high resolution to avoid errors on next computations
 	double last_cycle_ms;
-	
+
 	// TIMER: Get RUNNING
 	last_cycle_ms = prec->exc_tmr.getElapsedTimeMs();
 
@@ -810,7 +809,7 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_SyncChangeNotify(pregExCtx_t prec) {
 	// Checking if the apps is in Sync Status
 	if (!isAwmWaiting(prec))
 		return RTLIB_EXC_SYNCP_FAILED;
-	
+
 	return RTLIB_OK;
 }
 
@@ -851,7 +850,7 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_DoChangeNotify(pregExCtx_t prec) {
 	// TODO Setup the ground for reconfiguration statistics collection
 	// TODO Start the re-configuration by notifying the waiting thread
 	prec->cv.notify_one();
-	
+
 	return RTLIB_OK;
 }
 
