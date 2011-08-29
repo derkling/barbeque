@@ -293,6 +293,16 @@ public:
 	virtual bool HasApplications (ApplicationStatusIF::SyncState_t state) = 0;
 
 	/**
+	 * @brief The number of applications in the specified STATE
+	 */
+	uint16_t AppsCount (ApplicationStatusIF::State_t state);
+
+	/**
+	 * @brief The number of applications in the specified SYNC_STATE
+	 */
+	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state);
+
+	/**
 	 * @brief Retrieve an application descriptor (shared pointer) by PID and
 	 * Excution Context
 	 * @param pid Application PID

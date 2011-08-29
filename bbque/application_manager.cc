@@ -378,6 +378,20 @@ bool ApplicationManager::HasApplications (
 	return !(sync_vec[state].empty());
 }
 
+uint16_t ApplicationManager::AppsCount (
+		ApplicationStatusIF::State_t state) {
+	assert(state < Application::STATE_COUNT);
+	std::unique_lock<std::mutex> status_ul(status_mtx[state]);
+	return status_vec[state].size();
+}
+
+uint16_t ApplicationManager::AppsCount (
+		ApplicationStatusIF::SyncState_t state) {
+	assert(state < Application::SYNC_STATE_COUNT);
+	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
+	return sync_vec[state].size();
+}
+
 
 /*******************************************************************************
  *  Get EXC handlers

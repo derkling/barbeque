@@ -190,6 +190,15 @@ public:
 	 */
 	bool HasApplications (ApplicationStatusIF::SyncState_t state);
 
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	uint16_t AppsCount (ApplicationStatusIF::State_t state);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state);
 
 	/**
 	 * @see ApplicationManagerStatusIF
