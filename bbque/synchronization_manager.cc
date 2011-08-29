@@ -429,6 +429,10 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 		// TODO Here we should collect reconfiguration statistics
 		logger->Warn("TODO: Collect reconf statistics");
 
+		// Disregarding commit for EXC disabled meanwhile
+		if (papp->Disabled())
+			continue;
+
 		// Acquiring the resources for RUNNING Applications
 		if (!papp->Blocking()) {
 
