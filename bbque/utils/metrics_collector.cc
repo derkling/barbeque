@@ -83,6 +83,7 @@ MetricsCollector::Register(const char *name, const char *desc,
 	if (pm) {
 		logger->Error("Metric [%s] registration FAILED "
 				"(Error: metric already registered)", name);
+		DB(assert(!pm));
 		return DUPLICATE;
 	}
 
