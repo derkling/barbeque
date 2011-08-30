@@ -34,17 +34,66 @@
 
 #define SCHEDULER_MANAGER_NAMESPACE "bq.sm"
 
+/** Metrics (class COUNTER) declaration */
+#define SM_COUNTER_METRIC(NAME, DESC)\
+ {SCHEDULER_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::COUNTER, 0}
+/** Increase counter for the specified metric */
+#define SM_COUNT_EVENT(METRICS, INDEX) \
+	mc.Count(METRICS[INDEX].mh);
+/** Increase counter for the specified metric */
+#define SM_COUNT_EVENTS(METRICS, INDEX, AMOUNT) \
+	mc.Count(METRICS[INDEX].mh, AMOUNT);
+
+/** Metrics (class SAMPLE) declaration */
+#define SM_SAMPLE_METRIC(NAME, DESC)\
+ {SCHEDULER_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::SAMPLE, 0}
+/** Reset the timer used to evaluate metrics */
+#define SM_RESET_TIMING(TIMER) \
+	TIMER.start();
+/** Acquire a new completion time sample */
+#define SM_GET_TIMING(METRICS, INDEX, TIMER) \
+	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());
+/** Acquire a new EXC reconfigured sample */
+#define SM_ADD_SCHED(METRICS, INDEX, COUNT) \
+	mc.AddSample(METRICS[INDEX].mh, COUNT);
+
+namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 
 namespace bbque {
+
+/* Definition of metrics used by this module */
+MetricsCollector::MetricsCollection_t
+SchedulerManager::metrics[SM_METRICS_COUNT] = {
+	//----- Event counting metrics
+	SM_COUNTER_METRIC("runs",	"Scheduler executions count"),
+	SM_COUNTER_METRIC("comp",	"Scheduler completions count"),
+	SM_COUNTER_METRIC("start",	"START count"),
+	SM_COUNTER_METRIC("reconf",	"RECONF count"),
+	SM_COUNTER_METRIC("migrate","MIGRATE count"),
+	SM_COUNTER_METRIC("migrec",	"MIGREC count"),
+	SM_COUNTER_METRIC("block",	"BLOCK count"),
+	//----- Timing metrics
+	SM_SAMPLE_METRIC("time",	"Scheduler execution t[ms]"),
+	//----- Couting statistics
+	SM_SAMPLE_METRIC("avg.start",	"Avg START per schedule"),
+	SM_SAMPLE_METRIC("avg.reconf",	"Avg RECONF per schedule"),
+	SM_SAMPLE_METRIC("avg.migrec",	"Avg MIGREC per schedule"),
+	SM_SAMPLE_METRIC("avg.migrate",	"Avg MIGRATE per schedule"),
+	SM_SAMPLE_METRIC("avg.block",	"Avg BLOCK per schedule"),
+
+};
+
 
 SchedulerManager & SchedulerManager::GetInstance() {
 	static SchedulerManager rs;
 	return rs;
 }
 
-SchedulerManager::SchedulerManager() {
+SchedulerManager::SchedulerManager() :
+	am(ApplicationManager::GetInstance()),
+	mc(bu::MetricsCollector::GetInstance()) {
 	std::string opt_policy;
 
 	//---------- Get a logger module
@@ -82,10 +131,30 @@ SchedulerManager::SchedulerManager() {
 		assert(policy);
 	}
 
+	//---------- Setup all the module metrics
+	mc.Register(metrics, SM_METRICS_COUNT);
 
 }
 
 SchedulerManager::~SchedulerManager() {
+}
+
+#define SM_COLLECT_STATS(STATE) \
+	count = am.AppsCount(ApplicationStatusIF::STATE);\
+	SM_COUNT_EVENTS(metrics, SM_SCHED_ ## STATE, count);\
+	SM_ADD_SCHED(metrics, SM_SCHED_AVG_ ## STATE, (double)count);
+
+void
+SchedulerManager::CollectStats() {
+	uint16_t count;
+
+	// Account for scheduling decisions
+	SM_COLLECT_STATS(STARTING);
+	SM_COLLECT_STATS(RECONF);
+	SM_COLLECT_STATS(MIGREC);
+	SM_COLLECT_STATS(MIGRATE);
+	SM_COLLECT_STATS(BLOCKED);
+
 }
 
 SchedulerManager::ExitCode_t
@@ -114,12 +183,28 @@ SchedulerManager::Schedule() {
 	logger->Info("Resources scheduling, policy [%s]...",
 			policy->Name());
 
+
+	// Account for actual scheduling runs
+	SM_COUNT_EVENT(metrics, SM_SCHED_RUNS);
+
+	// Reset timer for scheduling time collection
+	SM_RESET_TIMING(sm_tmr);
+
 	result = policy->Schedule(sv);
 	if (result != SchedulerPolicyIF::SCHED_DONE) {
 		logger->Error("Scheduliung policy [%s] failed",
 				policy->Name());
 		return FAILED;
 	}
+
+	// Collecing execution metrics
+	SM_GET_TIMING(metrics, SM_SCHED_TIME, sm_tmr);
+
+	// Account for scheduling completed
+	SM_COUNT_EVENT(metrics, SM_SCHED_COMP);
+
+	// Collect statistics on scheduling decisions
+	CollectStats();
 
 	return DONE;
 }
