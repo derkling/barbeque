@@ -262,7 +262,7 @@ MetricsCollector::AddSample(MetricHandler_t mh, double sample) {
 void
 MetricsCollector::DumpCounter(CounterMetric_t *m) {
 	logger->Info(
-		" %-15s | %7ld : %s",
+		" %-20s | %9ld : %s",
 		m->name, m->count, m->desc);
 }
 
@@ -275,7 +275,7 @@ MetricsCollector::DumpValue(ValueMetric_t *m) {
 		_max = max(m->stat);
 	}
 	logger->Info(
-		" %-15s | %7ld | %7ld | %7ld : %s",
+		" %-20s | %9ld | %9ld | %9ld : %s",
 		m->name, m->value, _min, _max, m->desc);
 }
 
@@ -290,25 +290,25 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 		_var = variance(m->stat);
 	}
 	logger->Info(
-		" %-15s | %7.3f | %7.3f | %7.3f | %7.3f : %s",
+		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
 		m->name, _min, _max, _avg, _var, m->desc);
 
 }
 
 #define METRICS_COUNTER_HEADER \
-"  Metric         |  Count  |  Description"
+"  Metric              |  Count    |  Description"
 #define METRICS_COUNTER_SEPARATOR \
-"-----------------+---------+----------------------"
+"----------------------+-----------+----------------------"
 
 #define METRICS_VALUE_HEADER \
-"  Metric         |  Value  |  Min    |  Max    |  Description"
+"  Metric              |  Value    |  Min      |  Max      |  Description"
 #define METRICS_VALUE_SEPARATOR \
-"-----------------+---------+---------+---------+----------------------"
+"----------------------+-----------+-----------+-----------+----------------------"
 
 #define METRICS_SAMPLES_HEADER \
-"  Metric         |  Min    |  Max    |  Avg    |  Var    |  Description"
+"  Metric              |  Min      |  Max      |  Avg      |  Var      |  Description"
 #define METRICS_SAMPLES_SEPARATOR \
-"-----------------+---------+---------+---------+---------+----------------------"
+"----------------------+-----------+-----------+-----------+-----------+----------------------"
 
 void
 MetricsCollector::DumpMetrics() {
