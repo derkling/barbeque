@@ -426,7 +426,6 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	ResourceAccounter::ExitCode_t result;
-	ApplicationManager::ExitCode_t am_result;
 	AppsUidMapIt apps_it;
 	AppPtr_t papp;
 
@@ -450,12 +449,6 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 			SyncAbort();
 			return RA_ERR_SYNC_INIT;
 		}
-
-		// Continue to run...
-		am_result = am.RunningCommit(papp);
-		if (am_result != ApplicationManager::AM_SUCCESS)
-			return RA_ERR_SYNC_INIT;
-
 	}
 
 	logger->Debug("SyncMode [%d]: Initialization finished", sync_ssn.count);

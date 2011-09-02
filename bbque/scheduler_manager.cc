@@ -197,6 +197,9 @@ SchedulerManager::Schedule() {
 		return FAILED;
 	}
 
+	// Clear the next AWM from the RUNNING Apps/EXC
+	ClearRunningApps();
+
 	// Collecing execution metrics
 	SM_GET_TIMING(metrics, SM_SCHED_TIME, sm_tmr);
 
@@ -207,6 +210,19 @@ SchedulerManager::Schedule() {
 	CollectStats();
 
 	return DONE;
+}
+
+void SchedulerManager::ClearRunningApps() {
+	AppsUidMapIt apps_it;
+	AppPtr_t papp;
+
+	// Running Applications/EXC
+	papp = am.GetFirst(ApplicationStatusIF::RUNNING, apps_it);
+	for (; papp; papp = am.GetNext(ApplicationStatusIF::RUNNING, apps_it)) {
+
+		// Commit a running state (this cleans the next AWM)
+		am.RunningCommit(papp);
+	}
 }
 
 } // namespace bbque
