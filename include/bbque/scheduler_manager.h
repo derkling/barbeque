@@ -155,6 +155,10 @@ private:
 	 */
 	void CollectStats();
 
+	/**
+	 * @brief Clear next AWM in RUNNING Applications/EXC
+	 */
+	void ClearRunningApps();
 
 };
 
