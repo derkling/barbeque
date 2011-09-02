@@ -433,21 +433,13 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	// Running Applications/ExC
 	papp = am.GetFirst(ApplicationStatusIF::RUNNING, apps_it);
 	for ( ; papp; papp = am.GetNext(ApplicationStatusIF::RUNNING, apps_it)) {
-			
-		// Application/EXC must always have a next AWM here
-		if (!papp->NextAWM()) {
-			assert(papp->NextAWM());
-			logger->Fatal("SyncInit: [%s] missing next AWM.");
-			return RA_ERR_SYNC_INIT;
-		}
 
-		logger->Debug("SyncInit: [%s] AWM {curr = %d / next = %d}",
+		logger->Debug("SyncInit: [%s] current AWM: %d",
 				papp->StrId(),
-				papp->CurrentAWM()->Id(),
-				papp->NextAWM()->Id());
+				papp->CurrentAWM()->Id());
 
-		// Acquire the resources
-		result = BookResources(papp, papp->NextAWM()->GetResourceBinding(),
+		// Re-acquire the resources (these should not have a "Next AWM"!)
+		result = BookResources(papp, papp->CurrentAWM()->GetResourceBinding(),
 						sync_ssn.view, false);
 		if (result != RA_SUCCESS) {
 			logger->Fatal("SyncInit [%d]: Resource booking failed for %s."
