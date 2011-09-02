@@ -696,6 +696,8 @@ Application::ExitCode_t Application::ScheduleCommit() {
 }
 
 void Application::ScheduleAbort() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+
 	// The abort must be performed only for SYNC App/ExC
 	if (!Synching()) {
 		logger->Fatal("ScheduleAbort: [%s] in state [%s] (expected SYNC)",
