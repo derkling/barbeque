@@ -349,25 +349,30 @@ public:
 	 */
 	inline uint64_t Release(AppPtr_t const & app_ptr,
 			RViewToken_t vtok =	0) {
-
 		ResourceStatePtr_t view;
 		if (vtok == 0)
-			// Default view if token = 0
+			// Default view
 			view = default_view;
 		else {
-			// Retrieve the view
+			// Retrieve the state view
 			RSHashMap_t::iterator it = state_views.find(vtok);
 			if (it == state_views.end())
 				return 0;
 			view = it->second;
 		}
-		// Lookup the application amount and subtract to used
+
+		// Lookup the application using the resource
 		AppUseQtyMap_t::iterator lkp = view->apps.find(app_ptr->Uid());
 		if (lkp == view->apps.end())
 			return 0;
-		view->used -= lkp->second;
+
+		// Decrease the used value and remove the application
+		uint64_t used_by_app = lkp->second;
+		view->used -= used_by_app;	
+		view->apps.erase(app_ptr->Uid());
+
 		// Return the amount of resource released
-		return lkp->second;
+		return used_by_app;
 	}
 
 	/**
