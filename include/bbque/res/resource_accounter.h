@@ -182,6 +182,11 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	AppPtr_t const AppUsingPE(std::string const & path) const;
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	uint16_t ClusteringFactor(std::string const & path);
 
 	/**
@@ -305,7 +310,7 @@ private:
 
 	/** The Application Manager component */
 	bbque::ApplicationManager & am;
-	
+
 	/** Mutex protecting resource release and acquisition */
 	std::recursive_mutex status_mtx;
 
@@ -313,6 +318,18 @@ private:
 	 * Default constructor
 	 */
 	ResourceAccounter();
+
+	/**
+	 * @brief Report string about applications using PEs
+	 *
+	 * @param path The path of the PE resource in use
+	 * @param buff The string buffer to set
+	 * @param size The buffer size
+	 * @return A report string with the App/EXC id info, the priority and the
+	 * current AWM
+	 */
+	char const * StrAppUsingPE(std::string const & path, char * buff,
+			size_t	size) const;
 
 	/**
 	 * @brief Return a state parameter (availability, resources used, total
