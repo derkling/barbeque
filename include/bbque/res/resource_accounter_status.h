@@ -163,6 +163,14 @@ public:
 	virtual bool ExistResource(std::string const & path) const = 0;
 
 	/**
+	 * @brief App/EXC using a Processing Element resource
+	 *
+	 * @param path The resource path
+	 * @return A shared pointer to the App/EXC descriptor using the given PE
+	 */
+	AppPtr_t const AppUsingPE(std::string const & path) const;
+
+	/**
 	 * @brief Clustering factor
 	 *
 	 * Check if the resource is a clustered one and return the clustering

@@ -81,7 +81,6 @@ ResourceAccounter::~ResourceAccounter() {
  *                   LOGGER REPORTS                                     *
  ************************************************************************/
 
-
 void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 		bool verbose) const {
 	std::set<std::string>::const_iterator path_it(paths.begin());
@@ -122,6 +121,48 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 				"-----------------------------------------------------------");
 		);
 	}
+}
+
+AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path) const {
+	ResourcePtr_t rsrc_ptr;
+	Resource::ExitCode_t rsrc_ret;
+	AppUid_t app_uid;
+	AppPtr_t papp;
+	uint64_t amount;
+
+	// Get the Resource decriptor
+	rsrc_ptr = GetResource(path);
+
+	// Get the App/EXC descriptor
+	rsrc_ret = rsrc_ptr->UsedBy(app_uid, amount);
+	if (rsrc_ret != Resource::RS_SUCCESS)
+		return AppPtr_t();
+
+	papp = am.GetApplication(app_uid);
+	if (!papp)
+		return AppPtr_t();
+
+	// Skip if the App/EXC hasn't an AWM or the resource is not a PE
+	if (!papp->CurrentAWM() || (rsrc_ptr->Name().compare("pe") < 0))
+		return AppPtr_t();
+
+	return papp;
+}
+
+inline char const * ResourceAccounter::StrAppUsingPE(std::string const & path,
+		char * buff, size_t size) const {
+
+	// Lookup the App/EXC
+	AppPtr_t papp(AppUsingPE(path));
+	if (!papp) {
+		buff[0] = 0;
+		return NULL;
+	}
+
+	// Build the string
+	snprintf(buff, size, "%s,%d,%d", papp->StrId(), papp->Priority(),
+			papp->CurrentAWM()->Id());
+	return buff;
 }
 
 /************************************************************************
