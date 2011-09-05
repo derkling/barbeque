@@ -408,7 +408,6 @@ AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) {
 	if (it == uids.end()) {
 		logger->Error("Lookup UID [%07d] FAILED "
 				"(Error: UID not registered)", uid);
-		assert(it != uids.end());
 		return AppPtr_t();
 	}
 
