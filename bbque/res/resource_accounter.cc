@@ -87,6 +87,7 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	std::set<std::string>::const_iterator end_path(paths.end());
 	char padded_path[50];
 	char pad[30];
+	char app_info[50];
 
 	if (verbose) {
 		logger->Info("Report on state view: %d", vtok);
@@ -104,11 +105,13 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 		snprintf(padded_path, path_max_len + 8, "%s%s",
 				(*path_it).c_str(), pad);
 		if (verbose) {
-			logger->Notice("%s : %10llu | %10llu |",
-					padded_path, Used(*path_it, vtok), Total(*path_it));
+			logger->Notice("%s : %10llu | %10llu | %s",
+					padded_path, Used(*path_it, vtok), Total(*path_it),
+					StrAppUsingPE(*path_it, app_info, 50));
 		} else {
-			DB(logger->Debug("%s : %10llu | %10llu |",
-						padded_path, Used(*path_it, vtok), Total(*path_it)));
+			DB(logger->Debug("%s : %10llu | %10llu | %s",
+						padded_path, Used(*path_it, vtok), Total(*path_it),
+						StrAppUsingPE(*path_it, app_info, 50)));
 		}
 	}
 
