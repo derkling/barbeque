@@ -77,53 +77,10 @@ ResourceAccounter::~ResourceAccounter() {
 	rsrc_per_views.clear();
 }
 
-uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
-	uint16_t clustering_factor;
+/************************************************************************
+ *                   LOGGER REPORTS                                     *
+ ************************************************************************/
 
-	// Check if the resource exists
-	if (!ExistResource(path))
-		return 0;
-
-	// Check if the resource is clustered
-	int16_t clust_patt_pos = path.find(RSRC_CLUSTER);
-	if (clust_patt_pos < 0)
-		return 1;
-
-	// Compute the clustering factor
-	clustering_factor = Total(RSRC_CLUSTER);
-	if (clustering_factor == 0)
-		++clustering_factor;
-
-	return clustering_factor;
-}
-
-ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
-		std::string const & _path,
-		std::string const & _units,
-		uint64_t _amount) {
-	// Check arguments
-	if(_path.empty()) {
-		logger->Fatal("Registering: Invalid resource path");
-		return RA_ERR_MISS_PATH;
-	}
-
-	// Insert a new resource in the tree
-	ResourcePtr_t res_ptr = resources.insert(_path);
-	if (!res_ptr) {
-		logger->Crit("Registering: Unable to allocate a new resource"
-				"descriptor");
-		return RA_ERR_MEM;
-	}
-
-	// Set the amount of resource considering the units
-	res_ptr->SetTotal(ConvertValue(_amount, _units));
-
-	// Insert the path in the paths set
-	paths.insert(_path);
-	path_max_len = std::max((int) path_max_len, (int) _path.length());
-
-	return RA_SUCCESS;
-}
 
 void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 		bool verbose) const {
@@ -167,6 +124,30 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	}
 }
 
+/************************************************************************
+ *                   QUERY METHODS                                      *
+ ************************************************************************/
+
+uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
+	uint16_t clustering_factor;
+
+	// Check if the resource exists
+	if (!ExistResource(path))
+		return 0;
+
+	// Check if the resource is clustered
+	int16_t clust_patt_pos = path.find(RSRC_CLUSTER);
+	if (clust_patt_pos < 0)
+		return 1;
+
+	// Compute the clustering factor
+	clustering_factor = Total(RSRC_CLUSTER);
+	if (clustering_factor == 0)
+		++clustering_factor;
+
+	return clustering_factor;
+}
+
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 		QueryOption_t _att,
 		RViewToken_t vtok) const {
@@ -195,6 +176,84 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 		}
 	}
 	return val;
+}
+
+ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
+		UsagesMapPtr_t const & usages,
+		RViewToken_t vtok) const {
+	UsagesMap_t::const_iterator usages_it(usages->begin());
+	UsagesMap_t::const_iterator usages_end(usages->end());
+
+	// Check availability for each ResourceUsage object
+	for (; usages_it != usages_end; ++usages_it) {
+		uint64_t avail = Available(usages_it->second, vtok);
+		if (avail < usages_it->second->value) {
+			logger->Debug("ChkAvail: Exceeding request for {%s}"
+					"[USG:%llu | AV:%llu | TOT:%llu] ",
+					usages_it->first.c_str(),
+					usages_it->second->value,
+					avail,
+					Total(usages_it->second));
+			return RA_ERR_USAGE_EXC;
+		}
+	}
+	return RA_SUCCESS;
+}
+
+ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
+		RViewToken_t vtok,
+		AppUsagesMapPtr_t & apps_usages) {
+	AppUsagesViewsMap_t::iterator view;
+	if (vtok != 0) {
+		// "Alternate" view case
+		view = usages_per_views.find(vtok);
+		if (view == usages_per_views.end()) {
+			logger->Error("Application usages:"
+					"Cannot find the resource state view referenced by %d",
+					vtok);
+			return RA_ERR_MISS_VIEW;
+		}
+		apps_usages = view->second;
+	}
+	else {
+		// Default view / System state case
+		assert(sys_usages_view);
+		apps_usages = sys_usages_view;
+	}
+
+	return RA_SUCCESS;
+}
+
+/************************************************************************
+ *                   RESOURCE MANAGEMENT                                *
+ ************************************************************************/
+
+ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
+		std::string const & _path,
+		std::string const & _units,
+		uint64_t _amount) {
+	// Check arguments
+	if(_path.empty()) {
+		logger->Fatal("Registering: Invalid resource path");
+		return RA_ERR_MISS_PATH;
+	}
+
+	// Insert a new resource in the tree
+	ResourcePtr_t res_ptr = resources.insert(_path);
+	if (!res_ptr) {
+		logger->Crit("Registering: Unable to allocate a new resource"
+				"descriptor");
+		return RA_ERR_MEM;
+	}
+
+	// Set the amount of resource considering the units
+	res_ptr->SetTotal(ConvertValue(_amount, _units));
+
+	// Insert the path in the paths set
+	paths.insert(_path);
+	path_max_len = std::max((int) path_max_len, (int) _path.length());
+
+	return RA_SUCCESS;
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
@@ -286,27 +345,9 @@ void ResourceAccounter::ReleaseResources(AppPtr_t papp, RViewToken_t vtok) {
 		ReleaseResources(papp, sync_ssn.view);
 }
 
-ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
-		UsagesMapPtr_t const & usages,
-		RViewToken_t vtok) const {
-	UsagesMap_t::const_iterator usages_it(usages->begin());
-	UsagesMap_t::const_iterator usages_end(usages->end());
-
-	// Check availability for each ResourceUsage object
-	for (; usages_it != usages_end; ++usages_it) {
-		uint64_t avail = Available(usages_it->second, vtok);
-		if (avail < usages_it->second->value) {
-			logger->Debug("ChkAvail: Exceeding request for {%s}"
-					"[USG:%llu | AV:%llu | TOT:%llu] ",
-					usages_it->first.c_str(),
-					usages_it->second->value,
-					avail,
-					Total(usages_it->second));
-			return RA_ERR_USAGE_EXC;
-		}
-	}
-	return RA_SUCCESS;
-}
+/************************************************************************
+ *                   STATE VIEWS MANAGEMENT                             *
+ ************************************************************************/
 
 ResourceAccounter::ExitCode_t ResourceAccounter::GetView(std::string req_path,
 		RViewToken_t & token) {
@@ -391,6 +432,10 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 			sys_view_token);
 	return sys_view_token;
 }
+
+/************************************************************************
+ *                   SYNCHRONIZATION SUPPORT                            *
+ ************************************************************************/
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 	logger->Info("SyncMode: Start");
@@ -500,29 +545,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
 	return result;
 }
 
-ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
-		RViewToken_t vtok,
-		AppUsagesMapPtr_t & apps_usages) {
-	AppUsagesViewsMap_t::iterator view;
-	if (vtok != 0) {
-		// "Alternate" view case
-		view = usages_per_views.find(vtok);
-		if (view == usages_per_views.end()) {
-			logger->Error("Application usages:"
-					"Cannot find the resource state view referenced by %d",
-					vtok);
-			return RA_ERR_MISS_VIEW;
-		}
-		apps_usages = view->second;
-	}
-	else {
-		// Default view / System state case
-		assert(sys_usages_view);
-		apps_usages = sys_usages_view;
-	}
-
-	return RA_SUCCESS;
-}
+/************************************************************************
+ *                   RESOURCE ACCOUNTING                                *
+ ************************************************************************/
 
 void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		AppPtr_t const & papp,
@@ -644,7 +669,6 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 	}
 	assert(usage_freed == rsrc_usage->value);
 }
-
 
 }   // namespace res
 
