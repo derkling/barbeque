@@ -269,14 +269,14 @@ MetricsCollector::DumpCounter(CounterMetric_t *m) {
 
 void
 MetricsCollector::DumpValue(ValueMetric_t *m) {
-	double _min = 0, _max = 0;
+	uint64_t _min = 0, _max = 0;
 
 	if (count(m->stat)) {
 		_min = min(m->stat);
 		_max = max(m->stat);
 	}
 	logger->Notice(
-		" %-20s | %9ld | %9ld | %9ld : %s",
+		" %-20s | %9llu | %9llu | %9llu : %s",
 		m->name, m->value, _min, _max, m->desc);
 }
 
