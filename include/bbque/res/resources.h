@@ -249,19 +249,13 @@ public:
 
 	/**
 	 * @brief Count of applications using the resource
+	 *
 	 * @param vtok The token referencing the resource view
 	 * @return Number of applications
 	 */
-	inline uint16_t ApplicationsCount(RViewToken_t vtok = 0) {
-		// Default view if token = 0
-		if (vtok == 0)
-			return default_view->apps.size();
-
-		// Retrieve the view from hash map otherwise
-		RSHashMap_t::iterator it = state_views.find(vtok);
-		if (it == state_views.end())
-			return 0;
-		return it->second->apps.size();
+	uint16_t ApplicationsCount(RViewToken_t vtok = 0) {
+		AppUseQtyMap_t apps_map;
+		return ApplicationsCount(apps_map, vtok);
 	}
 
 	/**
@@ -405,6 +399,33 @@ private:
 
 	/** Pointer to the default state view */
 	ResourceStatePtr_t default_view;
+
+	/**
+	 * @brief Apps/EXCs using the resource
+	 *
+	 * @param apps_map Ref to the map of App/EXC to get
+	 * @param vtok The resource state view token
+	 *
+	 * @return The number of Apps/EXCs using the resource, and a
+	 * reference to the map
+	 */
+	uint16_t ApplicationsCount(AppUseQtyMap_t & apps_map,
+			RViewToken_t vtok = 0) {
+		// Default view if token = 0
+		if (vtok == 0) {
+			apps_map = default_view->apps;
+			return apps_map.size();
+		}
+
+		// Retrieve the view from hash map otherwise
+		RSHashMap_t::iterator it = state_views.find(vtok);
+		if (it == state_views.end())
+			return 0;
+
+		// Return the size and a reference to the map
+		apps_map = it->second->apps;
+		return apps_map.size();
+	}
 
 };
 
