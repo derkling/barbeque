@@ -119,6 +119,13 @@ class Resource {
 
 public:
 
+	enum ExitCode_t {
+		/** Generic success code */
+		RS_SUCCESS = 0,
+		/** The resource is not used by any application */
+		RS_NO_APPS
+	};
+
 	/**
 	 * @brief Constructor
 	 * @param nm Resource name
@@ -256,6 +263,45 @@ public:
 	uint16_t ApplicationsCount(RViewToken_t vtok = 0) {
 		AppUseQtyMap_t apps_map;
 		return ApplicationsCount(apps_map, vtok);
+	}
+
+	/**
+	 * @brief Get the Uid of the idx-th App/EXC using the resource
+	 *
+	 * @param app_uid The Uid of the n-th App/EXC using the resource
+	 * @param amount This is set to the amount of resource used by the App/EXC
+	 * @param idx The n-th App/EXC to find
+	 * @param vtok The token referencing the resource view
+	 * @return RS_SUCCESS if the App/EXC has been found, RS_NO_APPS otherwise
+	 */
+	ExitCode_t UsedBy(AppUid_t & app_uid, uint64_t & amount, uint8_t idx = 0,
+			RViewToken_t vtok = 0) {
+		// Get the map of Apps/EXCs using the resource
+		AppUseQtyMap_t apps_map;
+		size_t mapsize = ApplicationsCount(apps_map, vtok);
+		size_t count = 0;
+		app_uid = 0;
+		amount = 0;
+
+		// Index overflow check
+		if (idx >= mapsize)
+			return RS_NO_APPS;
+
+		// Search the idx-th App/EXC using the resource
+		for (AppUseQtyMap_t::iterator apps_it = apps_map.begin();
+				apps_it != apps_map.end(); ++apps_it, ++count) {
+
+			// Skip until the required index has not been reached
+			if (count < idx)
+				continue;
+
+			// Return the amount of resource used and the App/EXC Uid
+			amount = apps_it->second;
+			app_uid = apps_it->first;
+			return RS_SUCCESS;
+		}
+
+		return RS_NO_APPS;
 	}
 
 	/**
