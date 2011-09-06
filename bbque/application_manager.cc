@@ -521,7 +521,7 @@ void ApplicationManager::PrintStatusReport(bool verbose) {
 	char next_awm_cl[15];
 
 	if (verbose) {
-		logger->Info(
+		logger->Notice(
 				"---- App:EXC ---|---- State |----- Sync |"
 				"-- CurrentAWM |----- NextAWM |");
 	} else {
@@ -563,7 +563,7 @@ void ApplicationManager::PrintStatusReport(bool verbose) {
 				next_awm_cl);
 
 		if (verbose) {
-			logger->Info(line);
+			logger->Notice(line);
 		} else {
 			DB(logger->Debug(line));
 		}
@@ -572,7 +572,7 @@ void ApplicationManager::PrintStatusReport(bool verbose) {
 	}
 
 	if (verbose) {
-		logger->Info("---------------------------------------------"
+		logger->Notice("---------------------------------------------"
 				 "--------------------------");
 	} else {
 		DB(logger->Debug("---------------------------------------------"
