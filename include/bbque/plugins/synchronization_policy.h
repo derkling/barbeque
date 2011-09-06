@@ -29,7 +29,7 @@
 #include "bbque/app/application.h"
 #include "bbque/system_view.h"
 
-#define SYNCHRONIZATION_POLICY_NAMESPACE "sync.pol."
+#define SYNCHRONIZATION_POLICY_NAMESPACE "synp."
 
 using bbque::app::ApplicationStatusIF;
 
