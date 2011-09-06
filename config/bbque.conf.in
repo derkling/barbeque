@@ -50,34 +50,37 @@
 # Set root category priority and its appender
 # By default all logs are only from level greater than or equal to INFO
 ###
-rootCategory = INFO, raFile
-#rootCategory = INFO, raConsole
-#rootCategory = INFO, raSyslog
-#rootCategory = INFO, raRSyslog
+#rootCategory = ERROR, raFile
+rootCategory = ERROR, raConsole
+#rootCategory = ERROR, raSyslog
+#rootCategory = ERROR, raRSyslog
 ###
 # Uncomment each of the following lines for subsystems you want
 # to redefine the category priority to a value diffent from that of
 # the rootCategory
 ###
-#category.bq = 		DEBUG
-#category.bq.Test =	DEBUG
-#category.bq.pm =	DEBUG
-#category.bq.rm = 	DEBUG
-#category.bq.sm = 	DEBUG
-#category.bq.ym = 	DEBUG
-#category.bq.ra = 	DEBUG
-#category.bq.ap = 	DEBUG
-#category.bq.tpd = 	DEBUG
-#category.ap = 		DEBUG
-#category.ap.awm =	DEBUG
-#category.ap.exc =	DEBUG
-#category.rpc = 	DEBUG
-#category.test = 	DEBUG
-#category.rpc.fif = 	DEBUG
-#category.rpc.prx = 	DEBUG
-#category.rloader = 	DEBUG
-#category.sched.pol = 	DEBUG
-#category.sync.pol = 	DEBUG
+category.bq.rm = 	NOTICE
+category.bq.am =	NOTICE
+category.bq.ra =	NOTICE
+category.bq.mc =	NOTICE
+#category.bq.sp =	INFO
+#category.bq = 		INFO
+#category.bq.Test =	INFO
+#category.bq.pm =	INFO
+#category.bq.sm = 	INFO
+#category.bq.ym = 	INFO
+#category.bq.ra = 	INFO
+#category.bq.ap = 	INFO
+#category.bq.tpd = 	INFO
+#category.ap = 		INFO
+#category.ap.awm =	INFO
+#category.ap.exc =	INFO
+#category.rpc = 	INFO
+#category.test = 	INFO
+#category.rpc.fif = INFO
+#category.rpc.prx = INFO
+#category.rloader = INFO
+#category.sync.   = INFO
 ###
 # Root Appender
 ###
