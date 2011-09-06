@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<BarbequeRTRM version="0.4">
+	<application priority="1">
+		<awms>
+			<awm id="0" name="wm4" value="4">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="4"/>
+								<mem units="Kb" qty="3"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+			<awm id="1" name="wm2" value="2">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="2"/>
+								<mem units="Kb" qty="2"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+			<awm id="2" name="wm1" value="1">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="1"/>
+								<mem units="Kb" qty="2"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+		</awms>
+	</application>
+</BarbequeRTRM>
+<!-- vim:tabstop=2 -->
