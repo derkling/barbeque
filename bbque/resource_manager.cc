@@ -218,6 +218,9 @@ void ResourceManager::Optimize() {
 	// Account for a new synchronizaiton activation
 	RM_COUNT_EVENT(metrics, RM_SYNCH_TOTAL);
 	RM_GET_PERIOD(metrics, RM_SYNCH_PERIOD, period);
+	if (period)
+		logger->Notice("Schedule Run-time: %9.3f[ms]", period);
+
 	//--- Synchroniztion
 	logger->Notice("====================[ SYNC START ]====================");
 	optimization_tmr.start();
