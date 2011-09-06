@@ -111,7 +111,7 @@ void ResourceManager::Optimize() {
 	logger->Info("Running Optimization...");
 
 	//--- Scheduling
-	logger->Info("====================[ SCHEDULE START ]====================");
+	logger->Notice("====================[ SCHEDULE START ]====================");
 	optimization_tmr.start();
 	schedResult = sm.Schedule();
 	optimization_tmr.stop();
@@ -126,10 +126,10 @@ void ResourceManager::Optimize() {
 	default:
 		assert(schedResult == SchedulerManager::DONE);
 	}
-	logger->Debug("====================[ SCHEDULE ENDED ]====================");
-	logger->Debug("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
+	logger->Info("====================[ SCHEDULE ENDED ]====================");
+	logger->Notice("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 	am.PrintStatusReport(true);
-	ra.PrintStatusReport();
+	ra.PrintStatusReport(true);
 
 	// Check if there is at least one application to synchronize
 	if (!am.HasApplications(Application::SYNC)) {
@@ -138,12 +138,12 @@ void ResourceManager::Optimize() {
 	}
 
 	//--- Synchroniztion
-	logger->Info("====================[ SYNC START ]====================");
+	logger->Notice("====================[ SYNC START ]====================");
 	optimization_tmr.start();
 	syncResult = ym.SyncSchedule();
 	optimization_tmr.stop();
-	logger->Debug("====================[ SYNC ENDED ]====================");
-	logger->Debug("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
+	logger->Info("====================[ SYNC ENDED ]====================");
+	logger->Notice("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 	am.PrintStatusReport(true);
 	ra.PrintStatusReport(0, true);
 
@@ -177,31 +177,31 @@ void ResourceManager::EvtBbqUsr1() {
 	logger->Info("==========[ Status Queues ]============"
 			"========================================");
 	logger->Info("");
-	am.ReportStatusQ();
+	am.ReportStatusQ(true);
 
 	logger->Info("");
 	logger->Info("");
 	logger->Info("==========[ Synchronization Queues ]==="
 			"========================================");
 	logger->Info("");
-	am.ReportSyncQ();
+	am.ReportSyncQ(true);
 
-	logger->Info("");
-	logger->Info("");
-	logger->Info("==========[ EXCs Status ]=============="
+	logger->Notice("");
+	logger->Notice("");
+	logger->Notice("==========[ EXCs Status ]=============="
 			"========================================");
-	logger->Info("");
+	logger->Notice("");
 	am.PrintStatusReport(true);
 
-	logger->Info("");
-	logger->Info("");
-	logger->Info("==========[ Resources Status ]========="
+	logger->Notice("");
+	logger->Notice("");
+	logger->Notice("==========[ Resources Status ]========="
 			"========================================");
-	logger->Info("");
+	logger->Notice("");
 	ra.PrintStatusReport(0, true);
 
 	// Clear the corresponding event flag
-	logger->Info("");
+	logger->Notice("");
 	pendingEvts.reset(BBQ_USR1);
 }
 
@@ -217,7 +217,7 @@ void ResourceManager::EvtBbqExit() {
 	AppsUidMapIt apps_it;
 	AppPtr_t papp;
 
-	logger->Info("Terminating Barbeque...");
+	logger->Notice("Terminating Barbeque...");
 	done = true;
 
 	// Stop applications
