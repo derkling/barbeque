@@ -76,6 +76,7 @@ SchedulerManager::metrics[SM_METRICS_COUNT] = {
 	SM_COUNTER_METRIC("block",	"BLOCK count"),
 	//----- Timing metrics
 	SM_SAMPLE_METRIC("time",	"Scheduler execution t[ms]"),
+	SM_SAMPLE_METRIC("period",	"Scheduler activation period t[ms]"),
 	//----- Couting statistics
 	SM_SAMPLE_METRIC("avg.start",	"Avg START per schedule"),
 	SM_SAMPLE_METRIC("avg.reconf",	"Avg RECONF per schedule"),
@@ -93,7 +94,8 @@ SchedulerManager & SchedulerManager::GetInstance() {
 
 SchedulerManager::SchedulerManager() :
 	am(ApplicationManager::GetInstance()),
-	mc(bu::MetricsCollector::GetInstance()) {
+	mc(bu::MetricsCollector::GetInstance()),
+	sched_count(0) {
 	std::string opt_policy;
 
 	//---------- Get a logger module
@@ -184,10 +186,15 @@ SchedulerManager::Schedule() {
 			policy->Name());
 
 
+	// Collecing execution metrics
+	if (sched_count)
+		SM_GET_TIMING(metrics, SM_SCHED_PERIOD, sm_tmr);
+	sched_count++;
+
 	// Account for actual scheduling runs
 	SM_COUNT_EVENT(metrics, SM_SCHED_RUNS);
 
-	// Reset timer for scheduling time collection
+	// Reset timer for schedule execution time collection
 	SM_RESET_TIMING(sm_tmr);
 
 	result = policy->Schedule(sv);
@@ -199,6 +206,9 @@ SchedulerManager::Schedule() {
 
 	// Collecing execution metrics
 	SM_GET_TIMING(metrics, SM_SCHED_TIME, sm_tmr);
+
+	// Reset timer for schedule period time collection
+	SM_RESET_TIMING(sm_tmr);
 
 	// Account for scheduling completed
 	SM_COUNT_EVENT(metrics, SM_SCHED_COMP);
