@@ -292,7 +292,7 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 	}
 	logger->Notice(
 		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
-		m->name, _min, _max, _avg, _var, m->desc);
+		m->name, _min, _max, _avg, ::sqrt(_var), m->desc);
 
 }
 
@@ -307,7 +307,7 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 "----------------------+-----------+-----------+-----------+----------------------"
 
 #define METRICS_SAMPLES_HEADER \
-"  Metric              |  Min      |  Max      |  Avg      |  Var      |  Description"
+"  Metric              |  Min      |  Max      |  Avg      |  StdDev   |  Description"
 #define METRICS_SAMPLES_SEPARATOR \
 "----------------------+-----------+-----------+-----------+-----------+----------------------"
 
