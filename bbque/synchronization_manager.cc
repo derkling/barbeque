@@ -497,7 +497,7 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 		return result;
 
 	// Wait for the policy specified sync point
-	logger->Warn("Wait sync point for %d[ms]", policy->EstimatedSyncTime());
+	logger->Debug("Wait sync point for %d[ms]", policy->EstimatedSyncTime());
 	std::this_thread::sleep_for(
 			std::chrono::milliseconds(
 				policy->EstimatedSyncTime()));
