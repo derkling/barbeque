@@ -359,7 +359,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token) {
-		logger->Warn("SetView: View %d is the system state view yet!", vtok);
+		logger->Debug("SetView: View %d is the system state view yet!", vtok);
 		return sys_view_token;
 	}
 
