@@ -438,29 +438,53 @@ ApplicationManager::GetApplication(AppPid_t pid, uint8_t exc_id) {
 	}\
 
 
-void ApplicationManager::ReportStatusQ() const {
+void ApplicationManager::ReportStatusQ(bool verbose) const {
 
 	// Report on current status queue
 	char report[] = "StateQ: [DIS: 000, RDY: 000, SYC: 000, RUN: 000, FIN: 000]";
-	for (uint8_t i = 0; i < Application::STATE_COUNT; ++i) {
-		::sprintf(report+14+i*10, "%03u", (unsigned)status_vec[i].size());
-		report[17+i*10] = ',';
+
+	if (verbose) {
+		for (uint8_t i = 0; i < Application::STATE_COUNT; ++i) {
+			::sprintf(report+14+i*10, "%03u", (unsigned)status_vec[i].size());
+			report[17+i*10] = ',';
+		}
+		report[17+10*(Application::STATE_COUNT-1)] = ']';
+		logger->Info(report);
+	} else {
+		DB(
+		for (uint8_t i = 0; i < Application::STATE_COUNT; ++i) {
+			::sprintf(report+14+i*10, "%03u", (unsigned)status_vec[i].size());
+			report[17+i*10] = ',';
+		}
+		report[17+10*(Application::STATE_COUNT-1)] = ']';
+		logger->Debug(report);
+		);
 	}
-	report[17+10*(Application::STATE_COUNT-1)] = ']';
-	logger->Info(report);
 
 }
 
-void ApplicationManager::ReportSyncQ() const {
+void ApplicationManager::ReportSyncQ(bool verbose) const {
 
 	// Report on current status queue
 	char report[] = "SyncQ:  [STA: 000, REC: 000, M/R: 000, MIG: 000, BLK: 000]";
-	for (uint8_t i = 0; i < Application::SYNC_STATE_COUNT; ++i) {
-		::sprintf(report+14+i*10, "%03u", (unsigned)sync_vec[i].size());
-		report[17+i*10] = ',';
+
+	if (verbose) {
+		for (uint8_t i = 0; i < Application::SYNC_STATE_COUNT; ++i) {
+			::sprintf(report+14+i*10, "%03u", (unsigned)sync_vec[i].size());
+			report[17+i*10] = ',';
+		}
+		report[17+10*(Application::SYNC_STATE_COUNT-1)] = ']';
+		logger->Info(report);
+	} else {
+		DB(
+		for (uint8_t i = 0; i < Application::SYNC_STATE_COUNT; ++i) {
+			::sprintf(report+14+i*10, "%03u", (unsigned)sync_vec[i].size());
+			report[17+i*10] = ',';
+		}
+		report[17+10*(Application::SYNC_STATE_COUNT-1)] = ']';
+		logger->Debug(report);
+		);
 	}
-	report[17+10*(Application::SYNC_STATE_COUNT-1)] = ']';
-	logger->Info(report);
 
 }
 

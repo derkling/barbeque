@@ -273,12 +273,12 @@ public:
 	/**
 	 * @brief Dump a logline to report on current Status queue counts
 	 */
-	void ReportStatusQ() const;
+	void ReportStatusQ(bool verbose = false) const;
 
 	/**
 	 * @brief Dump a logline to report on current Status queue counts
 	 */
-	void ReportSyncQ() const;
+	void ReportSyncQ(bool verbose = false) const;
 
 	/**
 	 * @see ApplicationManagerStatusIF
