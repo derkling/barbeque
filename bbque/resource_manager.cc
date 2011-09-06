@@ -206,7 +206,7 @@ void ResourceManager::EvtBbqUsr1() {
 }
 
 void ResourceManager::EvtBbqUsr2() {
-	logger->Info("Dumping metrics collection...");
+	logger->Debug("Dumping metrics collection...");
 	mc.DumpMetrics();
 
 	// Clear the corresponding event flag
