@@ -249,7 +249,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Debugging messages
 		if (result != Application::APP_WM_ACCEPTED) {
-			logger->Warn("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
+			logger->Debug("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
 							papp->StrId(),
 							eval_awm->Id(),
 							result);
