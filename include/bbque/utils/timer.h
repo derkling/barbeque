@@ -38,6 +38,13 @@ public:
 	Timer(bool running = false);
 
 	/**
+	 * @brief Check if the timer is running
+	 */
+	inline bool Running() const {
+		return !stopped;
+	}
+
+	/**
 	 * @brief Start the timer
 	 * startCount will be set at this point.
 	 */
