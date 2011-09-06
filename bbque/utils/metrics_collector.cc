@@ -262,7 +262,7 @@ MetricsCollector::AddSample(MetricHandler_t mh, double sample) {
 
 void
 MetricsCollector::DumpCounter(CounterMetric_t *m) {
-	logger->Info(
+	logger->Notice(
 		" %-20s | %9ld : %s",
 		m->name, m->count, m->desc);
 }
@@ -275,7 +275,7 @@ MetricsCollector::DumpValue(ValueMetric_t *m) {
 		_min = min(m->stat);
 		_max = max(m->stat);
 	}
-	logger->Info(
+	logger->Notice(
 		" %-20s | %9ld | %9ld | %9ld : %s",
 		m->name, m->value, _min, _max, m->desc);
 }
@@ -290,7 +290,7 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 		_avg = mean(m->stat);
 		_var = variance(m->stat);
 	}
-	logger->Info(
+	logger->Notice(
 		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
 		m->name, _min, _max, _avg, _var, m->desc);
 
@@ -315,49 +315,49 @@ void
 MetricsCollector::DumpMetrics() {
 	MetricsMap_t::iterator it;
 
-	logger->Info("");
-	logger->Info("==========[ Counter Metrics ]=========="
+	logger->Notice("");
+	logger->Notice("==========[ Counter Metrics ]=========="
 			"========================================");
-	logger->Info("");
+	logger->Notice("");
 
 	// Dumping COUTNER metrics
-	logger->Info(METRICS_COUNTER_HEADER);
-	logger->Info(METRICS_COUNTER_SEPARATOR);
+	logger->Notice(METRICS_COUNTER_HEADER);
+	logger->Notice(METRICS_COUNTER_SEPARATOR);
 	it = metricsVec[COUNTER].begin();
 	for ( ; it != metricsVec[COUNTER].end(); ++it) {
 		DumpCounter((CounterMetric_t*)(((*it).second).get()));
 	}
-	logger->Info(METRICS_COUNTER_SEPARATOR);
+	logger->Notice(METRICS_COUNTER_SEPARATOR);
 
 
-	logger->Info("");
-	logger->Info("==========[ Value Metrics ]============"
+	logger->Notice("");
+	logger->Notice("==========[ Value Metrics ]============"
 			"========================================");
-	logger->Info("");
+	logger->Notice("");
 
 	// Dumping VALUE metrics
-	logger->Info(METRICS_VALUE_HEADER);
-	logger->Info(METRICS_VALUE_SEPARATOR);
+	logger->Notice(METRICS_VALUE_HEADER);
+	logger->Notice(METRICS_VALUE_SEPARATOR);
 	it = metricsVec[VALUE].begin();
 	for ( ; it != metricsVec[VALUE].end(); ++it) {
 		DumpValue((ValueMetric_t*)(((*it).second).get()));
 	}
-	logger->Info(METRICS_VALUE_SEPARATOR);
+	logger->Notice(METRICS_VALUE_SEPARATOR);
 
 
-	logger->Info("");
-	logger->Info("==========[ Sample Metrics ]==========="
+	logger->Notice("");
+	logger->Notice("==========[ Sample Metrics ]==========="
 			"========================================");
-	logger->Info("");
+	logger->Notice("");
 
 	// Dumping SAMPLES metrics
-	logger->Info(METRICS_SAMPLES_HEADER);
-	logger->Info(METRICS_SAMPLES_SEPARATOR);
+	logger->Notice(METRICS_SAMPLES_HEADER);
+	logger->Notice(METRICS_SAMPLES_SEPARATOR);
 	it = metricsVec[SAMPLE].begin();
 	for ( ; it != metricsVec[SAMPLE].end(); ++it) {
 		DumpSample((SamplesMetric_t*)(((*it).second).get()));
 	}
-	logger->Info(METRICS_SAMPLES_SEPARATOR);
+	logger->Notice(METRICS_SAMPLES_SEPARATOR);
 
 }
 
