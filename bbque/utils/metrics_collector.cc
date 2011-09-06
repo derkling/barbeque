@@ -99,6 +99,9 @@ MetricsCollector::Register(const char *name, const char *desc,
 	case SAMPLE:
 		pm = pMetric_t(new SamplesMetric(name, desc));
 		break;
+	case PERIOD:
+		pm = pMetric_t(new PeriodMetric(name, desc));
+		break;
 	default:
 		logger->Error("Metric [%s] registration FAILED "
 				"(Error: metric class not supported)", name);
@@ -260,6 +263,50 @@ MetricsCollector::AddSample(MetricHandler_t mh, double sample) {
 	return OK;
 }
 
+MetricsCollector::ExitCode_t
+MetricsCollector::PeriodSample(MetricHandler_t mh, double & last_period) {
+	pMetric_t pm = GetMetric(mh);
+	PeriodMetric_t *m;
+
+	// Check if the metric has not yet been registered
+	if (!pm) {
+		logger->Error("Period sampling FAILED "
+				"(Error: metric not registered)");
+		return UNKNOWEN;
+	}
+
+	// Check the metrics is of compatible type
+	if (pm->mc != PERIOD) {
+		logger->Error("Period sampling FAILED "
+				"(Error: wrong metric class)");
+		assert(pm->mc == PERIOD);
+		return UNSUPPORTED;
+	}
+
+	// Lock this metric
+	std::unique_lock<std::mutex> ul(pm->mtx);
+
+	// Get the SAMPLE metrics
+	m = (PeriodMetric_t*)pm.get();
+
+	// Just start the sampling timer (if not already)
+	if (unlikely(!m->period_tmr.Running())) {
+		m->period_tmr.start();
+		last_period = 0;
+		return OK;
+	}
+
+	// Push-in the new timer into the accumulator
+	last_period = m->period_tmr.getElapsedTimeMs();
+	m->stat(last_period);
+
+	// Reset timer for next period computation
+	m->period_tmr.start();
+
+	return OK;
+}
+
+
 void
 MetricsCollector::DumpCounter(CounterMetric_t *m) {
 	logger->Notice(
@@ -296,6 +343,27 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 
 }
 
+void
+MetricsCollector::DumpPeriod(PeriodMetric_t *m) {
+	double _min = 0, _max = 0, _avg = 0, _var = 0;
+
+	if (count(m->stat)) {
+		_min = min(m->stat);
+		_max = max(m->stat);
+		_avg = mean(m->stat);
+		_var = variance(m->stat);
+	}
+	logger->Notice(
+		" %-20s | %10.3f %10.3f | %10.3f %10.3f | %10.3f %10.3f |    %10.3f %10.3f : %s",
+		m->name,
+		_min, 1000.0/_min,
+		_max, 1000.0/_max,
+		_avg, 1000.0/_avg,
+		::sqrt(_var), 1000.0/::sqrt(_var),
+		m->desc);
+
+}
+
 #define METRICS_COUNTER_HEADER \
 "  Metric              |  Count    |  Description"
 #define METRICS_COUNTER_SEPARATOR \
@@ -310,6 +378,11 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 "  Metric              |  Min      |  Max      |  Avg      |  StdDev   |  Description"
 #define METRICS_SAMPLES_SEPARATOR \
 "----------------------+-----------+-----------+-----------+-----------+----------------------"
+
+#define METRICS_PERIOD_HEADER \
+"  Metric              |  Min  [ms]       [Hz] |  Max  [ms]       [Hz] |  Avg  [ms]       [Hz] |  StdDev  [ms]       [Hz] |  Description"
+#define METRICS_PERIOD_SEPARATOR \
+"----------------------+-----------------------+-----------------------+-----------------------+--------------------------+----------------------"
 
 void
 MetricsCollector::DumpMetrics() {
@@ -359,6 +432,22 @@ MetricsCollector::DumpMetrics() {
 	}
 	logger->Notice(METRICS_SAMPLES_SEPARATOR);
 
+
+	logger->Notice("");
+	logger->Notice("==========[ Period Metrics ]==========="
+			"========================================");
+	logger->Notice("");
+
+	// Dumping PERIOD metrics
+	logger->Notice(METRICS_PERIOD_HEADER);
+	logger->Notice(METRICS_PERIOD_SEPARATOR);
+	it = metricsVec[PERIOD].begin();
+	for ( ; it != metricsVec[PERIOD].end(); ++it) {
+		DumpPeriod((PeriodMetric_t*)(((*it).second).get()));
+	}
+	logger->Notice(METRICS_PERIOD_SEPARATOR);
+
+
 }
 
 
@@ -366,7 +455,8 @@ const char *
 MetricsCollector::metricClassName[MetricsCollector::CLASSES_COUNT] = {
 	"Counter",
 	"Value",
-	"Samples"
+	"Samples",
+	"Period"
 };
 
 

@@ -70,6 +70,8 @@ public:
 		VALUE,
 		/** A generic "double" sample for statistical computations */
 		SAMPLE,
+		/** A generic "time" sample for periods computations */
+		PERIOD,
 
 		/** The number of metrics classes */
 		CLASSES_COUNT // This MUST be the last value
@@ -182,6 +184,25 @@ public:
 
 	} SamplesMetric_t;
 
+	/**
+	 * @brief A period/frequency accounting metrics
+	 *
+	 * This is a simple metric which could be used to compute the
+	 * period/frequency of a certain event, by simply collecting a set of
+	 * measured timeframes. The metrics keep track also of the "maximum" and
+	 * "minimum" value for time intervals.
+	 */
+	typedef struct PeriodMetric : public Metric {
+		/** The timer used for period computation */
+		Timer period_tmr;
+		/** Statistics on Value */
+		accumulator_set<double,
+			stats<tag::min, tag::max, tag::variance>> stat;
+
+		PeriodMetric(const char *name, const char *desc) :
+			Metric(name, desc, PERIOD) {};
+
+	} PeriodMetric_t;
 
 	/**
 	 * @brief Get a reference to the metrics collector
@@ -259,6 +280,14 @@ public:
 	 * one more sample, thus updating the metrics statistics.
 	 */
 	ExitCode_t AddSample(MetricHandler_t mh, double sample);
+
+	/**
+	 * @brief Add a new time sample to a PERIDO metric
+	 *
+	 * This method is reserved to metrics of SAMPLE class and allows to collect
+	 * one more sample, thus updating the metrics statistics.
+	 */
+	ExitCode_t PeriodSample(MetricHandler_t mh, double & last_period);
 
 	/**
 	 * @brief Dump on screen a report of all the registered metrics
@@ -355,6 +384,10 @@ private:
 	 */
 	void DumpSample(SamplesMetric_t *m);
 
+	/**
+	 * @brief Dump the current value for a metric of class PERIOD
+	 */
+	void DumpPeriod(PeriodMetric_t *m);
 };
 
 } // namespace utils
