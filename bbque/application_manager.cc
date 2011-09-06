@@ -899,7 +899,7 @@ ApplicationManager::SyncRemove(AppPtr_t papp, Application::SyncState_t state) {
 
 	// Get the applications map
 	if (sync_vec[state].erase(papp->Uid())) {
-		logger->Info("Removed sync request for EXC [%s, %s]",
+		logger->Debug("Removed sync request for EXC [%s, %s]",
 				papp->StrId(),
 				papp->SyncStateStr());
 		return;
@@ -938,7 +938,7 @@ ApplicationManager::SyncAdd(AppPtr_t papp) {
 
 	SyncAdd(papp, papp->SyncState());
 
-	logger->Info("Added sync request for EXC [%s, %d:%s]",
+	logger->Debug("Added sync request for EXC [%s, %d:%s]",
 				papp->StrId(),
 				papp->SyncState(),
 				papp->SyncStateStr());
@@ -971,7 +971,7 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 
 	// TODO notify the Resource Manager
 
-	logger->Info("Sync request for EXC [%s, %s]", papp->StrId(),
+	logger->Debug("Sync request for EXC [%s, %s]", papp->StrId(),
 			Application::SyncStateStr(state));
 
 	return AM_SUCCESS;
@@ -980,13 +980,13 @@ ApplicationManager::SyncRequest(AppPtr_t papp, Application::SyncState_t state) {
 ApplicationManager::ExitCode_t
 ApplicationManager::SyncCommit(AppPtr_t papp) {
 
-	logger->Info("Synching EXC [%s, %s]...", papp->StrId(),
+	logger->Debug("Synching EXC [%s, %s]...", papp->StrId(),
 			papp->SyncStateStr());
 
 	// Notify application
 	papp->ScheduleCommit();
 
-	logger->Info("Sync for EXC [%s, %s] DONE", papp->StrId(),
+	logger->Debug("Sync for EXC [%s, %s] DONE", papp->StrId(),
 			papp->SyncStateStr());
 
 	return AM_SUCCESS;
@@ -995,7 +995,7 @@ ApplicationManager::SyncCommit(AppPtr_t papp) {
 void ApplicationManager::SyncAbort(AppPtr_t papp) {
 	Application::SyncState_t syncState = papp->SyncState();
 
-	logger->Info("Aborting sync for EXC [%s, %s]...", papp->StrId(),
+	logger->Warn("Aborting sync for EXC [%s, %s]...", papp->StrId(),
 			papp->SyncStateStr(syncState));
 
 	// Notify application
