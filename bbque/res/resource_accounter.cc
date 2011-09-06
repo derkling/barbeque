@@ -134,7 +134,7 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 
 	if (verbose) {
 		logger->Info("Report on state view: %d", vtok);
-		logger->Info(
+		logger->Notice(
 				"------------- Resources --------------- Used ------ Total -");
 	} else {
 		DB(
@@ -148,7 +148,7 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 		snprintf(padded_path, path_max_len + 8, "%s%s",
 				(*path_it).c_str(), pad);
 		if (verbose) {
-			logger->Info("%s : %10llu | %10llu |",
+			logger->Notice("%s : %10llu | %10llu |",
 					padded_path, Used(*path_it, vtok), Total(*path_it));
 		} else {
 			DB(logger->Debug("%s : %10llu | %10llu |",
@@ -157,7 +157,7 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	}
 
 	if (verbose) {
-		logger->Info(
+		logger->Notice(
 				"-----------------------------------------------------------");
 	} else {
 		DB(
