@@ -143,9 +143,9 @@ void ResourceManager::Optimize() {
 	syncResult = ym.SyncSchedule();
 	optimization_tmr.stop();
 	logger->Info("====================[ SYNC ENDED ]====================");
-	logger->Notice("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 	am.PrintStatusReport(true);
 	ra.PrintStatusReport(0, true);
+	logger->Notice("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 
 }
 
