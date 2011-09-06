@@ -85,43 +85,44 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 		bool verbose) const {
 	std::set<std::string>::const_iterator path_it(paths.begin());
 	std::set<std::string>::const_iterator end_path(paths.end());
-	char padded_path[50];
-	char pad[30];
+	char padded_path[30];
 	char app_info[50];
 
 	if (verbose) {
 		logger->Info("Report on state view: %d", vtok);
 		logger->Notice(
-				"------------- Resources --------------- Used ------ Total -");
+				"------------- Resources ------------- Used ------ Total -");
 	} else {
 		DB(
 		logger->Debug("Report on state view: %d", vtok);
 		logger->Debug(
-				"------------- Resources --------------- Used ------ Total -");
+				"------------- Resources ------------- Used ------ Total -");
 		);
 	}
 	for (; path_it != end_path; ++path_it) {
-		memset(pad, ' ', path_max_len + 8 - (*path_it).length());
-		snprintf(padded_path, path_max_len + 8, "%s%s",
-				(*path_it).c_str(), pad);
+		snprintf(padded_path, 30, "%-30s", (*path_it).c_str());
 		if (verbose) {
+			StrAppUsingPE(*path_it, app_info, 50);
 			logger->Notice("%s : %10llu | %10llu | %s",
 					padded_path, Used(*path_it, vtok), Total(*path_it),
-					StrAppUsingPE(*path_it, app_info, 50));
+					app_info[0] ? app_info : "");
 		} else {
-			DB(logger->Debug("%s : %10llu | %10llu | %s",
-						padded_path, Used(*path_it, vtok), Total(*path_it),
-						StrAppUsingPE(*path_it, app_info, 50)));
+			DB(
+			StrAppUsingPE(*path_it, app_info, 50);
+			logger->Debug("%s : %10llu | %10llu | %s",
+				padded_path, Used(*path_it, vtok), Total(*path_it),
+				app_info[0] ? app_info : "");
+			);
 		}
 	}
 
 	if (verbose) {
 		logger->Notice(
-				"-----------------------------------------------------------");
+				"---------------------------------------------------------");
 	} else {
 		DB(
 		logger->Debug(
-				"-----------------------------------------------------------");
+				"---------------------------------------------------------");
 		);
 	}
 }
