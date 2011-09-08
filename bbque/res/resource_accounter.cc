@@ -249,24 +249,25 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 ResourceAccounter::ExitCode_t ResourceAccounter::GetAppUsagesByView(
 		RViewToken_t vtok,
 		AppUsagesMapPtr_t & apps_usages) {
-	AppUsagesViewsMap_t::iterator view;
-	if (vtok != 0) {
-		// "Alternate" view case
-		view = usages_per_views.find(vtok);
-		if (view == usages_per_views.end()) {
-			logger->Error("Application usages:"
-					"Cannot find the resource state view referenced by %d",
-					vtok);
-			return RA_ERR_MISS_VIEW;
-		}
-		apps_usages = view->second;
-	}
-	else {
-		// Default view / System state case
+	// Get the map of all the Apps/EXCs resource usages
+	AppUsagesViewsMap_t::iterator view_it;
+	if (vtok == 0) {
+		// Default view / System state
 		assert(sys_usages_view);
 		apps_usages = sys_usages_view;
+		return RA_SUCCESS;
 	}
 
+	// "Alternate" state view
+	view_it = usages_per_views.find(vtok);
+	if (view_it == usages_per_views.end()) {
+		logger->Error("Application usages:"
+				"Cannot find the resource state view referenced by %d",	vtok);
+		return RA_ERR_MISS_VIEW;
+	}
+
+	// Set the the map
+	apps_usages = view_it->second;
 	return RA_SUCCESS;
 }
 
