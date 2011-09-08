@@ -456,6 +456,8 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 }
 
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
+	RViewToken_t old_sys_vtok;
+
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token) {
 		logger->Debug("SetView: View %d is the system state view yet!", vtok);
@@ -470,26 +472,26 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 		return sys_view_token;
 	}
 
-	sys_usages_view = us_view_it->second;
+	// Save the old view token
+	old_sys_vtok = sys_view_token;
+
+	// Update the system state view token and the map of Apps/EXCs resource
+	// usages
 	sys_view_token = vtok;
+	sys_usages_view = us_view_it->second;
 
-	// Get the resource set using the referenced view
-	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
-	if (rviews_it == rsrc_per_views.end()) {
-		logger->Warn("SetView: No resources used in view %d", vtok);
-		return sys_view_token;
-	}
+	// Put the old view
+	PutView(old_sys_vtok);
 
-	// For each resource set the view as default
-	ResourceSet_t::iterator rsrc_set_it(rviews_it->second->begin());
-	ResourceSet_t::iterator rsrc_set_end(rviews_it->second->end());
-	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it)
-		(*rsrc_set_it)->SetAsDefaultView(vtok);
-
-	logger->Info("SetView: View %d is the new system state view",
+	logger->Info("SetView: View %d is the new system state view.",
 			sys_view_token);
+	logger->Debug("SetView: %d resource set and %d usages per views"
+			"currently managed",
+			rsrc_per_views.size(),	usages_per_views.erase(vtok));
+
 	return sys_view_token;
 }
+
 
 /************************************************************************
  *                   SYNCHRONIZATION SUPPORT                            *
