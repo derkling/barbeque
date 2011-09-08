@@ -412,10 +412,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetView(std::string req_path,
 	token = std::hash<std::string>()(req_path);
 	logger->Debug("GetView: New resource state view. Token = %d", token);
 
-	// Allocate a new view for the applications resource usages and the
-	// set fo resources allocated
+	// Allocate a new view for the applications resource usages
 	usages_per_views.insert(std::pair<RViewToken_t, AppUsagesMapPtr_t>(token,
 				AppUsagesMapPtr_t(new AppUsagesMap_t)));
+
+	//Allocate a new view for the set of resources allocated
 	rsrc_per_views.insert(std::pair<RViewToken_t, ResourceSetPtr_t>(token,
 				ResourceSetPtr_t(new ResourceSet_t)));
 
@@ -432,8 +433,8 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	// Get the resource set using the referenced view
 	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 	if (rviews_it == rsrc_per_views.end()) {
-		logger->Error("PutView: Cannot find the resource view referenced by"
-				"%d", vtok);
+		logger->Error("PutView: Cannot find the resource view"
+				"referenced by %d", vtok);
 		return;
 	}
 
@@ -443,9 +444,15 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	for (; rsrc_set_it != rsrc_set_end; ++rsrc_set_it)
 		(*rsrc_set_it)->DeleteView(vtok);
 
-	// Remove the map of applications resource usages of this view
+	// Remove the map of Apps/EXCs resource usages and the resource reference
+	// set of this view
 	usages_per_views.erase(vtok);
+	rsrc_per_views.erase(vtok);
+
 	logger->Debug("PutView: view %d cleared", vtok);
+	logger->Debug("PutView: %d resource set and %d usages per views"
+			"currently managed",
+			rsrc_per_views.size(),	usages_per_views.erase(vtok));
 }
 
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
