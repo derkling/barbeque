@@ -137,6 +137,10 @@ AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
 
 	// Get the Resource decriptor
 	rsrc_ptr = GetResource(path);
+	if (!rsrc_ptr) {
+		logger->Error("Cannot find PE: '%s'", path.c_str());
+		return AppPtr_t();
+	}
 
 	// Get the App/EXC descriptor
 	rsrc_ret = rsrc_ptr->UsedBy(app_uid, amount, 0, vtok);
