@@ -538,7 +538,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	papp = am.GetFirst(ApplicationStatusIF::RUNNING, apps_it);
 	for ( ; papp; papp = am.GetNext(ApplicationStatusIF::RUNNING, apps_it)) {
 
-		logger->Debug("SyncInit: [%s] current AWM: %d",
+		logger->Info("SyncInit: [%s] current AWM: %d",
 				papp->StrId(),
 				papp->CurrentAWM()->Id());
 
@@ -556,7 +556,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 		}
 	}
 
-	logger->Debug("SyncMode [%d]: Initialization finished", sync_ssn.count);
+	logger->Info("SyncMode [%d]: Initialization finished", sync_ssn.count);
 	return RA_SUCCESS;
 }
 
@@ -601,7 +601,6 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
 		logger->Info("SyncMode [%d]: Session committed", sync_ssn.count);
 
 	PrintStatusReport();
-
 	return result;
 }
 
@@ -626,16 +625,21 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		// Do booking for this resource (usages_it->second)
 		result = DoResourceBooking(papp, rsrc_usage, vtok);
+
 		if (result != RA_SUCCESS)  {
-			logger->Crit("Booking: unexpected fail! [USG:%llu | AV:%llu | TOT:%llu]",
+			logger->Crit("Booking: unexpected fail! "
+					"%s [USG:%llu | AV:%llu | TOT:%llu]",
+				usages_it->first.c_str(),
 				rsrc_usage->value,
 				Available(usages_it->first),
 				Total(usages_it->first));
+
 			PrintStatusReport();
-			assert(result == RA_SUCCESS);
 		}
 
-		logger->Debug("Booking: success [USG:%llu | AV:%llu | TOT:%llu]",
+		assert(result == RA_SUCCESS);
+		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
+				usages_it->first.c_str(),
 				rsrc_usage->value,
 				Available(usages_it->first, vtok),
 				Total(usages_it->first));
