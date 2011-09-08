@@ -166,9 +166,11 @@ public:
 	 * @brief App/EXC using a Processing Element resource
 	 *
 	 * @param path The resource path
+	 * @param vtok The token referencing the resource state view
 	 * @return A shared pointer to the App/EXC descriptor using the given PE
 	 */
-	AppPtr_t const AppUsingPE(std::string const & path) const;
+	AppPtr_t const AppUsingPE(std::string const & path,
+			RViewToken_t vtok = 0) const;
 
 	/**
 	 * @brief Clustering factor

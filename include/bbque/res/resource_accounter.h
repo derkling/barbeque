@@ -182,7 +182,8 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	AppPtr_t const AppUsingPE(std::string const & path) const;
+	AppPtr_t const AppUsingPE(std::string const & path,
+			RViewToken_t vtok = 0) const;
 
 	/**
 	 * @see ResourceAccounterStatusIF
@@ -325,11 +326,12 @@ private:
 	 * @param path The path of the PE resource in use
 	 * @param buff The string buffer to set
 	 * @param size The buffer size
+	 * @param vtok The token referencing the resource state view
 	 * @return A report string with the App/EXC id info, the priority and the
 	 * current AWM
 	 */
 	char const * StrAppUsingPE(std::string const & path, char * buff,
-			size_t	size) const;
+			size_t	size, RViewToken_t vtok = 0) const;
 
 	/**
 	 * @brief Return a state parameter (availability, resources used, total

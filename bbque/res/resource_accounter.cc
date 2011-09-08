@@ -102,13 +102,13 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	for (; path_it != end_path; ++path_it) {
 		snprintf(padded_path, 30, "%-30s", (*path_it).c_str());
 		if (verbose) {
-			StrAppUsingPE(*path_it, app_info, 50);
+			StrAppUsingPE(*path_it, app_info, 50, vtok);
 			logger->Notice("%s : %10llu | %10llu | %s",
 					padded_path, Used(*path_it, vtok), Total(*path_it),
 					app_info[0] ? app_info : "");
 		} else {
 			DB(
-			StrAppUsingPE(*path_it, app_info, 50);
+			StrAppUsingPE(*path_it, app_info, 50, vtok);
 			logger->Debug("%s : %10llu | %10llu | %s",
 				padded_path, Used(*path_it, vtok), Total(*path_it),
 				app_info[0] ? app_info : "");
@@ -127,7 +127,8 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	}
 }
 
-AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path) const {
+AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
+		RViewToken_t vtok) const {
 	ResourcePtr_t rsrc_ptr;
 	Resource::ExitCode_t rsrc_ret;
 	AppUid_t app_uid;
@@ -138,7 +139,7 @@ AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path) const {
 	rsrc_ptr = GetResource(path);
 
 	// Get the App/EXC descriptor
-	rsrc_ret = rsrc_ptr->UsedBy(app_uid, amount);
+	rsrc_ret = rsrc_ptr->UsedBy(app_uid, amount, 0, vtok);
 	if (rsrc_ret != Resource::RS_SUCCESS)
 		return AppPtr_t();
 
@@ -154,10 +155,10 @@ AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path) const {
 }
 
 inline char const * ResourceAccounter::StrAppUsingPE(std::string const & path,
-		char * buff, size_t size) const {
+		char * buff, size_t size, RViewToken_t vtok) const {
 
 	// Lookup the App/EXC
-	AppPtr_t papp(AppUsingPE(path));
+	AppPtr_t papp(AppUsingPE(path, vtok));
 	if (!papp) {
 		buff[0] = 0;
 		return NULL;
