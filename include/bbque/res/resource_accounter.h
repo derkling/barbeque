@@ -441,8 +441,7 @@ private:
 	 * @param rsrcs_pèr_view Set of resources used in the view specified
 	 */
 	ExitCode_t DoResourceBooking(AppPtr_t const & papp,
-			UsagePtr_t & rsrc_usage, RViewToken_t vtok,
-			ResourceSetPtr_t & rsrcs_per_view);
+			UsagePtr_t & rsrc_usage, RViewToken_t vtok);
 
 	/**
 	 * @brief Decrement the resource usages counts
@@ -469,7 +468,7 @@ private:
 	 * @param rsrcs_pèr_view Set of resources used in the view specified
 	 */
 	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
-			RViewToken_t vtok, ResourceSetPtr_t & rsrcs_per_view);
+			RViewToken_t vtok);
 
 	/**
 	 * @brief Init the synchronized mode session
