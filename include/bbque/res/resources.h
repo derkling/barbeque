@@ -46,6 +46,9 @@ struct Resource;
 struct ResourceUsage;
 struct ResourceState;
 
+class ResourceAccounter;
+
+
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointers to Resource descriptors */
@@ -100,6 +103,7 @@ struct ResourceState {
 
 };
 
+
 /**
  * @class Resource
  *
@@ -130,35 +134,14 @@ public:
 	 * @brief Constructor
 	 * @param nm Resource name
 	 */
-	Resource(std::string const & nm):
-		name(nm),
-		total(1),
-		default_key(0) {
-		// Init the default view
-		default_view = ResourceStatePtr_t(new ResourceState());
-		state_views[default_key] = default_view;
-	}
+	Resource(std::string const & nm);
 
 	/**
 	 * @brief Constructor
 	 * @param res_path Resource path
 	 * @param tot The total amount of resource
 	 */
-	Resource(std::string const & res_path, uint64_t tot):
-		total(tot),
-		default_key(0) {
-
-		// Init the default view
-		default_view = ResourceStatePtr_t(new ResourceState());
-		state_views[0] = default_view;
-
-		// Extract the name from the path
-		size_t pos = res_path.find_last_of(".");
-		if (pos != std::string::npos)
-			name = res_path.substr(pos + 1);
-		else
-			name = res_path;
-	}
+	Resource(std::string const & res_path, uint64_t tot);
 
 	/**
 	 * Destructor
@@ -194,19 +177,7 @@ public:
 	 * @return Return the value of "used". If success, the value will be the
 	 * new just set, otherwise the old one.
 	 */
-	inline uint64_t SetUsed(uint64_t use) {
-		if (use <= total)
-			default_view->used = use;
-		return default_view->used;
-	}
-
-	/**
-	 * @brief Put the amount of resource used equal to 0.
-	 * @note This method acts only upon the default state view only
-	 */
-	inline void ResetUsed() {
-		default_view->used = 0;
-	}
+	uint64_t SetUsed(uint64_t use);
 
 	/**
 	 * @brief Resource total
@@ -221,38 +192,14 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return Amount of resource used
 	 */
-	inline uint64_t Used(RViewToken_t vtok = 0) {
-		// Default view if token = 0
-		if (vtok == 0)
-			return default_view->used;
-
-		// Retrieve the view from hash map otherwise
-		RSHashMap_t::iterator it = state_views.find(vtok);
-		if (it == state_views.end())
-			return 0;
-		return it->second->used;
-	}
+	uint64_t Used(RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Resource available
 	 * @param vtok The token referencing the resource view
 	 * @return How much resource is still available.
 	 */
-	inline uint64_t Availability(RViewToken_t vtok = 0) {
-		// Default view if token = 0
-		if (vtok == 0)
-			return (total - default_view->used);
-
-		// Retrieve the view from hash map otherwise
-		RSHashMap_t::iterator it = state_views.find(vtok);
-		if (it != state_views.end())
-			return (total - it->second->used);
-
-		// If the view is not found, it means that nothing has been allocated.
-		// Thus the availability value to return is the total amount of
-		// resource
-		return total;
-	}
+	uint64_t Availability(RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Count of applications using the resource
@@ -275,34 +222,7 @@ public:
 	 * @return RS_SUCCESS if the App/EXC has been found, RS_NO_APPS otherwise
 	 */
 	ExitCode_t UsedBy(AppUid_t & app_uid, uint64_t & amount, uint8_t idx = 0,
-			RViewToken_t vtok = 0) {
-		// Get the map of Apps/EXCs using the resource
-		AppUseQtyMap_t apps_map;
-		size_t mapsize = ApplicationsCount(apps_map, vtok);
-		size_t count = 0;
-		app_uid = 0;
-		amount = 0;
-
-		// Index overflow check
-		if (idx >= mapsize)
-			return RS_NO_APPS;
-
-		// Search the idx-th App/EXC using the resource
-		for (AppUseQtyMap_t::iterator apps_it = apps_map.begin();
-				apps_it != apps_map.end(); ++apps_it, ++count) {
-
-			// Skip until the required index has not been reached
-			if (count < idx)
-				continue;
-
-			// Return the amount of resource used and the App/EXC Uid
-			amount = apps_it->second;
-			app_uid = apps_it->first;
-			return RS_SUCCESS;
-		}
-
-		return RS_NO_APPS;
-	}
+			RViewToken_t vtok = 0); 
 
 	/**
 	 * @brief Acquire a given amount of resource
@@ -311,33 +231,8 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource acquired if success, 0 otherwise.
 	 */
-	inline uint64_t Acquire(uint64_t amount, AppPtr_t const & app_ptr,
-			RViewToken_t vtok = 0) {
-
-		ResourceStatePtr_t view;
-		if (vtok == 0)
-			// Default view if token = 0
-			view = default_view;
-		else {
-			// Retrieve the view (or create a new one)
-			RSHashMap_t::iterator it = state_views.find(vtok);
-			if (it != state_views.end())
-				view = it->second;
-			else {
-				view = ResourceStatePtr_t(new ResourceState());
-				state_views[vtok] = view;
-			}
-		}
-		// Try to set the new "used" value
-		uint64_t fut_used = view->used + amount;
-		if (fut_used > total)
-			return 0;
-		// Set new used value and application that requested the resource
-		view->used = fut_used;
-		view->apps[app_ptr->Uid()] = amount;
-		return amount;
-	}
-
+	 uint64_t Acquire(uint64_t amount, AppPtr_t const & app_ptr,
+			 RViewToken_t vtok = 0);
 	/**
 	 * @brief Release the resource
 	 *
@@ -347,61 +242,7 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource released
 	 */
-	inline uint64_t Release(AppPtr_t const & app_ptr,
-			RViewToken_t vtok =	0) {
-		ResourceStatePtr_t view;
-		if (vtok == 0)
-			// Default view
-			view = default_view;
-		else {
-			// Retrieve the state view
-			RSHashMap_t::iterator it = state_views.find(vtok);
-			if (it == state_views.end())
-				return 0;
-			view = it->second;
-		}
-
-		// Lookup the application using the resource
-		AppUseQtyMap_t::iterator lkp = view->apps.find(app_ptr->Uid());
-		if (lkp == view->apps.end())
-			return 0;
-
-		// Decrease the used value and remove the application
-		uint64_t used_by_app = lkp->second;
-		view->used -= used_by_app;	
-		view->apps.erase(app_ptr->Uid());
-
-		// Return the amount of resource released
-		return used_by_app;
-	}
-
-	/**
-	 * @brief Set a state view as default
-	 *
-	 * This call set the new default view to the one specified through the
-	 * token. It is needed when, for example, the Scheduler/Optimizer has
-	 * defined a new scheduling and resource allocation, by using a temporary
-	 * view. The following method allows it to say that such temporary must
-	 * become the new state of the system.
-	 * Note that we are assuming that Barbeque (with ResourceAccounter) will
-	 * consider the set of resource default view as its system resources state
-	 * view.
-	 *
-	 * @param vtok The token of the view
-	 * @return The token of the default view. Thus the new one if success, the
-	 * old one otherwise.
-	 */
-	inline RViewToken_t SetAsDefaultView(RViewToken_t vtok) {
-		// Retrieve the view
-		RSHashMap_t::iterator it = state_views.find(vtok);
-		if (it != state_views.end()) {
-			// Set the new default view
-			default_view = it->second;
-			state_views.erase(default_key);
-			default_key = vtok;
-		}
-		return default_key;
-	}
+	uint64_t Release(AppPtr_t const & app_ptr,RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Delete a state view
@@ -415,10 +256,14 @@ public:
 	 *
 	 * @param vtok The token of the view to delete
 	 */
-	inline void DeleteView(RViewToken_t vtok) {
-		if (vtok == default_key)
-			return;
-		state_views.erase(vtok);
+	void DeleteView(RViewToken_t vtok);
+
+	/**
+	 * @brief The number of state views of the resource
+	 * @return The size of the map
+	 */
+	inline size_t ViewCount() {
+		return state_views.size();
 	}
 
 private:
@@ -445,12 +290,6 @@ private:
 	 */
 	RSHashMap_t state_views;
 
-	/** The key of the default state view */
-	RViewToken_t default_key;
-
-	/** Pointer to the default state view */
-	ResourceStatePtr_t default_view;
-
 	/**
 	 * @brief Apps/EXCs using the resource
 	 *
@@ -461,24 +300,17 @@ private:
 	 * reference to the map
 	 */
 	uint16_t ApplicationsCount(AppUseQtyMap_t & apps_map,
-			RViewToken_t vtok = 0) {
-		// Default view if token = 0
-		if (vtok == 0) {
-			apps_map = default_view->apps;
-			return apps_map.size();
-		}
+			RViewToken_t vtok = 0);
 
-		// Retrieve the view from hash map otherwise
-		RSHashMap_t::iterator it = state_views.find(vtok);
-		if (it == state_views.end())
-			return 0;
-
-		// Return the size and a reference to the map
-		apps_map = it->second->apps;
-		return apps_map.size();
-	}
-
+	/**
+	 * @brief Get the view referenced by the token
+	 *
+	 * @param vtok The resource state view token
+	 * @return The ResourceState fo the referenced view
+	 */
+	ResourceStatePtr_t GetStateView(RViewToken_t vtok);
 };
+
 
 /**
  * @struct ResourceUsage
