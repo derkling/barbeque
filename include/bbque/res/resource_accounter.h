@@ -223,6 +223,15 @@ public:
 	void PutView(RViewToken_t tok);
 
 	/**
+	 * @brief Get the system resource state view
+	 *
+	 * @return The token of the system view
+	 */
+	inline RViewToken_t GetSystemView() {
+		return sys_view_token;
+	}
+
+	/**
 	 * @brief Print the resource hierarchy in a tree-like form
 	 */
 	inline void TreeView() {
