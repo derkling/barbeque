@@ -231,7 +231,7 @@ private:
 	/** The QoS value associated to the working mode */
 	float value;
 
-	/** The set of resources required (usages) */
+	/** The set of resources usages into the recipe  */
 	UsagesMap_t rsrc_usages;
 
 	/**
@@ -253,6 +253,22 @@ private:
 		bool changed;
 	} cluster_set;
 
+	/**
+	 * @brief ResourceUsage object referenced by template path
+	 *
+	 * @param temp_path The resource path (template)
+	 * @return The ResourceUsage object from the recipe map.
+	 */
+	UsagePtr_t ResourceUsageTempRef(std::string const & temp_path) const;
+
+	/**
+	 * @brief ResourceUsage object referenced by ID-based path
+	 *
+	 * @param path The resource path (ID-based)
+	 * @return The ResourceUsage object from the binding map. If this is
+	 * missing, the recipe map is considered.
+	 */
+	UsagePtr_t ResourceUsageRef(std::string const & path) const;
 };
 
 } // namespace app

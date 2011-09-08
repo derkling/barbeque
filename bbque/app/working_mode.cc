@@ -100,12 +100,58 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 
 uint64_t WorkingMode::ResourceUsageValue(
 		std::string const & _res_path) const {
-	// Get the resource usage object
-	UsagesMap_t::const_iterator it(rsrc_usages.find(_res_path));
-	if (it != rsrc_usages.end())
-		return it->second->value;
+	UsagePtr_t rsrc_usage_ptr;
+
+	if (IsPathTemplate(_res_path))
+		rsrc_usage_ptr = ResourceUsageTempRef(_res_path);
+	else
+		rsrc_usage_ptr = ResourceUsageRef(_res_path);
+
 	// Resource not used by this working mode
-	return 0;
+	if (!rsrc_usage_ptr)
+		return 0;
+
+	return rsrc_usage_ptr->value;
+}
+
+
+UsagePtr_t
+WorkingMode::ResourceUsageTempRef(std::string const & temp_path) const {
+	UsagesMap_t::const_iterator rsrc_it(rsrc_usages.begin());
+	UsagesMap_t::const_iterator it_end(rsrc_usages.end());
+
+	// Iterate over the map of resource usages retrieved from the recipe
+	for (; rsrc_it != it_end; ++rsrc_it) {
+		// Compare the path with the template of the current resource path
+		if (temp_path.compare(PathTemplate(rsrc_it->first)) != 0)
+			continue;
+
+		// Return the pointer to the ResourceUsage object
+		return rsrc_it->second;
+	}
+
+	// Search failed
+	return UsagePtr_t();
+}
+
+
+UsagePtr_t
+WorkingMode::ResourceUsageRef(std::string const & rsrc_path) const {
+	UsagesMap_t::const_iterator rsrc_it;
+
+	// If the resource binding is missing, perform the search in the map of
+	// resource usages parsed from the recipe
+	if (!sys_rsrc_usages)
+		rsrc_it = rsrc_usages.find(rsrc_path);
+	else
+		rsrc_it = sys_rsrc_usages->find(rsrc_path);
+
+	// Search failed
+	if (rsrc_it != rsrc_usages.end())
+		return UsagePtr_t();
+
+	// Return the ResourceUsage object
+	return rsrc_it->second;
 }
 
 
