@@ -534,11 +534,6 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		logger->Debug("{%s} availability = %llu", usage_it->first.c_str(),
 				rsrc_avail);
 
-		// If all the PEs have been booked return
-		if ((rsrc_avail == 0) &&
-				(PathTemplate(usage_it->first).compare(RSRC_CLUST_PE) == 0))
-			return SCHED_CLUSTER_FULL;
-
 		// If there is not enough resource return
 		if (rsrc_avail < usage_it->second->value) {
 			logger->Debug("Contention level: [%s] R=%d / A=%d",
@@ -546,7 +541,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 					usage_it->second->value,
 					rsrc_avail);
 
-			return SCHED_RSRC_UNAV;
+			rsrc_avail = 0.1 * usage_it->second->value;
 		}
 
 		// Update the contention level (inverse)
