@@ -32,11 +32,53 @@
 #include "bbque/plugins/logger.h"
 
 
+/** Metrics (class VALUE) declaration */
+#define YAMCA_VALUE_METRIC(NAME, DESC)\
+ {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, MetricsCollector::VALUE, 0}
+/** Increase value for the specified metric */
+#define YAMCA_ADD_VALUE(METRICS, INDEX, AMOUNT) \
+	mc.Add(METRICS[INDEX].mh, AMOUNT);
+/** Reset value for the specified metric */
+#define YAMCA_RESET_VALUE(METRICS, INDEX) \
+	mc.Reset(METRICS[INDEX].mh);
+
+/** Metrics (class SAMPLE) declaration */
+#define YAMCA_SAMPLE_METRIC(NAME, DESC)\
+ {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, MetricsCollector::SAMPLE, 0}
+/** Reset the timer used to evaluate metrics */
+#define YAMCA_RESET_TIMING(TIMER) \
+	TIMER.start();
+/** Acquire a new completion time sample */
+#define YAMCA_GET_TIMING(METRICS, INDEX, TIMER) \
+	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());
+
+
+#define SCHED_MAP_ESTIMATION\
+	((sizeof(float) + sizeof(SchedEntity_t))*sched_map.size() +\
+	 sizeof(sched_map))
+
+namespace bu = bbque::utils;
+
 namespace bbque { namespace plugins {
+
+/* Definition of metrics used by this module */
+MetricsCollector::MetricsCollection_t
+YamcaSchedPol::coll_metrics[YAMCA_METRICS_COUNT] = {
+	//-----  Value metrics
+	YAMCA_VALUE_METRIC("map",
+			"Size of the sched-entity map per cluster [bytes]"),
+	YAMCA_VALUE_METRIC("entities",
+			"Number of entity to schedule per cluster"),
+	//----- Timing metrics
+	YAMCA_SAMPLE_METRIC("ord", "Time to order SchedEntity into a cluster [ms]"),
+	YAMCA_SAMPLE_METRIC("mcomp", "Time for computing a single metrics [ms]"),
+	YAMCA_SAMPLE_METRIC("sel", "Time to assign AWMs to EXCs of a cluster [ms]")
+};
 
 
 YamcaSchedPol::YamcaSchedPol():
-	rsrc_acct(ResourceAccounter::GetInstance()) {
+	rsrc_acct(ResourceAccounter::GetInstance()),
+	mc(bu::MetricsCollector::GetInstance()) {
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(
@@ -52,6 +94,9 @@ YamcaSchedPol::YamcaSchedPol():
 
 	// Resource view counter
 	tok_counter = 0;
+
+	// Register all the metrics to collect
+	mc.Register(coll_metrics, YAMCA_METRICS_COUNT);
 }
 
 
@@ -145,6 +190,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 		AppPrio_t prio) {
 	ExitCode_t result;
 
+
 	//Order scheduling entities
 	for (uint16_t cl_id = 0; cl_id < num_clusters; ++cl_id) {
 		SchedEntityMap_t sched_map;
@@ -156,12 +202,15 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 			continue;
 		}
 
+		YAMCA_RESET_TIMING(yamca_tmr);
+
 		// Order schedule entities by metrics
 		result = OrderSchedEntity(sched_map, sv, prio, cl_id);
 		if (result == SCHED_CLUSTER_FULL) {
 			clusters_full[cl_id] = true;
 			continue;
 		}
+		YAMCA_GET_TIMING(coll_metrics, YAMCA_ORDER_TIME, yamca_tmr);
 
 		// Nothing to schedule in this cluster
 		if (sched_map.empty())
@@ -170,8 +219,15 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 		if (result != SCHED_OK)
 			return result;
 
+		YAMCA_ADD_VALUE(coll_metrics, YAMCA_SCHEDMAP_SIZE, SCHED_MAP_ESTIMATION);
+		YAMCA_ADD_VALUE(coll_metrics, YAMCA_NUM_ENTITY, sched_map.size());
+
+		YAMCA_RESET_TIMING(yamca_tmr);
+
 		// For each application schedule a working mode
 		SelectWorkingModes(sched_map);
+
+		YAMCA_GET_TIMING(coll_metrics, YAMCA_SELECT_TIME, yamca_tmr);
 	}
 
 	return SCHED_OK;
@@ -367,6 +423,9 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 	ExitCode_t result;
 	metrics = 0.0;
 
+	Timer comp_tmr;
+	YAMCA_RESET_TIMING(comp_tmr);
+
 	// If the resource binding implies migration from a cluster to another we
 	// have to evaluate the overheads
 	float migr_cost = GetMigrationOverhead(papp, wm, cl_id);
@@ -385,6 +444,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 	logger->Debug("AWM value: %.2f", wm->Value());
 	metrics = (wm->Value() - reconf_cost - migr_cost) / cont_level;
 
+	YAMCA_GET_TIMING(coll_metrics, YAMCA_METCOMP_TIME, comp_tmr);
 	return SCHED_OK;
 }
 
