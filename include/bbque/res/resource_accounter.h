@@ -324,6 +324,41 @@ private:
 	/** Mutex protecting resource release and acquisition */
 	std::recursive_mutex status_mtx;
 
+	/** The tree of all the resources in the system.*/
+	ResourceTree resources;
+
+	/** The set of all the resource paths registered */
+	std::set<std::string> paths;
+
+	/** Keep track of the max length between resources path string */
+	uint8_t path_max_len;
+
+	/**
+	 * Map containing the pointers to the map of resource usages specified in
+	 * the current working modes of each application. The key is the view
+	 * token. For each view an application can hold just one set of resource
+	 * usages.
+	 */
+	AppUsagesViewsMap_t usages_per_views;
+
+	/**
+	 * Keep track of the resources allocated for each view. This data
+	 * structure is needed to supports easily a view deletion or to set a view
+	 * as the new system state.
+	 */
+	ResourceViewsMap_t rsrc_per_views;
+
+	/**
+	 * Pointer (shared) to the map of applications resource usages, currently
+	 * describing the resources system state (default view).
+	 */
+	AppUsagesMapPtr_t sys_usages_view;
+
+	/**
+	 * The token referencing the system resources state (default view).
+	 */
+	RViewToken_t sys_view_token;
+
 	/**
 	 * Default constructor
 	 */
@@ -470,41 +505,6 @@ private:
 	 * @return The token referencing the system state view.
 	 */
 	RViewToken_t SetView(RViewToken_t vtok);
-
-	/** The tree of all the resources in the system.*/
-	ResourceTree resources;
-
-	/** The set of all the resource paths registered */
-	std::set<std::string> paths;
-
-	/** Keep track of the max length between resources path string */
-	uint8_t path_max_len;
-
-	/**
-	 * Map containing the pointers to the map of resource usages specified in
-	 * the current working modes of each application. The key is the view
-	 * token. For each view an application can hold just one set of resource
-	 * usages.
-	 */
-	AppUsagesViewsMap_t usages_per_views;
-
-	/**
-	 * Pointer (shared) to the map of applications resource usages, currently
-	 * describing the resources system state (default view).
-	 */
-	AppUsagesMapPtr_t sys_usages_view;
-
-	/**
-	 * The token referencing the system resources state (default view).
-	 */
-	RViewToken_t sys_view_token;
-
-	/**
-	 * Keep track of the resources allocated for each view. This data
-	 * structure is needed to supports easily a view deletion or to set a view
-	 * as the new system state.
-	 */
-	ResourceViewsMap_t rsrc_per_views;
 
 };
 
