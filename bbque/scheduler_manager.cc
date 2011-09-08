@@ -32,7 +32,6 @@
 
 #include "bbque/utils/utility.h"
 
-#define SCHEDULER_MANAGER_NAMESPACE "bq.sm"
 
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\
