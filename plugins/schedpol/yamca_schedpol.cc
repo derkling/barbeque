@@ -52,6 +52,10 @@
 #define YAMCA_GET_TIMING(METRICS, INDEX, TIMER) \
 	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());
 
+/* Get a new samplefor the metrics */
+#define YAMCA_GET_SAMPLE(METRICS, INDEX, VALUE) \
+	mc.AddSample(METRICS[INDEX].mh, VALUE);
+
 
 #define SCHED_MAP_ESTIMATION\
 	((sizeof(float) + sizeof(SchedEntity_t))*sched_map.size() +\
@@ -65,9 +69,9 @@ namespace bbque { namespace plugins {
 MetricsCollector::MetricsCollection_t
 YamcaSchedPol::coll_metrics[YAMCA_METRICS_COUNT] = {
 	//-----  Value metrics
-	YAMCA_VALUE_METRIC("map",
+	YAMCA_SAMPLE_METRIC("map",
 			"Size of the sched-entity map per cluster [bytes]"),
-	YAMCA_VALUE_METRIC("entities",
+	YAMCA_SAMPLE_METRIC("entities",
 			"Number of entity to schedule per cluster"),
 	//----- Timing metrics
 	YAMCA_SAMPLE_METRIC("ord", "Time to order SchedEntity into a cluster [ms]"),
@@ -210,6 +214,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 			clusters_full[cl_id] = true;
 			continue;
 		}
+
 		YAMCA_GET_TIMING(coll_metrics, YAMCA_ORDER_TIME, yamca_tmr);
 
 		// Nothing to schedule in this cluster
@@ -219,8 +224,9 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 		if (result != SCHED_OK)
 			return result;
 
-		YAMCA_ADD_VALUE(coll_metrics, YAMCA_SCHEDMAP_SIZE, SCHED_MAP_ESTIMATION);
-		YAMCA_ADD_VALUE(coll_metrics, YAMCA_NUM_ENTITY, sched_map.size());
+		YAMCA_GET_SAMPLE(coll_metrics, YAMCA_SCHEDMAP_SIZE,
+				SCHED_MAP_ESTIMATION);
+		YAMCA_GET_SAMPLE(coll_metrics, YAMCA_NUM_ENTITY, sched_map.size());
 
 		YAMCA_RESET_TIMING(yamca_tmr);
 
