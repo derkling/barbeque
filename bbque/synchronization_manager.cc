@@ -39,8 +39,6 @@
 
 #include "bbque/utils/utility.h"
 
-#define SYNCHRONIZATION_MANAGER_NAMESPACE "bq.sp"
-
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\
  {SYNCHRONIZATION_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::COUNTER, 0}
