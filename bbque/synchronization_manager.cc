@@ -76,6 +76,7 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	//----- Timing metrics
 	SM_SAMPLE_METRIC("syncp.avg.time",  "Avg SyncP execution t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.pre",   "  PreChange  exe t[ms]"),
+	SM_SAMPLE_METRIC("syncp.avg.lat",   "  Pre-Sync Lat   t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.sync",  "  SyncChange exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.do",    "  DoChange   exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.post",  "  PostChange exe t[ms]"),
@@ -480,6 +481,7 @@ void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
 
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
+	SynchronizationPolicyIF::SyncLatency_t syncLatency;
 	ExitCode_t result;
 
 	if (syncState == ApplicationStatusIF::SYNC_NONE) {
@@ -493,10 +495,11 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 		return result;
 
 	// Wait for the policy specified sync point
-	logger->Debug("Wait sync point for %d[ms]", policy->EstimatedSyncTime());
+	syncLatency = policy->EstimatedSyncTime();
+	logger->Debug("Wait sync point for %d[ms]", syncLatency);
 	std::this_thread::sleep_for(
-			std::chrono::milliseconds(
-				policy->EstimatedSyncTime()));
+			std::chrono::milliseconds(syncLatency));
+	SM_ADD_SAMPLE(metrics, SM_SYNCP_TIME_LATENCY, syncLatency);
 
 	result = Sync_SyncChange(syncState);
 	if (result != OK)
