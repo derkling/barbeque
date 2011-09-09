@@ -74,6 +74,7 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	SM_COUNTER_METRIC("comp", "SyncP completion count"),
 	SM_COUNTER_METRIC("excs", "Total EXC reconf count"),
 	//----- Timing metrics
+	SM_SAMPLE_METRIC("syncp.avg.time",  "Avg SyncP execution t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.pre",   "  PreChange  exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.sync",  "  SyncChange exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.do",    "  DoChange   exe t[ms]"),
@@ -480,6 +481,7 @@ void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	ExitCode_t result;
+	bu::Timer syncp_tmr;
 
 	if (syncState == ApplicationStatusIF::SYNC_NONE) {
 		logger->Warn("Synchronization FAILED (Error: empty EXCs list)");
@@ -500,6 +502,9 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 			std::chrono::milliseconds(
 				policy->EstimatedSyncTime()));
 
+	// Reset the SyncP overall timer
+	SM_RESET_TIMING(syncp_tmr);
+
 	result = Sync_SyncChange(syncState);
 	if (result != OK)
 		return result;
@@ -511,6 +516,9 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	result = Sync_PostChange(syncState);
 	if (result != OK)
 		return result;
+	
+	// Collecing overall SyncP execution time
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME, syncp_tmr);
 
 	// Account for SyncP completed
 	SM_COUNT_EVENT(metrics, SM_SYNCP_COMP);
