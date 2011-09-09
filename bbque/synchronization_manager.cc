@@ -481,16 +481,12 @@ void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	ExitCode_t result;
-	bu::Timer syncp_tmr;
 
 	if (syncState == ApplicationStatusIF::SYNC_NONE) {
 		logger->Warn("Synchronization FAILED (Error: empty EXCs list)");
 		assert(syncState != ApplicationStatusIF::SYNC_NONE);
 		return OK;
 	}
-
-	// Account for SyncP runs
-	SM_COUNT_EVENT(metrics, SM_SYNCP_RUNS);
 
 	result = Sync_PreChange(syncState);
 	if (result != OK)
@@ -501,9 +497,6 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	std::this_thread::sleep_for(
 			std::chrono::milliseconds(
 				policy->EstimatedSyncTime()));
-
-	// Reset the SyncP overall timer
-	SM_RESET_TIMING(syncp_tmr);
 
 	result = Sync_SyncChange(syncState);
 	if (result != OK)
@@ -516,12 +509,6 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	result = Sync_PostChange(syncState);
 	if (result != OK)
 		return result;
-	
-	// Collecing overall SyncP execution time
-	SM_GET_TIMING(metrics, SM_SYNCP_TIME, syncp_tmr);
-
-	// Account for SyncP completed
-	SM_COUNT_EVENT(metrics, SM_SYNCP_COMP);
 
 	return OK;
 }
@@ -529,8 +516,9 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
 	ApplicationStatusIF::SyncState_t syncState;
-	ExitCode_t result;
 	br::ResourceAccounter::ExitCode_t raResult;
+	bu::Timer syncp_tmr;
+	ExitCode_t result;
 
 	// TODO add here proper tracing/monitoring events for statistics
 	// collection
@@ -538,6 +526,12 @@ SynchronizationManager::SyncSchedule() {
 	logger->Info("Synchronization [%d] START", ++sync_count);
 	am.ReportStatusQ();
 	am.ReportSyncQ();
+
+	// Account for SyncP runs
+	SM_COUNT_EVENT(metrics, SM_SYNCP_RUNS);
+
+	// Reset the SyncP overall timer
+	SM_RESET_TIMING(syncp_tmr);
 
 	// TODO here a synchronization decision policy is used
 	// to decide if a synchronization should be run or not, e.g. based on
@@ -585,6 +579,12 @@ SynchronizationManager::SyncSchedule() {
 				"failed");
 		return ABORTED;
 	}
+
+	// Collecing overall SyncP execution time
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME, syncp_tmr);
+
+	// Account for SyncP completed
+	SM_COUNT_EVENT(metrics, SM_SYNCP_COMP);
 
 	logger->Info("Synchronization [%d] DONE", sync_count);
 	am.ReportStatusQ();
