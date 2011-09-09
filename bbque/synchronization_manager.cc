@@ -56,7 +56,7 @@
 #define SM_GET_TIMING(METRICS, INDEX, TIMER) \
 	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());
 /** Acquire a new EXC reconfigured sample */
-#define SM_ADD_RECONF(METRICS, INDEX, COUNT) \
+#define SM_ADD_SAMPLE(METRICS, INDEX, COUNT) \
 	mc.AddSample(METRICS[INDEX].mh, COUNT);
 
 namespace bu = bbque::utils;
@@ -444,7 +444,7 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 	logger->Debug("STEP 4: postChange() DONE");
 
 	// Collect statistics on average EXCSs reconfigured.
-	SM_ADD_RECONF(metrics, SM_SYNCP_AVGE, excs);
+	SM_ADD_SAMPLE(metrics, SM_SYNCP_AVGE, excs);
 
 	return OK;
 }
