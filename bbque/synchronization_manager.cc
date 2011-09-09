@@ -73,6 +73,8 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	SM_COUNTER_METRIC("runs", "SyncP executions count"),
 	SM_COUNTER_METRIC("comp", "SyncP completion count"),
 	SM_COUNTER_METRIC("excs", "Total EXC reconf count"),
+	SM_COUNTER_METRIC("sync_hit",  "Syncs HIT count"),
+	SM_COUNTER_METRIC("sync_miss", "Syncs MISS count"),
 	//----- Timing metrics
 	SM_SAMPLE_METRIC("syncp.avg.time",  "Avg SyncP execution t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.pre",   "  PreChange  exe t[ms]"),
@@ -317,6 +319,9 @@ SynchronizationManager::Sync_SyncChange(
 			papp->Disable();
 			// Remove the respose future
 			rsp_map.erase(resp_it);
+
+			// Accounting for syncpoints missed
+			SM_COUNT_EVENT(metrics, SM_SYNCP_SYNC_MISS);
 			continue;
 		}
 
@@ -331,6 +336,9 @@ SynchronizationManager::Sync_SyncChange(
 			// FIXME This case should be handled
 			assert(false);
 		}
+
+		// Accounting for syncpoints missed
+		SM_COUNT_EVENT(metrics, SM_SYNCP_SYNC_HIT);
 
 		logger->Info("STEP 2: <--------- OK -- [%s]", papp->StrId());
 
