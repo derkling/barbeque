@@ -33,9 +33,40 @@
 
 #include <signal.h>
 
+/** Metrics (class COUNTER) declaration */
+#define RP_COUNTER_METRIC(NAME, DESC)\
+ {RPC_CHANNEL_NAMESPACE".prx."NAME, DESC, MetricsCollector::COUNTER, 0}
+/** Increase counter for the specified metric */
+#define RP_COUNT_EVENT(METRICS, INDEX) \
+	mc.Count(METRICS[INDEX].mh);
+/** Add the specified amount to the specified counter metric */
+#define RP_COUNT_AMOUNT(METRICS, INDEX, AMOUNT) \
+	mc.Count(METRICS[INDEX].mh, AMOUNT);
+
+/** Metrics (class SAMPLE) declaration */
+#define RP_SAMPLE_METRIC(NAME, DESC)\
+ {RPC_CHANNEL_NAMESPACE".prx."NAME, DESC, MetricsCollector::SAMPLE, 0}
+/** Acquire a new EXC reconfigured sample */
+#define RP_ADD_SAMPLE(METRICS, INDEX, COUNT) \
+	mc.AddSample(METRICS[INDEX].mh, COUNT);
+
+namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 
 namespace bbque {
+
+/* Definition of metrics used by this module */
+MetricsCollector::MetricsCollection_t
+RPCProxy::metrics[RP_METRICS_COUNT] = {
+	//----- Event counting metrics
+	RP_COUNTER_METRIC("bytes.tx", "Total BYTES sent by RPC messages"),
+	RP_COUNTER_METRIC("bytes.rx", "Total BYTES received by RPC messages"),
+	RP_COUNTER_METRIC("msgs.tx",  "Total RPC messages sent"),
+	RP_COUNTER_METRIC("msgs.rx",  "Total RPC messages received"),
+	//----- Couting statistics
+	RP_SAMPLE_METRIC("queue",  "Avg length of the RX queue"),
+
+};
 
 /**
  * Specialize the ObjectAdapter template for RPCChannel plugins
@@ -44,6 +75,7 @@ typedef bp::ObjectAdapter<bp::RPCChannelAdapter, C_RPCChannel>
 	RPCChannel_ObjectAdapter;
 
 RPCProxy::RPCProxy(std::string const &id) :
+	mc(bu::MetricsCollector::GetInstance()),
 	done(false) {
 
 	// Get a logger
@@ -65,6 +97,9 @@ RPCProxy::RPCProxy(std::string const &id) :
 	// Keep track of the low-level channel module
 	channelLoaded = true;
 	rpc_channel = std::unique_ptr<RPCChannelIF>((RPCChannelIF*)module);
+
+	//---------- Setup all the module metrics
+	mc.Register(metrics, RP_METRICS_COUNT);
 
 }
 
@@ -119,9 +154,9 @@ int RPCProxy::Init() {
 size_t RPCProxy::RecvMessage(rpc_msg_ptr_t & msg) {
 	std::unique_lock<std::mutex> queue_status_ul(msg_queue_mtx);
 	channel_msg_t ch_msg;
-	size_t size;
+	size_t size = msg_queue.size();
 
-	if (!msg_queue.size()) {
+	if (!size) {
 		// Wait for at least one element being pushed into the queue
 		logger->Debug("PRXY RPC: waiting for new message");
 		queue_ready_cv.wait(queue_status_ul);
@@ -135,6 +170,9 @@ size_t RPCProxy::RecvMessage(rpc_msg_ptr_t & msg) {
 	// Setup return values
 	msg = ch_msg.first;
 	size = ch_msg.second;
+
+	// Collect stats on queue length
+	RP_ADD_SAMPLE(metrics, RP_RX_QUEUE, size);
 
 	logger->Debug("PRXY RPC: dq message [sze: %d]", size);
 
@@ -152,6 +190,11 @@ void RPCProxy::ReleasePluginData(plugin_data_t & pd) {
 
 size_t RPCProxy::SendMessage(plugin_data_t & pd,
 		rpc_msg_ptr_t msg, size_t count) {
+
+	// Collect stats on TX messages
+	RP_COUNT_EVENT(metrics, RP_MSGS_TX);
+	RP_COUNT_AMOUNT(metrics, RP_BYTES_TX, count);
+
 	return rpc_channel->SendMessage(pd, msg, count);
 }
 
@@ -187,6 +230,10 @@ void RPCProxy::EnqueueMessages() {
 
 		logger->Debug("PRXY RPC: RX [typ: %d, sze: %d]",
 				msg->typ, size);
+
+		// Collect stats on RX messages
+		RP_COUNT_EVENT(metrics, RP_MSGS_RX);
+		RP_COUNT_AMOUNT(metrics, RP_BYTES_RX, size);
 
 		// Enqueue the message
 		queue_status_ul.lock();

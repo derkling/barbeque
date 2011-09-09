@@ -28,12 +28,15 @@
 #include "bbque/plugins/rpc_channel.h"
 #include "bbque/plugins/logger.h"
 
+#include "bbque/utils/metrics_collector.h"
+
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <queue>
 
 using bbque::plugins::RPCChannelIF;
+using bbque::utils::MetricsCollector;
 
 namespace bbque {
 
@@ -139,6 +142,8 @@ private:
 	 */
 	static RPCProxy *instance;
 
+	MetricsCollector & mc;
+
 	static bool channelLoaded;
 
 	/**
@@ -208,6 +213,19 @@ private:
 	 */
 	std::condition_variable queue_ready_cv;
 
+	typedef enum RpcPrxMetrics {
+		//----- Event counting metrics
+		RP_BYTES_TX = 0,
+		RP_BYTES_RX,
+		RP_MSGS_TX,
+		RP_MSGS_RX,
+		//----- Couting statistics
+		RP_RX_QUEUE,
+
+		RP_METRICS_COUNT
+	} RpcPrxMetrics_t;
+
+	static MetricsCollector::MetricsCollection_t metrics[RP_METRICS_COUNT];
 	/**
 	 * 
 	 */
