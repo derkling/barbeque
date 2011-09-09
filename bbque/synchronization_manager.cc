@@ -82,6 +82,7 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	SM_SAMPLE_METRIC("syncp.avg.post",  "  PostChange exe t[ms]"),
 	//----- Couting statistics
 	SM_SAMPLE_METRIC("avge", "Average EXCs reconf"),
+	SM_SAMPLE_METRIC("app.SyncLat", "Average SyncLatency declared"),
 
 };
 
@@ -227,6 +228,9 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 		logger->Info("STEP 1: <--------- OK -- [%s]", papp->StrId());
 		logger->Info("STEP 1: [%s] declared syncLatency %d[ms]",
 				papp->StrId(), presp->syncLatency);
+
+		// Collect stats on declared sync latency
+		SM_ADD_SAMPLE(metrics, SM_SYNCP_APP_SYNCLAT, presp->syncLatency);
 
 		syncp_result = policy->CheckLatency(papp, presp->syncLatency);
 		// TODO: check the POLICY required action

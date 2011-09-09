@@ -123,6 +123,7 @@ private:
 		SM_SYNCP_TIME_POSTCHANGE,
 		//----- Couting statistics
 		SM_SYNCP_AVGE,
+		SM_SYNCP_APP_SYNCLAT,
 
 		SM_METRICS_COUNT
 	} SyncMgrMetrics_t;
