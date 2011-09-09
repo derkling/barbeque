@@ -74,10 +74,10 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	SM_COUNTER_METRIC("comp", "SyncP completion count"),
 	SM_COUNTER_METRIC("excs", "Total EXC reconf count"),
 	//----- Timing metrics
-	SM_SAMPLE_METRIC("pre",  "SyncP_PreChange  exe t[ms]"),
-	SM_SAMPLE_METRIC("sync", "SyncP_SyncChange exe t[ms]"),
-	SM_SAMPLE_METRIC("do",   "SyncP_DoChange   exe t[ms]"),
-	SM_SAMPLE_METRIC("post", "SyncP_PostChange exe t[ms]"),
+	SM_SAMPLE_METRIC("syncp.avg.pre",   "  PreChange  exe t[ms]"),
+	SM_SAMPLE_METRIC("syncp.avg.sync",  "  SyncChange exe t[ms]"),
+	SM_SAMPLE_METRIC("syncp.avg.do",    "  DoChange   exe t[ms]"),
+	SM_SAMPLE_METRIC("syncp.avg.post",  "  PostChange exe t[ms]"),
 	//----- Couting statistics
 	SM_SAMPLE_METRIC("avge", "Average EXCs reconf"),
 
@@ -234,7 +234,7 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_PRECHANGE, sm_tmr);
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME_PRECHANGE, sm_tmr);
 	logger->Debug("STEP 1: preChange() DONE");
 
 	return OK;
@@ -333,7 +333,7 @@ SynchronizationManager::Sync_SyncChange(
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_SYNCCHANGE, sm_tmr);
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME_SYNCCHANGE, sm_tmr);
 	logger->Debug("STEP 2: syncChange() DONE");
 
 	return OK;
@@ -373,7 +373,7 @@ SynchronizationManager::Sync_DoChange(ApplicationStatusIF::SyncState_t syncState
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_DOCHANGE, sm_tmr);
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME_DOCHANGE, sm_tmr);
 	logger->Debug("STEP 3: doChange() DONE");
 
 	return OK;
@@ -439,7 +439,7 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_POSTCHANGE, sm_tmr);
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME_POSTCHANGE, sm_tmr);
 	logger->Debug("STEP 4: postChange() DONE");
 
 	// Collect statistics on average EXCSs reconfigured.
