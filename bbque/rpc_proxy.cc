@@ -47,7 +47,7 @@ RPCProxy::RPCProxy(std::string const &id) :
 	done(false) {
 
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(RPC_CHANNEL_NAMESPACE"prx");
+	plugins::LoggerIF::Configuration conf(RPC_CHANNEL_NAMESPACE".prx");
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger!=NULL);
 

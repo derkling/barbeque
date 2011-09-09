@@ -30,7 +30,7 @@
 
 #include <cstdint>
 
-#define MODULE_NAMESPACE RPC_CHANNEL_NAMESPACE"fif"
+#define MODULE_NAMESPACE RPC_CHANNEL_NAMESPACE".fif"
 
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;

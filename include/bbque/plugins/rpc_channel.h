@@ -26,7 +26,7 @@
 
 #include <memory>
 
-#define RPC_CHANNEL_NAMESPACE "rpc."
+#define RPC_CHANNEL_NAMESPACE "bq.rpc"
 
 using bbque::rtlib::rpc_msg_header_t;
 
