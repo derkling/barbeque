@@ -244,8 +244,8 @@ private:
 	 * @param cont_level The contention level value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t GetContentionLevel(AwmPtr_t const & wm, int cl_id,
-			float & cont_level);
+	ExitCode_t GetContentionLevel(AwmPtr_t const & wm, AwmPtr_t const & wm_min,
+			int cl_id, float & cont_level);
 
 	/**
 	 * @brief Compute the resource contention level
@@ -254,8 +254,8 @@ private:
 	 * @param cont_level The contention level value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t ComputeContentionLevel(UsagesMapPtr_t const & rsrc_usages,
-			float & cont_level);
+	ExitCode_t ComputeContentionLevel(AwmPtr_t const & wm_min,
+			UsagesMapPtr_t const & rsrc_usages, float & cont_level);
 
 };
 
