@@ -26,9 +26,15 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/plugin.h"
 
+#include "bbque/utils/timer.h"
+#include "bbque/utils/metrics_collector.h"
+
 #include <cstdint>
 
 #define SYNCHRONIZATION_POLICY_NAME "sasb"
+
+using bbque::utils::Timer;
+using bbque::utils::MetricsCollector;
 
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
@@ -99,6 +105,29 @@ private:
 	 * @brief Keep track of the best estimation for the sync latency
 	 */
 	SyncLatency_t max_latency;
+
+	/** The metrics collector */
+	MetricsCollector & mc;
+
+	/** The set of metrics collected by this plugin */
+	typedef enum SyncPolMetrics {
+		//----- Event counting metrics
+		SM_SASB_RUNS = 0,
+		//----- Timing metrics
+		SM_SASB_TIME_START,
+		SM_SASB_TIME_RECONF,
+		SM_SASB_TIME_MIGREC,
+		SM_SASB_TIME_MIGRATE,
+		SM_SASB_TIME_BLOCKED,
+
+		SM_METRICS_COUNT
+	} SyncMgrMetrics_t;
+
+	/** The High-Resolution timer used for profiling */
+	Timer sm_tmr;
+
+	/** The collection of metrics used by this plugin */
+	static MetricsCollector::MetricsCollection_t metrics[SM_METRICS_COUNT];
 
 	/**
 	 * @brief   The plugins constructor

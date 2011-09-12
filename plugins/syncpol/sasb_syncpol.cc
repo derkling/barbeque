@@ -21,15 +21,54 @@
 
 #include "sasb_syncpol.h"
 
+#include "bbque/synchronization_manager.h"
 #include "bbque/modules_factory.h"
 
 #include <iostream>
 #include <random>
 
+/** Metrics (class COUNTER) declaration */
+#define SM_COUNTER_METRIC(NAME, DESC)\
+ {SYNCHRONIZATION_MANAGER_NAMESPACE"."SYNCHRONIZATION_POLICY_NAME"."NAME,\
+	 DESC, MetricsCollector::COUNTER, 0}
+/** Increase counter for the specified metric */
+#define SM_COUNT_EVENT(METRICS, INDEX) \
+	mc.Count(METRICS[INDEX].mh);
+
+/** Metrics (class SAMPLE) declaration */
+#define SM_SAMPLE_METRIC(NAME, DESC)\
+ {SYNCHRONIZATION_MANAGER_NAMESPACE"."SYNCHRONIZATION_POLICY_NAME"."NAME,\
+	 DESC, MetricsCollector::SAMPLE, 0}
+/** Reset the timer used to evaluate metrics */
+#define SM_START_TIMER(TIMER) \
+	TIMER.start();
+/** Acquire a new completion time sample */
+#define SM_GET_TIMING(METRICS, INDEX, TIMER) \
+	if (TIMER.Running()) {\
+		mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());\
+		TIMER.stop();\
+	}
+
+namespace bu = bbque::utils;
+
 namespace bbque { namespace plugins {
 
+/* Definition of metrics used by this module */
+MetricsCollector::MetricsCollection_t
+SasbSyncPol::metrics[SM_METRICS_COUNT] = {
+	//----- Event counting metrics
+	SM_COUNTER_METRIC("runs", "SASB SyncP executions count"),
+	//----- Timing metrics
+	SM_SAMPLE_METRIC("start", "START queue sync t[ms]"),
+	SM_SAMPLE_METRIC("rec",   "RECONF queue sync t[ms]"),
+	SM_SAMPLE_METRIC("mreg",  "MIGREC queue sync t[ms]"),
+	SM_SAMPLE_METRIC("mig",   "MIGRATE queue sync t[ms]"),
+	SM_SAMPLE_METRIC("block", "BLOCKED queue sync t[ms]"),
+};
+
 SasbSyncPol::SasbSyncPol() :
-	status(STEP10) {
+	status(STEP10),
+	mc(bu::MetricsCollector::GetInstance()) {
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(
@@ -41,6 +80,9 @@ SasbSyncPol::SasbSyncPol() :
 			<< this << "] FAILED (Error: missing logger module)" << std::endl;
 		assert(logger);
 	}
+
+	//---------- Setup all the module metrics
+	mc.Register(metrics, SM_METRICS_COUNT);
 
 	logger->Debug("Built a new dynamic object[%p]\n", this);
 
@@ -149,47 +191,65 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step4(
 
 ApplicationStatusIF::SyncState_t SasbSyncPol::GetApplicationsQueue(
 			bbque::SystemView & sv, bool restart) {
+	static ApplicationStatusIF::SyncState_t servedSyncState;
 	ApplicationStatusIF::SyncState_t syncState;
+
+	// Get timings for previously synched queue
+	if (servedSyncState != ApplicationStatusIF::SYNC_NONE) {
+		SM_GET_TIMING(metrics, SM_SASB_TIME_START + \
+				(servedSyncState - ApplicationStatusIF::STARTING),
+				sm_tmr);
+	}
 
 	if (restart) {
 		logger->Debug("Resetting sync status");
+		servedSyncState = ApplicationStatusIF::SYNC_NONE;
 		status = STEP10;
+		// Account for Policy runs
+		SM_COUNT_EVENT(metrics, SM_SASB_RUNS);
 	}
 
 	// Resetting the maximum latency since a new queue is going to be served,
 	// thus a new SyncP is going to start
 	max_latency = 0;
 
+	syncState = ApplicationStatusIF::SYNC_NONE;
 	for( ; status<=STEP40; ++status) {
 		switch(status) {
 		case STEP10:
 			syncState = step1(sv);
 			if (syncState != ApplicationStatusIF::SYNC_NONE)
-				return syncState;
+				goto do_sync;
 			continue;
 		case STEP21:
 		case STEP22:
 		case STEP23:
 			syncState = step2(sv);
 			if (syncState != ApplicationStatusIF::SYNC_NONE)
-				return syncState;
+				goto do_sync;
 			continue;
 		case STEP31:
 		case STEP32:
 		case STEP33:
 			syncState = step3(sv);
 			if (syncState != ApplicationStatusIF::SYNC_NONE)
-				return syncState;
+				goto do_sync;
 			break;
 		case STEP40:
 			syncState = step4(sv);
 			if (syncState != ApplicationStatusIF::SYNC_NONE)
-				return syncState;
+				goto do_sync;
 			break;
 		};
 	}
 
-	return ApplicationStatusIF::SYNC_NONE;
+	servedSyncState = ApplicationStatusIF::SYNC_NONE;
+	return servedSyncState;
+
+do_sync:
+	servedSyncState = syncState;
+	SM_START_TIMER(sm_tmr);
+	return syncState;
 
 }
 
