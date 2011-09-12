@@ -330,6 +330,10 @@ void ResourceManager::EvtBbqExit() {
 	logger->Notice("Terminating Barbeque...");
 	done = true;
 
+	// Dumping collected stats before termination
+	EvtBbqUsr1();
+	EvtBbqUsr2();
+
 	// Stop applications
 	papp = am.GetFirst(apps_it);
 	for ( ; papp; papp = am.GetNext(apps_it)) {
