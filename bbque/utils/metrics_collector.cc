@@ -310,7 +310,7 @@ MetricsCollector::PeriodSample(MetricHandler_t mh, double & last_period) {
 void
 MetricsCollector::DumpCounter(CounterMetric_t *m) {
 	logger->Notice(
-		" %-20s | %9ld : %s",
+		" %-20s | %9llu : %s",
 		m->name, m->count, m->desc);
 }
 
