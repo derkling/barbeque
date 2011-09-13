@@ -714,7 +714,7 @@ uint32_t BbqueRPC::GetSyncLatency(pregExCtx_t prec) {
 
 	// Compute a reasonale sync point esimation
 	// we assume a NORMAL distribution of execution times
-	syncDelay = _avg + (2 * sqrt(_var));
+	syncDelay = _avg + (10 * sqrt(_var));
 
 	// Discount the already passed time since lasy sync point
 	elapsedTime = prec->exc_tmr.getElapsedTimeMs();
