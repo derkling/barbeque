@@ -868,7 +868,7 @@ void ApplicationProxy::CompleteTransaction(pchMsg_t & pmsg) {
 	pcs->pmsg = pmsg;
 
 	// Notify command session
-	//std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
+	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
 	(pcs->resp_cv).notify_one();
 
 }
