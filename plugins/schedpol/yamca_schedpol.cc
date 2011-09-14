@@ -25,6 +25,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <iostream>
+#include <thread>
 
 #include "bbque/modules_factory.h"
 #include "bbque/app/working_mode.h"
@@ -358,61 +359,94 @@ inline bool YamcaSchedPol::CheckSkipConditions(AppPtr_t const & papp) {
 }
 
 
+void join_thread(std::thread & t) {
+	t.join();
+}
+
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		SchedEntityMap_t & sched_map,
 		AppPtr_t const & papp,
 		int cl_id) {
+	std::list<std::thread> awm_thds;
+
 	// Working modes
 	AwmPtrList_t const * awms = papp->WorkingModes();
 	AwmPtrList_t::const_iterator awm_it(awms->begin());
 	AwmPtrList_t::const_iterator end_awm(awms->end());
+
 	for (; awm_it != end_awm; ++awm_it) {
-		logger->Debug("Insert: [%s] AWM{%d} metrics computing...", papp->StrId(),
-				(*awm_it)->Id());
 
-		// Skip if the application has been disabled/stopped in the meanwhile
-		if (papp->Disabled()) {
-			logger->Debug("Insert: [%s] disabled/stopped during scheduling [Ord]",
-					papp->StrId());
-			return SCHED_SKIP_APP;
-		}
-
-		// Metrics computation
-		float * metrics = new float;
-		ExitCode_t result =
-			MetricsComputation(papp, (*awm_it), cl_id, *metrics);
-
-		switch (result) {
-		case SCHED_CLUSTER_FULL:
-			logger->Warn("Insert: No more PEs in cluster %d", cl_id);
-			return result;
-
-		case SCHED_RSRC_UNAV:
-			logger->Warn("Insert: [%s] AWM{%d} CL=%d unavailable resources "
-					"[RA:%d]", papp->StrId(), (*awm_it)->Id(), cl_id, result);
-			continue;
-
-		case SCHED_ERROR:
-			logger->Error("Insert: An error occurred [ret %d]", result);
-			return result;
-
-		default:
-			break;
-		}
-
-		// Set the metrics value and insert the entity into the map
-		(*awm_it)->SetAttribute(
-				SCHEDULER_POLICY_NAME, "metrics", VoidPtr_t(metrics));
-		sched_map.insert(std::pair<float, SchedEntity_t>(
-					static_cast<float>(*metrics),
-					SchedEntity_t(papp, (*awm_it))));
-
-		logger->Info("Insert: [%s] AWM{%d} CL=%d metrics %.4f", papp->StrId(),
-				(*awm_it)->Id(), cl_id, *metrics);
+		awm_thds.push_back(
+			std::thread(&YamcaSchedPol::EvalWorkingMode, this,
+			&sched_map, papp, (*awm_it), cl_id)
+		);
 	}
+
+	for_each(awm_thds.begin(), awm_thds.end(), join_thread);
+	awm_thds.clear();
+
+	logger->Debug("Schedule table size = %d", sched_map.size());
+	return SCHED_OK;
+}
+
+
+SchedulerPolicyIF::ExitCode_t YamcaSchedPol::EvalWorkingMode(
+				SchedEntityMap_t * sched_map,
+				AppPtr_t const & papp,
+				AwmPtr_t const & wm,
+				int cl_id) {
+	std::unique_lock<std::mutex> sched_ul(sched_mtx, std::defer_lock);
+
+	logger->Debug("Insert: [%s] AWM{%d} metrics computing...", papp->StrId(),
+			wm->Id());
+
+	// Skip if the application has been disabled/stopped in the meanwhile
+	if (papp->Disabled()) {
+		logger->Debug("Insert: [%s] disabled/stopped during scheduling [Ord]",
+				papp->StrId());
+		return SCHED_SKIP_APP;
+	}
+
+	// Metrics computation
+	float * metrics = new float;
+	ExitCode_t result =
+		MetricsComputation(papp, wm, cl_id, *metrics);
+
+	switch (result) {
+	case SCHED_CLUSTER_FULL:
+		logger->Warn("Insert: No more PEs in cluster %d", cl_id);
+		return result;
+
+	case SCHED_RSRC_UNAV:
+		logger->Warn("Insert: [%s] AWM{%d} CL=%d unavailable resources "
+				"[RA:%d]", papp->StrId(), wm->Id(), cl_id, result);
+		return result;
+
+	case SCHED_ERROR:
+		logger->Error("Insert: An error occurred [ret %d]", result);
+		return result;
+
+	default:
+		break;
+	}
+
+	// Set the metrics value and insert the entity into the map
+	wm->SetAttribute(
+			SCHEDULER_POLICY_NAME, "metrics", VoidPtr_t(metrics));
+
+	sched_ul.lock();
+	sched_map->insert(std::pair<float, SchedEntity_t>(
+				static_cast<float>(*metrics), SchedEntity_t(papp, wm)));
+
+	logger->Info("{%d} Insert: [%s] AWM{%d} CL=%d metrics %.4f",
+					sched_map->size(), papp->StrId(),
+					wm->Id(), cl_id, *metrics);
 
 	return SCHED_OK;
 }
+
+
+
 
 // Functions used by MetricsComputation() to get the migration and
 // reconfiguration overhead
