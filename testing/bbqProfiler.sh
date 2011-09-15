@@ -168,12 +168,6 @@ for M in $METRICS; do
 	DISTILLER="$DISTILLER -e $M"
 done
 
-# Extracing results dataset
-for M in $METRICS; do
-	extXexcYmet $M
-done
-exit 0
-
 # Run tests
 for C in $CLUSTERS; do
   for P in $PES; do
@@ -181,6 +175,11 @@ for C in $CLUSTERS; do
       testCase $C $P $E
     done
   done
+done
+
+# Extracing results dataset
+for M in $METRICS; do
+	extXexcYmet $M
 done
 
 bbq_log "\n\nTesting completed\n\n"
