@@ -156,6 +156,7 @@ function extXexcYmet {
 
 # Setup results dir
 mkdir -p $RESULTS
+[ -e results ] && rm -f results
 ln -s $RESULTS results
 
 # Dump configuration used
