@@ -19,16 +19,20 @@
 # GNU General Public License as published by the Free Software Foundation.
 # ============================================================================
 
-RESULTS=${RESULTS:-"`pwd`/bbqprof_`date +%Y%m%d_%k%M%S`"}
+DATETIME=`date +%Y%m%d_%H%M%S`
+DATETIME_STR=`date`
+RESULTS=${RESULTS:-"`pwd`/bbqprof_$DATETIME"}
 BOSP_BASE=${BOSP_BASE:-"/opt/MyBOSP"}
 EXC_RECIPE=${EXC_RECIPE:-"1Awm1PEPrio1"}
 EXC_WORKLOAD=${EXC_WORKLOAD:-2}
 EXC_CYCLES=${EXC_CYCLES:-20}
 COUNT=${COUNT:-30}
+BG=${BG:-"true"}
 
-CLUSTERS=${CLUSTERS:-"1 2 4 8 16"}
-PES=${PES:-"4 8 16 32"}
-EXCS=${EXCS:-"10 20 30 40 50 60 70 80 90"}
+CORES=${CORES:-"1"}
+CLUSTERS=${CLUSTERS:-"1 4"}
+PES=${PES:-"4 16"}
+EXCS=${EXCS:-"4 8 16 32 64"}
 
 # The set of metrics to be collected for graph generation
 METRICS="
@@ -48,7 +52,7 @@ bq.sm.yamca.sel      \
 
 # Setup other configuration vars
 BBQUE_SCRIPT="$RESULTS/bbque_profiling_$USER.sh"
-PROGRESS="$RESULTS/pprogress.log"
+PROGRESS="$RESULTS/bbque_profiling.log"
 DRY_RUN=${DRY_RUN:-0}
 
 function bbq_log {
@@ -61,6 +65,7 @@ function dumpConf {
 		"\n"\
 	        "BOSP Base: $BOSP_BASE\n"\
 	        "Recipe: $EXC_RECIPE\n"\
+	        "Host Cores: $CORES\n"\
 	        "Loops per test: $COUNT\n"\
 	        " Clusters: $CLUSTERS\n"\
 	        "      PEs: $PES\n"\
@@ -70,36 +75,56 @@ function dumpConf {
 }
 
 function bbq_stats {
-	kill -USR2 `ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep | head -n1 | awk '{print \$2}'`
+	kill -USR2 `ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep \
+		| head -n1 | awk '{print \$2}'`
 }
 
 function bbq_running {
-	BBQ_GREP=`ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep | wc -l`
+	# Look for a BarbequeRTRM running instance
+	BBQ_GREP=`ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep \
+		| wc -l`
 	#bbq_log "Grep: [$BBQ_GREP]"
-	BBQ_PID=`ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep | head -n1 | awk '{print \$2}'`
-	bbq_log "Found BarbequeRTRM instance, PID: $BBQ_PID"
-	[ $BBQ_GREP -gt 0 ] && return 1
-	return 0
+	[ $BBQ_GREP -eq 0 ] && return 0
+	# Report the PID of the BarbequeRTRM instance
+	BBQ_PID=`ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep \
+		| head -n1 | awk '{print \$2}'`
+	bbq_log "  Found BarbequeRTRM instance, PID: $BBQ_PID"
+	return 1
 }
 
 function bbq_stop {
 	sleep 1
-	BBQ_PID=`ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep | head -n1 | awk '{print \$2}'`
-	bbq_log "Terminating BBQ (PID: $BBQ_PID)"
+	BBQ_PID=`ps aux | grep "sbin/barbeque " | grep $USER | grep -v grep \
+		| head -n1 | awk '{print \$2}'`
+	bbq_log "  Terminating BBQ (PID: $BBQ_PID)"
 	kill -INT $BBQ_PID
 }
+
+# Setup the BarbequeRTRM sartup script
 
 # Function parameter:
 # CLUSTER; PEs; EXCs; TIME; CYCLES; RECIPE; LOGFILE
 function runTest {
 	cat > $BBQUE_SCRIPT <<EOF
 #!/bin/sh
-#stdbuf -oL $BOSP_BASE/out/sbin/barbeque --tpd.clusters $1 --tpd.pes $2 > $7.log
-stdbuf -oL $BOSP_BASE/out/sbin/barbeque --tpd.clusters $1 --tpd.pes $2 | tee $RESULTS/$7.log
+if [ "x$BG" == "xtrue" ]; then
+	stdbuf -oL $BOSP_BASE/out/sbin/barbeque \
+		--tpd.clusters $1 --tpd.pes $2 \
+		> $RESULTS/$7.log
+else
+	stdbuf -oL $BOSP_BASE/out/sbin/barbeque \
+		--tpd.clusters $1 --tpd.pes $2 \
+		| tee $RESULTS/$7.log
+fi
 EOF
 	chmod a+x $BBQUE_SCRIPT
 
-	xterm -bg black -fg gray -geometry 143x73+7-34 -title "Barbeque RTMR" $BBQUE_SCRIPT &
+	if [ "x$BG" == "xtrue" ]; then
+		$BBQUE_SCRIPT &
+	else
+		xterm -bg black -fg gray -geometry 143x73+7-34 \
+			-title "Barbeque RTMR" $BBQUE_SCRIPT &
+	fi
 	sleep 1
 	for i in `seq 1 $COUNT`; do
 		$BOSP_BASE/out/usr/bin/BbqRTLibTestApp -e $3 -w $4 -c $5 -r $6
@@ -119,8 +144,8 @@ function getStats {
 # Function parameter:
 # Input: CLUSTERS; PEs; EXCs
 function testCase {
-	LOGFILE=`printf "bbqprof_%s-e%03dw%03dc%03d-C%03dPE%03d" \
-		$EXC_RECIPE $3 $EXC_WORKLOAD $EXC_CYCLES $1 $2`
+	LOGFILE=`printf "bbqprof-%s-HC%02d-e%03dw%03dc%03d-C%03dPE%03d" \
+		$EXC_RECIPE $CORES $3 $EXC_WORKLOAD $EXC_CYCLES $1 $2`
 	bbq_log "Running test $LOGFILE..."
 	[ $DRY_RUN -eq 1 ] && return
 
@@ -132,19 +157,26 @@ function testCase {
 # Function parameter: METRIC
 function extXexcYmet {
 	M=${1:-"bq.sp.syncp.avg.time"}
-	G=${M//./_}
 	cd results
         echo "Extracing data for metric $M..."
 	for C in $CLUSTERS; do
 	  for P in $PES; do
 	    PLAT=`printf "w%03dc%03d-C%03dPE%03d" \
 		$EXC_WORKLOAD $EXC_CYCLES $C $P`
-	    echo -e \
-	         "# Metrics: $M\n# Platform: $PLAT\n#EXCs          Min           Max           Avg        StdDev"\
-		 > graph_$G-$PLAT.dat
-            grep $M *$PLAT.stats | sed -r 's/-e([0-9]{3}+)w/-e \1 w/' | tr -s " " | \
-                awk '{printf " %3d %13.3f %13.3f %13.3f %13.3f\n", $2, $12, $14, $16, $18}' \
-		>> graph_$G-$PLAT.dat
+	    DATFILE=`printf "graph-%s-%s-HC%02d-%s.dat" \
+		    ${M//./_} $EXC_RECIPE $CORES $PLAT`
+	    DATHEADER=""
+	    DATHEADER="$DATHEADER# BarbequeRTRM (Host Cores: $CORES)\n"
+	    DATHEADER="$DATHEADER# Test started at: $DATETIME_STR\n"
+	    DATHEADER="$DATHEADER# Metrics: $M\n# Platform: $PLAT\n"
+	    DATHEADER="$DATHEADER#EXCs\tMin\tMax\tAvg\tStdDev"
+	    echo -e $DATHEADER > $DATFILE
+            grep $M *$PLAT.stats \
+		    | sed -r 's/-e([0-9]{3}+)w/-e \1 w/' \
+		    | tr -s " " \
+		    | awk '{printf " %3d %13.3f %13.3f %13.3f %13.3f\n", \
+			$2, $12, $14, $16, $18}' \
+		>> $DATFILE
 	  done
 	done
 	cd - >/dev/null
@@ -182,5 +214,6 @@ for M in $METRICS; do
 	extXexcYmet $M
 done
 
+rm -f $BBQUE_SCRIPT
 bbq_log "\n\nTesting completed\n\n"
 
