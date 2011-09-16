@@ -45,6 +45,9 @@
 /** Increase counter for the specified metric */
 #define SM_COUNT_EVENT(METRICS, INDEX) \
 	mc.Count(METRICS[INDEX].mh);
+/** Increase counter for the specified metric */
+#define SM_COUNT_EVENT2(METRICS, INDEX, AMOUNT) \
+	mc.Count(METRICS[INDEX].mh, AMOUNT);
 
 /** Metrics (class SAMPLE) declaration */
 #define SM_SAMPLE_METRIC(NAME, DESC)\
@@ -446,15 +449,15 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 
 		// Perform resource acquisition for RUNNING App/ExC
 		DoAcquireResources(papp);
-
-		// Account for total reconfigured EXCs
-		SM_COUNT_EVENT(metrics, SM_SYNCP_EXCS);
 		excs++;
 	}
 
 	// Collecing execution metrics
 	SM_GET_TIMING(metrics, SM_SYNCP_TIME_POSTCHANGE, sm_tmr);
 	logger->Debug("STEP 4: postChange() DONE");
+
+	// Account for total reconfigured EXCs
+	SM_COUNT_EVENT2(metrics, SM_SYNCP_EXCS, excs);
 
 	// Collect statistics on average EXCSs reconfigured.
 	SM_ADD_SAMPLE(metrics, SM_SYNCP_AVGE, excs);
