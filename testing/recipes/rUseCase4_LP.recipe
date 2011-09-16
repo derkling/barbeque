@@ -1,0 +1,138 @@
+<?xml version="1.0"?>
+<BarbequeRTRM version="0.4">
+	<application priority="1">
+		<awms>
+
+			<awm id="0" name="wm0" value="1">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="1"/>
+								<mem units="Kb" qty="1"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="1" name="wm1" value="2">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="2"/>
+								<mem units="Kb" qty="2"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="2" name="wm2" value="3">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="3"/>
+								<mem units="Kb" qty="3"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="3" name="wm3" value="4">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="4"/>
+								<mem units="Kb" qty="4"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="4" name="wm4" value="5">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="5"/>
+								<mem units="Kb" qty="5"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="5" name="wm5" value="6">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="6"/>
+								<mem units="Kb" qty="6"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="6" name="wm6" value="7">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="7"/>
+								<mem units="Kb" qty="7"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="7" name="wm7" value="8">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="8"/>
+								<mem units="Kb" qty="8"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="8" name="wm8" value="9">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="9"/>
+								<mem units="Kb" qty="9"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+			<awm id="9" name="wm9" value="10">
+				<resources>
+					<arch name="P2012">
+						<tile id="0">
+							<cluster id="0">
+								<pe qty="10"/>
+								<mem units="Kb" qty="10"/>
+							</cluster>
+						</tile>
+					</arch>
+				</resources>
+			</awm>
+
+		</awms>
+	</application>
+</BarbequeRTRM>
