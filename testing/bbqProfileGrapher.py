@@ -26,77 +26,162 @@ import sys
 
 from pyx import *
 
-metrics = ( \
-"bq.sp.syncp.avg.time", \
-"bq.sp.syncp.avg.pre",  \
-"bq.sp.syncp.avg.sync", \
-"bq.sp.syncp.avg.do",   \
-"bq.sp.syncp.avg.post", \
-"bq.sm.time",           \
-"bq.sm.yamca.map",      \
-"bq.sm.yamca.entities", \
-"bq.sm.yamca.ord",      \
-"bq.sm.yamca.mcomp",    \
-"bq.sm.yamca.sel"       \
-)
+metrics = [ \
+("bq.sp.syncp.avg.time", "SyncP",                   "Time [ms]"), \
+("bq.sp.syncp.avg.pre",  "PreChange",               "Time [ms]"), \
+("bq.sp.syncp.avg.sync", "SyncChange",              "Time [ms]"), \
+("bq.sp.syncp.avg.do",   "DoChange",                "Time [ms]"), \
+("bq.sp.syncp.avg.post", "PostChange",              "Time [ms]"), \
+("bq.sm.time",           "Scheduler",               "Time [ms]"), \
+("bq.sm.yamca.map",      "Scheduler Data",          "Size [Bytes]"), \
+("bq.sm.yamca.entities", "Entities",                "Count"), \
+("bq.sm.yamca.ord",      "Scheduler Ordering",      "Time [ms]"), \
+("bq.sm.yamca.mcomp",    "Scheduler Metrics",       "Time [ms]"), \
+("bq.sm.yamca.sel"       "Scheduler Selection",     "Time [ms]") \
+]
+
+#recipes = ["1Awm1PEPrio1"]
+recipes = ["r05Awm01Pe", "r10Awm01Pe"]
+cores = [1, 2, 4]
+clusters = [1, 4]
+pes = [4, 8, 16, 32, 64]
+
 
 """
 m - Metrics to graph
+r - The recipe used to produce the data
+h - The fixed aount of Host Cores (HC) defining the dataset
 c - List of clusters defining dataset
 p - The fixed amout of PEs to consider
 """
-def plotXexcYmetZcls(m, c, p):
+def plotXexcYmetZcls(m, r, h, c, p):
 
-    g = graph.graphxy(width=320*unit.w_pt,
-            key=graph.key.key(pos="br", dist=0.1))
-            #x=graph.axis.linear(min=0, max=5),
+    # The metrics to be plotted
+    mk = string.replace(m[0], ".", "_")
+    print "Plotting: %s (%s) vs (EXCs, Clusters)..." % (mk, m[1])
 
+    # Setup graph geometry, axis and legend
+    g = graph.graphxy(width=8, ratio=16./9,
+            key=graph.key.key(pos="tl"),
+            x=graph.axis.linear(title="EXCs Count"),
+            y=graph.axis.linear(title=m[2]))
+
+    # Add dataset to be plotted
     plots = []
     for Ci in c:
-        dataset = "graph_%s-w002c020-C%03dPE%03d.dat" % (m,Ci,p)
+        dataset = "graph-%s-%s-HC%02d-w001c010-C%03dPE%03d.dat" % (mk,r,h,Ci,p)
         print "Adding dataset: %s ..." % (dataset)
         dataset_key = "%02d Clusters" % (Ci)
         plots.append(graph.data.file(dataset, x="EXCs", y="Avg", dy="StdDev",
             title=dataset_key))
     
+    # Plot the dataset on the graph
     g.plot(plots,
-            [graph.style.line([color.gradient.Rainbow]),
+            [graph.style.line([color.gradient.Rainbow,
+                style.linestyle.solid]),
                 graph.style.errorbar()])
 
-    graph_name = "graph_%s-w002c020-PE%03d.pdf" % (m,p)
+    # Now plot the text, horizontally centered 
+    graph_title = "%s vs EXCs (%s)" % (m[1], r) 
+    g.text(g.width/2, g.height + 0.2, graph_title,
+            [text.halign.center, text.valign.bottom, text.size.large])
+
+    graph_name = "graph-%s-%s-HC%02d-w001c010-PE%03d.pdf" % (mk,r,h,p)
     print "Plot graph %s ..." % (graph_name)
     g.writePDFfile(graph_name)
     g.pipeGS(filename=string.replace(graph_name, "pdf", "png"))
 
 """
 m - Metrics to graph
-c - The fixed amout of Clusters to consider
-p - List of PEs to defining dataset
+r - The recipe used to produce the data
+h - The fixed amount of Host Cores (HC) defining the dataset
+c - The fixed amount of Clusters to consider
+p - List of PEs defining the dataset
 """
-def plotXexcYmetZpes(m, c, p):
+def plotXexcYmetZpes(m, r, h, c, p):
 
-    g = graph.graphxy(width=320*unit.w_pt,
-            key=graph.key.key(pos="br", dist=0.1))
-            #x=graph.axis.linear(min=0, max=5),
+    # The metrics to be plotted
+    mk = string.replace(m[0], ".", "_")
+    print "Plotting: %s (%s) vs (EXCs, PEs)..." % (mk, m[1])
 
+    # Setup graph geometry, axis and legend
+    g = graph.graphxy(width=8, ratio=16./9,
+            key=graph.key.key(pos="tl"),
+            x=graph.axis.linear(title="EXCs Count"),
+            y=graph.axis.linear(title=m[2]))
+
+    # Add dataset to be plotted
     plots = []
     for Pi in p:
-        dataset = "graph_%s-w002c020-C%03dPE%03d.dat" % (m,c,Pi)
+        dataset = "graph-%s-%s-HC%02d-w001c010-C%03dPE%03d.dat" % (mk,r,h,c,Pi)
         print "Adding dataset: %s ..." % (dataset)
         dataset_key = "%02d PEs" % (Pi)
         plots.append(graph.data.file(dataset, x="EXCs", y="Avg", dy="StdDev",
             title=dataset_key))
 
-
+    # Plot the dataset on the graph
     g.plot(plots,
-            [graph.style.line([color.gradient.Rainbow]),
+            [graph.style.line([color.gradient.Rainbow,
+                style.linestyle.solid]),
                 graph.style.errorbar()])
         
-    graph_name = "graph_%s-w002c020-C%03d.pdf" % (m,c)
+    # Now plot the text, horizontally centered 
+    graph_title = "%s vs EXCs (%s)" % (m[1], r) 
+    g.text(g.width/2, g.height + 0.2, graph_title,
+            [text.halign.center, text.valign.bottom, text.size.large])
+
+    graph_name = "graph-%s-%s-HC%02d-w001c010-C%03d.pdf" % (mk,r,h,c)
     print "Plot graph %s ..." % (graph_name)
     g.writePDFfile(graph_name)
     string.replace(graph_name, "pdf", "png")
     g.pipeGS(filename=string.replace(graph_name, "pdf", "png"))
+
+
+"""
+m - Metrics to graph
+r - The recipe used to produce the data
+h - List of Host Cores (HC) defining the dataset
+c - The fixed amount of Clusters to consider
+p - The fixed amount of PEs to consider
+"""
+def plotXexcYmetZhc(m, r, h, c, p):
+
+    # The metrics to be plotted
+    mk = string.replace(m[0], ".", "_")
+    print "Plotting: %s (%s) vs (EXCs, HC)..." % (mk, m[1])
+
+    # Setup graph geometry, axis and legend
+    g = graph.graphxy(width=8, ratio=16./9,
+            key=graph.key.key(pos="tl"),
+            x=graph.axis.linear(title="EXCs Count"),
+            y=graph.axis.linear(title=m[2]))
+
+    # Add dataset to be plotted
+    plots = []
+    for Hi in h:
+        dataset = "graph-%s-%s-HC%02d-w001c010-C%03dPE%03d.dat" % (mk,r,Hi,c,p)
+        print "Adding dataset: %s ..." % (dataset)
+        dataset_key = "%02d HCores" % (Hi)
+        plots.append(graph.data.file(dataset, x="EXCs", y="Avg", dy="StdDev",
+            title=dataset_key))
+    
+    # Plot the dataset on the graph
+    g.plot(plots,
+            [graph.style.line([color.gradient.Rainbow,
+                style.linestyle.solid]),
+                graph.style.errorbar()])
+        
+    # Now plot the text, horizontally centered 
+    graph_title = "%s vs EXCs (%s)" % (m[1], r) 
+    g.text(g.width/2, g.height + 0.2, graph_title,
+            [text.halign.center, text.valign.bottom, text.size.large])
+
+    graph_name = "graph-%s-%s-w001c010-C%03dPE%03d.pdf" % (mk,r,c,p)
+    print "Plot graph %s ..." % (graph_name)
+    g.writePDFfile(graph_name)
+    string.replace(graph_name, "pdf", "png")
+    g.pipeGS(filename=string.replace(graph_name, "pdf", "png"))
+
 
 def getMetricsByStats(resluts_dir):
     flist = os.listdir(results_dir)
@@ -134,14 +219,23 @@ def main(argv=None):
         print >>sys.stderr, "for help use --help"
         return 2
 
-    clusters = [1, 2, 4, 8, 16]
-    pes = [4, 8, 16, 32]
-    for m in metrics:
-        _m = string.replace(m, ".", "_")
-        for c in clusters:
-            plotXexcYmetZpes(_m, c, pes)
-        for p in pes:
-            plotXexcYmetZcls(_m, clusters, p)
+    for Mi in metrics:
+        for Ri in recipes:
+        
+            # Plotting Z=HCores
+            for Ci in clusters:
+                for Pi in pes:
+                    plotXexcYmetZhc(Mi, Ri, cores, Ci, Pi)
+
+            # Plotting Z=PEs
+            for Hi in cores:
+                for Ci in clusters:
+                    plotXexcYmetZpes(Mi, Ri, Hi, Ci, pes)
+                    
+            # Plotting Z=Clusters
+            for Hi in cores:
+                for Pi in pes:
+                    plotXexcYmetZcls(Mi, Ri, Hi, clusters, Pi)
 
 if __name__ == "__main__":
 	sys.exit(main())
