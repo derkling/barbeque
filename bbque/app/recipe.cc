@@ -44,6 +44,7 @@ Recipe::Recipe(std::string const & name):
 
 	// Clear normalization info
 	memset(&norm, 0, sizeof(Recipe::AwmNormalInfo));
+	norm.min_value = UINT8_MAX;
 }
 
 
