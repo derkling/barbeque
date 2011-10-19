@@ -55,7 +55,7 @@ Recipe::~Recipe() {
 
 AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
 				std::string const & _name,
-				float _value) {
+				uint8_t _value) {
 	// Update info for supporting normalization
 	UpdateNormalInfo(_value);
 
@@ -107,26 +107,25 @@ void Recipe::AddConstraint(std::string const & rsrc_path,
 }
 
 
-void Recipe::UpdateNormalInfo(float last_value) {
+void Recipe::UpdateNormalInfo(uint8_t last_value) {
 	// This reset the "normalization done" flag
 	norm.done = false;
 
 	// Update the max value
-	if ((last_value > 0) && (last_value > norm.max_value)) {
+	if (last_value > norm.max_value)
 		norm.max_value = last_value;
-		logger->Info("AWM max value = %.2f", norm.max_value);
-	}
 
 	// Update the min value
-	if ((last_value > 0) && (last_value < norm.min_value)) {
+	if (last_value < norm.min_value)
 		norm.min_value = last_value;
-		logger->Info("AWM min value = %.2f", norm.min_value);
-	}
 
 	// Delta
 	norm.delta = norm.max_value - norm.min_value;
-}
 
+	logger->Debug("AWM max value = %d", norm.max_value);
+	logger->Debug("AWM min value = %d", norm.min_value);
+	logger->Debug("AWM delta = %d", norm.delta);
+}
 
 void Recipe::NormalizeValues() {
 	float norm_value = 0.0;

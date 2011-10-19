@@ -108,7 +108,7 @@ public:
 	 * @param value The user QoS value of the working mode
 	 */
 	AwmPtr_t & AddWorkingMode(uint8_t id, std::string const & name,
-					float value);
+					uint8_t value);
 
 	/**
 	 * @brief Remove an application working mode inserted
@@ -188,15 +188,15 @@ private:
 	/** Store information to support the normalization of the AWM values */
 	struct AwmNormalInfo {
 		/** Maximum value parsed */
-		float max_value;
+		uint8_t max_value;
 		/** Minimum value parse */
-		float min_value;
+		uint8_t min_value;
 		/** Diff max - min.
 		 * If 0 the value will be set to 0. This is done in order to give a
 		 * penalty to recipes wherein all the AWMs have been set to the same
 		 * value
 		 */
-		float delta;
+		uint8_t delta;
 		/** Set true means that normalization has been performed yet */
 		bool done;
 
@@ -209,7 +209,7 @@ private:
 	 *
 	 * @param last_value The value of the last AWM inserted
 	 */
-	void UpdateNormalInfo(float last_value);
+	void UpdateNormalInfo(uint8_t last_value);
 
 	/**
 	 * @brief Performe the AWM values normalization
