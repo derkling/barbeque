@@ -47,12 +47,10 @@ Recipe::Recipe(std::string const & name):
 	norm.min_value = UINT8_MAX;
 }
 
-
 Recipe::~Recipe() {
 	working_modes.clear();
 	constraints.clear();
 }
-
 
 AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
 				std::string const & _name,
@@ -66,18 +64,13 @@ AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
 	return working_modes[_id];
 }
 
-
 AwmPtr_t Recipe::WorkingMode(uint8_t _id) {
-	// Normalize values
-	NormalizeValues();
-
 	// Find the working mode
 	AwmMap_t::iterator it(norm_working_modes.find(_id));
 	if (it == norm_working_modes.end())
 		return AwmPtr_t();
 	return it->second;
 }
-
 
 void Recipe::AddConstraint(std::string const & rsrc_path,
 				uint64_t lb,
@@ -106,7 +99,6 @@ void Recipe::AddConstraint(std::string const & rsrc_path,
 					constraints[rsrc_path]->lower,
 					constraints[rsrc_path]->upper);
 }
-
 
 void Recipe::UpdateNormalInfo(uint8_t last_value) {
 	// This reset the "normalization done" flag

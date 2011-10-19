@@ -102,6 +102,7 @@ public:
 
 	/**
 	 * @brief Insert an application working mode
+	 *
 	 * @param app Application owning the working mode
 	 * @param id Working mode ID
 	 * @param name Working mode descripting name
@@ -122,6 +123,7 @@ public:
 	/**
 	 * @brief Return an application working mode object by specifying
 	 * its identifying name
+	 *
 	 * @param id Working mode ID
 	 * @return A shared pointer to the application working mode searched
 	 */
@@ -185,7 +187,9 @@ private:
 	/** Static constraints included in the recipe */
 	ConstrMap_t constraints;
 
-	/** Store information to support the normalization of the AWM values */
+	/**
+	 * Store information to support the normalization of the AWM values
+	 */
 	struct AwmNormalInfo {
 		/** Maximum value parsed */
 		uint8_t max_value;
@@ -199,20 +203,20 @@ private:
 		uint8_t delta;
 		/** Set true means that normalization has been performed yet */
 		bool done;
-
 	} norm;
 
 	/**
 	 * @brief Update the normalization info
 	 *
-	 * This is called when a new AWM is added to the recipe
+	 * This is called when the entire set of working modes is get by an
+	 * Application, during its initialization step.
 	 *
 	 * @param last_value The value of the last AWM inserted
 	 */
 	void UpdateNormalInfo(uint8_t last_value);
 
 	/**
-	 * @brief Performe the AWM values normalization
+	 * @brief Perform the AWM values normalization
 	 *
 	 *                    recipe_value - min
 	 * norm_value =  ------------------------------
