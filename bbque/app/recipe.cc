@@ -129,7 +129,7 @@ void Recipe::UpdateNormalInfo(uint8_t last_value) {
 }
 
 void Recipe::NormalizeValues() {
-	float norm_value = 0.0;
+	float normal_value = 0.0;
 
 	// Return if performed yet
 	if (norm.done)
@@ -138,26 +138,32 @@ void Recipe::NormalizeValues() {
 	AwmMap_t::iterator awm_it(working_modes.begin());
 	AwmMap_t::iterator end_awm(working_modes.end());
 
-	// Normalization
+	// Normalization of the whole set of AWMs
 	for (; awm_it != end_awm; ++awm_it) {
 		// Create a new AWM object by copy
-		AwmPtr_t nrm_awm(new app::WorkingMode((*(awm_it->second).get())));
+		AwmPtr_t normal_awm(new app::WorkingMode((*(awm_it->second).get())));
 
 		// Normalize the value
-		if (norm.delta > 0.001)
-			norm_value = (nrm_awm->Value() - norm.min_value) / norm.delta;
+		if (norm.delta > 0)
+			// The most commmon case
+			normal_value = (normal_awm->Value() - norm.min_value) / norm.delta;
+		else if (working_modes.size() == 1)
+			// There is only one AWM in the recipe
+			normal_value = 1.0;
 		else
-			norm_value = 0.0;
+			// This penalizes set of working modes having always the same QoS
+			// value
+			normal_value = 0.0;
 
-		// Set the normalized value
-		nrm_awm->SetValue(norm_value);
-		logger->Info("AWM %d normalized valued = %.2f => %.2f",
-					nrm_awm->Id(),
-					norm_value, nrm_awm->Value());
+		// Set the normalized value into the AWM
+		normal_awm->SetValue(normal_value);
+		logger->Info("AWM %d normalized value = %.2f ",
+					normal_awm->Id(),
+					normal_awm->Value());
 
 		// Insert into the normalized map
 		norm_working_modes.insert(std::pair<uint8_t, AwmPtr_t>(
-					awm_it->first, nrm_awm));
+					awm_it->first, normal_awm));
 	}
 
 	// Set the "normalization done" flag true
