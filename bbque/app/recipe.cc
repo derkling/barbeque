@@ -49,6 +49,7 @@ Recipe::Recipe(std::string const & name):
 
 Recipe::~Recipe() {
 	working_modes.clear();
+	norm_working_modes.clear();
 	constraints.clear();
 }
 
