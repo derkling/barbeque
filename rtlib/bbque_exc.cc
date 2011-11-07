@@ -302,13 +302,18 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 		DB(fprintf(stderr, FMT_DBG("CL 2-2. Switching EXC [%s] "
 				"to AWM [%02d]...\n"),
 				exc_name.c_str(), wmp.awm_id));
+
+		rtlib->Notify.PreConfigure(exc_hdl);
 		onConfigure(wmp.awm_id);
+		rtlib->Notify.PostConfigure(exc_hdl);
 		return result;
 
 	case RTLIB_EXC_GWM_BLOCKED:
 		DB(fprintf(stderr, FMT_DBG("CL 2-3. Suspending EXC [%s]...\n"),
 				exc_name.c_str()));
+		rtlib->Notify.PreSuspend(exc_hdl);
 		onSuspend();
+		rtlib->Notify.PostSuspend(exc_hdl);
 		return result;
 
 	default:
@@ -330,7 +335,9 @@ RTLIB_ExitCode_t BbqueEXC::Run() {
 					"AWM[%02d]...\n"),
 				exc_name.c_str(), cycles_count+1, wmp.awm_id));
 
+	rtlib->Notify.PreRun(exc_hdl);
 	result = onRun();
+	rtlib->Notify.PostRun(exc_hdl);
 	if (result == RTLIB_EXC_WORKLOAD_NONE)
 		done = true;
 
@@ -346,7 +353,9 @@ RTLIB_ExitCode_t BbqueEXC::Monitor() {
 	DB(fprintf(stderr, FMT_DBG("CL 4. Monitor EXC [%s]...\n"),
 				exc_name.c_str()));
 
+	rtlib->Notify.PreMonitor(exc_hdl);
 	result = onMonitor();
+	rtlib->Notify.PostMonitor(exc_hdl);
 	if (result == RTLIB_EXC_WORKLOAD_NONE)
 		done = true;
 
@@ -359,6 +368,9 @@ void BbqueEXC::ControlLoop() {
 
 	assert(rtlib);
 	assert(registered == true);
+
+	// Initialize Notifications
+	rtlib->Notify.Init(exc_hdl);
 
 	DB(fprintf(stderr, FMT_DBG("EXC [%s] control thread [%d] started...\n"),
 				exc_name.c_str(), gettid()));
@@ -398,6 +410,9 @@ void BbqueEXC::ControlLoop() {
 			continue;
 
 	};
+
+	// Finalizing Notifications
+	rtlib->Notify.Exit(exc_hdl);
 
 	// Disable the EXC (thus notifying waiters)
 	Disable();

@@ -90,6 +90,61 @@ static RTLIB_ExitCode_t rtlib_clear(
 	return rpc->Clear(ech);
 }
 
+
+/*******************************************************************************
+ *    Performance Monitoring Support
+ ******************************************************************************/
+
+static void rtlib_notify_init(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyInit(ech);
+}
+
+static void rtlib_notify_exit(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyExit(ech);
+}
+
+static void rtlib_notify_pre_configure(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPreConfigure(ech);
+}
+
+static void rtlib_notify_post_configure(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPostConfigure(ech);
+}
+
+static void rtlib_notify_pre_run(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPreRun(ech);
+}
+
+static void rtlib_notify_post_run(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPostRun(ech);
+}
+
+static void rtlib_notify_pre_monitor(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPreMonitor(ech);
+}
+
+static void rtlib_notify_post_monitor(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPostMonitor(ech);
+}
+
+static void rtlib_notify_pre_suspend(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPreSuspend(ech);
+}
+
+static void rtlib_notify_post_suspend(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPostSuspend(ech);
+}
+
 static const char *rtlib_app_name;
 static uint8_t rtlib_initialized = 0;
 
@@ -114,6 +169,18 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.ClearConstraints = rtlib_clear;
 	rtlib_services.Disable = rtlib_disable;
 	rtlib_services.Unregister = rtlib_unregister;
+
+	// Performance monitoring notifiers
+	rtlib_services.Notify.Init = rtlib_notify_init;
+	rtlib_services.Notify.Exit = rtlib_notify_exit;
+	rtlib_services.Notify.PreConfigure = rtlib_notify_pre_configure;
+	rtlib_services.Notify.PostConfigure = rtlib_notify_post_configure;
+	rtlib_services.Notify.PreRun = rtlib_notify_pre_run;
+	rtlib_services.Notify.PostRun = rtlib_notify_post_run;
+	rtlib_services.Notify.PreMonitor = rtlib_notify_pre_monitor;
+	rtlib_services.Notify.PostMonitor = rtlib_notify_post_monitor;
+	rtlib_services.Notify.PreSuspend = rtlib_notify_pre_suspend;
+	rtlib_services.Notify.PostSuspend = rtlib_notify_post_suspend;
 
 	// Building a communication channel
 	rpc = br::BbqueRPC::GetInstance();

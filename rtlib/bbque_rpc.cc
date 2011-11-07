@@ -945,6 +945,58 @@ RTLIB_ExitCode_t BbqueRPC::StopExecution(
 	return RTLIB_OK;
 }
 
+/*******************************************************************************
+ *    Performance Monitoring Support
+ ******************************************************************************/
+
+void BbqueRPC::NotifyInit(
+	RTLIB_ExecutionContextHandler_t ech) {
+}
+
+void BbqueRPC::NotifyExit(
+	RTLIB_ExecutionContextHandler_t ech) {
+}
+
+void BbqueRPC::NotifyPreConfigure(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("===> NotifyConfigure\n")));
+}
+
+void BbqueRPC::NotifyPostConfigure(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("<=== NotifyConfigure\n")));
+}
+
+void BbqueRPC::NotifyPreRun(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("===> NotifyRun\n")));
+}
+
+void BbqueRPC::NotifyPostRun(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("<=== NotifyRun\n")));
+}
+
+void BbqueRPC::NotifyPreMonitor(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("===> NotifyMonitor\n")));
+}
+
+void BbqueRPC::NotifyPostMonitor(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("<=== NotifyMonitor\n")));
+}
+
+void BbqueRPC::NotifyPreSuspend(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("===> NotifySuspend\n")));
+}
+
+void BbqueRPC::NotifyPostSuspend(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("<=== NotifySuspend\n")));
+}
+
 } // namespace rtlib
 
 } // namespace bbque

@@ -103,7 +103,7 @@ extern "C" {
  * The mainor version is increased at each internal library updated which do
  * not preclude backward compatibilities.
  */
-#define RTLIB_VERSION_MINOR 0
+#define RTLIB_VERSION_MINOR 1
 
 /**
  * @brief The maximum length for an "application" name
@@ -586,6 +586,148 @@ typedef RTLIB_ExitCode_t (*RTLIB_GetWorkingMode_t)(
 		RTLIB_WorkingModeParams_t *wm,
 		RTLIB_SyncType_t st);
 
+
+/*******************************************************************************
+ *    Performance Monitoring Support
+ ******************************************************************************/
+
+/**
+ * @brief Initialize the RTLib notification support
+ *
+ * Before using notification handler, an application must call this mathod to
+ * allow the run-time library to properly initialize the performance
+ * monitoring support. This method must be called from the main thread that
+ * want to be monitored and profiled.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_Init)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Finalize the RTLib notification support
+ *
+ * After the usage of the notification handler, an application must call this
+ * mathod to allow the run-time library to properly finalize the performance
+ * monitoring support, thus releasing all the associated resources.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_Exit)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Notify the RTLib a "reconfiguration" is starting
+ *
+ * Once a working mode reconfiguration is srarting, an application is
+ * encouraged to notify the run-time library by calling this method. This
+ * could be used by the RTLib implementation to collect suitable information
+ * and statistics on reconfigurations.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PreConfigure)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Notify the RTLib a "reconfiguration" has completed
+ *
+ * Once a working mode reconfiguration has been completed, an application is
+ * encouraged to notify the run-time library by calling this method. This
+ * could be used by the RTLib implementation to collect suitable information
+ * and statistics on reconfigurations.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PostConfigure)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Notify the RTLib a "run" is starting
+ *
+ * Once a new processing cycle is starting, an application is encouraged to
+ * notify the run-time library by calling this method. This could be used by
+ * the RTLib implementation to collect suitable information and statistics on
+ * application processing.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PreRun)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+
+/**
+ * @brief Notify the RTLib a "run" has completed
+ *
+ * Once a new processing cycle has been completed, an application is
+ * encouraged to notify the run-time library by calling this method. This
+ * could be used by the RTLib implementation to collect suitable information
+ * and statistics on application processing.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PostRun)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Notify the RTLib a "monitor" is starting
+ *
+ * Once a new QoS monitor is starting, an application is encouraged to
+ * notify the run-time library by calling this method. This could be used by
+ * the RTLib implementation to collect suitable information and statistics on
+ * application performance monitoring.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PreMonitor)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+
+/**
+ * @brief Notify the RTLib a "monitor" has completed
+ *
+ * Once a new QoS monitor has been completed, an application is
+ * encouraged to notify the run-time library by calling this method. This
+ * could be used by the RTLib implementation to collect suitable information
+ * and statistics on application performance monitoring.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PostMonitor)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Notify the RTLib a "suspend" is starting
+ *
+ * Once a working mode suspension is starting, an application is encouraged to
+ * notify the run-time library by calling this method. This could be used by
+ * the RTLib implementation to collect suitable information and statistics on
+ * application suspension overheads.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PreSuspend)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+
+/**
+ * @brief Notify the RTLib a "suspend" has completed
+ *
+ * Once a working mode suspension has been completed, an application is
+ * encouraged to notify the run-time library by calling this method. This
+ * could be used by the RTLib implementation to collect suitable information
+ * and statistics on application suspension overheads.
+ *i
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PostSuspend)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+
+/*******************************************************************************
+ *    RTLib Services Descriptor (RSD)
+ ******************************************************************************/
+
 /**
  * @brief Information passed to the application at RTLib initialization time.
  *
@@ -625,6 +767,31 @@ typedef struct RTLIB_Services {
 		 * Applications use this function to un-register an "execution
 		 * context" */
         RTLIB_Unregister_t Unregister;
+
+		/* Performance estimation and notification interface */
+		struct {
+			/** Initialization notifier */
+			RTLIB_Notify_Init Init;
+			/** Finalization notifier */
+			RTLIB_Notify_Exit Exit;
+			/** Pre-Configuration notifier */
+			RTLIB_Notify_PreConfigure PreConfigure;
+			/** Post-Configuration notifier */
+			RTLIB_Notify_PostConfigure PostConfigure;
+			/** Pre-Run notifier */
+			RTLIB_Notify_PreRun PreRun;
+			/** Post-Run notifier */
+			RTLIB_Notify_PostRun PostRun;
+			/** Pre-Monitor notifier */
+			RTLIB_Notify_PreMonitor PreMonitor;
+			/** Post-Monitor notifier */
+			RTLIB_Notify_PostMonitor PostMonitor;
+			/** Pre-Suspend notifier */
+			RTLIB_Notify_PreSuspend PreSuspend;
+			/** Post-Suspend notifier */
+			RTLIB_Notify_PostSuspend PostSuspend;
+		} Notify;
+
 } RTLIB_Services_t;
 
 

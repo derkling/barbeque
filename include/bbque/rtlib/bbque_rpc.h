@@ -109,6 +109,40 @@ public:
 			RTLIB_WorkingModeParams_t *wm,
 			RTLIB_SyncType_t st);
 
+/*******************************************************************************
+ *    Performance Monitoring Support
+ ******************************************************************************/
+
+	void NotifyInit(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyExit(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPreConfigure(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPostConfigure(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPreRun(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPostRun(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPreMonitor(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPostMonitor(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPreSuspend(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPostSuspend(
+		RTLIB_ExecutionContextHandler_t ech);
+
 protected:
 
 	/**
