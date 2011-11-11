@@ -1,43 +1,43 @@
 # BarbequeRTRM Daemon Configuration Options
-# Sourced by: sourced by ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_INIT}/bbqued
+# Sourced by: sourced by ${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_INIT}/bbqued
 #
 # NOTE: if possible, use absolute paths
 #
 #
 # The BBQ binary
-BIN='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_BBQ}/barbeque'
+BIN='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_BBQ}/barbeque'
 #
 # The BBQ configuration file
-CONF='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}'
+CONF='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}'
 #
 # The BBQ run-time folder
 BRTF='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}'
 #
 # The BBQ daemon PID file
-PIDFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_PIDFILE}'
+PIDFILE='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_DAEMON_PIDFILE}'
 #
 # The BBQ daemon lock file
-LOCKFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_LOCKFILE}'
+LOCKFILE='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_DAEMON_LOCKFILE}'
 #
 # The folder containing PIL Layouts
-PILSETUPS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PILS}'
+PILSETUPS='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_PILS}'
 #
 # The PIL Layout to use (if an host specific one is not available)
 PILLAYOUT='default'
 #
 # The PIL Layout parser (distributed with BarbequeRTRM)
-PILPARSER='${CMAKE_INSTALL_PREFIX}/sbin/bbque-plp'
+PILPARSER='${CONFIG_BOSP_RUNTIME_PATH}/sbin/bbque-plp'
 #
 # The folder containing (compiled) CGroups configuration
-CGCONFS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}'
+CGCONFS='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_VAR}'
 #
 # The CGroup configuration parser (part of libcgroup library)
-CGPARSER='${CMAKE_INSTALL_PREFIX}/sbin/cgconfigparser'
+CGPARSER='${CONFIG_BOSP_RUNTIME_PATH}/sbin/cgconfigparser'
 #
 # The mountpoint of the BBQ CGroup hierarchy
-CGMOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
+CGMOUNT='${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PIL_CGROUP_MOUNT}'
 #
 # The prefix for the BBQ installation
-SYSROOT='${CMAKE_INSTALL_PREFIX}'
+SYSROOT='${CONFIG_BOSP_RUNTIME_PATH}'
 #
 # vim: set tabstop=4:

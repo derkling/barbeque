@@ -30,7 +30,7 @@
 
 // NOTE: The Barbeque RTRM public FIFOs is defined by a configuration option of
 // the CMake building system
-#define BBQUE_PUBLIC_FIFO_PATH "${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}"
+#define BBQUE_PUBLIC_FIFO_PATH "${CONFIG_BOSP_RUNTIME_RWPATH}"
 #define BBQUE_PUBLIC_FIFO "rpc_fifo"
 
 #define BBQUE_FIFO_NAME_LENGTH 32

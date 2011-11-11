@@ -10,19 +10,19 @@
 # Generic Options
 ################################################################################
 [bbque]
-#plugins = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PLUGINS}
+#plugins = ${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_PLUGINS}
 
 ################################################################################
 # Recipes Loader Options
 ################################################################################
 [rloader]
-#xml.recipe_dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_RECIPES}
+#xml.recipe_dir = ${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_RECIPES}
 
 ################################################################################
 # RPC Channel Options
 ################################################################################
 [rpc]
-#fif.dir = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}
+#fif.dir = ${CONFIG_BOSP_RUNTIME_RWPATH}
 
 ################################################################################
 # Scheduler Manager Options
@@ -60,7 +60,7 @@ fairness.penalty.mem   = 0
 # Logger Options
 ################################################################################
 [logger]
-#log4cpp.conf_file = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/bbque.conf_dbg
+#log4cpp.conf_file = ${CONFIG_BOSP_RUNTIME_PATH}/${BBQUE_PATH_CONF}/bbque.conf_dbg
 
 ################################################################################
 # Log4CPP Logger Configuration
@@ -106,7 +106,7 @@ appender.raConsole = org.apache.log4j.ConsoleAppender
 appender.raConsole.layout = org.apache.log4j.PatternLayout
 appender.raConsole.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-15c : %m%n
 appender.raFile = org.apache.log4j.FileAppender
-appender.raFile.fileName = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}/bbque_dbg.log
+appender.raFile.fileName = ${CONFIG_BOSP_RUNTIME_RWPATH}/bbque_dbg.log
 appender.raFile.layout = org.apache.log4j.PatternLayout
 appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-15c : %m%n
 #appender.raSyslog = org.apache.log4j.SyslogAppender

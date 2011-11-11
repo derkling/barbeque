@@ -46,7 +46,7 @@
 #define BBQUE_CONF_FILE "${BBQUE_CONF_FILE}"
 
 /** The installation path */
-#define BBQUE_PATH_PREFIX "${CMAKE_INSTALL_PREFIX}"
+#define BBQUE_PATH_PREFIX "${CONFIG_BOSP_RUNTIME_PATH}"
 
 /** The 'barbeque' installation path */
 #define BBQUE_PATH_BBQ "${BBQUE_PATH_BBQ}"
@@ -70,7 +70,7 @@
 #define BBQUE_PATH_DOCS "${BBQUE_PATH_DOCS}"
 
 /** The 'var' installation path */
-#define BBQUE_PATH_VAR "${BBQUE_PATH_VAR}"
+#define BBQUE_PATH_VAR "${CONFIG_BOSP_RUNTIME_RWPATH}"
 
 /** The RPC channel TIMEOUT */
 #define BBQUE_RPC_TIMEOUT ${BBQUE_RPC_TIMEOUT}

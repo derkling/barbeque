@@ -8,6 +8,10 @@ cmake_minimum_required (VERSION 2.6 FATAL_ERROR)
 # The name of this project.
 project (BarbequeRTRM)
 
+
+INCLUDE (${CONFIGPATH})
+
+message ( "Runtime path: " ${CONFIG_BOSP_RUNTIME_PATH} )
 ################################################################################
 # Installation items
 ################################################################################
@@ -46,6 +50,9 @@ endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # Setup the CGroup-based Platform Integration Layers (PIL)
 set (BBQUE_PIL_CGROUP_MOUNT "mnt/cgroup")
+
+SET(CMAKE_INSTALL_RPATH "${CONFIG_BOSP_RUNTIME_PATH}/lib")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 ################################################################################
 # Common initialization settings
@@ -90,6 +97,12 @@ endif (NOT CMAKE_BUILD_TYPE)
 
 # Options common to all build version
 set (CMAKE_CXX_FLAGS "-std=c++0x -Wall")
+message("PRE SUBST Linker flags:" ${PLATFORM_EXE_LINKEROPTS})
+string(REPLACE @ = PLATFORM_EXE_LINKEROPTS "${PLATFORM_EXE_LINKEROPTS}")
+set (CMAKE_EXE_LINKER_FLAGS "${PLATFORM_EXE_LINKEROPTS}")
+message("CXX flags:" ${CMAKE_CXX_FLAGS})
+message("Linker flags:" ${PLATFORM_EXE_LINKEROPTS})
+message("Linker flags:" ${CMAKE_EXE_LINKER_FLAGS})
 
 # Options for build version: DEBUG
 set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic -DBBQUE_DEBUG")
@@ -220,7 +233,7 @@ message ( STATUS "   Barbeuqe RTRM...... <prefix>/${BBQUE_PATH_BBQ}" )
 message ( STATUS "   Configuration...... <prefix>/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}" )
 message ( STATUS "   Recipes............ <prefix>/${BBQUE_PATH_RECIPES}" )
 message ( STATUS "   Plugins............ <prefix>/${BBQUE_PATH_PLUGINS}" )
-message ( STATUS "   Var(RPC-Channel)... <prefix>/${BBQUE_PATH_VAR}" )
+message ( STATUS "   Var(RPC-Channel)... ${CONFIG_BOSP_RUNTIME_RWPATH}" )
 message ( STATUS "   Headers............ <prefix>/${BBQUE_PATH_HEADERS}" )
 message ( STATUS "   RTLib library...... <prefix>/${BBQUE_PATH_RTLIB}" )
 message ( STATUS "   Documentation...... <prefix>/${BBQUE_PATH_DOCS}" )
