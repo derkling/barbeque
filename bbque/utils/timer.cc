@@ -35,14 +35,14 @@ void Timer::start() {
 	std::lock_guard<std::mutex> lg(timer_mtx);
 
 	stopped = false;
-	clock_gettime(CLOCK_REALTIME, &start_ts);
+	clock_gettime(CLOCK_MONOTONIC, &start_ts);
 }
 
 void Timer::stop() {
 	std::lock_guard<std::mutex> lg(timer_mtx);
 
 	stopped = true;
-	clock_gettime(CLOCK_REALTIME, &stop_ts);
+	clock_gettime(CLOCK_MONOTONIC, &stop_ts);
 }
 
 double Timer::getElapsedTimeUs() {
@@ -50,7 +50,7 @@ double Timer::getElapsedTimeUs() {
 	double start, stop;
 
 	if(!stopped)
-		clock_gettime(CLOCK_REALTIME, &stop_ts);
+		clock_gettime(CLOCK_MONOTONIC, &stop_ts);
 
 	start = (start_ts.tv_sec * 1000000.0) + (start_ts.tv_nsec / 1000.0);
 	stop  = (stop_ts.tv_sec * 1000000.0)  + (stop_ts.tv_nsec / 1000.0);
