@@ -60,6 +60,7 @@ struct ResourceConstraint {
 		lower(0),
 		upper(std::numeric_limits<uint64_t>::max()) {
 	}
+
 	/**
 	 * @brief Constructor with resource descriptor
 	 * @param rsrc_ptr Resource descriptor pointer

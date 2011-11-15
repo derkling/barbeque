@@ -846,21 +846,21 @@ void Application::ClearWorkingModeConstraint(RTLIB_ConstraintType & cstr_type) {
 /************************** Resource Constraints ****************************/
 
 bool UsageOutOfBounds(const AwmPtr_t & awm) {
-	ConstrMap_t::iterator rsrc_cstr_it;
-	ConstrMap_t::iterator end_cstr(rsrc_constraints.end());
+	ConstrMap_t::iterator rsrc_constr_it;
+	ConstrMap_t::iterator end_rsrc_constr(rsrc_constraints.end());
 	UsagesMap_t::const_iterator usage_it = awm->ResourceUsages().begin();
 	UsagesMap_t::const_iterator end_usage = awm->ResourceUsages().end();
 
+	// Check if there are constraints on the resource usages
 	for (; usage_it != end_usage; ++usage_it) {
-		// Check if there are constraints on the resource
-		rsrc_cstr_it = rsrc_constraints.find(usage_it->first);
-		if (rsrc_cstr_it == end_cstr)
+		rsrc_constr_it = rsrc_constraints.find(usage_it->first);
+		if (rsrc_constr_it == end_rsrc_constr)
 			continue;
 
-		// Check if the usage value is out of constraint bounds
+		// Check if the usage value is out of the constraint bounds
 		UsagePtr_t const & rsrc_usage(usage_it->second);
-		if ((rsrc_usage->value < rsrc_cstr_it->second->lower) ||
-				(rsrc_usage->value > rsrc_cstr_it->second->upper))
+		if ((rsrc_usage->value < rsrc_constr_it->second->lower) ||
+				(rsrc_usage->value > rsrc_constr_it->second->upper))
 			return true;
 	}
 
@@ -879,21 +879,21 @@ Application::ExitCode_t Application::SetResourceConstraint(
 				std::string const & _rsrc_path,
 				ResourceConstraint::BoundType_t _type,
 				uint64_t _value) {
-	// Check if there is a constraint on this resource yet
+	// Init a new constraint (if do not exist yet)
 	ConstrMap_t::iterator it_con(rsrc_constraints.find(_rsrc_path));
 	if (it_con == rsrc_constraints.end()) {
-		// Insert a new constraint structure
 		rsrc_constraints.insert(ConstrPair_t(_rsrc_path,
 					ConstrPtr_t(new ResourceConstraint)));
 	}
 
-	// Set the constraint bound value (if value was existing overwrite it)
+	// Set the constraint bound value (if value exists overwrite it)
 	switch(_type) {
 	case ResourceConstraint::LOWER_BOUND:
 		rsrc_constraints[_rsrc_path]->lower = _value;
 		if (rsrc_constraints[_rsrc_path]->upper < _value)
 			rsrc_constraints[_rsrc_path]->upper =
 				std::numeric_limits<uint64_t>::max();
+
 		logger->Debug("SetConstraint (Resources): Set on {%s} LB = %llu",
 				_rsrc_path.c_str(), _value);
 		break;
@@ -902,12 +902,13 @@ Application::ExitCode_t Application::SetResourceConstraint(
 		rsrc_constraints[_rsrc_path]->upper = _value;
 		if (rsrc_constraints[_rsrc_path]->lower > _value)
 			rsrc_constraints[_rsrc_path]->lower = 0;
+
 		logger->Debug("SetConstraint (Resources): Set on {%s} UB = %llu",
 				_rsrc_path.c_str(), _value);
 		break;
 	}
 
-	// Check if there are some awms to disable
+	// Check if there are some AWMs to disable
 	UpdateEnabledWorkingModes();
 
 	return APP_SUCCESS;
@@ -916,7 +917,6 @@ Application::ExitCode_t Application::SetResourceConstraint(
 Application::ExitCode_t Application::ClearResourceConstraint(
 				std::string const & _rsrc_path,
 				ResourceConstraint::BoundType_t _type) {
-
 	// Lookup the constraint by resource pathname
 	ConstrMap_t::iterator it_con(rsrc_constraints.find(_rsrc_path));
 	if (it_con == rsrc_constraints.end()) {
@@ -925,23 +925,22 @@ Application::ExitCode_t Application::ClearResourceConstraint(
 		return APP_CONS_NOT_FOUND;
 	}
 
-	// Reset the constraint and check for AWM to enable
+	// Reset the constraint
 	switch (_type) {
 	case ResourceConstraint::LOWER_BOUND :
 		it_con->second->lower = 0;
-		// If there isn't an upper bound value, remove the constraint object
 		if (it_con->second->upper == std::numeric_limits<uint64_t>::max())
 			rsrc_constraints.erase(it_con);
 		break;
 
 	case ResourceConstraint::UPPER_BOUND :
 		it_con->second->upper = std::numeric_limits<uint64_t>::max();
-		// If there isn't a lower bound value, remove the constraint object
 		if (it_con->second->lower == 0)
 			rsrc_constraints.erase(it_con);
 		break;
 	}
 
+	// Check if there are some awms to enable
 	UpdateEnabledWorkingModes();
 
 	return APP_SUCCESS;
