@@ -97,47 +97,6 @@ public:
 			UsagesMapPtr_t & resource_set, RViewToken_t tok) = 0;
 
 	/**
-	 * @brief Set a constraint on the working modes
-	 *
-	 * It's important to clearly explain the behavior of the following API.
-	 * To set a lower bound means that all the AWMs having an ID lesser than
-	 * the one specified in the method call will be disabled. Thus they will
-	 * not considered by the scheduler. Similarly, but accordingly to the
-	 * reverse logics, if an upper bound is set: all the working modes with ID
-	 * greater to the one specified will be disabled.
-	 * An "exact value" constraint instead means that the scheduler should
-	 * consider only the working mode specified.
-	 *
-	 * Whenever a constraint of the same type occurs, the previous constraint
-	 * is replaced. This means that if the application sets a lower bound, a
-	 * second lower bound assertion will "overwrite" the firsts. The same for
-	 * upper and exact value cases.
-	 *
-	 * @constraint @see RTLIB_Constraint
-	 * @return APP_SUCCESS for success. APP_WM_NOT_FOUND if the working mode
-	 * id is not correct. APP_ABORT if 'add' field of RTLIB_Constraint
-	 * argument is unset (false).
-	 */
-	virtual ExitCode_t SetWorkingModeConstraint(RTLIB_Constraint & constraint)
-		= 0;
-
-	/**
-	 * @brief Remove a constraint on the working modes
-	 *
-	 * The method simply removes the bound type specified as argument.
-	 * In case of "exact value" bound, the method will enable all the working
-	 * modes, whatever are the current boundaries.
-	 *
-	 * If an exact value bound is currently set to working mode X, and the
-	 * method is called to remove an upper bound, the resulting enabled AWMs
-	 * would be = [X, last].
-	 * Converserly if the lower bound is removed the result would be =
-	 * [first, X].
-	 */
-	virtual void ClearWorkingModeConstraint(RTLIB_ConstraintType & cstr_type)
-		= 0;
-
-	/**
 	 * @brief Terminate this EXC by releasing all resources.
 	 *
 	 * This method requires to mark the EXC as terminated and to prepare the

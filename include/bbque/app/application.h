@@ -57,6 +57,8 @@ typedef std::shared_ptr<ResourceConstraint> ConstrPtr_t;
 typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
 /** Pair contained in the resource constraints map  */
 typedef std::pair<std::string, ConstrPtr_t> ConstrPair_t;
+/** Vector of shared pointer to WorkingMode*/
+typedef std::vector<AwmPtr_t> AwmPtrVect_t;
 
 
 /**
@@ -271,14 +273,37 @@ public:
 	ExitCode_t ScheduleContinue();
 
 	/**
-	 * @see ApplicationConfIF
+	 * @brief Set a constraint on the working modes
+	 *
+	 * It's important to clearly explain the behavior of the following API.
+	 * To set a lower bound means that all the AWMs having an ID lesser than
+	 * the one specified in the method call will be disabled. Thus they will
+	 * not considered by the scheduler. Similarly, but accordingly to the
+	 * reverse logics, if an upper bound is set: all the working modes with ID
+	 * greater to the one specified will be disabled.
+	 * An "exact value" constraint acts in addictive way. This means that the
+	 * working mode specified is added to the constraint range (if not
+	 * included yet).
+	 *
+	 * Whenever a constraint of the same type occurs, the previous constraint
+	 * is replaced. This means that if the application sets a lower bound, a
+	 * second lower bound assertion will "overwrite" the firsts. The same for
+	 * upper bound case.
+	 *
+	 * @constraint @see RTLIB_Constraint
+	 * @return APP_SUCCESS for success. APP_WM_NOT_FOUND if the working mode
+	 * id is not correct. APP_ABORT if 'add' field of RTLIB_Constraint
+	 * argument is unset (false).
 	 */
 	ExitCode_t SetWorkingModeConstraint(RTLIB_Constraint & constraint);
 
 	/**
-	 * @see ApplicationConfIF
+	 * @brief Remove all the working mode constraints
+	 *
+	 * Reset the list of enabled working modes by included the whole set of
+	 * working modes loaded from the recipe.
 	 */
-	void ClearWorkingModeConstraint(RTLIB_ConstraintType & cstr_type);
+	void ClearWorkingModeConstraints();
 
 	/**
 	 * @brief Get a working mode descriptor
@@ -342,19 +367,21 @@ private:
 	 */
 	RecipePtr_t recipe;
 
-	/** List of all the working modes */
-	AwmPtrList_t working_modes;
+	/** Vector of all the working modes */
+	AwmPtrVect_t working_modes;
 
 	/** List of pointers to enabled working modes */
 	AwmPtrList_t enabled_awms;
 
 	/** Iterators pointing to the enabled working modes boundaries */
 	struct WorkingModesBoundaries {
-		/** Iterator pointing the lower bound AWM*/
-		AwmPtrList_t::iterator low;
-		/** Iterator pointing the upper bound AWM*/
-		AwmPtrList_t::iterator upp;
-	} awm_bounds;
+		/** Lower bound AWM ID*/
+		uint8_t low;
+		/** Upper bound AWM ID*/
+		uint8_t upp;
+		/** The number of working modes - 1*/
+		uint8_t max;
+	} awm_range;
 
 	/**
 	 * @brief Init working modes by reading the recipe

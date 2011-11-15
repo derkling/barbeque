@@ -129,27 +129,28 @@ void Application::SetPriority(AppPrio_t _prio) {
 }
 
 void Application::InitWorkingModes(AppPtr_t & papp) {
+	// Get the working modes from recipe and init the vector size
 	AwmMap_t const & wms(recipe->WorkingModesAll());
-	AwmMap_t::const_iterator it(wms.begin());
-	AwmMap_t::const_iterator end(wms.end());
+	working_modes.resize(wms.size());
 
-	// Copy the working modes and set the owner
-	for (; it != end; ++it) {
+	// Init AWM range attributes (for AWM constraints)
+	awm_range.max = wms.size() - 1;
+	awm_range.low = 0;
+	awm_range.upp = awm_range.max;
+
+	AwmMap_t::const_iterator it(wms.begin());
+	for (; it != wms.end(); ++it) {
+		// Copy the working mode and set the owner (current Application)
 		AwmPtr_t app_awm(new WorkingMode((*(it->second).get())));
 		app_awm->SetOwner(papp);
-		working_modes.push_back(app_awm);
+
+		// Insert the working mode into the structures
+		working_modes[app_awm->Id()] = app_awm;
 		enabled_awms.push_back(app_awm);
 	}
 
 	// Sort the enabled list by "value"
 	enabled_awms.sort(AwmValueLesser);
-
-	// Sort the global list by Id
-	working_modes.sort(AwmIdLesser);
-
-	// Init the bounds to begin/end.
-	awm_bounds.low = working_modes.begin();
-	awm_bounds.upp = working_modes.end();
 }
 
 void Application::InitResourceConstraints() {
@@ -763,48 +764,50 @@ Application::ExitCode_t Application::SetWorkingModeConstraint(
 		return APP_ABORT;
 	}
 
-	// Find the working mode in the constraint assertion
-	AwmPtrList_t::iterator
-		wm_it(FindWorkingModeIter(working_modes, constraint.awm));
-	if (wm_it == working_modes.end()) {
-		logger->Error("SetConstraint (AWMs): No AWM {%d} found",
-				constraint.awm);
+	// Check the working mode ID validity
+	if (constraint.awm > awm_range.max)
 		return APP_WM_NOT_FOUND;
-	}
 
 	switch (constraint.type) {
 	case RTLIB_ConstraintType::LOW_BOUND:
 		// If the lower > upper: upper = end
-		if ((awm_bounds.upp != working_modes.end()) &&
-				((constraint.awm > (*awm_bounds.upp)->Id())))
-			awm_bounds.upp = working_modes.end();
+		if (constraint.awm > awm_range.upp)
+			awm_range.upp = awm_range.max;
 
-		awm_bounds.low = wm_it;
+		// Set a new lower bound
+		awm_range.low = constraint.awm;
 		logger->Debug("SetConstraint (AWMs): Set lower bound AWM {%d}",
-				(*awm_bounds.low)->Id());
+				awm_range.low);
 		break;
 
 	case RTLIB_ConstraintType::UPPER_BOUND:
 		// If the upper < lower: lower = begin
-		if (constraint.awm < (*awm_bounds.low)->Id())
-			awm_bounds.low = working_modes.begin();
+		if (constraint.awm < awm_range.low)
+			awm_range.low = 0;
 
-		awm_bounds.upp = wm_it;
-		++awm_bounds.upp; // This is needed to include the range upper bound
+		// Set a new upper bound
+		awm_range.upp = constraint.awm;
 		logger->Debug("SetConstraint (AWMs): Set upper bound AWM {%d}",
-				(*awm_bounds.upp)->Id());
+				awm_range.upp);
 		break;
 
 	case RTLIB_ConstraintType::EXACT_VALUE:
-		awm_bounds.low = wm_it;
-		awm_bounds.upp = ++wm_it;
+		// If the AWM is included in the range skip
+		if (constraint.awm <= awm_range.upp)
+			break;
+
+		// Insert the AWM into the list of enabled
+		enabled_awms.push_back(working_modes[constraint.awm]);
 		logger->Debug("SetConstraint (AWMs): Set exact value AWM{%d,%d}",
-				(*awm_bounds.low)->Id(),
-				(*awm_bounds.upp)->Id());
+				awm_range.low, awm_range.upp);
 	}
 
 	// Rebuild the list of enabled working modes
-	enabled_awms.assign(awm_bounds.low, awm_bounds.upp);
+	enabled_awms.clear();
+	for (int j = awm_range.low; j <= awm_range.upp; ++j)
+		enabled_awms.push_back(working_modes[j]);
+
+	// Check if there are resource constraints
 	UpdateEnabledWorkingModes();
 
 	logger->Debug("SetConstraint (AWMs): %d total working modes",
@@ -815,25 +818,17 @@ Application::ExitCode_t Application::SetWorkingModeConstraint(
 	return APP_SUCCESS;
 }
 
-void Application::ClearWorkingModeConstraint(RTLIB_ConstraintType & cstr_type) {
-	assert(working_modes.size() > 0);
-
-	switch (cstr_type) {
-	case RTLIB_ConstraintType::LOW_BOUND:
-		awm_bounds.low = working_modes.begin();
-		break;
-
-	case RTLIB_ConstraintType::UPPER_BOUND:
-		awm_bounds.upp = working_modes.end();
-		break;
-
-	case RTLIB_ConstraintType::EXACT_VALUE:
-		awm_bounds.low = working_modes.begin();
-		awm_bounds.upp = working_modes.end();
-	}
+void Application::ClearWorkingModeConstraints() {
+	// Reset range bounds
+	awm_range.low = 0;
+	awm_range.upp = awm_range.max;
 
 	// Rebuild the list of enabled working modes
-	enabled_awms.assign(awm_bounds.low, awm_bounds.upp);
+	enabled_awms.clear();
+	for (int j = 0; j <= awm_range.max; ++j)
+		enabled_awms.push_back(working_modes[j]);
+
+	// Check if there are resource constraints
 	UpdateEnabledWorkingModes();
 
 	logger->Debug("ClearConstraint (AWMs): %d total working modes",

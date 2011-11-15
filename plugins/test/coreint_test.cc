@@ -671,7 +671,7 @@ void CoreInteractionsTest::testConstraints(AppPtr_t & papp) {
 	PrintWorkingModesInfo(papp);
 
 	// Remove the last constraint
-	papp->ClearWorkingModeConstraint(cstr.type);
+	papp->ClearWorkingModeConstraints();
 	logger->Info("Constraint: REMOVED");
 	PrintWorkingModesInfo(papp);
 	getchar();
@@ -684,7 +684,7 @@ void CoreInteractionsTest::testConstraints(AppPtr_t & papp) {
 	PrintWorkingModesInfo(papp);
 
 	// Remove the last constraint
-	papp->ClearWorkingModeConstraint(cstr.type);
+	papp->ClearWorkingModeConstraints();
 	logger->Info("Constraint: REMOVED");
 	PrintWorkingModesInfo(papp);
 }
