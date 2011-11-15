@@ -288,7 +288,7 @@ public:
 	 *
 	 * @note The working mode must come from the enabled list
 	 */
-	inline AwmPtr_t GetWorkingMode(uint16_t wmId) {
+	inline AwmPtr_t GetWorkingMode(uint8_t wmId) {
 		AwmPtrList_t::iterator wm_it(FindWorkingModeIter(enabled_awms, wmId));
 		if (wm_it == enabled_awms.end())
 			return AwmPtr_t();
