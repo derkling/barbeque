@@ -226,6 +226,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_EXC_MISSING_RECIPE,
 	/** The Execution Context Unregistration Failed */
 	RTLIB_EXC_UNREGISTRATION_FAILED,
+	/** The Execution Context has not been started yet */
+	RTLIB_EXC_NOT_STARTED,
 	/** The Execution Context Start Failed */
 	RTLIB_EXC_ENABLE_FAILED,
 	/** The Execution Context is not currentyl enabled */

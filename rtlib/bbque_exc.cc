@@ -40,8 +40,7 @@
 
 BbqueEXC::BbqueEXC(std::string const & name,
 		std::string const & recipe,
-		RTLIB_Services_t * const rtl,
-		bool enabled) :
+		RTLIB_Services_t * const rtl) :
 	exc_name(name), rpc_name(recipe), rtlib(rtl), cycles_count(0),
 	registered(false), started(false), enabled(false), done(false) {
 
@@ -67,11 +66,6 @@ BbqueEXC::BbqueEXC(std::string const & name,
 	}
 	registered = true;
 
-	//--- Enable the working mode (if required)
-	if (enabled) {
-		Enable();
-	}
-
 	//--- Spawn the control thread
 	ctrl_trd = std::thread(&BbqueEXC::ControlLoop, this);
 
@@ -90,11 +84,13 @@ BbqueEXC::~BbqueEXC() {
  *    Execution Context Management
  ******************************************************************************/
 
-RTLIB_ExitCode_t BbqueEXC::Enable() {
-	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+RTLIB_ExitCode_t BbqueEXC::_Enable() {
 	RTLIB_ExitCode_t result;
 
 	assert(registered == true);
+
+	if (enabled)
+		return RTLIB_OK;
 
 	fprintf(stderr, FMT_INF("Enabling EXC [%s] (@%p)...\n"),
 			exc_name.c_str(), (void*)exc_hdl);
@@ -113,6 +109,13 @@ RTLIB_ExitCode_t BbqueEXC::Enable() {
 	enabled = true;
 
 	return RTLIB_OK;
+}
+
+RTLIB_ExitCode_t BbqueEXC::Enable() {
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+	if (!started)
+		return RTLIB_EXC_NOT_STARTED;
+	return _Enable();
 }
 
 RTLIB_ExitCode_t BbqueEXC::Disable() {
@@ -144,14 +147,16 @@ RTLIB_ExitCode_t BbqueEXC::Disable() {
 
 RTLIB_ExitCode_t BbqueEXC::Start() {
 	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+	RTLIB_ExitCode_t result;
 
 	assert(registered == true);
 
-	if (!enabled)
-		return RTLIB_EXC_NOT_ENABLED;
+	//--- Enable the working mode to get resources
+	result = _Enable();
+	if (result != RTLIB_OK)
+		return result;
 
 	//--- Notify the control-thread we are STARTED
-
 	started = true;
 	ctrl_cv.notify_all();
 

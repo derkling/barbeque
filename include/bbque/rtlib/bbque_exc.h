@@ -35,8 +35,7 @@ public:
 
 	BbqueEXC(std::string const & name,
 			std::string const & recipe,
-			RTLIB_Services_t *rtlib,
-			bool enabled = true);
+			RTLIB_Services_t *rtlib);
 
 	virtual ~BbqueEXC();
 
@@ -114,6 +113,8 @@ private:
 
 	bool done;
 
+
+	RTLIB_ExitCode_t _Enable();
 
 	bool WaitEnable();
 
