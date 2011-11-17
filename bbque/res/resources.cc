@@ -57,7 +57,7 @@ uint64_t Resource::Used(RViewToken_t vtok) {
 	return view->used;
 }
 
-uint64_t Resource::Availability(RViewToken_t vtok) {
+uint64_t Resource::Available(RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view) {
@@ -70,7 +70,7 @@ uint64_t Resource::Availability(RViewToken_t vtok) {
 	return (total - view->used);
 }
 
-uint64_t Resource::Availability(AppPtr_t & papp, RViewToken_t vtok) {
+uint64_t Resource::Available(AppPtr_t & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view) {

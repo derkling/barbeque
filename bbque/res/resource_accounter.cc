@@ -213,7 +213,7 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 		switch(_att) {
 		// Resource availability
 		case RA_AVAIL:
-			val += (*res_it)->Availability(vtok);
+			val += (*res_it)->Available(vtok);
 			break;
 		// Resource used
 		case RA_USED:
@@ -665,7 +665,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		// If the current resource bind has enough availability, reserve the
 		// whole quantity requested here. Otherwise split it in more "sibling"
 		// resource binds.
-		uint64_t availab = (*it_bind)->Availability(vtok);
+		uint64_t availab = (*it_bind)->Available(vtok);
 		if (usage_value < availab)
 			usage_value -= (*it_bind)->Acquire(usage_value, papp, vtok);
 		else

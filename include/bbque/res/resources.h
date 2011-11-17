@@ -203,7 +203,7 @@ public:
 	 *
 	 * @return How much resource is still available
 	 */
-	uint64_t Availability(RViewToken_t vtok = 0);
+	uint64_t Available(RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Resource availability
@@ -220,7 +220,7 @@ public:
 	 * @return How much resource is still available including the amount of
 	 * resource used by the given application
 	 */
-	uint64_t Availability(AppPtr_t & papp, RViewToken_t vtok = 0);
+	uint64_t Available(AppPtr_t & papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Count of applications using the resource
