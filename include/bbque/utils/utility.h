@@ -64,6 +64,9 @@
 #define container_of(ptr, type, member)\
 	(type*)((char*)(ptr) - offsetof(type, member))
 
+/** Get number of entries of the specified array */
+#define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
+
 /** Optimize branch prediction for "taken" */
 #define likely(x)       __builtin_expect((x),1)
 /** Optimize branch prediction for "untaken" */
