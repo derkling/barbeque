@@ -70,6 +70,16 @@ uint64_t Resource::Availability(RViewToken_t vtok) {
 	return (total - view->used);
 }
 
+uint64_t Resource::ApplicationUsage(AppPtr_t & papp, RViewToken_t vtok) {
+	// Retrieve the state view
+	ResourceStatePtr_t view = GetStateView(vtok);
+	if (!view)
+		return 0;
+
+	// Call the "low-level" ApplicationUsage()
+	return ApplicationUsage(papp, view->apps);
+}
+
 uint64_t Resource::SetUsed(uint64_t use) {
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	// Overflow check
@@ -179,6 +189,17 @@ uint16_t Resource::ApplicationsCount(AppUseQtyMap_t & apps_map,
 	// Return the size and a reference to the map
 	apps_map = view->apps;
 	return apps_map.size();
+}
+
+uint64_t Resource::ApplicationUsage(AppPtr_t & papp,
+		AppUseQtyMap_t & apps_map) {
+	// Retrieve the application from the map
+	AppUseQtyMap_t::iterator app_using_it(apps_map.find(papp->Uid()));
+	if (app_using_it == apps_map.end())
+		return 0;
+
+	// Return the amount of resource used
+	return app_using_it->second;
 }
 
 ResourceStatePtr_t Resource::GetStateView(RViewToken_t vtok) {

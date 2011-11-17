@@ -213,6 +213,16 @@ public:
 	}
 
 	/**
+	 * @brief Amount of resource used by the application
+	 *
+	 * @param papp Application (shared pointer) using the resource
+	 * @param vtok The token referencing the resource view
+	 *
+	 * @return The 'quota' of resource used by the application
+	 */
+	uint64_t ApplicationUsage(AppPtr_t & papp, RViewToken_t vtok = 0);
+
+	/**
 	 * @brief Get the Uid of the idx-th App/EXC using the resource
 	 *
 	 * @param app_uid The Uid of the n-th App/EXC using the resource
@@ -301,6 +311,16 @@ private:
 	 */
 	uint16_t ApplicationsCount(AppUseQtyMap_t & apps_map,
 			RViewToken_t vtok = 0);
+
+	/**
+	 * @brief Amount of resource used by the application
+	 *
+	 * @param papp Application (shared pointer) using the resource
+	 * @param apps_map Reference to the map of App/EXC to get
+	 *
+	 * @return The 'quota' of resource used by the application
+	 */
+	uint64_t ApplicationUsage(AppPtr_t & papp, AppUseQtyMap_t & apps_map);
 
 	/**
 	 * @brief Get the view referenced by the token
