@@ -70,6 +70,25 @@ uint64_t Resource::Availability(RViewToken_t vtok) {
 	return (total - view->used);
 }
 
+uint64_t Resource::Availability(AppPtr_t & papp, RViewToken_t vtok) {
+	// Retrieve the state view
+	ResourceStatePtr_t view = GetStateView(vtok);
+	if (!view) {
+		// If the view is not found, it means that nothing has been allocated.
+		// Thus the availability value to return is the total amount of
+		// resource
+		return total;
+	}
+
+	// Return the amount of available resource plus the amount currently
+	// used by the given application
+	if (papp)
+		return (total - view->used + ApplicationUsage(papp, view->apps));
+
+	// Return the amount of available resource
+	return (total - view->used);
+}
+
 uint64_t Resource::ApplicationUsage(AppPtr_t & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);

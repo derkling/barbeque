@@ -202,6 +202,23 @@ public:
 	uint64_t Availability(RViewToken_t vtok = 0);
 
 	/**
+	 * @brief Resource availability
+	 *
+	 * @param papp Application interested in the query. We want to include
+	 * in the count the amount of resource used by this application.
+	 * This could be useful when we want to check the availability with the
+	 * aim of allocate the resource to the given application. If the
+	 * application is using yet a certain amount of resource this quantity
+	 * should be considered as "available" for this application.
+	 *
+	 * @param vtok The token referencing the resource view
+	 *
+	 * @return How much resource is still available including the amount of
+	 * resource used by the given application
+	 */
+	uint64_t Availability(AppPtr_t & papp, RViewToken_t vtok = 0);
+
+	/**
 	 * @brief Count of applications using the resource
 	 *
 	 * @param vtok The token referencing the resource view
