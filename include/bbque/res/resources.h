@@ -188,16 +188,20 @@ public:
 	}
 
 	/**
-	 * @brief Resource used
+	 * @brief Amount of resource used
+	 *
 	 * @param vtok The token referencing the resource view
-	 * @return Amount of resource used
+	 *
+	 * @return How much resource has been allocated
 	 */
 	uint64_t Used(RViewToken_t vtok = 0);
 
 	/**
-	 * @brief Resource available
+	 * @brief Resource availablility
+	 *
 	 * @param vtok The token referencing the resource view
-	 * @return How much resource is still available.
+	 *
+	 * @return How much resource is still available
 	 */
 	uint64_t Availability(RViewToken_t vtok = 0);
 
@@ -260,6 +264,7 @@ public:
 	 */
 	 uint64_t Acquire(uint64_t amount, AppPtr_t const & app_ptr,
 			 RViewToken_t vtok = 0);
+
 	/**
 	 * @brief Release the resource
 	 *
@@ -269,7 +274,7 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource released
 	 */
-	uint64_t Release(AppPtr_t const & app_ptr,RViewToken_t vtok = 0);
+	uint64_t Release(AppPtr_t const & app_ptr, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Delete a state view
@@ -277,7 +282,7 @@ public:
 	 * If the token refers to the default view, the method returns doing
 	 * nothing. This control is ahead of safety and consistency purposes.
 	 * Indeed if the default view was removed, what state should be picked as
-	 * the new default one ?
+	 * the new default one?
 	 * Thus, this constraint force the caller to set a new default view, before
 	 * delete the current one.
 	 *
@@ -320,7 +325,7 @@ private:
 	/**
 	 * @brief Apps/EXCs using the resource
 	 *
-	 * @param apps_map Ref to the map of App/EXC to get
+	 * @param apps_map Reference to the map of App/EXC to get
 	 * @param vtok The resource state view token
 	 *
 	 * @return The number of Apps/EXCs using the resource, and a
