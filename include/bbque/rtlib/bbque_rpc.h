@@ -113,6 +113,9 @@ public:
  *    Performance Monitoring Support
  ******************************************************************************/
 
+	void NotifySetup(
+		RTLIB_ExecutionContextHandler_t ech);
+
 	void NotifyInit(
 		RTLIB_ExecutionContextHandler_t ech);
 

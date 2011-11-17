@@ -949,6 +949,10 @@ RTLIB_ExitCode_t BbqueRPC::StopExecution(
  *    Performance Monitoring Support
  ******************************************************************************/
 
+void BbqueRPC::NotifySetup(
+	RTLIB_ExecutionContextHandler_t ech) {
+}
+
 void BbqueRPC::NotifyInit(
 	RTLIB_ExecutionContextHandler_t ech) {
 }

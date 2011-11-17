@@ -95,6 +95,11 @@ static RTLIB_ExitCode_t rtlib_clear(
  *    Performance Monitoring Support
  ******************************************************************************/
 
+static void rtlib_notify_setup(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifySetup(ech);
+}
+
 static void rtlib_notify_init(
 		RTLIB_ExecutionContextHandler_t ech) {
 	rpc->NotifyInit(ech);
@@ -171,6 +176,7 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.Unregister = rtlib_unregister;
 
 	// Performance monitoring notifiers
+	rtlib_services.Notify.Setup = rtlib_notify_setup;
 	rtlib_services.Notify.Init = rtlib_notify_init;
 	rtlib_services.Notify.Exit = rtlib_notify_exit;
 	rtlib_services.Notify.PreConfigure = rtlib_notify_pre_configure;

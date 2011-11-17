@@ -211,6 +211,15 @@ RTLIB_ExitCode_t BbqueEXC::WaitCompletion() {
  *    Default Events Handler
  ******************************************************************************/
 
+RTLIB_ExitCode_t BbqueEXC::onSetup() {
+
+	DB(fprintf(stderr, FMT_WRN("<< Default setup of EXC [%s]  >>\n"),
+				exc_name.c_str()));
+	DB(::usleep(10000));
+
+	return RTLIB_OK;
+}
+
 RTLIB_ExitCode_t BbqueEXC::onConfigure(uint8_t awm_id) {
 
 	DB(fprintf(stderr, FMT_WRN("<< Default switching of EXC [%s] "
@@ -261,6 +270,16 @@ RTLIB_ExitCode_t BbqueEXC::onMonitor() {
 /*******************************************************************************
  *    Control Loop
  ******************************************************************************/
+
+RTLIB_ExitCode_t BbqueEXC::Setup() {
+	RTLIB_ExitCode_t result;
+
+	DB(fprintf(stderr, FMT_DBG("CL 0. Setup EXC [%s]...\n"),
+			exc_name.c_str()));
+
+	result = onSetup();
+	return result;
+}
 
 bool BbqueEXC::WaitEnable() {
 	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
@@ -381,6 +400,12 @@ void BbqueEXC::ControlLoop() {
 	ctrl_ul.unlock();
 
 	assert(enabled == true);
+
+	// Setup notification
+	rtlib->Notify.Setup(exc_hdl);
+
+	// Setup the EXC
+	Setup();
 
 	// Endless loop
 	while (!done) {

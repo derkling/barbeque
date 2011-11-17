@@ -592,12 +592,25 @@ typedef RTLIB_ExitCode_t (*RTLIB_GetWorkingMode_t)(
  ******************************************************************************/
 
 /**
- * @brief Initialize the RTLib notification support
+ * @brief Setup the RTLib notification support
  *
- * Before using notification handler, an application must call this mathod to
+ * Before using notification handler, an application must call this method to
  * allow the run-time library to properly initialize the performance
  * monitoring support. This method must be called from the main thread that
  * want to be monitored and profiled.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_Setup)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+/**
+ * @brief Notify the RTLib an EXC has been initialized
+ *
+ * Once an EXC has been properly configured and initialized, an application is
+ * encouraged to notify the run-time library by calling this method.  This
+ * could be used by the RTLib implementation to properly enable resources
+ * required to monitor application perforamnces.
  *
  * @param ech the handler of the EXC to configure
  */
@@ -605,14 +618,15 @@ typedef void (*RTLIB_Notify_Init)(
 		RTLIB_ExecutionContextHandler_t ech);
 
 /**
- * @brief Finalize the RTLib notification support
+ * @brief Notify the RTLib an EXC has completed
  *
- * After the usage of the notification handler, an application must call this
- * mathod to allow the run-time library to properly finalize the performance
- * monitoring support, thus releasing all the associated resources.
+ * Once an EXC has completed its workload, an application is encouraged to
+ * notify the run-time library by calling this method.  This could be used by
+ * the RTLib implementation to properly release all the resources used to
+ * monitor application perforamnces.
  *
  * @param ech the handler of the EXC to configure
- */
+  */
 typedef void (*RTLIB_Notify_Exit)(
 		RTLIB_ExecutionContextHandler_t ech);
 
@@ -770,6 +784,8 @@ typedef struct RTLIB_Services {
 
 		/* Performance estimation and notification interface */
 		struct {
+			/** Setup notifier */
+			RTLIB_Notify_Setup Setup;
 			/** Initialization notifier */
 			RTLIB_Notify_Init Init;
 			/** Finalization notifier */

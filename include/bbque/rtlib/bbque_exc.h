@@ -64,6 +64,8 @@ protected:
 
 	std::string const rpc_name;
 
+	virtual RTLIB_ExitCode_t onSetup();
+
 	virtual RTLIB_ExitCode_t onConfigure(uint8_t awm_id);
 
 	virtual RTLIB_ExitCode_t onSuspend();
@@ -114,6 +116,8 @@ private:
 
 
 	bool WaitEnable();
+
+	RTLIB_ExitCode_t Setup();
 
 	RTLIB_ExitCode_t Reconfigure(RTLIB_ExitCode_t result);
 
