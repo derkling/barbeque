@@ -360,10 +360,13 @@ RTLIB_ExitCode_t BbqueEXC::Run() {
 				exc_name.c_str(), cycles_count+1, wmp.awm_id));
 
 	rtlib->Notify.PreRun(exc_hdl);
+
 	result = onRun();
-	rtlib->Notify.PostRun(exc_hdl);
-	if (result == RTLIB_EXC_WORKLOAD_NONE)
+	if (result == RTLIB_EXC_WORKLOAD_NONE) {
 		done = true;
+	} else {
+		rtlib->Notify.PostRun(exc_hdl);
+	}
 
 	return result;
 }
@@ -393,16 +396,13 @@ void BbqueEXC::ControlLoop() {
 	assert(rtlib);
 	assert(registered == true);
 
-	// Initialize Notifications
-	rtlib->Notify.Init(exc_hdl);
-
-	DB(fprintf(stderr, FMT_DBG("EXC [%s] control thread [%d] started...\n"),
-				exc_name.c_str(), gettid()));
-
 	// Wait for the EXC being STARTED
 	while (!started)
 		ctrl_cv.wait(ctrl_ul);
 	ctrl_ul.unlock();
+
+	DB(fprintf(stderr, FMT_DBG("EXC [%s] control thread [%d] started...\n"),
+				exc_name.c_str(), gettid()));
 
 	assert(enabled == true);
 
@@ -411,6 +411,9 @@ void BbqueEXC::ControlLoop() {
 
 	// Setup the EXC
 	Setup();
+
+	// Initialize notification
+	rtlib->Notify.Init(exc_hdl);
 
 	// Endless loop
 	while (!done) {
@@ -441,11 +444,11 @@ void BbqueEXC::ControlLoop() {
 
 	};
 
-	// Finalizing Notifications
-	rtlib->Notify.Exit(exc_hdl);
-
 	// Disable the EXC (thus notifying waiters)
 	Disable();
+
+	// Exit notification
+	rtlib->Notify.Exit(exc_hdl);
 
 	DB(fprintf(stderr, FMT_ERR("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));
