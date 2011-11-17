@@ -47,6 +47,9 @@ BbqueRPC * BbqueRPC::GetInstance() {
 	if (instance)
 		return instance;
 
+	// Parse environment configuration
+	ParseOptions();
+
 #ifdef BBQUE_RPC_FIFO
 	DB(fprintf(stderr, FMT_DBG("Using FIFO RPC channel\n")));
 	instance = new BbqueRPC_FIFO_Client();
@@ -83,6 +86,74 @@ BbqueRPC::~BbqueRPC(void) {
 	// Clean-up all the registered EXCs
 	exc_map.clear();
 }
+
+RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
+	const char *env;
+	char buff[32];
+	char *opt;
+
+	DB(fprintf(stderr, FMT_DBG("Parsing environment options...\n")));
+	fprintf(stderr, FMT_DBG("Parsing environment options...\n"));
+
+	// Look-for the expected RTLIB configuration variable
+	env = getenv("BBQUE_RTLIB_OPTS");
+	if (!env)
+		return RTLIB_OK;
+
+	DB(fprintf(stderr, FMT_DBG("BBQUE_RTLIB_OPTS: [%s]\n"), env));
+	fprintf(stderr, FMT_DBG("BBQUE_RTLIB_OPTS: [%s]\n"), env);
+
+	// Tokenize configuration options
+	strncpy(buff, env, 32);
+	opt = strtok(buff, ":");
+
+	// Parsing all options (only single char opts are supported)
+	while (opt) {
+
+		DB(fprintf(stderr, FMT_DBG("OPT: %s\n"), opt));
+
+		switch (opt[0]) {
+		case 'b':
+			// Enabling "big numbers" notations
+			envBigNum = true;
+			break;
+		case 'c':
+			// Enabling CSV output
+			envCsvOutput = true;
+			break;
+		case 'G':
+			// Enabling Global statistics collection
+			envGlobal = true;
+			break;
+		case 'K':
+			// Disable Kernel and Hipervisor from collected statistics
+			envNoKernel = true;
+			break;
+		case 'O':
+			// Collect statistics on RTLIB overheads
+			envOverheads = true;
+			break;
+		case 'p':
+			// Enabling perf...
+			envPerfCount = true;
+			// ... with the specified verbosity level
+			sscanf(opt+1, "%d", &envDetailedRun);
+			fprintf(stderr, "Enabling Perf Counters [verbosity: %d]\n",
+					envDetailedRun);
+			break;
+		case 's':
+			// Setting CSV separator
+			envCsvSep = opt+1;
+			break;
+		}
+
+		// Get next option
+		opt = strtok(NULL, ":");
+	}
+
+	return RTLIB_OK;
+}
+
 
 RTLIB_ExitCode_t BbqueRPC::Init(const char *name) {
 	RTLIB_ExitCode_t exitCode;

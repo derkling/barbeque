@@ -344,6 +344,26 @@ protected:
 	 */
 	BbqueRPC(void);
 
+
+/******************************************************************************
+ * RTLib Run-Time Configuration
+ ******************************************************************************/
+
+	//---- Performance Counters options
+	static bool envPerfCount;
+	static bool envGlobal;
+	static bool envOverheads;
+	static int  envDetailedRun;
+	static bool envNoKernel;
+	static bool envCsvOutput;
+	static bool envBigNum;
+	static const char *envCsvSep;
+
+	/**
+	 * @brief Look-up configuration from environment variable BBQUE_RTLIB_OPTS
+	 */
+	static RTLIB_ExitCode_t ParseOptions();
+
 /******************************************************************************
  * Channel Dependant interface
  ******************************************************************************/
