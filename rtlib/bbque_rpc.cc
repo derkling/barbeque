@@ -457,6 +457,11 @@ RTLIB_ExitCode_t BbqueRPC::SetupStatistics(pregExCtx_t prec) {
 					prec->awm_id));
 		pstats = prec->stats[prec->awm_id] =
 			pAwmStats_t(new AwmStats_t);
+
+		// Setup Performance Counters (if required)
+		if (PerfRegisteredEvents(prec)) {
+			PerfSetupStats(prec, pstats);
+		}
 	}
 
 	// Update usage count
@@ -521,6 +526,22 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 				_cycles, pstats->time_processing,
 				_min, _max, _avg, _var));
 		}
+
+	}
+
+	if (!PerfRegisteredEvents(prec) || !verbose)
+		return;
+
+	// Print performance counters for this AWM
+	it = prec->stats.begin();
+	for ( ; it != prec->stats.end(); ++it) {
+		awm_id = (*it).first;
+		pstats = (*it).second;
+
+		_cycles = count(pstats->samples);
+		fprintf(stderr, "\nPerf counters stats for '%s-%d' (%d cycles):\n\n",
+				prec->name.c_str(), awm_id, _cycles);
+		PerfPrintStats(prec, pstats);
 	}
 
 }
@@ -1527,6 +1548,10 @@ void BbqueRPC::NotifySetup(
 
 	assert(isRegistered(prec) == true);
 
+	// Add all the required performance counters
+	if (envPerfCount)
+		PerfSetupEvents(prec);
+
 }
 
 void BbqueRPC::NotifyInit(
@@ -1544,6 +1569,10 @@ void BbqueRPC::NotifyInit(
 
 	assert(isRegistered(prec) == true);
 
+	if (envGlobal && PerfRegisteredEvents(prec)) {
+		PerfEnable(prec);
+	}
+
 }
 
 void BbqueRPC::NotifyExit(
@@ -1560,6 +1589,11 @@ void BbqueRPC::NotifyExit(
 	}
 
 	assert(isRegistered(prec) == true);
+
+	if (envGlobal && PerfRegisteredEvents(prec)) {
+		PerfDisable(prec);
+		PerfCollectStats(prec);
+	}
 
 }
 
@@ -1589,6 +1623,14 @@ void BbqueRPC::NotifyPreRun(
 	assert(isRegistered(prec) == true);
 
 	DB(fprintf(stderr, FMT_DBG("===> NotifyRun\n")));
+	if (!envGlobal && PerfRegisteredEvents(prec)) {
+		if (unlikely(envOverheads)) {
+			PerfDisable(prec);
+			PerfCollectStats(prec);
+		} else
+			PerfEnable(prec);
+	}
+
 }
 
 void BbqueRPC::NotifyPostRun(
@@ -1607,6 +1649,16 @@ void BbqueRPC::NotifyPostRun(
 	assert(isRegistered(prec) == true);
 
 	DB(fprintf(stderr, FMT_DBG("<=== NotifyRun\n")));
+
+	if (!envGlobal && PerfRegisteredEvents(prec)) {
+		if (unlikely(envOverheads))
+			PerfEnable(prec);
+		else {
+			PerfDisable(prec);
+			PerfCollectStats(prec);
+		}
+	}
+
 }
 
 void BbqueRPC::NotifyPreMonitor(
