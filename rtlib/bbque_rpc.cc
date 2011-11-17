@@ -1514,14 +1514,53 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 
 void BbqueRPC::NotifySetup(
 	RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return;
+	}
+
+	assert(isRegistered(prec) == true);
+
 }
 
 void BbqueRPC::NotifyInit(
 	RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return;
+	}
+
+	assert(isRegistered(prec) == true);
+
 }
 
 void BbqueRPC::NotifyExit(
 	RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return;
+	}
+
+	assert(isRegistered(prec) == true);
+
 }
 
 void BbqueRPC::NotifyPreConfigure(
@@ -1536,11 +1575,37 @@ void BbqueRPC::NotifyPostConfigure(
 
 void BbqueRPC::NotifyPreRun(
 	RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return;
+	}
+
+	assert(isRegistered(prec) == true);
+
 	DB(fprintf(stderr, FMT_DBG("===> NotifyRun\n")));
 }
 
 void BbqueRPC::NotifyPostRun(
 	RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return;
+	}
+
+	assert(isRegistered(prec) == true);
+
 	DB(fprintf(stderr, FMT_DBG("<=== NotifyRun\n")));
 }
 
