@@ -38,6 +38,7 @@
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_RPC  [ERR]", fmt)
 
 namespace ba = bbque::app;
+namespace bu = bbque::utils;
 
 namespace bbque { namespace rtlib {
 
@@ -1019,6 +1020,497 @@ RTLIB_ExitCode_t BbqueRPC::StopExecution(
 /*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
+
+BbqueRPC::PerfEventAttr_t BbqueRPC::default_events[] = {
+
+  {PERF_TYPE_SOFTWARE, PERF_COUNT_SW_TASK_CLOCK },
+  {PERF_TYPE_SOFTWARE, PERF_COUNT_SW_CONTEXT_SWITCHES },
+  {PERF_TYPE_SOFTWARE, PERF_COUNT_SW_CPU_MIGRATIONS },
+  {PERF_TYPE_SOFTWARE, PERF_COUNT_SW_PAGE_FAULTS },
+
+  {PERF_TYPE_HARDWARE, PERF_COUNT_HW_CPU_CYCLES	},
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+  {PERF_TYPE_HARDWARE, PERF_COUNT_HW_STALLED_CYCLES_FRONTEND },
+  {PERF_TYPE_HARDWARE, PERF_COUNT_HW_STALLED_CYCLES_BACKEND },
+#endif
+  {PERF_TYPE_HARDWARE, PERF_COUNT_HW_INSTRUCTIONS },
+  {PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_INSTRUCTIONS },
+  {PERF_TYPE_HARDWARE, PERF_COUNT_HW_BRANCH_MISSES },
+
+};
+
+
+BbqueRPC::PerfEventAttr_t BbqueRPC::detailed_events[] = {
+
+  {PERF_TYPE_HW_CACHE, L1DC_RA },
+  {PERF_TYPE_HW_CACHE, L1DC_RM },
+  {PERF_TYPE_HW_CACHE, LLC_RA },
+  {PERF_TYPE_HW_CACHE, LLC_RM },
+
+};
+
+
+BbqueRPC::PerfEventAttr_t BbqueRPC::very_detailed_events[] = {
+
+  {PERF_TYPE_HW_CACHE,	L1IC_RA },
+  {PERF_TYPE_HW_CACHE,	L1IC_RM },
+  {PERF_TYPE_HW_CACHE,	DTLB_RA },
+  {PERF_TYPE_HW_CACHE,	DTLB_RM },
+  {PERF_TYPE_HW_CACHE,	ITLB_RA },
+  {PERF_TYPE_HW_CACHE,	ITLB_RM },
+
+};
+
+BbqueRPC::PerfEventAttr_t BbqueRPC::very_very_detailed_events[] = {
+
+  {PERF_TYPE_HW_CACHE,	L1DC_PA },
+  {PERF_TYPE_HW_CACHE,	L1DC_PM },
+
+};
+
+bool BbqueRPC::envPerfCount = false;
+bool BbqueRPC::envGlobal = false;
+bool BbqueRPC::envOverheads = false;
+int  BbqueRPC::envDetailedRun = 0;
+bool BbqueRPC::envNoKernel = false;
+bool BbqueRPC::envCsvOutput = false;
+bool BbqueRPC::envBigNum = false;
+const char *BbqueRPC::envCsvSep = " ";
+
+BbqueRPC::pPerfEventStats_t BbqueRPC::PerfGetEventStats(pAwmStats_t pstats,
+		perf_type_id type, uint64_t config) {
+	PerfEventStatsMapByConf_t::iterator it;
+	pPerfEventStats_t ppes;
+	uint8_t conf_key, curr_key;
+
+	conf_key = (uint8_t)(0xFF & config);
+
+	// LookUp for requested event
+	it = pstats->events_conf_map.lower_bound(conf_key);
+	for ( ; it != pstats->events_conf_map.end(); ++it) {
+		ppes = (*it).second;
+
+		// Check if current (conf) key is still valid
+		curr_key = (uint8_t)(0xFF & ppes->pattr->config);
+		if (curr_key != conf_key)
+			break;
+
+		// Check if we found the required event
+		if ((ppes->pattr->type == type) &&
+			(ppes->pattr->config == config))
+			return ppes;
+	}
+
+	return pPerfEventStats_t();
+}
+
+void BbqueRPC::PerfSetupEvents(pregExCtx_t prec) {
+	uint8_t tot_counters = ARRAY_SIZE(default_events);
+	int fd;
+
+	// TODO get required Perf configuration from environment
+	// to add eventually more detailed counters or to completely disable perf
+	// support
+
+	// Adding default events
+	for (uint8_t e = 0; e < tot_counters; e++) {
+		fd = prec->perf.AddCounter(
+				default_events[e].type, default_events[e].config,
+				envNoKernel);
+		prec->events_map[fd] = &(default_events[e]);
+	}
+
+    if (envDetailedRun <  1)
+        return;
+
+    // Append detailed run extra attributes
+	for (uint8_t e = 0; e < ARRAY_SIZE(detailed_events); e++) {
+		fd = prec->perf.AddCounter(
+				detailed_events[e].type, detailed_events[e].config,
+				envNoKernel);
+		prec->events_map[fd] = &(detailed_events[e]);
+    }
+
+    if (envDetailedRun <  2)
+        return;
+
+    // Append detailed run extra attributes
+	for (uint8_t e = 0; e < ARRAY_SIZE(very_detailed_events); e++) {
+		fd = prec->perf.AddCounter(
+				very_detailed_events[e].type, very_detailed_events[e].config,
+				envNoKernel);
+		prec->events_map[fd] = &(very_detailed_events[e]);
+    }
+
+    if (envDetailedRun <  3)
+        return;
+
+    // Append detailed run extra attributes
+	for (uint8_t e = 0; e < ARRAY_SIZE(very_very_detailed_events); e++) {
+		fd = prec->perf.AddCounter(
+				very_very_detailed_events[e].type, very_very_detailed_events[e].config,
+				envNoKernel);
+		prec->events_map[fd] = &(very_very_detailed_events[e]);
+    }
+}
+
+void BbqueRPC::PerfSetupStats(pregExCtx_t prec, pAwmStats_t pstats) {
+	PerfRegisteredEventsMap_t::iterator it;
+	pPerfEventStats_t ppes;
+	pPerfEventAttr_t ppea;
+	uint8_t conf_key;
+	int fd;
+
+	if (PerfRegisteredEvents(prec) == 0)
+		return;
+
+	// Setup performance counters
+	for (it = prec->events_map.begin(); it != prec->events_map.end(); ++it) {
+		fd = (*it).first;
+		ppea = (*it).second;
+
+		// Build new perf counter statistics
+		ppes = pPerfEventStats_t(new PerfEventStats_t());
+		assert(ppes);
+		ppes->id = fd;
+		ppes->pattr = ppea;
+
+		// Keep track of perf statistics for this AWM
+		pstats->events_map[fd] = ppes;
+
+		// Index statistics by configuration (radix)
+		conf_key = (uint8_t)(0xFF & ppea->config);
+		pstats->events_conf_map.insert(
+			PerfEventStatsMapByConfEntry_t(conf_key, ppes));
+	}
+
+}
+
+void BbqueRPC::PerfCollectStats(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> stats_ul(prec->pAwmStats->stats_mtx);
+	pAwmStats_t pstats = prec->pAwmStats;
+	PerfEventStatsMap_t::iterator it;
+	pPerfEventStats_t ppes;
+	uint64_t delta;
+	int fd;
+
+	// Collect counters for registered events
+	it = pstats->events_map.begin();
+	for ( ; it != pstats->events_map.end(); ++it) {
+		ppes = (*it).second;
+		fd = (*it).first;
+
+		// Reading delta for this perf counter
+		delta = prec->perf.Update(fd);
+
+		// Computing stats for this counter
+		ppes->value += delta;
+		ppes->samples(delta);
+	}
+
+}
+
+void BbqueRPC::PerfPrintNsec(pAwmStats_t pstats, pPerfEventStats_t ppes) {
+	pPerfEventAttr_t ppea = ppes->pattr;
+	double avg = mean(ppes->samples);
+	double total, ratio = 0.0;
+    double msecs = avg / 1e6;
+
+    fprintf(stderr, "%19.6f%s%-25s", msecs, envCsvSep,
+			bu::Perf::EventName(ppea->type, ppea->config));
+
+	if (envCsvOutput)
+        return;
+
+	if (PerfEventMatch(ppea, PERF_SW(TASK_CLOCK))) {
+		// Get AWM average running time
+		total = mean(pstats->samples) * 1e6;
+
+		if (total) {
+			ratio = avg / total;
+			fprintf(stderr, " # %8.3f CPUs utilized          ", ratio);
+			return;
+		}
+	}
+
+}
+
+void BbqueRPC::PerfPrintMissesRatio(double avg_missed, double tot_branches, const char *text) {
+	double ratio = 0.0;
+	const char *color;
+
+	if (tot_branches)
+		ratio = avg_missed / tot_branches * 100.0;
+
+	color = PERF_COLOR_NORMAL;
+	if (ratio > 20.0)
+		color = PERF_COLOR_RED;
+	else if (ratio > 10.0)
+		color = PERF_COLOR_MAGENTA;
+	else if (ratio > 5.0)
+		color = PERF_COLOR_YELLOW;
+
+	fprintf(stderr, " #  ");
+	bu::Perf::FPrintf(stderr, color, "%6.2f%%", ratio);
+	fprintf(stderr, " %-23s", text);
+
+}
+
+void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
+	pPerfEventAttr_t ppea = ppes->pattr;
+	double avg = mean(ppes->samples);
+	double total, ratio = 0.0;
+	pPerfEventStats_t ppes2;
+	const char *fmt;
+
+	if (envCsvOutput)
+		fmt = "%.0f%s%s";
+	else if (envBigNum)
+		fmt = "%'19.0f%s%-25s";
+	else
+		fmt = "%19.0f%s%-25s";
+
+	fprintf(stderr, fmt, avg, envCsvSep,
+			bu::Perf::EventName(ppea->type, ppea->config));
+
+    if (envCsvOutput)
+        return;
+
+	if (PerfEventMatch(ppea, PERF_HW(INSTRUCTIONS))) {
+
+		// Compute "instructions per cycle"
+		ppes2 = PerfGetEventStats(pstats, PERF_HW(CPU_CYCLES));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+
+		if (total)
+			ratio = avg / total;
+
+		fprintf(stderr, " #   %5.2f  insns per cycle        ", ratio);
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+		// Compute "stalled cycles per instruction"
+		ppes2 = PerfGetEventStats(pstats, PERF_HW(STALLED_CYCLES_FRONTEND));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+
+		ppes2 = PerfGetEventStats(pstats, PREF_HW(STALLED_CYCLES_BACKEND));
+		if (!ppes2)
+			return;
+		total = max(total, mean(ppes2->samples));
+
+		if (total && avg) {
+			ratio = total / avg;
+			fprintf(stderr, "\n%45s#   %5.2f  stalled cycles per insn", " ", ratio);
+		}
+#endif
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HW(BRANCH_MISSES))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HW(BRANCH_INSTRUCTIONS));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total)
+			PerfPrintMissesRatio(avg, total, "of all branches");
+
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HC(L1DC_RM))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HC(L1DC_RA));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total)
+			PerfPrintMissesRatio(avg, total, "of all L1-dcache hits");
+
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HC(L1IC_RM))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HC(L1IC_RA));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total)
+			PerfPrintMissesRatio(avg, total, "of all L1-icache hits");
+
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HC(DTLB_RM))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HC(DTLB_RA));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total)
+			PerfPrintMissesRatio(avg, total, "of all dTLB cache hits");
+
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HC(ITLB_RM))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HC(ITLB_RA));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total)
+			PerfPrintMissesRatio(avg, total, "of all iTLB cache hits");
+
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HC(LLC_RM))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HC(LLC_RA));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total)
+			PerfPrintMissesRatio(avg, total, "of all LL-cache hits");
+
+		return;
+	}
+
+	if (PerfEventMatch(ppea, PERF_HW(CACHE_MISSES))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_HW(CACHE_REFERENCES));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total) {
+			ratio = avg * 100 / total;
+		    fprintf(stderr, " # %8.3f %% of all cache refs    ", ratio);
+		}
+
+		return;
+	}
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
+	// TODO add CPU front/back-end stall stats
+#endif
+
+	if (PerfEventMatch(ppea, PERF_HW(CPU_CYCLES))) {
+		ppes2 = PerfGetEventStats(pstats, PERF_SW(TASK_CLOCK));
+		if (!ppes2)
+			return;
+		total = mean(ppes2->samples);
+		if (total) {
+			ratio = 1.0 * avg / total;
+			fprintf(stderr, " # %8.3f GHz                    ", ratio);
+		}
+
+		return;
+	}
+
+	// By default print the frequency of the event in [M/sec]
+	ppes2 = PerfGetEventStats(pstats, PERF_SW(TASK_CLOCK));
+	if (!ppes2)
+		return;
+	total = mean(ppes2->samples);
+	if (total) {
+		ratio = 1000.0 * avg / total;
+		fprintf(stderr, " # %8.3f M/sec                  ", ratio);
+		return;
+	}
+
+	// Otherwise, simply generate an empty line
+	fprintf(stderr, "%-35s", " ");
+
+}
+
+bool BbqueRPC::IsNsecCounter(pregExCtx_t prec, int fd) {
+	pPerfEventAttr_t ppea = prec->events_map[fd];
+	if (PerfEventMatch(ppea, PERF_SW(CPU_CLOCK)) ||
+		PerfEventMatch(ppea, PERF_SW(TASK_CLOCK)))
+		return true;
+	return false;
+}
+
+void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
+	PerfEventStatsMap_t::iterator it;
+	pPerfEventStats_t ppes;
+	uint64_t avg_enabled, avg_running;
+	double avg_value, std_value;
+	int fd;
+
+	// For each registered counter
+	for (it = pstats->events_map.begin(); it != pstats->events_map.end(); ++it) {
+		ppes = (*it).second;
+		fd = (*it).first;
+
+		if (IsNsecCounter(prec, fd))
+			PerfPrintNsec(pstats, ppes);
+		else
+			PerfPrintAbs(pstats, ppes);
+
+		// Print stddev ratio
+		if (count(ppes->samples) > 1) {
+
+			// Get AWM average and stddev running time
+			avg_value = mean(ppes->samples);
+			std_value = sqrt(variance(ppes->samples));
+
+			PrintNoisePct(std_value, avg_value);
+		}
+
+		// Computing counter scheduling statistics
+		avg_enabled = prec->perf.Enabled(ppes->id, false);
+		avg_running = prec->perf.Running(ppes->id, false);
+
+		DB(fprintf(stderr, " (Ena: %20lu, Run: %10lu) ", avg_enabled, avg_running));
+
+		// Print percentage of counter usage
+		if (avg_enabled != avg_running)
+			fprintf(stderr, " [%5.2f%%]", 100.0 * avg_running / avg_enabled);
+
+		fputc('\n', stderr);
+	}
+
+	if (!envCsvOutput) {
+
+		fputc('\n', stderr);
+
+		// Get AWM average and stddev running time
+		avg_value = mean(pstats->samples);
+		std_value = sqrt(variance(pstats->samples));
+
+		fprintf(stderr, " %18.6f seconds time elapsed", avg_value);
+		if (count(pstats->samples) > 1) {
+			fprintf(stderr, "                                        ");
+			PrintNoisePct(std_value, avg_value);
+		}
+		fprintf(stderr, "\n\n");
+	}
+
+}
+
+void BbqueRPC::PrintNoisePct(double total, double avg) {
+	const char *color;
+	double pct = 0.0;
+
+	if (avg)
+		pct = 100.0*total/avg;
+
+	if (envCsvOutput) {
+		fprintf(stderr, "%s%.2f%%", envCsvSep, pct);
+		return;
+	}
+
+	color = PERF_COLOR_NORMAL;
+	if (pct > 80.0)
+		color = PERF_COLOR_RED;
+	else if (pct > 60.0)
+		color = PERF_COLOR_MAGENTA;
+	else if (pct > 40.0)
+		color = PERF_COLOR_YELLOW;
+
+	fprintf(stderr, "  ( ");
+	bu::Perf::FPrintf(stderr, color, "+-%6.2f%%", pct);
+	fprintf(stderr, " )");
+}
 
 void BbqueRPC::NotifySetup(
 	RTLIB_ExecutionContextHandler_t ech) {

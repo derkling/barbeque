@@ -31,6 +31,7 @@
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
 #include "bbque/utils/timer.h"
+#include "bbque/utils/perf.h"
 
 #include <map>
 #include <memory>
@@ -148,6 +149,43 @@ public:
 
 protected:
 
+	typedef struct PerfEventAttr {
+		perf_type_id type;
+		uint64_t config;
+	} PerfEventAttr_t;
+
+	typedef PerfEventAttr_t *pPerfEventAttr_t;
+
+	typedef std::map<int, pPerfEventAttr_t> PerfRegisteredEventsMap_t;
+
+	typedef std::pair<int, pPerfEventAttr_t> PerfRegisteredEventsMapEntry_t;
+
+	typedef	struct PerfEventStats {
+		/** Per AWM perf counter value */
+		uint64_t value;
+		/** Per AWM perf counter enable time */
+		uint64_t time_enabled;
+		/** Per AWM perf counter running time */
+		uint64_t time_running;
+		/** Perf counter attrs */
+		pPerfEventAttr_t pattr;
+		/** Perf counter ID */
+		int id;
+		/** The statistics collected for this PRE */
+		accumulator_set<uint32_t,
+			stats<tag::min, tag::max, tag::variance>> samples;
+	} PerfEventStats_t;
+
+	typedef std::shared_ptr<PerfEventStats_t> pPerfEventStats_t;
+
+	typedef std::map<int, pPerfEventStats_t> PerfEventStatsMap_t;
+
+	typedef std::pair<int, pPerfEventStats_t> PerfEventStatsMapEntry_t;
+
+	typedef std::multimap<uint8_t, pPerfEventStats_t> PerfEventStatsMapByConf_t;
+
+	typedef std::pair<uint8_t, pPerfEventStats_t> PerfEventStatsMapByConfEntry_t;
+
 	/**
 	 * @brief Statistics on AWM usage
 	 */
@@ -160,6 +198,12 @@ protected:
 		/** Statistics on AWM cycles */
 		accumulator_set<double,
 			stats<tag::min, tag::max, tag::variance>> samples;
+
+		/** Map of registered Perf counters */
+		PerfEventStatsMap_t events_map;
+		/** Map registered Perf counters to their type */
+		PerfEventStatsMapByConf_t events_conf_map;
+
 		/** The mutex protecting concurrent access to statistical data */
 		std::mutex stats_mtx;
 
@@ -212,6 +256,11 @@ protected:
 		uint32_t time_reconf;
 		/** The time [ms] spent on processing */
 		uint32_t time_processing;
+
+		/** Performance counters */
+		utils::Perf perf;
+		/** Map of registered Perf counter IDs */
+		PerfRegisteredEventsMap_t events_map;
 
 		/** Statistics on AWM's of this EXC */
 		AwmStatsMap_t stats;
@@ -618,6 +667,63 @@ private:
 	 * @brief Get an EXC handler for the give EXC ID
 	 */
 	pregExCtx_t getRegistered(uint8_t exc_id);
+
+
+/******************************************************************************
+ * Performance Counters
+ ******************************************************************************/
+
+	/** Default performance attributes to collect for each task */
+	static PerfEventAttr_t default_events[];
+
+	/** Detailed stats (-d), covering the L1 and last level data caches */
+	static PerfEventAttr_t detailed_events[];
+
+	/** Very detailed stats (-d -d), covering the instruction cache and the
+	 * TLB caches: */
+	static PerfEventAttr_t very_detailed_events[];
+
+	/** Very, very detailed stats (-d -d -d), adding prefetch events */
+	static PerfEventAttr_t very_very_detailed_events[];
+
+	inline uint8_t PerfRegisteredEvents(pregExCtx_t prec) {
+		return prec->events_map.size();
+	}
+
+	inline bool PerfEventMatch(pPerfEventAttr_t ppea,
+			perf_type_id type, uint64_t config) {
+		return (ppea->type == type && ppea->config == config);
+	}
+
+	inline void PerfDisable(pregExCtx_t prec) {
+		prec->perf.Disable();
+	}
+
+	inline void PerfEnable(pregExCtx_t prec) {
+		prec->perf.Enable();
+	}
+
+	void PerfSetupEvents(pregExCtx_t prec);
+
+	void PerfSetupStats(pregExCtx_t prec, pAwmStats_t pstats);
+
+	void PerfCollectStats(pregExCtx_t prec);
+
+	void PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats);
+
+	bool IsNsecCounter(pregExCtx_t prec, int fd);
+
+	void PerfPrintNsec(pAwmStats_t pstats, pPerfEventStats_t ppes);
+
+	void PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes);
+
+	pPerfEventStats_t PerfGetEventStats(pAwmStats_t pstats, perf_type_id type,
+										uint64_t config);
+
+	void PerfPrintMissesRatio(double avg_missed, double tot_branches,
+			const char *text);
+
+	void PrintNoisePct(double total, double avg);
 
 };
 
