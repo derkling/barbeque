@@ -824,7 +824,7 @@ struct RTLIB_Services {
 /**
  * @brief A stringified rapresentation of error messages
  */
-extern const char *RTLIB_errorStr[RTLIB_EXIT_CODE_COUNT];
+extern const char *RTLIB_errorStr[];
 
 /**
  * @brief Get a string description for the specified RTLib error
