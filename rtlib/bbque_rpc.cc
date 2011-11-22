@@ -620,6 +620,11 @@ RTLIB_ExitCode_t BbqueRPC::GetAssignedWorkingMode(
 		return RTLIB_EXC_GWM_FAILED;
 	}
 
+	if (isBlocked(prec)) {
+		DB(fprintf(stderr, FMT_DBG("BLOCKED\n")));
+		return RTLIB_EXC_GWM_BLOCKED;
+	}
+
 	if (isSyncMode(prec) && !isAwmValid(prec)) {
 		DB(fprintf(stderr, FMT_DBG("SYNC Pending\n")));
 		return RTLIB_EXC_SYNC_MODE;
@@ -650,9 +655,14 @@ RTLIB_ExitCode_t BbqueRPC::WaitForWorkingMode(
 	// TIMER: Start BLOCKED
 	prec->exc_tmr.start();
 
-	// Wait fot the EXC being assigned an AWM
-	while (isEnabled(prec) && !isAwmValid(prec) && !isBlocked(prec))
-		prec->cv.wait(rec_ul);
+	// Wait for the EXC being un-BLOCKED
+	if (isBlocked(prec))
+		while (isBlocked(prec))
+			prec->cv.wait(rec_ul);
+	else
+	// Wait for the EXC being assigned an AWM
+		while (isEnabled(prec) && !isAwmValid(prec) && !isBlocked(prec))
+			prec->cv.wait(rec_ul);
 
 	clearAwmWaiting(prec);
 	wm->awm_id = prec->awm_id;
@@ -723,6 +733,13 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 		return RTLIB_OK;
 	}
 
+	// Checking if the EXC has been blocked
+	if (result == RTLIB_EXC_GWM_BLOCKED) {
+		setSyncDone(prec);
+		// Notify about synchronization completed
+		prec->cv.notify_one();
+	}
+
 	// Exit if the EXC has been disabled
 	if (!isEnabled(prec))
 		return RTLIB_EXC_GWM_FAILED;
@@ -738,9 +755,11 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 		if (result != RTLIB_OK)
 			goto exit_gwm_failed;
 	} else {
-		// At this point, the EXC should be in Synchronization Mode
-		// and thus it should wait for an EXC being assigned by the RTRM
-		assert(result == RTLIB_EXC_SYNC_MODE);
+		// At this point, the EXC should be either in Synchronization Mode
+		// or Blocked, and thus it should wait for an EXC being
+		// assigned by the RTRM
+		assert((result == RTLIB_EXC_SYNC_MODE) ||
+				(result == RTLIB_EXC_GWM_BLOCKED));
 	}
 
 	DB(fprintf(stderr, FMT_DBG("Waiting for assigned AWM...\n")));
@@ -836,9 +855,6 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(pregExCtx_t prec) {
 	clearSyncDone(prec);
 	// Setting current AWM as invalid
 	setAwmInvalid(prec);
-	// Set application BLOCKED (if required)
-	if (prec->event == RTLIB_EXC_GWM_BLOCKED)
-		setBlocked(prec);
 	return RTLIB_OK;
 }
 
@@ -937,8 +953,13 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_SyncChangeNotify(
 RTLIB_ExitCode_t BbqueRPC::SyncP_DoChangeNotify(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> rec_ul(prec->mtx);
 
-	// Setting current AWM as valid
-	setAwmValid(prec);
+	// Update the EXC status based on the last required re-configuration action
+	if (prec->event == RTLIB_EXC_GWM_BLOCKED) {
+		setBlocked(prec);
+	} else {
+		clearBlocked(prec);
+		setAwmValid(prec);
+	}
 
 	// TODO Setup the ground for reconfiguration statistics collection
 	// TODO Start the re-configuration by notifying the waiting thread
