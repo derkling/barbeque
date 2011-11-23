@@ -20,6 +20,7 @@
 #define BBQUE_RESOURCE_UTILS_H_
 
 #include "bbque/res/resources.h"
+#include "bbque/res/resource_accounter_status.h"
 
 #include <sstream>
 #include <string>
