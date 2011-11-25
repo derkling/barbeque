@@ -29,11 +29,10 @@
 
 using bbque::app::ApplicationStatusIF;
 using bbque::app::AppPrio_t;
+using bbque::app::AppPtr_t;
+
 
 namespace bbque {
-
-/** A shared pointer to the Application descriptor */
-typedef std::shared_ptr<app::Application> AppPtr_t;
 
 /**
  * Map containing shared pointers to Application descriptors, where the key is
