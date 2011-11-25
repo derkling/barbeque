@@ -260,11 +260,11 @@ public:
 	 *
 	 * Release the specific amount of resource used by an application
 	 *
-	 * @param app_ptr The application releasing the resource
+	 * @param papp The application releasing the resource
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource released
 	 */
-	uint64_t Release(AppPtr_t const & app_ptr, RViewToken_t vtok = 0);
+	uint64_t Release(AppPtr_t const & papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Delete a state view

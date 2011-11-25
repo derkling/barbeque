@@ -151,21 +151,21 @@ uint64_t Resource::Acquire(AppPtr_t const & papp, uint64_t amount,
 	return amount;
 }
 
-uint64_t Resource::Release(AppPtr_t const & app_ptr, RViewToken_t vtok) {
+uint64_t Resource::Release(AppPtr_t const & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view)
 		return 0;
 
 	// Lookup the application using the resource
-	AppUseQtyMap_t::iterator lkp = view->apps.find(app_ptr->Uid());
+	AppUseQtyMap_t::iterator lkp = view->apps.find(papp->Uid());
 	if (lkp == view->apps.end())
 		return 0;
 
 	// Decrease the used value and remove the application
 	uint64_t used_by_app = lkp->second;
 	view->used -= used_by_app;
-	view->apps.erase(app_ptr->Uid());
+	view->apps.erase(papp->Uid());
 
 	// Return the amount of resource released
 	return used_by_app;
