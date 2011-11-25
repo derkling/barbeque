@@ -667,10 +667,10 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		// resource binds.
 		uint64_t availab = (*it_bind)->Available(vtok);
 		if (usage_value < availab)
-			usage_value -= (*it_bind)->Acquire(usage_value, papp, vtok);
+			usage_value -= (*it_bind)->Acquire(papp, usage_value, vtok);
 		else
 			usage_value -=
-				(*it_bind)->Acquire(availab, papp, vtok);
+				(*it_bind)->Acquire(papp, availab, vtok);
 
 		// Add the resource to the set of resources used in the view
 		// referenced by 'vtok'

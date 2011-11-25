@@ -246,12 +246,13 @@ public:
 
 	/**
 	 * @brief Acquire a given amount of resource
+	 *
+	 * @param papp The application requiring the resource
 	 * @param amount How much resource is required
-	 * @param app_ptr The application requiring the resource
 	 * @param vtok The token referencing the resource view
 	 * @return The amount of resource acquired if success, 0 otherwise.
 	 */
-	 uint64_t Acquire(uint64_t amount, AppPtr_t const & app_ptr,
+	 uint64_t Acquire(AppPtr_t const & papp, uint64_t amount,
 			 RViewToken_t vtok = 0);
 
 	/**

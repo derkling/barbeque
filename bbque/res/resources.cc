@@ -131,7 +131,7 @@ Resource::ExitCode_t Resource::UsedBy(AppUid_t & app_uid,
 	return RS_NO_APPS;
 }
 
-uint64_t Resource::Acquire(uint64_t amount, AppPtr_t const & app_ptr,
+uint64_t Resource::Acquire(AppPtr_t const & papp, uint64_t amount,
 		RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
@@ -147,7 +147,7 @@ uint64_t Resource::Acquire(uint64_t amount, AppPtr_t const & app_ptr,
 
 	// Set new used value and application that requested the resource
 	view->used = fut_used;
-	view->apps[app_ptr->Uid()] = amount;
+	view->apps[papp->Uid()] = amount;
 	return amount;
 }
 
