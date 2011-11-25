@@ -42,8 +42,6 @@ struct ResourceNode;
 
 /** List of pointers to ResourceNode */
 typedef std::list<ResourceNode *> ResourceNodesList_t;
-/** List of shared pointers to Resource descriptors */
-typedef std::list<ResourcePtr_t> ResourcesList_t;
 
 
 /**
@@ -157,9 +155,9 @@ public:
 	 * @param temp_path Template path to match
 	 * @return A list of resource descriptors (pointers)
 	 */
-	inline ResourcesList_t findAll(std::string const & temp_path) const {
+	inline ResourcePtrList_t findAll(std::string const & temp_path) const {
 		// List of matches to return
-		ResourcesList_t matches;
+		ResourcePtrList_t matches;
 
 		// Start the recursive search
 		find_node(root, temp_path, RT_ALL_MATCHES, matches);
@@ -180,9 +178,9 @@ public:
 	 * @param hyb_path The resource path in hybrid form
 	 * @return A list of resource descriptors (pointers)
 	 */
-	inline ResourcesList_t findSet(std::string const & hyb_path) const {
+	inline ResourcePtrList_t findSet(std::string const & hyb_path) const {
 		// List of matches to return
-		ResourcesList_t matches;
+		ResourcePtrList_t matches;
 
 		// Start the recursive search
 		find_node(root, hyb_path, RT_SET_MATCHES, matches);
@@ -200,7 +198,7 @@ public:
 	 */
 	inline bool existPath(std::string const & temp_path) const {
 		// List of matches to be filled
-		ResourcesList_t matches;
+		ResourcePtrList_t matches;
 
 		// Start the recursive search
 		return find_node(root, temp_path, RT_FIRST_MATCH, matches);
@@ -258,7 +256,7 @@ private:
 	 * @return True if the search have found some matchings.
 	 */
 	bool find_node(ResourceNode * curr_node, std::string const & rsrc_path,
-			SearchOption_t opt, ResourcesList_t & matches) const;
+			SearchOption_t opt, ResourcePtrList_t & matches) const;
 
 	/**
 	 * @brief Append a child to the current node
