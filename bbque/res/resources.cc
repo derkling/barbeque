@@ -99,25 +99,6 @@ uint64_t Resource::ApplicationUsage(AppPtr_t & papp, RViewToken_t vtok) {
 	return ApplicationUsage(papp, view->apps);
 }
 
-uint64_t Resource::SetUsed(uint64_t use) {
-	ResourceAccounter &ra(ResourceAccounter::GetInstance());
-	// Overflow check
-	if (use > total)
-		return 0;
-
-	// Retrieve the state view
-	ResourceStatePtr_t view = GetStateView(0);
-	if (!view) {
-		// Allocate a new view
-		view = ResourceStatePtr_t(new ResourceState());
-		state_views[ra.GetSystemView()] = view;
-	}
-
-	// Set the "used" value
-	view->used = use;
-	return view->used;
-}
-
 Resource::ExitCode_t Resource::UsedBy(AppUid_t & app_uid,
 		uint64_t & amount,
 		uint8_t idx,

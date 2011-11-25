@@ -169,17 +169,6 @@ public:
 	}
 
 	/**
-	 * @brief Set the amount of resource used.
-	 *
-	 * The value must be lesser than total availability.
-	 *
-	 * @note This method acts only upon the default state view only
-	 * @return Return the value of "used". If success, the value will be the
-	 * new just set, otherwise the old one.
-	 */
-	uint64_t SetUsed(uint64_t use);
-
-	/**
 	 * @brief Resource total
 	 * @return The total amount of resource
 	 */
