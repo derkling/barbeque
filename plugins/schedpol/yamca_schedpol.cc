@@ -279,7 +279,6 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 	// metrics value
 	SchedEntityMap_t::reverse_iterator se_it(sched_map.rbegin());
 	SchedEntityMap_t::reverse_iterator end_se(sched_map.rend());
-	float eval_metrics;
 
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
@@ -290,11 +289,6 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 		// application/EXC
 		if (CheckSkipConditions(papp))
 			continue;
-
-		// Get the metrics of the AWM to schedule
-		eval_metrics = *(static_cast<float *>
-				(eval_awm->GetAttribute(SCHEDULER_POLICY_NAME,
-										"metrics").get()));
 
 		logger->Debug("Selecting: [%s] schedule request for AWM{%d}...",
 				papp->StrId(),
@@ -408,9 +402,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::EvalWorkingMode(
 	}
 
 	// Metrics computation
-	float * metrics = new float;
-	ExitCode_t result =
-		MetricsComputation(papp, wm, cl_id, *metrics);
+	float metrics;
+	ExitCode_t result = MetricsComputation(papp, wm, cl_id, metrics);
 
 	switch (result) {
 	case SCHED_CLUSTER_FULL:
@@ -430,17 +423,14 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::EvalWorkingMode(
 		break;
 	}
 
-	// Set the metrics value and insert the entity into the map
-	wm->SetAttribute(
-			SCHEDULER_POLICY_NAME, "metrics", VoidPtr_t(metrics));
-
+	// Insert the SchedEntity in the map ordered by the metrics value
 	sched_ul.lock();
-	sched_map->insert(std::pair<float, SchedEntity_t>(
-				static_cast<float>(*metrics), SchedEntity_t(papp, wm)));
+	sched_map->insert(std::pair<float, SchedEntity_t>(metrics,
+				SchedEntity_t(papp, wm)));
 
 	logger->Info("{%d} Insert: [%s] AWM{%d} CL=%d metrics %.4f",
 					sched_map->size(), papp->StrId(),
-					wm->Id(), cl_id, *metrics);
+					wm->Id(), cl_id, metrics);
 
 	return SCHED_OK;
 }
