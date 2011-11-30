@@ -32,6 +32,7 @@
 #include <unordered_map>
 
 #include "bbque/app/application.h"
+#include "bbque/utils/utility.h"
 
 /** @see WorkingMode BindResource */
 #define RSRC_ID_ANY 	-1
@@ -39,7 +40,7 @@
 
 using bbque::app::AppPtr_t;
 using bbque::app::AppUid_t;
-
+using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace res {
 
@@ -122,7 +123,7 @@ struct ResourceState {
  * of resource. This feature is particularly useful for components like the
  * Scheduler/Optimizer (see below.)
  */
-class Resource {
+class Resource: public AttributesContainer {
 
 public:
 
