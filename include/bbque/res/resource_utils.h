@@ -28,8 +28,7 @@
 #define POW_2_20 0x100000
 #define POW_2_30 0x40000000
 
-/** Type for ID used in resource path */
-typedef int16_t ResID_t;
+using bbque::res::ResID_t;
 
 /**
  * @brief Convert to unity

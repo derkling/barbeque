@@ -40,15 +40,17 @@
 using bbque::app::AppPtr_t;
 using bbque::app::AppUid_t;
 
+
 namespace bbque { namespace res {
+
+/** Type for ID used in resource path */
+typedef int16_t ResID_t;
 
 // Forward declarations
 struct Resource;
 struct ResourceUsage;
 struct ResourceState;
-
 class ResourceAccounter;
-
 
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;

@@ -59,8 +59,7 @@ using bbque::app::Application;
 
 namespace bbque { namespace res {
 
-/** Type for ID used in resource path */
-typedef int16_t ResID_t;
+
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointer to Resource*/
