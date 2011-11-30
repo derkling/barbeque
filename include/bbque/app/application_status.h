@@ -33,20 +33,22 @@
 using bbque::utils::AttributesContainer;
 
 
-/** The application identifier */
-typedef uint32_t AppPid_t;
-
 #define BBQUE_UID_SHIFT 5
 #define BBQUE_UID_MASK 0x1F
 
 
 namespace bbque { namespace app {
 
-/** The application priotity */
+
+/** The application identifier type */
+typedef uint32_t AppPid_t;
 
 /** The application UID type */
 typedef uint32_t AppUid_t;
+
+/** The application priority type */
 typedef uint16_t AppPrio_t;
+
 
 class WorkingMode;
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;

@@ -31,6 +31,7 @@ using bbque::app::ApplicationStatusIF;
 using bbque::app::AppPrio_t;
 using bbque::app::AppPtr_t;
 using bbque::app::AppUid_t;
+using bbque::app::AppPid_t;
 
 
 namespace bbque {
