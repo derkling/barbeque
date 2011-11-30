@@ -35,7 +35,6 @@
 
 #include "bbque/app/application_conf.h"
 #include "bbque/app/recipe.h"
-#include "bbque/app/plugin_data.h"
 #include "bbque/plugins/logger.h"
 
 #define APPLICATION_NAMESPACE "ap"
