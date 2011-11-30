@@ -36,9 +36,6 @@ using bbque::utils::AttributesContainer;
 /** The application identifier */
 typedef uint32_t AppPid_t;
 
-/** The application UID */
-typedef uint32_t AppUid_t;
-
 #define BBQUE_UID_SHIFT 5
 #define BBQUE_UID_MASK 0x1F
 
@@ -46,6 +43,9 @@ typedef uint32_t AppUid_t;
 namespace bbque { namespace app {
 
 /** The application priotity */
+
+/** The application UID type */
+typedef uint32_t AppUid_t;
 typedef uint16_t AppPrio_t;
 
 class WorkingMode;

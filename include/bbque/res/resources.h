@@ -38,6 +38,7 @@
 #define RSRC_ID_NONE 	-2
 
 using bbque::app::AppPtr_t;
+using bbque::app::AppUid_t;
 
 namespace bbque { namespace res {
 
