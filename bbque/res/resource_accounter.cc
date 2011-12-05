@@ -597,8 +597,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
 	}
 
 	SyncFinalize();
-	if (result == RA_SUCCESS)
+	if (result == RA_SUCCESS) {
 		logger->Info("SyncMode [%d]: Session committed", sync_ssn.count);
+		// Release the last scheduled view, by setting it to the system view
+		SetScheduledView(sys_view_token);
+	}
 
 	PrintStatusReport();
 	return result;

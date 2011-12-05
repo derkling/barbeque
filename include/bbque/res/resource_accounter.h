@@ -232,6 +232,31 @@ public:
 	}
 
 	/**
+	 * @brief Get the scheduled resource state view
+	 *
+	 * @return The token of the scheduled view
+	 */
+	inline RViewToken_t GetScheduledView() {
+		return sch_view_token;
+	}
+
+	/**
+	 * @brief Set the scheduled resource state view
+	 *
+	 * @return The token of the system view
+	 */
+	inline void SetScheduledView(RViewToken_t svt) {
+		RViewToken_t old_svt = sch_view_token;
+		// First updated the new scheduled view
+		sch_view_token = svt;
+		// ... than we can keep time to release the previous one
+		if (old_svt != sys_view_token)
+			// but this is to be done only if the previous view was not the
+			// current system view
+			PutView(old_svt);
+	}
+
+	/**
 	 * @brief Print the resource hierarchy in a tree-like form
 	 */
 	inline void TreeView() {
@@ -358,6 +383,17 @@ private:
 	 * The token referencing the system resources state (default view).
 	 */
 	RViewToken_t sys_view_token;
+
+	/**
+	 * @brief Token referencing the view on scheduled resources
+	 *
+	 * When a new scheduling has been selected, this is the token referencing
+	 * the corresponding view on resources state. When that schedule has been
+	 * committed, i.e. resources usage synchronized, this has the same value
+	 * of sys_view_token.
+	 * 
+	 */
+	RViewToken_t sch_view_token;
 
 	/**
 	 * Default constructor
