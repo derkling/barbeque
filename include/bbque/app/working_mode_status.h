@@ -24,8 +24,8 @@
 #include <bitset>
 #include <list>
 #include <map>
-#include "bbque/app/plugin_data.h"
 #include "bbque/res/resource_accounter.h"
+#include "bbque/utils/attributes_container.h"
 
 #define MAX_NUM_CLUSTERS 16
 
@@ -33,6 +33,7 @@ using bbque::res::ResID_t;
 using bbque::res::ResourceUsage;
 using bbque::res::UsagePtr_t;
 using bbque::res::UsagesMap_t;
+using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace app {
 
@@ -55,7 +56,7 @@ typedef std::bitset<MAX_NUM_CLUSTERS> ClustersBitSet;
  *
  * Read-only interface for the WorkingMode runtime status
  */
-class WorkingModeStatusIF: public PluginsData {
+class WorkingModeStatusIF: public AttributesContainer {
 
 public:
 
