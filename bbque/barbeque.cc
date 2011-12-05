@@ -24,7 +24,6 @@
 #include "bbque/resource_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/signals_manager.h"
-#include "bbque/test_platform_data.h"
 
 #include "bbque/utils/timer.h"
 #include "bbque/utils/utility.h"
@@ -101,14 +100,6 @@ int main(int argc, char *argv[]) {
 				cm.GetPluginsDir().c_str());
 		pm.LoadAll(cm.GetPluginsDir());
 	}
-
-#if BBQUE_TEST_PLATFORM_DATA
-	//---------- Loading TEST platform data
-	// This is just a temporary placeholder for the (still-missing)
-	// ResourceAbstraction module
-	bb::TestPlatformData &tpd(bb::TestPlatformData::GetInstance());
-	tpd.LoadPlatformData();
-#endif // BBQUE_TEST_PLATFORM_DATA
 
 	// Initialize Signals Manager module
 	bb::SignalsManager::GetInstance();
