@@ -73,6 +73,7 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	SM_SAMPLE_METRIC("syncp.avg.pre",   "  PreChange  exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.lat",   "  Pre-Sync Lat   t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.sync",  "  SyncChange exe t[ms]"),
+	SM_SAMPLE_METRIC("syncp.avg.synp",  "  SyncPlatform exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.do",    "  DoChange   exe t[ms]"),
 	SM_SAMPLE_METRIC("syncp.avg.post",  "  PostChange exe t[ms]"),
 	//----- Couting statistics
@@ -91,6 +92,7 @@ SynchronizationManager::SynchronizationManager() :
 	ap(ApplicationProxy::GetInstance()),
 	mc(bu::MetricsCollector::GetInstance()),
 	ra(br::ResourceAccounter::GetInstance()),
+	pp(PlatformProxy::GetInstance()),
 	sv(SystemView::GetInstance()),
 	sync_count(0) {
 	std::string sync_policy;
@@ -484,6 +486,60 @@ void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
 	am.SyncCommit(papp);
 }
 
+
+SynchronizationManager::ExitCode_t
+SynchronizationManager::Sync_Platform(ApplicationStatusIF::SyncState_t syncState) {
+	PlatformProxy::ExitCode_t result = PlatformProxy::OK;
+	AppsUidMapIt apps_it;
+	AppPtr_t papp;
+
+	logger->Debug("STEP M: SyncPlatform() START");
+	SM_RESET_TIMING(sm_tmr);
+
+	papp = am.GetFirst(syncState, apps_it);
+	for ( ; papp; papp = am.GetNext(syncState, apps_it)) {
+
+		logger->Info("STEP M: SyncPlatform() ===> [%s]", papp->StrId());
+
+		// Jumping meanwhile disabled applications
+		if (papp->Disabled()) {
+			logger->Debug("STEP M: release resources of disabled EXC [%s]",
+					papp->StrId());
+			pp.ReclaimResources(papp);
+		}
+
+		// TODO: reconfigure resources
+		switch (syncState) {
+		case ApplicationStatusIF::STARTING:
+			result = pp.MapResources(papp,
+					papp->NextAWM()->GetResourceBinding());
+			break;
+		case ApplicationStatusIF::RECONF:
+		case ApplicationStatusIF::MIGREC:
+		case ApplicationStatusIF::MIGRATE:
+			result = pp.MapResources(papp,
+					papp->NextAWM()->GetResourceBinding());
+			break;
+		case ApplicationStatusIF::BLOCKED:
+			result = pp.ReclaimResources(papp);
+			break;
+		default:
+			break;
+		}
+
+		logger->Info("STEP M: <--------- OK -- [%s]", papp->StrId());
+	}
+
+	// Collecting execution metrics
+	SM_GET_TIMING(metrics, SM_SYNCP_TIME_SYNCPLAT, sm_tmr);
+	logger->Debug("STEP M: SyncPlatform() DONE");
+
+	if (result == PlatformProxy::OK)
+		return OK;
+
+	return PLATFORM_SYNC_FAILED;
+}
+
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	SynchronizationPolicyIF::SyncLatency_t syncLatency;
@@ -507,6 +563,10 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 	SM_ADD_SAMPLE(metrics, SM_SYNCP_TIME_LATENCY, syncLatency);
 
 	result = Sync_SyncChange(syncState);
+	if (result != OK)
+		return result;
+
+	result = Sync_Platform(syncState);
 	if (result != OK)
 		return result;
 

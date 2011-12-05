@@ -21,6 +21,7 @@
 #include "bbque/config.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/application_proxy.h"
+#include "bbque/platform_proxy.h"
 
 #include "bbque/utils/timer.h"
 #include "bbque/utils/metrics_collector.h"
@@ -63,7 +64,8 @@ public:
 	 */
 	typedef enum ExitCode {
 		OK = 0,
-		ABORTED
+		ABORTED,
+		PLATFORM_SYNC_FAILED
 	} ExitCode_t;
 
 
@@ -104,6 +106,7 @@ private:
 	ApplicationProxy & ap;
 	MetricsCollector & mc;
 	ResourceAccounter & ra;
+	PlatformProxy & pp;
 	SystemView & sv;
 
 	/**
@@ -123,6 +126,7 @@ private:
 		SM_SYNCP_TIME_PRECHANGE,
 		SM_SYNCP_TIME_LATENCY,
 		SM_SYNCP_TIME_SYNCCHANGE,
+		SM_SYNCP_TIME_SYNCPLAT,
 		SM_SYNCP_TIME_DOCHANGE,
 		SM_SYNCP_TIME_POSTCHANGE,
 		//----- Couting statistics
@@ -146,6 +150,11 @@ private:
 	 * @brief Synchronize the specified EXCs
 	 */
 	ExitCode_t SyncApps(ApplicationStatusIF::SyncState_t syncState);
+
+	/**
+	 * @brief Synchronize platform resources for the specified EXCs
+	 */
+	ExitCode_t Sync_Platform(ApplicationStatusIF::SyncState_t syncState);
 
 	/**
 	 * @brief Notify a Pre-Change to the specified EXCs
