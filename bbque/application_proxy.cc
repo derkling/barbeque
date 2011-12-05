@@ -1382,6 +1382,11 @@ void ApplicationProxy::Dispatcher() {
 	std::unique_lock<std::mutex> trdStatus_ul(trdStatus_mtx);
 	pchMsg_t pmsg;
 
+	// Set the module name
+	if (prctl(PR_SET_NAME, BBQUE_MODULE_NAME("ap"), 0, 0, 0) != 0) {
+		logger->Error("Set name FAILED! (Error: %s)\n", strerror(errno));
+	}
+
 	// Waiting for thread authorization to start
 	if (!trdRunning)
 		trdStatus_cv.wait(trdStatus_ul);

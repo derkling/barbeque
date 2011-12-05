@@ -28,6 +28,7 @@
 #include <cstdint>
 #include <cstdlib>
 
+#include <sys/prctl.h>
 #include <sys/syscall.h>
 
 #include <bbque/utils/timer.h>
@@ -76,6 +77,8 @@
 inline pid_t gettid() {
 	return syscall(SYS_gettid);
 }
+
+#define BBQUE_MODULE_NAME(STR) "bbque_" STR
 
 /** The High-Resolution timer exported by either the Barbeque and the RTLib */
 extern bbque::utils::Timer bbque_tmr;
