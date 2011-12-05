@@ -32,6 +32,7 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace res {
 
+
 ResourceTree::ResourceTree():
 	max_depth(0) {
 
@@ -40,7 +41,7 @@ ResourceTree::ResourceTree():
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
 
-	root = new ResourceNode;
+	root = new ResourceNode_t;
 	root->data = ResourcePtr_t(new Resource("root"));
 	root->parent = NULL;
 	root->depth = 0;
@@ -49,7 +50,7 @@ ResourceTree::ResourceTree():
 
 ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 	// Extract the first namespace level in the resource path
-	ResourceNode * curr_node = root;
+	ResourceNode_t * curr_node = root;
 	std::string ns_path(_rsrc_path);
 	std::string curr_ns(SplitAndPop(ns_path));
 
@@ -89,7 +90,7 @@ ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 }
 
 
-bool ResourceTree::find_node(ResourceNode * curr_node,
+bool ResourceTree::find_node(ResourceNode_t * curr_node,
 		std::string const & rsrc_path,
 		SearchOption_t opt,
 		std::list<ResourcePtr_t> & matches) const {
@@ -147,10 +148,11 @@ bool ResourceTree::find_node(ResourceNode * curr_node,
 }
 
 
-ResourceNode * ResourceTree::add_child(ResourceNode * curr_node,
+ResourceTree::ResourceNode_t *
+ResourceTree::add_child(ResourceNode_t * curr_node,
 		std::string const & rsrc_name) {
 	// Create the new resource node
-	ResourceNode * _node = new ResourceNode;
+	ResourceNode_t * _node = new ResourceNode_t;
 	_node->data = ResourcePtr_t(new Resource(rsrc_name));
 
 	// Set the parent and the depth
@@ -163,7 +165,7 @@ ResourceNode * ResourceTree::add_child(ResourceNode * curr_node,
 }
 
 
-void ResourceTree::print_children(ResourceNode * _node, int _depth) {
+void ResourceTree::print_children(ResourceNode_t * _node, int _depth) {
 	// Increase the level of depth
 	++_depth;
 
@@ -184,7 +186,7 @@ void ResourceTree::print_children(ResourceNode * _node, int _depth) {
 }
 
 
-void ResourceTree::clear_node(ResourceNode * _node) {
+void ResourceTree::clear_node(ResourceNode_t * _node) {
 	// Children iterators
 	ResourceNodesList_t::iterator it(_node->children.begin());
 	ResourceNodesList_t::iterator end(_node->children.end());
