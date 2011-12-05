@@ -125,6 +125,9 @@ struct ResourceState {
  */
 class Resource: public AttributesContainer {
 
+// This makes method SetTotal() accessible to RA
+friend class ResourceAccounter;
+
 public:
 
 	enum ExitCode_t {
@@ -160,16 +163,6 @@ public:
 	 */
 	inline std::string const & Name() {
 		return name;
-	}
-
-	/**
-	 * @brief Set the total amount of resource
-	 *
-	 * @note This method acts only upon the default state view only
-	 * @param tot The amount to set
-	 */
-	inline void SetTotal(uint64_t tot) {
-		total = tot;
 	}
 
 	/**
@@ -315,6 +308,16 @@ private:
 	 * views lifecycle.
 	 */
 	RSHashMap_t state_views;
+
+	/**
+	 * @brief Set the total amount of resource
+	 *
+	 * @note This method acts only upon the default state view only
+	 * @param tot The amount to set
+	 */
+	inline void SetTotal(uint64_t tot) {
+		total = tot;
+	}
 
 	/**
 	 * @brief Apps/EXCs using the resource
