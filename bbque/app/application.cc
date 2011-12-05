@@ -184,14 +184,14 @@ void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
 	priority = recipe->GetPriority();
 	InitWorkingModes(papp);
 	InitResourceConstraints();
-	plugins_data = PlugDataMap_t(recipe->plugins_data);
+	attributes = AttributesMap_t(recipe->attributes);
 
 	// Debug messages
 	logger->Info("%d working modes (enabled = %d).", working_modes.size(),
 			enabled_awms.size());
 	logger->Info("%d constraints in the application.",
 			rsrc_constraints.size());
-	logger->Info("%d plugins specific attributes.", plugins_data.size());
+	logger->Info("%d plugins specific attributes.", attributes.size());
 }
 
 AwmPtrList_t::iterator Application::FindWorkingModeIter(

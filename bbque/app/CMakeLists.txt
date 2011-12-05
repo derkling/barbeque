@@ -19,8 +19,9 @@ set (BBQUE_DEBUG ON)
 set (APPLICATION_SRC application)
 set (APPLICATION_SRC working_mode ${APPLICATION_SRC})
 set (APPLICATION_SRC recipe ${APPLICATION_SRC})
-set (APPLICATION_SRC plugin_data ${APPLICATION_SRC})
 
 #Add as library
 add_library(application_objs STATIC ${APPLICATION_SRC})
 
+#Link static library
+target_link_libraries(application_objs bbque_utils)

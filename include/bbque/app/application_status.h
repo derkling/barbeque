@@ -28,7 +28,9 @@
 #include <mutex>
 #include <string>
 
-#include "bbque/app/plugin_data.h"
+#include "bbque/utils/attributes_container.h"
+
+using bbque::utils::AttributesContainer;
 
 
 /** The application identifier */
@@ -39,6 +41,7 @@ typedef uint32_t AppUid_t;
 
 #define BBQUE_UID_SHIFT 5
 #define BBQUE_UID_MASK 0x1F
+
 
 namespace bbque { namespace app {
 
@@ -56,7 +59,7 @@ typedef std::list<AwmPtr_t> AwmPtrList_t;
  * @class ApplicationStatusIF
  * @brief Provide interfaces to query application information
  */
-class ApplicationStatusIF: public PluginsData {
+class ApplicationStatusIF: public AttributesContainer {
 
 public:
 

@@ -27,12 +27,13 @@
 #include <string>
 #include <vector>
 #include "bbque/app/constraints.h"
-#include "bbque/app/plugin_data.h"
 #include "bbque/plugins/logger.h"
+#include "bbque/utils/attributes_container.h"
 
 #define RECIPE_NAMESPACE "rcp"
 
 using bbque::plugins::LoggerIF;
+using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace app {
 
@@ -60,7 +61,7 @@ typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
  * one recipe, but a single instance must specify the one upon which base its
  * execution.
  */
-class Recipe: public PluginsData {
+class Recipe: public AttributesContainer {
 
 friend class Application;
 
