@@ -19,13 +19,12 @@
 
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
+#include "bbque/platform_proxy.h"
 
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/app/recipe.h"
 #include "bbque/plugins/recipe_loader.h"
-
-#include "bbque/application_manager.h"
 #include "bbque/res/resource_accounter.h"
 
 #include <boost/program_options/options_description.hpp>
@@ -44,7 +43,8 @@ ApplicationManager & ApplicationManager::GetInstance() {
 }
 
 
-ApplicationManager::ApplicationManager() {
+ApplicationManager::ApplicationManager() :
+	pp(PlatformProxy::GetInstance()) {
 
 	// Get a logger
 	bp::LoggerIF::Configuration conf(APPLICATION_MANAGER_NAMESPACE);
@@ -626,6 +626,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
 	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
+	PlatformProxy::ExitCode_t pp_result;
 	Application::ExitCode_t app_result;
 	RecipePtr_t rcp_ptr;
 	AppPtr_t papp;
@@ -651,6 +652,14 @@ AppPtr_t ApplicationManager::CreateEXC(
 	if (app_result != Application::APP_SUCCESS) {
 		logger->Error("Create EXC [%s] FAILED "
 				"(Error: recipe rejected)",
+				papp->StrId());
+		return AppPtr_t();
+	}
+
+	// Setup platform specific data
+	pp_result = pp.Setup(papp);
+	if (pp_result != PlatformProxy::OK) {
+		logger->Error("Create EXC [%s] FAILED (Error: platform data setup)",
 				papp->StrId());
 		return AppPtr_t();
 	}
@@ -743,12 +752,21 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	PlatformProxy::ExitCode_t pp_result;
 	ExitCode_t result;
 
 	logger->Debug("Removing EXC [%s] ...", papp->StrId());
 
 	// Mark the EXC as finished
 	papp->Terminate();
+
+	// Remove platform specific data
+	pp_result = pp.Release(papp);
+	if (pp_result != PlatformProxy::OK) {
+		logger->Error("Create EXC [%s] FAILED (Error: platform data cleanup)",
+				papp->StrId());
+		return AM_PLAT_PROXY_ERROR;
+	}
 
 	// Remove execution context form priority and status maps
 	result = PriorityRemove(papp);

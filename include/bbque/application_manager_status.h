@@ -157,6 +157,8 @@ public:
 		AM_RESCHED_REQUIRED,
 		/** Application Execution Context not found */
 		AM_EXC_NOT_FOUND,
+		/** Error accessing the platform proxy */
+		AM_PLAT_PROXY_ERROR,
 		/** Execution of a method interrupted by an unexpected state in an
 		 * internal data structure state */
 		AM_DATA_CORRUPT,

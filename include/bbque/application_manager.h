@@ -47,8 +47,11 @@ using bbque::app::RecipePtr_t;
 using bbque::plugins::LoggerIF;
 using bbque::plugins::RecipeLoaderIF;
 
+
 namespace bbque {
 
+// Forward declaration
+class PlatformProxy;
 
 /**
  * @brief The class provides interfaces for managing the applications lifecycle.
@@ -324,6 +327,8 @@ private:
 	/** Lowest application priority value (maximum integer) */
 	app::AppPrio_t lowest_prio;
 
+	/** The PlatformProxy, used to setup/release platform specific data */
+	PlatformProxy & pp;
 
 	/**
 	 * MultiMap of all the applications instances which entered the
