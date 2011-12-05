@@ -41,6 +41,8 @@ using bbque::app::AppPrio_t;
 using bbque::app::AppPtr_t;
 using bbque::app::AwmPtr_t;
 
+using bbque::res::RViewToken_t;
+
 using bbque::utils::Timer;
 using bbque::utils::MetricsCollector;
 
@@ -117,7 +119,7 @@ public:
 	 * @see ScheduerPolicyIF
 	 */
 	SchedulerPolicyIF::ExitCode_t
-		Schedule(bbque::SystemView & sv);
+		Schedule(bbque::SystemView & sv, RViewToken_t & rav);
 
 private:
 

@@ -73,7 +73,7 @@ public:
 	char const * Name();
 
 	SchedulerPolicyIF::ExitCode_t
-		Schedule(bbque::SystemView & sv);
+		Schedule(bbque::SystemView & sv, RViewToken_t & rav);
 
 private:
 
@@ -83,7 +83,8 @@ private:
 	LoggerIF *logger;
 
 	/**
-	 * 
+	 * @brief Resource Accounter view used for the last (successfull)
+	 * scheduling
 	 */
 	RViewToken_t ra_view;
 	

@@ -117,7 +117,7 @@ char const * YamcaSchedPol::Name() {
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
-		bbque::SystemView & sv) {
+		bbque::SystemView & sv, RViewToken_t & rav) {
 	ExitCode_t result;
 
 	logger->Debug(
@@ -156,9 +156,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
 
 	rsrc_acct.PrintStatusReport(rsrc_view_token);
 
-	// Release the resource view
-	rsrc_acct.PutView(rsrc_view_token);
-
+	rav = rsrc_view_token;
 	return SCHED_DONE;
 }
 

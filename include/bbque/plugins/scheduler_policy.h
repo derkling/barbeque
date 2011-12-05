@@ -24,6 +24,8 @@
 #ifndef BBQUE_SCHEDULER_POLICY_H_
 #define BBQUE_SCHEDULER_POLICY_H_
 
+#include "bbque/res/resources.h"
+
 #define SCHEDULER_POLICY_NAMESPACE "schp."
 
 namespace bbque {
@@ -73,8 +75,11 @@ public:
 	 *
 	 * @param system a reference to the system view which exposes information
 	 * related to both resources and applications.
+	 * @param rvt a token representing the view on resource allocation, if
+	 * the scheduling has been successfull.
 	 */
-	virtual ExitCode_t Schedule(bbque::SystemView & system) = 0;
+	virtual ExitCode_t Schedule(bbque::SystemView & system,
+			bbque::res::RViewToken_t &rvt) = 0;
 
 };
 

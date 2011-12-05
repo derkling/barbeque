@@ -116,7 +116,7 @@ void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
 
 
 SchedulerPolicyIF::ExitCode_t
-RandomSchedPol::Schedule(bbque::SystemView & sv) {
+RandomSchedPol::Schedule(bbque::SystemView & sv, RViewToken_t &rav) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t viewResult;
 	AppsUidMapIt app_it;
@@ -152,9 +152,8 @@ RandomSchedPol::Schedule(bbque::SystemView & sv) {
 		papp = sv.GetNextReady(app_it);
 	}
 
-	// Release the ResourceAccounter view
-	ra.PutView(ra_view);
-
+	// Pass back to the SchedulerManager a reference to the scheduled view
+	rav = ra_view;
 	return SCHED_DONE;
 }
 
