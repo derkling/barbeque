@@ -27,7 +27,6 @@
 
 #include "bbque/app/application.h"
 #include "bbque/app/constraints.h"
-#include "bbque/app/plugin_data.h"
 #include "bbque/app/recipe.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
@@ -389,15 +388,9 @@ inline void XMLRecipeLoader::getPluginData(T _container,
 		plugdata_node->ToElement()->GetText(&value, false);
 
 		// Set the plugin data
-		VoidPtr_t value_ptr = VoidPtr_t(new std::string(value));
-		_container->SetAttribute(_plug_name, key, value_ptr);
-
-		logger->Info("Plugin %s: attribute %s = %s",
-				_plug_name.c_str(),
-				key.c_str(),
-				(static_cast<std::string *>(
-					(_container->GetAttribute(_plug_name,
-											  key)).get()))->c_str());
+		PluginAttrPtr_t pattr(new PluginAttr_t(_plug_name, key));
+		pattr->str = value;
+		_container->SetAttribute(pattr);
 
 	} catch (ticpp::Exception &ex) {
 		logger->Error(ex.what());

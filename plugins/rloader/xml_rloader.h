@@ -31,17 +31,17 @@
 #include <ticpp.h>
 #include <tinyxml.h>
 
-#include "bbque/app/plugin_data.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/plugin.h"
+#include "bbque/utils/attributes_container.h"
 
 using bbque::app::Application;
 using bbque::app::AppPtr_t;
 using bbque::app::Recipe;
 using bbque::app::WorkingMode;
-using bbque::app::PluginsData;
+using bbque::utils::AttributesContainer;
 
 // Parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
@@ -84,6 +84,21 @@ typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 class XMLRecipeLoader : public RecipeLoaderIF {
 
 public:
+
+	/**
+	 * @struct Attribute structure for plugin specific data
+	 */
+	typedef struct PluginAttr: public AttributesContainer::Attribute {
+		/** Constructor */
+		PluginAttr(std::string const & _ns, std::string const & _key):
+			AttributesContainer::Attribute(_ns, _key) {}
+
+		/** Attribute value: a string object */
+		std::string str;
+	} PluginAttr_t;
+
+	/** Shared pointer to PluginAttr_t */
+	typedef std::shared_ptr<PluginAttr_t> PluginAttrPtr_t;
 
 	/**
 	 * @brief Method for creating the static plugin
