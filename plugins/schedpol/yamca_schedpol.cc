@@ -295,14 +295,18 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 				eval_awm->Id());
 
 		// Get the resource binding of the current AWM
-		UsagesMapPtr_t rsrc_usages =
-			UsagesMapPtr_t(static_cast<UsagesMap_t *>(eval_awm->GetAttribute(
-							SCHEDULER_POLICY_NAME, "binding").get()));
-		assert(rsrc_usages->size() == eval_awm->ResourceUsages().size());
+		UsageAttrPtr_t pattr_usg = std::static_pointer_cast<UsagesAttribute_t>
+				(eval_awm->GetAttribute(SCHEDULER_POLICY_NAME, "binding"));
+		assert(pattr_usg->resources->size() ==
+				eval_awm->ResourceUsages().size());
 
 		// Schedule the application in the working mode just evaluated
 		Application::ExitCode_t result =
-			papp->ScheduleRequest(eval_awm, rsrc_usages, rsrc_view_token);
+			papp->ScheduleRequest(eval_awm, pattr_usg->resources,
+					rsrc_view_token);
+
+		// Clear the resource binding map from the AWM attributes
+		eval_awm->ClearAttribute(SCHEDULER_POLICY_NAME);
 
 		// Debugging messages
 		if (result != Application::APP_WM_ACCEPTED) {
@@ -529,24 +533,28 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		return SCHED_ERROR;
 	}
 
-	// Bind the clustered resources request into the current cluster.
-	// Note: The current policy doesn't support multi-cluster resources
-	logger->Debug("Contention level: Binding into cluster %d", cl_id);
-	UsagesMapPtr_t rsrc_usages = UsagesMapPtr_t(new UsagesMap_t());
-	WorkingMode::ExitCode_t result =
-		wm->BindResource("cluster", RSRC_ID_ANY, cl_id, rsrc_usages);
+	// Attribute for the keeping track of the resource binding
+	UsageAttrPtr_t pattr_usg(
+			new UsagesAttribute_t(SCHEDULER_POLICY_NAME, "binding"));
+	pattr_usg->resources = UsagesMapPtr_t(new UsagesMap_t());
 
+	// Binding of the resources requested by the working mode into the current
+	// cluster.
+	// Note: No mult-cluster allocation supported yet!
+	logger->Debug("Contention level: Binding into cluster %d", cl_id);
+	WorkingMode::ExitCode_t result =
+		wm->BindResource("cluster", RSRC_ID_ANY, cl_id, pattr_usg->resources);
 	if (result == WorkingMode::WM_RSRC_MISS_BIND)
 		logger->Error("Contention level: {AWM %d} [cluster = %d]"
 				"Incomplete resources binding. %d / %d resources bound.",
-						wm->Id(),cl_id,	rsrc_usages->size(),
+						wm->Id(),cl_id,	pattr_usg->resources->size(),
 						wm->ResourceUsages().size());
 
-	// Keep track of the resource binding map we want to set
-	wm->SetAttribute(SCHEDULER_POLICY_NAME, "binding", VoidPtr_t(rsrc_usages));
+	// Keep track of the resource binding map using attributes API
+	wm->SetAttribute(pattr_usg);
 
 	// Contention level
-	return ComputeContentionLevel(wm_min, rsrc_usages, cont_level);
+	return ComputeContentionLevel(wm_min, pattr_usg->resources, cont_level);
 }
 
 
