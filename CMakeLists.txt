@@ -111,15 +111,18 @@ set (BOOST_INCLUDEDIR ${CMAKE_INSTALL_PREFIX})
 
 # Check for required libs and packages (headers + lib)
 find_package(Boost 1.45.0 REQUIRED system program_options filesystem)
+find_package(CGroup REQUIRED)
 
 # Add compilation dependencies
 include_directories(
 	${Boost_INCLUDE_DIRS}
+	${CGroup_INCLUDE_DIRS}
 )
 
 # Add linking dependencies
 link_directories(
 	${Boost_LIBRARY_DIRS}
+	${CGroup_LIBRARY_DIRS}
 )
 
 ################################################################################

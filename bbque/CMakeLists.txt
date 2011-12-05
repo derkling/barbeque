@@ -39,6 +39,7 @@ set (BARBEQUE_SRC plugin_manager modules_factory ${BARBEQUE_SRC})
 set (BARBEQUE_SRC resource_manager application_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC application_proxy rpc_proxy ${BARBEQUE_SRC})
 set (BARBEQUE_SRC platform_proxy ${BARBEQUE_SRC})
+set (BARBEQUE_SRC pp/linux ${BARBEQUE_SRC})
 set (BARBEQUE_SRC signals_manager scheduler_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC synchronization_manager ${BARBEQUE_SRC})
 if(BBQUE_TEST_PLATFORM_DATA)
@@ -47,6 +48,9 @@ if(BBQUE_TEST_PLATFORM_DATA)
 	set (BARBEQUE_SRC test_platform_data ${BARBEQUE_SRC})
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBQUE_TEST_PLATFORM_DATA")
 endif(BBQUE_TEST_PLATFORM_DATA)
+
+# This should be converted to a KConfig option
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBQUE_PLATFORM_LINUX")
 
 add_executable (barbeque ${BARBEQUE_SRC})
 
@@ -57,6 +61,7 @@ target_link_libraries(
 	resource_accounting
 	apps
 	${Boost_LIBRARIES}
+	${CGroup_LIBRARIES}
 )
 
 # Linking static plugins
