@@ -56,6 +56,7 @@
 #define SM_ADD_SCHED(METRICS, INDEX, COUNT) \
 	mc.AddSample(METRICS[INDEX].mh, COUNT);
 
+namespace br = bbque::res;
 namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
@@ -160,8 +161,10 @@ SchedulerManager::CollectStats() {
 
 SchedulerManager::ExitCode_t
 SchedulerManager::Schedule() {
+	br::ResourceAccounter &ra = br::ResourceAccounter::GetInstance();
 	SystemView &sv = SystemView::GetInstance();
 	SchedulerPolicyIF::ExitCode result;
+	RViewToken_t svt;
 
 	if (!policy) {
 		logger->Crit("Resource scheduling FAILED (Error: missing policy)");
@@ -196,7 +199,7 @@ SchedulerManager::Schedule() {
 	// Reset timer for schedule execution time collection
 	SM_RESET_TIMING(sm_tmr);
 
-	result = policy->Schedule(sv);
+	result = policy->Schedule(sv, svt);
 	if (result != SchedulerPolicyIF::SCHED_DONE) {
 		logger->Error("Scheduliung policy [%s] failed",
 				policy->Name());
@@ -205,6 +208,9 @@ SchedulerManager::Schedule() {
 
 	// Clear the next AWM from the RUNNING Apps/EXC
 	ClearRunningApps();
+
+	// Set the scheduled resource view
+	ra.SetScheduledView(svt);
 
 	// Collecing execution metrics
 	SM_GET_TIMING(metrics, SM_SCHED_TIME, sm_tmr);
