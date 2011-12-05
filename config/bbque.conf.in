@@ -87,6 +87,7 @@ category.bq.mc =	NOTICE
 #category.bq.ym = 	INFO
 #category.bq.ra = 	INFO
 #category.bq.ap = 	INFO
+category.bq.pp = 	DEBUG
 #category.bq.tpd = 	INFO
 #category.bq.app = 	INFO
 #category.bq.app.awm =	INFO
