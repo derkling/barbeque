@@ -221,7 +221,7 @@ public:
 	 *
 	 * @return The 'quota' of resource used by the application
 	 */
-	uint64_t ApplicationUsage(AppPtr_t & papp, RViewToken_t vtok = 0);
+	uint64_t ApplicationUsage(AppPtr_t const & papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Get the Uid of the idx-th App/EXC using the resource
@@ -333,7 +333,7 @@ private:
 	 *
 	 * @return The 'quota' of resource used by the application
 	 */
-	uint64_t ApplicationUsage(AppPtr_t & papp, AppUseQtyMap_t & apps_map);
+	uint64_t ApplicationUsage(AppPtr_t const & papp, AppUseQtyMap_t & apps_map);
 
 	/**
 	 * @brief Get the view referenced by the token

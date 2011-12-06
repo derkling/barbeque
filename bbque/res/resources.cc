@@ -76,7 +76,7 @@ uint64_t Resource::Available(AppPtr_t papp, RViewToken_t vtok) {
 	return (total - view->used);
 }
 
-uint64_t Resource::ApplicationUsage(AppPtr_t & papp, RViewToken_t vtok) {
+uint64_t Resource::ApplicationUsage(AppPtr_t const & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view)
@@ -178,7 +178,7 @@ uint16_t Resource::ApplicationsCount(AppUseQtyMap_t & apps_map,
 	return apps_map.size();
 }
 
-uint64_t Resource::ApplicationUsage(AppPtr_t & papp,
+uint64_t Resource::ApplicationUsage(AppPtr_t const & papp,
 		AppUseQtyMap_t & apps_map) {
 	// Retrieve the application from the map
 	AppUseQtyMap_t::iterator app_using_it(apps_map.find(papp->Uid()));
