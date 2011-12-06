@@ -420,10 +420,13 @@ private:
 	 * @param rsrc_set A list of resource descriptors
 	 * @param q_opt Resource state attribute requested (@see QueryOption_t)
 	 * @param vtok The token referencing the resource state view
+	 * @param papp The application interested in the query
+	 *
 	 * @return The value of the attribute request
 	 */
 	uint64_t QueryStatus(ResourcePtrList_t const & rsrc_set,
-				QueryOption_t q_opt, RViewToken_t vtok = 0) const;
+				QueryOption_t q_opt, RViewToken_t vtok = 0,
+				AppPtr_t papp =	AppPtr_t()) const;
 
 	/**
 	 * @brief Check the resource availability for a whole set

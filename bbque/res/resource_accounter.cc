@@ -200,7 +200,8 @@ uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
 
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 		QueryOption_t _att,
-		RViewToken_t vtok) const {
+		RViewToken_t vtok,
+		AppPtr_t papp) const {
 	// Cumulative value to return
 	uint64_t val = 0;
 
@@ -213,7 +214,7 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 		switch(_att) {
 		// Resource availability
 		case RA_AVAIL:
-			val += (*res_it)->Available(vtok);
+			val += (*res_it)->Available(papp, vtok);
 			break;
 		// Resource used
 		case RA_USED:
