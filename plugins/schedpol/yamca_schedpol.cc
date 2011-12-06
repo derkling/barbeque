@@ -453,7 +453,6 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 		int cl_id,
 		float & metrics) {
 	ExitCode_t result;
-	AwmPtr_t wm_min;
 	metrics = 0.0;
 
 	Timer comp_tmr;
@@ -469,8 +468,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 
 	// Contention level
 	float cont_level;
-	wm_min = papp->LowValueAWM();
-	result = GetContentionLevel(wm, wm_min, cl_id, cont_level);
+	result = GetContentionLevel(papp, wm, cl_id, cont_level);
 	if (result != SCHED_OK)
 		return result;
 
@@ -517,8 +515,8 @@ inline float GetReconfigOverhead(AppPtr_t const & papp,
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
+		AppPtr_t const & papp,
 		AwmPtr_t const & wm,
-		AwmPtr_t const & wm_min,
 		int cl_id,
 		float & cont_level) {
 
@@ -552,16 +550,16 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 	wm->SetAttribute(pattr_usg);
 
 	// Contention level
-	return ComputeContentionLevel(wm_min, pattr_usg->resources, cont_level);
+	return ComputeContentionLevel(papp, pattr_usg->resources, cont_level);
 }
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
-		AwmPtr_t const & wm_min,
+		AppPtr_t const & papp,
 		UsagesMapPtr_t const & rsrc_usages,
 		float & cont_level) {
-
 	uint64_t rsrc_avail;
+	uint64_t min_usage;
 	cont_level = 0;
 
 	// Check the availability of the resources requested
@@ -586,11 +584,13 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		}
 
 		// Get the resource usage of the AWM with the min value
-		uint64_t min_usage =
-			wm_min->ResourceUsageValue(PathTemplate(usage_it->first));
+		AwmPtr_t wm_min(papp->LowValueAWM());
+		min_usage = wm_min->ResourceUsageValue(PathTemplate(usage_it->first));
 
 		// Update the contention level (inverse)
-		cont_level += (((float) usage_it->second->value) * min_usage) / (float) rsrc_avail;
+		cont_level +=
+			(((float) usage_it->second->value) * min_usage) / (float) rsrc_avail;
+
 		++usage_it;
 	}
 

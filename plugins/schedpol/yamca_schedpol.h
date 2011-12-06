@@ -263,22 +263,24 @@ private:
 	 * particuar it catches the impact of resource request on the total
 	 * availability.
 	 *
+	 * @param papp Shared pointer to the application to schedule
 	 * @param wm The working mode containing the resource requests
 	 * @param cl_id The current cluster for the clustered resources
 	 * @param cont_level The contention level value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t GetContentionLevel(AwmPtr_t const & wm, AwmPtr_t const & wm_min,
+	ExitCode_t GetContentionLevel(AppPtr_t const & papp, AwmPtr_t const & wm,
 			int cl_id, float & cont_level);
 
 	/**
 	 * @brief Compute the resource contention level
 	 *
+	 * @param papp Shared pointer to the application to schedule
 	 * @param rsrc_usages Map of resource usages to bind
 	 * @param cont_level The contention level value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t ComputeContentionLevel(AwmPtr_t const & wm_min,
+	ExitCode_t ComputeContentionLevel(AppPtr_t const & papp,
 			UsagesMapPtr_t const & rsrc_usages, float & cont_level);
 
 };
