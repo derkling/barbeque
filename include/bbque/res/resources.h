@@ -183,15 +183,6 @@ public:
 	uint64_t Used(RViewToken_t vtok = 0);
 
 	/**
-	 * @brief Resource availablility
-	 *
-	 * @param vtok The token referencing the resource view
-	 *
-	 * @return How much resource is still available
-	 */
-	uint64_t Available(RViewToken_t vtok = 0);
-
-	/**
 	 * @brief Resource availability
 	 *
 	 * @param papp Application interested in the query. We want to include
@@ -201,12 +192,15 @@ public:
 	 * application is using yet a certain amount of resource this quantity
 	 * should be considered as "available" for this application.
 	 *
+	 * If the Application is not specified the method returns the amount of
+	 * resource free, i.e. not allocated to any Application/EXC.
+	 *
 	 * @param vtok The token referencing the resource view
 	 *
 	 * @return How much resource is still available including the amount of
 	 * resource used by the given application
 	 */
-	uint64_t Available(AppPtr_t & papp, RViewToken_t vtok = 0);
+	uint64_t Available(AppPtr_t papp = AppPtr_t(), RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Count of applications using the resource
