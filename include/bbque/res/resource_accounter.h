@@ -119,19 +119,19 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Available(std::string const & path,
-			RViewToken_t vtok = 0) const {
+			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
 		ResourcePtrList_t matches = GetResources(path);
-		return QueryStatus(matches, RA_AVAIL, vtok);
+		return QueryStatus(matches, RA_AVAIL, vtok, papp);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Available(UsagePtr_t const & usage_ptr,
-			RViewToken_t vtok = 0) const {
+			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
 		if (usage_ptr->binds.empty())
 			return 0;
-		return QueryStatus(usage_ptr->binds, RA_AVAIL, vtok);
+		return QueryStatus(usage_ptr->binds, RA_AVAIL, vtok, papp);
 	}
 
 	/**
@@ -433,11 +433,12 @@ private:
 	 *
 	 * @param usages A map of ResourceUsage objects to check
 	 * @param vtok The token referencing the resource state view
+	 * @param papp The application interested in the query
 	 * @return RA_SUCCESS if all the resources are availables,
 	 * RA_ERR_USAGE_EXC otherwise.
 	 */
 	ExitCode_t CheckAvailability(UsagesMapPtr_t const & usages,
-			RViewToken_t vtok = 0) const;
+			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const;
 
 	/**
 	 * @brief Get a pointer to the map of applications resource usages

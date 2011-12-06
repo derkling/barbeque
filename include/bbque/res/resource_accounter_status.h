@@ -101,19 +101,21 @@ public:
 	 * @brief Amount of resource available
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
+	 * @param papp The application interested in the query
 	 * @return The amount of resource available
 	 */
-	virtual uint64_t Available(std::string const & path, RViewToken_t vtok = 0)
+	virtual uint64_t Available(std::string const & path, RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t())
 		const = 0;
 
 	/**
 	 * @brief Amount of resources available
 	 * @param usage A pointer to ResourceUsage
 	 * @param vtok The token referencing the resource state view
+	 * @param papp The application interested in the query
 	 * @return The amount of resource available
 	 */
 	virtual uint64_t Available(UsagePtr_t const & usage,
-			RViewToken_t vtok = 0) const = 0;
+			RViewToken_t vtok = 0, AppPtr_t = AppPtr_t()) const = 0;
 
 	/**
 	 * @brief Amount of resources used

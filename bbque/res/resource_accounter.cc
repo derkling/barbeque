@@ -231,13 +231,14 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		UsagesMapPtr_t const & usages,
-		RViewToken_t vtok) const {
+		RViewToken_t vtok,
+		AppPtr_t papp) const {
 	UsagesMap_t::const_iterator usages_it(usages->begin());
 	UsagesMap_t::const_iterator usages_end(usages->end());
 
 	// Check availability for each ResourceUsage object
 	for (; usages_it != usages_end; ++usages_it) {
-		uint64_t avail = Available(usages_it->second, vtok);
+		uint64_t avail = Available(usages_it->second, vtok, papp);
 		if (avail < usages_it->second->value) {
 			logger->Debug("ChkAvail: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
@@ -635,7 +636,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 					"%s [USG:%llu | AV:%llu | TOT:%llu]",
 				usages_it->first.c_str(),
 				rsrc_usage->value,
-				Available(usages_it->first),
+				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 
 			PrintStatusReport();
@@ -645,7 +646,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
 				usages_it->first.c_str(),
 				rsrc_usage->value,
-				Available(usages_it->first, vtok),
+				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 	}
 }
