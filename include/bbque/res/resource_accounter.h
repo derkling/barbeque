@@ -478,7 +478,9 @@ private:
 	 * @param papp The Application/ExC using the resource
 	 * @param rsrc_usage ResourceUsage object
 	 * @param vtok The token referencing the resource state view
-	 * @param rsrcs_pèr_view Set of resources used in the view specified
+	 *
+	 * @return RA_ERR_USAGE_EXC if the usage required overcome the
+	 * availability. RA_SUCCESS otherwise.
 	 */
 	ExitCode_t DoResourceBooking(AppPtr_t const & papp,
 			UsagePtr_t & rsrc_usage, RViewToken_t vtok);
@@ -505,7 +507,6 @@ private:
 	 * @param papp The Application/ExC using the resource
 	 * @param rsrc_usage ResourceUsage object
 	 * @param vtok The token referencing the resource state view
-	 * @param rsrcs_pèr_view Set of resources used in the view specified
 	 */
 	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
 			RViewToken_t vtok);
@@ -517,7 +518,8 @@ private:
 	 * of the RUNNING Applications/ExC. Thus the ones that will not be
 	 * reconfigured or migrated.
 	 *
-	 * @return @see ExiTCode_t
+	 * @return RA_ERR_SYNC_INIT if the something goes wrong in the assignment
+	 * resources to the previuosly running applications/EXC.
 	 */
 	ExitCode_t SyncInit();
 

@@ -622,13 +622,13 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end;	++usages_it) {
+		// Current required resource (ResourceUsage object)
 		UsagePtr_t rsrc_usage(usages_it->second);
-
 		logger->Debug("Booking: [%s] requires resource {%s}",
 				papp->StrId(),
 				usages_it->first.c_str());
 
-		// Do booking for this resource (usages_it->second)
+		// Do booking for this resource
 		result = DoResourceBooking(papp, rsrc_usage, vtok);
 
 		if (result != RA_SUCCESS)  {
@@ -639,6 +639,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 
+			// Print the report table of the resource assignments
 			PrintStatusReport();
 		}
 
@@ -695,19 +696,16 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 		AppPtr_t const & papp,
 		RViewToken_t vtok) {
+	// Maps of resource usages per Application/EXC
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
-
 	logger->Debug("DecCount: [%s] holds %d resources", papp->StrId(),
 			app_usages->size());
 
-	// Release the amount of resource hold by each application
+	// Release the all the resources hold by the Application/EXC
 	for (; usages_it != usages_end; ++usages_it) {
 		UsagePtr_t rsrc_usage(usages_it->second);
-
-		// Undo booking for this resource (usages_it->second)
 		UndoResourceBooking(papp, rsrc_usage, vtok);
-
 		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
 				usages_it->first.c_str(),
 				rsrc_usage->value);
@@ -726,7 +724,7 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 	// Keep track of the amount of resource freed
 	uint64_t usage_freed = 0;
 
-	// For each resource bind release the quantity held
+	// For each resource binding release the amount allocated to the App/EXC
 	ResourcePtrList_t::iterator it_bind(rsrc_usage->binds.begin());
 	ResourcePtrList_t::iterator end_it(rsrc_usage->binds.end());
 	while (usage_freed < rsrc_usage->value) {
