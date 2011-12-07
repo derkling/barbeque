@@ -454,7 +454,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	logger->Debug("PutView: view %d cleared", vtok);
 	logger->Debug("PutView: %d resource set and %d usages per views"
 			"currently managed",
-			rsrc_per_views.size(),	usages_per_views.erase(vtok));
+			rsrc_per_views.size(), usages_per_views.erase(vtok));
 }
 
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
@@ -489,7 +489,7 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 			sys_view_token);
 	logger->Debug("SetView: %d resource set and %d usages per views"
 			"currently managed",
-			rsrc_per_views.size(),	usages_per_views.erase(vtok));
+			rsrc_per_views.size(), usages_per_views.erase(vtok));
 
 	return sys_view_token;
 }
@@ -524,8 +524,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 		return RA_ERR_SYNC_VIEW;
 	}
 
-	logger->Debug("SyncMode [%d]: Resource state view token = %d", sync_ssn.count,
-			sync_ssn.view);
+	logger->Debug("SyncMode [%d]: Resource state view token = %d",
+			sync_ssn.count,	sync_ssn.view);
 
 	// Init the view with the resource accounting of running applications
 	return SyncInit();
@@ -540,8 +540,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	papp = am.GetFirst(ApplicationStatusIF::RUNNING, apps_it);
 	for ( ; papp; papp = am.GetNext(ApplicationStatusIF::RUNNING, apps_it)) {
 
-		logger->Info("SyncInit: [%s] current AWM: %d",
-				papp->StrId(),
+		logger->Info("SyncInit: [%s] current AWM: %d", papp->StrId(),
 				papp->CurrentAWM()->Id());
 
 		// Re-acquire the resources (these should not have a "Next AWM"!)
@@ -549,9 +548,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 						sync_ssn.view, false);
 		if (result != RA_SUCCESS) {
 			logger->Fatal("SyncInit [%d]: Resource booking failed for %s."
-					" Aborting sync session...",
-					sync_ssn.count,
-					papp->StrId());
+					" Aborting sync session...", sync_ssn.count, papp->StrId());
 
 			SyncAbort();
 			return RA_ERR_SYNC_INIT;
@@ -625,17 +622,14 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		// Current required resource (ResourceUsage object)
 		UsagePtr_t rsrc_usage(usages_it->second);
 		logger->Debug("Booking: [%s] requires resource {%s}",
-				papp->StrId(),
-				usages_it->first.c_str());
+				papp->StrId(), usages_it->first.c_str());
 
 		// Do booking for this resource
 		result = DoResourceBooking(papp, rsrc_usage, vtok);
-
 		if (result != RA_SUCCESS)  {
 			logger->Crit("Booking: unexpected fail! "
 					"%s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(),
-				rsrc_usage->value,
+				usages_it->first.c_str(), rsrc_usage->value,
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 
@@ -645,8 +639,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		assert(result == RA_SUCCESS);
 		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(),
-				rsrc_usage->value,
+				usages_it->first.c_str(), rsrc_usage->value,
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 	}
@@ -707,8 +700,7 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 		UsagePtr_t rsrc_usage(usages_it->second);
 		UndoResourceBooking(papp, rsrc_usage, vtok);
 		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
-				usages_it->first.c_str(),
-				rsrc_usage->value);
+				usages_it->first.c_str(), rsrc_usage->value);
 	}
 }
 
