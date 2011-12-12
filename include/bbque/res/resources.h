@@ -348,7 +348,7 @@ private:
 
 
 /**
- * @struct ResourceUsage
+ * @class ResourceUsage
  *
  * An application working modes defines a set of this resource requests
  * (usages).
@@ -369,7 +369,23 @@ private:
  * The list "binds", after such binding, will contain the descriptors of the
  * resources "pe" in the cluster assigned by the scheduler/optimizer module.
  */
-struct ResourceUsage {
+class ResourceUsage {
+
+public:
+
+	/**
+	 * @enum ExitCode_t
+	 */
+	enum ExitCode_t {
+		/** Success */
+		RU_OK = 0,
+		/** Application pointer is null */
+		RU_ERR_NULL_POINTER,
+		/** Application pointer mismatch */
+		RU_ERR_APP_MISMATCH,
+		/** Resource state view token mismatch */
+		RU_ERR_VIEW_MISMATCH
+	};
 
 	/**
 	 * @brief Constructor
@@ -386,12 +402,176 @@ struct ResourceUsage {
 		binds.clear();
 	}
 
+	/**
+	 * @brief The amount of resource required/assigned to the Application/EXC
+	 *
+	 * @return The amount of resource
+	 */
+	uint64_t GetAmount() {
+		return value;
+	}
+
+	/**
+	 * @brief Get the entire list of resource bindings
+	 *
+	 * @return A reference to the resource bindings list
+	 */
+	inline ResourcePtrList_t & GetBindingList() {
+		return binds;
+	}
+
+	/**
+	 * @brief Set the list of resource bindings
+	 *
+	 * Commonly a ResourceUsage object specifies the request of a specific
+	 * type of resource, which can be bound on a set of platform resources
+	 * (i.e. "arch.tile0,cluster2.pe" -> "...cluster2.pe{0|1|2|...}".
+	 * The bindings list includes the pointers to all the resource descriptors
+	 * that can satisfy the request. The method initialises the iterators
+	 * pointing to the set of resource bindings effectively granted to the
+	 * Application/EXC.
+	 *
+	 * @param bind_list The list of resource descriptor for binding
+	 */
+	inline void SetBindingList(ResourcePtrList_t bind_list) {
+		binds = bind_list;
+		first_bind = bind_list.begin();
+		last_bind = bind_list.end();
+	}
+	/**
+	 * @brief Check of the resource binding list is empty
+	 *
+	 * @return true if the list is empty, false otherwise.
+	 */
+	inline bool EmptyBindingList() {
+		return binds.empty();
+	}
+
+	/**
+	 * @brief Get the first resource from the binding list
+	 *
+	 * @param it The list iterator. This is set and hence must be used for
+	 * iteration purposes.
+	 *
+	 * @return The pointer (shared) to the resource descriptor providing a
+	 * first quota (or the whole of it) of the resource usage required.
+	 */
+	inline ResourcePtr_t GetFirstResource(ResourcePtrListIterator_t & it) {
+		// Check if 'first_bind' points to a valid resource descriptor
+		if (first_bind == binds.end())
+			return ResourcePtr_t();
+
+		// Set the argument iterator and return the shared pointer to the
+		// resource descriptor
+		it = first_bind;
+		return (*it);
+	}
+
+	/**
+	 * @brief Get the last resource from the binding list
+	 *
+	 * @param it The list iterator returned by GetFirstResource() or a
+	 * previous call to GetNextResource().
+	 *
+	 * @return The pointer (shared) to the resource descriptor providing a
+	 * quota of the resource usage required.
+	 */
+	inline ResourcePtr_t GetNextResource(ResourcePtrListIterator_t & it) {
+		// Next resource used by the application
+		do {
+			++it;
+
+			// Return null if there are no more resource binds
+			if ((it == binds.end()) || (it == last_bind))
+				return ResourcePtr_t();
+		} while ((*it)->ApplicationUsage(own_app, view_tk) == 0);
+
+		// Return the shared pointer to the resource descriptor
+		return (*it);
+	}
+
+	/**
+	 * @brief Track the first resource, from the binding list, granted to the
+	 * Application/EXC
+	 *
+	 * The binding list tracks the whole set of possible resources to which
+	 * bind the usage request. This method set the first resource granted to
+	 * the Application/EXC, to satisfy part of the usage request, or the whole
+	 * of it.
+	 *
+	 * @param papp The Application/EXC requiring the resource
+	 * @param first_it The list iterator of the resource binding to track
+	 * @param vtok The token of the resource state view into which the
+	 * assignment has been performed.
+	 *
+	 * @return RU_OK if success. RU_ERR_NULL_POINTER if the pointer to the
+	 * application is null.
+	 */
+	inline ExitCode_t TrackFirstBinding(AppPtr_t const & papp,
+			ResourcePtrListIterator_t & first_it, RViewToken_t vtok) {
+		if (!papp)
+			return RU_ERR_NULL_POINTER;
+
+		view_tk = vtok;
+		own_app = papp;
+		first_bind = first_it;
+
+		return RU_OK;
+	}
+
+	/**
+	 * @brief Track the last resource, from the binding list, granted to the
+	 * Application/EXC
+	 *
+	 * The binding list tracks the whole set of possible resources to which
+	 * bind the usage request. This method set the last resource granted to
+	 * the Application/EXC, to satisfy the last quota of the usage request.
+	 *
+	 * @param papp The Application/EXC requiring the resource
+	 * @param first_it The list iterator of the resource binding to track
+	 * @param vtok The token of the resource state view into which the
+	 * assignment has been performed.
+	 *
+	 * @return RU_OK if success.
+	 * RU_ERR_NULL_POINTER if the pointer to the application is null.
+	 * RU_ERR_APP_MISMATCH if the application specified differs from the one
+	 * specified in TrackFirstBinding().
+	 * RU_ERR_VIEW_MISMATCH if the state view token does not match the one set
+	 * in TrackFirstBinding().
+	 */
+	inline ExitCode_t TrackLastBinding(AppPtr_t const & papp,
+			ResourcePtrListIterator_t & last_it, RViewToken_t vtok) {
+		if (!papp)
+			return RU_ERR_NULL_POINTER;
+
+		if (!own_app)
+			return RU_ERR_APP_MISMATCH;
+
+		if (vtok != view_tk)
+			return RU_ERR_VIEW_MISMATCH;
+
+		last_bind = last_it;
+		return RU_OK;
+	}
+
+
 	/** Usage value request */
 	uint64_t value;
 
-	/** List of resource descriptors which to the resource usage is bind*/
+	/** List of resource descriptors which to the resource usage is bound */
 	ResourcePtrList_t binds;
 
+	/** The application/EXC owning this resource usage */
+	AppPtr_t own_app;
+
+	/** The token referencing the state view of the resource usage */
+	RViewToken_t view_tk;
+
+	/** List iterator pointing to the first resource used by the App/EXC */
+	ResourcePtrListIterator_t first_bind;
+
+	/** List iterator pointing to the last resource used by the App/EXC */
+	ResourcePtrListIterator_t last_bind;
 };
 
 }   // namespace res
