@@ -109,10 +109,10 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Total(UsagePtr_t const & usage_ptr) const {
-		if (usage_ptr->binds.empty())
+	inline uint64_t Total(UsagePtr_t const & pusage) const {
+		if (pusage->binds.empty())
 			return 0;
-		return QueryStatus(usage_ptr->binds, RA_TOTAL, 0);
+		return QueryStatus(pusage->binds, RA_TOTAL);
 	}
 
 	/**
@@ -127,11 +127,11 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Available(UsagePtr_t const & usage_ptr,
+	inline uint64_t Available(UsagePtr_t const & pusage,
 			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
-		if (usage_ptr->binds.empty())
+		if (pusage->binds.empty())
 			return 0;
-		return QueryStatus(usage_ptr->binds, RA_AVAIL, vtok, papp);
+		return QueryStatus(pusage->binds, RA_AVAIL, vtok, papp);
 	}
 
 	/**
@@ -146,11 +146,11 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Used(UsagePtr_t const & usage_ptr,
+	inline uint64_t Used(UsagePtr_t const & pusage,
 			RViewToken_t vtok = 0) const {
-		if (usage_ptr->binds.empty())
+		if (pusage->binds.empty())
 			return 0;
-		return QueryStatus(usage_ptr->binds, RA_USED, vtok);
+		return QueryStatus(pusage->binds, RA_USED, vtok);
 	}
 
 	/**
@@ -476,14 +476,14 @@ private:
 	 * list.
 	 *
 	 * @param papp The Application/ExC using the resource
-	 * @param rsrc_usage ResourceUsage object
+	 * @param pusage ResourceUsage object
 	 * @param vtok The token referencing the resource state view
 	 *
 	 * @return RA_ERR_USAGE_EXC if the usage required overcome the
 	 * availability. RA_SUCCESS otherwise.
 	 */
 	ExitCode_t DoResourceBooking(AppPtr_t const & papp,
-			UsagePtr_t & rsrc_usage, RViewToken_t vtok);
+			UsagePtr_t & pusage, RViewToken_t vtok);
 
 	/**
 	 * @brief Decrement the resource usages counts
@@ -505,10 +505,10 @@ private:
 	 * list.
 	 *
 	 * @param papp The Application/ExC using the resource
-	 * @param rsrc_usage ResourceUsage object
+	 * @param pusage ResourceUsage object
 	 * @param vtok The token referencing the resource state view
 	 */
-	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & rsrc_usage,
+	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & pusage,
 			RViewToken_t vtok);
 
 	/**

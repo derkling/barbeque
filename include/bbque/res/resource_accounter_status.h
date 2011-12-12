@@ -92,10 +92,10 @@ public:
 
 	/**
 	 * @brief Total amount of resources
-	 * @param usage A pointer to ResourceUsage
+	 * @param pusage A pointer to ResourceUsage
 	 * @return The total amount of resource
 	 */
-	virtual uint64_t Total(UsagePtr_t const & usage) const = 0;
+	virtual uint64_t Total(UsagePtr_t const & pusage) const = 0;
 
 	/**
 	 * @brief Amount of resource available
@@ -109,12 +109,12 @@ public:
 
 	/**
 	 * @brief Amount of resources available
-	 * @param usage A pointer to ResourceUsage
+	 * @param pusage A pointer to ResourceUsage
 	 * @param vtok The token referencing the resource state view
 	 * @param papp The application interested in the query
 	 * @return The amount of resource available
 	 */
-	virtual uint64_t Available(UsagePtr_t const & usage,
+	virtual uint64_t Available(UsagePtr_t const & pusage,
 			RViewToken_t vtok = 0, AppPtr_t = AppPtr_t()) const = 0;
 
 	/**
@@ -128,11 +128,11 @@ public:
 
 	/**
 	 * @brief Amount of resources used
-	 * @param usage A pointer to ResourceUsage
+	 * @param pusage A pointer to ResourceUsage
 	 * @param vtok The token referencing the resource state view
 	 * @return The used amount of resource
 	 */
-	virtual uint64_t Used(UsagePtr_t const & usage, RViewToken_t vtok = 0)
+	virtual uint64_t Used(UsagePtr_t const & pusage, RViewToken_t vtok = 0)
 		const = 0;
 
 	/**

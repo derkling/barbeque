@@ -620,16 +620,16 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end;	++usages_it) {
 		// Current required resource (ResourceUsage object)
-		UsagePtr_t rsrc_usage(usages_it->second);
+		UsagePtr_t pusage(usages_it->second);
 		logger->Debug("Booking: [%s] requires resource {%s}",
 				papp->StrId(), usages_it->first.c_str());
 
 		// Do booking for this resource
-		result = DoResourceBooking(papp, rsrc_usage, vtok);
+		result = DoResourceBooking(papp, pusage, vtok);
 		if (result != RA_SUCCESS)  {
 			logger->Crit("Booking: unexpected fail! "
 					"%s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(), rsrc_usage->value,
+				usages_it->first.c_str(), pusage->value,
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 
@@ -639,7 +639,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		assert(result == RA_SUCCESS);
 		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(), rsrc_usage->value,
+				usages_it->first.c_str(), pusage->value,
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 	}
@@ -647,7 +647,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		AppPtr_t const & papp,
-		UsagePtr_t & rsrc_usage,
+		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
@@ -655,11 +655,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	ResourceSetPtr_t rsrc_set(rsrc_view->second);
 
 	// Amount of resource to book
-	uint64_t usage_value = rsrc_usage->value;
+	uint64_t usage_val = pusage->value;
 
 	// Get the list of resource binds
-	ResourcePtrList_t::iterator it_bind(rsrc_usage->binds.begin());
-	ResourcePtrList_t::iterator end_it(rsrc_usage->binds.end());
+	ResourcePtrListIterator_t it_bind(pusage->binds.begin());
+	ResourcePtrListIterator_t end_it(pusage->binds.end());
 	while ((usage_value > 0) && (it_bind != end_it)) {
 		// If the current resource bind has enough availability, reserve the
 		// whole quantity requested here. Otherwise split it in more "sibling"
@@ -697,15 +697,15 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 
 	// Release the all the resources hold by the Application/EXC
 	for (; usages_it != usages_end; ++usages_it) {
-		UsagePtr_t rsrc_usage(usages_it->second);
-		UndoResourceBooking(papp, rsrc_usage, vtok);
+		UsagePtr_t pusage(usages_it->second);
+		UndoResourceBooking(papp, pusage, vtok);
 		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
-				usages_it->first.c_str(), rsrc_usage->value);
+				usages_it->first.c_str(), pusage->value);
 	}
 }
 
 void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
-		UsagePtr_t & rsrc_usage,
+		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
@@ -717,9 +717,9 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 	uint64_t usage_freed = 0;
 
 	// For each resource binding release the amount allocated to the App/EXC
-	ResourcePtrList_t::iterator it_bind(rsrc_usage->binds.begin());
-	ResourcePtrList_t::iterator end_it(rsrc_usage->binds.end());
-	while (usage_freed < rsrc_usage->value) {
+	ResourcePtrListIterator_t it_bind(pusage->binds.begin());
+	ResourcePtrListIterator_t end_it(pusage->binds.end());
+	while (usage_freed < pusage->value) {
 		assert(it_bind != end_it);
 		usage_freed += (*it_bind)->Release(papp, vtok);
 
@@ -735,7 +735,7 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 
 		++it_bind;
 	}
-	assert(usage_freed == rsrc_usage->value);
+	assert(usage_freed == pusage->value);
 }
 
 }   // namespace res
