@@ -651,7 +651,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
 	assert(rsrc_view != rsrc_per_views.end());
-	ResourceSetPtr_t rsrc_set(rsrc_view->second);
+	ResourceSetPtr_t & rsrc_set(rsrc_view->second);
 
 	// Amount of resource to book
 	uint64_t usage_val = pusage->value;
@@ -708,9 +708,7 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 		RViewToken_t vtok) {
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
-	ResourceSetPtr_t rsrc_set;
-	if (rsrc_view != rsrc_per_views.end())
-		rsrc_set = rsrc_view->second;
+	ResourceSetPtr_t & rsrc_set(rsrc_view->second);
 
 	// Keep track of the amount of resource freed
 	uint64_t usage_freed = 0;
