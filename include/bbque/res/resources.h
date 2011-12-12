@@ -57,6 +57,8 @@ class ResourceAccounter;
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointers to Resource descriptors */
 typedef std::list<ResourcePtr_t> ResourcePtrList_t;
+/** Iterator of ResourcePtr_t list */
+typedef ResourcePtrList_t::iterator ResourcePtrListIterator_t;
 /** Shared pointer to ResourceState object */
 typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
 /** Map of amounts of resource used by applications. Key: Application UID */
