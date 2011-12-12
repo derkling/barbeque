@@ -136,14 +136,14 @@ public:
 	 * @see WorkingModeStatusIF
 	 */
 	inline UsagesMap_t const & ResourceUsages() const {
-		return rsrc_usages;
+		return recp_usages;
 	}
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
 	inline size_t NumberOfResourceUsages() const {
-		return rsrc_usages.size();
+		return recp_usages.size();
 	}
 
 	/**
@@ -174,7 +174,7 @@ public:
 	 * @see WorkingModeStatusIF
 	 */
 	inline UsagesMapPtr_t GetResourceBinding() const {
-		return sys_rsrc_usages;
+		return sys_usages;
 	}
 
 	/**
@@ -186,7 +186,7 @@ public:
 	 * @brief Clear the current binding with the system resources
 	 */
 	inline void ClearResourceBinding() {
-		sys_rsrc_usages->clear();
+		sys_usages->clear();
 		cluster_set.curr = cluster_set.prev;
 	}
 
@@ -232,13 +232,13 @@ private:
 	float value;
 
 	/** The set of resources usages into the recipe  */
-	UsagesMap_t rsrc_usages;
+	UsagesMap_t recp_usages;
 
 	/**
 	 * The set of the system resources used by the working mode
 	 * @see SetResourceBinding()
 	 */
-	UsagesMapPtr_t sys_rsrc_usages;
+	UsagesMapPtr_t sys_usages;
 
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;

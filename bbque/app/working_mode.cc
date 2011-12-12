@@ -63,7 +63,7 @@ WorkingMode::WorkingMode(uint8_t _id,
 
 WorkingMode::~WorkingMode() {
 	overheads.clear();
-	rsrc_usages.clear();
+	recp_usages.clear();
 }
 
 
@@ -88,9 +88,8 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	}
 
 	// Insert a new resource usage object in the map
-	br::UsagePtr_t res_usage(br::UsagePtr_t(new br::ResourceUsage(_value)));
-	rsrc_usages.insert(std::pair<std::string, br::UsagePtr_t>(
-				_res_path, res_usage));
+	UsagePtr_t pusage(UsagePtr_t(new ResourceUsage(_value)));
+	recp_usages.insert(std::pair<std::string, UsagePtr_t>(_res_path, pusage));
 
 	logger->Debug("AddResUsage: added {%s}\t[usage: %llu]",
 			_res_path.c_str(), _value);
@@ -100,25 +99,25 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 
 uint64_t WorkingMode::ResourceUsageValue(
 		std::string const & _res_path) const {
-	UsagePtr_t rsrc_usage_ptr;
+	UsagePtr_t pusage;
 
 	if (IsPathTemplate(_res_path))
-		rsrc_usage_ptr = ResourceUsageTempRef(_res_path);
+		pusage = ResourceUsageTempRef(_res_path);
 	else
-		rsrc_usage_ptr = ResourceUsageRef(_res_path);
+		pusage = ResourceUsageRef(_res_path);
 
 	// Resource not used by this working mode
-	if (!rsrc_usage_ptr)
+	if (!pusage)
 		return 0;
 
-	return rsrc_usage_ptr->value;
+	return pusage->value;
 }
 
 
 UsagePtr_t
 WorkingMode::ResourceUsageTempRef(std::string const & temp_path) const {
-	UsagesMap_t::const_iterator rsrc_it(rsrc_usages.begin());
-	UsagesMap_t::const_iterator it_end(rsrc_usages.end());
+	UsagesMap_t::const_iterator rsrc_it(recp_usages.begin());
+	UsagesMap_t::const_iterator it_end(recp_usages.end());
 
 	// Iterate over the map of resource usages retrieved from the recipe
 	for (; rsrc_it != it_end; ++rsrc_it) {
@@ -141,13 +140,13 @@ WorkingMode::ResourceUsageRef(std::string const & rsrc_path) const {
 
 	// If the resource binding is missing, perform the search in the map of
 	// resource usages parsed from the recipe
-	if (!sys_rsrc_usages)
-		rsrc_it = rsrc_usages.find(rsrc_path);
+	if (!sys_usages)
+		rsrc_it = recp_usages.find(rsrc_path);
 	else
-		rsrc_it = sys_rsrc_usages->find(rsrc_path);
+		rsrc_it = sys_usages->find(rsrc_path);
 
 	// Search failed
-	if (rsrc_it != rsrc_usages.end())
+	if (rsrc_it != recp_usages.end())
 		return UsagePtr_t();
 
 	// Return the ResourceUsage object
@@ -202,10 +201,10 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string const & rsrc_name,
 		ResID_t src_ID,
 		ResID_t dst_ID,
-		UsagesMapPtr_t & usages_bind) {
+		UsagesMapPtr_t & bindings) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	UsagesMap_t::iterator usage_it(rsrc_usages.begin());
-	UsagesMap_t::iterator it_end(rsrc_usages.end());
+	UsagesMap_t::iterator usage_it(recp_usages.begin());
+	UsagesMap_t::iterator it_end(recp_usages.end());
 
 	// Null name check
 	if (rsrc_name.empty()) {
@@ -214,46 +213,43 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	}
 
 	// If the pointer to the UsagesMap_t is null allocate a new map
-	if (!usages_bind)
-		usages_bind = UsagesMapPtr_t(new UsagesMap_t());
+	if (!bindings)
+		bindings = UsagesMapPtr_t(new UsagesMap_t());
 
 	// Resource usages loaded from the recipe
 	for (; usage_it != it_end; ++usage_it) {
 		// Replace resource name+src_ID with resource_name+dst_ID in the
 		// resource path
-		std::string bind_rsrc_path =
+		std::string bind_path =
 				ReplaceResourceID(usage_it->first, rsrc_name, src_ID, dst_ID);
 
 		logger->Debug("Binding: 'recipe' [%s] => 'bbque' [%s]",
-				usage_it->first.c_str(), bind_rsrc_path.c_str());
+				usage_it->first.c_str(), bind_path.c_str());
 
 		// Create a new ResourceUsage object, fill "binds" attribute with the
 		// list of resource descriptors
-		UsagePtr_t bind_rsrc_usage =
-			UsagePtr_t(new ResourceUsage(usage_it->second->value));
-		bind_rsrc_usage->binds = ra.GetResources(bind_rsrc_path);
-
-		assert(!bind_rsrc_usage->binds.empty());
+		UsagePtr_t bind_pusage(new ResourceUsage(usage_it->second->value));
+		bind_pusage->binds = ra.GetResources(bind_path);
+		assert(!bind_pusage->binds.empty());
 		logger->Debug("Binding: resources count [%d]",
-				bind_rsrc_usage->binds.size());
+				bind_pusage->binds.size());
 
 		// Insert the bound resource into the usages map to return
-		usages_bind->insert(std::pair<std::string,
-					UsagePtr_t>(bind_rsrc_path, bind_rsrc_usage));
+		bindings->insert(std::pair<std::string,
+					UsagePtr_t>(bind_path, bind_pusage));
 	}
 
 	// Debug messages
-	usage_it = usages_bind->begin();
-	it_end = usages_bind->end();
+	usage_it = bindings->begin();
+	it_end = bindings->end();
 	for (; usage_it != it_end; ++usage_it) {
 		logger->Debug("Binding: {%s} [value = %llu #binds = %d]",
-				usage_it->first.c_str(),
-				usage_it->second->value,
+				usage_it->first.c_str(), usage_it->second->value,
 				usage_it->second->binds.size());
 	}
 
 	// Are all the resource usages bound ?
-	if (rsrc_usages.size() < usages_bind->size())
+	if (recp_usages.size() < bindings->size())
 		return WM_RSRC_MISS_BIND;
 
 	return WM_SUCCESS;
@@ -261,16 +257,16 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 
 
 WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
-		UsagesMapPtr_t & usages_bind) {
+		UsagesMapPtr_t & bindings) {
 	// If the bind map has a size different from the resource usages one
 	// return
-	if (usages_bind->size() != rsrc_usages.size())
+	if (bindings->size() != recp_usages.size())
 		return WM_RSRC_MISS_BIND;
 
-	UsagesMap_t::iterator bind_it(usages_bind->begin());
-	UsagesMap_t::iterator end_bind(usages_bind->end());
-	UsagesMap_t::iterator rsrc_it(rsrc_usages.begin());
-	UsagesMap_t::iterator end_rsrc(rsrc_usages.end());
+	UsagesMap_t::iterator bind_it(bindings->begin());
+	UsagesMap_t::iterator end_bind(bindings->end());
+	UsagesMap_t::iterator rsrc_it(recp_usages.begin());
+	UsagesMap_t::iterator end_rsrc(recp_usages.end());
 
 	// If there's a path template mismatch returns
 	while ((bind_it != end_bind) && (rsrc_it != end_rsrc)) {
@@ -288,8 +284,8 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 	cluster_set.prev = cluster_set.curr;
 	cluster_set.curr.reset();
 
-	bind_it = usages_bind->begin();
-	end_bind = usages_bind->end();
+	bind_it = bindings->begin();
+	end_bind = bindings->end();
 	for (; bind_it != end_bind; ++bind_it) {
 		// If this is a clustered resource mark the cluster bit in the set
 		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
@@ -302,8 +298,8 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 	// Cluster set changed ?
 	cluster_set.changed = cluster_set.prev != cluster_set.curr;
 
-	// Set the bind map
-	sys_rsrc_usages = usages_bind;
+	// Set the resource bindings map
+	sys_usages = bindings;
 	return WM_SUCCESS;
 }
 
