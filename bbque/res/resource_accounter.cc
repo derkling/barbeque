@@ -197,7 +197,7 @@ uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
 	return clustering_factor;
 }
 
-uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
+uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_list,
 		QueryOption_t _att,
 		RViewToken_t vtok,
 		AppPtr_t papp) const {
@@ -206,22 +206,24 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_set,
 
 	// For all the descriptors in the list add the quantity of resource in the
 	// specified state (available, used, total)
-	ResourcePtrList_t::const_iterator res_it(rsrc_set.begin());
-	ResourcePtrList_t::const_iterator res_end(rsrc_set.end());
+	ResourcePtrList_t::const_iterator res_it(rsrc_list.begin());
+	ResourcePtrList_t::const_iterator res_end(rsrc_list.end());
 	for (; res_it != res_end; ++res_it) {
+		// Current resource descriptor
+		ResourcePtr_t const & rsrc(*res_it);
 
 		switch(_att) {
 		// Resource availability
 		case RA_AVAIL:
-			val += (*res_it)->Available(papp, vtok);
+			val += rsrc->Available(papp, vtok);
 			break;
 		// Resource used
 		case RA_USED:
-			val += (*res_it)->Used(vtok);
+			val += rsrc->Used(vtok);
 			break;
 		// Resource total
 		case RA_TOTAL:
-			val += (*res_it)->Total();
+			val += rsrc->Total();
 			break;
 		}
 	}

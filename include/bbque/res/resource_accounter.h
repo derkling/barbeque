@@ -417,14 +417,14 @@ private:
 	 * @brief Return a state parameter (availability, resources used, total
 	 * amount) for the resource.
 	 *
-	 * @param rsrc_set A list of resource descriptors
+	 * @param rsrc_list A list of descriptors of resources of the same type
 	 * @param q_opt Resource state attribute requested (@see QueryOption_t)
 	 * @param vtok The token referencing the resource state view
 	 * @param papp The application interested in the query
 	 *
 	 * @return The value of the attribute request
 	 */
-	uint64_t QueryStatus(ResourcePtrList_t const & rsrc_set,
+	uint64_t QueryStatus(ResourcePtrList_t const & rsrc_list,
 				QueryOption_t q_opt, RViewToken_t vtok = 0,
 				AppPtr_t papp =	AppPtr_t()) const;
 
