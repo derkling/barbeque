@@ -203,8 +203,6 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		ResID_t dst_ID,
 		UsagesMapPtr_t & bindings) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	UsagesMap_t::iterator usage_it(recp_usages.begin());
-	UsagesMap_t::iterator it_end(recp_usages.end());
 
 	// Null name check
 	if (rsrc_name.empty()) {
@@ -217,18 +215,21 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		bindings = UsagesMapPtr_t(new UsagesMap_t());
 
 	// Resource usages loaded from the recipe
+	UsagesMap_t::iterator usage_it(recp_usages.begin());
+	UsagesMap_t::iterator it_end(recp_usages.end());
 	for (; usage_it != it_end; ++usage_it) {
+		// Current required resource
+		UsagePtr_t & rcp_pusage(usage_it->second);
+
 		// Replace resource name+src_ID with resource_name+dst_ID in the
 		// resource path
 		std::string bind_path =
 				ReplaceResourceID(usage_it->first, rsrc_name, src_ID, dst_ID);
-
 		logger->Debug("Binding: 'recipe' [%s] => 'bbque' [%s]",
 				usage_it->first.c_str(), bind_path.c_str());
 
-		// Create a new ResourceUsage object, fill "binds" attribute with the
-		// list of resource descriptors
-		UsagePtr_t bind_pusage(new ResourceUsage(usage_it->second->value));
+		// Create a new ResourceUsage object and set the binding list
+		UsagePtr_t bind_pusage(new ResourceUsage(rcp_pusage->GetAmount()));
 		bind_pusage->binds = ra.GetResources(bind_path);
 		assert(!bind_pusage->binds.empty());
 		logger->Debug("Binding: resources count [%d]",
@@ -240,13 +241,16 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	}
 
 	// Debug messages
-	usage_it = bindings->begin();
-	it_end = bindings->end();
-	for (; usage_it != it_end; ++usage_it) {
-		logger->Debug("Binding: {%s} [value = %llu #binds = %d]",
-				usage_it->first.c_str(), usage_it->second->value,
-				usage_it->second->binds.size());
-	}
+	DB(
+		usage_it = bindings->begin();
+		it_end = bindings->end();
+		for (; usage_it != it_end; ++usage_it) {
+			UsagePtr_t & pusage(usage_it->second);
+			logger->Debug("Binding: {%s} [amount = %llu #binds = %d]",
+					usage_it->first.c_str(), pusage->GetAmount(),
+					pusage->GetBindingList().size());
+		}
+	);
 
 	// Are all the resource usages bound ?
 	if (recp_usages.size() < bindings->size())
