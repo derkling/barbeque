@@ -110,7 +110,7 @@ uint64_t WorkingMode::ResourceUsageValue(
 	if (!pusage)
 		return 0;
 
-	return pusage->value;
+	return pusage->GetAmount();
 }
 
 
@@ -231,9 +231,9 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		// Create a new ResourceUsage object and set the binding list
 		UsagePtr_t bind_pusage(new ResourceUsage(rcp_pusage->GetAmount()));
 		bind_pusage->binds = ra.GetResources(bind_path);
-		assert(!bind_pusage->binds.empty());
 		logger->Debug("Binding: resources count [%d]",
 				bind_pusage->binds.size());
+		assert(!bind_pusage->EmptyBindingList());
 
 		// Insert the bound resource into the usages map to return
 		bindings->insert(std::pair<std::string,
