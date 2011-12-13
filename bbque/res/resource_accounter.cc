@@ -240,11 +240,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	// Check availability for each ResourceUsage object
 	for (; usages_it != usages_end; ++usages_it) {
 		uint64_t avail = Available(usages_it->second, vtok, papp);
-		if (avail < usages_it->second->value) {
+		if (avail < usages_it->second->GetAmount()) {
 			logger->Debug("ChkAvail: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
 					usages_it->first.c_str(),
-					usages_it->second->value,
+					usages_it->second->GetAmount(),
 					avail,
 					Total(usages_it->second));
 			return RA_ERR_USAGE_EXC;
@@ -630,7 +630,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		if (result != RA_SUCCESS)  {
 			logger->Crit("Booking: unexpected fail! "
 					"%s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(), pusage->value,
+				usages_it->first.c_str(), pusage->GetAmount(),
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 
@@ -640,7 +640,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		assert(result == RA_SUCCESS);
 		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(), pusage->value,
+				usages_it->first.c_str(), pusage->GetAmount(),
 				Available(usages_it->first, vtok, papp),
 				Total(usages_it->first));
 	}
@@ -659,7 +659,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	ResourceSetPtr_t & rsrc_set(rsrc_view->second);
 
 	// Amount of resource to book
-	uint64_t usage_val = pusage->value;
+	uint64_t usage_val = pusage->GetAmount();
 
 	// Get the list of resource binds
 	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
@@ -751,7 +751,7 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 		UsagePtr_t pusage(usages_it->second);
 		UndoResourceBooking(papp, pusage, vtok);
 		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
-				usages_it->first.c_str(), pusage->value);
+				usages_it->first.c_str(), pusage->GetAmount());
 	}
 }
 
@@ -768,7 +768,7 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 	// For each resource binding release the amount allocated to the App/EXC
 	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
 	ResourcePtrListIterator_t end_it(pusage->GetBindingList().end());
-	for(; usage_freed < pusage->value; ++it_bind) {
+	for(; usage_freed < pusage->GetAmount(); ++it_bind) {
 		assert(it_bind != end_it);
 
 		// Release the quantity hold by the Application/EXC
@@ -783,7 +783,7 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 		if (rsrc->ApplicationsCount() == 0)
 			rsrc_set->erase(rsrc);
 	}
-	assert(usage_freed == pusage->value);
+	assert(usage_freed == pusage->GetAmount());
 }
 
 }   // namespace res
