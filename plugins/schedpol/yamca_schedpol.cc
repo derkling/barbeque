@@ -548,30 +548,33 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 	UsagesMap_t::const_iterator usage_it(rsrc_usages->begin());
 	UsagesMap_t::const_iterator end_usage(rsrc_usages->end());
 	while (usage_it != end_usage) {
+		// Current resource
+		std::string const & rsrc_path(usage_it->first);
+		UsagePtr_t const & pusage(usage_it->second);
 
 		// Query resource availability
-		rsrc_avail =
-			rsrc_acct.Available(usage_it->second, rsrc_view_token, papp);
-		logger->Debug("{%s} availability = %llu", usage_it->first.c_str(),
+		rsrc_avail = rsrc_acct.Available(pusage, rsrc_view_token, papp);
+		logger->Debug("{%s} availability = %llu", rsrc_path.c_str(),
 				rsrc_avail);
 
-		// If there is not enough resource return
-		if (rsrc_avail < usage_it->second->value) {
+		// Is the request satisfiable?
+		if (rsrc_avail < pusage->GetAmount()) {
 			logger->Debug("Contention level: [%s] R=%d / A=%d",
-					usage_it->first.c_str(),
-					usage_it->second->value,
-					rsrc_avail);
+					rsrc_path.c_str(), pusage->GetAmount(),	rsrc_avail);
 
-			rsrc_avail = 0.1 * usage_it->second->value;
+			// Set the availability to a 1/10 of the requested amount of
+			// resource in order to increase dramatically the resulting
+			// contention level
+			rsrc_avail = 0.1 * pusage->GetAmount();
 		}
 
 		// Get the resource usage of the AWM with the min value
 		AwmPtr_t wm_min(papp->LowValueAWM());
-		min_usage = wm_min->ResourceUsageValue(PathTemplate(usage_it->first));
+		min_usage = wm_min->ResourceUsageValue(PathTemplate(rsrc_path));
 
 		// Update the contention level (inverse)
 		cont_level +=
-			(((float) usage_it->second->value) * min_usage) / (float) rsrc_avail;
+			(((float) pusage->GetAmount()) * min_usage) / (float) rsrc_avail;
 
 		++usage_it;
 	}
