@@ -854,8 +854,8 @@ bool UsageOutOfBounds(const AwmPtr_t & awm) {
 
 		// Check if the usage value is out of the constraint bounds
 		UsagePtr_t const & pusage(usage_it->second);
-		if ((pusage->value < rsrc_constr_it->second->lower) ||
-				(pusage->value > rsrc_constr_it->second->upper))
+		if ((pusage->GetAmount() < rsrc_constr_it->second->lower) ||
+				(pusage->GetAmount() > rsrc_constr_it->second->upper))
 			return true;
 	}
 
