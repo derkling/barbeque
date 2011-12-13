@@ -486,6 +486,35 @@ private:
 			UsagePtr_t & pusage, RViewToken_t vtok);
 
 	/**
+	 * @brief Allocate a quota of resource in the scheduling case
+	 *
+	 * Allocate a quota of the required resource in a single resource binding
+	 * taken from the "binds" list of the ResourceUsage associated.
+	 *
+	 * @param papp The Application/ExC using the resource
+	 * @param rsrc The resource descriptor of the resource binding
+	 * @param usage_val The amount of resource required
+	 * @param vtok The token referencing the resource state view
+	 */
+	void SchedResourceBooking(AppPtr_t const & papp, ResourcePtr_t & rsrc,
+			uint64_t & usage_val, RViewToken_t vtok);
+
+	/**
+	 * @brief Allocate a quota of resource in the synchronization case
+	 *
+	 * Allocate a quota of the required resource in a single resource binding
+	 * taken checking the assigments done by the scheduler. To retrieve this
+	 * information, the scheduled view is properly queried.
+	 *
+	 * @param papp The Application/ExC using the resource
+	 * @param rsrc The resource descriptor of the resource binding
+	 * @param usage_val The amount of resource required
+	 * @param vtok The token referencing the resource state view
+	 */
+	void SyncResourceBooking(AppPtr_t const & papp, ResourcePtr_t & rsrc,
+			uint64_t & usage_val, RViewToken_t vtok);
+
+	/**
 	 * @brief Decrement the resource usages counts
 	 *
 	 * Each time an application releases a set of resources the counts of

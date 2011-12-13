@@ -650,6 +650,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		AppPtr_t const & papp,
 		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
+	// When the first resource bind has been tracked this is set false
+	bool first_resource = true;
+
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
 	assert(rsrc_view != rsrc_per_views.end());
@@ -659,32 +662,79 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	uint64_t usage_val = pusage->value;
 
 	// Get the list of resource binds
-	ResourcePtrListIterator_t it_bind(pusage->binds.begin());
-	ResourcePtrListIterator_t end_it(pusage->binds.end());
-	while ((usage_val > 0) && (it_bind != end_it)) {
-		// If the current resource bind has enough availability, reserve the
-		// whole quantity requested here. Otherwise split it in more "sibling"
-		// resource binds.
-		uint64_t availab = (*it_bind)->Available(vtok);
-		if (usage_val < availab)
-			usage_val -= (*it_bind)->Acquire(papp, usage_val, vtok);
-		else
-			usage_val -=
-				(*it_bind)->Acquire(papp, availab, vtok);
+	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
+	ResourcePtrListIterator_t end_it(pusage->GetBindingList().end());
+	for (; it_bind != end_it; ++it_bind) {
+		// Break if the required resource has been completely allocated
+		if (usage_val == 0)
+			break;
 
-		// Add the resource to the set of resources used in the view
-		// referenced by 'vtok'
-		rsrc_set->insert(*it_bind);
+		// Add the current resource binding to the set of resources used in
+		// the view referenced by 'vtok'
+		ResourcePtr_t & rsrc(*it_bind);
+		rsrc_set->insert(rsrc);
 
-		++it_bind;
+		// Synchronization: booking according to scheduling decisions
+		if (sync_ssn.started) {
+			SyncResourceBooking(papp, rsrc, usage_val, vtok);
+			continue;
+		}
+
+		// Scheduling: allocate required resource among its bindings
+		SchedResourceBooking(papp, rsrc, usage_val, vtok);
+		if (!first_resource)
+			continue;
+
+		// Keep track of the first resource granted from the bindings
+		pusage->TrackFirstBinding(papp, it_bind, vtok);
+		first_resource = false;
 	}
 
-	// Critical error. This means that the availability of resources
-	// mismatches the one checked in the scheduling phase
+	// Keep track of the last resource granted from the bindings (only if we
+	// are in the scheduling case)
+	if (!sync_ssn.started)
+		pusage->TrackLastBinding(papp, it_bind, vtok);
+
+	// Critical error: The availability of resources mismatches the one
+	// checked in the scheduling phase. This should never happen!
 	if (usage_val != 0)
 		return RA_ERR_USAGE_EXC;
 
 	return RA_SUCCESS;
+}
+
+inline void ResourceAccounter::SchedResourceBooking(AppPtr_t const & papp,
+		ResourcePtr_t & rsrc,
+		uint64_t & usage_val,
+		RViewToken_t vtok) {
+	// Check the available amount in the current resource binding
+	uint64_t avail_amount = rsrc->Available(papp, vtok);
+	if (usage_val < avail_amount)
+		// If it is greater than the required amount, acquire the whole
+		// quantity from the current resource binding
+		usage_val -= rsrc->Acquire(papp, usage_val, vtok);
+	else
+		// Otherwise split it among sibling resource bindings
+		usage_val -= rsrc->Acquire(papp, avail_amount, vtok);
+
+	logger->Debug("DoResBook: %s scheduled to use %s (%d left)",
+			papp->StrId(), rsrc->Name().c_str(), usage_val);
+}
+
+inline void ResourceAccounter::SyncResourceBooking(AppPtr_t const & papp,
+		ResourcePtr_t & rsrc,
+		uint64_t & usage_val,
+		RViewToken_t vtok) {
+	// Skip the resource binding if the not assigned by the scheduler
+	uint64_t sched_usage = rsrc->ApplicationUsage(papp, sch_view_token);
+	if (sched_usage == 0)
+		return;
+
+	// Acquire the resource according to the amount assigned by the
+	// scheduler
+	usage_val -= rsrc->Acquire(papp, sched_usage, sync_ssn.view);
+	logger->Debug("DoResBook: %s acquires %s (%d left)",
+			papp->StrId(), rsrc->Name().c_str(), usage_val);
 }
 
 void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
@@ -716,23 +766,22 @@ void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
 	uint64_t usage_freed = 0;
 
 	// For each resource binding release the amount allocated to the App/EXC
-	ResourcePtrListIterator_t it_bind(pusage->binds.begin());
-	ResourcePtrListIterator_t end_it(pusage->binds.end());
-	while (usage_freed < pusage->value) {
+	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
+	ResourcePtrListIterator_t end_it(pusage->GetBindingList().end());
+	for(; usage_freed < pusage->value; ++it_bind) {
 		assert(it_bind != end_it);
-		usage_freed += (*it_bind)->Release(papp, vtok);
 
-		// If there are no more applications using the resource remove it
-		// from the set of resources referenced in the view
-		if (rsrc_set) {
-			logger->Debug("ApplicationsCount: %s = %d",
-					(*it_bind)->Name().c_str(),
-					(*it_bind)->ApplicationsCount());
-			if ((*it_bind)->ApplicationsCount() == 0)
-				rsrc_set->erase(*it_bind);
-		}
+		// Release the quantity hold by the Application/EXC
+		ResourcePtr_t & rsrc(*it_bind);
+		usage_freed += rsrc->Release(papp, vtok);
 
-		++it_bind;
+		if (!rsrc_set)
+			continue;
+
+		// If no more applications are using this resource, remove it from
+		// the set of resources referenced in the view
+		if (rsrc->ApplicationsCount() == 0)
+			rsrc_set->erase(rsrc);
 	}
 	assert(usage_freed == pusage->value);
 }
