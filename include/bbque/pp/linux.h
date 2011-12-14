@@ -85,20 +85,21 @@ private:
 	 * @breif Resource assignement bindings on a Linux machine
 	 */
 	typedef struct RLinuxBindings {
-		uint8_t node_id; ///> Maps a "tile" on Host Linux machines
-		uint8_t socket_id; ///> Maps a "cluster" on SMP Linux machine
+		unsigned short node_id; ///> Maps a "tile" on Host Linux machines
+		unsigned short socket_id; ///> Maps a "cluster" on SMP Linux machine
 		char *cpus;
 		char *mems;
-		RLinuxBindings(const uint8_t MaxCpusCount, const uint8_t MaxMemsCount) {
+		RLinuxBindings(const uint8_t MaxCpusCount, const uint8_t MaxMemsCount) :
+			cpus(NULL), mems(NULL) {
 			// 3 chars are required for each CPU/MEM resource if formatted
 			// with syntax: "nn,". This allows for up-to 99 resources per
 			// cluster
-			cpus = (char*)calloc(3*MaxCpusCount, sizeof(char));
-			mems = (char*)calloc(3*MaxMemsCount, sizeof(char));
+			if (MaxCpusCount)
+				cpus = (char*)calloc(3*MaxCpusCount, sizeof(char));
+			if (MaxMemsCount)
+				mems = (char*)calloc(3*MaxMemsCount, sizeof(char));
 		}
 		~RLinuxBindings() {
-			fprintf(stderr, "!!! Releasing bindings: {CPU[%s], MEM[%s]} !!!\n",
-					cpus, mems);
 			free(cpus);
 			free(mems);
 		}
