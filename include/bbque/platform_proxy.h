@@ -55,6 +55,9 @@ public:
 	 */
 	typedef enum ExitCode {
 		OK = 0,
+		PLATFORM_INIT_FAILED,
+		PLATFORM_ENUMERATION_FAILED,
+		PLATFORM_NODE_PARSING_FAILED,
 		PLATFORM_DATA_NOT_FOUND,
 		PLATFORM_DATA_PARSING_ERROR,
 		MAPPING_FAILED
@@ -239,6 +242,11 @@ protected:
 	 * @brief Platform specific resource setup interface.
 	 */
 	virtual ExitCode_t _Setup(AppPtr_t papp) = 0;
+
+	/**
+	 * @brief Platform specific resources enumeration
+	 */
+	virtual ExitCode_t _LoadPlatformData() = 0;
 
 	/**
 	 * @brief Platform specific resources release interface.

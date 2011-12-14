@@ -110,9 +110,11 @@ void PlatformProxy::Monitor() {
 
 PlatformProxy::ExitCode_t
 PlatformProxy::LoadPlatformData() {
+	ExitCode_t result = OK;
 
 #if BBQUE_TEST_PLATFORM_DATA
 	//---------- Loading TEST platform data
+	logger->Debug("PLAT PRX: loading TEST PLATFORM data");
 	// This is just a temporary placeholder for the (still-missing)
 	// ResourceAbstraction module
 	bb::TestPlatformData &tpd(bb::TestPlatformData::GetInstance());
@@ -120,8 +122,10 @@ PlatformProxy::LoadPlatformData() {
 	return OK;
 #endif // BBQUE_TEST_PLATFORM_DATA
 
-	// TODO place here the code to parse the CGroup configuration and get
-	// the set of Barbeuqe managed resources
+	// Platform specific resources enumeration
+	logger->Debug("PLAT PRX: loading platform data");
+	result = _LoadPlatformData();
+	return result;
 }
 
 PlatformProxy::ExitCode_t
