@@ -19,6 +19,7 @@
 
 #include "bbque/pp/linux.h"
 
+#include "bbque/res/resource_accounter.h"
 #include "bbque/res/resource_utils.h"
 
 #include <string.h>
@@ -69,6 +70,211 @@ LinuxPP::LinuxPP() :
 LinuxPP::~LinuxPP() {
 
 }
+
+LinuxPP::ExitCode_t
+LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	char resourcePath[] = "arch.tile0.cluster256.pe256";
+	unsigned short first_cpu_id;
+	unsigned short last_cpu_id;
+	const char *p = prlb->cpus;
+
+	while (*p) {
+
+		// Get a CPU id, and register the corresponding resource path
+		sscanf(p, "%hu", &first_cpu_id);
+		snprintf(resourcePath+18, 8, "%hu.pe%d",
+				prlb->socket_id, first_cpu_id);
+		logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
+		ra.RegisterResource(resourcePath, "", 1);
+
+		// Look-up for next CPU id
+		while (*p && (*p != ',') && (*p != '-')) {
+			++p;
+		}
+
+		if (!*p)
+			return OK;
+
+		if (*p == ',') {
+			++p;
+			continue;
+		}
+		// Otherwise: we have stopped on a "-"
+
+		// Get last CPU of this range
+		sscanf(++p, "%hu", &last_cpu_id);
+		// Register all the other CPUs of this range
+		while (++first_cpu_id <= last_cpu_id) {
+			snprintf(resourcePath+18, 8, "%hu.pe%d",
+					prlb->socket_id, first_cpu_id);
+			logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
+			ra.RegisterResource(resourcePath, "", 1);
+		}
+
+		// Look-up for next CPU id
+		while (*p && (*p != ',')) {
+				++p;
+		}
+
+		if (*p == ',')
+			++p;
+	}
+
+	return OK;
+}
+
+LinuxPP::ExitCode_t
+LinuxPP::RegisterCluster(RLinuxBindingsPtr_t prlb) {
+	ExitCode_t pp_result;
+
+	logger->Debug("PLAT LNX: Setup resources for Node [%d], "
+			"CPUs [%s], MEMs [%s]",
+			prlb->socket_id, prlb->cpus, prlb->mems);
+
+	// The CPUs are generally represented with a syntax like this:
+	// 1-3,4,5-7
+	pp_result = RegisterClusterCPUs(prlb);
+
+	return OK;
+}
+
+LinuxPP::ExitCode_t
+LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
+		RLinuxBindingsPtr_t prlb) {
+	char group_name[] = "bbq_resources/node123";
+	struct cgroup_controller *cg_cpuset = NULL;
+	struct cgroup *bbq_node = NULL;
+	ExitCode_t pp_result = OK;
+	int cg_result;
+
+	// Read "cpuset" attributes from kernel
+	logger->Debug("PLAT LNX: Loading kernel info for [%s]...", entry.path);
+
+	// Initialize the CGroup variable
+	sscanf(entry.path+4, "%hu", &prlb->socket_id);
+	snprintf(group_name+18, 4, "%d", prlb->socket_id);
+	bbq_node = cgroup_new_cgroup(group_name);
+	if (bbq_node == NULL) {
+		logger->Error("PLAT LNX: Parsing resources FAILED! "
+				"(Error: cannot create [%s] group)", entry.path);
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	// Update the CGroup variable with kernel info
+	cg_result = cgroup_get_cgroup(bbq_node);
+	if (cg_result != 0) {
+		logger->Error("PLAT LNX: Reading kernel info FAILED! "
+				"(Error: %d, %s)", cg_result, cgroup_strerror(cg_result));
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	// Get "cpuset" controller info
+	cg_cpuset = cgroup_get_controller(bbq_node, "cpuset");
+	if (cg_cpuset == NULL) {
+		logger->Error("PLAT LNX: Getting controller FAILED! "
+				"(Error: Cannot find controller \"cpuset\" "
+				"in group [%s])", entry.path);
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	// Getting the value fot the "cpuset.cpus" attribute
+	cg_result = cgroup_get_value_string(cg_cpuset, "cpuset.cpus",
+			&(prlb->cpus));
+	if (cg_result) {
+		logger->Error("PLAT LNX: Getting CPUs attribute FAILED! "
+				"(Error: 'cpuset.cpus' not configured or not readable)");
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+parsing_failed:
+	cgroup_free (&bbq_node);
+	return pp_result;
+}
+
+LinuxPP::ExitCode_t
+LinuxPP::ParseNode(struct cgroup_file_info &entry) {
+	RLinuxBindingsPtr_t prlb(new RLinuxBindings_t(0,0));
+	ExitCode_t pp_result = OK;
+
+	// Jump all entries deeper than first-level subdirs
+	if (entry.depth > 1)
+		return OK;
+
+	// Skip parsing of all NON directory, if not required to parse an attribute
+	if (entry.type != CGROUP_FILE_TYPE_DIR)
+		return OK;
+
+	logger->Warn("PLAT LNX: scanning [%d:%s]...",
+			entry.depth, entry.full_path);
+
+	// Consistency check for required folder names
+	if (strncmp("node", entry.path, 4)) {
+		logger->Warn("PLAT LNX: Resources enumeration, "
+				"ignoring unexpected CGroup [%s]", entry.full_path);
+		return OK;
+	}
+
+	pp_result = ParseNodeAttributes(entry, prlb);
+	if (pp_result != OK)
+		return pp_result;
+
+	// Scan "cpus" and "mems" attributes for each cluster
+	logger->Debug("PLAT LNX: Setup resources from [%s]...",
+			entry.full_path);
+
+	// Register CPUs for this Node
+	pp_result = RegisterCluster(prlb);
+	return pp_result;
+
+}
+
+LinuxPP::ExitCode_t
+LinuxPP::_LoadPlatformData() {
+	struct cgroup *bbq_resources = NULL;
+	struct cgroup_file_info entry;
+	ExitCode_t pp_result = OK;
+	void *node_it = NULL;
+	int cg_result;
+	int level;
+
+	logger->Info("PLAT LNX: CGROUP based resources enumeration...");
+
+	// Lookup for a "bbq_resources" cgroup
+	bbq_resources = cgroup_new_cgroup("bbq_resources");
+	cg_result = cgroup_get_cgroup(bbq_resources);
+	if (cg_result) {
+		logger->Error("PLAT LNX: [bbq_resources] lookup FAILED! "
+				"(Error: No resources assignment)");
+		return PLATFORM_ENUMERATION_FAILED;
+	}
+
+	// Scan  subfolders to map "clusters"
+	cg_result = cgroup_walk_tree_begin("cpuset", "bbq_resources", 1,
+			&node_it, &entry, &level);
+	if ((cg_result != 0) || (node_it == NULL)) {
+		logger->Error("PLAT LNX: [bbq_resources] lookup FAILED! "
+				"(Error: No resources assignment)");
+		return PLATFORM_ENUMERATION_FAILED;
+	}
+
+	// Scan all "nodeN" assignment
+	while (!cg_result && (pp_result == OK)) {
+		// That's fine here, since we want also to skip the root group [bbq_resources]
+		cg_result =	cgroup_walk_tree_next(1, &node_it, &entry, level);
+		pp_result = ParseNode(entry);
+	}
+
+	// Release the iterator
+	cgroup_walk_tree_end(&node_it);
+
+	return pp_result;
+}
+
 
 LinuxPP::RLinuxType_t
 LinuxPP::GetRLinuxType(br::ResourcePtr_t pres) {

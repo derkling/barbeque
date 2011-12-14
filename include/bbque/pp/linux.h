@@ -180,6 +180,20 @@ private:
  * @{
  */
 
+	ExitCode_t RegisterCluster(RLinuxBindingsPtr_t prlb);
+	ExitCode_t RegisterClusterCPUs(RLinuxBindingsPtr_t prlb);
+	ExitCode_t ParseNode(struct cgroup_file_info &entry);
+	ExitCode_t ParseNodeAttributes(struct cgroup_file_info &entry,
+			RLinuxBindingsPtr_t prlb);
+
+	/**
+	 * @brief Parse the resources assigned to Bqrbeque by CGroup
+	 *
+	 * This method allows to parse a set of resources, assinged to Barbeque for
+	 * run-time management, which are defined with a properly configure
+	 * control group.
+	 */
+	ExitCode_t _LoadPlatformData();
 	ExitCode_t _Setup(AppPtr_t papp);
 	ExitCode_t _Release(AppPtr_t papp);
 
