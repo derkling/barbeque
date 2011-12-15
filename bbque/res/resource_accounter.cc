@@ -129,21 +129,20 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 
 AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
 		RViewToken_t vtok) const {
-	ResourcePtr_t rsrc_ptr;
 	Resource::ExitCode_t rsrc_ret;
 	AppUid_t app_uid;
 	AppPtr_t papp;
 	uint64_t amount;
 
 	// Get the Resource decriptor
-	rsrc_ptr = GetResource(path);
-	if (!rsrc_ptr) {
+	ResourcePtr_t rsrc(GetResource(path));
+	if (!rsrc) {
 		logger->Error("Cannot find PE: '%s'", path.c_str());
 		return AppPtr_t();
 	}
 
 	// Get the App/EXC descriptor
-	rsrc_ret = rsrc_ptr->UsedBy(app_uid, amount, 0, vtok);
+	rsrc_ret = rsrc->UsedBy(app_uid, amount, 0, vtok);
 	if (rsrc_ret != Resource::RS_SUCCESS)
 		return AppPtr_t();
 
@@ -152,7 +151,7 @@ AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
 		return AppPtr_t();
 
 	// Skip if the App/EXC hasn't an AWM or the resource is not a PE
-	if (!papp->CurrentAWM() || (rsrc_ptr->Name().compare("pe") < 0))
+	if (!papp->CurrentAWM() || (rsrc->Name().compare("pe") < 0))
 		return AppPtr_t();
 
 	return papp;
@@ -292,15 +291,15 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 	}
 
 	// Insert a new resource in the tree
-	ResourcePtr_t res_ptr = resources.insert(_path);
-	if (!res_ptr) {
+	ResourcePtr_t rsrc(resources.insert(_path));
+	if (!rsrc) {
 		logger->Crit("Registering: Unable to allocate a new resource"
 				"descriptor");
 		return RA_ERR_MEM;
 	}
 
 	// Set the amount of resource considering the units
-	res_ptr->SetTotal(ConvertValue(_amount, _units));
+	rsrc->SetTotal(ConvertValue(_amount, _units));
 
 	// Insert the path in the paths set
 	paths.insert(_path);
