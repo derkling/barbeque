@@ -130,15 +130,13 @@ public:
 	 * @return A shared pointer to the resource descriptor found
 	 */
 	inline ResourcePtr_t find(std::string const & rsrc_path) const {
-		// Null shared pointer
-		ResourcePtr_t null_ptr;
-		assert(null_ptr.use_count() == 0);
-
 		// List of matches to be filled
-		std::list<ResourcePtr_t> matches;
+		ResourcePtrList_t matches;
+
+		// Return the first element of the list if success
 		if (find_node(root, rsrc_path, RT_EXACT_MATCH, matches))
 			return (*(matches.begin()));
-		return null_ptr;
+		return ResourcePtr_t();
 	}
 
 	/**
