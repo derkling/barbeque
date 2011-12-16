@@ -187,28 +187,28 @@ public:
 	 */
 	inline void ClearResourceBinding() {
 		sys_usages->clear();
-		cluster_set.curr = cluster_set.prev;
+		clusters.curr = clusters.prev;
 	}
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
 	inline ClustersBitSet const & ClusterSet() const {
-		return cluster_set.curr;
+		return clusters.curr;
 	}
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
 	inline ClustersBitSet const & PrevClusterSet() const {
-		return cluster_set.prev;
+		return clusters.prev;
 	}
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
 	inline bool ClustersChanged() const {
-		return cluster_set.changed;
+		return clusters.changed;
 	}
 
 private:
@@ -244,14 +244,14 @@ private:
 	OverheadsMap_t overheads;
 
 	/** The set of clusters used by this working mode */
-	struct cluster_set {
+	struct clusters {
 		/** Save the previous set of clusters bound */
 		ClustersBitSet prev;
 		/** The current set of clusters bound */
 		ClustersBitSet curr;
 		/** True if current set differs from previous */
 		bool changed;
-	} cluster_set;
+	} clusters;
 
 	/**
 	 * @brief ResourceUsage object referenced by template path

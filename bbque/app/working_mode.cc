@@ -276,17 +276,20 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 	while ((bind_it != end_bind) && (rsrc_it != end_rsrc)) {
 		if (PathTemplate(bind_it->first).compare(
 					PathTemplate(rsrc_it->first)) != 0) {
+	ClustersBitSet clust_tmp;
 			logger->Error("SetBinding: %s resource path mismatch");
 			return WM_RSRC_MISS_BIND;
 		}
 
 		++rsrc_it;
 		++bind_it;
+		logger->Debug("SetBinding: Bound into cluster %d", cl_id);
+		clust_tmp.set(cl_id);
 	}
 
 	// Update the clusters bitset
-	cluster_set.prev = cluster_set.curr;
-	cluster_set.curr.reset();
+	clusters.prev = clusters.curr;
+	clusters.curr = clust_tmp;
 
 	bind_it = bindings->begin();
 	end_bind = bindings->end();
@@ -295,12 +298,11 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
 		if (cl_id != RSRC_ID_NONE) {
 			logger->Debug("SetBinding: Bound into cluster %d", cl_id);
-			cluster_set.curr.set(cl_id);
 		}
 	}
 
-	// Cluster set changed ?
-	cluster_set.changed = cluster_set.prev != cluster_set.curr;
+	// Cluster set changed?
+	clusters.changed = clusters.prev != clusters.curr;
 
 	// Set the resource bindings map
 	sys_usages = bindings;
