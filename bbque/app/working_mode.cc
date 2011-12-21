@@ -200,68 +200,6 @@ OverheadPtr_t WorkingMode::OverheadInfo(uint8_t _dest_awm_id) const {
 WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string const & rsrc_name,
 		ResID_t src_ID,
-		ResID_t dst_ID,
-		UsagesMapPtr_t & bindings) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-
-	// Null name check
-	if (rsrc_name.empty()) {
-		logger->Error("Binding: Missing resource name");
-		return WM_RSRC_ERR_NAME;
-	}
-
-	// If the pointer to the UsagesMap_t is null allocate a new map
-	if (!bindings)
-		bindings = UsagesMapPtr_t(new UsagesMap_t());
-
-	// Resource usages loaded from the recipe
-	UsagesMap_t::iterator usage_it(recp_usages.begin());
-	UsagesMap_t::iterator it_end(recp_usages.end());
-	for (; usage_it != it_end; ++usage_it) {
-		// Current required resource
-		UsagePtr_t & rcp_pusage(usage_it->second);
-
-		// Replace resource name+src_ID with resource_name+dst_ID in the
-		// resource path
-		std::string bind_path =
-				ReplaceResourceID(usage_it->first, rsrc_name, src_ID, dst_ID);
-		logger->Debug("Binding: 'recipe' [%s] => 'bbque' [%s]",
-				usage_it->first.c_str(), bind_path.c_str());
-
-		// Create a new ResourceUsage object and set the binding list
-		UsagePtr_t bind_pusage(new ResourceUsage(rcp_pusage->GetAmount()));
-		bind_pusage->binds = ra.GetResources(bind_path);
-		logger->Debug("Binding: resources count [%d]",
-				bind_pusage->binds.size());
-		assert(!bind_pusage->EmptyBindingList());
-
-		// Insert the bound resource into the usages map to return
-		bindings->insert(std::pair<std::string,
-					UsagePtr_t>(bind_path, bind_pusage));
-	}
-
-	// Debug messages
-	DB(
-		usage_it = bindings->begin();
-		it_end = bindings->end();
-		for (; usage_it != it_end; ++usage_it) {
-			UsagePtr_t & pusage(usage_it->second);
-			logger->Debug("Binding: {%s} [amount = %llu #binds = %d]",
-					usage_it->first.c_str(), pusage->GetAmount(),
-					pusage->GetBindingList().size());
-		}
-	);
-
-	// Are all the resource usages bound ?
-	if (recp_usages.size() < bindings->size())
-		return WM_RSRC_MISS_BIND;
-
-	return WM_SUCCESS;
-}
-
-WorkingMode::ExitCode_t WorkingMode::BindResource(
-		std::string const & rsrc_name,
-		ResID_t src_ID,
 		ResID_t dst_ID) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	UsagesMap_t::iterator usage_it, it_end;
@@ -381,56 +319,6 @@ WorkingMode::ExitCode_t WorkingMode::SetSchedResourceBinding() {
 	sys_usages = sched_binds;
 	sched_binds.reset();
 
-	return WM_SUCCESS;
-}
-
-
-WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
-		UsagesMapPtr_t & bindings) {
-	// If the bind map has a size different from the resource usages one
-	// return
-	if (bindings->size() != recp_usages.size())
-		return WM_RSRC_MISS_BIND;
-
-	UsagesMap_t::iterator bind_it(bindings->begin());
-	UsagesMap_t::iterator end_bind(bindings->end());
-	UsagesMap_t::iterator rsrc_it(recp_usages.begin());
-	UsagesMap_t::iterator end_rsrc(recp_usages.end());
-
-	// If there's a path template mismatch returns
-	while ((bind_it != end_bind) && (rsrc_it != end_rsrc)) {
-		if (PathTemplate(bind_it->first).compare(
-					PathTemplate(rsrc_it->first)) != 0) {
-	ClustersBitSet clust_tmp;
-			logger->Error("SetBinding: %s resource path mismatch");
-			return WM_RSRC_MISS_BIND;
-		}
-
-		++rsrc_it;
-		++bind_it;
-		logger->Debug("SetBinding: Bound into cluster %d", cl_id);
-		clust_tmp.set(cl_id);
-	}
-
-	// Update the clusters bitset
-	clusters.prev = clusters.curr;
-	clusters.curr = clust_tmp;
-
-	bind_it = bindings->begin();
-	end_bind = bindings->end();
-	for (; bind_it != end_bind; ++bind_it) {
-		// If this is a clustered resource mark the cluster bit in the set
-		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
-		if (cl_id != RSRC_ID_NONE) {
-			logger->Debug("SetBinding: Bound into cluster %d", cl_id);
-		}
-	}
-
-	// Cluster set changed?
-	clusters.changed = clusters.prev != clusters.curr;
-
-	// Set the resource bindings map
-	sys_usages = bindings;
 	return WM_SUCCESS;
 }
 

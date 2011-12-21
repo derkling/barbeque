@@ -129,39 +129,6 @@ public:
 	virtual OverheadPtr_t OverheadInfo(uint8_t dest_awm_id) const = 0;
 
 	/**
-	 * @brief Bind resource usages to system resources descriptors
-	 *
-	 * Resource paths taken from the recipes use IDs that don't care about the
-	 * real system resource IDs registered by Barbeque. Thus a binding must be
-	 * solved in order to make the request of resources satisfiables.
-	 *
-	 * The method takes the resource name we want to bind (i.e. "cluster"),
-	 * the ID of the destination system resource, and the source resource ID
-	 * (optional). Then it substitutes "cluster+[source ID]" with
-	 * "cluster+[dest ID]" and get the descriptor (list of) returned by
-	 * ResourceAccounter.
-	 *
-	 * If the source ID is left blank, the method will bind ALL the
-	 * resource path containing "cluster" or "clusterN" to the descriptor
-	 * referenced by such path, with the destination resource ID in
-	 * the system.
-	 *
-	 * @param rsrc_name The resource name we want to bind
-	 * @param src_ID Recipe resource name source ID
-	 * @param dst_ID System resource name destination ID
-	 * @param usages_bind A map of resource usages to return with the field
-	 * "bind" of ResourceUsage objects filled by binding Resource descriptors
-	 * @param rsrc_path_unbound A resource path left to bind
-	 * @return An exit code (@see ExitCode_t)
-	 *
-	 * @note Use RSRC_ID_ANY if you want to bind the resource without care
-	 * about its ID.
-	 */
-	virtual ExitCode_t BindResource(std::string const & rsrc_name,
-			ResID_t src_ID,	ResID_t dst_ID,
-			UsagesMapPtr_t & usages_bind) = 0;
-
-	/**
 	 * @brief Current resource usages bound with the system resources
 	 *
 	 * This is the map of resource usages that should be built by the

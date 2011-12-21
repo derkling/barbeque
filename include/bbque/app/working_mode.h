@@ -165,12 +165,6 @@ public:
 	}
 
 	/**
-	 * @see WorkingModeStatusIF
-	 */
-	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
-			ResID_t dst_ID, UsagesMapPtr_t & usages_bind);
-
-	/**
 	 * @see WorkingModeConfIF
 	 */
 	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
@@ -219,12 +213,6 @@ public:
 	inline UsagesMapPtr_t GetResourceBinding() const {
 		return sys_usages;
 	}
-
-	/**
-	 * @see WorkingModeConfIF
-	 */
-	ExitCode_t SetResourceBinding(UsagesMapPtr_t & usages_bind);
-
 
 	/**
 	 * @brief Clear the scheduled resource binding
