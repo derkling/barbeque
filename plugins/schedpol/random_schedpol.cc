@@ -75,7 +75,6 @@ void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
 	ba::AwmPtrList_t::const_iterator it;
 	ba::AwmPtrList_t::const_iterator end;
 	ba::AwmPtrList_t const *awms;
-	br::UsagesMapPtr_t pum;
 	uint32_t selected_awm;
 	uint32_t selected_cluster;
 	uint8_t cluster_count;
@@ -103,14 +102,14 @@ void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
 	selected_cluster = dist(rng_engine) % cluster_count;
 	logger->Debug("Scheduling EXC [%s] on Cluster [%d of %d]",
 			papp->StrId(), selected_cluster, ra.Total(RSRC_CLUSTER));
-	bindResult = (*it)->BindResource("cluster", RSRC_ID_ANY, selected_cluster, pum);
+	bindResult = (*it)->BindResource("cluster", RSRC_ID_ANY, selected_cluster);
 	if (bindResult != ba::WorkingMode::WM_SUCCESS) {
 		logger->Error("Resource biding for EXC [%s] FAILED", papp->StrId());
 		return;
 	}
 
 	// Schedule the selected AWM on the selected Cluster
-	papp->ScheduleRequest((*it), pum, ra_view);
+	papp->ScheduleRequest((*it), ra_view);
 
 }
 
