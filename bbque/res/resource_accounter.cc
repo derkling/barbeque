@@ -239,11 +239,12 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 
 	// Check availability for each ResourceUsage object
 	for (; usages_it != usages_end; ++usages_it) {
+		std::string const & rsrc_path(usages_it->first);
 		uint64_t avail = Available(usages_it->second, vtok, papp);
 		if (avail < usages_it->second->GetAmount()) {
 			logger->Debug("ChkAvail: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
-					usages_it->first.c_str(),
+					rsrc_path.c_str(),
 					usages_it->second->GetAmount(),
 					avail,
 					Total(usages_it->second));
@@ -621,18 +622,19 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end;	++usages_it) {
 		// Current required resource (ResourceUsage object)
+		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t pusage(usages_it->second);
 		logger->Debug("Booking: [%s] requires resource {%s}",
-				papp->StrId(), usages_it->first.c_str());
+				papp->StrId(), rsrc_path.c_str());
 
 		// Do booking for this resource
 		result = DoResourceBooking(papp, pusage, vtok);
 		if (result != RA_SUCCESS)  {
 			logger->Crit("Booking: unexpected fail! "
 					"%s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(), pusage->GetAmount(),
-				Available(usages_it->first, vtok, papp),
-				Total(usages_it->first));
+				rsrc_path.c_str(), pusage->GetAmount(),
+				Available(rsrc_path, vtok, papp),
+				Total(rsrc_path));
 
 			// Print the report table of the resource assignments
 			PrintStatusReport();
@@ -640,9 +642,9 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 
 		assert(result == RA_SUCCESS);
 		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
-				usages_it->first.c_str(), pusage->GetAmount(),
-				Available(usages_it->first, vtok, papp),
-				Total(usages_it->first));
+				rsrc_path.c_str(), pusage->GetAmount(),
+				Available(rsrc_path, vtok, papp),
+				Total(rsrc_path));
 	}
 }
 
@@ -748,10 +750,11 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 
 	// Release the all the resources hold by the Application/EXC
 	for (; usages_it != usages_end; ++usages_it) {
+		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t pusage(usages_it->second);
 		UndoResourceBooking(papp, pusage, vtok);
 		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
-				usages_it->first.c_str(), pusage->GetAmount());
+				rsrc_path.c_str(), pusage->GetAmount());
 	}
 }
 
