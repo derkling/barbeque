@@ -240,14 +240,16 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	// Check availability for each ResourceUsage object
 	for (; usages_it != usages_end; ++usages_it) {
 		std::string const & rsrc_path(usages_it->first);
-		uint64_t avail = Available(usages_it->second, vtok, papp);
-		if (avail < usages_it->second->GetAmount()) {
+		UsagePtr_t const & pusage(usages_it->second);
+	
+		uint64_t avail = Available(pusage, vtok, papp);
+		if (avail < pusage->GetAmount()) {
 			logger->Debug("ChkAvail: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
 					rsrc_path.c_str(),
-					usages_it->second->GetAmount(),
+					pusage->GetAmount(),
 					avail,
-					Total(usages_it->second));
+					Total(pusage));
 			return RA_ERR_USAGE_EXC;
 		}
 	}
