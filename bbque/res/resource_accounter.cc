@@ -661,15 +661,15 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	// Get the list of resource binds
 	ResourcePtrListIterator_t it_bind(pusage->binds.begin());
 	ResourcePtrListIterator_t end_it(pusage->binds.end());
-	while ((usage_value > 0) && (it_bind != end_it)) {
+	while ((usage_val > 0) && (it_bind != end_it)) {
 		// If the current resource bind has enough availability, reserve the
 		// whole quantity requested here. Otherwise split it in more "sibling"
 		// resource binds.
 		uint64_t availab = (*it_bind)->Available(vtok);
-		if (usage_value < availab)
-			usage_value -= (*it_bind)->Acquire(papp, usage_value, vtok);
+		if (usage_val < availab)
+			usage_val -= (*it_bind)->Acquire(papp, usage_val, vtok);
 		else
-			usage_value -=
+			usage_val -=
 				(*it_bind)->Acquire(papp, availab, vtok);
 
 		// Add the resource to the set of resources used in the view
@@ -681,7 +681,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 	// Critical error. This means that the availability of resources
 	// mismatches the one checked in the scheduling phase
-	if (usage_value != 0)
+	if (usage_val != 0)
 		return RA_ERR_USAGE_EXC;
 
 	return RA_SUCCESS;
