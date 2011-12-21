@@ -76,25 +76,24 @@ public:
 	 * @brief Request to re-schedule this application into a new configuration
 	 *
 	 * The Optimizer call this method when an AWM is selected for this
-	 * application to verify if it could be scheduled, i.e. resources are
-	 * available, and eventually to update the application status.
+	 * application to verify if it could be scheduled, i.e. bound resources
+	 * are available, and eventually to update the application status.
 	 *
 	 * First the application verify resources availability. If the quality and
 	 * amount of required resources could be satisfied, the application is
 	 * going to be re-scheduled otherwise, it is un-scheduled.
 	 *
 	 * @param awm Next working mode scheduled for the application
-	 * @param resource_set The map of resources on which bind the working mode
 	 * @param tok The token referencing the resources state view
 	 *
 	 * @return The method return an exit code representing the decision taken:
-	 * APP_WM_ACCEPTED if the specified working mode could be scheduled for
-	 * this application, APP_WM_REJECTED if the working mode could not beed
+	 * APP_WM_ACCEPTED if the specified working mode can be scheduled for
+	 * this application, APP_WM_REJECTED if the working mode cannot not be
 	 * scheduled. If the application is currently disabled this call returns
 	 * always APP_DISABLED.
 	 */
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
-			UsagesMapPtr_t & resource_set, RViewToken_t tok) = 0;
+			RViewToken_t tok) = 0;
 
 	/**
 	 * @brief Terminate this EXC by releasing all resources.
