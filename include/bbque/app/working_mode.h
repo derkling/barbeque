@@ -171,7 +171,50 @@ public:
 			ResID_t dst_ID, UsagesMapPtr_t & usages_bind);
 
 	/**
+	 * @see WorkingModeConfIF
+	 */
+	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
+			ResID_t dst_ID);
+
+	/**
 	 * @see WorkingModeStatusIF
+	 */
+	inline UsagesMapPtr_t GetSchedResourceBinding() const {
+		return sched_binds;
+	}
+
+	/**
+	 * @brief Set the resource binding to schedule
+	 *
+	 * This binds the map of resource usages pointed by "sched_binds" to the
+	 * WorkingMode. The map will contain ResourceUsage objects specifying the
+	 * the amount of resource requested (value) and a list of system resource
+	 * descriptors to which bind the request.
+	 *
+	 * This method is invoked during the scheduling step to track the set of
+	 * resources to acquire at the end of the synchronization step.
+	 *
+	 * @return WM_SUCCESS, or WM_RSRC_MISS_BIND if some bindings are missing
+	 */
+	ExitCode_t SetSchedResourceBinding();
+
+	/**
+	 * @see WorkingModeConfIF
+	 */
+	inline void ClearSchedResourceBinding() {
+		sched_binds = UsagesMapPtr_t();
+	}
+
+	/**
+	 * @brief Get the map of scheduled resource usages
+	 *
+	 * This method returns the map of the resource usages built through the
+	 * mandatory resource binding, in charge of the scheduling policy.
+	 *
+	 * It is called by the ResourceAccounter to scroll through the list of
+	 * resources bound to the working mode assigned.
+	 *
+	 * @return A shared pointer to a map of ResourceUsage objects
 	 */
 	inline UsagesMapPtr_t GetResourceBinding() const {
 		return sys_usages;
@@ -182,8 +225,11 @@ public:
 	 */
 	ExitCode_t SetResourceBinding(UsagesMapPtr_t & usages_bind);
 
+
 	/**
-	 * @brief Clear the current binding with the system resources
+	 * @brief Clear the scheduled resource binding
+	 *
+	 * The method reverts the effects of ScheduleResourceBinding()
 	 */
 	inline void ClearResourceBinding() {
 		sys_usages->clear();
@@ -231,13 +277,18 @@ private:
 	/** The QoS value associated to the working mode */
 	float value;
 
-	/** The set of resources usages into the recipe  */
+	/** The map of resources usages from the recipe  */
 	UsagesMap_t recp_usages;
 
 	/**
-	 * The set of the system resources used by the working mode
-	 * @see SetResourceBinding()
-	 */
+	 * The temporary map of resource bindings.
+	 * This is built by the BindResource calls */
+	UsagesMapPtr_t sched_binds;
+
+	/**
+	 * The map of the resource bindings allocated for the working mode.
+	 * This is set by ScheduleResourceBinding() as a commit of the bindings
+	 * performed, reasonably by the scheduling policy.	 */
 	UsagesMapPtr_t sys_usages;
 
 	/** The overheads coming from switching to other working modes */

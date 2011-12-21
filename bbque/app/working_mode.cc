@@ -259,6 +259,131 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	return WM_SUCCESS;
 }
 
+WorkingMode::ExitCode_t WorkingMode::BindResource(
+		std::string const & rsrc_name,
+		ResID_t src_ID,
+		ResID_t dst_ID) {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	UsagesMap_t::iterator usage_it, it_end;
+
+	// Null name check
+	if (rsrc_name.empty()) {
+		logger->Error("Binding: Missing resource name");
+		return WM_RSRC_ERR_NAME;
+	}
+
+	// Allocate a new temporary resource usages map
+	UsagesMapPtr_t temp_binds(UsagesMapPtr_t(new UsagesMap_t()));
+
+	// If this is the first binding action, the resource paths to consider
+	// must be taken from the recipe resource map. Converserly, if a previous
+	// call to this method has been performed, a map of resource usages to
+	// schedule has been created. Thus we must continue the binding...
+	if (!sched_binds) {
+		usage_it = recp_usages.begin();
+		it_end = recp_usages.end();
+	}
+	else {
+		usage_it = sched_binds->begin();
+		it_end = sched_binds->end();
+	}
+
+	// Proceed with the resource binding...
+	for (; usage_it != it_end; ++usage_it) {
+		UsagePtr_t & rcp_pusage(usage_it->second);
+		std::string const & rcp_path(usage_it->first);
+
+		// Replace resource name+src_ID with resource_name+dst_ID in the
+		// resource path
+		std::string bind_path(
+				ReplaceResourceID(rcp_path, rsrc_name, src_ID, dst_ID));
+		logger->Debug("Binding:	'recipe' [%s] => 'bbque' [%s]",
+				rcp_path.c_str(), bind_path.c_str());
+
+		// Create a new ResourceUsage object and set the binding list
+		UsagePtr_t bind_pusage(new ResourceUsage(rcp_pusage->GetAmount()));
+		bind_pusage->SetBindingList(ra.GetResources(bind_path));
+		assert(!bind_pusage->EmptyBindingList());
+
+		// Insert the bound resource into the temporary resource usages map
+		temp_binds->insert(std::pair<std::string,
+					UsagePtr_t>(bind_path, bind_pusage));
+	}
+
+	// Update the resource usages map to schedule
+	sched_binds = temp_binds;
+
+	// Debug messages
+	DB(
+		usage_it = sched_binds->begin();
+		it_end = sched_binds->end();
+		for (; usage_it != it_end; ++usage_it) {
+			UsagePtr_t & pusage(usage_it->second);
+			std::string const & rcp_path(usage_it->first);
+
+			logger->Debug("Binding: {%s} [amount = %llu #binds = %d]",
+					rcp_path->first.c_str(), pusage->GetAmount(),
+					pusage->GetBindingList().size());
+		}
+	);
+
+	// Are all the resource usages bound ?
+	if (recp_usages.size() < sched_binds->size())
+		return WM_RSRC_MISS_BIND;
+
+	return WM_SUCCESS;
+}
+
+
+WorkingMode::ExitCode_t WorkingMode::SetSchedResourceBinding() {
+	ClustersBitSet clust_tmp;
+
+	// The binding map must have the same size of resource usages map built
+	// from the recipe
+	if (!sched_binds || (sched_binds->size() != recp_usages.size()))
+		return WM_RSRC_MISS_BIND;
+
+	// Init the iterators for the maps
+	UsagesMap_t::iterator bind_it(sched_binds->begin());
+	UsagesMap_t::iterator end_bind(sched_binds->end());
+	UsagesMap_t::iterator recp_it(recp_usages.begin());
+	UsagesMap_t::iterator end_recp(recp_usages.end());
+
+	// Check the correctness of the binding
+	for(; bind_it != end_bind, recp_it != end_recp; ++recp_it, ++bind_it) {
+		std::string const & bind_tmpl(PathTemplate(bind_it->first));
+		std::string const & recp_tmpl(PathTemplate(recp_it->first));
+
+		// A mismatch of path template means an error
+		if (bind_tmpl.compare(recp_tmpl) != 0) {
+			logger->Error("SetBinding: %s resource path mismatch");
+			return WM_RSRC_MISS_BIND;
+		}
+
+		// Retrieve the bound cluster[s]
+		ResID_t cl_id = GetResourceID(bind_tmpl, "cluster");
+		if (cl_id == RSRC_ID_NONE)
+			continue;
+
+		// Set the bit in the clusters bitset
+		logger->Debug("SetBinding: Bound into cluster %d", cl_id);
+		clust_tmp.set(cl_id);
+	}
+
+	// Update the clusters bitset
+	clusters.prev = clusters.curr;
+	clusters.curr = clust_tmp;
+
+	// Cluster set changed?
+	clusters.changed = clusters.prev != clusters.curr;
+
+	// Set the new binding / resource usages map
+	sys_usages = sched_binds;
+	sched_binds.reset();
+
+	return WM_SUCCESS;
+}
+
 
 WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(
 		UsagesMapPtr_t & bindings) {

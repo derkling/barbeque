@@ -163,6 +163,11 @@ public:
 
 	/**
 	 * @brief Current resource usages bound with the system resources
+	 *
+	 * This is the map of resource usages that should be built by the
+	 * scheduling policy. If the method returns a null pointer then the
+	 * resources have been set for being allocated yet.
+	 *
 	 * @return A map of ResourceUsage objects
 	 */
 	virtual UsagesMapPtr_t GetResourceBinding() const = 0;
