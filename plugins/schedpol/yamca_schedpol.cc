@@ -270,6 +270,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 
 
 void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
+	Application::ExitCode_t app_result;
 	logger->Debug(
 			"____________________| Scheduling entities |____________________");
 
@@ -281,7 +282,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
 		AppPtr_t & papp = (se_it->second).first;
-		AwmPtr_t & eval_awm = (se_it->second).second;
+		AwmPtr_t const & eval_awm((se_it->second).second);
 
 		// Check a set of conditions accordingly to skip current
 		// application/EXC
@@ -292,26 +293,15 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 				papp->StrId(),
 				eval_awm->Id());
 
-		// Get the resource binding of the current AWM
-		UsageAttrPtr_t pattr_usg = std::static_pointer_cast<UsagesAttribute_t>
-				(eval_awm->GetAttribute(SCHEDULER_POLICY_NAME, "binding"));
-		assert(pattr_usg->resources->size() ==
-				eval_awm->ResourceUsages().size());
-
 		// Schedule the application in the working mode just evaluated
-		Application::ExitCode_t result =
-			papp->ScheduleRequest(eval_awm, pattr_usg->resources,
-					rsrc_view_token);
-
-		// Clear the resource binding map from the AWM attributes
-		eval_awm->ClearAttribute(SCHEDULER_POLICY_NAME);
+		app_result = papp->ScheduleRequest(eval_awm, rsrc_view_token);
 
 		// Debugging messages
-		if (result != Application::APP_WM_ACCEPTED) {
+		if (app_result != Application::APP_WM_ACCEPTED) {
 			logger->Debug("Selecting: [%s] AWM{%d} rejected ! [ret %d]",
 							papp->StrId(),
 							eval_awm->Id(),
-							result);
+							app_result);
 			continue;
 		}
 
@@ -519,6 +509,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		AwmPtr_t const & wm,
 		int cl_id,
 		float & cont_level) {
+	WorkingMode::ExitCode_t wm_result;
 
 	// Safety data check
 	if (!wm) {
@@ -529,28 +520,19 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		return SCHED_ERROR;
 	}
 
-	// Attribute for the keeping track of the resource binding
-	UsageAttrPtr_t pattr_usg(
-			new UsagesAttribute_t(SCHEDULER_POLICY_NAME, "binding"));
-	pattr_usg->resources = UsagesMapPtr_t(new UsagesMap_t());
-
 	// Binding of the resources requested by the working mode into the current
-	// cluster.
-	// Note: No mult-cluster allocation supported yet!
+	// cluster. Note: No multi-cluster allocation supported yet!
 	logger->Debug("Contention level: Binding into cluster %d", cl_id);
-	WorkingMode::ExitCode_t result =
-		wm->BindResource("cluster", RSRC_ID_ANY, cl_id, pattr_usg->resources);
-	if (result == WorkingMode::WM_RSRC_MISS_BIND)
+	wm_result = wm->BindResource("cluster", RSRC_ID_ANY, cl_id);
+	if (wm_result == WorkingMode::WM_RSRC_MISS_BIND)
 		logger->Error("Contention level: {AWM %d} [cluster = %d]"
 				"Incomplete resources binding. %d / %d resources bound.",
-						wm->Id(),cl_id,	pattr_usg->resources->size(),
+						wm->Id(), cl_id, wm->GetSchedResourceBinding()->size(),
 						wm->ResourceUsages().size());
 
-	// Keep track of the resource binding map using attributes API
-	wm->SetAttribute(pattr_usg);
-
 	// Contention level
-	return ComputeContentionLevel(papp, pattr_usg->resources, cont_level);
+	return ComputeContentionLevel(papp, wm->GetSchedResourceBinding(),
+			cont_level);
 }
 
 

@@ -70,23 +70,6 @@ class YamcaSchedPol : public SchedulerPolicyIF {
 
 public:
 
-	/**
-	 * @struct UsagesAttribute_t
-	 *
-	 * Store a UsagesMap as attribute value to keep track of the resource
-	 * binding defined during the scheduling attempts
-	 */
-	typedef struct UsagesAttribute: public AttributesContainer::Attribute {
-		/** Constructor */
-		UsagesAttribute(std::string const & _ns, std::string const & _key):
-			Attribute(_ns, _key) {}
-		/** Attribute vale: a shared pointer to UsagesMap_t */
-		UsagesMapPtr_t resources;
-	} UsagesAttribute_t;
-
-	/** Shared pointer to UsagesAttribute_t */
-	typedef std::shared_ptr<UsagesAttribute_t> UsageAttrPtr_t;
-
 //----- static plugin interface
 
 	/**
