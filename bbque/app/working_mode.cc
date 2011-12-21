@@ -68,43 +68,43 @@ WorkingMode::~WorkingMode() {
 
 
 WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
-		std::string const & _res_path,
+		std::string const & rsrc_path,
 		uint64_t _value) {
 	// Check the total amount of resource
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	uint64_t rsrc_total_qty = ra.Total(_res_path);
+	uint64_t rsrc_total_qty = ra.Total(rsrc_path);
 
 	// Does the resource exist ?
 	if (rsrc_total_qty == 0) {
-		logger->Warn("AddResUsage: {%s} not found.", _res_path.c_str());
+		logger->Warn("AddResUsage: {%s} not found.", rsrc_path.c_str());
 		return WM_RSRC_NOT_FOUND;
 	}
 
 	// Is the usage value acceptable ? (below the total availability)
 	if (rsrc_total_qty < _value) {
 		logger->Warn("AddResUsage: {%s} usage value exceeds total (%d)",
-				_res_path.c_str(), rsrc_total_qty);
+				rsrc_path.c_str(), rsrc_total_qty);
 		return WM_RSRC_USAGE_EXCEEDS;
 	}
 
 	// Insert a new resource usage object in the map
 	UsagePtr_t pusage(UsagePtr_t(new ResourceUsage(_value)));
-	recp_usages.insert(std::pair<std::string, UsagePtr_t>(_res_path, pusage));
+	recp_usages.insert(std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
 
 	logger->Debug("AddResUsage: added {%s}\t[usage: %llu]",
-			_res_path.c_str(), _value);
+			rsrc_path.c_str(), _value);
 	return WM_SUCCESS;
 }
 
 
 uint64_t WorkingMode::ResourceUsageValue(
-		std::string const & _res_path) const {
+		std::string const & rsrc_path) const {
 	UsagePtr_t pusage;
 
-	if (IsPathTemplate(_res_path))
-		pusage = ResourceUsageTempRef(_res_path);
+	if (IsPathTemplate(rsrc_path))
+		pusage = ResourceUsageTempRef(rsrc_path);
 	else
-		pusage = ResourceUsageRef(_res_path);
+		pusage = ResourceUsageRef(rsrc_path);
 
 	// Resource not used by this working mode
 	if (!pusage)

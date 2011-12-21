@@ -122,15 +122,15 @@ public:
 
 	/**
 	 * @brief Set a resource usage
-	 * @param res_path Resource path
+	 * @param rsrc_path Resource path
 	 * @param value The usage value
 	 */
-	ExitCode_t AddResourceUsage(std::string const & res_path, uint64_t value);
+	ExitCode_t AddResourceUsage(std::string const & rsrc_path, uint64_t value);
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	uint64_t ResourceUsageValue(std::string const & res_path) const;
+	uint64_t ResourceUsageValue(std::string const & rsrc_path) const;
 
 	/**
 	 * @see WorkingModeStatusIF
@@ -268,7 +268,7 @@ private:
 	 * @return The ResourceUsage object from the binding map. If this is
 	 * missing, the recipe map is considered.
 	 */
-	UsagePtr_t ResourceUsageRef(std::string const & path) const;
+	UsagePtr_t ResourceUsageRef(std::string const & rsrc_path) const;
 };
 
 } // namespace app
