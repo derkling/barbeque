@@ -81,23 +81,21 @@ inline uint64_t ConvertValue(uint64_t value, std::string const & units) {
 inline std::string SplitAndPop(std::string & tail,
 		const char * pattern = ".") {
 	// Head of the path to return
-	std::string _head;
+	std::string head;
 
-	// Find the position of a  "_pattern" char in "tail"
+	// Find the position of a "pattern" char in "tail" and split the two parts
+	// of the string
 	size_t dot_pos = tail.find_first_of(pattern);
-
 	if (dot_pos != std::string::npos) {
-		// Split head and tail of the path
-		_head = tail.substr(0, dot_pos);
+		head = tail.substr(0, dot_pos);
 		tail = tail.substr(dot_pos + 1);
+		return head;
 	}
-	else {
-		// Head == path (i.e "mem0", "dma0", ...)
-		_head = tail;
-		tail.clear();
-	}
-	// The head
-	return _head;
+
+	// head == tail (i.e "mem0", "dma0", ...)
+	head = tail;
+	tail.clear();
+	return head;
 }
 
 /**
