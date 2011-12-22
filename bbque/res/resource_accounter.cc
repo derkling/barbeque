@@ -680,7 +680,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 		// Synchronization: booking according to scheduling decisions
 		if (sync_ssn.started) {
-			SyncResourceBooking(papp, rsrc, usage_val, vtok);
+			SyncResourceBooking(papp, rsrc, usage_val);
 			continue;
 		}
 
@@ -727,8 +727,7 @@ inline void ResourceAccounter::SchedResourceBooking(AppPtr_t const & papp,
 
 inline void ResourceAccounter::SyncResourceBooking(AppPtr_t const & papp,
 		ResourcePtr_t & rsrc,
-		uint64_t & usage_val,
-		RViewToken_t vtok) {
+		uint64_t & usage_val) {
 	// Skip the resource binding if the not assigned by the scheduler
 	uint64_t sched_usage = rsrc->ApplicationUsage(papp, sch_view_token);
 	if (sched_usage == 0)

@@ -509,10 +509,9 @@ private:
 	 * @param papp The Application/ExC using the resource
 	 * @param rsrc The resource descriptor of the resource binding
 	 * @param usage_val The amount of resource required
-	 * @param vtok The token referencing the resource state view
 	 */
 	void SyncResourceBooking(AppPtr_t const & papp, ResourcePtr_t & rsrc,
-			uint64_t & usage_val, RViewToken_t vtok);
+			uint64_t & usage_val);
 
 	/**
 	 * @brief Decrement the resource usages counts
