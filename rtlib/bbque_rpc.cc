@@ -25,12 +25,10 @@
  */
 
 #include "bbque/rtlib/bbque_rpc.h"
-
 #include "bbque/rtlib/rpc_fifo_client.h"
 #include "bbque/app/application.h"
 
 #include <cstdio>
-
 
 #define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_RPC  [DBG]", fmt)
 #define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_RPC  [INF]", fmt)
@@ -1033,18 +1031,54 @@ RTLIB_ExitCode_t BbqueRPC::Set(
 		const RTLIB_ExecutionContextHandler_t ech,
 		RTLIB_Constraint_t* constraints,
 		uint8_t count) {
-	//Silence "args not used" warning.
-	(void)ech;
-	(void)constraints;
-	(void)count;
+	RTLIB_ExitCode_t result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Constraining EXC [%p] "
+				"(Error: EXC not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	// Calling the low-level enable function
+	result = _Set(prec, constraints, count);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Constraining EXC [%p:%s] FAILED "
+				"(Error %d: %s)\n"),
+				(void*)ech, prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
+		return RTLIB_EXC_ENABLE_FAILED;
+	}
 
 	return RTLIB_OK;
 }
 
 RTLIB_ExitCode_t BbqueRPC::Clear(
 		const RTLIB_ExecutionContextHandler_t ech) {
-	//Silence "args not used" warning.
-	(void)ech;
+	RTLIB_ExitCode_t result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Clear constraints for EXC [%p] "
+				"(Error: EXC not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	// Calling the low-level enable function
+	result = _Clear(prec);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Clear contraints for EXC [%p:%s] FAILED "
+				"(Error %d: %s)\n"),
+				(void*)ech, prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
+		return RTLIB_EXC_ENABLE_FAILED;
+	}
 
 	return RTLIB_OK;
 }

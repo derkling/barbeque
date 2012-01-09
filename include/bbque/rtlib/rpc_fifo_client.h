@@ -63,13 +63,10 @@ protected:
 
 	RTLIB_ExitCode_t _ScheduleRequest(pregExCtx_t prec);
 
-	RTLIB_ExitCode_t _Set(
-			const RTLIB_ExecutionContextHandler_t ech,
-			RTLIB_Constraint* constraints,
-			uint8_t count);
+	RTLIB_ExitCode_t _Set(pregExCtx_t prec,
+			RTLIB_Constraint* constraints, uint8_t count);
 
-	RTLIB_ExitCode_t _Clear(
-			const RTLIB_ExecutionContextHandler_t ech);
+	RTLIB_ExitCode_t _Clear(pregExCtx_t prec);
 
 	void _Exit();
 

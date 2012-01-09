@@ -428,13 +428,10 @@ protected:
 
 	virtual RTLIB_ExitCode_t _Disable(pregExCtx_t prec) = 0;
 
-	virtual RTLIB_ExitCode_t _Set(
-		const RTLIB_ExecutionContextHandler_t ech,
-			RTLIB_Constraint_t* constraints,
-			uint8_t count) = 0;
+	virtual RTLIB_ExitCode_t _Set(pregExCtx_t prec,
+			RTLIB_Constraint_t* constraints, uint8_t count) = 0;
 
-	virtual RTLIB_ExitCode_t _Clear(
-			const RTLIB_ExecutionContextHandler_t ech) = 0;
+	virtual RTLIB_ExitCode_t _Clear(pregExCtx_t prec) = 0;
 
 	virtual RTLIB_ExitCode_t _ScheduleRequest(pregExCtx_t prec) = 0;
 

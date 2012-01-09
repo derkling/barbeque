@@ -498,28 +498,87 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Disable(pregExCtx_t prec) {
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
-RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(
-			const RTLIB_ExecutionContextHandler_t ech,
-			RTLIB_Constraint_t* constraints,
-			uint8_t count) {
-	//Silence "args not used" warning.
-	(void)ech;
-	(void)constraints;
-	(void)count;
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
+			RTLIB_Constraint_t* constraints, uint8_t count) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
+	// Here the message is dynamically allocate to make room for a variable
+	// number of constraints...
+    rpc_fifo_EXC_SET_t *prf_EXC_SET;
+	size_t msg_size;
 
-	fprintf(stderr, FMT_WRN("EXC Set: not yet implemeted\n"));
+	// At least 1 constraint it is expected
+	assert(count);
 
-	return RTLIB_OK;
+	// Allocate the buffer to hold all the contraints
+	msg_size = FIFO_PKT_SIZE(EXC_SET) + 
+			((count-1)*sizeof(RTLIB_Constraint_t));
+	prf_EXC_SET = (rpc_fifo_EXC_SET_t*)::malloc(msg_size);
+
+
+	// Init FIFO header
+	prf_EXC_SET->hdr.fifo_msg_size = msg_size;
+	prf_EXC_SET->hdr.rpc_msg_offset = FIFO_PYL_OFFSET(EXC_SET);
+	prf_EXC_SET->hdr.rpc_msg_type = RPC_EXC_SET;
+
+	// Init RPC header
+	prf_EXC_SET->pyl.hdr.typ = RPC_EXC_SET;
+	prf_EXC_SET->pyl.hdr.token = RpcMsgToken();
+	prf_EXC_SET->pyl.hdr.app_pid = chTrdPid;
+	prf_EXC_SET->pyl.hdr.exc_id = prec->exc_id;
+
+	DB(fprintf(stderr, FMT_DBG("Copying [%d] constraints using buffer @%p [%d] Bytes...\n"),
+				count, &(prf_EXC_SET->pyl.constraints), (count)*sizeof(RTLIB_Constraint_t)));
+
+	// Init RPC header
+	prf_EXC_SET->pyl.count = count;
+	::memcpy(&(prf_EXC_SET->pyl.constraints), constraints,
+			(count)*sizeof(RTLIB_Constraint_t));
+
+	// Sending RPC Request
+   	volatile rpc_fifo_EXC_SET_t & rf_EXC_SET = (*prf_EXC_SET);
+	DB(fprintf(stderr, FMT_DBG("Set [%d] constraints on EXC [%d:%d]...\n"),
+				count, rf_EXC_SET.pyl.hdr.app_pid,
+				rf_EXC_SET.pyl.hdr.exc_id));
+	RPC_FIFO_SEND(EXC_SET);
+
+	// Clean-up the FIFO message
+	::free(prf_EXC_SET);
+
+	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
+
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return (RTLIB_ExitCode_t)chResp.result;
 }
 
-RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Clear(
-			const RTLIB_ExecutionContextHandler_t ech) {
-	//Silence "args not used" warning.
-	(void)ech;
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Clear(pregExCtx_t prec) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
+	rpc_fifo_EXC_CLEAR_t rf_EXC_CLEAR = {
+		{
+			FIFO_PKT_SIZE(EXC_CLEAR),
+			FIFO_PYL_OFFSET(EXC_CLEAR),
+			RPC_EXC_CLEAR
+		},
+		{
+			{
+				RPC_EXC_CLEAR,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
+		}
+	};
 
-	fprintf(stderr, FMT_WRN("EXC Clear: not yet implemeted\n"));
+	DB(fprintf(stderr, FMT_DBG("Clear constraints for EXC [%d:%d]...\n"),
+				rf_EXC_CLEAR.pyl.hdr.app_pid,
+				rf_EXC_CLEAR.pyl.hdr.exc_id));
 
-	return RTLIB_OK;
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_CLEAR);
+
+	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
+
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return (RTLIB_ExitCode_t)chResp.result;
 }
 
 RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
