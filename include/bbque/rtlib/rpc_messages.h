@@ -161,6 +161,25 @@ typedef struct rpc_msg_EXC_UNREGISTER {
 	char exc_name[RTLIB_EXC_NAME_LENGTH];
 } rpc_msg_EXC_UNREGISTER_t;
 
+/**
+ * @brief Command to set constraints on an execution context.
+ */
+typedef struct rpc_msg_EXC_SET {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+	/** The count of following contraints */
+	uint8_t count;
+	/** The set of asserted contraints */
+	RTLIB_Constraint_t constraints;
+} rpc_msg_EXC_SET_t;
+
+/**
+ * @brief Command to clear constraints on an execution context.
+ */
+typedef struct rpc_msg_EXC_CLEAR {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+} rpc_msg_EXC_CLEAR_t;
 
 /**
  * @brief Command to start an execution context.
