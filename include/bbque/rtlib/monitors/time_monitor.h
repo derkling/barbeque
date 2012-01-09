@@ -32,6 +32,15 @@
 #include <memory>
 #include <mutex>
 
+/**
+ * @brief A TIME monitor
+ * @ingroup rtlib_sec04_mon_time
+ *
+ * This class is a specialization of the general monitor class, it provides
+ * tools to manage the time monitors.  In addition to the monitors with the
+ * complete gestion of the windows of old values it also offers a basically
+ * monitor without any advance features.
+ */
 class TimeMonitor : public Monitor <uint32_t> {
 public:
 
@@ -164,5 +173,17 @@ private:
 	void _stop(uint16_t id);
 
 };
+
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @defgroup rtlib_sec04_mon_time Time Monitoring
+ * @ingroup rtlib_sec04_mon
+ *
+ * ADD MORE DETAILS HERE (Time Monitoring)
+ *
+ */
 
 #endif /* BBQUE_TIME_MONITOR_H_ */

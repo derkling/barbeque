@@ -31,6 +31,7 @@ namespace bbque {
 
 /**
  * @brief The "Configuration" interface for the ApplicationManager.
+ * @ingroup sec03_am
  *
  * The interface exposes the ApplicationManager methods for applications
  * lifecycle manipulation.
@@ -194,4 +195,3 @@ public:
 } // namespace bbque
 
 #endif // BBQUE_APPLICATION_MANAGER_CONF_IF_H_
-

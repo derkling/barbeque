@@ -28,6 +28,13 @@
 
 #include "generic_window.h"
 
+/**
+ * @brief A THROUGHPUT data window
+ * @ingroup rtlib_sec04_mon_thgpt
+ *
+ * This class provides a window specifically created for the throughpput
+ * monitor.
+ */
 class ThroughputWindow : public GenericWindow <double> {
 public:
 

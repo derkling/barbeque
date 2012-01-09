@@ -65,6 +65,13 @@ namespace bac = boost::accumulators;
  */
 const uint16_t defaultWindowSize = 100;
 
+/**
+ * @brief A generic data window
+ * @ingroup rtlib_sec04_mon
+ *
+ * This class provides a general window able to contain different types of
+ * values and manage them by provided utility functions.
+ */
 template <typename dataType>
 class GenericWindow {
 

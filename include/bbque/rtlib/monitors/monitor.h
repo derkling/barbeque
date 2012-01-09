@@ -33,6 +33,13 @@
 
 #include "generic_window.h"
 
+/**
+ * @brief A generic monitor
+ * @ingroup rtlib_sec04_mon
+ *
+ * This class provides a general monitor which functions are common to many
+ * classes of metrics specific monitors such as time and throughput monitors.
+ */
 template <typename dataType>
 class Monitor {
 public:
@@ -196,5 +203,17 @@ template <typename dataType>
 inline void Monitor <dataType>::resetGoal(uint16_t id) {
 	goalList[id]->clear();
 }
+
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @defgroup rtlib_sec04_mon Application-Specific Monitoring Support
+ * @ingroup rtlib
+ *
+ * ADD MORE DETAILS HERE (Monitors)
+ *
+ */
 
 #endif /* BBQUE_MONITOR_H_ */

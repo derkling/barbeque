@@ -27,6 +27,12 @@
 
 #include "generic_window.h"
 
+/**
+ * @brief A TIME data window
+ * @ingroup rtlib_sec04_mon_time
+ *
+ * This class provides a window specifically created for the time monitor.
+ */
 class TimeWindow : public GenericWindow <uint32_t> {
 public:
 

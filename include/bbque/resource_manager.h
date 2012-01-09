@@ -46,6 +46,7 @@ namespace bbque {
 
 /**
  * @brief The class implementing the glue logic of Barbeque
+ * @ingroup sec04_rm
  *
  * This class provides the glue logic of the Barbeque RTRM. Its 'Go'
  * method represents the entry point of the run-time manager and it is
@@ -281,5 +282,19 @@ private:
 
 } // namespace bbque
 
-#endif // BBQUE_RESOURCE_MANAGER_H_
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
 
+/**
+ * @defgroup sec04_rm Resource Manager
+ *
+ * The ResourceManager is a BarbequeRTRM core module which provides the
+ * implementation of the Run-Time Resource Manager (RTRM), which is the main
+ * barbeque module implementing its glue code.
+ *
+ *
+ * ADD MORE DETAILS HERE
+ */
+
+#endif // BBQUE_RESOURCE_MANAGER_H_

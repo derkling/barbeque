@@ -31,6 +31,15 @@
 #include "monitor.h"
 #include "throughput_window.h"
 
+/**
+ * @brief A THROUGHPUT monitor
+ * @ingroup rtlib_sec04_mon_thgpt
+ *
+ * This class is a specialization of the general monitor class which provides
+ * tools to manage throughput monitors.  In addition to the monitors with the
+ * complete handling of previous old values, it also offers a basic monitor
+ * without any advanced feature.
+ */
 class ThroughputMonitor : public Monitor <double> {
 public:
 
@@ -153,5 +162,17 @@ private:
 	 */
 	void _stop(uint16_t id, const double &data);
 };
+
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @defgroup rtlib_sec04_mon_thgpt Throughput Monitoring
+ * @ingroup rtlib_sec04_mon
+ *
+ * ADD MORE DETAILS HERE (Throughput Monitoring)
+ *
+ */
 
 #endif /* BBQUE_THROUGHPUT_MONITOR_H_ */

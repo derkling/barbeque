@@ -25,6 +25,12 @@
 
 #include "monitor.h"
 
+/**
+ * @brief A MEMORY monitor
+ * @ingroup rtlib_sec04_mon_memory
+ *
+ * This class provides a monitor on application memory usage.
+ */
 class MemoryMonitor: public Monitor <uint32_t> {
 public:
 
@@ -68,5 +74,17 @@ public:
 	uint32_t extractMemoryUsage(uint16_t id);
 
 };
+
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @defgroup rtlib_sec04_mon_memory Memory Monitoring
+ * @ingroup rtlib_sec04_mon
+ *
+ * ADD MORE DETAILS HERE (Memory Monitoring)
+ *
+ */
 
 #endif /* BBQUE_MEMORY_MONITOR_H_ */

@@ -57,6 +57,7 @@ namespace bbque { namespace rtlib {
 
 /**
  * @brief The class implementing the RTLib plain API
+ * @ingroup rtlib_sec03_plain
  */
 class BbqueRPC {
 
@@ -746,5 +747,40 @@ private:
 // Clean-up locally used definitions
 #undef FMT_DBG
 
-#endif /* end of include guard: BBQUE_RPC_H_ */
 
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * \page rtlib The Barbeque Run-Time Library (RTLib)
+ *
+ * @section rtlib_sec01_ow RTLib Overall View
+ *
+ * The RTLib is the BarbequeRTRM component which provides the definition of
+ * the interface and related services exported by the Barbeque Run-Time
+ * library (RTLib). This library is provided to be linked by application that
+ * needs to interact with the Barbeque (BBQ) Run-Time Resource Manager (RTRM).
+ * The library not only defines the set of services accessable by
+ * applications, but allows also to mask the platform specific communication
+ * channel between controlled applications and the run-time manager. Moreover,
+ * the library provides some of the functional supports required for a proper
+ * integration of an application with the RTRM, thus offloading the
+ * application developer as much as possible from the Run-Time management
+ * required boilerplate integration code. Indeed, form an application
+ * developer perspective this library enforeces just the conformance to a
+ * properly define "Application Lifecycle", by specifying a set of calls and
+ * the order on which these should be performed.
+ *
+ * ADD MORE DETAILS HERE
+ *
+ * @section Run-Time Library Interfaces
+ *
+ * If you are interested into the integration of new applications with the
+ * BarbequeRTRM you could either one of these two interfaces, which correspond
+ * to different abstraction levels:
+ * -# @ref rtlib_sec02_aem
+ * -# @ref rtlib_sec03_plain
+ */
+
+#endif /* end of include guard: BBQUE_RPC_H_ */

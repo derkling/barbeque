@@ -34,6 +34,7 @@ namespace bbque { namespace plugins {
 
 /**
  * @brief A module interface to implement resource scheduler policies.
+ * @ingroup sec06_ym
  *
  * This class could be used to implement applications synchronization
  * alghoritms and heuristics.
@@ -138,5 +139,24 @@ public:
 
 } // namespace bbque
 
-#endif // BBQUE_SYNCHRONIZATION_POLICY_H_
 
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @ingroup sec06_ym
+ *
+ * The SynchronizationPolicyIF is an abstract class which defines the common
+ * interface between the BarequeRTRM and an applications status
+ * synchronization policy.
+ *
+ * Such a policy is used by the SynchronizationManager (YM) to identify the
+ * set of EXCs which should be synchronized. The policy should just select the
+ * EXCs and than pass them back to the YM which in turns performs the actual
+ * synchronization.
+ *
+ * ADD MORE DETAILS HERE
+ */
+
+#endif // BBQUE_SYNCHRONIZATION_POLICY_H_

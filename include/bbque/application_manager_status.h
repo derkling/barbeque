@@ -141,6 +141,7 @@ private:
 
 /**
  * @brief "Status" interface for ApplicationManager.
+ * @ingroup sec03_am
  */
 class ApplicationManagerStatusIF {
 
@@ -338,4 +339,3 @@ public:
 } // namespace bbque
 
 #endif // BBQUE_APPLICATION_MANAGER_STATUS_IF_H_
-

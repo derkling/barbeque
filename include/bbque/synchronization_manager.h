@@ -52,6 +52,7 @@ namespace bbque {
 
 /**
  * @brief The class implementing the glue logic for status synchronization.
+ * @ingroup sec06_ym
  */
 class SynchronizationManager {
 
@@ -64,6 +65,7 @@ public:
 		OK = 0,
 		ABORTED
 	} ExitCode_t;
+
 
 	/**
 	 * @brief Get a reference to the synchronization manager
@@ -84,6 +86,7 @@ public:
 	 * @brief Synchronize the application status
 	 */
 	ExitCode_t SyncSchedule();
+
 
 private:
 
@@ -175,5 +178,24 @@ private:
 
 } // namespace bbque
 
-#endif // BBQUE_SYNCHRONIZATION_MANAGER_H_
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
 
+/**
+ * @defgroup sec06_ym Synchronization Manager
+ *
+ * The SynchronizationManager is a BarbequeRTRM core module which
+ * provides a unified interface to access application state synchronization
+ * primitives. Once a new resource scheduling has been computed, the status of
+ * registered application should be updated according to the new schedule.
+ * This update requires to communicate each Execution Context its new assigned
+ * set of resources and to verify that the actual resources usage by each
+ * application match the schedule. Some of these operations are delagated to
+ * module plugins, while the core glue code for status synchronization is
+ * defined by this class
+ *
+ * ADD MORE DETAILS HERE
+ */
+
+#endif // BBQUE_SYNCHRONIZATION_MANAGER_H_
