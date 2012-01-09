@@ -105,6 +105,29 @@ public:
 	 */
 	ExitCode_t DestroyEXC(AppPid_t pid, uint8_t exc_id);
 
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	ExitCode_t SetConstraintsEXC(AppPtr_t papp,
+			RTLIB_Constraint_t *constraints, uint8_t count);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	ExitCode_t SetConstraintsEXC(AppPid_t pid, uint8_t exc_id,
+			RTLIB_Constraint_t *constraints, uint8_t count);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	ExitCode_t ClearConstraintsEXC(AppPtr_t papp);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	ExitCode_t ClearConstraintsEXC(AppPid_t pid, uint8_t exc_id);
+
 	/**
 	 * @see ApplicationManagerConfIF
 	 */

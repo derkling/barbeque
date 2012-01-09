@@ -87,6 +87,48 @@ public:
 	virtual ExitCode_t DestroyEXC(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
+	 * @brief Set constraints asserted on the specified EXC
+	 *
+	 * The AWMs of the specified EXC are enabled/disabled based on the
+	 * specified constraints.
+	 *
+	 * @param papp pointer to the application to enable
+	 */
+	virtual ExitCode_t SetConstraintsEXC(AppPtr_t papp,
+			RTLIB_Constraint_t *constraints, uint8_t count) = 0;
+
+	/**
+	 * @brief Set constraints asserted on the specified EXC
+	 *
+	 * The AWMs of the specified EXC are enabled/disabled based on the
+	 * specified constraints.
+	 *
+	 * @param pid the processi ID of the application
+	 * @param exc_id the Execution Context ID to enable
+	 */
+	virtual ExitCode_t SetConstraintsEXC(AppPid_t pid, uint8_t exc_id,
+			RTLIB_Constraint_t *constraints, uint8_t count) = 0;
+
+	/**
+	 * @brief Clear all the constraints asserted on the specified EXC
+	 *
+	 * If the specified EXC has some consraints, they are all removed and a
+	 * scheduler request event is generated.
+	 * @param papp pointer to the application to enable
+	 */
+	virtual ExitCode_t ClearConstraintsEXC(AppPtr_t papp) = 0;
+
+	/**
+	 * @brief Clear all the constratins asserted on the specified EXC
+	 *
+	 * If the specified EXC has some consraints, they are all removed and a
+	 * scheduler request event is generated.
+	 * @param pid the processi ID of the application
+	 * @param exc_id the Execution Context ID to enable
+	 */
+	virtual ExitCode_t ClearConstraintsEXC(AppPid_t pid, uint8_t exc_id) = 0;
+
+	/**
 	 * @brief Enable the EXC for resources scheduling
 	 *
 	 * Enable assignment of resources to the specified EXC.

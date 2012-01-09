@@ -823,6 +823,83 @@ ApplicationManager::DestroyEXC(AppPid_t pid) {
 
 
 /*******************************************************************************
+ *  EXC Constraints management
+ ******************************************************************************/
+
+
+ApplicationManager::ExitCode_t
+ApplicationManager::SetConstraintsEXC(AppPtr_t papp,
+			RTLIB_Constraint_t *constraints, uint8_t count) {
+	Application::ExitCode_t result;
+
+	// Define the contraints for this execution context
+	logger->Debug("Setting constraints on EXC [%s]...", papp->StrId());
+
+	while (count) {
+
+		result = papp->SetWorkingModeConstraint(constraints[0]);
+		if (result != Application::APP_SUCCESS)
+			return AM_ABORT;
+
+		// Move to next constraint
+		constraints++;
+		count--;
+	}
+
+	// TODO look for the need of a new schedule request
+	logger->Warn("TODO: check for re-schedule required");
+
+	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::SetConstraintsEXC(AppPid_t pid, uint8_t exc_id,
+			RTLIB_Constraint_t *constraints, uint8_t count) {
+	AppPtr_t papp;
+
+	// Find the required EXC
+	papp = GetApplication(Application::Uid(pid, exc_id));
+	if (!papp) {
+		logger->Warn("Set constraints for EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
+		assert(papp);
+		return AM_EXC_NOT_FOUND;
+	}
+
+	// Set constraints for this EXC
+	return SetConstraintsEXC(papp, constraints, count);
+
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::ClearConstraintsEXC(AppPtr_t papp) {
+
+	// Releaseing the contraints for this execution context
+	logger->Debug("Clearing constraints on EXC [%s]...", papp->StrId());
+	papp->ClearWorkingModeConstraints();
+
+	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::ClearConstraintsEXC(AppPid_t pid, uint8_t exc_id) {
+	AppPtr_t papp;
+
+	// Find the required EXC
+	papp = GetApplication(Application::Uid(pid, exc_id));
+	if (!papp) {
+		logger->Warn("Clear constraints for EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
+		assert(papp);
+		return AM_EXC_NOT_FOUND;
+	}
+
+	// Release all constraints for this EXC
+	return ClearConstraintsEXC(papp);
+
+}
+
+/*******************************************************************************
  *  EXC Enabling
  ******************************************************************************/
 
