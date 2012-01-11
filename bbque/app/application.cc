@@ -873,6 +873,15 @@ Application::ExitCode_t Application::SetResourceConstraint(
 				std::string const & _rsrc_path,
 				ResourceConstraint::BoundType_t _type,
 				uint64_t _value) {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+
+	// Check the existance of the resource
+	if (!ra.ExistResource(_rsrc_path)) {
+		logger->Warn("SetResourceConstraint: %s not found",
+				_rsrc_path.c_str());
+		return APP_RSRC_NOT_FOUND;
+	}
+
 	// Init a new constraint (if do not exist yet)
 	ConstrMap_t::iterator it_con(rsrc_constraints.find(_rsrc_path));
 	if (it_con == rsrc_constraints.end()) {

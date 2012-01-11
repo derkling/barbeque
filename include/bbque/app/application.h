@@ -422,7 +422,9 @@ private:
 	 * @param res_path Resource path
 	 * @param type The constraint type (@see ContraintType)
 	 * @param value The constraint value
-	 * @return An error code (@see ExitCode_t)
+	 *
+	 * @return APP_SUCCESS if success, APP_RSRC_NOT_FOUND if the resource
+	 * specified does not exist.
 	 */
 	ExitCode_t SetResourceConstraint(std::string const & res_path,
 			ResourceConstraint::BoundType_t type, uint64_t value);
