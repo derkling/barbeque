@@ -32,6 +32,9 @@
 
 #define RECIPE_NAMESPACE "rcp"
 
+// Maximum number of Application Working Modes manageable
+#define MAX_NUM_AWM 	255
+
 using bbque::plugins::LoggerIF;
 using bbque::utils::AttributesContainer;
 
