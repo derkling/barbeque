@@ -140,8 +140,9 @@ void Application::InitWorkingModes(AppPtr_t & papp) {
 
 	AwmMap_t::const_iterator it(wms.begin());
 	for (; it != wms.end(); ++it) {
+		AwmPtr_t const & rcp_awm(it->second);
 		// Copy the working mode and set the owner (current Application)
-		AwmPtr_t app_awm(new WorkingMode((*(it->second).get())));
+		AwmPtr_t app_awm(new WorkingMode((*(rcp_awm).get())));
 		app_awm->SetOwner(papp);
 
 		// Insert the working mode into the structures
@@ -159,16 +160,17 @@ void Application::InitResourceConstraints() {
 
 	// For each static constraint on a resource make an assertion
 	for (; cons_it != end_cons; ++cons_it) {
+		std::string const & rsrc_path(cons_it->first);
+		ResourceConstrPtr_t const & rsrc_constr(cons_it->second);
+
 		// Lower bound
-		if ((cons_it->second)->lower > 0)
-				SetResourceConstraint(cons_it->first,
-						ResourceConstraint::LOWER_BOUND,
-						(cons_it->second)->lower);
+		if (rsrc_constr->lower > 0)
+				SetResourceConstraint(rsrc_path,
+						ResourceConstraint::LOWER_BOUND, rsrc_constr->lower);
 		// Upper bound
-		if ((cons_it->second)->upper > 0)
-				SetResourceConstraint(cons_it->first,
-						ResourceConstraint::UPPER_BOUND,
-						(cons_it->second)->upper);
+		if (rsrc_constr->upper > 0)
+				SetResourceConstraint(rsrc_path,
+						ResourceConstraint::UPPER_BOUND, rsrc_constr->upper);
 	}
 
 	logger->Debug("%d resource constraints from the recipe",

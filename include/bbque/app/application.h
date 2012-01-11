@@ -51,7 +51,7 @@ typedef std::shared_ptr<Application> AppPtr_t;
 /** Shared pointer to Recipe object */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
 /** Shared pointer to ResourceConstraint object */
-typedef std::shared_ptr<ResourceConstraint> ConstrPtr_t;
+typedef std::shared_ptr<ResourceConstraint> ResourceConstrPtr_t;
 /** Map of Resource constraints pointers, with the resource path as key*/
 typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
 /** Pair contained in the resource constraints map  */
