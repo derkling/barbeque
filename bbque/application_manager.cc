@@ -633,6 +633,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 			status_mtx[Application::DISABLED], std::defer_lock);
 	RecipeLoaderIF::ExitCode_t result;
 	RecipePtr_t rcp_ptr;
+	Application::ExitCode_t app_result;
 	AppPtr_t papp;
 
 	// Create a new descriptor
@@ -650,7 +651,15 @@ AppPtr_t ApplicationManager::CreateEXC(
 				papp->StrId(), _rcp_name.c_str());
 		return AppPtr_t();
 	}
-	papp->SetRecipe(rcp_ptr, papp);
+
+	// Set the recipe into the Application/EXC
+	app_result = papp->SetRecipe(rcp_ptr, papp);
+	if (app_result != Application::APP_SUCCESS) {
+		logger->Error("Create EXC [%s] FAILED "
+				"(Error: recipe rejected)",
+				papp->StrId());
+		return AppPtr_t();
+	}
 
 	// Save application descriptors
 	apps.insert(AppsMapEntry_t(papp->Pid(), papp));

@@ -170,7 +170,7 @@ public:
 	 * @note papp should be provided by ApplicationManager, which instances
 	 * the new Application descriptor
 	 */
-	void SetRecipe(RecipePtr_t & recipe, AppPtr_t & papp);
+	ExitCode_t SetRecipe(RecipePtr_t & recipe, AppPtr_t & papp);
 
 	/**
 	 * @see ApplicationStatuIF

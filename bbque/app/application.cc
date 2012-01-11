@@ -177,15 +177,23 @@ void Application::InitResourceConstraints() {
 			rsrc_constraints.size());
 }
 
-void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
-	// Set the recipe that the application will use
-	assert(_recipe.get() != NULL);
-	recipe = _recipe;
+Application::ExitCode_t
+Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
+	// Check if the recipe object is null
+	if (!_recipe) {
+		logger->Error("SetRecipe: null recipe object");
+		return APP_RECP_NULL;
+	}
 
-	// Init information got from the recipe
+	// Set the recipe that the application will use
+	recipe = _recipe;
+	// Set the static priority
 	priority = recipe->GetPriority();
+	// Set the working modes
 	InitWorkingModes(papp);
+	// Are there any resource constraints?
 	InitResourceConstraints();
+	// Specific attributes (i.e. plugin specific)
 	attributes = AttributesMap_t(recipe->attributes);
 
 	// Debug messages
@@ -194,6 +202,8 @@ void Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
 	logger->Info("%d constraints in the application.",
 			rsrc_constraints.size());
 	logger->Info("%d plugins specific attributes.", attributes.size());
+
+	return APP_SUCCESS;
 }
 
 AwmPtrList_t::iterator Application::FindWorkingModeIter(

@@ -71,6 +71,8 @@ public:
 		APP_SUCCESS = 0,
 		/** Application being DISABLED */
 		APP_DISABLED,
+		/** Null recipe object passed */
+		APP_RECP_NULL,
 		/** Application working mode not found */
 		APP_WM_NOT_FOUND,
 		/** Resource not found */
