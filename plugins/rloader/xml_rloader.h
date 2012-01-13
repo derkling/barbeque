@@ -31,6 +31,7 @@
 #include <ticpp.h>
 #include <tinyxml.h>
 
+#include "bbque/app/recipe.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/plugins/logger.h"
@@ -39,6 +40,7 @@
 
 using bbque::app::Application;
 using bbque::app::AppPtr_t;
+using bbque::app::AwmPtr_t;
 using bbque::app::Recipe;
 using bbque::app::WorkingMode;
 using bbque::utils::AttributesContainer;
@@ -47,10 +49,6 @@ using bbque::utils::AttributesContainer;
 struct PF_ObjectParams;
 
 namespace bbque { namespace plugins {
-
-/** Shared pointer to @ref WorkingMode*/
-typedef std::shared_ptr<WorkingMode> AwmPtr_t;
-
 
 // Return code for internal purpose
 #define __RSRC_SUCCESS 		0x0

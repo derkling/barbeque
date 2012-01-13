@@ -27,7 +27,6 @@
 
 #include "bbque/app/application.h"
 #include "bbque/app/constraints.h"
-#include "bbque/app/recipe.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
