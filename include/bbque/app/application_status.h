@@ -150,6 +150,8 @@ public:
 	 * choosed by the scheduler/optimizer module.
 	 */
 	struct SchedulingInfo_t {
+		/** The mutex to serialize access to scheduling info */
+		std::recursive_mutex mtx;
 		/** The current scheduled state */
 		State_t state;
 		/** The state before a sync has been required */

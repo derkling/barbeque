@@ -221,7 +221,7 @@ bool Application::_Disabled() const {
 }
 
 bool Application::Disabled() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _Disabled();
 }
 
@@ -231,7 +231,7 @@ bool Application::_Active() const {
 }
 
 bool Application::Active() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _Active();
 }
 
@@ -240,7 +240,7 @@ bool Application::_Synching() const {
 }
 
 bool Application::Synching() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _Synching();
 }
 
@@ -249,7 +249,7 @@ bool Application::_Blocking() const {
 }
 
 bool Application::Blocking() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _Blocking();
 }
 
@@ -258,7 +258,7 @@ Application::State_t Application::_State() const {
 }
 
 Application::State_t Application::State() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _State();
 }
 
@@ -267,7 +267,7 @@ Application::State_t Application::_PreSyncState() const {
 }
 
 Application::State_t Application::PreSyncState() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _PreSyncState();
 }
 
@@ -276,7 +276,7 @@ Application::SyncState_t Application::_SyncState() const {
 }
 
 Application::SyncState_t Application::SyncState() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _SyncState();
 }
 
@@ -285,7 +285,7 @@ AwmPtr_t const & Application::_CurrentAWM() const {
 }
 
 AwmPtr_t const & Application::CurrentAWM() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _CurrentAWM();
 }
 
@@ -294,11 +294,11 @@ AwmPtr_t const & Application::_NextAWM() const {
 }
 
 AwmPtr_t const & Application::NextAWM() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 	return _NextAWM();
 }
 
-// NOTE: this requires a lock on schedule_mtx
+// NOTE: this requires a lock on schedule.mtx
 void Application::SetSyncState(SyncState_t sync) {
 
 	logger->Debug("Changing sync state [%s, %d:%s => %d:%s]",
@@ -309,7 +309,7 @@ void Application::SetSyncState(SyncState_t sync) {
 	schedule.syncState = sync;
 }
 
-// NOTE: this requires a lock on schedule_mtx
+// NOTE: this requires a lock on schedule.mtx
 void Application::SetState(State_t state, SyncState_t sync) {
 	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	AppPtr_t papp = am.GetApplication(Uid());
@@ -368,7 +368,7 @@ void Application::SetState(State_t state, SyncState_t sync) {
 Application::ExitCode_t Application::Terminate() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
 	// Release resources
 	if (_CurrentAWM())
@@ -391,7 +391,7 @@ Application::ExitCode_t Application::Terminate() {
 
 Application::ExitCode_t Application::Enable() {
 	std::unique_lock<std::recursive_mutex>
-		state_ul(schedule_mtx, std::defer_lock);
+		state_ul(schedule.mtx, std::defer_lock);
 
 	// Enabling the execution context
 	logger->Debug("Enabling EXC [%s]...", StrId());
@@ -426,7 +426,7 @@ Application::ExitCode_t Application::Disable() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex>
-		state_ul(schedule_mtx, std::defer_lock);
+		state_ul(schedule.mtx, std::defer_lock);
 
 	// Not disabled applications could not be marked as READY
 	if (_Disabled()) {
@@ -455,7 +455,7 @@ Application::ExitCode_t Application::Disable() {
  *  EXC Optimization
  ******************************************************************************/
 
-// NOTE: this requires a lock on schedule_mtx
+// NOTE: this requires a lock on schedule.mtx
 Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 	bbque::ApplicationManager &am(bbque::ApplicationManager::GetInstance());
 	AppPtr_t papp = am.GetApplication(Uid());
@@ -579,7 +579,7 @@ Application::ExitCode_t Application::Unschedule() {
 
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		RViewToken_t vtok) {
-	std::unique_lock<std::recursive_mutex> schedule_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> schedule_ul(schedule.mtx);
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
 	AppPtr_t papp(awm->Owner());
@@ -657,7 +657,7 @@ Application::ExitCode_t Application::SetBlocked() {
 }
 
 Application::ExitCode_t Application::ScheduleCommit() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
 	// Ignoring applications disabled during a SYNC
 	if (_Disabled()) {
@@ -698,7 +698,7 @@ Application::ExitCode_t Application::ScheduleCommit() {
 }
 
 void Application::ScheduleAbort() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
 	// The abort must be performed only for SYNC App/ExC
 	if (!Synching()) {
@@ -718,7 +718,7 @@ void Application::ScheduleAbort() {
 }
 
 Application::ExitCode_t Application::ScheduleContinue() {
-	std::unique_lock<std::recursive_mutex> state_ul(schedule_mtx);
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
 	// Current AWM must be set
 	assert(schedule.awm);

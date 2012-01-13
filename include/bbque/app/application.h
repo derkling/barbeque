@@ -355,9 +355,6 @@ private:
 	/** Current scheduling informations */
 	SchedulingInfo_t schedule;
 
-	/** The mutex to serialize access to scheduling info */
-	std::recursive_mutex schedule_mtx;
-
 	/**
 	 * Recipe pointer for the current application instance.
 	 * At runtime we could manage many instances of the same application using
