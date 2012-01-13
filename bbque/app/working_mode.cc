@@ -53,7 +53,7 @@ WorkingMode::WorkingMode(uint8_t _id,
 
 	// Value must be positive
 	_value > 0 ?
-		value = _value: value = 0;
+		value.recpv = _value: value.recpv = 0;
 
 	// Get a logger
 	bp::LoggerIF::Configuration conf(AWM_NAMESPACE);

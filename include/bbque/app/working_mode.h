@@ -54,7 +54,7 @@ public:
 	 * @param app Application owning the working mode
 	 * @param id Working mode ID
 	 * @param name Working mode descripting name
-	 * @param value The user QoS value of the working mode
+	 * @param value The QoS value read from the recipe
 	 */
 	explicit WorkingMode(uint8_t id, std::string const & name,
 			float value);
@@ -102,22 +102,54 @@ public:
 	}
 
 	/**
-	 * @see WorkingModeStatusIF
+	 * @brief Return the value specified in the recipe
 	 */
-	inline float Value() const {
-		return value;
+	inline float RecipeValue() const {
+		return value.recpv;
 	}
 
 	/**
-	 * @see WorkingModeConfIF
+	 * @see WorkingModeStatusIF
 	 */
-	inline void SetValue(float user_value) {
+	inline float Value() const {
+		return value.normal;
+	}
+
+	/**
+	 * @brief Set the QoS value specified in the recipe
+	 *
+	 * The value is viewed as a kind of satisfaction level, from the user
+	 * perspective, about the execution of the application.
+	 *
+	 * @param r_value The QoS value of the working mode
+	 */
+	inline void SetRecipeValue(float r_value) {
 		// Value must be positive
-		if (user_value > 0) {
-			value = user_value;
+		if (r_value < 0) {
+			value.recpv = 0.0;
 			return;
 		}
-		value = 0.0;
+		value.recpv = r_value;
+	}
+
+	/**
+	 * @brief Set the normalized QoS value
+	 *
+	 * The value is viewed as a kind of satisfaction level, from the user
+	 * perspective, about the execution of the application.
+	 *
+	 * @param n_value The normalized QoS value of the working mode. It must
+	 * belong to range [0, 1].
+	 */
+	inline void SetNormalValue(float n_value) {
+		// Normalized value must be in [0, 1]
+		if ((n_value < 0.0) || (n_value > 1.0)) {
+			logger->Error("SetNormalValue: value not normalized (v = %2.2f)",
+					n_value);
+			value.normal = 0.0;
+			return;
+		}
+		value.normal = n_value;
 	}
 
 	/**
@@ -262,8 +294,18 @@ private:
 	/** A descriptive name */
 	std::string name;
 
-	/** The QoS value associated to the working mode */
-	float value;
+	/**
+	 * @struct WorkingModeValue
+	 *
+	 * Store information regarding the value of the AWM
+	 */
+	struct WorkingModeValue {
+		/** The QoS value associated to the working mode as specified in the
+		 * recipe */
+		float recpv;
+		/** The normalized QoS value associated to the working mode */
+		float normal;
+	} value;
 
 	/** The map of resources usages from the recipe  */
 	UsagesMap_t recp_usages;

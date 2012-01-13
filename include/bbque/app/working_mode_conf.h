@@ -38,18 +38,6 @@ class WorkingModeConfIF: public WorkingModeStatusIF {
 public:
 
 	/**
-	 * @brief Set the QoS value associated to the working mode
-	 *
-	 * The value is viewed as a kind of satisfaction level, from the user
-	 * perspective, about the execution of the application.
-	 * This method has thinked to allow (optional) changes of WM values, as a
-	 * consequence of changes of scheduling policy.
-	 *
-	 * @param value The QoS value of the working mode
-	 */
-	virtual void SetValue(float value) = 0;
-
-	/**
 	 * @brief Init a new transition overheads descriptor
 	 *
 	 * Create a new object TransitionOverheads managing the overhead
