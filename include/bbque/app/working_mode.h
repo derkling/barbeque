@@ -123,9 +123,9 @@ public:
 	/**
 	 * @brief Set a resource usage
 	 * @param rsrc_path Resource path
-	 * @param value The usage value
+	 * @param amount The usage amount
 	 */
-	ExitCode_t AddResourceUsage(std::string const & rsrc_path, uint64_t value);
+	ExitCode_t AddResourceUsage(std::string const & rsrc_path, uint64_t amount);
 
 	/**
 	 * @see WorkingModeStatusIF
