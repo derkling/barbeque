@@ -159,7 +159,7 @@ WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint8_t _dest_awm_id,
 		double _time) {
 	// Check the existance of the destination AWM
 	assert(owner->GetRecipe().get() != NULL);
-	if (!(owner->GetRecipe()->WorkingMode(_dest_awm_id))) {
+	if (!(owner->GetRecipe()->GetWorkingMode(_dest_awm_id))) {
 		logger->Warn("AddOvhead: AWM{%d} not found in {%s}",
 		             _dest_awm_id, owner->StrId());
 		return WM_NOT_FOUND;

@@ -190,7 +190,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 			awm_elem->GetAttribute("value", &wm_value, true);
 
 			// The awm ID must be unique!
-			if (recipe_ptr->WorkingMode(wm_id)) {
+			if (recipe_ptr->GetWorkingMode(wm_id)) {
 				logger->Warn("Skipping working mode %s [doubled ID found]",
 								wm_name.c_str());
 				awm_elem = awm_elem->NextSiblingElement("awm", false);

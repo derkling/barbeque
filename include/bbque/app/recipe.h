@@ -131,7 +131,7 @@ public:
 	 * @param id Working mode ID
 	 * @return A shared pointer to the application working mode searched
 	 */
-	AwmPtr_t WorkingMode(uint8_t id);
+	inline AwmPtr_t GetWorkingMode(uint8_t id) {
 
 	/**
 	 * @brief All the working modes defined into the recipe

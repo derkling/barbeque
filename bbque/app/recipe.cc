@@ -65,7 +65,6 @@ AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
 	return working_modes[_id];
 }
 
-AwmPtr_t Recipe::WorkingMode(uint8_t _id) {
 	// Find the working mode
 	AwmMap_t::iterator it(norm_working_modes.find(_id));
 	if (it == norm_working_modes.end())
