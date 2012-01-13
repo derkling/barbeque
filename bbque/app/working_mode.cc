@@ -64,6 +64,7 @@ WorkingMode::WorkingMode(uint8_t _id,
 WorkingMode::~WorkingMode() {
 	overheads.clear();
 	recp_usages.clear();
+	sys_usages->clear();
 }
 
 
