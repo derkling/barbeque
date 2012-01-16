@@ -50,6 +50,8 @@ typedef std::shared_ptr<Application> AppPtr_t;
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
 /** Map of shared pointers to WorkingMode */
 typedef std::map<uint8_t, AwmPtr_t> AwmMap_t;
+/** Vector of shared pointer to WorkingMode*/
+typedef std::vector<AwmPtr_t> AwmPtrVect_t;
 /** Shared pointer to Constraint object */
 typedef std::shared_ptr<ResourceConstraint> ConstrPtr_t;
 /** Map of Constraints pointers, with the resource path as key*/
@@ -112,7 +114,7 @@ public:
 	 * @param name Working mode descripting name
 	 * @param value The user QoS value of the working mode
 	 */
-	AwmPtr_t & AddWorkingMode(uint8_t id, std::string const & name,
+	AwmPtr_t const AddWorkingMode(uint8_t id, std::string const & name,
 					uint8_t value);
 
 	/**
@@ -132,6 +134,10 @@ public:
 	 * @return A shared pointer to the application working mode searched
 	 */
 	inline AwmPtr_t GetWorkingMode(uint8_t id) {
+		if (last_awm_id == 0)
+			return AwmPtr_t();
+		return working_modes[id];
+	}
 
 	/**
 	 * @brief All the working modes defined into the recipe
@@ -182,9 +188,11 @@ private:
 	/** Priority */
 	uint8_t priority;
 
-	/** The complete set of working modes descriptors defined in the recipe */
-	AwmMap_t working_modes;
+	/** Expected AWM ID */
+	uint8_t last_awm_id;
 
+	/** The complete set of working modes descriptors defined in the recipe */
+	AwmPtrVect_t working_modes;
 	/** The map of working modes after value normalization */
 	AwmMap_t norm_working_modes;
 

@@ -34,7 +34,8 @@ namespace bbque { namespace app {
 
 
 Recipe::Recipe(std::string const & name):
-	pathname(name) {
+	pathname(name),
+	last_awm_id(0) {
 
 	// Get a logger
 	std::string logger_name(RECIPE_NAMESPACE"." + name);
@@ -45,6 +46,7 @@ Recipe::Recipe(std::string const & name):
 	// Clear normalization info
 	memset(&norm, 0, sizeof(Recipe::AwmNormalInfo));
 	norm.min_value = UINT8_MAX;
+	working_modes.resize(MAX_NUM_AWM);
 }
 
 Recipe::~Recipe() {
@@ -53,23 +55,27 @@ Recipe::~Recipe() {
 	constraints.clear();
 }
 
-AwmPtr_t & Recipe::AddWorkingMode(uint8_t _id,
+AwmPtr_t const Recipe::AddWorkingMode(uint8_t _id,
 				std::string const & _name,
 				uint8_t _value) {
+	// Check if the AWMs are sequentially numbered
+	if (_id != last_awm_id) {
+		logger->Error("AddWorkingModes: Found ID = %d. Expected %d",
+				_id, last_awm_id);
+		return AwmPtr_t();
+	}
+
 	// Update info for supporting normalization
 	UpdateNormalInfo(_value);
 
-	// Insert a new working mode descriptor into the map
+	// Insert a new working mode descriptor into the vector
 	AwmPtr_t new_awm(new app::WorkingMode(_id, _name, _value));
-	working_modes.insert(std::pair<uint8_t, AwmPtr_t>(_id, new_awm));
-	return working_modes[_id];
-}
 
-	// Find the working mode
-	AwmMap_t::iterator it(norm_working_modes.find(_id));
-	if (it == norm_working_modes.end())
-		return AwmPtr_t();
-	return it->second;
+	// Insert the AWM descriptor into the vector
+	working_modes[_id] = new_awm;
+	++last_awm_id;
+
+	return working_modes[_id];
 }
 
 void Recipe::AddConstraint(std::string const & rsrc_path,
