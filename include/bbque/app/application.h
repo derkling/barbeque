@@ -56,8 +56,6 @@ typedef std::shared_ptr<ResourceConstraint> ResourceConstrPtr_t;
 typedef std::map<std::string, ConstrPtr_t> ConstrMap_t;
 /** Pair contained in the resource constraints map  */
 typedef std::pair<std::string, ConstrPtr_t> ConstrPair_t;
-/** Vector of shared pointer to WorkingMode*/
-typedef std::vector<AwmPtr_t> AwmPtrVect_t;
 
 
 /**
