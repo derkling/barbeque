@@ -116,14 +116,6 @@ public:
 					uint8_t value);
 
 	/**
-	 * @brief Remove an application working mode inserted
-	 * @param id Working mode ID
-	 */
-	inline void RemoveWorkingMode(uint8_t id) {
-		working_modes.erase(id);
-	}
-
-	/**
 	 * @brief Return an application working mode object by specifying
 	 * its identifying name
 	 *
