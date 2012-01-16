@@ -249,13 +249,16 @@ uint8_t XMLRecipeLoader::loadResources(ticpp::Element * _xml_elem,
 			// Parse the attributes from the resource element
 			std::string res_path = _curr_path;
 			result |= getResourceAttributes(res_elem, _wm, res_path);
+			if (result >= __RSRC_FORMAT_ERR)
+				return result;
 
 			// The current resource is a container of other resources,
 			// thus load the children resources recursively
-			if (!res_elem->NoChildren())
+			if (!res_elem->NoChildren()) {
 				result |= loadResources(res_elem, _wm, res_path);
-			if (result == __RSRC_FORMAT_ERR)
-				return result;
+				if (result >= __RSRC_FORMAT_ERR)
+					return result;
+			}
 
 			// Next resource
 			res_elem = res_elem->NextSiblingElement(false);
@@ -316,14 +319,17 @@ inline uint8_t XMLRecipeLoader::getResourceAttributes(
 	std::string res_units;
 	_res_elem->GetAttribute("units", &res_units, false);
 
-	// Convert the usage value accordingly to the units, and then append the
-	// request to the working mode.
-	if (res_usage > 0) {
-		res_usage = ConvertValue(res_usage, res_units);
-		return appendToWorkingMode(_wm, _res_path, res_usage);
+	// The usage requested must be > 0
+	if (!_res_elem->GetAttribute("qty").empty() && res_usage <= 0) {
+		logger->Error("Resource ""%s"": usage value not valid (%llu)",
+				_res_path.c_str(), res_usage);
+		return __RSRC_FORMAT_ERR;
 	}
 
-	return __RSRC_SUCCESS;
+	// Convert the usage value accordingly to the units, and then append the
+	// request to the working mode.
+	res_usage = ConvertValue(res_usage, res_units);
+	return appendToWorkingMode(_wm, _res_path, res_usage);
 }
 
 
