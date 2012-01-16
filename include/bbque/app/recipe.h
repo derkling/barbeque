@@ -48,8 +48,6 @@ class WorkingMode;
 typedef std::shared_ptr<Application> AppPtr_t;
 /** Shared pointer to Working Mode descriptor */
 typedef std::shared_ptr<WorkingMode> AwmPtr_t;
-/** Map of shared pointers to WorkingMode */
-typedef std::map<uint8_t, AwmPtr_t> AwmMap_t;
 /** Vector of shared pointer to WorkingMode*/
 typedef std::vector<AwmPtr_t> AwmPtrVect_t;
 /** Shared pointer to Constraint object */
@@ -123,7 +121,6 @@ public:
 	 */
 	inline void RemoveWorkingMode(uint8_t id) {
 		working_modes.erase(id);
-		norm_working_modes.erase(id);
 	}
 
 	/**
@@ -143,9 +140,10 @@ public:
 	 * @brief All the working modes defined into the recipe
 	 * @return A vector containing all the working modes
 	 */
-	inline AwmMap_t const & WorkingModesAll() {
+	inline AwmPtrVect_t const & WorkingModesAll() {
 		NormalizeValues();
-		return norm_working_modes;
+		working_modes.resize(last_awm_id);
+		return working_modes;
 	}
 
 	/**
@@ -193,8 +191,6 @@ private:
 
 	/** The complete set of working modes descriptors defined in the recipe */
 	AwmPtrVect_t working_modes;
-	/** The map of working modes after value normalization */
-	AwmMap_t norm_working_modes;
 
 	/** Static constraints included in the recipe */
 	ConstrMap_t constraints;

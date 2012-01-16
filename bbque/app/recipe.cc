@@ -51,7 +51,6 @@ Recipe::Recipe(std::string const & name):
 
 Recipe::~Recipe() {
 	working_modes.clear();
-	norm_working_modes.clear();
 	constraints.clear();
 }
 
@@ -133,18 +132,12 @@ void Recipe::NormalizeValues() {
 	if (norm.done)
 		return;
 
-	AwmMap_t::iterator awm_it(working_modes.begin());
-	AwmMap_t::iterator end_awm(working_modes.end());
-
 	// Normalization of the whole set of AWMs
-	for (; awm_it != end_awm; ++awm_it) {
-		// Create a new AWM object by copy
-		AwmPtr_t normal_awm(new app::WorkingMode((*(awm_it->second).get())));
-
+	for (int i = 0; i < last_awm_id; ++i) {
 		// Normalize the value
 		if (norm.delta > 0)
 			// The most commmon case
-			normal_value = (normal_awm->Value() - norm.min_value) / norm.delta;
+			normal_value = (working_modes[i]->RecipeValue() - norm.min_value) / norm.delta;
 		else if (working_modes.size() == 1)
 			// There is only one AWM in the recipe
 			normal_value = 1.0;
@@ -154,14 +147,9 @@ void Recipe::NormalizeValues() {
 			normal_value = 0.0;
 
 		// Set the normalized value into the AWM
-		normal_awm->SetValue(normal_value);
+		working_modes[i]->SetNormalValue(normal_value);
 		logger->Info("AWM %d normalized value = %.2f ",
-					normal_awm->Id(),
-					normal_awm->Value());
-
-		// Insert into the normalized map
-		norm_working_modes.insert(std::pair<uint8_t, AwmPtr_t>(
-					awm_it->first, normal_awm));
+					working_modes[i]->Id(), working_modes[i]->Value());
 	}
 
 	// Set the "normalization done" flag true
