@@ -191,16 +191,20 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 
 			// The awm ID must be unique!
 			if (recipe_ptr->GetWorkingMode(wm_id)) {
-				logger->Warn("Skipping working mode %s [doubled ID found]",
-								wm_name.c_str());
-				awm_elem = awm_elem->NextSiblingElement("awm", false);
-				continue;
+				logger->Error("AWM ""%s"" error: Double ID found %d",
+								wm_name.c_str(), wm_id);
+				return RL_FORMAT_ERROR;
 			}
 
 			// Add a new working mode passing its name and value
-			AwmPtr_t & awm(recipe_ptr->AddWorkingMode(wm_id, wm_name,
+			// Note: IDs must be numbered from 0 to N
+			AwmPtr_t awm(recipe_ptr->AddWorkingMode(wm_id, wm_name,
 							static_cast<uint8_t> (wm_value)));
-			assert(awm.get() != NULL);
+			if (!awm) {
+				logger->Error("AWM ""%s"" error: Wrong ID specified %d",
+								wm_name.c_str(), wm_id);
+				return RL_FORMAT_ERROR;
+			}
 
 			// Load resource usages of the working mode
 			ticpp::Element * resources_elem =
