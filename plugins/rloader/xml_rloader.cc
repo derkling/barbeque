@@ -214,8 +214,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::loadWorkingModes(
 				return RL_FORMAT_ERROR;
 
 			// AWM plugin specific data
-			if (awm)
-				loadPluginsData<ba::AwmPtr_t>(awm, awm_elem);
+			loadPluginsData<ba::AwmPtr_t>(awm, awm_elem);
 
 			// Next working mode
 			awm_elem = awm_elem->NextSiblingElement("awm", false);
