@@ -166,6 +166,9 @@ public:
 	 * @param recipe Recipe object shared pointer
 	 * @param papp Shared pointer to the current Application.
 	 *
+	 * @return APP_SUCCESS if success, APP_RECP_NULL if a null Recipe object
+	 * is passed
+	 *
 	 * @note papp should be provided by ApplicationManager, which instances
 	 * the new Application descriptor
 	 */
@@ -399,6 +402,7 @@ private:
 
 	/**
 	 * @brief Init working modes by reading the recipe
+	 *
 	 * @param papp Pointer to the current Application, allocated by
 	 * ApplicationManager
 	 */
@@ -452,7 +456,9 @@ private:
 	 *
 	 * @param res_path A pointer to the resource object
 	 * @param type The constraint type (@see ContraintType)
-	 * @return An error code (@see ExitCode)
+	 *
+	 * @return APP_SUCCESS if success, APP_CONS_NOT_FOUND if cannot be found
+	 * a previous constraint on the resource
 	 */
 	ExitCode_t ClearResourceConstraint(std::string const & res_path,
 			ResourceConstraint::BoundType_t type);
