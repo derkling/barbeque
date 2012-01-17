@@ -43,6 +43,12 @@ public:
 
 	RTLIB_ExitCode_t Disable();
 
+	RTLIB_ExitCode_t SetConstraints(
+		RTLIB_Constraint_t *constraints,
+		uint8_t count);
+
+	RTLIB_ExitCode_t ClearConstraints();
+
 	RTLIB_ExitCode_t Start();
 
 	RTLIB_ExitCode_t Terminate();

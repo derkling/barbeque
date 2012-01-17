@@ -273,6 +273,43 @@ RTLIB_ExitCode_t BbqueEXC::onMonitor() {
 
 
 /*******************************************************************************
+ *    Constraints Management
+ ******************************************************************************/
+
+RTLIB_ExitCode_t BbqueEXC::SetConstraints(
+		RTLIB_Constraint_t *constraints,
+		uint8_t count) {
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+	RTLIB_ExitCode_t result = RTLIB_OK;
+
+	assert(registered == true);
+	assert(rtlib->SetConstraints);
+
+	//--- Assert constraints on this EXC
+	fprintf(stderr, FMT_INF("Set [%d] constraints for EXC [%s] (@%p)...\n"),
+			count, exc_name.c_str(), (void*)exc_hdl);
+	result = rtlib->SetConstraints(exc_hdl, constraints, count);
+
+	return result;
+}
+
+RTLIB_ExitCode_t BbqueEXC::ClearConstraints() {
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+	RTLIB_ExitCode_t result = RTLIB_OK;
+
+	assert(registered == true);
+	assert(rtlib->ClearConstraints);
+
+	//--- Clear constraints on this EXC
+	fprintf(stderr, FMT_INF("Clear ALL constraints for EXC [%s] (@%p)...\n"),
+			exc_name.c_str(), (void*)exc_hdl);
+	result = rtlib->ClearConstraints(exc_hdl);
+
+	return result;
+}
+
+
+/*******************************************************************************
  *    Control Loop
  ******************************************************************************/
 
