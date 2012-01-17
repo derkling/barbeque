@@ -319,6 +319,18 @@ public:
 	}
 
 	/**
+	 * @brief Check the validity of the AWM scheduled
+	 *
+	 * This call check if the current scheduled AWM has been invalidated by a
+	 * constraint assertion.
+	 *
+	 * @return true is the AWM is no more valid, false otherwise.
+	 */
+	bool CurrentAWMNotValid() {
+		return awms.curr_inv;
+	}
+
+	/**
 	 * @brief Terminate this EXC by releasing all resources.
 	 *
 	 * This method requires to mark the EXC as terminated and to prepare the
@@ -380,6 +392,8 @@ private:
 		uint8_t upp_id;
 		/** The number of working modes - 1*/
 		uint8_t max_id;
+		/** Current AWM invalidated by a constraint assertion */
+		bool curr_inv;
 	} awms;
 
 	/**

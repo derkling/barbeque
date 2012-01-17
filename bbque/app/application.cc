@@ -140,6 +140,7 @@ void Application::InitWorkingModes(AppPtr_t & papp) {
 	awms.low_id = 0;
 	awms.upp_id = awms.max_id;
 	awms.enabled_bset.set();
+	awms.curr_inv = false;
 	logger->Debug("InitWorkingModes: enabled bitset = %s",
 			awms.enabled_bset.to_string().c_str());
 	logger->Debug("InitWorkingModes: max_id = %d", awms.max_id);
@@ -649,6 +650,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 
 	// Set next awm
 	schedule.next_awm = awm;
+	awms.curr_inv = false;
 
 	return APP_WM_ACCEPTED;
 }
