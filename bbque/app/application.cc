@@ -774,19 +774,26 @@ Application::ExitCode_t Application::ScheduleContinue() {
 
 Application::ExitCode_t Application::SetWorkingModeConstraint(
 		RTLIB_Constraint & constraint) {
-	ExitCode_t result;
 	// Get a lock. The assertion may invalidate the current AWM.
 	std::unique_lock<std::recursive_mutex> schedule_ul(schedule.mtx);
+	ExitCode_t result = APP_ABORT;
 
 	// Check the working mode ID validity
 	if (constraint.awm > awms.max_id)
 		return APP_WM_NOT_FOUND;
 
 	// Dispatch the constraint assertion
-	if (constraint.add)
-		result = AddWorkingModeConstraint(constraint);
-	else
+	switch (constraint.operation) {
+	case CONSTRAINT_REMOVE:
 		result = RemoveWorkingModeConstraint(constraint);
+		break;
+	case CONSTRAINT_ADD:
+		result = AddWorkingModeConstraint(constraint);
+		break;
+	default:
+		logger->Error("SetConstraint (AWMs): Operation not supported");
+		return result;
+	}
 
 	// If there are no changes in the enabled list return
 	if (result == APP_WM_ENAB_UNCHANGED) {

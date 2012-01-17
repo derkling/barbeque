@@ -253,6 +253,16 @@ typedef enum RTLIB_ExitCode {
 } RTLIB_ExitCode_t;
 
 /**
+ * @brief The operation requested on a resource constraint.
+ */
+typedef enum RTLIB_ConstraintOperation {
+	/** Remove the specified consraint */
+	CONSTRAINT_REMOVE = 0,
+	/** Add the specified consraint */
+	CONSTRAINT_ADD
+} RTLIB_ConstraintOperation_t;
+
+/**
  * @brief The possible boundary asserted by a resource constraint.
  */
 typedef enum RTLIB_ConstraintType {
@@ -381,9 +391,8 @@ struct RTLIB_ExecutionContextParams {
 struct RTLIB_Constraint {
 	/** The identified of an Application Working Mode (AWM */
 	uint8_t awm;
-	/** The required operation: true to add the specified constraint, false to
-	 * remove it */
-	uint8_t add;
+	/** The required operation on the previous AWM */
+	RTLIB_ConstraintOperation_t operation;
 	/** The constraint boundary */
 	RTLIB_ConstraintType_t type;
 };
