@@ -25,6 +25,7 @@
 #ifndef BBQUE_APPLICATION_H
 #define BBQUE_APPLICATION_H
 
+#include <bitset>
 #include <cassert>
 #include <cstdint>
 #include <list>
@@ -219,21 +220,21 @@ public:
 	 * @see ApplicationStatusIF
 	 */
 	inline AwmPtrList_t const * WorkingModes() {
-		return &enabled_awms;
+		return &awms.enabled_list;
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
 	inline AwmPtr_t const & LowValueAWM() {
-		return enabled_awms.front();
+		return awms.enabled_list.front();
 	}
 
 	/**
 	 * @see ApplicationStatusIF
 	 */
 	inline AwmPtr_t const & HighValueAWM() {
-		return enabled_awms.back();
+		return awms.enabled_list.back();
 	}
 
 	/**
@@ -310,8 +311,9 @@ public:
 	 * @note The working mode must come from the enabled list
 	 */
 	inline AwmPtr_t GetWorkingMode(uint8_t wmId) {
-		AwmPtrList_t::iterator wm_it(FindWorkingModeIter(enabled_awms, wmId));
-		if (wm_it == enabled_awms.end())
+		AwmPtrList_t::iterator wm_it(
+				FindWorkingModeIter(awms.enabled_list, wmId));
+		if (wm_it == awms.enabled_list.end())
 			return AwmPtr_t();
 		return (*wm_it);
 	}
@@ -360,21 +362,25 @@ private:
 	 */
 	RecipePtr_t recipe;
 
-	/** Vector of all the working modes */
-	AwmPtrVect_t working_modes;
-
-	/** List of pointers to enabled working modes */
-	AwmPtrList_t enabled_awms;
-
-	/** Iterators pointing to the enabled working modes boundaries */
-	struct WorkingModesBoundaries {
+	/** @struct WorkingModesInfo
+	 *
+	 * Store the information needed to support the management of the
+	 * application working modes.
+	 */
+	struct WorkingModesInfo {
+		/** Vector of all the working modes */
+		AwmPtrVect_t recipe_vect;
+		/** List of pointers to enabled working modes */
+		AwmPtrList_t enabled_list;
+		/** A bitset to keep track of the enabled working modes */
+		std::bitset<MAX_NUM_AWM> enabled_bset;
 		/** Lower bound AWM ID*/
-		uint8_t low;
+		uint8_t low_id;
 		/** Upper bound AWM ID*/
-		uint8_t upp;
+		uint8_t upp_id;
 		/** The number of working modes - 1*/
-		uint8_t max;
-	} awm_range;
+		uint8_t max_id;
+	} awms;
 
 	/**
 	 * @brief Init working modes by reading the recipe
