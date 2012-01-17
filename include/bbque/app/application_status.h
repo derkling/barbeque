@@ -83,6 +83,10 @@ public:
 		APP_WM_ACCEPTED,
 		/** The working mode is not schedulable */
 		APP_WM_REJECTED,
+		/** The list of enabled working modes has changed */
+		APP_WM_ENAB_CHANGED,
+		/** The list of enabled working modes has not changed */
+		APP_WM_ENAB_UNCHANGED,
 		/** Method forced to exit */
 		APP_ABORT
 	};

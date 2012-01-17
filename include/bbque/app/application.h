@@ -270,7 +270,7 @@ public:
 	ExitCode_t ScheduleContinue();
 
 	/**
-	 * @brief Set a constraint on the working modes
+	 * @brief Set or clear a constraint on the working modes
 	 *
 	 * It's important to clearly explain the behavior of the following API.
 	 * To set a lower bound means that all the AWMs having an ID lesser than
@@ -287,10 +287,11 @@ public:
 	 * second lower bound assertion will "overwrite" the firsts. The same for
 	 * upper bound case.
 	 *
-	 * @constraint @see RTLIB_Constraint
-	 * @return APP_SUCCESS for success. APP_WM_NOT_FOUND if the working mode
-	 * id is not correct. APP_ABORT if 'add' field of RTLIB_Constraint
-	 * argument is unset (false).
+	 * @param constraint @see RTLIB_Constraint
+	 * @return APP_WM_ENAB_CHANGED if the set of enabled working modes has
+	 * been successfully changed, APP_WM_ENAB_UNCHANGED otherwise.
+	 * Then APP_WM_NOT_FOUND is returned if the working mode ID is not
+	 * correct.
 	 */
 	ExitCode_t SetWorkingModeConstraint(RTLIB_Constraint & constraint);
 
@@ -474,13 +475,88 @@ private:
 			uint16_t wmId);
 
 	/**
+	 * @brief Set a constraint on the working modes list
+	 *
+	 * Three types of constraints are provided, according to @see
+	 * RTLIB_Constraint: lower bound, upper bound, exact value.
+	 *
+	 * @param constraint @see RTLIB_Constraint
+	 * @return APP_WM_ENAB_CHANGED if the enabled AWM list has changed,
+	 * APP_WM_ENAB_UNCHANGED otherwise.
+	 */
+	ExitCode_t AddWorkingModeConstraint(RTLIB_Constraint & constraint);
+
+	/**
+	 * @brief Set lower bound info into the awm_range struct
+	 *
+	 * The structure awm_range is properly filled with the info needed to
+	 * rebuild the list of enabled working modes, according to the asserted
+	 * lower bound.
+	 *
+	 * @param constraint @see RTLIB_Constraint
+	 */
+	void SetWorkingModesLowerBound(RTLIB_Constraint & constraint);
+
+	/**
+	 * @brief Set the upper bound info into the awm_range struct
+	 *
+	 * The structure awm_range is properly filled with the info needed to
+	 * rebuild the list of enabled working modes, according to the asserted
+	 * upper bound.
+	 *
+	 * @param constraint @see RTLIB_Constraint
+	 */
+	void SetWorkingModesUpperBound(RTLIB_Constraint & constraint);
+
+	/**
+	 * @brief Remove a constraint on a working modes list
+	 *
+	 * If the constraint is a lower bound, this is placed equal to 0. If it
+	 * is an upper bound it is set to the max AWM ID. The bitset is then
+	 * restored accordingly.
+	 */
+	ExitCode_t RemoveWorkingModeConstraint(RTLIB_Constraint & constraint);
+
+	/**
+	 * @brief Rebuild the list of enabled working modes
+	 *
+	 * This is needed whenever a constraint has been asserted or removed.
+	 * The bitmap of the enabled is scanned, each set bit is related to the ID
+	 * of the AWM to consider enabled. If the resources required by the AWM
+	 * do not violate any resource constraint, the AWM is inserted into the
+	 * list. Finally the list is ordered by "AWM value".
+	 */
+	void RebuildEnabledWorkingModes();
+
+	/**
+	 * @brief Finalize the changes in the enabled working modes list
+	 *
+	 * When the list of enabled working modes changes, due to constraint
+	 * assertions, a couple of operations are required:
+	 * 1) we must signal if the currently scheduled AWM has been invalidated.
+	 * 2) the list must be re-ordered by AWM value
+	 * This is what this method does.
+	 */
+	void FinalizeEnabledWorkingModes();
+
+	/**
+	 * @brief Clear the lower bound info from awm_range struct
+	 */
+	void ClearWorkingModesLowerBound();
+
+	/**
+	 * @brief Clear the lower bound info from awm_range struct
+	 */
+	void ClearWorkingModesUpperBound();
+
+	/**
 	 * @brief Update enabled working modes list
 	 *
-	 * Whenever a constraint is set or removed, the method is called in
-	 * order to check if there are some working mode to disable or re-enable.
-	 * The method rebuilds the list of enabled working modes by checking if
-	 * there are some working modes requiring a resource usage which is out of
-	 * the bounds set by a resource constraint assertion.
+	 * Whenever a resource constraint is set or removed, the method is called
+	 * in order to check if there are some working mode to disable or
+	 * re-enable.  The method rebuilds the list of enabled working modes by
+	 * checking if there are some working modes requiring a resource usage
+	 * which is out of the bounds set by a resource constraint assertion.
 	 */
 	void UpdateEnabledWorkingModes();
 

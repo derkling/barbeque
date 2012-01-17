@@ -774,40 +774,179 @@ Application::ExitCode_t Application::ScheduleContinue() {
 
 Application::ExitCode_t Application::SetWorkingModeConstraint(
 		RTLIB_Constraint & constraint) {
-
-	// 'add' field must be true
-	if (!constraint.add) {
-		logger->Error("SetConstraint (AWMs): Expected 'add' == true");
-		return APP_ABORT;
-	}
+	ExitCode_t result;
+	// Get a lock. The assertion may invalidate the current AWM.
+	std::unique_lock<std::recursive_mutex> schedule_ul(schedule.mtx);
 
 	// Check the working mode ID validity
 	if (constraint.awm > awms.max_id)
 		return APP_WM_NOT_FOUND;
 
+	// Dispatch the constraint assertion
+	if (constraint.add)
+		result = AddWorkingModeConstraint(constraint);
+	else
+		result = RemoveWorkingModeConstraint(constraint);
+
+	// If there are no changes in the enabled list return
+	if (result == APP_WM_ENAB_UNCHANGED) {
+		logger->Debug("SetConstraint (AWMs): Nothing to change");
+		return result;
+	}
+
+	// Rebuild the list of enabled working modes
+	RebuildEnabledWorkingModes();
+
 	logger->Debug("SetConstraint (AWMs): %d total working modes",
 			awms.recipe_vect.size());
 	logger->Debug("SetConstraint (AWMs): %d enabled working modes",
 			awms.enabled_list.size());
+
+	DB(
+		logger->Debug("SetConstraint (AWMs): enabled map/list = {");
+		for (int j = 0; j <= awms.max_id; ++j) {
+			if (!awms.enabled_bset.test(i))
+				continue;
+		logger->Debug("%d, ", i);
+		}
+		logger->Debug("}");
+	  );
+
+	return result;
+}
+
+Application::ExitCode_t Application::AddWorkingModeConstraint(
+		RTLIB_Constraint & constraint) {
+	// Check the type of constraint to set
 	switch (constraint.type) {
 	case RTLIB_ConstraintType::LOW_BOUND:
+		// Return immediately if there is nothing to change
+		if (constraint.awm == awms.low_id)
+			return APP_WM_ENAB_UNCHANGED;
+
+		// If the lower > upper: upper = max
+		if (constraint.awm > awms.upp_id)
+			awms.upp_id = awms.max_id;
+
+		// Update the bitmap of the enabled working modes
+		SetWorkingModesLowerBound(constraint);
+		return APP_WM_ENAB_CHANGED;
 
 	case RTLIB_ConstraintType::UPPER_BOUND:
+		// Return immediately if there is nothing to change
+		if (constraint.awm == awms.upp_id)
+			return APP_WM_ENAB_UNCHANGED;
+
 		// If the upper < lower: lower = begin
 		if (constraint.awm < awms.low_id)
 			awms.low_id = 0;
 
+		// Update the bitmap of the enabled working modes
+		SetWorkingModesUpperBound(constraint);
+		return APP_WM_ENAB_CHANGED;
 
 	case RTLIB_ConstraintType::EXACT_VALUE:
+		// If the AWM is set yet, return
+		if (awms.enabled_bset.test(constraint.awm))
+			return APP_WM_ENAB_UNCHANGED;
 
+		// Mark the corresponding bit in the enabled map
+		awms.enabled_bset.set(constraint.awm);
+		logger->Debug("SetConstraint (AWMs): Set exact value AWM {%d}",
+				constraint.awm);
+		return APP_WM_ENAB_CHANGED;
 	}
 
+	return APP_WM_ENAB_UNCHANGED;
+}
 
-	// Check if there are resource constraints
-	UpdateEnabledWorkingModes();
+void Application::SetWorkingModesLowerBound(RTLIB_Constraint & constraint) {
+	uint8_t hb = std::max(constraint.awm, awms.low_id);
 
+	// Disable all the AWMs lower than the new lower bound and if the
+	// previous lower bound was greater than the new one, enable the AWMs
+	// lower than it
+	for (int i = hb; i >= 0; --i) {
+		if (i < constraint.awm)
+			awms.enabled_bset.reset(i);
+		else
+			awms.enabled_bset.set(i);
+	}
 
-	return APP_SUCCESS;
+	// Save the new lower bound
+	awms.low_id = constraint.awm;
+	logger->Debug("SetConstraint (AWMs): Set lower bound AWM {%d}",
+			awms.low_id);
+}
+
+void Application::SetWorkingModesUpperBound(RTLIB_Constraint & constraint) {
+	uint8_t lb = std::min(constraint.awm, awms.upp_id);
+
+	// Disable all the AWMs greater than the new upper bound and if the
+	// previous upper bound was lower than the new one, enable the AWMs
+	// greater than it
+	for (int i = lb; i <= awms.max_id; ++i) {
+		if (i > constraint.awm)
+			awms.enabled_bset.reset(i);
+		else
+			awms.enabled_bset.set(i);
+	}
+
+	// Save the new upper bound
+	awms.upp_id = constraint.awm;
+	logger->Debug("SetConstraint (AWMs): Set upper bound AWM {%d}",
+			awms.upp_id);
+}
+
+Application::ExitCode_t Application::RemoveWorkingModeConstraint(
+		RTLIB_Constraint & constraint) {
+	// Check the type of constraint to remove
+	switch (constraint.type) {
+	case RTLIB_ConstraintType::LOW_BOUND:
+		// Set the bit related to the AWM below the lower bound
+		ClearWorkingModesLowerBound();
+		return APP_WM_ENAB_CHANGED;
+
+	case RTLIB_ConstraintType::UPPER_BOUND:
+		// Set the bit related to the AWM above the upper bound
+		ClearWorkingModesUpperBound();
+		return APP_WM_ENAB_CHANGED;
+
+	case RTLIB_ConstraintType::EXACT_VALUE:
+		// If the AWM is not set yet, return
+		if (!awms.enabled_bset.test(constraint.awm))
+			return APP_WM_ENAB_UNCHANGED;
+
+		// Reset the bit related to the AWM
+		awms.enabled_bset.reset(constraint.awm);
+		return APP_WM_ENAB_CHANGED;
+	}
+
+	return APP_WM_ENAB_UNCHANGED;
+}
+
+void Application::ClearWorkingModesLowerBound() {
+	// Set all the bit previously unset
+	for (int i = awms.low_id - 1; i >= 0; --i)
+		awms.enabled_bset.set(i);
+
+	logger->Debug("SetConstraint (AWMs): Cleared lower bound AWM {%d}",
+			awms.low_id);
+
+	// Reset the lower bound
+	awms.low_id = 0;
+}
+
+void Application::ClearWorkingModesUpperBound() {
+	// Set all the bit previously unset
+	for (int i = awms.upp_id + 1; i <= awms.max_id; ++i)
+		awms.enabled_bset.set(i);
+
+	logger->Debug("SetConstraint (AWMs): Cleared upper bound AWM {%d}",
+			awms.upp_id);
+
+	// Reset the upperbound
+	awms.upp_id = awms.max_id;
 }
 
 void Application::ClearWorkingModeConstraints() {
@@ -816,9 +955,7 @@ void Application::ClearWorkingModeConstraints() {
 	awms.upp_id = awms.max_id;
 
 	// Rebuild the list of enabled working modes
-
-	// Check if there are resource constraints
-	UpdateEnabledWorkingModes();
+	RebuildEnabledWorkingModes();
 
 	logger->Debug("ClearConstraint (AWMs): %d total working modes",
 			awms.recipe_vect.size());
@@ -826,6 +963,42 @@ void Application::ClearWorkingModeConstraints() {
 			awms.enabled_list.size());
 }
 
+// Forward function declaration
+bool UsageOutOfBounds(const AwmPtr_t & awm);
+
+void Application::RebuildEnabledWorkingModes() {
+	// Clear the list
+	awms.enabled_list.clear();
+
+	// Push back the enabled working modes of
+	for (int j = 0; j <= awms.max_id; ++j) {
+		// Skip if the related bit of the map is not set or one of the
+		// resource usage required violates a resource constraint
+		if ((!awms.enabled_bset.test(j)) ||
+				(UsageOutOfBounds(awms.recipe_vect[j])))
+			continue;
+
+		// Insert the working mode
+		awms.enabled_list.push_back(awms.recipe_vect[j]);
+	}
+
+	// Check current AWM and re-order the list
+	FinalizeEnabledWorkingModes();
+}
+
+void Application::FinalizeEnabledWorkingModes() {
+	// Check if the current AWM has been invalidated
+	if (schedule.awm &&
+			!awms.enabled_bset.test(schedule.awm->Id())) {
+		logger->Warn("WorkingMode constraints: current AWM (""%s"" ID:%d)"
+				" invalidated.", schedule.awm->Name().c_str(),
+				schedule.awm->Id());
+		awms.curr_inv = true;
+	}
+
+	// Sort by working mode "value
+	awms.enabled_list.sort(AwmValueLesser);
+}
 
 /************************** Resource Constraints ****************************/
 
@@ -855,8 +1028,8 @@ void Application::UpdateEnabledWorkingModes() {
 	// Remove working modes that violate resources constraints
 	awms.enabled_list.remove_if(UsageOutOfBounds);
 
-	// Sort by working mode "value
-	awms.enabled_list.sort(AwmValueLesser);
+	// Check current AWM and re-order the list
+	FinalizeEnabledWorkingModes();
 }
 
 Application::ExitCode_t Application::SetResourceConstraint(
