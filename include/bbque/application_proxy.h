@@ -331,6 +331,11 @@ private:
 	void RpcExcUnregister(prqsSn_t prqs);
 
 
+	void RpcExcSet(prqsSn_t prqs);
+
+	void RpcExcClear(prqsSn_t prqs);
+
+
 	void RpcExcStart(prqsSn_t prqs);
 
 	void RpcExcStop(prqsSn_t prqs);

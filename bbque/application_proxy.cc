@@ -997,6 +997,74 @@ void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
 
 }
 
+void ApplicationProxy::RpcExcSet(prqsSn_t prqs) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	rpc_msg_EXC_SET_t * pmsg_pyl = (rpc_msg_EXC_SET_t*)pmsg_hdr;
+	pconCtx_t pcon;
+	ApplicationManager::ExitCode_t result;
+
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
+		return;
+
+	// Setting constraints for the requesting Execution Context
+	logger->Info("APPs PRX: Set [%d] constraints on EXC "
+			"[app: %s, pid: %d, exc: %d]",
+			pmsg_pyl->count, pcon->app_name,
+			pcon->app_pid, pmsg_hdr->exc_id);
+	result = am.SetConstraintsEXC(pcon->app_pid, pmsg_hdr->exc_id,
+			&(pmsg_pyl->constraints), pmsg_pyl->count);
+	if (result != ApplicationManager::AM_SUCCESS) {
+		logger->Error("APPs PRX: EXC "
+			"[pid: %d, exc: %d] "
+			"set [%d] constraints FAILED",
+			pcon->app_pid, pmsg_hdr->exc_id, pmsg_pyl->count);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_ENABLE_FAILED);
+		return;
+	}
+
+	// Sending ACK response to application
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
+}
+
+void ApplicationProxy::RpcExcClear(prqsSn_t prqs) {
+	ApplicationManager &am(ApplicationManager::GetInstance());
+	pchMsg_t pchMsg = prqs->pmsg;
+	rpc_msg_header_t * pmsg_hdr = pchMsg;
+	pconCtx_t pcon;
+	ApplicationManager::ExitCode_t result;
+
+	assert(pchMsg);
+
+	// Looking for a valid connection context
+	pcon = GetConnectionContext(pmsg_hdr);
+	if (!pcon)
+		return;
+
+	// Clearing constraints for the requesting Execution Context
+	logger->Info("APPs PRX: Clearing constraints on EXC "
+			"[app: %s, pid: %d, exc: %d]",
+			pcon->app_name, pcon->app_pid, pmsg_hdr->exc_id);
+	result = am.ClearConstraintsEXC(pcon->app_pid, pmsg_hdr->exc_id);
+	if (result != ApplicationManager::AM_SUCCESS) {
+		logger->Error("APPs PRX: EXC "
+			"[pid: %d, exc: %d] "
+			"clear constraints FAILED",
+			pcon->app_pid, pmsg_hdr->exc_id);
+		RpcNAK(pcon, pmsg_hdr, RPC_EXC_RESP, RTLIB_EXC_ENABLE_FAILED);
+		return;
+	}
+
+	// Sending ACK response to application
+	RpcACK(pcon, pmsg_hdr, RPC_EXC_RESP);
+
+}
+
 void ApplicationProxy::RpcExcStart(prqsSn_t prqs) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
@@ -1226,10 +1294,12 @@ void ApplicationProxy::RequestExecutor(prqsSn_t prqs) {
 
 	case RPC_EXC_SET:
 		logger->Debug("EXC_SET");
+		RpcExcSet(prqs);
 		break;
 
 	case RPC_EXC_CLEAR:
 		logger->Debug("EXC_CLEAR");
+		RpcExcClear(prqs);
 		break;
 
 	case RPC_EXC_START:
