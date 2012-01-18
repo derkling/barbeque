@@ -798,7 +798,7 @@ Application::ExitCode_t Application::SetWorkingModeConstraint(
 	// If there are no changes in the enabled list return
 	if (result == APP_WM_ENAB_UNCHANGED) {
 		logger->Debug("SetConstraint (AWMs): Nothing to change");
-		return result;
+		return APP_SUCCESS;
 	}
 
 	// Rebuild the list of enabled working modes
@@ -810,7 +810,8 @@ Application::ExitCode_t Application::SetWorkingModeConstraint(
 			awms.enabled_list.size());
 
 	DB(DumpValidAWMs());
-	return result;
+
+	return APP_SUCCESS;
 }
 
 void Application::DumpValidAWMs() const {
