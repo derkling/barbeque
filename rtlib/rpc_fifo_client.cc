@@ -41,22 +41,26 @@
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_FIFO [ERR]", fmt)
 
 
-#define RPC_FIFO_SEND(RPC_MSG)\
+#define RPC_FIFO_SEND_SIZE(RPC_MSG, SIZE)\
 DB(fprintf(stderr, FMT_DBG("Tx [" #RPC_MSG "] Request "\
 				"FIFO_HDR [sze: %hd, off: %hd, typ: %hd], "\
-				"RPC_HDR [typ: %d, pid: %d, eid: %hd]...\n"),\
+				"RPC_HDR [typ: %d, pid: %d, eid: %hd], Bytes: %lu...\n"),\
 	rf_ ## RPC_MSG.hdr.fifo_msg_size,\
 	rf_ ## RPC_MSG.hdr.rpc_msg_offset,\
 	rf_ ## RPC_MSG.hdr.rpc_msg_type,\
 	rf_ ## RPC_MSG.pyl.hdr.typ,\
 	rf_ ## RPC_MSG.pyl.hdr.app_pid,\
-	rf_ ## RPC_MSG.pyl.hdr.exc_id\
+	rf_ ## RPC_MSG.pyl.hdr.exc_id,\
+	SIZE\
 ));\
-if(::write(server_fifo_fd, (void*)&rf_ ## RPC_MSG, FIFO_PKT_SIZE(RPC_MSG)) <= 0) {\
+if(::write(server_fifo_fd, (void*)&rf_ ## RPC_MSG, SIZE) <= 0) {\
 	fprintf(stderr, FMT_ERR("write to BBQUE fifo FAILED [%s]\n"),\
 		bbque_fifo_path.c_str());\
 	return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;\
 }
+
+#define RPC_FIFO_SEND(RPC_MSG)\
+	RPC_FIFO_SEND_SIZE(RPC_MSG, FIFO_PKT_SIZE(RPC_MSG))
 
 
 namespace bbque { namespace rtlib {
