@@ -173,6 +173,13 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	inline uint16_t GetTotalNumOfResources() const {
+		return rsrc_counter;
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	AppPtr_t const AppUsingPE(std::string const & path,
 			RViewToken_t vtok = 0) const;
 
@@ -395,6 +402,9 @@ private:
 
 	/** Keep track of the max length between resources path string */
 	uint8_t path_max_len;
+
+	/** Counter for the total number of registered resources */
+	uint16_t rsrc_counter;
 
 	/**
 	 * Map containing the pointers to the map of resource usages specified in

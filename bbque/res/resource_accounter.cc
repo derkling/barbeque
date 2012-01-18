@@ -57,6 +57,7 @@ ResourceAccounter::ResourceAccounter() :
 	sys_view_token = 0;
 	usages_per_views[sys_view_token] = sys_usages_view;
 	rsrc_per_views[sys_view_token] = ResourceSetPtr_t(new ResourceSet_t);
+	rsrc_counter = 0;
 
 	// Init sync session info
 	sync_ssn.count = 0;
@@ -303,6 +304,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 
 	// Insert the path in the paths set
 	paths.insert(_path);
+	++rsrc_counter;
 	path_max_len = std::max((int) path_max_len, (int) _path.length());
 
 	return RA_SUCCESS;

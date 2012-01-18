@@ -202,6 +202,15 @@ public:
 	}
 
 	/**
+	 * @brief The number of system resources
+	 * @return This returns the total number of system resources, i.e. the
+	 * number of resource allocables to the applications.
+	 */
+	inline uint16_t GetTotalNumOfResources() const {
+		return ra.GetTotalNumOfResources();
+	}
+
+	/**
 	 * @brief Resource clustering factor
 	 * @see ClusteringFactor
 	 */

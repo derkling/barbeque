@@ -235,6 +235,13 @@ public:
 	virtual bool ExistResource(std::string const & path) const = 0;
 
 	/**
+	 * @brief The number of system resources
+	 * @return This returns the total number of system resources, i.e. the
+	 * number of resource allocables to the applications.
+	 */
+	virtual uint16_t GetTotalNumOfResources() const = 0;
+
+	/**
 	 * @brief App/EXC using a Processing Element resource
 	 *
 	 * @param path The resource path
