@@ -76,6 +76,7 @@ ResourceManager::metrics[RM_METRICS_COUNT] = {
 	RM_COUNTER_METRIC("evt.tot",	"Total events"),
 	RM_COUNTER_METRIC("evt.start",	"  START events"),
 	RM_COUNTER_METRIC("evt.stop",	"  STOP  events"),
+	RM_COUNTER_METRIC("evt.opts",	"  OPTS  events"),
 	RM_COUNTER_METRIC("evt.usr1",	"  USR1  events"),
 	RM_COUNTER_METRIC("evt.usr2",	"  USR2  events"),
 
@@ -90,12 +91,14 @@ ResourceManager::metrics[RM_METRICS_COUNT] = {
 	RM_SAMPLE_METRIC("evt.avg.time",  "Avg events processing t[ms]"),
 	RM_SAMPLE_METRIC("evt.avg.start", "  START events"),
 	RM_SAMPLE_METRIC("evt.avg.stop",  "  STOP  events"),
+	RM_SAMPLE_METRIC("evt.avg.opts",  "  OPTS  events"),
 	RM_SAMPLE_METRIC("evt.avg.usr1",  "  USR1  events"),
 	RM_SAMPLE_METRIC("evt.avg.usr2",  "  USR2  events"),
 
 	RM_PERIOD_METRIC("evt.per",		"Avg events period t[ms]"),
 	RM_PERIOD_METRIC("evt.per.start",	"  START events"),
 	RM_PERIOD_METRIC("evt.per.stop",	"  STOP  events"),
+	RM_PERIOD_METRIC("evt.per.opts",	"  OPTS  events"),
 	RM_PERIOD_METRIC("evt.per.usr1",	"  USR1  events"),
 	RM_PERIOD_METRIC("evt.per.usr2",	"  USR2  events"),
 
@@ -268,6 +271,22 @@ void ResourceManager::EvtExcStop() {
 	RM_GET_TIMING(metrics, RM_EVT_TIME_STOP, rm_tmr);
 }
 
+void ResourceManager::EvtBbqOpts() {
+
+	logger->Info("BBQ Optimization Request");
+
+	// Reset timer for START event execution time collection
+	RM_RESET_TIMING(rm_tmr);
+
+	// TODO add here a suitable policy to trigger the optimization
+
+	Optimize();
+
+	// Collecing execution metrics
+	RM_GET_TIMING(metrics, RM_EVT_TIME_OPTS, rm_tmr);
+}
+
+
 void ResourceManager::EvtBbqUsr1() {
 
 	// Reset timer for START event execution time collection
@@ -380,6 +399,12 @@ void ResourceManager::ControlLoop() {
 			EvtExcStop();
 			RM_COUNT_EVENT(metrics, RM_EVT_STOP);
 			RM_GET_PERIOD(metrics, RM_EVT_PERIOD_STOP, period);
+			break;
+		case BBQ_OPTS:
+			logger->Debug("Event [BBQ_OPTS]");
+			EvtBbqOpts();
+			RM_COUNT_EVENT(metrics, RM_EVT_OPTS);
+			RM_GET_PERIOD(metrics, RM_EVT_PERIOD_OPTS, period);
 			break;
 		case BBQ_USR1:
 			logger->Debug("Event [BBQ_USR1]");

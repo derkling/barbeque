@@ -61,6 +61,7 @@ public:
 		EXC_START = 0,
 		EXC_STOP,
 
+		BBQ_OPTS,
 		BBQ_USR1,
 		BBQ_USR2,
 
@@ -179,6 +180,7 @@ private:
 		RM_EVT_TOTAL = 0,
 		RM_EVT_START,
 		RM_EVT_STOP,
+		RM_EVT_OPTS,
 		RM_EVT_USR1,
 		RM_EVT_USR2,
 
@@ -193,12 +195,14 @@ private:
 		RM_EVT_TIME,
 		RM_EVT_TIME_START,
 		RM_EVT_TIME_STOP,
+		RM_EVT_TIME_OPTS,
 		RM_EVT_TIME_USR1,
 		RM_EVT_TIME_USR2,
 
 		RM_EVT_PERIOD,
 		RM_EVT_PERIOD_START,
 		RM_EVT_PERIOD_STOP,
+		RM_EVT_PERIOD_OPTS,
 		RM_EVT_PERIOD_USR1,
 		RM_EVT_PERIOD_USR2,
 
@@ -246,6 +250,11 @@ private:
 	 * @brief Process a EXC_START event
 	 */
 	void EvtExcStart();
+
+	/**
+	 * @brief Process a BBQ_OPTS event
+	 */
+	void EvtBbqOpts();
 
 	/**
 	 * @brief Process a BBQ_USR1 event
