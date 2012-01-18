@@ -104,6 +104,11 @@ option (BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
 # Lookup for library dependencies
 ################################################################################
 
+# Force usage of BOSP provided BOOST installation
+set (Boost_NO_SYSTEM_PATHS ON)
+set (BOOST_ROOT ${CMAKE_INSTALL_PREFIX})
+set (BOOST_INCLUDEDIR ${CMAKE_INSTALL_PREFIX})
+
 # Check for required libs and packages (headers + lib)
 find_package(Boost 1.45.0 REQUIRED system program_options filesystem)
 
@@ -179,6 +184,9 @@ message ( STATUS "   Var(RPC-Channel)... <prefix>/${BBQUE_PATH_VAR}" )
 message ( STATUS "   Headers............ <prefix>/${BBQUE_PATH_HEADERS}" )
 message ( STATUS "   RTLib library...... <prefix>/${BBQUE_PATH_RTLIB}" )
 message ( STATUS "   Documentation...... <prefix>/${BBQUE_PATH_DOCS}" )
+message ( STATUS "Dependencies:")
+message ( STATUS "   Boost library...... ${Boost_LIBRARY_DIRS}" )
+
 message ( STATUS )
 message ( STATUS "Default values could be changes at command line, with:")
 message ( STATUS "  cmake -D<Variable>=<Value>" )
