@@ -72,15 +72,15 @@ category.bq.mc =	NOTICE
 #category.bq.ra = 	INFO
 #category.bq.ap = 	INFO
 #category.bq.tpd = 	INFO
-#category.ap = 		INFO
-#category.ap.awm =	INFO
-#category.ap.exc =	INFO
+#category.bq.app = 	INFO
+#category.bq.app.awm =	INFO
+#category.bq.app.exc =	INFO
 #category.rpc = 	INFO
 #category.test = 	INFO
-#category.rpc.fif = INFO
-#category.rpc.prx = INFO
-#category.rloader = INFO
-#category.sync.   = INFO
+#category.rpc.fif = 	INFO
+#category.rpc.prx = 	INFO
+#category.rloader = 	INFO
+#category.sync.   = 	INFO
 ###
 # Root Appender
 ###

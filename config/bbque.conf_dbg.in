@@ -59,25 +59,25 @@ rootCategory = DEBUG, raConsole
 # to redefine the category priority to a value diffent from that of
 # the rootCategory
 ###
-#category.bq = 			INFO
-#category.bq.Test =		INFO
-#category.bq.pm =		INFO
-#category.bq.rm = 		INFO
-#category.bq.sm = 		INFO
-#category.bq.ym = 		INFO
-#category.bq.ra = 		INFO
-#category.bq.ap = 		INFO
-#category.bq.tpd = 		INFO
-#category.ap = 			INFO
-#category.ap.awm =		INFO
-#category.ap.exc =		INFO
-#category.rpc = 		INFO
-#category.test = 		INFO
-#category.rpc.fif = 	INFO
-#category.rpc.prx = 	INFO
-#category.rloader = 	INFO
-#category.sched.pol = 	INFO
-#category.sync.pol = 	INFO
+#category.bq = 			ERROR
+#category.bq.Test =		ERROR
+#category.bq.pm =		ERROR
+#category.bq.rm = 		ERROR
+#category.bq.sm = 		ERROR
+#category.bq.ym = 		ERROR
+#category.bq.ra = 		ERROR
+#category.bq.ap = 		ERROR
+#category.bq.tpd = 		ERROR
+#category.bq.app = 		ERROR
+#category.bq.app.awm =		ERROR
+#category.bq.app.exc =		ERROR
+#category.rpc = 		ERROR
+#category.test = 		ERROR
+#category.rpc.fif = 		ERROR
+#category.rpc.prx = 		ERROR
+#category.rloader = 		ERROR
+#category.sched.pol = 		ERROR
+#category.sync.pol = 		ERROR
 ###
 # Root Appender
 ###
