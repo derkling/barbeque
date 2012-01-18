@@ -130,6 +130,7 @@ link_directories(
 add_subdirectory (rtlib)
 add_subdirectory (plugins)
 add_subdirectory (bbque)
+add_subdirectory (test)
 
 
 ################################################################################
