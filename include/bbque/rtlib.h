@@ -389,7 +389,7 @@ struct RTLIB_ExecutionContextParams {
  * constraints at run-time, to invalidate a subset of its own working modes.
  */
 struct RTLIB_Constraint {
-	/** The identified of an Application Working Mode (AWM */
+	/** The identified of an Application Working Mode (AWM) */
 	uint8_t awm;
 	/** The required operation on the previous AWM */
 	RTLIB_ConstraintOperation_t operation;
