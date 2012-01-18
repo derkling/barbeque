@@ -778,6 +778,11 @@ Application::ExitCode_t Application::SetWorkingModeConstraint(
 	std::unique_lock<std::recursive_mutex> schedule_ul(schedule.mtx);
 	ExitCode_t result = APP_ABORT;
 
+	logger->Debug("SetConstraint, AWM_ID: %d, OP: %s, TYPE: %d",
+			constraint.awm,
+			constraint.operation ? "ADD" : "REMOVE",
+			constraint.type);
+
 	// Check the working mode ID validity
 	if (constraint.awm > awms.max_id)
 		return APP_WM_NOT_FOUND;
