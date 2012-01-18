@@ -38,7 +38,7 @@
 #include "bbque/app/recipe.h"
 #include "bbque/plugins/logger.h"
 
-#define APPLICATION_NAMESPACE "ap"
+#define APPLICATION_NAMESPACE "bq.app"
 
 using bbque::plugins::LoggerIF;
 
