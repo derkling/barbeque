@@ -267,7 +267,7 @@ typedef enum RTLIB_ConstraintOperation {
  */
 typedef enum RTLIB_ConstraintType {
 	/** Targets AWMs lower or equal to the specified one */
-	LOW_BOUND = 0,
+	LOWER_BOUND = 0,
 	/** Targets AWMs higer or equal to the specified one */
 	UPPER_BOUND,
 	/** Targets the specified AWM */

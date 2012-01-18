@@ -826,7 +826,7 @@ Application::ExitCode_t Application::AddWorkingModeConstraint(
 		RTLIB_Constraint & constraint) {
 	// Check the type of constraint to set
 	switch (constraint.type) {
-	case RTLIB_ConstraintType::LOW_BOUND:
+	case RTLIB_ConstraintType::LOWER_BOUND:
 		// Return immediately if there is nothing to change
 		if (constraint.awm == awms.low_id)
 			return APP_WM_ENAB_UNCHANGED;
@@ -909,7 +909,7 @@ Application::ExitCode_t Application::RemoveWorkingModeConstraint(
 		RTLIB_Constraint & constraint) {
 	// Check the type of constraint to remove
 	switch (constraint.type) {
-	case RTLIB_ConstraintType::LOW_BOUND:
+	case RTLIB_ConstraintType::LOWER_BOUND:
 		// Set the bit related to the AWM below the lower bound
 		ClearWorkingModesLowerBound();
 		return APP_WM_ENAB_CHANGED;
