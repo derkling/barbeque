@@ -530,8 +530,10 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 	prf_EXC_SET->pyl.hdr.app_pid = chTrdPid;
 	prf_EXC_SET->pyl.hdr.exc_id = prec->exc_id;
 
-	DB(fprintf(stderr, FMT_DBG("Copying [%d] constraints using buffer @%p [%d] Bytes...\n"),
-				count, &(prf_EXC_SET->pyl.constraints), (count)*sizeof(RTLIB_Constraint_t)));
+	DB(fprintf(stderr, FMT_DBG("Copying [%d] constraints using buffer @%p "
+					"of [%d] Bytes...\n"),
+				count, (void*)&(prf_EXC_SET->pyl.constraints),
+				(count)*sizeof(RTLIB_Constraint_t)));
 
 	// Init RPC header
 	prf_EXC_SET->pyl.count = count;
@@ -543,7 +545,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 	DB(fprintf(stderr, FMT_DBG("Set [%d] constraints on EXC [%d:%d]...\n"),
 				count, rf_EXC_SET.pyl.hdr.app_pid,
 				rf_EXC_SET.pyl.hdr.exc_id));
-	RPC_FIFO_SEND(EXC_SET);
+	RPC_FIFO_SEND_SIZE(EXC_SET, msg_size);
 
 	// Clean-up the FIFO message
 	::free(prf_EXC_SET);
