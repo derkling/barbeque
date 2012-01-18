@@ -809,17 +809,21 @@ Application::ExitCode_t Application::SetWorkingModeConstraint(
 	logger->Debug("SetConstraint (AWMs): %d enabled working modes",
 			awms.enabled_list.size());
 
-	DB(
-		logger->Debug("SetConstraint (AWMs): enabled map/list = {");
-		for (int j = 0; j <= awms.max_id; ++j) {
-			if (!awms.enabled_bset.test(i))
-				continue;
-		logger->Debug("%d, ", i);
-		}
-		logger->Debug("}");
-	  );
-
+	DB(DumpValidAWMs());
 	return result;
+}
+
+void Application::DumpValidAWMs() const {
+	uint8_t len = 0;
+	char buff[256];
+
+	for (int j = 0; j <= awms.max_id; ++j) {
+		if (awms.enabled_bset.test(j))
+			len += snprintf(buff+len, 265-len, "%d,", j);
+	}
+	// Remove leading comma
+	buff[len-1] = 0;
+	logger->Info("SetConstraint (AWMs): enabled map/list = {%s}", buff);
 }
 
 Application::ExitCode_t Application::AddWorkingModeConstraint(
