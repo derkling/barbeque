@@ -153,6 +153,8 @@ public:
 	enum ExitCode_t {
 		/** Success */
 		AM_SUCCESS = 0,
+		/** Reschedule required */
+		AM_RESCHED_REQUIRED,
 		/** Application Execution Context not found */
 		AM_EXC_NOT_FOUND,
 		/** Execution of a method interrupted by an unexpected state in an

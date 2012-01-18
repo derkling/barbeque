@@ -330,7 +330,7 @@ public:
 	 *
 	 * @return true is the AWM is no more valid, false otherwise.
 	 */
-	bool CurrentAWMNotValid() {
+	inline bool CurrentAWMNotValid() const {
 		return awms.curr_inv;
 	}
 

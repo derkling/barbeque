@@ -846,8 +846,11 @@ ApplicationManager::SetConstraintsEXC(AppPtr_t papp,
 		count--;
 	}
 
-	// TODO look for the need of a new schedule request
-	logger->Warn("TODO: check for re-schedule required");
+	// Check for the need of a new schedule request
+	if (papp->CurrentAWMNotValid()) {
+		logger->Warn("Re-schedule required");
+		return AM_RESCHED_REQUIRED;
+	}
 
 	return AM_SUCCESS;
 }
