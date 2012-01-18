@@ -999,6 +999,7 @@ void ApplicationProxy::RpcExcUnregister(prqsSn_t prqs) {
 
 void ApplicationProxy::RpcExcSet(prqsSn_t prqs) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
+	ResourceManager &rm(ResourceManager::GetInstance());
 	pchMsg_t pchMsg = prqs->pmsg;
 	rpc_msg_header_t * pmsg_hdr = pchMsg;
 	rpc_msg_EXC_SET_t * pmsg_pyl = (rpc_msg_EXC_SET_t*)pmsg_hdr;
@@ -1019,7 +1020,11 @@ void ApplicationProxy::RpcExcSet(prqsSn_t prqs) {
 			pcon->app_pid, pmsg_hdr->exc_id);
 	result = am.SetConstraintsEXC(pcon->app_pid, pmsg_hdr->exc_id,
 			&(pmsg_pyl->constraints), pmsg_pyl->count);
-	if (result != ApplicationManager::AM_SUCCESS) {
+	if (result == ApplicationManager::AM_RESCHED_REQUIRED) {
+		// Notify the ResourceManager for a new reschedule request
+		logger->Debug("APPs PRX: Notifing ResourceManager...");
+		rm.NotifyEvent(ResourceManager::BBQ_OPTS);
+	} else if (result != ApplicationManager::AM_SUCCESS) {
 		logger->Error("APPs PRX: EXC "
 			"[pid: %d, exc: %d] "
 			"set [%d] constraints FAILED",
