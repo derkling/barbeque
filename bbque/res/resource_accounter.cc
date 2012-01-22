@@ -234,25 +234,29 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		UsagesMapPtr_t const & usages,
 		RViewToken_t vtok,
 		AppPtr_t papp) const {
+	uint64_t avail = 0;
 	UsagesMap_t::const_iterator usages_it(usages->begin());
 	UsagesMap_t::const_iterator usages_end(usages->end());
 
 	// Check availability for each ResourceUsage object
 	for (; usages_it != usages_end; ++usages_it) {
+		// Current ResourceUsage
 		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t const & pusage(usages_it->second);
 	
-		uint64_t avail = Available(pusage, vtok, papp);
+		// Query the availability of the resources in the list
+		avail = QueryStatus(pusage->GetBindingList(), RA_AVAIL, vtok, papp);
+
+		// If the availability is less than the amount required...
 		if (avail < pusage->GetAmount()) {
 			logger->Debug("ChkAvail: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
-					rsrc_path.c_str(),
-					pusage->GetAmount(),
-					avail,
-					Total(pusage));
+					rsrc_path.c_str(), pusage->GetAmount(), avail,
+					QueryStatus(pusage->GetBindingList(), RA_TOTAL));
 			return RA_ERR_USAGE_EXC;
 		}
 	}
+
 	return RA_SUCCESS;
 }
 
