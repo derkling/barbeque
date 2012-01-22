@@ -528,7 +528,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 		logger->Error("Contention level: {AWM %d} [cluster = %d]"
 				"Incomplete resources binding. %d / %d resources bound.",
 						wm->Id(), cl_id, wm->GetSchedResourceBinding()->size(),
-						wm->ResourceUsages().size());
+						wm->RecipeResourceUsages().size());
 
 	// Contention level
 	return ComputeContentionLevel(papp, wm->GetSchedResourceBinding(),

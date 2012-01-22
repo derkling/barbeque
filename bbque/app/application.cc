@@ -1022,8 +1022,8 @@ void Application::FinalizeEnabledWorkingModes() {
 bool UsageOutOfBounds(const AwmPtr_t & awm) {
 	ConstrMap_t::iterator rsrc_constr_it;
 	ConstrMap_t::iterator end_rsrc_constr(rsrc_constraints.end());
-	UsagesMap_t::const_iterator usage_it = awm->ResourceUsages().begin();
-	UsagesMap_t::const_iterator end_usage = awm->ResourceUsages().end();
+	UsagesMap_t::const_iterator usage_it(awm->RecipeResourceUsages().begin());
+	UsagesMap_t::const_iterator end_usage(awm->RecipeResourceUsages().end());
 
 	// Check if there are constraints on the resource usages
 	for (; usage_it != end_usage; ++usage_it) {
