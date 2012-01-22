@@ -31,7 +31,7 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/res/resources.h"
 
-#define RESOURCE_THREE_NAMESPACE "rt"
+#define RESOURCE_TREE_NAMESPACE "rt"
 
 using bbque::plugins::LoggerIF;
 

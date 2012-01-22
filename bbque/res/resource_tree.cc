@@ -37,7 +37,7 @@ ResourceTree::ResourceTree():
 	max_depth(0) {
 
 	// Get a logger
-	bp::LoggerIF::Configuration conf(RESOURCE_THREE_NAMESPACE);
+	bp::LoggerIF::Configuration conf(RESOURCE_TREE_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	assert(logger);
 
