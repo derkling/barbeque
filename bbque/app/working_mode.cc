@@ -63,8 +63,8 @@ WorkingMode::WorkingMode(uint8_t _id,
 
 WorkingMode::~WorkingMode() {
 	overheads.clear();
-	recp_usages.clear();
-	sys_usages->clear();
+	resources.from_recp.clear();
+	resources.to_sync->clear();
 }
 
 
@@ -90,7 +90,8 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 
 	// Insert a new resource usage object in the map
 	UsagePtr_t pusage(UsagePtr_t(new ResourceUsage(_value)));
-	recp_usages.insert(std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
+	resources.from_recp.insert(
+			std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
 
 	logger->Debug("AddResUsage: added {%s}\t[usage: %llu]",
 			rsrc_path.c_str(), _value);
@@ -117,8 +118,8 @@ uint64_t WorkingMode::ResourceUsageValue(
 
 UsagePtr_t
 WorkingMode::ResourceUsageTempRef(std::string const & temp_path) const {
-	UsagesMap_t::const_iterator rsrc_it(recp_usages.begin());
-	UsagesMap_t::const_iterator it_end(recp_usages.end());
+	UsagesMap_t::const_iterator rsrc_it(resources.from_recp.begin());
+	UsagesMap_t::const_iterator it_end(resources.from_recp.end());
 
 	// Iterate over the map of resource usages retrieved from the recipe
 	for (; rsrc_it != it_end; ++rsrc_it) {
@@ -141,13 +142,13 @@ WorkingMode::ResourceUsageRef(std::string const & rsrc_path) const {
 
 	// If the resource binding is missing, perform the search in the map of
 	// resource usages parsed from the recipe
-	if (!sys_usages)
-		rsrc_it = recp_usages.find(rsrc_path);
+	if (!resources.to_sync)
+		rsrc_it = resources.from_recp.find(rsrc_path);
 	else
-		rsrc_it = sys_usages->find(rsrc_path);
+		rsrc_it = resources.to_sync->find(rsrc_path);
 
 	// Search failed
-	if (rsrc_it != recp_usages.end())
+	if (rsrc_it != resources.from_recp.end())
 		return UsagePtr_t();
 
 	// Return the ResourceUsage object
@@ -218,13 +219,13 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	// must be taken from the recipe resource map. Converserly, if a previous
 	// call to this method has been performed, a map of resource usages to
 	// schedule has been created. Thus we must continue the binding...
-	if (!sched_binds) {
-		usage_it = recp_usages.begin();
-		it_end = recp_usages.end();
+	if (!resources.on_sched) {
+		usage_it = resources.from_recp.begin();
+		it_end = resources.from_recp.end();
 	}
 	else {
-		usage_it = sched_binds->begin();
-		it_end = sched_binds->end();
+		usage_it = resources.on_sched->begin();
+		it_end = resources.on_sched->end();
 	}
 
 	// Proceed with the resource binding...
@@ -250,12 +251,12 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	}
 
 	// Update the resource usages map to schedule
-	sched_binds = temp_binds;
+	resources.on_sched = temp_binds;
 
 	// Debug messages
 	DB(
-		usage_it = sched_binds->begin();
-		it_end = sched_binds->end();
+		usage_it = resources.on_sched->begin();
+		it_end = resources.on_sched->end();
 		for (; usage_it != it_end; ++usage_it) {
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
@@ -267,7 +268,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	);
 
 	// Are all the resource usages bound ?
-	if (recp_usages.size() < sched_binds->size())
+	if (resources.from_recp.size() < resources.on_sched->size())
 		return WM_RSRC_MISS_BIND;
 
 	return WM_SUCCESS;
@@ -279,14 +280,15 @@ WorkingMode::ExitCode_t WorkingMode::SetSchedResourceBinding() {
 
 	// The binding map must have the same size of resource usages map built
 	// from the recipe
-	if (!sched_binds || (sched_binds->size() != recp_usages.size()))
+	if (!resources.on_sched ||
+			(resources.on_sched->size() != resources.from_recp.size()))
 		return WM_RSRC_MISS_BIND;
 
 	// Init the iterators for the maps
-	UsagesMap_t::iterator bind_it(sched_binds->begin());
-	UsagesMap_t::iterator end_bind(sched_binds->end());
-	UsagesMap_t::iterator recp_it(recp_usages.begin());
-	UsagesMap_t::iterator end_recp(recp_usages.end());
+	UsagesMap_t::iterator bind_it(resources.on_sched->begin());
+	UsagesMap_t::iterator end_bind(resources.on_sched->end());
+	UsagesMap_t::iterator recp_it(resources.from_recp.begin());
+	UsagesMap_t::iterator end_recp(resources.from_recp.end());
 
 	// Check the correctness of the binding
 	for(; bind_it != end_bind, recp_it != end_recp; ++recp_it, ++bind_it) {
@@ -317,8 +319,8 @@ WorkingMode::ExitCode_t WorkingMode::SetSchedResourceBinding() {
 	clusters.changed = clusters.prev != clusters.curr;
 
 	// Set the new binding / resource usages map
-	sys_usages = sched_binds;
-	sched_binds.reset();
+	resources.to_sync = resources.on_sched;
+	resources.on_sched.reset();
 
 	return WM_SUCCESS;
 }

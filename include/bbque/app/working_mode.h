@@ -167,15 +167,15 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline UsagesMap_t const & ResourceUsages() const {
-		return recp_usages;
+	inline UsagesMap_t const & RecipeResourceUsages() const {
+		return resources.from_recp;
 	}
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
 	inline size_t NumberOfResourceUsages() const {
-		return recp_usages.size();
+		return resources.from_recp.size();
 	}
 
 	/**
@@ -206,16 +206,16 @@ public:
 	 * @see WorkingModeStatusIF
 	 */
 	inline UsagesMapPtr_t GetSchedResourceBinding() const {
-		return sched_binds;
+		return resources.on_sched;
 	}
 
 	/**
 	 * @brief Set the resource binding to schedule
 	 *
-	 * This binds the map of resource usages pointed by "sched_binds" to the
-	 * WorkingMode. The map will contain ResourceUsage objects specifying the
-	 * the amount of resource requested (value) and a list of system resource
-	 * descriptors to which bind the request.
+	 * This binds the map of resource usages pointed by "resources.on_sched"
+	 * to the WorkingMode. The map will contain ResourceUsage objects
+	 * specifying the the amount of resource requested (value) and a list of
+	 * system resource descriptors to which bind the request.
 	 *
 	 * This method is invoked during the scheduling step to track the set of
 	 * resources to acquire at the end of the synchronization step.
@@ -228,7 +228,7 @@ public:
 	 * @see WorkingModeConfIF
 	 */
 	inline void ClearSchedResourceBinding() {
-		sched_binds = UsagesMapPtr_t();
+		resources.on_sched = UsagesMapPtr_t();
 	}
 
 	/**
@@ -243,7 +243,7 @@ public:
 	 * @return A shared pointer to a map of ResourceUsage objects
 	 */
 	inline UsagesMapPtr_t GetResourceBinding() const {
-		return sys_usages;
+		return resources.to_sync;
 	}
 
 	/**
@@ -252,7 +252,7 @@ public:
 	 * The method reverts the effects of ScheduleResourceBinding()
 	 */
 	inline void ClearResourceBinding() {
-		sys_usages->clear();
+		resources.to_sync->clear();
 		clusters.curr = clusters.prev;
 	}
 
@@ -307,19 +307,23 @@ private:
 		float normal;
 	} value;
 
-	/** The map of resources usages from the recipe  */
-	UsagesMap_t recp_usages;
-
 	/**
-	 * The temporary map of resource bindings.
-	 * This is built by the BindResource calls */
-	UsagesMapPtr_t sched_binds;
-
-	/**
-	 * The map of the resource bindings allocated for the working mode.
-	 * This is set by ScheduleResourceBinding() as a commit of the bindings
-	 * performed, reasonably by the scheduling policy.	 */
-	UsagesMapPtr_t sys_usages;
+	 * @struct ResourceUsagesInfo
+	 *
+	 * Store information about the resource requests specified in the recipe
+	 * and the bindings built by the scheduling policy
+	 */
+	struct ResourceUsagesInfo {
+		/** The map of resources usages from the recipe  */
+		UsagesMap_t from_recp;
+		/** The temporary map of resource bindings. This is built by the
+		 * BindResource calls */
+		UsagesMapPtr_t on_sched;
+		/** The map of the resource bindings allocated for the working mode.
+		 * This is set by SetSchedResourceBinding() as a commit of the
+		 * bindings performed, reasonably by the scheduling policy.	 */
+		UsagesMapPtr_t to_sync;
+	} resources;
 
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;
