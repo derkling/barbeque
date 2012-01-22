@@ -324,8 +324,13 @@ private:
 	/** The overheads coming from switching to other working modes */
 	OverheadsMap_t overheads;
 
-	/** The set of clusters used by this working mode */
-	struct clusters {
+	/**
+	 * @struct ClustersInfo
+	 *
+	 * The set of clusters used by this working mode. The current and previous
+	 * one.
+	 */
+	struct ClustersInfo {
 		/** Save the previous set of clusters bound */
 		ClustersBitSet prev;
 		/** The current set of clusters bound */
