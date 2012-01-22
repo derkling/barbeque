@@ -242,8 +242,9 @@ public:
 	 * RA_ERR_USAGE_EXC if the resource set required is not completely
 	 * available.
 	 */
-	ExitCode_t BookResources(AppPtr_t papp, UsagesMapPtr_t const & usages,
-			RViewToken_t vtok = 0, bool do_check = true);
+	ExitCode_t BookResources(AppPtr_t papp,
+			UsagesMapPtr_t const & rsrc_usages, RViewToken_t vtok = 0,
+			bool do_check = true);
 
 	/**
 	 * @brief Release the resources

@@ -314,7 +314,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
-		UsagesMapPtr_t const & resource_set,
+		UsagesMapPtr_t const & rsrc_usages,
 		RViewToken_t vtok,
 		bool do_check) {
 	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
@@ -325,8 +325,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 		return RA_ERR_MISS_APP;
 	}
 
-	// Check that the next working mode has been set
-	if ((!resource_set) || (resource_set->empty())) {
+	// Check that the set of resource usages is not null
+	if ((!rsrc_usages) || (rsrc_usages->empty())) {
 		logger->Fatal("Booking: Empty resource usages set");
 		return RA_ERR_MISS_USAGES;
 	}
@@ -350,7 +350,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 
 	// Check resource availability (if this is not a sync session)
 	if ((do_check) && !(sync_ssn.started)) {
-		if (CheckAvailability(resource_set, vtok) == RA_ERR_USAGE_EXC) {
+		if (CheckAvailability(rsrc_usages, vtok) == RA_ERR_USAGE_EXC) {
 			logger->Debug("Booking: Cannot allocate the resource set");
 			return RA_ERR_USAGE_EXC;
 		}
@@ -358,11 +358,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 
 	// Increment the booking counts and save the reference to the resource set
 	// used by the application
-	IncBookingCounts(resource_set, papp, vtok);
+	IncBookingCounts(rsrc_usages, papp, vtok);
 	apps_usages->insert(std::pair<AppUid_t, UsagesMapPtr_t>(papp->Uid(),
-				resource_set));
+				rsrc_usages));
 	logger->Debug("Booking: [%s] now holds %d resources", papp->StrId(),
-			resource_set->size());
+			rsrc_usages->size());
 
 	return RA_SUCCESS;
 }
