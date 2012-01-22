@@ -64,13 +64,6 @@ namespace bbque { namespace res {
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointer to Resource*/
 typedef std::list<ResourcePtr_t> ResourcePtrList_t;
-/** Shared pointer to ResourceUsage object */
-typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
-/** Map of ResourceUsage descriptors. Key: resource path */
-typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
-/** Constant pointer to the map of ResourceUsage descriptors */
-typedef std::shared_ptr<UsagesMap_t> UsagesMapPtr_t;
-
 
 /**
  * @class ResourceAccounterStatusIF
