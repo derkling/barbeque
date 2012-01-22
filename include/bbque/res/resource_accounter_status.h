@@ -55,8 +55,6 @@
 #define RSRC_CLUST_PE 	"arch.tile.cluster.pe"
 
 
-using bbque::app::Application;
-
 namespace bbque { namespace res {
 
 
