@@ -30,8 +30,6 @@
 
 #include "bbque/res/resource_accounter_status.h"
 
-using bbque::app::AppPtr_t;
-using bbque::app::Application;
 
 namespace bbque { namespace res {
 
