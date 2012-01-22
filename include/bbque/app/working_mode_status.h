@@ -105,7 +105,8 @@ public:
 	 * @param res_path Resource path
 	 * @return The usage value
 	 */
-	virtual uint64_t ResourceUsageValue(std::string const & res_path) const = 0;
+	virtual uint64_t ResourceUsageAmount(std::string const & res_path)
+		const = 0;
 
 	/**
 	 * @brief Return a map of all the resource usages in the current working

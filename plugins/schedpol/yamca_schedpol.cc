@@ -570,7 +570,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 
 		// Get the resource usage of the AWM with the min value
 		AwmPtr_t wm_min(papp->LowValueAWM());
-		min_usage = wm_min->ResourceUsageValue(PathTemplate(rsrc_path));
+		min_usage = wm_min->ResourceUsageAmount(PathTemplate(rsrc_path));
 
 		// Update the contention level (inverse)
 		cont_level +=

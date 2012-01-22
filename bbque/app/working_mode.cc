@@ -99,7 +99,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 }
 
 
-uint64_t WorkingMode::ResourceUsageValue(
+uint64_t WorkingMode::ResourceUsageAmount(
 		std::string const & rsrc_path) const {
 	UsagePtr_t pusage;
 
