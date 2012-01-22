@@ -84,6 +84,39 @@ class ResourceAccounterStatusIF {
 public:
 
 	/**
+	 * @enum Exit codes
+	 */
+	enum ExitCode_t {
+		/** Successful return  */
+		RA_SUCCESS = 0,
+		/** Argument "path" missing */
+		RA_ERR_MISS_PATH,
+		/** Unable to allocate a new resource descriptor */
+		RA_ERR_MEM,
+		/** Unable to find the state view specified */
+		RA_ERR_MISS_VIEW,
+		/** Application reference missing */
+		RA_ERR_MISS_APP,
+		/** Resource usages map missing	 */
+		RA_ERR_MISS_USAGES,
+		/** Next AWM is missing */
+		RA_ERR_MISS_AWM,
+		/** Application uses yet another resource set */
+		RA_ERR_APP_USAGES,
+		/** Resource usage required exceeds the availabilities */
+		RA_ERR_USAGE_EXC,
+
+		// --- Synchronization mode ---
+
+		/** Initialization failed */
+		RA_ERR_SYNC_INIT,
+		/** Error occured in using/getting the resource view  */
+		RA_ERR_SYNC_VIEW,
+		/** Synchronization session has not been started */
+		RA_ERR_SYNC_START
+	};
+
+	/**
 	 * @brief Total amount of resources
 	 * @param path Resource path
 	 * @return The total amount of resource
