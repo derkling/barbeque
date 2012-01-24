@@ -545,7 +545,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		UsagePtr_t const & pusage(usage_it->second);
 
 		// Query resource availability
-		rsrc_avail = rsrc_acct.Available(pusage, rsrc_view_token, papp);
+		rsrc_avail = rsrc_acct.Available(pusage->GetBindingList(),
+				rsrc_view_token, papp);
 		logger->Debug("{%s} availability = %llu", rsrc_path.c_str(),
 				rsrc_avail);
 

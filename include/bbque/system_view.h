@@ -134,37 +134,49 @@ public:
 	}
 
 	/**
-	 * @brief The amount of resource available given an identifying resource
-	 * path
-	 * @param path Resource path
-	 * @return The amount of resource available
+	 * @see ResourceAccounterStatusIF::Available()
 	 */
-	inline uint64_t ResourceAvailability(std::string const & path) const {
-		return ra.Available(path);
+	inline uint64_t ResourceAvailable(std::string const & path,
+			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
+		return ra.Available(path, vtok, papp);
 	}
 
 	/**
-	 * @brief The total amount of resource given an Identifying resource path
-	 * @param path Resource path
-	 * @return The total amount of resource available
+	 * @see ResourceAccounterStatusIF::Available()
+	 */
+	inline uint64_t ResourceAvailable(ResourcePtrList_t & rsrc_list,
+			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
+		return ra.Available(rsrc_list, vtok, papp);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF::Total()
 	 */
 	inline uint64_t ResourceTotal(std::string const & path) const {
 		return ra.Total(path);
 	}
 
 	/**
-	 * @brief The used amount of resource given an identifying resource path
-	 * @param path Resource path
-	 * @return The used amount of resource available
+	 * @see ResourceAccounterStatusIF::Total()
+	 */
+	inline uint64_t ResourceTotal(ResourcePtrList_t & rsrc_list) const {
+		return ra.Total(rsrc_list);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF::Used()
 	 */
 	inline uint64_t ResourceUsed(std::string const & path) const {
 		return ra.Used(path);
 	}
 
 	/**
-	 * @brief Retrieve a pointer to the resource descriptor
-	 * @param path Resource path
-	 * @return A shared pointer to the resource desciptor found
+	 * @see ResourceAccounterStatusIF::Used()
+	 */
+	inline uint64_t ResourceUsed(ResourcePtrList_t & rsrc_list) const {
+		return ra.Used(rsrc_list);
+	}
+
 	 */
 	inline res::ResourcePtr_t GetResource(std::string const & path) const {
 		return ra.GetResource(path);

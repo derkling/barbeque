@@ -109,23 +109,46 @@ public:
 
 	/**
 	 * @brief Total amount of resources
+	 *
+	 * This is used when the only available information is the resource path
+	 * (wheter template or specific).
+	 *
 	 * @param path Resource path
+	 *
 	 * @return The total amount of resource
 	 */
 	virtual uint64_t Total(std::string const & path) const = 0;
 
 	/**
-	 * @brief Total amount of resources
-	 * @param pusage A pointer to ResourceUsage
+	 * @brief Total amount of resource
+	 *
+	 * This is a slighty more efficient version of method Total(), to invoke
+	 * whenever we have a list of Resource descriptors yet. This usually
+	 * happens when the set of resources required by an AWM has been bound by
+	 * the scheduling policy. Accordingly, a map of ResourceUsage objects
+	 * should be retrievable (by calling AWM->GetSchedResourceBinding() and
+	 * similars). Each bound ResourceUsage provides the list of bound
+	 * resources through GetBindingList().
+	 *
+	 * @param rsrc_list A list of shared pointer to Resource descriptors (of
+	 * the same type).
+	 *
 	 * @return The total amount of resource
 	 */
-	virtual uint64_t Total(UsagePtr_t const & pusage) const = 0;
+	virtual uint64_t Total(ResourcePtrList_t & rsrc_list) const = 0;
 
 	/**
 	 * @brief Amount of resource available
+	 *
+	 * This is used when the only available information is the resource path
+	 * (wheter template or specific).
+
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
-	 * @param papp The application interested in the query
+	 * @param papp The application interested in the query. This means that if
+	 * the application pointed by 'papp' is using yet the resource, such
+	 * amount is added to the real available quantity.
+	 *
 	 * @return The amount of resource available
 	 */
 	virtual uint64_t Available(std::string const & path, RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t())
@@ -133,18 +156,36 @@ public:
 
 	/**
 	 * @brief Amount of resources available
-	 * @param pusage A pointer to ResourceUsage
+	 *
+	 * This is a slighty more efficient version of method Available(), to
+	 * invoke whenever we have a list of Resource descriptors yet. This
+	 * usually happens when the set of resources required by an AWM has been
+	 * bound by the scheduling policy. Accordingly, a map of ResourceUsage
+	 * objects should be retrievable (by calling
+	 * AWM->GetSchedResourceBinding() and similars). Each bound ResourceUsage
+	 * provides the list of bound resources through GetBindingList().
+	 *
+	 * @param rsrc_list A list of shared pointer to Resource descriptors (of
+	 * the same type).
 	 * @param vtok The token referencing the resource state view
-	 * @param papp The application interested in the query
+	 * @param papp The application interested in the query. This means that if
+	 * the application pointed by 'papp' is using yet the resource, such
+	 * amount is added to the real available quantity.
+	 *
 	 * @return The amount of resource available
 	 */
-	virtual uint64_t Available(UsagePtr_t const & pusage,
+	virtual uint64_t Available(ResourcePtrList_t & rsrc_list,
 			RViewToken_t vtok = 0, AppPtr_t = AppPtr_t()) const = 0;
 
 	/**
 	 * @brief Amount of resources used
+	 *
+	 * This is used when the only available information is the resource path
+	 * (wheter template or specific).
+	 *
 	 * @param path Resource path
 	 * @param vtok The token referencing the resource state view
+	 *
 	 * @return The used amount of resource
 	 */
 	virtual uint64_t Used(std::string const & path, RViewToken_t vtok = 0)
@@ -152,11 +193,22 @@ public:
 
 	/**
 	 * @brief Amount of resources used
-	 * @param pusage A pointer to ResourceUsage
+	 *
+	 * This is a slighty more efficient version of method Used(), to invoke
+	 * whenever we have a list of Resource descriptors yet. This usually
+	 * happens when the set of resources required by an AWM has been bound by
+	 * the scheduling policy. Accordingly, a map of ResourceUsage objects
+	 * should be retrievable (by calling AWM->GetSchedResourceBinding() and
+	 * similars). Each bound ResourceUsage provides the list of bound
+	 * resources through GetBindingList().
+	 *
+	 * @param rsrc_list A list of shared pointer to Resource descriptors (of
+	 * the same type).
 	 * @param vtok The token referencing the resource state view
+	 *
 	 * @return The used amount of resource
 	 */
-	virtual uint64_t Used(UsagePtr_t const & pusage, RViewToken_t vtok = 0)
+	virtual uint64_t Used(ResourcePtrList_t & rsrc_list, RViewToken_t vtok = 0)
 		const = 0;
 
 	/**

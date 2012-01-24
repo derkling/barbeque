@@ -109,10 +109,10 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Total(UsagePtr_t const & pusage) const {
-		if (pusage->EmptyBindingList())
+	inline uint64_t Total(ResourcePtrList_t & rsrc_list) const {
+		if (rsrc_list.empty())
 			return 0;
-		return QueryStatus(pusage->GetBindingList(), RA_TOTAL);
+		return QueryStatus(rsrc_list, RA_TOTAL);
 	}
 
 	/**
@@ -127,11 +127,11 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Available(UsagePtr_t const & pusage,
+	inline uint64_t Available(ResourcePtrList_t & rsrc_list,
 			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
-		if (pusage->EmptyBindingList())
+		if (rsrc_list.empty())
 			return 0;
-		return QueryStatus(pusage->GetBindingList(), RA_AVAIL, vtok, papp);
+		return QueryStatus(rsrc_list, RA_AVAIL, vtok, papp);
 	}
 
 	/**
@@ -146,11 +146,11 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint64_t Used(UsagePtr_t const & pusage,
+	inline uint64_t Used(ResourcePtrList_t & rsrc_list,
 			RViewToken_t vtok = 0) const {
-		if (pusage->EmptyBindingList())
+		if (rsrc_list.empty())
 			return 0;
-		return QueryStatus(pusage->GetBindingList(), RA_USED, vtok);
+		return QueryStatus(rsrc_list, RA_USED, vtok);
 	}
 
 	/**
