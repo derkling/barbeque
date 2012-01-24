@@ -31,6 +31,8 @@ using bbque::ApplicationManagerStatusIF;
 using bbque::app::ApplicationStatusIF;
 using bbque::res::ResourceAccounter;
 using bbque::res::ResourceAccounterStatusIF;
+using bbque::res::ResourcePtr_t;
+using bbque::res::ResourcePtrList_t;
 
 namespace bbque {
 
@@ -55,6 +57,7 @@ public:
 		return instance;
 	}
 
+	/// ...........................: APPLICATIONS :...........................
 
 	/**
 	 * @brief Return the first app at the specified priority
@@ -133,6 +136,9 @@ public:
 		return am.LowestPriority();
 	}
 
+
+	/// .............................: RESOURCES :............................
+
 	/**
 	 * @see ResourceAccounterStatusIF::Available()
 	 */
@@ -177,26 +183,23 @@ public:
 		return ra.Used(rsrc_list);
 	}
 
+	/**
+	 * @see ResourceAccounterStatusIF::GetResource()
 	 */
-	inline res::ResourcePtr_t GetResource(std::string const & path) const {
+	inline ResourcePtr_t GetResource(std::string const & path) const {
 		return ra.GetResource(path);
 	}
 
 	/**
-	 * @brief List of resource descriptors matching a template path
-	 * @param path Resource template path
-	 * @return A list of resource descriptors
+	 * @see ResourceAccounterStatusIF::GetResources()
 	 */
-	inline res::ResourcePtrList_t
-	GetResources(std::string const & temp_path) const {
-			return ra.GetResources(temp_path);
+	inline ResourcePtrList_t GetResources(std::string const & temp_path)
+		const {
+		return ra.GetResources(temp_path);
 	}
 
 	/**
-	 * @brief Check the existence of a resource, looking for at least one
-	 * compatible matching.
-	 * @param path Resource path
-	 * @return True if the resource exists, false otherwise.
+	 * @see ResourceAccounterStatusIF::ExistResources()
 	 */
 	inline bool ExistResource(std::string const & path) const {
 		return ra.ExistResource(path);
