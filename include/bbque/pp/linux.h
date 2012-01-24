@@ -207,6 +207,9 @@ private:
 	ExitCode_t ParseNodeAttributes(struct cgroup_file_info &entry,
 			RLinuxBindingsPtr_t prlb);
 
+
+	const char* _GetPlatformID();
+
 	/**
 	 * @brief Parse the resources assigned to Bqrbeque by CGroup
 	 *

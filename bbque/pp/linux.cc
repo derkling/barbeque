@@ -24,6 +24,8 @@
 
 #include <string.h>
 
+#define BBQUE_LINUXPP_PLATFORM_ID		"org.linux.cgroup"
+
 #define BBQUE_LINUXPP_SILOS 			"bbq_silos"
 
 #define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
@@ -247,6 +249,12 @@ LinuxPP::ParseNode(struct cgroup_file_info &entry) {
 	pp_result = RegisterCluster(prlb);
 	return pp_result;
 
+}
+
+const char*
+LinuxPP::_GetPlatformID() {
+	static const char linuxPlatformID[] = BBQUE_LINUXPP_PLATFORM_ID;
+	return linuxPlatformID;
 }
 
 LinuxPP::ExitCode_t
