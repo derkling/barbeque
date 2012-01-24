@@ -483,11 +483,17 @@ LinuxPP::GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd) {
 
 LinuxPP::ExitCode_t
 LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
-		bool move) {
+		bool excl, bool move) {
 	int result;
 
 	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
 	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
+
+	// Setting CPUs as EXCLUSIVE if required
+	if (excl) {
+		cgroup_set_value_string(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM, "1");
+	}
 
 	if (move) {
 		logger->Notice("PLAT LNX: [%s] => {cpus [%s], mems [%s]}",
@@ -525,7 +531,7 @@ LinuxPP::_Setup(AppPtr_t papp) {
 	}
 
 	// Setup the kernel CGroup with an empty resources assignement
-	SetupCGroup(pcgd, prlb, false);
+	SetupCGroup(pcgd, prlb, false, false);
 
 	// Reclaim application resource, thus moving this app into the silos
 	result = _ReclaimResources(papp);
@@ -601,7 +607,7 @@ LinuxPP::_MapResources(AppPtr_t papp, UsagesMapPtr_t pum, RViewToken_t rvt,
 	//prlb->mems << "0";
 
 	// Configure the CGroup based on resource bindings
-	SetupCGroup(pcgd, prlb);
+	SetupCGroup(pcgd, prlb, excl, true);
 
 	logger->Debug("PLAT LNX: CGroup resource mapping DONE!");
 	return OK;

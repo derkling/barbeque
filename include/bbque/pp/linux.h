@@ -222,7 +222,7 @@ private:
 
 	ExitCode_t GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd);
 	ExitCode_t SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
-			bool move = true);
+			bool excl = false, bool move = true);
 
 };
 
