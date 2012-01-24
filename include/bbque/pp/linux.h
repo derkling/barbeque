@@ -44,6 +44,7 @@
  */
 #define PLAT_LNX_ATTRIBUTE PLATFORM_PROXY_NAMESPACE".lnx"
 
+using bbque::res::UsagePtr_t;
 using bbque::res::ResourcePtr_t;
 using bbque::utils::AttributesContainer;
 
@@ -212,6 +213,8 @@ private:
 
 	uint8_t GetRLinuxId(ResourcePtr_t pres);
 
+	ExitCode_t ParseBindings(AppPtr_t papp, RViewToken_t rvt,
+			RLinuxBindingsPtr_t prlb, UsagePtr_t pusage);
 	ExitCode_t GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 		RViewToken_t rvt, RLinuxBindingsPtr_t prlb);
 

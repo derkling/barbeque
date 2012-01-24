@@ -314,15 +314,51 @@ LinuxPP::GetRLinuxId(br::ResourcePtr_t pres) {
 }
 
 LinuxPP::ExitCode_t
+LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
+		RLinuxBindingsPtr_t prlb, br::UsagePtr_t pusage) {
+	br::ResourcePtrList_t::iterator rit;
+	char buff[] = "123456789,";
+	br::ResourcePtr_t pres;
+	unsigned char rid;
+
+	rit = pusage->binds.begin();
+	for ( ; rit != pusage->binds.end(); ++rit) {
+		pres = (*rit);
+
+		// Jump resources not assigned to this application
+		if (!pres->ApplicationUsage(papp, rvt))
+			continue;
+
+		// Get the resource ID
+		rid = GetRLinuxId(pres);
+		sprintf(buff, "%d,", rid);
+
+		// Set the resource Type
+		switch (GetRLinuxType(pres)) {
+		case RLINUX_TYPE_SMEM:
+			strcat(prlb->mems, buff);
+			logger->Debug("PLAT LNX: adding MEMORY %d", rid);
+			break;
+		case RLINUX_TYPE_CPU:
+			strcat(prlb->cpus, buff);
+			logger->Debug("PLAT LNX: adding CPU %d", rid);
+			break;
+		default:
+			// Just to mute compiler warnings..
+			break;
+		}
+	}
+
+	return OK;
+
+}
+
+LinuxPP::ExitCode_t
 LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 		RViewToken_t rvt, RLinuxBindingsPtr_t prlb) {
-	br::ResourcePtrList_t::iterator rit;
 	br::UsagesMap_t::iterator uit;
-	br::ResourcePtr_t pres;
 	br::UsagePtr_t pusage;
 	const char *pname;
-	unsigned char rid;
-	char buff[] = "123456789,";
 
 	uit = pum->begin();
 	for ( ; uit != pum->end(); ++uit) {
@@ -341,33 +377,7 @@ LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 				prlb->node_id, prlb->socket_id);
 
 		// Parse bindings...
-		rit = pusage->binds.begin();
-		for ( ; rit != pusage->binds.end(); ++rit) {
-			pres = (*rit);
-
-			// Jump resources not assigned to this application
-			if (!pres->ApplicationUsage(papp, rvt))
-				continue;
-
-			// Get the resource ID
-			rid = GetRLinuxId(pres);
-			sprintf(buff, "%d,", rid);
-
-			// Set the resource Type
-			switch (GetRLinuxType(pres)) {
-			case RLINUX_TYPE_SMEM:
-				strcat(prlb->mems, buff);
-				logger->Debug("PLAT LNX: adding MEMORY %d", rid);
-				break;
-			case RLINUX_TYPE_CPU:
-				strcat(prlb->cpus, buff);
-				logger->Debug("PLAT LNX: adding CPU %d", rid);
-				break;
-			default:
-				// Just to mute compiler warnings..
-				break;
-			}
-		}
+		ParseBindings(papp, rvt, prlb, pusage);
 	}
 
 	// clean-up leading commas
