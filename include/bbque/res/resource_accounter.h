@@ -228,8 +228,8 @@ public:
 	 * resource set, then check thier availability, and finally reserves, for
 	 * each resource in the usages map specified, the required quantity.
 	 *
-	 * @param app The application requiring resource usages
-	 * @param usages Map of ResourceUsage objects
+	 * @param papp The application requiring resource usages
+	 * @param rsrc_usages Map of ResourceUsage objects
 	 * @param vtok The token referencing the resource state view
 	 * @param do_check If true the controls upon set validity and resources
 	 * availability are enabled
@@ -254,7 +254,7 @@ public:
 	 * It lookups the current set of resource usages of the application and
 	 * release it all.
 	 *
-	 * @param app The application holding the resources
+	 * @param papp The application holding the resources
 	 * @param vtok The token referencing the resource state view
 	 */
 	void ReleaseResources(AppPtr_t papp, RViewToken_t vtok = 0);

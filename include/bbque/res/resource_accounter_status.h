@@ -151,8 +151,8 @@ public:
 	 *
 	 * @return The amount of resource available
 	 */
-	virtual uint64_t Available(std::string const & path, RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t())
-		const = 0;
+	virtual uint64_t Available(std::string const & path, RViewToken_t vtok = 0,
+			AppPtr_t papp = AppPtr_t()) const = 0;
 
 	/**
 	 * @brief Amount of resources available

@@ -1,15 +1,9 @@
 /**
  *       @file  resource_accounter_conf.h
- *      @brief  "Update" ResourceAccounter status interface
+ *      @brief  Subset of ResourceAccounter write interface
  *
- * This defines the "update" status interface for ResourceAccounter.
- * This interface allows the update of resource states information. For
- * instance, when the Application Manager receive a notify upon an Application
- * working mode switch. In such case an update about the resource usages is
- * needed.
- * Moreover when Barbeque check for the platform resources, we need a method
- * for register the resources, filling a descriptor with the information
- * exposed by the platform.
+ * This export some write method of class ResourceAccounter in order to make
+ * it available to module components.
  *
  *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
  *
@@ -36,8 +30,8 @@ namespace bbque { namespace res {
 /**
  * @class ResourceAccounterConfIF
  *
- * This interface allow the update of runtime resource information into the
- * Resource Accounter component.
+ * This virtual class provides the access to a subset of write interface of
+ * the Resource Accounter.
  */
 class ResourceAccounterConfIF: public ResourceAccounterStatusIF {
 
@@ -58,7 +52,8 @@ public:
 	 *
 	 * @param who_req A string identifying who requires the resource view
 	 * @param tok The token to return for future references to the view
-	 * @return @see ExitCode_t
+	 * @return RA_SUCCESS if a valid token has been returned.
+	 * RA_ERR_MISS_PATH if the identifier path is empty.
 	 */
 	virtual ExitCode_t GetView(std::string who_req, RViewToken_t & tok) = 0;
 
