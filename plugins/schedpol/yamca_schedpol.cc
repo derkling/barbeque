@@ -487,17 +487,9 @@ inline float GetMigrationOverhead(AppPtr_t const & papp,
 
 inline float GetReconfigOverhead(AppPtr_t const & papp,
 		AwmPtr_t const & wm) {
-
-	if (papp->CurrentAWM() && (papp->CurrentAWM() != wm)) {
-		OverheadPtr_t reconf_over(
-				papp->CurrentAWM()->OverheadInfo(wm->Id()));
-		if (reconf_over){
-
-//			logger->Debug("Reconfiguration overhead : %.4f",
-//					reconf_over->MaxTime());
-			return reconf_over->MaxTime();
-		}
-	}
+	// Silence args warnings
+	(void) papp;
+	(void) wm;
 
 //	logger->Debug("Reconfiguration overhead : 0.0");
 	return 0.0;
