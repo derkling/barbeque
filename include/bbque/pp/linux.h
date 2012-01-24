@@ -40,6 +40,14 @@
 #define DEFAULT_MAX_MEMS 16
 
 /**
+ * @brief The CGroup expected to assigne resources to BBQ
+ *
+ * Resources which are assignet to Barbeque for Run-Time Management
+ * are expected to be define under this control group.
+ */
+#define BBQUE_LINUXPP_RESOURCES "bbque"
+
+/**
  * @brief The namespace of the Linux platform integration module
  */
 #define PLAT_LNX_ATTRIBUTE PLATFORM_PROXY_NAMESPACE".lnx"
@@ -110,20 +118,24 @@ private:
 
 	typedef struct CGroupData : public AttributesContainer::Attribute {
 		AppPtr_t papp; /** The controlled application */
-		char cgpath[20]; // "bbq/12345:ABCDEF:00";
+#define BBQUE_LINUXPP_CGROUP_PATH_MAX 22 // "bbque/12345:ABCDEF:00";
+		char cgpath[BBQUE_LINUXPP_CGROUP_PATH_MAX];
 		struct cgroup *pcg;
 		struct cgroup_controller *pc_cpuset;
 
 		CGroupData(AppPtr_t pa) :
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
 			papp(pa), pcg(NULL), pc_cpuset(NULL) {
-			snprintf(cgpath, 20, "bbq/%s", papp->StrId());
+			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
+					BBQUE_LINUXPP_RESOURCES"/%s",
+					papp->StrId());
 		}
 
 		CGroupData(const char *cgp) :
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
 			pcg(NULL), pc_cpuset(NULL) {
-			snprintf(cgpath, 20, "%s", cgp);
+			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
+					"%s", cgp);
 		}
 
 		~CGroupData() {

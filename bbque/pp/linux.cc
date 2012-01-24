@@ -24,7 +24,6 @@
 
 #include <string.h>
 
-#define BBQUE_LINUXPP_RESOURCES 		"bbq_resources"
 #define BBQUE_LINUXPP_SILOS 			"bbq_silos"
 
 #define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
