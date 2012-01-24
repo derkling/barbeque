@@ -398,7 +398,8 @@ LinuxPP::BuildCGroup(CGroupDataPtr_t &pcgd) {
 	pcgd->pc_cpuset = cgroup_add_controller(pcgd->pcg, "cpuset");
 	if (!pcgd->pcg) {
 		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
-				"(Error: libcgroup, [cpuset] \"controller\" creation)");
+				"(Error: libcgroup, [cpuset] \"controller\" "
+				"creation failed)");
 		return MAPPING_FAILED;
 	}
 
@@ -418,7 +419,8 @@ LinuxPP::BuildCGroup(CGroupDataPtr_t &pcgd) {
 
 LinuxPP::ExitCode_t
 LinuxPP::BuildSilosCG(CGroupDataPtr_t &pcgd) {
-	RLinuxBindingsPtr_t prlb(new RLinuxBindings_t(MaxCpusCount, MaxMemsCount));
+	RLinuxBindingsPtr_t prlb(new RLinuxBindings_t(
+				MaxCpusCount, MaxMemsCount));
 	ExitCode_t result;
 	int error;
 
@@ -433,8 +435,10 @@ LinuxPP::BuildSilosCG(CGroupDataPtr_t &pcgd) {
 	sprintf(prlb->mems, "0");
 
 	// Configuring silos constraints
-	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
-	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
+	cgroup_set_value_string(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
+	cgroup_set_value_string(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
 
 	// Updating silos constraints
 	logger->Notice("PLAT LNX: Updating kernel CGroup [%s]", pcgd->cgpath);
@@ -462,8 +466,8 @@ LinuxPP::GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd) {
 
 	// Loop-up for application control group data
 	pcgd = std::static_pointer_cast<CGroupData_t>(
-				papp->GetAttribute(PLAT_LNX_ATTRIBUTE, "cgroup")
-				);
+			papp->GetAttribute(PLAT_LNX_ATTRIBUTE, "cgroup")
+		);
 	if (pcgd)
 		return OK;
 
@@ -473,8 +477,8 @@ LinuxPP::GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd) {
 		return result;
 
 	// Keep track of this control group
-	// FIXME check return value otherwise multiple BuildCGroup could be called
-	// for the same application
+	// FIXME check return value otherwise multiple BuildCGroup could be
+	// called for the same application
 	papp->SetAttribute(pcgd);
 
 	return OK;
@@ -486,8 +490,10 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 		bool excl, bool move) {
 	int result;
 
-	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
-	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
+	cgroup_set_value_string(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
+	cgroup_set_value_string(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
 
 	// Setting CPUs as EXCLUSIVE if required
 	if (excl) {
@@ -518,7 +524,8 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 
 LinuxPP::ExitCode_t
 LinuxPP::_Setup(AppPtr_t papp) {
-	RLinuxBindingsPtr_t prlb(new RLinuxBindings_t(MaxCpusCount, MaxMemsCount));
+	RLinuxBindingsPtr_t prlb(new RLinuxBindings_t(
+				MaxCpusCount, MaxMemsCount));
 	ExitCode_t result = OK;
 	CGroupDataPtr_t pcgd;
 
