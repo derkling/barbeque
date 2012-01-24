@@ -39,7 +39,8 @@ namespace bbque {
 
 PlatformProxy::PlatformProxy() :
 	trdRunning(false),
-	done(false) {
+	done(false),
+	platformIdentifier(NULL) {
 
 	// Get a logger module
 	std::string logger_name(PLATFORM_PROXY_NAMESPACE);
@@ -122,9 +123,19 @@ PlatformProxy::LoadPlatformData() {
 	return OK;
 #endif // BBQUE_TEST_PLATFORM_DATA
 
+	platformIdentifier = _GetPlatformID();
+
 	// Platform specific resources enumeration
 	logger->Debug("PLAT PRX: loading platform data");
 	result = _LoadPlatformData();
+	if (unlikely(result != OK)) {
+		logger->Fatal("PLAT PRX: Platform [%s] initialization FAILED",
+				GetPlatformID());
+		return result;
+	}
+
+	logger->Notice("PLAT PRX: Platform [%s] initialization COMPLETED",
+			GetPlatformID());
 	return result;
 }
 

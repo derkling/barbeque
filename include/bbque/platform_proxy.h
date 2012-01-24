@@ -126,6 +126,18 @@ public:
 	 */
 	ExitCode_t LoadPlatformData();
 
+
+	/**
+	 * @breif Return the string ID of the target platform
+	 *
+	 * Each platform is uniquely identifyed by a string identifier. This
+	 * method return a pointer to that string.
+	 *
+	 * @return A poiinter to the platform string identifier
+	 */
+	const char* GetPlatformID() const {
+		return platformIdentifier;
+	};
 /**
  * @}
  * @name Resource state monitoring
@@ -234,9 +246,20 @@ protected:
 	 */
 	PlatformProxy();
 
+
+	/**
+	 * @brief The platform specific string identifier
+	 */
+	const char *platformIdentifier;
+
 /*******************************************************************************
  *  Platform Specific (low-level) methods
  ******************************************************************************/
+
+	/**
+	 * @brief Return the Platform specific string identifier
+	 */
+	virtual const char* _GetPlatformID() = 0;
 
 	/**
 	 * @brief Platform specific resource setup interface.
