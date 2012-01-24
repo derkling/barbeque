@@ -24,6 +24,11 @@
 
 #include <string.h>
 
+#define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
+#define BBQUE_LINUXPP_MEMS_PARAM 		"cpuset.mems"
+#define BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM 	"cpuset.cpu_exclusive"
+#define BBQUE_LINUXPP_MEM_EXCLUSIVE_PARAM 	"cpuset.mem_exclusive"
+
 namespace bb = bbque;
 namespace br = bbque::res;
 
@@ -424,8 +429,8 @@ LinuxPP::BuildSilosCG(CGroupDataPtr_t &pcgd) {
 	sprintf(prlb->mems, "0");
 
 	// Configuring silos constraints
-	cgroup_set_value_string(pcgd->pc_cpuset, "cpus", prlb->cpus);
-	cgroup_set_value_string(pcgd->pc_cpuset, "mems", prlb->mems);
+	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
+	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
 
 	// Updating silos constraints
 	logger->Notice("PLAT LNX: Updating kernel CGroup [%s]", pcgd->cgpath);
@@ -477,8 +482,8 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 		bool move) {
 	int result;
 
-	cgroup_set_value_string(pcgd->pc_cpuset, "cpus", prlb->cpus);
-	cgroup_set_value_string(pcgd->pc_cpuset, "mems", prlb->mems);
+	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
+	cgroup_set_value_string(pcgd->pc_cpuset, BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
 
 	if (move) {
 		logger->Notice("PLAT LNX: [%s] => {cpus [%s], mems [%s]}",
