@@ -68,6 +68,9 @@
 /** Get number of entries of the specified array */
 #define ARRAY_SIZE(x) (sizeof(x)/sizeof(x[0]))
 
+/** Get a string lenght at compile time (null terminator not counted) */
+#define STRLEN(s) ((sizeof(s)/sizeof(s[0]))-1)
+
 /** Optimize branch prediction for "taken" */
 #define likely(x)       __builtin_expect((x),1)
 /** Optimize branch prediction for "untaken" */
