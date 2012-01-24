@@ -633,7 +633,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	}
 
 	// Bind the resource set to the working mode
-	awm->SetSchedResourceBinding();
+	awm->SetResourceBinding();
 
 	// Reschedule accordingly to "awm"
 	logger->Debug("Rescheduling [%s] into AWM [%d:%s]...",

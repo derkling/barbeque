@@ -230,7 +230,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 }
 
 
-WorkingMode::ExitCode_t WorkingMode::SetSchedResourceBinding() {
+WorkingMode::ExitCode_t WorkingMode::SetResourceBinding() {
 	ClustersBitSet clust_tmp;
 
 	// The binding map must have the same size of resource usages map built

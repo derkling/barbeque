@@ -211,7 +211,7 @@ public:
 	 *
 	 * @return WM_SUCCESS, or WM_RSRC_MISS_BIND if some bindings are missing
 	 */
-	ExitCode_t SetSchedResourceBinding();
+	ExitCode_t SetResourceBinding();
 
 	/**
 	 * @see WorkingModeConfIF
@@ -238,7 +238,7 @@ public:
 	/**
 	 * @brief Clear the scheduled resource binding
 	 *
-	 * The method reverts the effects of ScheduleResourceBinding()
+	 * The method reverts the effects of SetResourceBinding()
 	 */
 	inline void ClearResourceBinding() {
 		resources.to_sync->clear();
@@ -309,7 +309,7 @@ private:
 		 * BindResource calls */
 		UsagesMapPtr_t on_sched;
 		/** The map of the resource bindings allocated for the working mode.
-		 * This is set by SetSchedResourceBinding() as a commit of the
+		 * This is set by SetResourceBinding() as a commit of the
 		 * bindings performed, reasonably by the scheduling policy.	 */
 		UsagesMapPtr_t to_sync;
 	} resources;
