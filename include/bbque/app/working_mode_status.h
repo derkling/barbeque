@@ -80,7 +80,7 @@ public:
 
 	/**
 	 * @brief Working Mode ID
-	 * @return ID number
+	 * @return An integer number
 	 */
 	virtual uint8_t Id() const = 0;
 
@@ -92,13 +92,14 @@ public:
 
 	/**
 	 * @brief Get the QoS value associated to the working mode
+	 * @return A floating point value
 	 */
 	virtual float Value() const = 0;
 
 	/**
-	 * @brief Get the usage value of a resource
+	 * @brief The amount required of a specific resource
 	 * @param res_path Resource path
-	 * @return The usage value
+	 * @return A floating point value
 	 */
 	virtual uint64_t ResourceUsageAmount(std::string const & res_path)
 		const = 0;

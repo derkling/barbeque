@@ -216,7 +216,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
 
-			logger->Debug("Binding: {%s} [amount = %llu #binds = %d]",
+			logger->Debug("Binding: {%s} \t[amount = %llu #binds = %d]",
 					rcp_path.c_str(), pusage->GetAmount(),
 					pusage->GetBindingList().size());
 		}

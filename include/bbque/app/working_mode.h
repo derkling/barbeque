@@ -153,9 +153,16 @@ public:
 	}
 
 	/**
-	 * @brief Set a resource usage
+	 * @brief Set the amount of a resource usage request
+	 *
+	 * This method should be mainly called by the recipe loader.
+	 *
 	 * @param rsrc_path Resource path
 	 * @param amount The usage amount
+	 *
+	 * @return WM_RSRC_NOT_FOUND if the resource cannot be found in the
+	 * system. WM_RSRC_USAGE_EXCEEDS if the amount required overhelms the
+	 * total availability. WM_SUCCESS if the request has been correctly added
 	 */
 	ExitCode_t AddResourceUsage(std::string const & rsrc_path, uint64_t amount);
 
