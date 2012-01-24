@@ -135,7 +135,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 
 LinuxPP::ExitCode_t
 LinuxPP::RegisterCluster(RLinuxBindingsPtr_t prlb) {
-	ExitCode_t pp_result;
+	ExitCode_t pp_result = OK;
 
 	logger->Debug("PLAT LNX: Setup resources for Node [%d], "
 			"CPUs [%s], MEMs [%s]",
@@ -145,7 +145,7 @@ LinuxPP::RegisterCluster(RLinuxBindingsPtr_t prlb) {
 	// 1-3,4,5-7
 	pp_result = RegisterClusterCPUs(prlb);
 
-	return OK;
+	return pp_result;
 }
 
 LinuxPP::ExitCode_t
