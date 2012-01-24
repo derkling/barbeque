@@ -150,7 +150,7 @@ LinuxPP::RegisterCluster(RLinuxBindingsPtr_t prlb) {
 LinuxPP::ExitCode_t
 LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		RLinuxBindingsPtr_t prlb) {
-	char group_name[] = BBQUE_LINUXPP_RESOURCES "/node123";
+	char group_name[] = BBQUE_LINUXPP_RESOURCES "/" BBQUE_LINUXPP_CLUSTER "123";
 	struct cgroup_controller *cg_cpuset = NULL;
 	struct cgroup *bbq_node = NULL;
 	ExitCode_t pp_result = OK;
@@ -159,9 +159,15 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 	// Read "cpuset" attributes from kernel
 	logger->Debug("PLAT LNX: Loading kernel info for [%s]...", entry.path);
 
+
 	// Initialize the CGroup variable
-	sscanf(entry.path+4, "%hu", &prlb->socket_id);
-	snprintf(group_name+18, 4, "%d", prlb->socket_id);
+	sscanf(entry.path + STRLEN(BBQUE_LINUXPP_CLUSTER), "%hu",
+			&prlb->socket_id);
+	snprintf(group_name +
+			STRLEN(BBQUE_LINUXPP_RESOURCES) +   // e.g. "bbque"
+			STRLEN(BBQUE_LINUXPP_CLUSTER) + 1,  // e.g. "/" + "node"
+			4, "%d",
+			prlb->socket_id);
 	bbq_node = cgroup_new_cgroup(group_name);
 	if (bbq_node == NULL) {
 		logger->Error("PLAT LNX: Parsing resources FAILED! "
@@ -221,9 +227,11 @@ LinuxPP::ParseNode(struct cgroup_file_info &entry) {
 			entry.depth, entry.full_path);
 
 	// Consistency check for required folder names
-	if (strncmp("node", entry.path, 4)) {
+	if (strncmp(BBQUE_LINUXPP_CLUSTER, entry.path,
+				STRLEN(BBQUE_LINUXPP_CLUSTER))) {
 		logger->Warn("PLAT LNX: Resources enumeration, "
-				"ignoring unexpected CGroup [%s]", entry.full_path);
+				"ignoring unexpected CGroup [%s]",
+				entry.full_path);
 		return OK;
 	}
 

@@ -48,6 +48,14 @@
 #define BBQUE_LINUXPP_RESOURCES "bbque"
 
 /**
+ * @brief The CGroup expected to define Clusters
+ *
+ * Resources managed by Barbeque are clusterized by grouping available
+ * platform resources into CGroups which name start with this radix.
+ */
+#define BBQUE_LINUXPP_CLUSTER "node"
+
+/**
  * @brief The namespace of the Linux platform integration module
  */
 #define PLAT_LNX_ATTRIBUTE PLATFORM_PROXY_NAMESPACE".lnx"
