@@ -135,8 +135,8 @@ int FifoRPC::Init() {
 size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	br::rpc_fifo_header_t hdr;
 	void *fifo_buff_ptr;
+	ssize_t result;
 	size_t bytes;
-	size_t result;
 
 	logger->Debug("FIFO RPC: waiting message...");
 
@@ -159,6 +159,16 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 		// Remove the remaining message from the FIFO
 		for ( ; bytes<hdr.fifo_msg_size; bytes++) {
 			result = ::read(rpc_fifo_fd, (void*)&c, sizeof(char));
+			if (likely(result != -1))
+				continue;
+
+			// FIXME If a read fails at that point, the FIFO queue
+			// could be dirty with pending bytes of the current
+			// header message... a proper clean-up procedure
+			// should be activated, e.g. lookup for the next
+			// HEADER.
+			logger->Error("FIFO RPC: read FAILED (Error: %s)",
+					::strerror(errno));
 		}
 		return 0;
 	}
@@ -173,6 +183,8 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 		result = ::read(rpc_fifo_fd,
 			&(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->rpc_fifo),
 			hdr.fifo_msg_size - FIFO_PKT_SIZE(header));
+		if (unlikely(result == -1))
+			goto exit_read_failed;
 
 		msg = (rpc_msg_ptr_t)&(((br::rpc_fifo_APP_PAIR_t*)fifo_buff_ptr)->pyl);
 		logger->Debug("FIFO RPC: Rx FIFO_HDR [sze: %hd, off: %hd, typ: %hd] "
@@ -189,6 +201,8 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 		result = ::read(rpc_fifo_fd,
 			&(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl),
 			hdr.fifo_msg_size - FIFO_PKT_SIZE(header));
+		if (unlikely(result == -1))
+			goto exit_read_failed;
 
 		msg = &(((br::rpc_fifo_GENERIC_t*)fifo_buff_ptr)->pyl);
 		logger->Debug("FIFO RPC: Rx FIFO_HDR [sze: %hd, off: %hd, typ: %hd] "
@@ -212,6 +226,16 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	//RPC_FIFO_HEX_DUMP_BUFFER(fifo_buff_ptr, hdr.fifo_msg_size);
 
 	return bytes;
+
+exit_read_failed:
+
+	logger->Error("FIFO RPC: read RPC message FAILED (Error: %s)",
+			::strerror(errno));
+
+	free(fifo_buff_ptr);
+	msg = NULL;
+
+	return 0;
 }
 
 RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
