@@ -38,18 +38,6 @@ class WorkingModeConfIF: public WorkingModeStatusIF {
 public:
 
 	/**
-	 * @brief Init a new transition overheads descriptor
-	 *
-	 * Create a new object TransitionOverheads managing the overhead
-	 * information in switching to 'dest_awm' working mode.
-	 *
-	 * @param dest_awm_id Destination working mode ID
-	 * @param time Time spent in switching to destination working mode
-	 * @return A reference to the TransitionOverheads just created
-	 */
-	virtual ExitCode_t AddOverheadInfo(uint8_t dest_awm_id, double time) = 0;
-
-	/**
 	 * @brief Bind resource usages to system resources descriptors
 	 *
 	 * Resource paths taken from the recipes use IDs that do not care about

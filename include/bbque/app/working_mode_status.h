@@ -39,14 +39,9 @@ namespace bbque { namespace app {
 
 // Forward declarations
 class Application;
-class TransitionOverheads;
 
 /** Shared pointer to Application  */
 typedef std::shared_ptr<Application> AppPtr_t;
-/**  Shared pointer to TransitionOverheads */
-typedef std::shared_ptr<TransitionOverheads> OverheadPtr_t;
-/** Map of OverheadPtr_t. Key: destination working mode name */
-typedef std::map<uint8_t, OverheadPtr_t> OverheadsMap_t;
 /** Bitset for clusters use monitoring */
 typedef std::bitset<MAX_NUM_CLUSTERS> ClustersBitSet;
 
@@ -120,14 +115,6 @@ public:
 	 * @return The number of resource usages
 	 */
 	virtual size_t NumberOfResourceUsages() const = 0;
-
-	/**
-	 * @brief Retrieve overhead information about switching to <tt>awm_name</tt>
-	 * working mode
-	 * @param dest_awm_id Destination working mode ID
-	 * @return A pointer to the TransitionOverheads object
-	 */
-	virtual OverheadPtr_t OverheadInfo(uint8_t dest_awm_id) const = 0;
 
 	/**
 	 * @brief Current resource usages bound with the system resources

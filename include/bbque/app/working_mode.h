@@ -181,24 +181,6 @@ public:
 	/**
 	 * @see WorkingModeConfIF
 	 */
-	ExitCode_t AddOverheadInfo(uint8_t dest_awm_id, double time);
-
-	/**
-	 * @see WorkingModeStatusIF
-	 */
-	OverheadPtr_t OverheadInfo(uint8_t dest_awm_id) const;
-
-	/**
-	 * @brief Remove switching overhead information
-	 * @param dest_awm_id Destination working mode ID
-	 */
-	inline void RemoveOverheadInfo(uint8_t dest_awm_id) {
-		overheads.erase(dest_awm_id);
-	}
-
-	/**
-	 * @see WorkingModeConfIF
-	 */
 	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
 			ResID_t dst_ID);
 
@@ -324,9 +306,6 @@ private:
 		 * bindings performed, reasonably by the scheduling policy.	 */
 		UsagesMapPtr_t to_sync;
 	} resources;
-
-	/** The overheads coming from switching to other working modes */
-	OverheadsMap_t overheads;
 
 	/**
 	 * @struct ClustersInfo

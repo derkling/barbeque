@@ -29,7 +29,6 @@
 #include "bbque/application_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
-#include "bbque/app/overheads.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resource_accounter.h"
 

@@ -29,7 +29,6 @@
 #include "bbque/plugin_manager.h"
 
 #include "bbque/app/application.h"
-#include "bbque/app/overheads.h"
 #include "bbque/app/recipe.h"
 #include "bbque/res/resource_accounter.h"
 #include "bbque/utils/utility.h"
@@ -62,7 +61,6 @@ WorkingMode::WorkingMode(uint8_t _id,
 
 
 WorkingMode::~WorkingMode() {
-	overheads.clear();
 	resources.from_recp.clear();
 	resources.to_sync->clear();
 }
@@ -153,49 +151,6 @@ WorkingMode::ResourceUsageRef(std::string const & rsrc_path) const {
 
 	// Return the ResourceUsage object
 	return rsrc_it->second;
-}
-
-
-WorkingMode::ExitCode_t WorkingMode::AddOverheadInfo(uint8_t _dest_awm_id,
-		double _time) {
-	// Check the existance of the destination AWM
-	assert(owner->GetRecipe().get() != NULL);
-	if (!(owner->GetRecipe()->GetWorkingMode(_dest_awm_id))) {
-		logger->Warn("AddOvhead: AWM{%d} not found in {%s}",
-		             _dest_awm_id, owner->StrId());
-		return WM_NOT_FOUND;
-	}
-
-	// Update overhead info
-	OverheadsMap_t::iterator it(overheads.find(_dest_awm_id));
-	if (it == overheads.end()) {
-		overheads.insert(std::pair<uint8_t, OverheadPtr_t>(
-					_dest_awm_id, OverheadPtr_t(
-						new TransitionOverheads(_time))));
-	}
-	else {
-		it->second->IncCount();
-		it->second->SetSwitchTime(_time);
-	}
-
-	// Debug messages
-	logger->Debug("AWM{%d} -> AWM{%d}  overhead [t] :\n", id, _dest_awm_id);
-	logger->Debug("\tlast : %.4f", OverheadInfo(_dest_awm_id)->LastTime());
-	logger->Debug("\tmin  : %.4f", OverheadInfo(_dest_awm_id)->MinTime());
-	logger->Debug("\tmax  : %.4f", OverheadInfo(_dest_awm_id)->MaxTime());
-	logger->Debug("\tcount  : %d", OverheadInfo(_dest_awm_id)->Count());
-
-	return WM_SUCCESS;
-}
-
-
-OverheadPtr_t WorkingMode::OverheadInfo(uint8_t _dest_awm_id) const {
-	// Overhead descriptor of the destination working mode
-	OverheadsMap_t::const_iterator it(overheads.find(_dest_awm_id));
-	if (it != overheads.end())
-		return it->second;
-	// Otherwise... null pointer return
-	return OverheadPtr_t();
 }
 
 
