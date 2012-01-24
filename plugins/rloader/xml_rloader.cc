@@ -325,6 +325,11 @@ inline uint8_t XMLRecipeLoader::getResourceAttributes(
 		return __RSRC_FORMAT_ERR;
 	}
 
+	// If the quantity is 0 return without adding the resource request to the
+	// current AWM
+	if (res_usage == 0)
+		return __RSRC_SUCCESS;
+
 	// Convert the usage value accordingly to the units, and then append the
 	// request to the working mode.
 	res_usage = ConvertValue(res_usage, res_units);
