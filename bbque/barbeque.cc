@@ -109,7 +109,10 @@ int main(int argc, char *argv[]) {
 		return Tests(pm);
 
 	// Let's start baking applications...
-	bb::ResourceManager::GetInstance().Go();
+	bb::ResourceManager::ExitCode_t result =
+		bb::ResourceManager::GetInstance().Go();
+	if (result != bb::ResourceManager::ExitCode_t::OK)
+		return EXIT_FAILURE;
 
 
 	// Cleaning-up the grill
