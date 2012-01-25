@@ -34,7 +34,7 @@ namespace bbque { namespace app {
 
 
 WorkingMode::WorkingMode() {
-
+	resources.on_sched.resize(MAX_NUM_BINDINGS);
 }
 
 
@@ -47,6 +47,9 @@ WorkingMode::WorkingMode(uint8_t _id,
 	// Value must be positive
 	_value > 0 ?
 		value.recpv = _value: value.recpv = 0;
+
+	// Init the size of the scheduling bindings vector
+	resources.on_sched.resize(MAX_NUM_BINDINGS);
 
 	// Get a logger
 	bp::LoggerIF::Configuration conf(AWM_NAMESPACE);
@@ -151,7 +154,8 @@ WorkingMode::ResourceUsageRef(std::string const & rsrc_path) const {
 WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string const & rsrc_name,
 		ResID_t src_ID,
-		ResID_t dst_ID) {
+		ResID_t dst_ID,
+		uint8_t bid) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	UsagesMap_t::iterator usage_it, it_end;
 
@@ -168,13 +172,13 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	// must be taken from the recipe resource map. Converserly, if a previous
 	// call to this method has been performed, a map of resource usages to
 	// schedule has been created. Thus we must continue the binding...
-	if (!resources.on_sched) {
+	if (!resources.on_sched[bid]) {
 		usage_it = resources.from_recp.begin();
 		it_end = resources.from_recp.end();
 	}
 	else {
-		usage_it = resources.on_sched->begin();
-		it_end = resources.on_sched->end();
+		usage_it = resources.on_sched[bid]->begin();
+		it_end = resources.on_sched[bid]->end();
 	}
 
 	// Proceed with the resource binding...
@@ -186,7 +190,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		// resource path
 		std::string bind_path(
 				ReplaceResourceID(rcp_path, rsrc_name, src_ID, dst_ID));
-		logger->Debug("Binding:	'recipe' [%s] => 'bbque' [%s]",
+		logger->Debug("Binding: 'recipe' [%s] => 'bbque' [%s]",
 				rcp_path.c_str(), bind_path.c_str());
 
 		// Create a new ResourceUsage object and set the binding list
@@ -200,12 +204,12 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	}
 
 	// Update the resource usages map to schedule
-	resources.on_sched = temp_binds;
+	resources.on_sched[bid] = temp_binds;
 
 	// Debug messages
 	DB(
-		usage_it = resources.on_sched->begin();
-		it_end = resources.on_sched->end();
+		usage_it = resources.on_sched[bid]->begin();
+		it_end = resources.on_sched[bid]->end();
 		for (; usage_it != it_end; ++usage_it) {
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
@@ -217,25 +221,25 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 	);
 
 	// Are all the resource usages bound ?
-	if (resources.from_recp.size() < resources.on_sched->size())
+	if (resources.from_recp.size() < resources.on_sched[bid]->size())
 		return WM_RSRC_MISS_BIND;
 
 	return WM_SUCCESS;
 }
 
 
-WorkingMode::ExitCode_t WorkingMode::SetResourceBinding() {
+WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(uint8_t bid) {
 	ClustersBitSet clust_tmp;
 
 	// The binding map must have the same size of resource usages map built
 	// from the recipe
-	if (!resources.on_sched ||
-			(resources.on_sched->size() != resources.from_recp.size()))
+	if (!resources.on_sched[bid] ||
+			(resources.on_sched[bid]->size() != resources.from_recp.size()))
 		return WM_RSRC_MISS_BIND;
 
 	// Init the iterators for the maps
-	UsagesMap_t::iterator bind_it(resources.on_sched->begin());
-	UsagesMap_t::iterator end_bind(resources.on_sched->end());
+	UsagesMap_t::iterator bind_it(resources.on_sched[bid]->begin());
+	UsagesMap_t::iterator end_bind(resources.on_sched[bid]->end());
 	UsagesMap_t::iterator recp_it(resources.from_recp.begin());
 	UsagesMap_t::iterator end_recp(resources.from_recp.end());
 
@@ -268,8 +272,8 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding() {
 	clusters.changed = clusters.prev != clusters.curr;
 
 	// Set the new binding / resource usages map
-	resources.to_sync = resources.on_sched;
-	resources.on_sched.reset();
+	resources.to_sync = resources.on_sched[bid];
+	resources.on_sched[bid].reset();
 
 	return WM_SUCCESS;
 }

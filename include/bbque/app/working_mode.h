@@ -181,13 +181,13 @@ public:
 	 * @see WorkingModeConfIF
 	 */
 	ExitCode_t BindResource(std::string const & rsrc_name, ResID_t src_ID,
-			ResID_t dst_ID);
+			ResID_t dst_ID, uint8_t bid = 0);
 
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline UsagesMapPtr_t GetSchedResourceBinding() const {
-		return resources.on_sched;
+	inline UsagesMapPtr_t GetSchedResourceBinding(uint8_t bid = 0) const {
+		return resources.on_sched[bid];
 	}
 
 	/**
@@ -201,15 +201,19 @@ public:
 	 * This method is invoked during the scheduling step to track the set of
 	 * resources to acquire at the end of the synchronization step.
 	 *
+	 * @param s_bid The scheduling binding id to set ready for synchronization
+	 * (optional)
+	 *
 	 * @return WM_SUCCESS, or WM_RSRC_MISS_BIND if some bindings are missing
 	 */
-	ExitCode_t SetResourceBinding();
+	ExitCode_t SetResourceBinding(uint8_t bid = 0);
 
 	/**
 	 * @see WorkingModeConfIF
 	 */
 	inline void ClearSchedResourceBinding() {
-		resources.on_sched = UsagesMapPtr_t();
+		resources.on_sched.clear();
+		resources.on_sched.resize(MAX_NUM_BINDINGS);
 	}
 
 	/**
@@ -299,7 +303,7 @@ private:
 		UsagesMap_t from_recp;
 		/** The temporary map of resource bindings. This is built by the
 		 * BindResource calls */
-		UsagesMapPtr_t on_sched;
+		std::vector<UsagesMapPtr_t> on_sched;
 		/** The map of the resource bindings allocated for the working mode.
 		 * This is set by SetResourceBinding() as a commit of the
 		 * bindings performed, reasonably by the scheduling policy.	 */

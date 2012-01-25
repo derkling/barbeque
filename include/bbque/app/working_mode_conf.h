@@ -68,6 +68,7 @@ public:
 	 * @param rsrc_name The resource name we want to bind
 	 * @param src_ID Recipe resource name ID
 	 * @param dst_ID System resource name ID
+	 * @param bid An optional binding identifier
 	 *
 	 * @return WM_SUCCESS if the binding has been correctly performed.
 	 * WM_ERR_RSRC_NAME if the resource name specified is not correct, and
@@ -77,7 +78,7 @@ public:
 	 * about its ID.
 	 */
 	virtual ExitCode_t BindResource(std::string const & rsrc_name,
-			ResID_t src_ID, ResID_t dst_ID) = 0;
+			ResID_t src_ID, ResID_t dst_ID, uint8_t bid = 0) = 0;
 
 	/**
 	 * @brief Clear the resource binding to schedule

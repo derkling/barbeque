@@ -291,6 +291,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 		// Schedule the application in the working mode just evaluated
 		app_result = papp->ScheduleRequest(eval_awm, rsrc_view_token);
+		eval_awm->ClearSchedResourceBinding();
 
 		// Debugging messages
 		if (app_result != Application::APP_WM_ACCEPTED) {

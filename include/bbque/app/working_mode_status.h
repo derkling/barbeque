@@ -122,9 +122,13 @@ public:
 	 * scheduling policy. If the method returns a null pointer then the
 	 * resources have been set for being allocated yet.
 	 *
+	 * @param bid A binding identifier. This should be specified if the
+	 * scheduling policy aims to handle more than one binding. Currently the
+	 * range of acceptable values goes from 0 to 255.
+	 *
 	 * @return A map of ResourceUsage objects
 	 */
-	virtual UsagesMapPtr_t GetResourceBinding() const = 0;
+	virtual UsagesMapPtr_t GetSchedResourceBinding(uint8_t bid = 0) const = 0;
 
 	/**
 	 * @brief Get the bitmap of the clusters currently used.
