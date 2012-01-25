@@ -190,6 +190,7 @@ private:
 		RM_SCHED_EMPTY,
 
 		RM_SYNCH_TOTAL,
+		RM_SYNCH_FAILED,
 
 		//----- Sample statistics
 		RM_EVT_TIME,

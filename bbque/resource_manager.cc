@@ -86,6 +86,7 @@ ResourceManager::metrics[RM_METRICS_COUNT] = {
 	RM_COUNTER_METRIC("sch.empty",	"  EMPTY   schedules"),
 
 	RM_COUNTER_METRIC("syn.tot",	"Total Synchronization activations"),
+	RM_COUNTER_METRIC("syn.failed",	"  FAILED synchronizations"),
 
 	//----- Sampling statistics
 	RM_SAMPLE_METRIC("evt.avg.time",  "Avg events processing t[ms]"),
@@ -196,11 +197,11 @@ void ResourceManager::Optimize() {
 	switch(schedResult) {
 	case SchedulerManager::MISSING_POLICY:
 	case SchedulerManager::FAILED:
-		logger->Error("EXC start FAILED (Error: scheduling policy failed)");
+		logger->Warn("Schedule FAILED (Error: scheduling policy failed)");
 		RM_COUNT_EVENT(metrics, RM_SCHED_FAILED);
 		return;
 	case SchedulerManager::DELAYED:
-		logger->Error("EXC start DELAYED");
+		logger->Error("Schedule DELAYED");
 		RM_COUNT_EVENT(metrics, RM_SCHED_DELAYED);
 		return;
 	default:
@@ -229,6 +230,13 @@ void ResourceManager::Optimize() {
 	optimization_tmr.start();
 	syncResult = ym.SyncSchedule();
 	optimization_tmr.stop();
+	if (syncResult != SynchronizationManager::OK) {
+		logger->Warn("====================[ SYNC FAILED ]===================");
+		RM_COUNT_EVENT(metrics, RM_SYNCH_FAILED);
+		// FIXME here we should implement some counter-meaure to
+		// ensure consistency
+		return;
+	}
 	logger->Info("====================[ SYNC ENDED ]====================");
 	am.PrintStatusReport(true);
 	ra.PrintStatusReport(0, true);
