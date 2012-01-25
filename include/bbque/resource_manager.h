@@ -55,6 +55,14 @@ class ResourceManager {
 
 public:
 
+	/**
+	 * @brief Exit codes returned by methods of this class
+	 */
+	typedef enum ExitCode {
+		OK = 0,
+		SETUP_FAILED
+	} ExitCode_t;
+
 	typedef enum controlEvent {
 		EXC_START = 0,
 		EXC_STOP,
@@ -91,7 +99,7 @@ public:
 	 * This will be in charge to load all the required modules and then start
 	 * the control cycle.
 	 */
-	void Go();
+	ExitCode_t Go();
 
 	/**
 	 * @brief Notify an event to the resource manager
@@ -241,7 +249,7 @@ private:
 	 * @brief   The run-time resource manager setup routine
 	 * This provides all the required playground setup to run the Barbeque RTRM.
 	 */
-	void Setup();
+	ExitCode_t Setup();
 
 	/**
 	 * @brief   The run-time resource manager control loop
