@@ -38,8 +38,10 @@ ConfigurationManager::ConfigurationManager() :
 #endif // BBQUE_TEST_PLATFORM_DATA
 	cmd_opts_desc("") {
 
+	// BBQ core options (exposed to command line)
 	core_opts_desc.add_options()
 		("help,h", "print this help message")
+		("daemon,d", "run as daemon in background")
 		("config,c", po::value<std::string>(&conf_file_path)->
 #ifdef BBQUE_DEBUG
 			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf_dbg"),
@@ -53,7 +55,28 @@ ConfigurationManager::ConfigurationManager() :
 		("bbque.test,t", "Run TESTs plugins")
 		("version,v", "print program version")
 		;
+
+	// All options (not all exposed to command line)
 	all_opts_desc.add(core_opts_desc);
+	all_opts_desc.add_options()
+		("bbque.daemon_name", po::value<std::string>(&daemon_name)->
+			default_value(BBQUE_DAEMON_NAME),
+			"the BBQ daemon process name")
+		("bbque.uid", po::value<std::string>(&daemon_uid)->
+			default_value(BBQUE_DAEMON_UID),
+			"user ID to run the daemon under")
+		("bbque.gid", po::value<std::string>(&daemon_gid)->
+			default_value(BBQUE_DAEMON_GID),
+			"group ID to run the daemon under")
+		("bbque.lockfile", po::value<std::string>(&daemon_lockfile)->
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_LOCKFILE),
+			"daemon lock-file")
+		("bbque.rundir", po::value<std::string>(&daemon_rundir)->
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_RUNDIR),
+			"daemon run directory")
+		;
+
+	// Options exposed to command line
 	cmd_opts_desc.add(core_opts_desc);
 
 #ifdef BBQUE_DEBUG

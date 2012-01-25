@@ -25,6 +25,21 @@
  * Installation PATHs
  ******************************************************************************/
 
+/** The Barbeque DAEMON name */
+#define BBQUE_DAEMON_NAME "${BBQUE_DAEMON_NAME}"
+
+/** The Barbeque DAEMON user ID */
+#define BBQUE_DAEMON_UID "${BBQUE_DAEMON_UID}"
+
+/** The Barbeque DAEMON group ID */
+#define BBQUE_DAEMON_GID "${BBQUE_DAEMON_GID}"
+
+/** The Barbeque DAEMON 'lockfile' path */
+#define BBQUE_DAEMON_LOCKFILE "${BBQUE_DAEMON_LOCKFILE}"
+
+/** The Barbeque DAEMON run-directory path */
+#define BBQUE_DAEMON_RUNDIR "${BBQUE_DAEMON_RUNDIR}"
+
 /** The installation path */
 #define BBQUE_PATH_PREFIX "${CMAKE_INSTALL_PREFIX}"
 

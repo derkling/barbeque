@@ -77,6 +77,14 @@ public:
 	}
 
 	/**
+	 * @brief   Check if BBQ should run as a daemon
+	 * @return  true if BBQ should run as a daemon, false otherwise
+	 */
+	inline bool RunAsDaemon() const {
+		return opts_vm.count("daemon");
+	}
+
+	/**
 	 * @brief   Check if plugins should be loaded
 	 * @return  true if all plugins should be loaded, false otherwise
 	 */
@@ -90,6 +98,46 @@ public:
 	 */
 	inline bool RunTests() const {
 		return opts_vm.count("bbque.test");
+	}
+
+	/**
+	 * @brief  Get the BBQUE daemon name
+	 * @return the name of the process which runs the BBQ daemon
+	 */
+	inline std::string GetDaemonName() const {
+		return daemon_name;
+	}
+
+	/**
+	 * @brief  Get the BBQUE daemon UID
+	 * @return the user ID to run the dameon under
+	 */
+	inline std::string GetUID() const {
+		return daemon_uid;
+	}
+
+	/**
+	 * @brief  Get the BBQUE daemon GID
+	 * @return the group ID to run the dameon under
+	 */
+	inline std::string GetGID() const {
+		return daemon_gid;
+	}
+
+	/**
+	 * @brief  Get the path of BBQUE lockfile
+	 * @return the complete path of the lock file
+	 */
+	inline std::string GetLockfile() const {
+		return daemon_lockfile;
+	}
+
+	/**
+	 * @brief  Get the path of BBQUE run directory
+	 * @return the complete path of the run directory
+	 */
+	inline std::string GetRundir() const {
+		return daemon_rundir;
 	}
 
 	/**
@@ -167,6 +215,30 @@ private:
 	 */
 	std::string plugins_dir;
 
+	/**
+	 * The BBQ daemon process name
+	 */
+	std::string daemon_name;
+
+	/**
+	 * The user ID to run the daemon under
+	 */
+	std::string daemon_uid;
+
+	/**
+	 * The group ID to run the daemon under
+	 */
+	std::string daemon_gid;
+
+	/**
+	 * The path of the locking file
+	 */
+	std::string daemon_lockfile;
+
+	/**
+	 * daemon run directory
+	 */
+	std::string daemon_rundir;
 };
 
 } // namespace bbque

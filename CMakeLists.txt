@@ -12,6 +12,14 @@ project (BarbequeRTRM)
 # Installation items
 ################################################################################
 
+# Barbeque DAEMON configuraiton
+set (BBQUE_DAEMON_NAME     "bbqued")
+set (BBQUE_DAEMON_UID      "bbque")
+set (BBQUE_DAEMON_GID      "rtrm")
+set (BBQUE_DAEMON_LOCKFILE "var/lock/bbqued.lock")
+set (BBQUE_DAEMON_RUNDIR   "")
+
+# Barbeque installation pats
 set (BBQUE_PATH_BBQ     "sbin")
 set (BBQUE_PATH_CONF    "etc/bbque")
 set (BBQUE_PATH_RECIPES "etc/bbque/recipes")
