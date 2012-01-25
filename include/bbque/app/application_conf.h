@@ -82,6 +82,7 @@ public:
 	 *
 	 * @param awm Next working mode scheduled for the application
 	 * @param tok The token referencing the resources state view
+	 * @param bid An optional identifier for the resource binding
 	 *
 	 * @return The method return an exit code representing the decision taken:
 	 * APP_WM_ACCEPTED if the specified working mode can be scheduled for
@@ -89,8 +90,8 @@ public:
 	 * scheduled. If the application is currently disabled this call returns
 	 * always APP_DISABLED.
 	 */
-	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm,
-			RViewToken_t tok) = 0;
+	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t tok,
+			uint8_t bid = 0) = 0;
 
 	/**
 	 * @brief Terminate this EXC by releasing all resources.

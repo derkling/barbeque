@@ -234,7 +234,8 @@ public:
 	/**
 	 * @see ApplicationConfIF
 	 */
-	ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok);
+	ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok,
+			uint8_t bid = 0);
 
 	/**
 	 * @brief Commit a previously required re-scheduling request
