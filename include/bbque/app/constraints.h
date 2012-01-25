@@ -20,21 +20,24 @@
  * ============================================================================
  */
 
+#ifndef BBQUE_CONSTRAINTS_H_
+#define BBQUE_CONSTRAINTS_H_
+
 #include <limits>
 #include <memory>
 
-#ifndef BBQUE_CONSTRAINTS_H_
-#define BBQUE_CONSTRAINTS_H_
 
 namespace bbque { namespace res {
 	// Forward declaration
 	class Resource;
+	// Shared pointer to Resource descriptor
+	typedef std::shared_ptr<res::Resource> ResourcePtr_t;
 }}
 
-namespace bbque { namespace app {
+using bbque::res::ResourcePtr_t;
 
-/** Shared pointer to Resource descriptor */
-typedef std::shared_ptr<res::Resource> ResourcePtr_t;
+
+namespace bbque { namespace app {
 
 /**
  * @struct ResourceConstraint
