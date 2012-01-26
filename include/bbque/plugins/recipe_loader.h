@@ -28,7 +28,7 @@
 
 #include "bbque/app/application.h"
 
-#define RECIPE_LOADER_NAMESPACE "rloader."
+#define RECIPE_LOADER_NAMESPACE "bq.rl."
 
 using bbque::app::Application;
 using bbque::app::Recipe;
