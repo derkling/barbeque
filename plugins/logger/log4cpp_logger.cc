@@ -21,6 +21,8 @@
 #include <log4cpp/Priority.hh>
 #include <log4cpp/PropertyConfigurator.hh>
 
+#include "bbque/utils/utility.h"
+
 namespace l4 = log4cpp;
 namespace po = boost::program_options;
 
@@ -118,16 +120,25 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	if (response!=PF_SERVICE_DONE)
 		return NULL;
 
-	fprintf(stdout, "Log4CppLogger: Using configuration file [%s]\n",
-			conf_file_path.c_str());
+	if (daemonized)
+		syslog(LOG_INFO, "Using Log4CppLogger configuration file [%s]",
+				conf_file_path.c_str());
+	else
+		fprintf(stdout, FMT_INFO("Using Log4CppLogger configuration file [%s]\n"),
+				conf_file_path.c_str());
 
 	// Setting up Appender, layout and Category
 	try {
 		l4::PropertyConfigurator::configure(conf_file_path);
 		configured = true;
 	} catch (log4cpp::ConfigureFailure e) {
-		fprintf(stdout, "Log4CppLogger: configuration error [%s]\n",
-				e.what());
+
+		if (daemonized)
+			syslog(LOG_INFO, "Log4CppLogger configuration FAILED (Error %s)",
+					e.what());
+		else
+			fprintf(stdout, FMT_INFO("Log4CppLogger configuration FAILED (Error %s)\n"),
+					e.what());
 		return false;
 	}
 
