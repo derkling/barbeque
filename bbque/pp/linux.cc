@@ -26,7 +26,7 @@
 
 #define BBQUE_LINUXPP_PLATFORM_ID		"org.linux.cgroup"
 
-#define BBQUE_LINUXPP_SILOS 			"bbq_silos"
+#define BBQUE_LINUXPP_SILOS 			"bbque_silos"
 
 #define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
 #define BBQUE_LINUXPP_MEMS_PARAM 		"cpuset.mems"
