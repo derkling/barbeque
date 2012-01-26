@@ -20,6 +20,8 @@
 #include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"
 
+#include "bbque/utils/utility.h"
+
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 
@@ -77,7 +79,10 @@ int32_t PlatformServices::ServiceConfData(PF_ServiceData & data) {
 	po::variables_map & opts =
 		 std::ref(*(((PF_Service_ConfDataOut*)data.response)->opts_value));
 
-	fprintf(stdout, "PS: ServiceConfData ===> '%s'\n", data.id);
+	if (cm.RunAsDaemon())
+		syslog(LOG_INFO, "Loading configuration for system service [%s]...", data.id);
+	else
+		fprintf(stdout, FMT_INFO("Loading configuration for system service [%s]...\n"), data.id);
 	cm.ParseConfigurationFile(opts_desc, opts);
 
 	return PF_SERVICE_DONE;
