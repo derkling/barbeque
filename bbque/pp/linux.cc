@@ -233,7 +233,7 @@ LinuxPP::ParseNode(struct cgroup_file_info &entry) {
 	if (entry.type != CGROUP_FILE_TYPE_DIR)
 		return OK;
 
-	logger->Warn("PLAT LNX: scanning [%d:%s]...",
+	logger->Info("PLAT LNX: scanning [%d:%s]...",
 			entry.depth, entry.full_path);
 
 	// Consistency check for required folder names
@@ -407,8 +407,8 @@ LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 	prlb->cpus[strlen(prlb->cpus)-1] = 0;
 	prlb->mems[strlen(prlb->mems)-1] = 0;
 
-	logger->Notice("PLAT LNX: [%s] => {cpus [%s], mems [%s]}",
-			papp->StrId(), prlb->cpus, prlb->mems);
+	logger->Debug("PLAT LNX: [%s] => {cpus [%s], mnode[%d]}",
+			papp->StrId(), prlb->cpus, prlb->socket_id);
 
 	return OK;
 
@@ -547,7 +547,7 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 	if (result) {
 		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
 				"(Error: libcgroup, kernel cgroup update "
-				"[%d: %s]", errno, strerror(errno));
+				"[%d: %s])", errno, strerror(errno));
 		return MAPPING_FAILED;
 	}
 
