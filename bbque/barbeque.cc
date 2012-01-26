@@ -35,9 +35,6 @@ namespace bp = bbque::plugins;
 namespace bu = bbque::utils;
 namespace po = boost::program_options;
 
-#define FMT(fmt) BBQUE_FMT(COLOR_GREEN, "BQ", fmt)
-
-
 /* The global timer, this can be used to get the time since Barbeque start */
 bu::Timer bbque_tmr(true);
 
@@ -51,12 +48,12 @@ int Tests(bp::PluginManager & pm) {
 				strlen(TEST_NAMESPACE),TEST_NAMESPACE)))
 		return false;
 
-	fprintf(stdout, FMT(".:: Entering Testing Mode\n"));
+	fprintf(stdout, FMT_INFO("Entering Testing Mode\n"));
 
 	do {
 		bu::Timer test_tmr;
 
-		fprintf(stdout, "\n"FMT("___ Testing [%s]...\n"),
+		fprintf(stdout, "\n"FMT_INFO("___ Testing [%s]...\n"),
 				(*near_match).first.c_str());
 
 		bp::TestIF * tms = bb::ModulesFactory::GetTestModule(
@@ -66,7 +63,7 @@ int Tests(bp::PluginManager & pm) {
 		tms->Test();
 		test_tmr.stop();
 
-		fprintf(stdout, FMT("___ completed, [%11.6f]s\n"),
+		fprintf(stdout, FMT_INFO("___ completed, [%11.6f]s\n"),
 				test_tmr.getElapsedTime());
 
 		near_match++;
@@ -74,20 +71,41 @@ int Tests(bp::PluginManager & pm) {
 	} while (near_match != rm.end() &&
 			((*near_match).first.compare(0,5,"test.")) == 0 );
 
-	fprintf(stdout, "\n\n"FMT(".:: All tests completed\n\n"));
+	fprintf(stdout, "\n\n"FMT_INFO("All tests completed\n\n"));
 	return EXIT_SUCCESS;
 }
 
+// The deamonizing ruotine
+extern int
+daemonize(const char *name, const char *uid, const char *gid,
+		const char *lockfile, const char *rundir);
+
 int main(int argc, char *argv[]) {
+	int exit_code;
+
+	/* Initialize the logging interface */
+	openlog(BBQUE_DAEMON_NAME, LOG_PID, LOG_LOCAL5);
 
 	// Command line parsing
 	bb::ConfigurationManager & cm = bb::ConfigurationManager::GetInstance();
 	cm.ParseCommandLine(argc, argv);
 
-	// Welcome screen
-	fprintf(stdout, FMT(".:: Barbeque RTRM (ver. %s) ::.\n"),
-			g_git_version);
-	fprintf(stdout, FMT("Built: " __DATE__  " " __TIME__ "\n\n"));
+	// Check if we should run as daemon
+	if (cm.RunAsDaemon()) {
+		syslog(LOG_INFO, "Starting BBQ daemon (ver. %s)...", g_git_version);
+		syslog(LOG_INFO, "BarbequeRTRM build time: " __DATE__  " " __TIME__ "");
+		daemonize(
+				cm.GetDaemonName().c_str(),
+				cm.GetUID().c_str(),
+				cm.GetGID().c_str(),
+				cm.GetLockfile().c_str(),
+				cm.GetRundir().c_str()
+			);
+	} else {
+		// Welcome screen
+		fprintf(stdout, FMT_INFO("Starting BBQ (ver. %s)...\n"), g_git_version);
+		fprintf(stdout, FMT_INFO("BarbequeRTRM build time: " __DATE__  " " __TIME__ "\n"));
+	}
 
 	// Initialization
 	bp::PluginManager & pm = bp::PluginManager::GetInstance();
@@ -96,8 +114,12 @@ int main(int argc, char *argv[]) {
 
 	// Plugins loading
 	if (cm.LoadPlugins()) {
-		fprintf(stdout, FMT("Loading plugins, dir [%s]\n"),
-				cm.GetPluginsDir().c_str());
+		if (cm.RunAsDaemon())
+			syslog(LOG_INFO, "Loading plugins from dir [%s]...",
+					cm.GetPluginsDir().c_str());
+		else
+			fprintf(stdout, FMT_INFO("Loading plugins from dir [%s]...\n"),
+					cm.GetPluginsDir().c_str());
 		pm.LoadAll(cm.GetPluginsDir());
 	}
 
@@ -111,14 +133,24 @@ int main(int argc, char *argv[]) {
 	// Let's start baking applications...
 	bb::ResourceManager::ExitCode_t result =
 		bb::ResourceManager::GetInstance().Go();
-	if (result != bb::ResourceManager::ExitCode_t::OK)
-		return EXIT_FAILURE;
+	if (result != bb::ResourceManager::ExitCode_t::OK) {
+		exit_code = EXIT_FAILURE;
+		goto bbq_exit;
+	}
 
+bbq_exit:
 
 	// Cleaning-up the grill
 
+	// Final greetings
+	if (cm.RunAsDaemon())
+		syslog(LOG_INFO, "BBQ daemon termination [%s]",
+				(exit_code == EXIT_FAILURE) ? "FAILURE" : "SUCCESS" );
+	else
+		fprintf(stdout, FMT_INFO("BBQ termination [%s]\n"),
+				(exit_code == EXIT_FAILURE) ? "FAILURE" : "SUCCESS" );
 
-	return EXIT_SUCCESS;
-
+	closelog();
+	return exit_code;
 }
 
