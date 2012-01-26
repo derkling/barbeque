@@ -89,6 +89,10 @@ LinuxPP::~LinuxPP() {
 
 }
 
+/*******************************************************************************
+ *    Platform Resources Parsing and Loading
+ ******************************************************************************/
+
 LinuxPP::ExitCode_t
 LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
@@ -307,6 +311,9 @@ LinuxPP::_LoadPlatformData() {
 	return pp_result;
 }
 
+/*******************************************************************************
+ *    Resources Mappign and Assigment to Applications
+ ******************************************************************************/
 
 LinuxPP::RLinuxType_t
 LinuxPP::GetRLinuxType(br::ResourcePtr_t pres) {
