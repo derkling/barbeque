@@ -521,12 +521,18 @@ LinuxPP::GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd) {
 LinuxPP::ExitCode_t
 LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 		bool excl, bool move) {
+	char mnode[] = "\09"; // Empty memory node (by default)
 	int result;
 
+	// Set the assigned CPUs
 	cgroup_set_value_string(pcgd->pc_cpuset,
 			BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
-	cgroup_set_value_string(pcgd->pc_cpuset,
-			BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
+	// Set the assigned memory NODE (only if we have at least one CPUS)
+	if (prlb->cpus[0]) {
+		snprintf(mnode, 3, "%d", prlb->socket_id);
+		cgroup_set_value_string(pcgd->pc_cpuset,
+				BBQUE_LINUXPP_MEMS_PARAM, mnode);
+	}
 
 	// Setting CPUs as EXCLUSIVE if required
 	if (excl) {
@@ -534,9 +540,12 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 			BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM, "1");
 	}
 
+	logger->Debug("PLAT LNX: Setup CGroup for [%s]: {cpus [%s], mnode[%s]}",
+			pcgd->papp->StrId(), prlb->cpus, mnode);
+
 	if (move) {
-		logger->Notice("PLAT LNX: [%s] => {cpus [%s], mems [%s]}",
-				pcgd->papp->StrId(), prlb->cpus, prlb->mems);
+		logger->Notice("PLAT LNX: [%s] => {cpus [%s], mnode [%s]}",
+				pcgd->papp->StrId(), prlb->cpus, mnode);
 		cgroup_set_value_uint64(pcgd->pc_cpuset,
 				BBQUE_LINUXPP_PROCS_PARAM,
 				pcgd->papp->Pid());
