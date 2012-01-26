@@ -26,7 +26,7 @@
 
 #include "bbque/res/resources.h"
 
-#define SCHEDULER_POLICY_NAMESPACE "schp."
+#define SCHEDULER_POLICY_NAMESPACE "bq.sp."
 
 namespace bbque {
 	class SystemView;
