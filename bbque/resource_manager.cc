@@ -117,10 +117,10 @@ ResourceManager::ResourceManager() :
 	ym(SynchronizationManager::GetInstance()),
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
-	pp(PlatformProxy::GetInstance()),
 	pm(bp::PluginManager::GetInstance()),
 	ra(br::ResourceAccounter::GetInstance()),
-	mc(bu::MetricsCollector::GetInstance()) {
+	mc(bu::MetricsCollector::GetInstance()),
+	pp(PlatformProxy::GetInstance()) {
 
 	//---------- Setup all the module metrics
 	mc.Register(metrics, RM_METRICS_COUNT);
