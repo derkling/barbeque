@@ -51,9 +51,10 @@
 #define COLOR_LCYAN  "\033[1;36m"
 
 # define BBQUE_FMT(color, module, fmt) \
-	        color "[%05d - %11.6f] " module ": " fmt "\033[0m", \
+	        "\033[0m[%05d - %11.6f] " module ": " color fmt "\033[0m", \
 			gettid(),\
 			bbque_tmr.getElapsedTime()
+#define FMT_INFO(fmt) BBQUE_FMT(COLOR_GREEN, "  - INFO   main            ", fmt)
 
 #ifdef BBQUE_DEBUG
 # define DB(x) x
