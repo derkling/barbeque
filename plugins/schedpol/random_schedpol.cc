@@ -41,12 +41,16 @@ RandomSchedPol::RandomSchedPol() :
 			SCHEDULER_POLICY_NAME);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
-		std::cout << "Random: Build random plugin "
-			<< this << "] FAILED (Error: missing logger module)" << std::endl;
-		assert(logger);
+		if (daemonized)
+			syslog(LOG_INFO, "Build RANDOM schedpol plugin [%p] FAILED "
+					"(Error: missing logger module)", (void*)this);
+		else
+			fprintf(stdout, FMT_INFO("Build RANDOM schedpol plugin [%p] FAILED "
+					"(Error: missing logger module)\n"), (void*)this);
 	}
 
-	logger->Info("Random: Built a new dynamic object[%p]\n", this);
+	assert(logger);
+	logger->Debug("Built RANDOM SchedPol object @%p", (void*)this);
 
 }
 
