@@ -40,6 +40,7 @@ namespace bbque {
 PlatformProxy::PlatformProxy() :
 	trdRunning(false),
 	done(false),
+	pilInitialized(false),
 	platformIdentifier(NULL) {
 
 	// Get a logger module
@@ -123,6 +124,13 @@ PlatformProxy::LoadPlatformData() {
 	return OK;
 #endif // BBQUE_TEST_PLATFORM_DATA
 
+	// Return if the PIL has not been properly initialized
+	if (!pilInitialized) {
+		logger->Fatal("PLAT PRX: Platform Integration Layer initialization FAILED");
+		return PLATFORM_INIT_FAILED;
+	}
+
+	// Setup the Platform Specific ID
 	platformIdentifier = _GetPlatformID();
 
 	// Platform specific resources enumeration

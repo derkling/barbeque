@@ -152,7 +152,7 @@ public:
  */
 
 	/**
-	 * @brief Setup platform data required to manage the specified applciation
+	 * @brief Setup platform data required to manage the specified application
 	 *
 	 * Once a new application enter the system, a set of platform specific
 	 * applications data could be require in order to properly set-up the
@@ -210,13 +210,21 @@ private:
 	 */
 	bool trdRunning;
 
-
 	/**
 	 * @brief Set true to terminate the moniroting thread
 	 *
 	 * This is set to true to end the monitoring thread.
 	 */
 	bool done;
+
+	/**
+	 * @brief Set true if the PIL has been properly initialized
+	 *
+	 * This is set to true if the Platform Integration Layer (PIL) has
+	 * been properly initialized, thus Barbeque has control on assigned
+	 * resources.
+	 */
+	bool pilInitialized;
 
 	/**
 	 * @brief Mutex controlling the thread execution
@@ -251,6 +259,18 @@ protected:
 	 * @brief The platform specific string identifier
 	 */
 	const char *platformIdentifier;
+
+
+	/**
+	 * @brief Set the PIL as initialized
+	 *
+	 * The Platform Specific (low-level) module is expected to call this
+	 * method if the platform dependent initialization has been completed
+	 * with success.
+	 */
+	void SetPilInitialized() {
+		pilInitialized = true;
+	}
 
 /*******************************************************************************
  *  Platform Specific (low-level) methods
