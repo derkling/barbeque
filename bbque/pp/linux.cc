@@ -44,19 +44,24 @@ LinuxPP::LinuxPP() :
 	controller("cpuset"),
 	MaxCpusCount(DEFAULT_MAX_CPUS),
 	MaxMemsCount(DEFAULT_MAX_MEMS) {
-	ExitCode_t pp_result;
-	char *mount_path;
+	ExitCode_t pp_result = OK;
+	char *mount_path = NULL;
 	int cg_result;
 
 	// Init the Control Group Library
 	cg_result = cgroup_init();
 	if (cg_result) {
 		logger->Error("PLAT LNX: CGroup Library initializaton FAILED! "
-				"(Error: %d - %d)", cg_result, cgroup_strerror(cg_result));
+				"(Error: %d - %s)", cg_result, cgroup_strerror(cg_result));
 		return;
 	}
 
-	cgroup_get_subsys_mount_point(controller, &mount_path);
+	cg_result = cgroup_get_subsys_mount_point(controller, &mount_path);
+	if (cg_result) {
+		logger->Error("PLAT LNX: CGroup Library mountpoint lookup FAILED! "
+				"(Error: %d - %s)", cg_result, cgroup_strerror(cg_result));
+		return;
+	}
 	logger->Info("PLAT LNX: controller [%s] mounted at [%s]",
 			controller, mount_path);
 
@@ -75,6 +80,9 @@ LinuxPP::LinuxPP() :
 	}
 
 	free(mount_path);
+
+	// Mark the Platform Integration Layer (PIL) as initialized
+	SetPilInitialized();
 }
 
 LinuxPP::~LinuxPP() {
