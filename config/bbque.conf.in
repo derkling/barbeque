@@ -86,11 +86,11 @@ category.bq.mc =	NOTICE
 ###
 appender.raConsole = org.apache.log4j.ConsoleAppender
 appender.raConsole.layout = org.apache.log4j.PatternLayout
-appender.raConsole.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-10c : %m%n
+appender.raConsole.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-15c : %m%n
 appender.raFile = org.apache.log4j.FileAppender
 appender.raFile.fileName = ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}/bbque.log
 appender.raFile.layout = org.apache.log4j.PatternLayout
-appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n
+appender.raFile.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-15c : %m%n
 #appender.raSyslog = org.apache.log4j.SyslogAppender
 #appender.raSyslog.layout = org.apache.log4j.PatternLayout
 #appender.raSyslog.layout.ConversionPattern = %d{%Y-%m-%d %H:%M:%S,%l} - %-6p %-40c : %m%n
