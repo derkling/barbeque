@@ -72,15 +72,19 @@ SasbSyncPol::SasbSyncPol() :
 			SYNCHRONIZATION_POLICY_NAME);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
-		std::cout << "SASB: Build sasb synchronization policy "
-			<< this << "] FAILED (Error: missing logger module)" << std::endl;
-		assert(logger);
+		if (daemonized)
+			syslog(LOG_ERR, "Build SASB syncpol plugin [%p] FAILED "
+					"(Error: missing logger module)", (void*)this);
+		else
+			fprintf(stdout, FMT_INFO("Build SASB syncpol plugin [%p] FAILED "
+					"(Error: missing logger module)\n"), (void*)this);
 	}
 
 	//---------- Setup all the module metrics
 	mc.Register(metrics, SM_METRICS_COUNT);
 
-	logger->Debug("Built a new dynamic object[%p]\n", this);
+	assert(logger);
+	logger->Debug("Built SASB SyncPol object @%p", (void*)this);
 
 }
 
