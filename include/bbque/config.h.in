@@ -18,6 +18,8 @@
 #ifndef BBQUE_CONFIG_H_
 #define BBQUE_CONFIG_H_
 
+#include <syslog.h>
+
 /** Use Boost Filesyste library version 3 */
 #define BOOST_FILESYSTEM_VERSION 3
 
@@ -66,5 +68,9 @@
 
 /** The 'var' installation path */
 #define BBQUE_PATH_VAR "${BBQUE_PATH_VAR}"
+
+
+/* A global variable to signal if we are running as a daemon */
+extern unsigned char daemonized;
 
 #endif // BBQUE_CONFIG_H_
