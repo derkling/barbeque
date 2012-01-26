@@ -29,30 +29,30 @@ namespace po = boost::program_options;
 
 #define LOG_MAX_SENTENCE 256
 
-#define COLOR_WHITE  "\033[1;37m%s\033[0m"
-#define COLOR_LGRAY  "\033[37m%s\033[0m"
-#define COLOR_GRAY   "\033[1;30m%s\033[0m"
-#define COLOR_BLACK  "\033[30m%s\033[0m"
-#define COLOR_RED    "\033[31m%s\033[0m"
-#define COLOR_LRED   "\033[1;31m%s\033[0m"
-#define COLOR_GREEN  "\033[32m%s\033[0m"
-#define COLOR_LGREEN "\033[1;32m%s\033[0m"
-#define COLOR_BROWN  "\033[33m%s\033[0m"
-#define COLOR_YELLOW "\033[1;33m%s\033[0m"
-#define COLOR_BLUE   "\033[34m%s\033[0m"
-#define COLOR_LBLUE  "\033[1;34m%s\033[0m"
-#define COLOR_PURPLE "\033[35m%s\033[0m"
-#define COLOR_PINK   "\033[1;35m%s\033[0m"
-#define COLOR_CYAN   "\033[36m%s\033[0m"
-#define COLOR_LCYAN  "\033[1;36m%s\033[0m"
+#define LOG4CPP_COLOR_WHITE	"\033[1;37m%s\033[0m"
+#define LOG4CPP_COLOR_LGRAY	"\033[37m%s\033[0m"
+#define LOG4CPP_COLOR_GRAY	"\033[1;30m%s\033[0m"
+#define LOG4CPP_COLOR_BLACK	"\033[30m%s\033[0m"
+#define LOG4CPP_COLOR_RED	"\033[31m%s\033[0m"
+#define LOG4CPP_COLOR_LRED	"\033[1;31m%s\033[0m"
+#define LOG4CPP_COLOR_GREEN	"\033[32m%s\033[0m"
+#define LOG4CPP_COLOR_LGREEN	"\033[1;32m%s\033[0m"
+#define LOG4CPP_COLOR_BROWN	"\033[33m%s\033[0m"
+#define LOG4CPP_COLOR_YELLOW	"\033[1;33m%s\033[0m"
+#define LOG4CPP_COLOR_BLUE	"\033[34m%s\033[0m"
+#define LOG4CPP_COLOR_LBLUE	"\033[1;34m%s\033[0m"
+#define LOG4CPP_COLOR_PURPLE	"\033[35m%s\033[0m"
+#define LOG4CPP_COLOR_PINK	"\033[1;35m%s\033[0m"
+#define LOG4CPP_COLOR_CYAN	"\033[36m%s\033[0m"
+#define LOG4CPP_COLOR_LCYAN	"\033[1;36m%s\033[0m"
 
-#define COLOR_INFO		COLOR_LGREEN
-#define COLOR_NOTICE	COLOR_GREEN
-#define COLOR_WARN		COLOR_YELLOW
-#define COLOR_ERROR		COLOR_PURPLE
-#define COLOR_CRIT		COLOR_PURPLE
-#define COLOR_ALERT		COLOR_LRED
-#define COLOR_FATAL		COLOR_RED
+#define LOG4CPP_COLOR_INFO	LOG4CPP_COLOR_LGREEN
+#define LOG4CPP_COLOR_NOTICE	LOG4CPP_COLOR_GREEN
+#define LOG4CPP_COLOR_WARN	LOG4CPP_COLOR_YELLOW
+#define LOG4CPP_COLOR_ERROR	LOG4CPP_COLOR_PURPLE
+#define LOG4CPP_COLOR_CRIT	LOG4CPP_COLOR_PURPLE
+#define LOG4CPP_COLOR_ALERT	LOG4CPP_COLOR_LRED
+#define LOG4CPP_COLOR_FATAL	LOG4CPP_COLOR_RED
 
 namespace bbque { namespace plugins {
 
@@ -164,7 +164,7 @@ void Log4CppLogger::Info(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::INFO,
-					COLOR_INFO, str);
+					LOG4CPP_COLOR_INFO, str);
 		else
 			logger.log(l4::Priority::INFO, str);
 	}
@@ -181,7 +181,7 @@ void Log4CppLogger::Notice(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::NOTICE,
-					COLOR_NOTICE, str);
+					LOG4CPP_COLOR_NOTICE, str);
 		else
 			logger.log(l4::Priority::NOTICE, str);
 	}
@@ -197,7 +197,7 @@ void Log4CppLogger::Warn(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::WARN,
-					COLOR_WARN, str);
+					LOG4CPP_COLOR_WARN, str);
 		else
 			logger.log(l4::Priority::WARN, str);
 	}
@@ -213,7 +213,7 @@ void Log4CppLogger::Error(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::ERROR,
-					COLOR_ERROR, str);
+					LOG4CPP_COLOR_ERROR, str);
 		else
 			logger.log(l4::Priority::ERROR, str);
 	}
@@ -229,7 +229,7 @@ void Log4CppLogger::Crit(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::CRIT,
-					COLOR_CRIT, str);
+					LOG4CPP_COLOR_CRIT, str);
 		else
 			logger.log(l4::Priority::CRIT, str);
 	}
@@ -245,7 +245,7 @@ void Log4CppLogger::Alert(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::ALERT,
-					COLOR_ALERT, str);
+					LOG4CPP_COLOR_ALERT, str);
 		else
 			logger.log(l4::Priority::ALERT, str);
 	}
@@ -261,7 +261,7 @@ void Log4CppLogger::Fatal(const char *fmt, ...) {
 		va_end(args);
 		if (use_colors)
 			logger.log(l4::Priority::FATAL,
-					COLOR_FATAL, str);
+					LOG4CPP_COLOR_FATAL, str);
 		else
 			logger.log(l4::Priority::FATAL, str);
 	}
