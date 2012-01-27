@@ -257,7 +257,7 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding() {
 		}
 
 		// Retrieve the bound cluster[s]
-		ResID_t cl_id = GetResourceID(bind_tmpl, "cluster");
+		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
 		if (cl_id == RSRC_ID_NONE)
 			continue;
 
