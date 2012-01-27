@@ -141,7 +141,7 @@ RTLIB_ExitCode_t BbqueEXC::Disable() {
 	assert(rtlib->Disable);
 	result = rtlib->Disable(exc_hdl);
 
-	return RTLIB_OK;
+	return result;
 
 }
 

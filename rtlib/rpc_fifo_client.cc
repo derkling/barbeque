@@ -531,7 +531,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 	prf_EXC_SET->pyl.hdr.exc_id = prec->exc_id;
 
 	DB(fprintf(stderr, FMT_DBG("Copying [%d] constraints using buffer @%p "
-					"of [%d] Bytes...\n"),
+					"of [%lu] Bytes...\n"),
 				count, (void*)&(prf_EXC_SET->pyl.constraints),
 				(count)*sizeof(RTLIB_Constraint_t)));
 

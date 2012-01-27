@@ -631,9 +631,8 @@ AppPtr_t ApplicationManager::CreateEXC(
 	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
 	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
-	RecipeLoaderIF::ExitCode_t result;
-	RecipePtr_t rcp_ptr;
 	Application::ExitCode_t app_result;
+	RecipePtr_t rcp_ptr;
 	AppPtr_t papp;
 
 	// Create a new descriptor
@@ -644,7 +643,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 			papp->StrId(), papp->Priority());
 
 	// Load the required recipe
-	result = LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
+	LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
 	if (!rcp_ptr) {
 		logger->Error("Create EXC [%s] FAILED "
 				"(Error: unable to load recipe [%s])",

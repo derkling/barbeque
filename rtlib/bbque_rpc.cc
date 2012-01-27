@@ -906,9 +906,9 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_PreChangeNotify(
 				"SyncLatency [%u]\n"),
 				msg.hdr.exc_id, syncLatency));
 
-	_SyncpPreChangeResp(msg.hdr.token, prec, syncLatency);
+	result = _SyncpPreChangeResp(msg.hdr.token, prec, syncLatency);
 
-	return RTLIB_OK;
+	return result;
 }
 
 RTLIB_ExitCode_t BbqueRPC::SyncP_SyncChangeNotify(pregExCtx_t prec) {
@@ -986,7 +986,7 @@ RTLIB_ExitCode_t BbqueRPC::SyncP_DoChangeNotify(
 	fprintf(stderr, FMT_INF("SyncP_3 (Do-Change) EXC [%d]\n"),
 			msg.hdr.exc_id);
 
-	return RTLIB_OK;
+	return result;
 }
 
 RTLIB_ExitCode_t BbqueRPC::SyncP_PostChangeNotify(pregExCtx_t prec) {
@@ -1655,11 +1655,13 @@ void BbqueRPC::NotifyExit(
 void BbqueRPC::NotifyPreConfigure(
 	RTLIB_ExecutionContextHandler_t ech) {
 	DB(fprintf(stderr, FMT_DBG("===> NotifyConfigure\n")));
+	(void)ech;
 }
 
 void BbqueRPC::NotifyPostConfigure(
 	RTLIB_ExecutionContextHandler_t ech) {
 	DB(fprintf(stderr, FMT_DBG("<=== NotifyConfigure\n")));
+	(void)ech;
 }
 
 void BbqueRPC::NotifyPreRun(
@@ -1719,21 +1721,25 @@ void BbqueRPC::NotifyPostRun(
 void BbqueRPC::NotifyPreMonitor(
 	RTLIB_ExecutionContextHandler_t ech) {
 	DB(fprintf(stderr, FMT_DBG("===> NotifyMonitor\n")));
+	(void)ech;
 }
 
 void BbqueRPC::NotifyPostMonitor(
 	RTLIB_ExecutionContextHandler_t ech) {
 	DB(fprintf(stderr, FMT_DBG("<=== NotifyMonitor\n")));
+	(void)ech;
 }
 
 void BbqueRPC::NotifyPreSuspend(
 	RTLIB_ExecutionContextHandler_t ech) {
 	DB(fprintf(stderr, FMT_DBG("===> NotifySuspend\n")));
+	(void)ech;
 }
 
 void BbqueRPC::NotifyPostSuspend(
 	RTLIB_ExecutionContextHandler_t ech) {
 	DB(fprintf(stderr, FMT_DBG("<=== NotifySuspend\n")));
+	(void)ech;
 }
 
 } // namespace rtlib

@@ -453,7 +453,7 @@ RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 		pSyncChangeRsp_t presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
-	rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t *pmsg_pyl;
+	//rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
 	std::cv_status ready;
 	pchMsg_t pchMsg;
@@ -475,7 +475,7 @@ ApplicationProxy::SyncP_SyncChangeRecv(pcmdSn_t pcs,
 	// Getting command response
 	pchMsg = pcs->pmsg;
 	pmsg_hdr = pchMsg;
-	pmsg_pyl = (rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t*)pmsg_hdr;
+	//pmsg_pyl = (rpc_msg_BBQ_SYNCP_SYNCCHANGE_RESP_t*)pmsg_hdr;
 
 	logger->Debug("APPs PRX: command response [typ: %d, pid: %d]",
 			pmsg_hdr->typ,
@@ -708,7 +708,7 @@ RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 		pPostChangeRsp_t presp) {
 	std::unique_lock<std::mutex> resp_ul(pcs->resp_mtx);
-	rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t *pmsg_pyl;
+	//rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t *pmsg_pyl;
 	rpc_msg_header_t *pmsg_hdr;
 	std::cv_status ready;
 	pchMsg_t pchMsg;
@@ -730,7 +730,7 @@ ApplicationProxy::SyncP_PostChangeRecv(pcmdSn_t pcs,
 	// Getting command response
 	pchMsg = pcs->pmsg;
 	pmsg_hdr = pchMsg;
-	pmsg_pyl = (rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t*)pmsg_hdr;
+	//pmsg_pyl = (rpc_msg_BBQ_SYNCP_POSTCHANGE_RESP_t*)pmsg_hdr;
 
 	logger->Debug("APPs PRX: command response [typ: %d, pid: %d]",
 			pmsg_hdr->typ,
