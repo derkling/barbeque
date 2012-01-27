@@ -507,7 +507,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	// Here the message is dynamically allocate to make room for a variable
 	// number of constraints...
-    rpc_fifo_EXC_SET_t *prf_EXC_SET;
+	rpc_fifo_EXC_SET_t *prf_EXC_SET;
 	size_t msg_size;
 
 	// At least 1 constraint it is expected
@@ -541,7 +541,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 			(count)*sizeof(RTLIB_Constraint_t));
 
 	// Sending RPC Request
-   	volatile rpc_fifo_EXC_SET_t & rf_EXC_SET = (*prf_EXC_SET);
+	volatile rpc_fifo_EXC_SET_t & rf_EXC_SET = (*prf_EXC_SET);
 	DB(fprintf(stderr, FMT_DBG("Set [%d] constraints on EXC [%d:%d]...\n"),
 				count, rf_EXC_SET.pyl.hdr.app_pid,
 				rf_EXC_SET.pyl.hdr.exc_id));
