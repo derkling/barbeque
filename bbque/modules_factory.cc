@@ -6,7 +6,7 @@
  * the core framework thanks to a correponfing method of this singleton
  * Factory class.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  02/01/2011

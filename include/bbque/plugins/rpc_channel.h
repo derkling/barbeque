@@ -5,7 +5,7 @@
  * This defines the common interface for each communication channel module
  * which can be used by the Barbeque framework to interface with applications.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

@@ -5,7 +5,7 @@
  * This is a really simple application which could be used as a template to
  * develop real applications interacting with the Barbeque RTRM
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  04/28/2011

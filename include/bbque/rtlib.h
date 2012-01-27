@@ -59,7 +59,7 @@
  * conformance to a properly define "Application Lifecycle", by specifying a
  * set of calls and the order on which these should be performed.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/13/2011

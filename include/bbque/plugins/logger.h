@@ -5,7 +5,7 @@
  * This defines the basic logging services which are provided to each Barbeque
  * components. The object class defines logging and modules name.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011

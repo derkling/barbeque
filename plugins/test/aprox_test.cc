@@ -6,7 +6,7 @@
  * module. This test evaluate both functional and performance aspects of the
  * implementation.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  05/06/2011

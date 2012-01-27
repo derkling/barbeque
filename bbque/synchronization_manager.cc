@@ -11,7 +11,7 @@
  * are delagated to module plugins, while the core glue code for status
  * synchronization is defined by this class
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  06/03/2011

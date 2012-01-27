@@ -11,7 +11,7 @@
  * @see bbque/rtlib.h
  * @see bbque/rtlib/rpc_messages.h
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/13/2011

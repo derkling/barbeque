@@ -2,7 +2,7 @@
  *       @file  resource_utils.h
  *      @brief  A set of utility functions for resources management
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/17/2011

@@ -5,7 +5,7 @@
  * This class provides a set of services to barbeuqe modules throughout the
  * single InvokeServices method.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  02/01/2011

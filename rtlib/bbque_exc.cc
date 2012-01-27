@@ -5,7 +5,7 @@
  * This is a base class suitable for the implementation of EXC that should be
  * managed by the Barbeque RTRM.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  04/28/2011

@@ -6,7 +6,7 @@
  * It is designed to work with plugin object classes that implement the
  * PF_CreateFunc and PF_DestroyFunc mandatory functions as static methods.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/27/2011

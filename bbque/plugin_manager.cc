@@ -4,7 +4,7 @@
  *
  * This provides the definition of the Puligin Manager for the Barbeque RTRM.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/27/2011

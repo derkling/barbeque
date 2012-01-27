@@ -5,7 +5,7 @@
  * This defines a simple example of static C++ plugin which is intended both to
  * demostrate how to write them and to test the PluginManager implementation.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

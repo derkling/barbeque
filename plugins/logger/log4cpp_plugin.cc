@@ -5,7 +5,7 @@
  * This defines a static Log4CPP based plugin which instantiate an object
  * implementing the LoggerIF interface.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

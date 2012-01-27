@@ -5,7 +5,7 @@
  * This provide a set of utility functions and definitions common to all other
  * modules.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/17/2011

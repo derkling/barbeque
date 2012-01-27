@@ -12,7 +12,7 @@
  * initialization just like with dynamic plugins after loading the dynamic
  * library.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/27/2011

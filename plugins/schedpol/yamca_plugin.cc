@@ -5,7 +5,7 @@
  * This implements a dynamic C++ plugin which implements the YaMCA resource
  * scheduler heuristic.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

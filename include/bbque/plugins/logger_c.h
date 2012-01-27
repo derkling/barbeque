@@ -5,7 +5,7 @@
  * This defines the interface for Logger barbque C based plugin. This file
  * provided the C based object model for Logger plugins.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

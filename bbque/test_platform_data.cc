@@ -9,7 +9,7 @@
  * cluster, the amount of cluster-shared memory and the amount of PE-private
  * memory.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  06/22/2011

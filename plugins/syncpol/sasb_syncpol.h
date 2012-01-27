@@ -5,7 +5,7 @@
  * This defines a dynamic C++ plugin which implements the "Starvation Avoidance
  * State Based" (SASB) heuristic for EXCc synchronizaiton.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

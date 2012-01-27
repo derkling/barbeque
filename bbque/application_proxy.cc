@@ -8,7 +8,7 @@
  * proxy. Each call requires to specify the application to witch it is
  * addressed and the actual parameters.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  04/18/2011

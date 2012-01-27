@@ -5,7 +5,7 @@
  * This defines a console based logger to be used for logging if a more
  * advanced logger module is not available
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011

@@ -6,7 +6,7 @@
 # This is a simple script which produces a scheduling graph out of a Barbeque RTRM
 # log file.
 #
-#     @author  Patrick Bellasi (derkling), derkling@google.com
+#     @author  Patrick Bellasi (derkling), derkling@gmail.com
 #
 #   @internal
 #     Created  09/07/2011

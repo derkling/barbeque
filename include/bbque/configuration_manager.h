@@ -6,7 +6,7 @@
  * This class defines the set of methods to access Barbeque run-time
  * configuration options, either on command line and configuration file.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  02/04/2011

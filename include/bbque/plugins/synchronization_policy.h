@@ -8,7 +8,7 @@
  * just select the EXCs and than pass them back to the SM to perform the
  * actual synchronization.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

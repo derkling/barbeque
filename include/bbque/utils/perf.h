@@ -9,7 +9,7 @@
  * and all the other guys which contributed to the Linux Performance events
  * framework.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  11/05/2011

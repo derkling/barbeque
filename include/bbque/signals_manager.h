@@ -5,7 +5,7 @@
  * This class provides the implementation of Signals Management and Signals
  * Handlers for the main Baebque handled signals
  * 
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  05/27/2011

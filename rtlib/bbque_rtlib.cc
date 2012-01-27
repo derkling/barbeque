@@ -6,7 +6,7 @@
  * This library provides an implementation of the services the Barbeque RTRM
  * exposes to applications.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011

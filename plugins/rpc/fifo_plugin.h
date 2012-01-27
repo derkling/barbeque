@@ -4,7 +4,7 @@
  *
  * This defines a FIFO based RPC communication channel
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

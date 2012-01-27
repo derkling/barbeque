@@ -6,7 +6,7 @@
  * base class which provides a centralized repository for system metrics which
  * could be dynamically defined, updated and queryed.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  08/24/2011

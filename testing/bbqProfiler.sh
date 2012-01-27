@@ -7,7 +7,7 @@
 # different platform configurations in order to collect performance metrics and
 # graph them.
 #
-#     @author  Patrick Bellasi (derkling), derkling@google.com
+#     @author  Patrick Bellasi (derkling), derkling@gmail.com
 #
 #   @internal
 #     Created  09/12/2011

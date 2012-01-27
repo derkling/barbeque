@@ -8,7 +8,7 @@
  * implementaton. Meanwhile, this is class provides all the code to manage
  * message queuing and dequenung policies.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

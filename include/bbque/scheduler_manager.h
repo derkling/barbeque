@@ -9,7 +9,7 @@
  * resources state/availability changes) and considering its internal
  * configurabile policy.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  05/25/2011

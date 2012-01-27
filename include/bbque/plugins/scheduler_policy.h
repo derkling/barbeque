@@ -7,7 +7,7 @@
  * three-way Synchronization Protocol which is used to sync the RTRM status
  * with the effective applications status.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

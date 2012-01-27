@@ -4,7 +4,7 @@
  *
  * This defines a Log4CPP based Logger plugin.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011

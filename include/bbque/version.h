@@ -4,7 +4,7 @@
  *
  * This source file provides a global symbol for the building version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011

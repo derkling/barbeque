@@ -5,7 +5,7 @@
  * This class provides basic service to measure elapres time with microseconds
  * accuracy.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/21/2011

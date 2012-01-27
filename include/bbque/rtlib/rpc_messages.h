@@ -11,7 +11,7 @@
  *
  * @see bbque/rtlib.h
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/13/2011

@@ -10,7 +10,7 @@
  * an instance to the concrete communication channel that can be selected at
  * compile time.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011

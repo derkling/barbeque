@@ -5,7 +5,7 @@
  * This defines an example of static C++ plugin which instantiate an object
  * implementing the TestingObjectIF interface.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/28/2011

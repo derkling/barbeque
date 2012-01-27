@@ -4,7 +4,7 @@
  *
  * This class provides a wrapper to adapt Test modules written in C.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  02/01/2011

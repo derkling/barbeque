@@ -5,7 +5,7 @@
  * This class provides the implementation of the Run-Time Resource Manager
  * (RTRM), which is the main barbeque module implementing its glue code.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  02/01/2011

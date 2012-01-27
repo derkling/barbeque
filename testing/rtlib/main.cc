@@ -5,7 +5,7 @@
  * This provide a really simple (toy example) implementation for an application
  * accessing the Barbeque RTRM services.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  04/28/2011

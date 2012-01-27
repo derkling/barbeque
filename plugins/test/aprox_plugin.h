@@ -5,7 +5,7 @@
  * This defines a dynamic C++ plugin which which is used to test and evaluate
  * the ApplicationProxy component.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  05/06/2011

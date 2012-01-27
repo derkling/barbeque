@@ -5,7 +5,7 @@
  *
  * This provides s stringified representation of RTLib generated errors code.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
  *   @internal
  *     Created  01/11/2011
