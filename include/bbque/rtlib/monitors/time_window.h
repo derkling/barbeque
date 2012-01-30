@@ -29,23 +29,28 @@
 class TimeWindow : public GenericWindow <uint32_t> {
 public:
 	TimeWindow(std::vector<GenericWindow<uint32_t>::Target> targets):
-		GenericWindow<uint32_t>(targets){}
+		GenericWindow<uint32_t>(targets) {
+		}
 
 	TimeWindow(std::vector<GenericWindow<uint32_t>::Target> targets,
-		   uint16_t windowSize):
-			   GenericWindow<uint32_t>(targets, windowSize){}
+			uint16_t windowSize) :
+		GenericWindow<uint32_t>(targets, windowSize) {
+		}
 	/**
 	 * @brief The start time of the basic time monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStart;
+
 	/**
 	 * @brief The stop time of the basic time monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStop;
+
 	/**
 	 * @brief Indicates whether a starting time has been set or not
 	 */
 	bool started;
+
 };
 
 #endif /* BBQUE_TIME_WINDOW_H_ */

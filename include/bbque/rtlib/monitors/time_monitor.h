@@ -131,53 +131,54 @@ public:
 
 	/**
 	 * @brief Starts new basic time monitor
-	 *
 	 */
 	void start();
 
 	/**
 	 * @brief Stops basic time monitor
-	 *
 	 */
 	void stop();
 
 	/**
 	 * @brief Returns elapsed time for the basic time monitor (in seconds)
-	 *
 	 */
 	double getElapsedTime();
 
 	/**
 	 * @brief Returns elapsed time for the basic time monitor
 	 * (in milliseconds)
-	 *
 	 */
 	double getElapsedTimeMs();
+
 	/**
 	 * @brief Returns elapsed time for the basic time monitor
 	 * (in microsecond)
-	 *
 	 */
 	double getElapsedTimeUs();
 	//@} //@}
 
 private:
+
 	/**
-	* @brief Mutex variable associated to the timer.
-	*/
+	 * @brief Mutex variable associated to the timer.
+	 */
 	std::mutex timerMutex;
+
 	/**
 	 * @brief Start time of the Basic Time Monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStart;
+
 	/**
 	 * @brief Stop time of the Basic Time Monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStop;
+
 	/**
 	 * @brief Auxiliary varible for Basic Time Monitor
 	 */
 	bool started;
+
 };
 
 #endif /* BBQUE_TIME_MONITOR_H_ */

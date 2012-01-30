@@ -30,23 +30,28 @@ class ThroughputWindow : public GenericWindow <double> {
 public:
 
 	ThroughputWindow(std::vector<GenericWindow<double>::Target> targets):
-				GenericWindow<double>(targets){}
+				GenericWindow<double>(targets) {
+			}
 
 	ThroughputWindow(std::vector<GenericWindow<double>::Target> targets,
 			 uint16_t windowSize):
-				GenericWindow<double>(targets, windowSize){}
+				GenericWindow<double>(targets, windowSize) {
+			}
 
 	/**
 	 * @brief Indicates whether a starting time has been set or not
 	 */
 	bool started;
+
 	/**
 	 * @brief The start time of the basic time monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStart;
+
 	/**
 	 * @brief The stop time of the basic time monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStop;
+
 };
 #endif /* BBQUE_THROUGHPUT_WINDOW_H_ */
