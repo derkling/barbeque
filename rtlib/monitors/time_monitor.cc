@@ -56,6 +56,7 @@ void TimeMonitor::resetGoal(uint16_t id) {
 	dynamic_cast<TimeWindow*>(goalList[id])->started = false;
 }
 
+//FIXME Are you sure that this method is thread safe?
 void TimeMonitor::start(uint16_t id) {
 	if (goalList.find(id) == goalList.end())
 		return;
@@ -65,6 +66,7 @@ void TimeMonitor::start(uint16_t id) {
 		std::chrono::monotonic_clock::now();
 }
 
+//FIXME Are you sure that this method is thread safe?
 void TimeMonitor::stop(uint16_t id) {
 	if (goalList.find(id) == goalList.end())
 		return;
