@@ -167,6 +167,16 @@ private:
 	 */
 	bool started;
 
+	/**
+	 * @brief Locked starts new basic time monitor
+	 */
+	void _start();
+
+	/**
+	 * @brief Locked stops basic time monitor
+	 */
+	void _stop();
+
 };
 
 #endif /* BBQUE_TIME_MONITOR_H_ */
