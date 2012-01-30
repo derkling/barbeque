@@ -7,16 +7,6 @@
 #include "bbque/utils/utility.h"
 #include <ratio>
 
-uint16_t TimeMonitor::newGoal(uint32_t goal) {
-	TimeWindow::Target target(DataFunction::Average,
-			ComparisonFunction::LessOrEqual,
-			goal);
-	std::vector<TimeWindow::Target> targets;
-	targets.push_back(target);
-
-	return TimeMonitor::newGoal(targets, defaultWindowSize);
-}
-
 uint16_t TimeMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
 	TimeWindow::Target target(DataFunction::Average,
 			ComparisonFunction::LessOrEqual,
@@ -29,16 +19,6 @@ uint16_t TimeMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
 
 uint16_t TimeMonitor::newGoal(DataFunction fType,
 		ComparisonFunction cType,
-		uint32_t goal) {
-	TimeWindow::Target target(fType, cType, goal);
-	std::vector<TimeWindow::Target> targets;
-	targets.push_back(target);
-
-	return TimeMonitor::newGoal(targets, defaultWindowSize);
-}
-
-uint16_t TimeMonitor::newGoal(DataFunction fType,
-		ComparisonFunction cType,
 		uint32_t goal,
 		uint16_t windowSize) {
 	TimeWindow::Target target(fType, cType, goal);
@@ -46,10 +26,6 @@ uint16_t TimeMonitor::newGoal(DataFunction fType,
 	targets.push_back(target);
 
 	return TimeMonitor::newGoal(targets, windowSize);
-}
-
-uint16_t TimeMonitor::newGoal(std::vector<TimeWindow::Target> targets) {
-	return TimeMonitor::newGoal(targets, defaultWindowSize);
 }
 
 uint16_t TimeMonitor::newGoal(std::vector<TimeWindow::Target> targets,
