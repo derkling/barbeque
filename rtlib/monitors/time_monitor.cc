@@ -71,7 +71,7 @@ void TimeMonitor::stop(uint16_t id) {
 	if (goalList.find(id) == goalList.end())
 		return;
 
-	if (!unlikely(dynamic_cast<TimeWindow*>(goalList[id])->started))
+	if (unlikely(!dynamic_cast<TimeWindow*>(goalList[id])->started))
 		return;
 
 	dynamic_cast<TimeWindow*>(goalList[id])->tStop =

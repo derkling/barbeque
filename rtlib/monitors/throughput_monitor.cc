@@ -61,7 +61,7 @@ void ThroughputMonitor::stop(uint16_t id, double data) {
 	if (goalList.find(id) == goalList.end())
 		return;
 
-	if (!unlikely(dynamic_cast<ThroughputWindow*>(goalList[id])->started))
+	if (unlikely(!dynamic_cast<ThroughputWindow*>(goalList[id])->started))
 		return;
 
 	dynamic_cast<ThroughputWindow*>
