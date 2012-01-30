@@ -4,6 +4,7 @@
  */
 
 #include "bbque/rtlib/monitors/time_monitor.h"
+#include "bbque/utils/utility.h"
 #include <ratio>
 
 uint16_t TimeMonitor::newGoal(uint32_t goal) {
@@ -81,17 +82,19 @@ void TimeMonitor::stop(uint16_t id) {
 	if (goalList.find(id) == goalList.end())
 		return;
 
-	if (dynamic_cast<TimeWindow*> (goalList[id])->started) {
-		dynamic_cast<TimeWindow*> (goalList[id])->tStop =
-			std::chrono::monotonic_clock::now();
-		uint32_t elapsedTime =
-			std::chrono::duration_cast<std::chrono::milliseconds > (
-			dynamic_cast<TimeWindow*> (goalList[id])->tStop -
-			dynamic_cast<TimeWindow*> (goalList[id])->tStart
+	if (unlikely(!dynamic_cast<TimeWindow*>(goalList[id])->started))
+		return;
+
+	dynamic_cast<TimeWindow*>(goalList[id])->tStop =
+		std::chrono::monotonic_clock::now();
+
+	uint32_t elapsedTime =
+		std::chrono::duration_cast<std::chrono::milliseconds>(
+				dynamic_cast<TimeWindow*>(goalList[id])->tStop -
+				dynamic_cast<TimeWindow*>(goalList[id])->tStart
 			).count();
-		goalList[id]->addElement(elapsedTime);
-		dynamic_cast<TimeWindow*> (goalList[id])->started = false;
-	}
+	goalList[id]->addElement(elapsedTime);
+	dynamic_cast<TimeWindow*>(goalList[id])->started = false;
 
 }
 

@@ -4,6 +4,7 @@
  */
 
 #include "bbque/rtlib/monitors/throughput_monitor.h"
+#include "bbque/utils/utility.h"
 
 uint16_t ThroughputMonitor::newGoal(double goal) {
 	ThroughputWindow::Target target(DataFunction::Average,
@@ -83,19 +84,19 @@ void ThroughputMonitor::stop(uint16_t id, double data) {
 	if (goalList.find(id) == goalList.end())
 		return;
 
-	if (dynamic_cast<ThroughputWindow*> (goalList[id])->started) {
-		dynamic_cast<ThroughputWindow*> (goalList[id])->tStop =
-			std::chrono::monotonic_clock::now();
-		uint32_t elapsedTime =
-			std::chrono::duration_cast<std::chrono::microseconds > (
-			dynamic_cast<ThroughputWindow*> (goalList[id])->tStop -
-			dynamic_cast<ThroughputWindow*> (goalList[id])->tStart
-			).count();
-		double tPut = data * (1000000.0 / elapsedTime);
-		goalList[id]->addElement(tPut);
-		dynamic_cast<ThroughputWindow*> (goalList[id])->started = false;
-	}
+	if (unlikely(!dynamic_cast<ThroughputWindow*>(goalList[id])->started))
+		return;
 
+	dynamic_cast<ThroughputWindow*>
+		(goalList[id])->tStop = std::chrono::monotonic_clock::now();
+	uint32_t elapsedTime =
+		std::chrono::duration_cast<std::chrono::microseconds> (
+				dynamic_cast<ThroughputWindow*> (goalList[id])->tStop -
+				dynamic_cast<ThroughputWindow*> (goalList[id])->tStart
+			).count();
+	double tPut = data * (1000000.0 / elapsedTime);
+	goalList[id]->addElement(tPut);
+	dynamic_cast<ThroughputWindow*>(goalList[id])->started = false;
 }
 
 void ThroughputMonitor::start() {
