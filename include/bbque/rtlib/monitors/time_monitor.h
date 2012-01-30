@@ -89,32 +89,54 @@ public:
 	 */
 	void stop(uint16_t id);
 
+
+	/**
+	 * \addtogroup basicMonitors
+	 *
+	 *
+	 * @{
+	 * @defgroup basicTime Basic Time monitor
+	 * These functions are used for a timeMonitor without a window
+	 * of values
+	 *
+	 * @{
+	 */
+
 	/**
 	 * @brief Starts new basic time monitor
+	 * @ingroup basicTime
 	 */
 	void start();
 
 	/**
 	 * @brief Stops basic time monitor
+	 * @ingroup basicTime
 	 */
 	void stop();
 
 	/**
 	 * @brief Returns elapsed time for the basic time monitor (in seconds)
+	 * @ingroup basicTime
 	 */
 	double getElapsedTime();
 
 	/**
 	 * @brief Returns elapsed time for the basic time monitor
 	 * (in milliseconds)
+	 * @ingroup basicTime
 	 */
 	double getElapsedTimeMs();
 
 	/**
 	 * @brief Returns elapsed time for the basic time monitor
 	 * (in microsecond)
+	 * @ingroup basicTime
 	 */
 	double getElapsedTimeUs();
+
+	/**
+	 * @} @}
+	 */
 
 private:
 

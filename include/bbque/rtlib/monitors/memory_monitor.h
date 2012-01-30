@@ -47,14 +47,22 @@ public:
 	 */
 	uint16_t newGoal(uint32_t goal, uint16_t windowSize);
 
-	/** @defgroup basicMemory Basic Memory monitor
-	 *  These functions are for memoryMonitor without a window of values
+	/**
+	 * @ingroup  basicMonitors
+	 * @defgroup basicMonitors Basic Monitor
+	 *
+	 *  These functions are used for simple monitors (without a window of
+	 *  values)
+	 *
+	 * @{
+	 * @defgroup basicMemory Basic Memory monitor
+	 * These functions are for memoryMonitor without a window of values
+	 * @}
 	 */
 
 	/**
 	 * @brief Extracts current memory usage for the basic monitor
 	 * @ingroup basicMemory
-	 *
 	 */
 	uint32_t extractMemoryUsage();
 
