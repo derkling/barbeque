@@ -6,16 +6,6 @@
 #include "bbque/rtlib/monitors/throughput_monitor.h"
 #include "bbque/utils/utility.h"
 
-uint16_t ThroughputMonitor::newGoal(double goal) {
-	ThroughputWindow::Target target(DataFunction::Average,
-			ComparisonFunction::GreaterOrEqual,
-			goal);
-	std::vector<ThroughputWindow::Target> targets;
-	targets.push_back(target);
-
-	return ThroughputMonitor::newGoal(targets, defaultWindowSize);
-}
-
 uint16_t ThroughputMonitor::newGoal(double goal, uint16_t windowSize) {
 	ThroughputWindow::Target target(DataFunction::Average,
 			ComparisonFunction::GreaterOrEqual,
@@ -28,16 +18,6 @@ uint16_t ThroughputMonitor::newGoal(double goal, uint16_t windowSize) {
 
 uint16_t ThroughputMonitor::newGoal(DataFunction fType,
 		ComparisonFunction cType,
-		double goal) {
-	ThroughputWindow::Target target(fType, cType, goal);
-	std::vector<ThroughputWindow::Target> targets;
-	targets.push_back(target);
-
-	return ThroughputMonitor::newGoal(targets, defaultWindowSize);
-}
-
-uint16_t ThroughputMonitor::newGoal(DataFunction fType,
-		ComparisonFunction cType,
 		double goal,
 		uint16_t windowSize) {
 	ThroughputWindow::Target target(fType, cType, goal);
@@ -45,11 +25,6 @@ uint16_t ThroughputMonitor::newGoal(DataFunction fType,
 	targets.push_back(target);
 
 	return ThroughputMonitor::newGoal(targets, windowSize);
-}
-
-uint16_t ThroughputMonitor::newGoal(
-		std::vector<ThroughputWindow::Target> targets) {
-	return ThroughputMonitor::newGoal(targets, defaultWindowSize);
 }
 
 uint16_t ThroughputMonitor::newGoal(

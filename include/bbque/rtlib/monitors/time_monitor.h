@@ -39,30 +39,9 @@ public:
 	 * previous values
 	 *
 	 * @param goal Value of goal required
-	 */
-	uint16_t newGoal(uint32_t goal);
-
-	/**
-	 * @brief Creates a new monitor with a window containing an history of
-	 * previous values
-	 *
-	 * @param goal Value of goal required
 	 * @param windowSize Number of elements in window of values
 	 */
-	uint16_t newGoal(uint32_t goal, uint16_t windowSize);
-
-	/**
-	 * @brief Creates a new monitor with a window containing an history of
-	 * previous values
-	 *
-	 * @param goal Value of goal required
-	 * @param fType Selects the DataFunction for the evaluation of goal
-	 * @param cType Selects the ComparisonFunction for the evaluation
-	 * of goal
-	 */
-	uint16_t newGoal(DataFunction fType,
-			 ComparisonFunction cType,
-			 uint32_t goal);
+	uint16_t newGoal(uint32_t goal, uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Creates a new monitor with a window containing an history of
@@ -76,15 +55,7 @@ public:
 	uint16_t newGoal(DataFunction fType,
 			 ComparisonFunction cType,
 			 uint32_t goal,
-			 uint16_t windowSize);
-
-	/**
-	 * @brief Creates a new monitor with a window keeping track of old
-	 * values
-	 *
-	 * @param targets List of targets for the current goal
-	 */
-	uint16_t newGoal(std::vector<TimeWindow::Target> targets);
+			 uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Creates a new monitor with a window keeping track of old values
@@ -93,7 +64,7 @@ public:
 	 * @param windowSize Number of elements in the window of values
 	 */
 	uint16_t newGoal(std::vector<TimeWindow::Target> targets,
-			 uint16_t windowSize);
+			 uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Deletes all the values previously saved
