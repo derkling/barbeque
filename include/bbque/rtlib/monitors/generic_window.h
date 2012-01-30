@@ -291,14 +291,13 @@ inline bool GenericWindow<dataType>::checkGoal() {
 template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	bool result = true;
-	typename std::vector<Target>::iterator it = goalTargets.begin();
-	while (result && it != goalTargets.end()) {
+	typename std::vector<Target>::iterator it;
+	for (it = goalTargets.begin(); it != goalTargets.end(); ++it) {
 		gaps.push_back((it->dataFunction(this) - it->goalValue) /
 				it->goalValue);
-		result = it->comparisonFunction(
-				 it->dataFunction(this),
-				 it->goalValue);
-		++it;
+		result = result && it->comparisonFunction(
+					it->dataFunction(this),
+					it->goalValue);
 	}
 
 	return result;
