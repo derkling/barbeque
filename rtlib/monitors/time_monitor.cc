@@ -98,37 +98,47 @@ void TimeMonitor::stop(uint16_t id) {
 
 }
 
-void TimeMonitor::start() {
-	std::lock_guard<std::mutex> lg(timerMutex);
+void TimeMonitor::_start() {
+	if (unlikely(started))
+		return;
 	started = true;
 	tStart = std::chrono::monotonic_clock::now();
 }
 
+void TimeMonitor::_stop() {
+	if (unlikely(!started))
+		return;
+	started = false;
+	tStop = std::chrono::monotonic_clock::now();
+}
+
+void TimeMonitor::start() {
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_start();
+}
+
 void TimeMonitor::stop() {
 	std::lock_guard<std::mutex> lg(timerMutex);
-	if (started) {
-		tStop = std::chrono::monotonic_clock::now();
-		started = false;
-	}
+	_stop();
 }
 
 double TimeMonitor::getElapsedTime() {
-	if (started)
-		stop();
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_stop();
 	return (std::chrono::duration_cast<std::chrono::duration<double>>
 		(tStop - tStart).count());
 }
 
 double TimeMonitor::getElapsedTimeMs() {
-	if (started)
-		stop();
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_stop();
 	return (std::chrono::duration_cast<std::chrono::duration<double, std::milli>>
 		(tStop - tStart).count());
 }
 
 double TimeMonitor::getElapsedTimeUs() {
-	if (started)
-		stop();
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_stop();
 	return (std::chrono::duration_cast<std::chrono::duration<double, std::micro>>
 		(tStop - tStart).count());
 }
