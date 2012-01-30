@@ -84,14 +84,13 @@ public:
 		 * @param goalValue Value of goal desired (regarding the target)
 		 *
 		 */
-		Target(std::function<dataType(GenericWindow <dataType>*)>
-							dataFunction,
-		       std::function<bool(dataType, dataType)>
-							comparisonFunction,
+		Target(std::function<dataType(GenericWindow <dataType>*)> dataFunction,
+			std::function<bool(dataType, dataType)> comparisonFunction,
 			dataType goalValue) :
 				dataFunction(dataFunction),
 				comparisonFunction(comparisonFunction),
-				goalValue(goalValue){}
+				goalValue(goalValue) {
+		}
 
 		/**
 		 * @brief Constructor of the Target class
@@ -103,8 +102,8 @@ public:
 		 */
 		Target(DataFunction dFun,
 		       ComparisonFunction cFun,
-		       dataType goalValue) : goalValue(goalValue)
-		{
+		       dataType goalValue) :
+				goalValue(goalValue) {
 			comparisonFunction =
 				comparisonFunctions[static_cast<uint8_t>(cFun)];
 			dataFunction =
@@ -112,35 +111,37 @@ public:
 		}
 
 		/**
-		* @brief Value of the goal desired (regarding the target)
-		*/
+		 * @brief Value of the goal desired (regarding the target)
+		 */
 		dataType goalValue;
 
 		/**
-		* @brief Current dataFunction
-		**/
+		 * @brief Current dataFunction
+		 */
 		std::function<dataType(GenericWindow <dataType>*)> dataFunction;
 
 		/**
-		* @brief Current comparisonFunction
-		**/
+		 * @brief Current comparisonFunction
+		 */
 		std::function<bool(dataType, dataType)> comparisonFunction;
 	};
 
 	/**
 	 * @brief Initializes internal variables
 	 */
-	GenericWindow(
-		std::vector<typename GenericWindow<dataType>::Target> targets,
-		uint16_t windowSize) :
-			goalTargets(targets) {setCapacity(windowSize);}
+	GenericWindow(std::vector<typename GenericWindow<dataType>::Target> targets,
+			uint16_t windowSize) :
+				goalTargets(targets) {
+			setCapacity(windowSize);
+	}
 
 	/**
 	 * @brief Initializes internal variables
 	 */
-	GenericWindow(
-		std::vector<typename GenericWindow<dataType>::Target> targets) :
-			goalTargets(targets) {setCapacity(defaultWindowSize);}
+	GenericWindow(std::vector<typename GenericWindow<dataType>::Target> targets) :
+		goalTargets(targets) {
+		setCapacity(defaultWindowSize);
+	}
 
 	/**
 	 * @brief Returns the maximum value from the window
@@ -197,8 +198,7 @@ public:
 	 *
 	 * @param target List of Target elements
 	 */
-	void setGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets);
+	void setGoal(std::vector<typename GenericWindow<dataType>::Target> targets);
 
 	/**
 	 * @brief Sets the capacity of the window
@@ -224,12 +224,13 @@ public:
 protected:
 
 	/**
-	* @brief Mutex variable associated to the window buffer.
-	*/
+	 * @brief Mutex variable associated to the window buffer.
+	 */
 	std::mutex windowMutex;
+
 	/**
-	* @brief Buffer for the window of values
-	*/
+	 * @brief Buffer for the window of values
+	 */
 	boost::circular_buffer<dataType> windowBuffer;
 
 	/**
@@ -238,19 +239,19 @@ protected:
 	std::vector<Target> goalTargets;
 
 	/**
-	* @brief Number of samples used to compute the result.
-	*/
+	 * @brief Number of samples used to compute the result.
+	 */
 	uint16_t resultsWindowSize;
 
 	/**
-	* @brief Set of mathematical functions used on a set of value.
-	*/
+	 * @brief Set of mathematical functions used on a set of value.
+	 */
 	static const std::function<dataType(GenericWindow <dataType>*)>
 							dataFunctions[4];
 	/**
-	* @brief Set of logical functions (less, greater, etc. etc.)
-	* used to have the right comparison in the goal-checking phase
-	*/
+	 * @brief Set of logical functions (less, greater, etc. etc.)
+	 * used to have the right comparison in the goal-checking phase
+	 */
 	static const std::function<bool(dataType, dataType)>
 							comparisonFunctions[4];
 };
@@ -274,8 +275,7 @@ GenericWindow<dataType>::comparisonFunctions[4] = {
 };
 
 template <typename dataType>
-inline bool GenericWindow<dataType>::checkGoal()
-{
+inline bool GenericWindow<dataType>::checkGoal() {
 	bool result = true;
 	typename std::vector<Target>::iterator it = goalTargets.begin();
 	while (it != goalTargets.end() && result) {
@@ -289,8 +289,7 @@ inline bool GenericWindow<dataType>::checkGoal()
 }
 
 template <typename dataType>
-inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps)
-{
+inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	bool result = true;
 	typename std::vector<Target>::iterator it;
 	for (it = goalTargets.begin(); it != goalTargets.end(); ++it) {
@@ -305,10 +304,8 @@ inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps)
 }
 
 template <typename dataType>
-inline dataType GenericWindow<dataType>::getMax() const
-{
-	bac::accumulator_set<dataType, bac::features<bac::tag::max> > acc;
-
+inline dataType GenericWindow<dataType>::getMax() const {
+	bac::accumulator_set<dataType, bac::features<bac::tag::max>> acc;
 	if (windowBuffer.size() <= resultsWindowSize) {
 		acc = std::for_each(windowBuffer.begin(),
 				    windowBuffer.end(), acc);
@@ -320,10 +317,8 @@ inline dataType GenericWindow<dataType>::getMax() const
 }
 
 template <typename dataType>
-inline dataType GenericWindow<dataType>::getMin() const
-{
-	bac::accumulator_set<dataType, bac::features<bac::tag::min> > acc;
-
+inline dataType GenericWindow<dataType>::getMin() const {
+	bac::accumulator_set<dataType, bac::features<bac::tag::min>> acc;
 	if (windowBuffer.size() <= resultsWindowSize) {
 		acc = std::for_each(windowBuffer.begin(),
 				    windowBuffer.end(), acc);
@@ -335,11 +330,9 @@ inline dataType GenericWindow<dataType>::getMin() const
 }
 
 template <typename dataType>
-inline dataType GenericWindow<dataType>::getAverage() const
-{
-	bac::accumulator_set<dataType, bac::features<
-				       bac::tag::mean(bac::immediate)> > acc;
-
+inline dataType GenericWindow<dataType>::getAverage() const {
+	bac::accumulator_set<dataType,
+		bac::features<bac::tag::mean(bac::immediate)>> acc;
 	if (windowBuffer.size() <= resultsWindowSize) {
 		acc = std::for_each(windowBuffer.begin(),
 				    windowBuffer.end(), acc);
@@ -351,10 +344,8 @@ inline dataType GenericWindow<dataType>::getAverage() const
 }
 
 template <typename dataType>
-inline dataType GenericWindow<dataType>::getVariance() const
-{
-	bac::accumulator_set<dataType, bac::features<bac::tag::variance> > acc;
-
+inline dataType GenericWindow<dataType>::getVariance() const {
+	bac::accumulator_set<dataType, bac::features<bac::tag::variance>> acc;
 	if (windowBuffer.size() <= resultsWindowSize) {
 		acc = std::for_each(windowBuffer.begin(),
 				    windowBuffer.end(), acc);
@@ -366,49 +357,42 @@ inline dataType GenericWindow<dataType>::getVariance() const
 }
 
 template <typename dataType>
-inline dataType GenericWindow<dataType>::getLastElement() const
-{
+inline dataType GenericWindow<dataType>::getLastElement() const {
 	return (windowBuffer.back());
 }
 
 template <typename dataType>
-inline void GenericWindow<dataType>::setResultsWindow(uint16_t resultSize)
-{
+inline void GenericWindow<dataType>::setResultsWindow(uint16_t resultSize) {
 	resultsWindowSize = resultSize;
 }
 
 template <typename dataType>
-void GenericWindow<dataType>::addElement(dataType element)
-{
+void GenericWindow<dataType>::addElement(dataType element) {
 	std::lock_guard<std::mutex> lg(windowMutex);
 	windowBuffer.push_back(element);
 }
 
 template <typename dataType>
-void GenericWindow<dataType>::clear()
-{
+void GenericWindow<dataType>::clear() {
 	std::lock_guard<std::mutex> lg(windowMutex);
 	windowBuffer.clear();
 }
 
 template <typename dataType>
 void GenericWindow<dataType>::setGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets)
-{
+		std::vector<typename GenericWindow<dataType>::Target> targets) {
 	goalTargets = targets;
 }
 
 template <typename dataType>
-void GenericWindow<dataType>::setCapacity(uint16_t windowSize)
-{
+void GenericWindow<dataType>::setCapacity(uint16_t windowSize) {
 	std::lock_guard <std::mutex> lg(windowMutex);
 	windowBuffer.set_capacity(windowSize);
 	resultsWindowSize = windowSize;
 }
 
 template <typename dataType>
-inline void GenericWindow <dataType>::resetResultsWindow()
-{
+inline void GenericWindow <dataType>::resetResultsWindow() {
 	resultsWindowSize = windowBuffer.capacity;
 }
 

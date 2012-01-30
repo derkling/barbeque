@@ -146,18 +146,22 @@ public:
 	//@}//@}
 
 private:
+
 	/**
-	* @brief Mutex variable associated to the timer.
-	*/
+	 * @brief Mutex variable associated to the timer.
+	 */
 	std::mutex timerMutex;
+
 	/**
 	 * @brief Start time of the Basic Throughput Monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStart;
+
 	/**
 	 * @brief Stop time of the Basic Throughput Monitor
 	 */
 	std::chrono::monotonic_clock::time_point tStop;
+
 	/**
 	 * @brief Auxiliary varible for the Basic Throughput Monitor
 	 */

@@ -142,36 +142,32 @@ protected:
 };
 
 template <typename dataType>
-inline GenericWindow<dataType>* Monitor <dataType>::getWindow(uint16_t id)
-{
+inline GenericWindow<dataType>* Monitor <dataType>::getWindow(uint16_t id) {
 	if (goalList.find(id) != goalList.end())
 		return goalList[id];
 	return NULL;
 }
 
 template <typename dataType>
-inline uint16_t Monitor <dataType>::getUniqueId() const
-{
+inline uint16_t Monitor <dataType>::getUniqueId() const {
 	static uint16_t id = 0;
 	return id++;
 }
 
 template <typename dataType>
-Monitor <dataType>::~Monitor()
-{
+Monitor <dataType>::~Monitor() {
 	typename std::map<uint16_t, GenericWindow<dataType>*>::iterator it;
 
-	for (it = goalList.begin(); it != goalList.end(); ++it) {
+	for (it = goalList.begin(); it != goalList.end(); ++it)
 		delete it->second;
-	}
+
 	goalList.clear();
 }
 
 template <typename dataType>
 inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
 					    ComparisonFunction cType,
-					    dataType goal)
-{
+					    dataType goal) {
 	return Monitor::newGoal(fType, cType, goal, defaultWindowSize);
 }
 
@@ -179,8 +175,7 @@ template <typename dataType>
 inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
 					    ComparisonFunction cType,
 					    dataType goal,
-					    uint16_t windowSize)
-{
+					    uint16_t windowSize) {
 	typename GenericWindow<dataType>::Target target(fType, cType, goal);
 	std::vector<typename GenericWindow<dataType>::Target> targets;
 	targets.push_back(target);
@@ -190,16 +185,14 @@ inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
 
 template <typename dataType>
 inline uint16_t Monitor <dataType>::newGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets)
-{
+		std::vector<typename GenericWindow<dataType>::Target> targets) {
 	return Monitor::newGoal(targets, defaultWindowSize);
 }
 
 template <typename dataType>
 inline uint16_t Monitor <dataType>::newGoal(
 		std::vector<typename GenericWindow<dataType>::Target> targets,
-		uint16_t windowSize)
-{
+		uint16_t windowSize) {
 	GenericWindow<dataType>* gWindow =
 			new GenericWindow<dataType>(targets, windowSize);
 
@@ -210,8 +203,7 @@ inline uint16_t Monitor <dataType>::newGoal(
 }
 
 template <typename dataType>
-inline bool Monitor <dataType>::checkGoal(uint16_t id)
-{
+inline bool Monitor <dataType>::checkGoal(uint16_t id) {
 	if (goalList.find(id) == goalList.end())
 		return false;
 
@@ -219,8 +211,7 @@ inline bool Monitor <dataType>::checkGoal(uint16_t id)
 }
 
 template <typename dataType>
-inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &gaps)
-{
+inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &gaps) {
 	if (goalList.find(id) == goalList.end()) {
 		gaps.clear();
 		gaps.push_back(0);
@@ -231,15 +222,13 @@ inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &gaps)
 }
 
 template <typename dataType>
-inline void Monitor <dataType>::deleteGoal(uint16_t id)
-{
+inline void Monitor <dataType>::deleteGoal(uint16_t id) {
 	delete goalList[id];
 	goalList.erase(id);
 }
 
 template <typename dataType>
-inline void Monitor <dataType>::resetGoal(uint16_t id)
-{
+inline void Monitor <dataType>::resetGoal(uint16_t id) {
 	goalList[id]->clear();
 }
 

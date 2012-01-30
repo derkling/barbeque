@@ -28,24 +28,23 @@
 #include <unistd.h>
 
 class MemoryMonitor: public Monitor <uint32_t> {
-private:
 public:
 
 	/**
-	* @brief Creates a new monitor with a window containing an history of
-	* previous values
-	*
-	* @param goal Value of goal required
-	*/
+	 * @brief Creates a new monitor with a window containing an history of
+	 * previous values
+	 *
+	 * @param goal Value of goal required
+	 */
 	uint16_t newGoal(uint32_t goal);
 
 	/**
-	* @brief Creates a new monitor with a window containing an history of
-	* previous values
-	*
-	* @param goal Value of goal required
-	* @param windowSize Number of elements in the window of values
-	*/
+	 * @brief Creates a new monitor with a window containing an history of
+	 * previous values
+	 *
+	 * @param goal Value of goal required
+	 * @param windowSize Number of elements in the window of values
+	 */
 	uint16_t newGoal(uint32_t goal, uint16_t windowSize);
 
 	// * @ingroup basicMonitors
@@ -57,26 +56,27 @@ public:
 	*/
 	//@{
 	/** @defgroup basicMemory Basic Memory monitor
-	*  These functions are for memoryMonitor without a window of values
-	*/
+	 *  These functions are for memoryMonitor without a window of values
+	 */
 
 	/**
-	* @brief Extracts current memory usage for the basic monitor
-	* @ingroup basicMemory
-	*
-	*/
+	 * @brief Extracts current memory usage for the basic monitor
+	 * @ingroup basicMemory
+	 *
+	 */
 	uint32_t extractMemoryUsage();
 
 	/**
-	* @brief Extracts memory usage for the goal specified by the given id
-	*
-	* Adds a value in the window of the monitor in corrispondence with the
-	* correct id
-	*
-	* @param id Identifies monitor and corresponding list with old values
-	* of used memory
-	*/
+	 * @brief Extracts memory usage for the goal specified by the given id
+	 *
+	 * Adds a value in the window of the monitor in corrispondence with the
+	 * correct id
+	 *
+	 * @param id Identifies monitor and corresponding list with old values
+	 * of used memory
+	 */
 	uint32_t extractMemoryUsage(uint16_t id);
+
 	//@}
 };
 
