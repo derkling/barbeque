@@ -278,10 +278,10 @@ template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal() {
 	bool result = true;
 	typename std::vector<Target>::iterator it = goalTargets.begin();
-	while (it != goalTargets.end() && result) {
-		result = result &&
-				(it->comparisonFunction (
-				 it->dataFunction(this), it->goalValue));
+	while (result && it != goalTargets.end()) {
+		result = it->comparisonFunction(
+				 it->dataFunction(this),
+				 it->goalValue);
 		++it;
 	}
 
@@ -291,13 +291,14 @@ inline bool GenericWindow<dataType>::checkGoal() {
 template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	bool result = true;
-	typename std::vector<Target>::iterator it;
-	for (it = goalTargets.begin(); it != goalTargets.end(); ++it) {
+	typename std::vector<Target>::iterator it = goalTargets.begin();
+	while (result && it != goalTargets.end()) {
 		gaps.push_back((it->dataFunction(this) - it->goalValue) /
-							 it->goalValue);
-		result = result &&
-				(it->comparisonFunction (
-				 it->dataFunction(this), it->goalValue));
+				it->goalValue);
+		result = it->comparisonFunction(
+				 it->dataFunction(this),
+				 it->goalValue);
+		++it;
 	}
 
 	return result;
