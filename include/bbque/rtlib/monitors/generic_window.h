@@ -304,29 +304,24 @@ inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	return result;
 }
 
+#define GW_ACCUMULATE()\
+	uint16_t count = windowBuffer.size();\
+	if (count > resultsWindowSize)\
+		count = resultsWindowSize;\
+	acc = std::for_each(windowBuffer.end() - count,\
+			    windowBuffer.end(), acc);
+
 template <typename dataType>
 inline dataType GenericWindow<dataType>::getMax() const {
 	bac::accumulator_set<dataType, bac::features<bac::tag::max>> acc;
-	if (windowBuffer.size() <= resultsWindowSize) {
-		acc = std::for_each(windowBuffer.begin(),
-				    windowBuffer.end(), acc);
-	} else {
-		acc = std::for_each(windowBuffer.end() - resultsWindowSize,
-				    windowBuffer.end(), acc);
-	}
+	GW_ACCUMULATE();
 	return (bac::extract::max(acc));
 }
 
 template <typename dataType>
 inline dataType GenericWindow<dataType>::getMin() const {
 	bac::accumulator_set<dataType, bac::features<bac::tag::min>> acc;
-	if (windowBuffer.size() <= resultsWindowSize) {
-		acc = std::for_each(windowBuffer.begin(),
-				    windowBuffer.end(), acc);
-	} else {
-		acc = std::for_each(windowBuffer.end() - resultsWindowSize,
-				    windowBuffer.end(), acc);
-	}
+	GW_ACCUMULATE();
 	return (bac::extract::min(acc));
 }
 
@@ -334,26 +329,14 @@ template <typename dataType>
 inline dataType GenericWindow<dataType>::getAverage() const {
 	bac::accumulator_set<dataType,
 		bac::features<bac::tag::mean(bac::immediate)>> acc;
-	if (windowBuffer.size() <= resultsWindowSize) {
-		acc = std::for_each(windowBuffer.begin(),
-				    windowBuffer.end(), acc);
-	} else {
-		acc = std::for_each(windowBuffer.end() - resultsWindowSize,
-				    windowBuffer.end(), acc);
-	}
+	GW_ACCUMULATE();
 	return (bac::extract::mean(acc));
 }
 
 template <typename dataType>
 inline dataType GenericWindow<dataType>::getVariance() const {
 	bac::accumulator_set<dataType, bac::features<bac::tag::variance>> acc;
-	if (windowBuffer.size() <= resultsWindowSize) {
-		acc = std::for_each(windowBuffer.begin(),
-				    windowBuffer.end(), acc);
-	} else {
-		acc = std::for_each(windowBuffer.end() - resultsWindowSize,
-				    windowBuffer.end(), acc);
-	}
+	GW_ACCUMULATE();
 	return (bac::extract::variance(acc));
 }
 
