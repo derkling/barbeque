@@ -121,16 +121,6 @@ public:
 	 */
 	void stop(uint16_t id, double data);
 
-	/** \addtogroup basicMonitors
-	 *
-	 */
-	//@{
-	/** @defgroup basicThroughput Basic Throughput monitor
-	 *  These functions are used for a throughputMonitor without a window
-	 *  of values
-	 *
-	 */
-	//@{
 	/**
 	 * @brief Starts a new basic throughput monitor
 	 *
@@ -143,7 +133,6 @@ public:
 	 * @param data Amount of data analyzed in that amount of time
 	 */
 	double getThroughput(double data);
-	//@}//@}
 
 private:
 

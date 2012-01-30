@@ -118,17 +118,6 @@ public:
 	 */
 	void stop(uint16_t id);
 
-	/** \addtogroup basicMonitors
-	 *
-	 */
-	//@{
-	/** @defgroup basicTime Basic Time monitor
-	 *  These functions are used for a timeMonitor without a window
-	 *  of values
-	 *
-	 */
-	//@{
-
 	/**
 	 * @brief Starts new basic time monitor
 	 */
@@ -155,7 +144,6 @@ public:
 	 * (in microsecond)
 	 */
 	double getElapsedTimeUs();
-	//@} //@}
 
 private:
 
