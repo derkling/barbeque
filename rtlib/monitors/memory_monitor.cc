@@ -23,12 +23,18 @@ uint16_t MemoryMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
 
 uint32_t MemoryMonitor::extractMemoryUsage() {
 	uint32_t memoryUsageKb = 0;
-	uint32_t temp;
+	int result;
 
 	//The second number in /proc/self/statm is VmRSS in pages
 	//TODO decide whether use VmRSS or VmRSS - sharedPages
 	FILE* fp = fopen("/proc/self/statm","r");
-	fscanf(fp, "%d %d", &temp, &memoryUsageKb);
+	result = ::fscanf(fp, "%*d %u", &memoryUsageKb);
+	if (result == EOF) {
+		// FIXME perhaps error handling could be better handled
+		fprintf(stderr, "MemoryMonitor read FAILED (Error: %d, %s)\n",
+				errno, strerror(errno));
+		memoryUsageKb = 0;
+	}
 	fclose(fp);
 
 	memoryUsageKb = memoryUsageKb * getpagesize() / 1024;
