@@ -45,6 +45,7 @@ void ThroughputMonitor::resetGoal(uint16_t id) {
 	dynamic_cast<ThroughputWindow*> (goalList[id])->started = false;
 }
 
+//FIXME Are you sure that this method is thread safe?
 void ThroughputMonitor::start(uint16_t id) {
 	if (goalList.find(id) == goalList.end())
 		return;
@@ -55,6 +56,7 @@ void ThroughputMonitor::start(uint16_t id) {
 
 }
 
+//FIXME Are you sure that this method is thread safe?
 void ThroughputMonitor::stop(uint16_t id, double data) {
 	if (goalList.find(id) == goalList.end())
 		return;
