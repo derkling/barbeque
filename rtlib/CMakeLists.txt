@@ -12,10 +12,14 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--gc-sections")
 
 set (RTLIB_SRC bbque_rtlib bbque_rpc ${PROJECT_BINARY_DIR}/bbque/version.cc)
 set (RTLIB_SRC bbque_exc ${RTLIB_SRC})
+
 if(BBQUE_RPC_FIFO)
 	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBQUE_RPC_FIFO")
 	set (RTLIB_SRC rpc_fifo_client ${RTLIB_SRC})
 endif(BBQUE_RPC_FIFO)
+
+# Build subdirs
+add_subdirectory(monitors)
 
 set (RTLIB_SRC ${RTLIB_SRC})
 #----- Add "bbque_rtlib" target dinamic binary
@@ -25,6 +29,7 @@ add_library(bbque_rtlib SHARED ${RTLIB_SRC})
 target_link_libraries(
 	bbque_rtlib
 	bbque_utils
+	bbque_monitors
 	${Boost_LIBRARIES}
 	-ldl -lrt
 )
@@ -48,5 +53,3 @@ install (TARGETS bbque_rtlib LIBRARY
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/bbque/utils"
 		DESTINATION "${BBQUE_PATH_HEADERS}"
 		FILES_MATCHING PATTERN "*.h")
-
-
