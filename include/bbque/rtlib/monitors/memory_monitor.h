@@ -47,14 +47,6 @@ public:
 	 */
 	uint16_t newGoal(uint32_t goal, uint16_t windowSize);
 
-	// * @ingroup basicMonitors
-	// * @defgroup basicMonitors Basic Monitor
-	/** @defgroup basicMonitors Basic Monitor
-	*
-	*  These functions are used for simple monitors (without a window of
-	*  values)
-	*/
-	//@{
 	/** @defgroup basicMemory Basic Memory monitor
 	 *  These functions are for memoryMonitor without a window of values
 	 */
@@ -77,7 +69,6 @@ public:
 	 */
 	uint32_t extractMemoryUsage(uint16_t id);
 
-	//@}
 };
 
 #endif /* BBQUE_MEMORY_MONITOR_H_ */
