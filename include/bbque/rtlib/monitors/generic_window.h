@@ -27,6 +27,7 @@
 
 #include <mutex>
 #include <vector>
+#include <memory>
 #include <cstdint>
 #include <functional>
 #include <boost/circular_buffer.hpp>
@@ -68,7 +69,6 @@ template <typename dataType>
 class GenericWindow {
 
 public:
-
 	/**
 	 * @class Target
 	 *
@@ -126,11 +126,13 @@ public:
 		std::function<bool(dataType, dataType)> comparisonFunction;
 	};
 
+	typedef std::vector<GenericWindow<dataType>::Target> Targets;
+	typedef std::shared_ptr<Targets> TargetsPtr;
+
 	/**
 	 * @brief Initializes internal variables
 	 */
-	GenericWindow(std::vector<typename GenericWindow<dataType>::Target> targets,
-			uint16_t windowSize) :
+	GenericWindow(TargetsPtr targets, uint16_t windowSize) :
 				goalTargets(targets) {
 			setCapacity(windowSize);
 	}
@@ -138,7 +140,7 @@ public:
 	/**
 	 * @brief Initializes internal variables
 	 */
-	GenericWindow(std::vector<typename GenericWindow<dataType>::Target> targets) :
+	GenericWindow(TargetsPtr targets) :
 		goalTargets(targets) {
 		setCapacity(defaultWindowSize);
 	}
@@ -198,7 +200,7 @@ public:
 	 *
 	 * @param target List of Target elements
 	 */
-	void setGoal(std::vector<typename GenericWindow<dataType>::Target> targets);
+	void setGoal(TargetsPtr targets);
 
 	/**
 	 * @brief Sets the capacity of the window
@@ -236,7 +238,7 @@ protected:
 	/**
 	 * List of targets that need to be satisfied to achieve the goal
 	 */
-	std::vector<Target> goalTargets;
+	TargetsPtr goalTargets;
 
 	/**
 	 * @brief Number of samples used to compute the result.
@@ -277,8 +279,8 @@ GenericWindow<dataType>::comparisonFunctions[4] = {
 template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal() {
 	bool result = true;
-	typename std::vector<Target>::iterator it = goalTargets.begin();
-	while (result && it != goalTargets.end()) {
+	typename std::vector<Target>::iterator it = goalTargets->begin();
+	while (result && it != goalTargets->end()) {
 		result = it->comparisonFunction(
 				 it->dataFunction(this),
 				 it->goalValue);
@@ -292,7 +294,7 @@ template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	bool result = true;
 	typename std::vector<Target>::iterator it;
-	for (it = goalTargets.begin(); it != goalTargets.end(); ++it) {
+	for (it = goalTargets->begin(); it != goalTargets->end(); ++it) {
 		gaps.push_back((it->dataFunction(this) - it->goalValue) /
 							 it->goalValue);
 		result = result &&
@@ -362,8 +364,7 @@ void GenericWindow<dataType>::clear() {
 }
 
 template <typename dataType>
-void GenericWindow<dataType>::setGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets) {
+void GenericWindow<dataType>::setGoal(TargetsPtr targets) {
 	goalTargets = targets;
 }
 

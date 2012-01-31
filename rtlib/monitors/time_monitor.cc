@@ -3,7 +3,7 @@
  *
  */
 
-#include "bbque/rtlib/monitors/time_monitor.h"
+#include "bbque/monitors/time_monitor.h"
 #include "bbque/utils/utility.h"
 #include <ratio>
 
@@ -12,12 +12,8 @@ uint16_t TimeMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
 			ComparisonFunction::LessOrEqual,
 			goal);
 
-	// FIXME This call, as well a the next three similar ones, allocate
-	// local vectors which are then passed BY COPY multiple times!
-	// For example, this "target" vector is copied all these times:
-	// 1. first into TimeMonitor::newGoal
-	std::vector<TimeWindow::Target> targets;
-	targets.push_back(target);
+	TimeWindow::TargetsPtr targets (new TimeWindow::Targets());
+	targets->push_back(target);
 
 	return TimeMonitor::newGoal(targets, windowSize);
 }
@@ -27,20 +23,15 @@ uint16_t TimeMonitor::newGoal(DataFunction fType,
 		uint32_t goal,
 		uint16_t windowSize) {
 	TimeWindow::Target target(fType, cType, goal);
-	std::vector<TimeWindow::Target> targets;
-	targets.push_back(target);
+	TimeWindow::TargetsPtr targets (new TimeWindow::Targets());
+	targets->push_back(target);
 
 	return TimeMonitor::newGoal(targets, windowSize);
 }
 
-uint16_t TimeMonitor::newGoal(std::vector<TimeWindow::Target> targets,
+uint16_t TimeMonitor::newGoal(TimeWindow::TargetsPtr targets,
 		uint16_t windowSize) {
-	// 2. then into the constructor of the TimeWindow...
-	// 3. which in turn copies it into the GenericWindow..
-	// 4. which finally copies it into its private GenericWindow::goalTargets
-	//
-	// For a total of FOUR VECTOR copies just to initialize a data structure!
-	// why not using a shared_pointer and pass everyting by reference?!?
+
 	TimeWindow * tWindow = new TimeWindow(targets, windowSize);
 
 	tWindow->started = false;

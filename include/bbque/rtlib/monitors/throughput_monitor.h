@@ -65,7 +65,7 @@ public:
 	 * @param targets List of targets for the current goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	uint16_t newGoal(std::vector<ThroughputWindow::Target> targets,
+	uint16_t newGoal(ThroughputWindow::TargetsPtr targets,
 			 uint16_t windowSize = defaultWindowSize);
 
 	/**

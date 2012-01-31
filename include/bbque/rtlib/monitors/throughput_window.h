@@ -24,16 +24,21 @@
 #ifndef BBQUE_THROUGHPUT_WINDOW_H_
 #define BBQUE_THROUGHPUT_WINDOW_H_
 
+#include <chrono>
+
 #include "generic_window.h"
 
 class ThroughputWindow : public GenericWindow <double> {
 public:
 
-	ThroughputWindow(std::vector<GenericWindow<double>::Target> targets):
+	typedef std::vector<ThroughputWindow::Target> Targets;
+	typedef std::shared_ptr<Targets> TargetsPtr;
+
+	ThroughputWindow(TargetsPtr targets):
 				GenericWindow<double>(targets) {
 			}
 
-	ThroughputWindow(std::vector<GenericWindow<double>::Target> targets,
+	ThroughputWindow(TargetsPtr targets,
 			 uint16_t windowSize):
 				GenericWindow<double>(targets, windowSize) {
 			}
@@ -54,4 +59,5 @@ public:
 	std::chrono::monotonic_clock::time_point tStop;
 
 };
+
 #endif /* BBQUE_THROUGHPUT_WINDOW_H_ */
