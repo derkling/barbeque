@@ -88,10 +88,10 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # Options for build version: DESKTOP RELEASE
-set (CMAKE_CXX_FLAGS_RELEASE "-O3")
+set (CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
 
 # Options for build version: EMBEDDED RELEASE
-set (CMAKE_CXX_FLAGS_MINSIZEREL "-Os")
+set (CMAKE_CXX_FLAGS_MINSIZEREL "-Os -DNDEBUG")
 
 
 ################################################################################
