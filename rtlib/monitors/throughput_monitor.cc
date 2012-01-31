@@ -75,16 +75,15 @@ void ThroughputMonitor::stop(uint16_t id, double data) {
 	dynamic_cast<ThroughputWindow*>(goalList[id])->started = false;
 }
 
-void ThroughputMonitor::start() {
-	std::lock_guard<std::mutex> lg(timerMutex);
+void ThroughputMonitor::_start() {
+	if (unlikely(started))
+		return;
 	started = true;
 	tStart = std::chrono::monotonic_clock::now();
 }
 
-double ThroughputMonitor::getThroughput(double data) {
-	std::lock_guard<std::mutex> lg(timerMutex);
-
-	if (!started)
+double ThroughputMonitor::_getThroughput(const double &data) {
+	if (unlikely(!started))
 		return 0;
 
 	started = false;
@@ -94,4 +93,14 @@ double ThroughputMonitor::getThroughput(double data) {
 			(tStop - tStart).count();
 
 	return data * (1000000.0 / elapsedTime);
+}
+
+void ThroughputMonitor::start() {
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_start();
+}
+
+double ThroughputMonitor::getThroughput(double data) {
+	std::lock_guard<std::mutex> lg(timerMutex);
+	return _getThroughput(data);
 }
