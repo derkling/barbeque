@@ -77,8 +77,33 @@ int Tests(bp::PluginManager & pm) {
 
 // The deamonizing ruotine
 extern int
-daemonize(const char *name, const char *uid, const char *gid,
-		const char *lockfile, const char *rundir);
+daemonize(const char *name, const char *uid,
+		const char *lockfile, const char *pidfile,
+		const char *rundir);
+
+static void DaemonizeBBQ(bb::ConfigurationManager & cm) {
+	int result;
+
+	fprintf(stderr, "Starting BarbequeRTRM as daemon [%s], running with uid [%s]...\n",
+			cm.GetDaemonName().c_str(), cm.GetUID().c_str());
+	result = daemonize(
+			cm.GetDaemonName().c_str(),
+			cm.GetUID().c_str(),
+			cm.GetLockfile().c_str(),
+			cm.GetPIDfile().c_str(),
+			cm.GetRundir().c_str()
+			);
+	if (result == 0) {
+		// The OK is not reported, since actual BBQ initialization
+		// could still fails
+		return;
+	}
+
+	syslog(LOG_ERR, "Daemonization FAILED, terminate BBQ");
+	fprintf(stderr, "FAILED\n");
+	exit(EXIT_FAILURE);
+
+}
 
 int main(int argc, char *argv[]) {
 	int exit_code;
@@ -93,14 +118,8 @@ int main(int argc, char *argv[]) {
 	// Check if we should run as daemon
 	if (cm.RunAsDaemon()) {
 		syslog(LOG_INFO, "Starting BBQ daemon (ver. %s)...", g_git_version);
-		syslog(LOG_INFO, "BarbequeRTRM build time: " __DATE__  " " __TIME__ "");
-		daemonize(
-				cm.GetDaemonName().c_str(),
-				cm.GetUID().c_str(),
-				cm.GetGID().c_str(),
-				cm.GetLockfile().c_str(),
-				cm.GetRundir().c_str()
-			);
+		syslog(LOG_INFO, "BarbequeRTRM build time: " __DATE__  " " __TIME__);
+		DaemonizeBBQ(cm);
 	} else {
 		// Welcome screen
 		fprintf(stdout, FMT_INFO("Starting BBQ (ver. %s)...\n"), g_git_version);
