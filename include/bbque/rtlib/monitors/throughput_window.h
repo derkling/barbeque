@@ -34,12 +34,8 @@ public:
 	typedef std::vector<ThroughputWindow::Target> Targets;
 	typedef std::shared_ptr<Targets> TargetsPtr;
 
-	ThroughputWindow(TargetsPtr targets):
-				GenericWindow<double>(targets) {
-			}
-
 	ThroughputWindow(TargetsPtr targets,
-			 uint16_t windowSize):
+			 uint16_t windowSize = defaultWindowSize):
 				GenericWindow<double>(targets, windowSize) {
 			}
 

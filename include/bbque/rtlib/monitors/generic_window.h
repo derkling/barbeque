@@ -69,6 +69,10 @@ template <typename dataType>
 class GenericWindow {
 
 public:
+
+	typedef std::function<dataType(GenericWindow <dataType>*)> DataFunctor;
+	typedef std::function<bool(dataType, dataType)> ComparisonFunctor;
+
 	/**
 	 * @class Target
 	 *
@@ -84,9 +88,9 @@ public:
 		 * @param goalValue Value of goal desired (regarding the target)
 		 *
 		 */
-		Target(std::function<dataType(GenericWindow <dataType>*)> dataFunction,
-			std::function<bool(dataType, dataType)> comparisonFunction,
-			dataType goalValue) :
+		Target(DataFunctor dataFunction,
+		       ComparisonFunctor comparisonFunction,
+		       dataType goalValue) :
 				dataFunction(dataFunction),
 				comparisonFunction(comparisonFunction),
 				goalValue(goalValue) {
@@ -118,12 +122,12 @@ public:
 		/**
 		 * @brief Current dataFunction
 		 */
-		std::function<dataType(GenericWindow <dataType>*)> dataFunction;
+		DataFunctor dataFunction;
 
 		/**
 		 * @brief Current comparisonFunction
 		 */
-		std::function<bool(dataType, dataType)> comparisonFunction;
+		ComparisonFunctor comparisonFunction;
 	};
 
 	typedef std::vector<GenericWindow<dataType>::Target> Targets;
@@ -132,17 +136,10 @@ public:
 	/**
 	 * @brief Initializes internal variables
 	 */
-	GenericWindow(TargetsPtr targets, uint16_t windowSize) :
-				goalTargets(targets) {
-			setCapacity(windowSize);
-	}
-
-	/**
-	 * @brief Initializes internal variables
-	 */
-	GenericWindow(TargetsPtr targets) :
+	GenericWindow(TargetsPtr targets,
+		      uint16_t windowSize = defaultWindowSize) :
 		goalTargets(targets) {
-		setCapacity(defaultWindowSize);
+			setCapacity(windowSize);
 	}
 
 	/**
@@ -248,14 +245,13 @@ protected:
 	/**
 	 * @brief Set of mathematical functions used on a set of value.
 	 */
-	static const std::function<dataType(GenericWindow <dataType>*)>
-							dataFunctions[4];
+	static const DataFunctor dataFunctions[4];
+
 	/**
 	 * @brief Set of logical functions (less, greater, etc. etc.)
 	 * used to have the right comparison in the goal-checking phase
 	 */
-	static const std::function<bool(dataType, dataType)>
-							comparisonFunctions[4];
+	static const ComparisonFunctor comparisonFunctions[4];
 };
 
 template <typename dataType>

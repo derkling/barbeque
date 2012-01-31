@@ -33,13 +33,9 @@ public:
 	typedef std::vector<TimeWindow::Target> Targets;
 	typedef std::shared_ptr<Targets> TargetsPtr;
 
-	TimeWindow(TargetsPtr targets):
-		GenericWindow<uint32_t>(targets) {
-		}
-
 	TimeWindow(TargetsPtr targets,
-			uint16_t windowSize) :
-		GenericWindow<uint32_t>(targets, windowSize) {
+		   uint16_t windowSize = defaultWindowSize) :
+			   GenericWindow<uint32_t>(targets, windowSize) {
 		}
 	/**
 	 * @brief The start time of the basic time monitor
