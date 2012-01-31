@@ -29,6 +29,7 @@
 #include "monitor.h"
 #include "time_window.h"
 #include <chrono>
+#include <memory>
 #include <mutex>
 
 class TimeMonitor : public Monitor <uint32_t> {
@@ -63,7 +64,7 @@ public:
 	 * @param targets List of targets for the current goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	uint16_t newGoal(std::vector<TimeWindow::Target> targets,
+	uint16_t newGoal(TimeWindow::TargetsPtr targets,
 			 uint16_t windowSize = defaultWindowSize);
 
 	/**

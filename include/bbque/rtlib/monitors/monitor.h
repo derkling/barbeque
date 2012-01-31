@@ -46,19 +46,6 @@ public:
 	 * @brief Creates a new monitor with a window keeping track of old
 	 * values
 	 *
-	 * @param fType Selects the DataFunction for the evaluation of the goal
-	 * @param cType Selects the ComparisonFunction for the evaluation of
-	 * the goal
-	 * @param goal Value of goal required
-	 */
-	virtual uint16_t newGoal(DataFunction sType,
-				 ComparisonFunction cType,
-				 dataType goal);
-
-	/**
-	 * @brief Creates a new monitor with a window keeping track of old
-	 * values
-	 *
 	 * @param goal Required goal value
 	 * @param fType DataFunction to use for the evaluation of the goal
 	 * @param cType ComparisonFunction to use for the evaluation of the goal
@@ -67,16 +54,7 @@ public:
 	virtual uint16_t newGoal(DataFunction sType,
 				 ComparisonFunction cType,
 				 dataType goal,
-				 uint16_t windowSize);
-
-	/**
-	 * @brief Creates a new monitor with a window keeping track of old
-	 * values
-	 *
-	 * @param targets List of targets for the current goal
-	 */
-	virtual uint16_t newGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets);
+				 uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Creates a new monitor with a window keeping track of old values
@@ -84,9 +62,8 @@ public:
 	 * @param targets List of targets for the current goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	virtual uint16_t newGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets,
-		uint16_t windowSize);
+	virtual uint16_t newGoal(typename GenericWindow<dataType>::TargetsPtr targets,
+				 uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Checks whether the goal has been respected or not
@@ -138,7 +115,7 @@ protected:
 	 *
 	 * @see GenericWindow
 	 **/
-	std::map <uint16_t, GenericWindow <dataType>*> goalList;
+	std::map <uint16_t, GenericWindow<dataType>*> goalList;
 };
 
 template <typename dataType>
@@ -167,31 +144,19 @@ Monitor <dataType>::~Monitor() {
 template <typename dataType>
 inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
 					    ComparisonFunction cType,
-					    dataType goal) {
-	return Monitor::newGoal(fType, cType, goal, defaultWindowSize);
-}
-
-template <typename dataType>
-inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
-					    ComparisonFunction cType,
 					    dataType goal,
 					    uint16_t windowSize) {
 	typename GenericWindow<dataType>::Target target(fType, cType, goal);
-	std::vector<typename GenericWindow<dataType>::Target> targets;
-	targets.push_back(target);
+	typename GenericWindow<dataType>::TargetsPtr targets (
+			new typename GenericWindow<dataType>::Targets());
+	targets->push_back(target);
 
 	return Monitor::newGoal(targets, windowSize);
 }
 
 template <typename dataType>
 inline uint16_t Monitor <dataType>::newGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets) {
-	return Monitor::newGoal(targets, defaultWindowSize);
-}
-
-template <typename dataType>
-inline uint16_t Monitor <dataType>::newGoal(
-		std::vector<typename GenericWindow<dataType>::Target> targets,
+		typename GenericWindow<dataType>::TargetsPtr targets,
 		uint16_t windowSize) {
 	GenericWindow<dataType>* gWindow =
 			new GenericWindow<dataType>(targets, windowSize);

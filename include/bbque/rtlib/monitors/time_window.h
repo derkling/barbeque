@@ -24,15 +24,20 @@
 #define BBQUE_TIME_WINDOW_H_
 
 #include <chrono>
+
 #include "generic_window.h"
 
 class TimeWindow : public GenericWindow <uint32_t> {
 public:
-	TimeWindow(std::vector<GenericWindow<uint32_t>::Target> targets):
+
+	typedef std::vector<TimeWindow::Target> Targets;
+	typedef std::shared_ptr<Targets> TargetsPtr;
+
+	TimeWindow(TargetsPtr targets):
 		GenericWindow<uint32_t>(targets) {
 		}
 
-	TimeWindow(std::vector<GenericWindow<uint32_t>::Target> targets,
+	TimeWindow(TargetsPtr targets,
 			uint16_t windowSize) :
 		GenericWindow<uint32_t>(targets, windowSize) {
 		}
