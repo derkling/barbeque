@@ -143,6 +143,18 @@ private:
 	 * @brief Auxiliary varible for the Basic Throughput Monitor
 	 */
 	bool started;
+
+	/**
+	 * @brief Locked starts a new basic throughput monitor
+	 */
+	void _start();
+
+	/**
+	 * @brief Returns the throughput of basic throughput monitor
+	 *
+	 * @param data Amount of data analyzed in that amount of time
+	 */
+	double _getThroughput(const double &data);
 };
 
 #endif /* BBQUE_THROUGHPUT_MONITOR_H_ */
