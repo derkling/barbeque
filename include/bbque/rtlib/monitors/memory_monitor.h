@@ -25,8 +25,6 @@
 
 #include "monitor.h"
 
-#include <unistd.h>
-
 class MemoryMonitor: public Monitor <uint32_t> {
 public:
 

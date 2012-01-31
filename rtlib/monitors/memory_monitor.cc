@@ -3,9 +3,9 @@
  *
  */
 
+#include <stdio.h>
+
 #include "bbque/rtlib/monitors/memory_monitor.h"
-#include <fstream>
-#include <sstream>
 
 uint16_t MemoryMonitor::newGoal(uint32_t goal) {
 	return Monitor::newGoal(DataFunction::Average,
@@ -30,15 +30,13 @@ uint32_t MemoryMonitor::extractMemoryUsage() {
 	FILE* fp = fopen("/proc/self/statm","r");
 	result = ::fscanf(fp, "%*d %d", &memoryUsageKb);
 	if (result == EOF) {
-		// FIXME perhaps error handling could be better handled
-		fprintf(stderr, "MemoryMonitor read FAILED (Error: %d, %s)\n",
-				errno, strerror(errno));
-		memoryUsageKb = 0;
+		perror("MemoryMonitor read FAILED");
+		fclose(fp);	//Is it safe to close it here? Is fp valid?
+		return 0;
 	}
 	fclose(fp);
 
-	memoryUsageKb = memoryUsageKb * getpagesize() / 1024;
-	return memoryUsageKb;
+	return (memoryUsageKb * getpagesize() / 1024);
 }
 
 uint32_t MemoryMonitor::extractMemoryUsage(uint16_t id) {
