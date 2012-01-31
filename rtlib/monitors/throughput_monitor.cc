@@ -44,25 +44,31 @@ void ThroughputMonitor::resetGoal(uint16_t id) {
 	dynamic_cast<ThroughputWindow*> (goalList[id])->started = false;
 }
 
-//FIXME Are you sure that this method is thread safe?
 void ThroughputMonitor::start(uint16_t id) {
-	if (goalList.find(id) == goalList.end())
-		return;
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_start(id);
+}
 
+void ThroughputMonitor::stop(uint16_t id, double data) {
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_stop(id, data);
+}
+
+void ThroughputMonitor::_start(uint16_t id) {
+	if (unlikely(goalList.find(id) == goalList.end()))
+		return;
+	if (unlikely(dynamic_cast<ThroughputWindow*>(goalList[id])->started))
+		return;
 	dynamic_cast<ThroughputWindow*> (goalList[id])->started = true;
 	dynamic_cast<ThroughputWindow*> (goalList[id])->tStart =
 		std::chrono::monotonic_clock::now();
-
 }
 
-//FIXME Are you sure that this method is thread safe?
-void ThroughputMonitor::stop(uint16_t id, double data) {
-	if (goalList.find(id) == goalList.end())
+void ThroughputMonitor::_stop(uint16_t id, const double &data) {
+	if (unlikely(goalList.find(id) == goalList.end()))
 		return;
-
 	if (unlikely(!dynamic_cast<ThroughputWindow*>(goalList[id])->started))
 		return;
-
 	dynamic_cast<ThroughputWindow*>
 		(goalList[id])->tStop = std::chrono::monotonic_clock::now();
 	uint32_t elapsedTime =

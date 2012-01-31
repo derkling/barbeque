@@ -47,21 +47,29 @@ void TimeMonitor::resetGoal(uint16_t id) {
 	dynamic_cast<TimeWindow*>(goalList[id])->started = false;
 }
 
-//FIXME Are you sure that this method is thread safe?
 void TimeMonitor::start(uint16_t id) {
-	if (goalList.find(id) == goalList.end())
-		return;
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_start(id);
+}
 
+void TimeMonitor::stop(uint16_t id) {
+	std::lock_guard<std::mutex> lg(timerMutex);
+	_stop(id);
+}
+
+void TimeMonitor::_start(uint16_t id) {
+	if (unlikely(goalList.find(id) == goalList.end()))
+		return;
+	if (unlikely(dynamic_cast<TimeWindow*>(goalList[id])->started))
+		return;
 	dynamic_cast<TimeWindow*>(goalList[id])->started = true;
 	dynamic_cast<TimeWindow*>(goalList[id])->tStart =
 		std::chrono::monotonic_clock::now();
 }
 
-//FIXME Are you sure that this method is thread safe?
-void TimeMonitor::stop(uint16_t id) {
-	if (goalList.find(id) == goalList.end())
+void TimeMonitor::_stop(uint16_t id) {
+	if (unlikely(goalList.find(id) == goalList.end()))
 		return;
-
 	if (unlikely(!dynamic_cast<TimeWindow*>(goalList[id])->started))
 		return;
 

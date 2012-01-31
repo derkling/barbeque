@@ -155,6 +155,20 @@ private:
 	 * @param data Amount of data analyzed in that amount of time
 	 */
 	double _getThroughput(const double &data);
+
+	/**
+	 * @brief Starts a new basic throughput monitor (locked)
+	 */
+	void _start(uint16_t id);
+
+	/**
+	 * @brief Stops previous measure and saves the result in the right
+	 * window (given by the id) (locked)
+	 *
+	 * @param id Identifies monitor and corresponding list
+	 * @param data Amount of data analyzed in that amount of time
+	 */
+	void _stop(uint16_t id, const double &data);
 };
 
 #endif /* BBQUE_THROUGHPUT_MONITOR_H_ */

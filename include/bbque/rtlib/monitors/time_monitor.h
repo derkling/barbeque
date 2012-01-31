@@ -171,6 +171,20 @@ private:
 	 */
 	void _stop();
 
+	/**
+	 * @brief Locked starts new basic time monitor
+	 * @param id Identifies monitor and corresponding list
+	 *
+	 */
+	void _start(uint16_t id);
+
+	/**
+	 * @brief Locked stops basic time monitor
+	 * @param id Identifies monitor and corresponding list
+	 *
+	 */
+	void _stop(uint16_t id);
+
 };
 
 #endif /* BBQUE_TIME_MONITOR_H_ */
