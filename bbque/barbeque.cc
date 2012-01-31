@@ -86,6 +86,10 @@ static void DaemonizeBBQ(bb::ConfigurationManager & cm) {
 
 	fprintf(stderr, "Starting BarbequeRTRM as daemon [%s], running with uid [%s]...\n",
 			cm.GetDaemonName().c_str(), cm.GetUID().c_str());
+	fprintf(stderr, "Using configuration file [%s]\n",
+			cm.GetConfigurationFile().c_str());
+
+	// Daemonize this process
 	result = daemonize(
 			cm.GetDaemonName().c_str(),
 			cm.GetUID().c_str(),

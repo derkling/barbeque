@@ -101,6 +101,14 @@ public:
 	}
 
 	/**
+	 * @brief  Get the BBQUE configuration file
+	 * @return the complete PATH of the used configuration file
+	 */
+	inline std::string GetConfigurationFile() const {
+		return conf_file_path;
+	}
+
+	/**
 	 * @brief  Get the BBQUE daemon name
 	 * @return the name of the process which runs the BBQ daemon
 	 */
