@@ -86,4 +86,9 @@ install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf"
 install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
 		DESTINATION ${BBQUE_PATH_CONF}
 		COMPONENT BarbequeRTRM)
+# Install the PIL configurations
+install (DIRECTORY "${PROJECT_SOURCE_DIR}/config/pil/"
+		DESTINATION ${BBQUE_PATH_PILS}
+		COMPONENT BarbequeRTRM
+		FILES_MATCHING PATTERN "*.cgroup")
 

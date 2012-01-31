@@ -1,0 +1,39 @@
+# libcgroup configuration file
+# CPUSets configuration for BarbequeRTRM running on i7 host
+
+# Permissions of the given control group on mounted filesystem.
+group bbque {
+	perm {
+		task {
+			uid = bbque;
+			gid = rtrm;
+		}
+		admin {
+			uid = bbque;
+			gid = rtrm;
+		}
+	}
+	cpuset {
+		cpuset.cpus = "0-3";
+		cpuset.mems = "0";
+	}
+}
+
+group bbque/node0 {
+	perm {
+		task {
+			uid = bbque;
+			gid = rtrm;
+		}
+		admin {
+			uid = bbque;
+			gid = rtrm;
+		}
+	}
+	cpuset {
+		cpuset.cpus = "0-3";
+		cpuset.mems = "0";
+	}
+}
+
+# vim: set tabstop=4:
