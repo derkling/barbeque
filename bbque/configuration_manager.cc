@@ -43,11 +43,7 @@ ConfigurationManager::ConfigurationManager() :
 		("help,h", "print this help message")
 		("daemon,d", "run as daemon in background")
 		("config,c", po::value<std::string>(&conf_file_path)->
-#ifdef BBQUE_DEBUG
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf_dbg"),
-#else
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf"),
-#endif
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/"BBQUE_CONF_FILE),
 			"configuration file path")
 		("bbque.plugins,p", po::value<std::string>(&plugins_dir)->
 			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_PLUGINS),

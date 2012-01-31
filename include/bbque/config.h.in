@@ -42,6 +42,9 @@
 /** The Barbeque DAEMON run-directory path */
 #define BBQUE_DAEMON_RUNDIR "${BBQUE_DAEMON_RUNDIR}"
 
+/** The Barbeque configuration file */
+#define BBQUE_CONF_FILE "${BBQUE_CONF_FILE}"
+
 /** The installation path */
 #define BBQUE_PATH_PREFIX "${CMAKE_INSTALL_PREFIX}"
 

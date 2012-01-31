@@ -29,6 +29,13 @@ set (BBQUE_PATH_PLUGINS "lib/bbque/plugins")
 set (BBQUE_PATH_DOCS    "usr/share/bbque")
 set (BBQUE_PATH_VAR     "var/bbque")
 
+# Barbeque configuration file
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (BBQUE_CONF_FILE   "bbque.conf_dbg")
+else (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	set (BBQUE_CONF_FILE   "bbque.conf")
+endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 
 ################################################################################
 # Common initialization settings
@@ -189,7 +196,7 @@ message ( STATUS "Barbeque Version...... ${VERSION}" )
 message ( STATUS "Build type............ ${CMAKE_BUILD_TYPE}" )
 message ( STATUS "Installation prefix... ${CMAKE_INSTALL_PREFIX}" )
 message ( STATUS "   Barbeuqe RTRM...... <prefix>/${BBQUE_PATH_BBQ}" )
-message ( STATUS "   Configuration...... <prefix>/${BBQUE_PATH_CONF}" )
+message ( STATUS "   Configuration...... <prefix>/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}" )
 message ( STATUS "   Recipes............ <prefix>/${BBQUE_PATH_RECIPES}" )
 message ( STATUS "   Plugins............ <prefix>/${BBQUE_PATH_PLUGINS}" )
 message ( STATUS "   Var(RPC-Channel)... <prefix>/${BBQUE_PATH_VAR}" )
