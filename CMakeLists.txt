@@ -21,7 +21,9 @@ set (BBQUE_DAEMON_RUNDIR   "")
 
 # Barbeque installation pats
 set (BBQUE_PATH_BBQ     "sbin")
+set (BBQUE_PATH_INIT    "etc/init.d")
 set (BBQUE_PATH_CONF    "etc/bbque")
+set (BBQUE_PATH_PILS    "etc/bbque/pil")
 set (BBQUE_PATH_RECIPES "etc/bbque/recipes")
 set (BBQUE_PATH_HEADERS "include/bbque")
 set (BBQUE_PATH_RTLIB   "lib/bbque")
@@ -36,6 +38,8 @@ else (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (BBQUE_CONF_FILE   "bbque.conf")
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
+# Setup the CGroup-based Platform Integration Layers (PIL)
+set (BBQUE_PIL_CGROUP_MOUNT "mnt/cgroup")
 
 ################################################################################
 # Common initialization settings

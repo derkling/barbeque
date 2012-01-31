@@ -1,0 +1,113 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          bbqued
+# Required-Start:
+# Required-Stop:
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: BarbequeRTRM daemon for Run-Time Resource Management
+# Description:       The Barbeque daemon wait for applications needing to
+#                    access accellerator resources and assigne them according
+#                    to resources availability and application requirements.
+### END INIT INFO
+
+# Barbeque daemon handler script. Distro-independent script to start/stop
+# daemon. Should be runnable in any distro but won't give any feedback.
+
+# Avoid bashism since this script runs using /bin/sh, not /bin/bash!
+
+BBQUE_BIN='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_BBQ}/barbeque'
+BBQUE_CONF='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}'
+LOCKFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_LOCKFILE}'
+PIDFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_PIDFILE}'
+
+BBQUE_PATH_CONFS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PILS}'
+BBQUE_PATH_MOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
+CGPARSER='${CMAKE_INSTALL_PREFIX}/sbin/cgconfigparser'
+
+# Setup CGroups if required
+setup() {
+
+	# Lookup for host specific configuration
+	CONF="$BBQUE_PATH_CONFS/`hostname`.cgroup"
+	if [ ! -f $CONF ]; then
+		# if not provided: revert to default configuration
+		CONF="$BBQUE_PATH_CONFS/default.cgroup"
+	fi
+
+	# Check if the CGroup hierarcy is already mounted
+	if [ ! -f $BBQUE_PATH_MOUNT/tasks ]; then
+		echo "Mounting CGroups on [$BBQUE_PATH_MOUNT]..."
+		mkdir -p $BBQUE_PATH_MOUNT >/dev/null 2>&1
+		mount -t cgroup -o cpuset bbque_cgroups  $BBQUE_PATH_MOUNT
+	fi
+
+	echo "Loading CGroups configuration [$CONF]..."
+	$CGPARSER -l $CONF || exit 1
+}
+
+start() {
+	# Start the daemon only if there is not another instance running
+	if [ -f $PIDFILE ]; then
+		PID=`cat $PIDFILE`
+		if [ -d /proc/$PID ]; then
+			echo "Barbeque RTRM daemon already running [PID: $PID]"
+			exit 1
+		fi
+	fi
+
+	# Setup CGroups
+	setup
+
+	# Run the daemon
+	"$BBQUE_BIN" -c $BBQUE_CONF -d
+}
+
+stop() {
+	# Stop the daemon only if there is an instance running
+	if [ ! -f $PIDFILE ]; then
+		exit 0
+	fi
+
+	# Terminating BBQ daemon
+	PID=`cat $PIDFILE`
+	kill -TERM $PID >/dev/null 2>&1
+
+	# Cleaning-up CGroup reservations
+	rmdir $BBQUE_PATH_MOUNT/bbque/node*
+	rmdir $BBQUE_PATH_MOUNT/bbque*
+
+	# Clean-up lock and PID files
+	rm -f $PIDFILE $LOCKFILE >/dev/null 2>&1
+
+	exit 0
+}
+
+restart() {
+	stop
+	sleep 1
+	start
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart)
+		restart
+		;;
+	status)
+		# not implemented
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+		;;
+esac
+
+# vim: set tabstop=4:

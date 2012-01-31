@@ -27,6 +27,12 @@ configure_file (
 	"${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
 )
 
+# Setup the daemon initialization script
+configure_file (
+	"${PROJECT_SOURCE_DIR}/config/bbqued.in"
+	"${PROJECT_BINARY_DIR}/config/bbqued"
+)
+
 # Build subdirs
 add_subdirectory(utils)
 add_subdirectory(app)
@@ -80,11 +86,16 @@ set_property(TARGET barbeque PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 install (TARGETS barbeque RUNTIME
 		DESTINATION ${BBQUE_PATH_BBQ}
 		COMPONENT BarbequeRTRM)
+# Install the Barbeque configuration files
 install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf"
 		DESTINATION ${BBQUE_PATH_CONF}
 		COMPONENT BarbequeRTRM)
 install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
 		DESTINATION ${BBQUE_PATH_CONF}
+		COMPONENT BarbequeRTRM)
+# Install the daemon init script
+install (PROGRAMS "${PROJECT_BINARY_DIR}/config/bbqued"
+	DESTINATION ${BBQUE_PATH_INIT}
 		COMPONENT BarbequeRTRM)
 # Install the PIL configurations
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/config/pil/"
