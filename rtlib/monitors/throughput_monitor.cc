@@ -6,6 +6,10 @@
 #include "bbque/rtlib/monitors/throughput_monitor.h"
 #include "bbque/utils/utility.h"
 
+using std::chrono::duration_cast;
+using std::chrono::duration;
+typedef std::chrono::monotonic_clock chr_mc;
+
 uint16_t ThroughputMonitor::newGoal(double goal, uint16_t windowSize) {
 	ThroughputWindow::Target target(DataFunction::Average,
 			ComparisonFunction::GreaterOrEqual,
@@ -59,9 +63,9 @@ void ThroughputMonitor::_start(uint16_t id) {
 		return;
 	if (unlikely(dynamic_cast<ThroughputWindow*>(goalList[id])->started))
 		return;
+
 	dynamic_cast<ThroughputWindow*> (goalList[id])->started = true;
-	dynamic_cast<ThroughputWindow*> (goalList[id])->tStart =
-		std::chrono::monotonic_clock::now();
+	dynamic_cast<ThroughputWindow*> (goalList[id])->tStart = chr_mc::now();
 }
 
 void ThroughputMonitor::_stop(uint16_t id, const double &data) {
@@ -69,12 +73,12 @@ void ThroughputMonitor::_stop(uint16_t id, const double &data) {
 		return;
 	if (unlikely(!dynamic_cast<ThroughputWindow*>(goalList[id])->started))
 		return;
-	dynamic_cast<ThroughputWindow*>
-		(goalList[id])->tStop = std::chrono::monotonic_clock::now();
-	uint32_t elapsedTime =
-		std::chrono::duration_cast<std::chrono::microseconds> (
-				dynamic_cast<ThroughputWindow*> (goalList[id])->tStop -
-				dynamic_cast<ThroughputWindow*> (goalList[id])->tStart
+
+	dynamic_cast<ThroughputWindow*>(goalList[id])->tStop = chr_mc::now();
+
+	uint32_t elapsedTime = duration_cast<std::chrono::microseconds> (
+			dynamic_cast<ThroughputWindow*> (goalList[id])->tStop -
+			dynamic_cast<ThroughputWindow*> (goalList[id])->tStart
 			).count();
 	double tPut = data * (1000000.0 / elapsedTime);
 	goalList[id]->addElement(tPut);
@@ -84,6 +88,7 @@ void ThroughputMonitor::_stop(uint16_t id, const double &data) {
 void ThroughputMonitor::_start() {
 	if (unlikely(started))
 		return;
+
 	started = true;
 	tStart = std::chrono::monotonic_clock::now();
 }
@@ -94,8 +99,7 @@ double ThroughputMonitor::_getThroughput(const double &data) {
 
 	started = false;
 	tStop = std::chrono::monotonic_clock::now();
-	uint32_t elapsedTime =
-			std::chrono::duration_cast<std::chrono::microseconds>
+	uint32_t elapsedTime = duration_cast<std::chrono::microseconds>
 			(tStop - tStart).count();
 
 	return data * (1000000.0 / elapsedTime);
