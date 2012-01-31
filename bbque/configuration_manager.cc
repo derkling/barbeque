@@ -65,12 +65,12 @@ ConfigurationManager::ConfigurationManager() :
 		("bbque.uid", po::value<std::string>(&daemon_uid)->
 			default_value(BBQUE_DAEMON_UID),
 			"user ID to run the daemon under")
-		("bbque.gid", po::value<std::string>(&daemon_gid)->
-			default_value(BBQUE_DAEMON_GID),
-			"group ID to run the daemon under")
 		("bbque.lockfile", po::value<std::string>(&daemon_lockfile)->
 			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_LOCKFILE),
 			"daemon lock-file")
+		("bbque.pidfile", po::value<std::string>(&daemon_pidfile)->
+			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_PIDFILE),
+			"group ID to run the daemon under")
 		("bbque.rundir", po::value<std::string>(&daemon_rundir)->
 			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_RUNDIR),
 			"daemon run directory")

@@ -15,8 +15,8 @@ project (BarbequeRTRM)
 # Barbeque DAEMON configuraiton
 set (BBQUE_DAEMON_NAME     "bbqued")
 set (BBQUE_DAEMON_UID      "bbque")
-set (BBQUE_DAEMON_GID      "rtrm")
 set (BBQUE_DAEMON_LOCKFILE "var/lock/bbqued.lock")
+set (BBQUE_DAEMON_PIDFILE  "var/run/bbqued.pid")
 set (BBQUE_DAEMON_RUNDIR   "")
 
 # Barbeque installation pats

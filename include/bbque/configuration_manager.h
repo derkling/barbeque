@@ -117,19 +117,19 @@ public:
 	}
 
 	/**
-	 * @brief  Get the BBQUE daemon GID
-	 * @return the group ID to run the dameon under
-	 */
-	inline std::string GetGID() const {
-		return daemon_gid;
-	}
-
-	/**
 	 * @brief  Get the path of BBQUE lockfile
 	 * @return the complete path of the lock file
 	 */
 	inline std::string GetLockfile() const {
 		return daemon_lockfile;
+	}
+
+	/**
+	 * @brief  Get the path of BBQUE pidfile
+	 * @return the complete path of the PID file
+	 */
+	inline std::string GetPIDfile() const {
+		return daemon_pidfile;
 	}
 
 	/**
@@ -226,14 +226,14 @@ private:
 	std::string daemon_uid;
 
 	/**
-	 * The group ID to run the daemon under
-	 */
-	std::string daemon_gid;
-
-	/**
 	 * The path of the locking file
 	 */
 	std::string daemon_lockfile;
+
+	/**
+	 * The path of the PID file
+	 */
+	std::string daemon_pidfile;
 
 	/**
 	 * daemon run directory
