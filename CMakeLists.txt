@@ -22,6 +22,7 @@ set (BBQUE_DAEMON_RUNDIR   "")
 # Barbeque installation pats
 set (BBQUE_PATH_BBQ        "sbin")
 set (BBQUE_PATH_INIT       "etc/init.d")
+set (BBQUE_PATH_DEFAULTS   "etc/default")
 set (BBQUE_PATH_CONF       "etc/bbque")
 set (BBQUE_PATH_PILS       "etc/bbque/pil")
 set (BBQUE_PATH_RECIPES    "etc/bbque/recipes")

@@ -32,6 +32,10 @@ configure_file (
 	"${PROJECT_SOURCE_DIR}/config/bbqued.in"
 	"${PROJECT_BINARY_DIR}/config/bbqued"
 )
+configure_file (
+	"${PROJECT_SOURCE_DIR}/config/bbqued.defaults.in"
+	"${PROJECT_BINARY_DIR}/config/default/bbqued"
+)
 
 # Build subdirs
 add_subdirectory(utils)
@@ -93,9 +97,12 @@ install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf"
 install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
 		DESTINATION ${BBQUE_PATH_CONF}
 		COMPONENT BarbequeRTRM)
-# Install the daemon init script
+# Install the daemon init script and its configuration file
 install (PROGRAMS "${PROJECT_BINARY_DIR}/config/bbqued"
 	DESTINATION ${BBQUE_PATH_INIT}
+		COMPONENT BarbequeRTRM)
+install (FILES "${PROJECT_BINARY_DIR}/config/default/bbqued"
+	DESTINATION ${BBQUE_PATH_DEFAULTS}
 		COMPONENT BarbequeRTRM)
 # Install the PIL configurations
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/config/pil/"

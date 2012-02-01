@@ -1,0 +1,31 @@
+# BarbequeRTRM Daemon Configuration Options
+# Sourced by: sourced by ${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_INIT}/bbqued
+#
+# NOTE: if possible, use absolute paths
+#
+#
+# The BBQ binary
+BIN='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_BBQ}/barbeque'
+#
+# The BBQ configuration file
+CONF='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}'
+#
+# The BBQ daemon PID file
+PIDFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_PIDFILE}'
+#
+# The BBQ daemon lock file
+LOCKFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_LOCKFILE}'
+#
+# The mountpoint of the BBQ CGroup hierarchy
+MOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
+#
+# The folder containing CGroups configuration
+CGSETUPS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PILS}'
+#
+# The CGroups configuration to use (if an host specific one is not available)
+CGLAYOUT='default'
+#
+# The CGroup configuration parser (part of libcgroup library)
+CGPARSER='${CMAKE_INSTALL_PREFIX}/sbin/cgconfigparser'
+#
+# vim: set tabstop=4:
