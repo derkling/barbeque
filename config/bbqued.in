@@ -1,4 +1,5 @@
 #!/bin/sh
+
 ### BEGIN INIT INFO
 # Provides:          bbqued
 # Required-Start:
@@ -15,43 +16,53 @@
 
 # Barbeque daemon handler script. Distro-independent script to start/stop
 # daemon. Should be runnable in any distro but won't give any feedback.
-
 # Avoid bashism since this script runs using /bin/sh, not /bin/bash!
 
-BBQUE_BIN='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_BBQ}/barbeque'
-BBQUE_CONF='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}'
-LOCKFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_LOCKFILE}'
-PIDFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_PIDFILE}'
+DAEMON_CONF="${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_DEFAULTS}/bbqued"
+if [ ! -f $DAEMON_CONF ]; then
+		echo "Daemon configuration [$DAEMON_CONF] not found"
+		exit 1
+fi
 
-BBQUE_PATH_CONFS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PILS}'
-BBQUE_PATH_MOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
-CGPARSER='${CMAKE_INSTALL_PREFIX}/sbin/cgconfigparser'
+# Source the daemon configuration settings
+. ${CMAKE_INSTALL_PREFIX}/etc/default/bbqued
+
+# Setup actual value (env overriding allowed)
+BBQUE_BIN="${BBQUE_BIN:-$BIN}"
+BBQUE_CONF="${BBQUE_CONF:-$CONF}"
+BBQUE_PIDFILE="${BBQUE_PIDFILE:-$PIDFILE}"
+BBQUE_LOCKFILE="${BBQUE_LOCKFILE:-$LOCKFILE}"
+
+BBQUE_MOUNT="${BBQUE_MOUNT:-$MOUNT}"
+BBQUE_CGSETUPS="${BBQUE_CGSETUPS:-$CGSETUPS}"
+BBQUE_CGLAYOUT="${BBQUE_CGLAYOUT:-$CGLAYOUT}"
+BBQUE_CGPARSER="${BBQUE_CGPARSER:-$CGPARSER}"
 
 # Setup CGroups if required
 setup() {
 
 	# Lookup for host specific configuration
-	CONF="$BBQUE_PATH_CONFS/`hostname`.cgroup"
-	if [ ! -f $CONF ]; then
+	CGSETUP="$BBQUE_CGSETUPS/`hostname`.cgroup"
+	if [ ! -f $CGSETUP ]; then
 		# if not provided: revert to default configuration
-		CONF="$BBQUE_PATH_CONFS/default.cgroup"
+		CGSETUP="$BBQUE_CGSETUPS/$BBQUE_CGLAYOUT.cgroup"
 	fi
 
 	# Check if the CGroup hierarcy is already mounted
-	if [ ! -f $BBQUE_PATH_MOUNT/tasks ]; then
-		echo "Mounting CGroups on [$BBQUE_PATH_MOUNT]..."
-		mkdir -p $BBQUE_PATH_MOUNT >/dev/null 2>&1
-		mount -t cgroup -o cpuset bbque_cgroups  $BBQUE_PATH_MOUNT
+	if [ ! -f $BBQUE_MOUNT/tasks ]; then
+		echo "Mounting CGroups on [$BBQUE_MOUNT]..."
+		mkdir -p $BBQUE_MOUNT >/dev/null 2>&1
+		mount -t cgroup -o cpuset bbque_cgroups  $BBQUE_MOUNT
 	fi
 
-	echo "Loading CGroups configuration [$CONF]..."
-	$CGPARSER -l $CONF || exit 1
+	echo "Loading CGroups configuration [$CGSETUP]..."
+	$BBQUE_CGPARSER -l $CGSETUP || exit 1
 }
 
 start() {
 	# Start the daemon only if there is not another instance running
-	if [ -f $PIDFILE ]; then
-		PID=`cat $PIDFILE`
+	if [ -f $BBQUE_PIDFILE ]; then
+		PID=`cat $BBQUE_PIDFILE`
 		if [ -d /proc/$PID ]; then
 			echo "Barbeque RTRM daemon already running [PID: $PID]"
 			exit 1
@@ -67,20 +78,20 @@ start() {
 
 stop() {
 	# Stop the daemon only if there is an instance running
-	if [ ! -f $PIDFILE ]; then
+	if [ ! -f $BBQUE_PIDFILE ]; then
 		exit 0
 	fi
 
 	# Terminating BBQ daemon
-	PID=`cat $PIDFILE`
+	PID=`cat $BBQUE_PIDFILE`
 	kill -TERM $PID >/dev/null 2>&1
 
 	# Cleaning-up CGroup reservations
-	rmdir $BBQUE_PATH_MOUNT/bbque/node*
-	rmdir $BBQUE_PATH_MOUNT/bbque*
+	rmdir $BBQUE_MOUNT/bbque/node*
+	rmdir $BBQUE_MOUNT/bbque*
 
 	# Clean-up lock and PID files
-	rm -f $PIDFILE $LOCKFILE >/dev/null 2>&1
+	rm -f $BBQUE_PIDFILE $BBQUE_LOCKFILE >/dev/null 2>&1
 
 	exit 0
 }
