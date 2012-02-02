@@ -53,6 +53,12 @@ setup() {
 		echo "Mounting CGroups on [$BBQUE_MOUNT]..."
 		mkdir -p $BBQUE_MOUNT >/dev/null 2>&1
 		mount -t cgroup -o cpuset,memory bbque_cgroups $BBQUE_MOUNT
+		if [ $? -ne 0 ]; then
+				echo "Mounting hierarchies [cpuset,memory] FAILED"
+				echo "Check they are not yet mounted with different controllers"
+				cat /proc/cgroups
+				exit 1
+		fi
 	fi
 
 	echo "Loading CGroups configuration [$CGSETUP]..."
