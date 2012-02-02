@@ -1,9 +1,17 @@
+# Sets the include path for libxml
+set (LIBXML2_INCLUDE_PATH "/usr/include/libxml2")
+
+# Include libxml headers
+include_directories (
+	${LIBXML2_INCLUDE_PATH}
+)
 
 # Add "barbeque" specific flags
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x")
 
 set (MONITORS_SRC time_monitor ${PROJECT_BINARY_DIR}/bbque/version.cc)
 set (MONITORS_SRC throughput_monitor memory_monitor ${MONITORS_SRC})
+set (MONITORS_SRC op_manager ${MONITORS_SRC})
 
 #----- Add "bbque_monitors" target dinamic binary
 add_library(bbque_monitors SHARED ${MONITORS_SRC})
@@ -12,7 +20,7 @@ add_library(bbque_monitors SHARED ${MONITORS_SRC})
 target_link_libraries(
 	bbque_monitors
 	${Boost_LIBRARIES}
-	-ldl -lrt
+	-ldl -lrt -lxml2
 )
 
 # Use link path ad RPATH
@@ -30,7 +38,11 @@ set_property (TARGET bbque_monitors PROPERTY PUBLIC_HEADER
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/throughput_monitor.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/throughput_window.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/memory_monitor.h
-	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/temperature_monitor.h)
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/temperature_monitor.h
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/metric_priority.h
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/operating_point.h
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/op_filter.h
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/op_manager.h)
 
 
 # Install Monitors
