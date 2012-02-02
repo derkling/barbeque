@@ -1335,9 +1335,12 @@ void BbqueRPC::PerfPrintMissesRatio(double avg_missed, double tot_branches, cons
 void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 	pPerfEventAttr_t ppea = ppes->pattr;
 	double avg = mean(ppes->samples);
-	double total, ratio = 0.0;
+	double total, total2, ratio = 0.0;
 	pPerfEventStats_t ppes2;
 	const char *fmt;
+
+	// shutdown compiler warnings for kernels < 3.1
+	(void)total2;
 
 	if (envCsvOutput)
 		fmt = "%.0f%s%s";
@@ -1372,10 +1375,12 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 			return;
 		total = mean(ppes2->samples);
 
-		ppes2 = PerfGetEventStats(pstats, PREF_HW(STALLED_CYCLES_BACKEND));
+		ppes2 = PerfGetEventStats(pstats, PERF_HW(STALLED_CYCLES_BACKEND));
 		if (!ppes2)
 			return;
-		total = max(total, mean(ppes2->samples));
+		total2 = mean(ppes2->samples);
+		if (total < total2)
+			total = total2;
 
 		if (total && avg) {
 			ratio = total / avg;
