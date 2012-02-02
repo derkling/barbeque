@@ -52,7 +52,7 @@ setup() {
 	if [ ! -f $BBQUE_MOUNT/tasks ]; then
 		echo "Mounting CGroups on [$BBQUE_MOUNT]..."
 		mkdir -p $BBQUE_MOUNT >/dev/null 2>&1
-		mount -t cgroup -o cpuset bbque_cgroups  $BBQUE_MOUNT
+		mount -t cgroup -o cpuset,memory bbque_cgroups $BBQUE_MOUNT
 	fi
 
 	echo "Loading CGroups configuration [$CGSETUP]..."
