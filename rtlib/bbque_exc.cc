@@ -44,7 +44,8 @@ BbqueEXC::BbqueEXC(std::string const & name,
 		std::string const & recipe,
 		RTLIB_Services_t * const rtl) :
 	exc_name(name), rpc_name(recipe), rtlib(rtl), cycles_count(0),
-	registered(false), started(false), enabled(false), done(false) {
+	registered(false), started(false), enabled(false),
+	suspended(false), done(false) {
 
 	RTLIB_ExecutionContextParams_t exc_params = {
 		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
@@ -247,6 +248,16 @@ RTLIB_ExitCode_t BbqueEXC::onSuspend() {
 	return RTLIB_OK;
 }
 
+RTLIB_ExitCode_t BbqueEXC::onResume() {
+
+	DB(fprintf(stderr, FMT_WRN("<< Default resume of EXC [%s],"
+					"latency 10[ms] >>\n"),
+				exc_name.c_str()));
+	DB(::usleep(10000));
+
+	return RTLIB_OK;
+}
+
 RTLIB_ExitCode_t BbqueEXC::onRun() {
 
 	// By default return after a pre-defined number of cycles
@@ -346,19 +357,35 @@ RTLIB_ExitCode_t BbqueEXC::GetWorkingMode() {
 	return result;
 }
 
-RTLIB_ExitCode_t BbqueEXC::Configure(uint8_t awm_id) {
+RTLIB_ExitCode_t BbqueEXC::Configure(uint8_t awm_id, RTLIB_ExitCode_t event) {
+
+	if (suspended || (event == RTLIB_EXC_GWM_START)) {
+		// Call the user-defined resuming procedure
+		onResume();
+
+		// Set this EXC as NOT SUSPENDED
+		suspended = false;
+	}
 
 	// Call the user-defined configuration procedure
 	rtlib->Notify.PreConfigure(exc_hdl);
 	onConfigure(awm_id);
 	rtlib->Notify.PostConfigure(exc_hdl);
+
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode_t BbqueEXC::Suspend() {
+
 	// Call the user-defined suspension procedure
 	rtlib->Notify.PreSuspend(exc_hdl);
 	onSuspend();
 	rtlib->Notify.PostSuspend(exc_hdl);
+
+	// Set this EXC as SUSPENDED
+	suspended = true;
+
+	return RTLIB_OK;
 }
 
 RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
@@ -380,7 +407,7 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 		DB(fprintf(stderr, FMT_DBG("CL 2-2. Switching EXC [%s] "
 				"to AWM [%02d]...\n"),
 				exc_name.c_str(), wmp.awm_id));
-		Configure(wmp.awm_id);
+		Configure(wmp.awm_id, result);
 		return result;
 
 	case RTLIB_EXC_GWM_BLOCKED:

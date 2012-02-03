@@ -77,6 +77,8 @@ protected:
 
 	virtual RTLIB_ExitCode_t onSuspend();
 
+	virtual RTLIB_ExitCode_t onResume();
+
 	virtual RTLIB_ExitCode_t onRun();
 
 	virtual RTLIB_ExitCode_t onMonitor();
@@ -119,8 +121,9 @@ private:
 
 	bool enabled;
 
-	bool done;
+	bool suspended;
 
+	bool done;
 
 	RTLIB_ExitCode_t _Enable();
 
@@ -128,7 +131,7 @@ private:
 
 	RTLIB_ExitCode_t Setup();
 
-	RTLIB_ExitCode_t Configure(uint8_t awm_id);
+	RTLIB_ExitCode_t Configure(uint8_t awm_id, RTLIB_ExitCode_t event);
 
 	RTLIB_ExitCode_t Suspend();
 
