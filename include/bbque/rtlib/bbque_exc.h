@@ -128,6 +128,10 @@ private:
 
 	RTLIB_ExitCode_t Setup();
 
+	RTLIB_ExitCode_t Configure(uint8_t awm_id);
+
+	RTLIB_ExitCode_t Suspend();
+
 	RTLIB_ExitCode_t Reconfigure(RTLIB_ExitCode_t result);
 
 	RTLIB_ExitCode_t GetWorkingMode();

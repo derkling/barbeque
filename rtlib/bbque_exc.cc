@@ -346,6 +346,21 @@ RTLIB_ExitCode_t BbqueEXC::GetWorkingMode() {
 	return result;
 }
 
+RTLIB_ExitCode_t BbqueEXC::Configure(uint8_t awm_id) {
+
+	// Call the user-defined configuration procedure
+	rtlib->Notify.PreConfigure(exc_hdl);
+	onConfigure(awm_id);
+	rtlib->Notify.PostConfigure(exc_hdl);
+}
+
+RTLIB_ExitCode_t BbqueEXC::Suspend() {
+	// Call the user-defined suspension procedure
+	rtlib->Notify.PreSuspend(exc_hdl);
+	onSuspend();
+	rtlib->Notify.PostSuspend(exc_hdl);
+}
+
 RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 
 	DB(fprintf(stderr, FMT_DBG("CL 2. Reconfigure check for EXC [%s]...\n"),
@@ -365,18 +380,13 @@ RTLIB_ExitCode_t BbqueEXC::Reconfigure(RTLIB_ExitCode_t result) {
 		DB(fprintf(stderr, FMT_DBG("CL 2-2. Switching EXC [%s] "
 				"to AWM [%02d]...\n"),
 				exc_name.c_str(), wmp.awm_id));
-
-		rtlib->Notify.PreConfigure(exc_hdl);
-		onConfigure(wmp.awm_id);
-		rtlib->Notify.PostConfigure(exc_hdl);
+		Configure(wmp.awm_id);
 		return result;
 
 	case RTLIB_EXC_GWM_BLOCKED:
 		DB(fprintf(stderr, FMT_DBG("CL 2-3. Suspending EXC [%s]...\n"),
 				exc_name.c_str()));
-		rtlib->Notify.PreSuspend(exc_hdl);
-		onSuspend();
-		rtlib->Notify.PostSuspend(exc_hdl);
+		Suspend();
 		return result;
 
 	default:
