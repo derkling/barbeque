@@ -51,6 +51,8 @@ public:
 
 	RTLIB_ExitCode_t ClearConstraints();
 
+	RTLIB_ExitCode_t SetGoalGap(uint8_t percent);
+
 	RTLIB_ExitCode_t Start();
 
 	RTLIB_ExitCode_t Terminate();

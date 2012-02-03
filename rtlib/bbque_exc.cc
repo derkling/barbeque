@@ -321,6 +321,20 @@ RTLIB_ExitCode_t BbqueEXC::ClearConstraints() {
 	return result;
 }
 
+RTLIB_ExitCode_t BbqueEXC::SetGoalGap(uint8_t percent) {
+	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
+	RTLIB_ExitCode_t result = RTLIB_OK;
+
+	assert(registered == true);
+	assert(rtlib->SetConstraints);
+
+	//--- Assert a Goal-Gap on this EXC
+	fprintf(stderr, FMT_INF("Set [%d] Goal-Gap for EXC [%s] (@%p)...\n"),
+			percent, exc_name.c_str(), (void*)exc_hdl);
+	result = rtlib->SetGoalGap(exc_hdl, percent);
+
+	return result;
+}
 
 /*******************************************************************************
  *    Control Loop
