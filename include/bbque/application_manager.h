@@ -131,6 +131,16 @@ public:
 	/**
 	 * @see ApplicationManagerConfIF
 	 */
+	ExitCode_t SetGoalGapEXC(AppPtr_t papp, uint8_t gap);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
+	ExitCode_t SetGoalGapEXC(AppPid_t pid, uint8_t exc_id, uint8_t gap);
+
+	/**
+	 * @see ApplicationManagerConfIF
+	 */
 	ExitCode_t EnableEXC(AppPtr_t papp);
 
 	/**

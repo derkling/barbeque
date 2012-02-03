@@ -129,6 +129,30 @@ public:
 	virtual ExitCode_t ClearConstraintsEXC(AppPid_t pid, uint8_t exc_id) = 0;
 
 	/**
+	 * @brief Set the Goal-Gap on the specified EXC
+	 *
+	 * Set the actual Goal-Gap for the currently selected AWMs of the
+	 * specified EXC.
+	 *
+	 * @param papp pointer to the application to enable
+	 * @param gap the current goal-gap value
+	 */
+	virtual ExitCode_t SetGoalGapEXC(AppPtr_t papp, uint8_t gap) = 0;
+
+	/**
+	 * @brief Set the Goal-Gap on the specified EXC
+	 *
+	 * Set the actual Goal-Gap for the currently selected AWMs of the
+	 * specified EXC.
+	 *
+	 * @param pid the processi ID of the application
+	 * @param exc_id the Execution Context ID to enable
+	 * @param gap the current goal-gap value
+	 */
+	virtual ExitCode_t SetGoalGapEXC(AppPid_t pid, uint8_t exc_id,
+			uint8_t gap) = 0;
+
+	/**
 	 * @brief Enable the EXC for resources scheduling
 	 *
 	 * Enable assignment of resources to the specified EXC.

@@ -901,6 +901,46 @@ ApplicationManager::ClearConstraintsEXC(AppPid_t pid, uint8_t exc_id) {
 
 }
 
+ApplicationManager::ExitCode_t
+ApplicationManager::SetGoalGapEXC(AppPtr_t papp, uint8_t gap) {
+	Application::ExitCode_t result;
+
+	// Define the contraints for this execution context
+	logger->Debug("Setting Goal-Gap on EXC [%s]...", papp->StrId());
+
+	// Set the Goal-Gap for the specified application
+	result = papp->SetGoalGap(gap);
+	if (result != Application::APP_SUCCESS)
+		return AM_ABORT;
+
+	// FIXME the reschedule should be activated based on some
+	// configuration parameter or policy decision
+	// Check for the need of a new schedule request
+	if (gap > 20) {
+		logger->Warn("Re-schedule required");
+		return AM_RESCHED_REQUIRED;
+	}
+
+	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::SetGoalGapEXC(AppPid_t pid, uint8_t exc_id, uint8_t gap) {
+	AppPtr_t papp;
+
+	// Find the required EXC
+	papp = GetApplication(Application::Uid(pid, exc_id));
+	if (!papp) {
+		logger->Warn("Set Goal-Gap for EXC [%d:*:%d] FAILED "
+				"(Error: EXC not found)");
+		assert(papp);
+		return AM_EXC_NOT_FOUND;
+	}
+
+	// Set constraints for this EXC
+	return SetGoalGapEXC(papp, gap);
+
+}
 /*******************************************************************************
  *  EXC Enabling
  ******************************************************************************/
