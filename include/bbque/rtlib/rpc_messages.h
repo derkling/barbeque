@@ -54,6 +54,7 @@ typedef enum rpc_msg_type {
 	RPC_EXC_UNREGISTER,
 	RPC_EXC_SET,
 	RPC_EXC_CLEAR,
+	RPC_EXC_GGAP,
 	RPC_EXC_START,
 	RPC_EXC_STOP,
 	RPC_EXC_SCHEDULE,
@@ -180,6 +181,16 @@ typedef struct rpc_msg_EXC_CLEAR {
 	/** The RPC fifo command header */
 	rpc_msg_header_t hdr;
 } rpc_msg_EXC_CLEAR_t;
+
+/**
+ * @brief Command to set a Goal-Gap on an execution context.
+ */
+typedef struct rpc_msg_EXC_GGAP {
+	/** The RPC fifo command header */
+	rpc_msg_header_t hdr;
+	/** The asserted Goal-Gap */
+	uint8_t gap;
+} rpc_msg_EXC_GGAP_t;
 
 /**
  * @brief Command to start an execution context.
