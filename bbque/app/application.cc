@@ -79,7 +79,8 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 		uint8_t _exc_id) :
 	name(_name),
 	pid(_pid),
-	exc_id(_exc_id) {
+	exc_id(_exc_id),
+	ggap_percent(0) {
 
 	// Init the working modes vector
 	awms.recipe_vect.resize(MAX_NUM_AWM);
@@ -975,6 +976,30 @@ void Application::ClearWorkingModeConstraints() {
 			awms.recipe_vect.size());
 	logger->Debug("ClearConstraint (AWMs): %d enabled working modes",
 			awms.enabled_list.size());
+}
+
+Application::ExitCode_t Application::SetGoalGap(uint8_t percent) {
+
+	// Enfore the Goal-Gap domain
+	if (unlikely(percent > 100)) {
+		logger->Warn("SetGoalGap [%d] on EXC [%s] FAILED "
+				"(Error: out-of-bound)",
+				percent, StrId());
+		return APP_ABORT;
+	}
+
+	// A Goal-Gap could be assigned only for applications already running
+	if (State() != RUNNING) {
+		logger->Warn("SetGoalGap [%d] on EXC [%s] FAILED "
+				"(Error: EXC not running)",
+				percent, StrId());
+		return APP_ABORT;
+	}
+
+	ggap_percent = percent;
+	logger->Info("Setting Goal-Gap [%d] for EXC [%s]", ggap_percent, StrId());
+
+	return APP_SUCCESS;
 }
 
 // Forward function declaration

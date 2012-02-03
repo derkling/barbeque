@@ -306,6 +306,26 @@ public:
 	 */
 	void ClearWorkingModeConstraints();
 
+
+	/**
+	 * @brief Set the current Goal-Gap
+	 *
+	 * Once an application has an assigned AWM it expect a certain QoS.
+	 * If the expected QoS value could not be reached, the application
+	 * could assert a Goal Gap which could than used by a scheduling
+	 * policy to sponsor the selection of an higher value AWM.
+	 *
+	 * @param percent the asserted GoalGap value, 0 to reset the Goal Gap.
+	 */
+	ExitCode_t SetGoalGap(uint8_t percent);
+
+	/**
+	 * @brief Return the current value for the Goal-Gap
+	 */
+	inline uint8_t GetGoalGap() const {
+		return ggap_percent;
+	}
+
 	/**
 	 * @brief Get a working mode descriptor
 	 *
@@ -379,6 +399,9 @@ private:
 
 	/** Current scheduling informations */
 	SchedulingInfo_t schedule;
+
+	/** The current Goal-Gap value, must be in [0,100] */
+	uint8_t ggap_percent;
 
 	/**
 	 * Recipe pointer for the current application instance.
