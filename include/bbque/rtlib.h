@@ -223,7 +223,7 @@ typedef enum RTLIB_ExitCode {
 
 //---- Reconfiguration actions required for an EXC
 // NOTE these values should match (in number and order) those defined by the
-//	    ApplicationStatusIF::SyncState_t
+//      ApplicationStatusIF::SyncState_t
 
 	/** Start running on the assigned AWM */
 	RTLIB_EXC_GWM_START,
@@ -527,7 +527,7 @@ typedef void (*RTLIB_Unregister_t)(
  * constraints at run-time to invalidate certain working modes.
  *
  * @param constraints a vector of constraints to be asserted
- * @oaran count the number of constraint to be asserted
+ * @param count the number of constraint to be asserted
  *
  * @note the Barbeque RTRM will do the best to satisfay a constraint
  * requirements, however, it is worth to notice that, since we are in a mixed
@@ -767,62 +767,62 @@ typedef void (*RTLIB_Notify_PostSuspend)(
  * initialization time.
 */
 struct RTLIB_Services {
-        /** Current version of the plugins API */
-        RTLIB_APIVersion_t version;
-		/** Execution contexts registration
-		 * Applications use this function at RTLib library initialization
-		 * time to register each "execution context" they want. */
-        RTLIB_Register_t Register;
-		/** Execution contexts scheduing
-		 * Applications use this function to ask resources for a specified EXCs
-		 * (ar all the registered ones).*/
-        RTLIB_Enable_t Enable;
-		/** Notify synchronization and get the assigned Working Mode.
-		 * Applications call this method, during the initialization or after a
-		 * false returning sync, to get a reference to the new assigned
-		 * working mode. */
-		RTLIB_GetWorkingMode_t GetWorkingMode;
-		/** Constraints assertion on a recipe working modes An execution
-		 * context could set a boundary on a set of working modes to consider
-		 * at run-time for resource scheduling. The Barbeque RTRM resource
-		 * scheduling of working modes should satisfying these requirement. */
-		RTLIB_SetConstraints_t SetConstraints;
-		/** Constraints removal on recipe working modes */
-		RTLIB_ClearConstraints_t ClearConstraints;
-		/** Execution contexts release
-		 * Applications use this function to release resources for a specified
-		 * EXCs (ar all the scheduled ones).*/
-        RTLIB_Disable_t Disable;
-		/** Execution contexts un-registration
-		 * Applications use this function to un-register an "execution
-		 * context" */
-        RTLIB_Unregister_t Unregister;
+	/** Current version of the plugins API */
+	RTLIB_APIVersion_t version;
+	/** Execution contexts registration
+	 * Applications use this function at RTLib library initialization
+	 * time to register each "execution context" they want. */
+	RTLIB_Register_t Register;
+	/** Execution contexts scheduing
+	 * Applications use this function to ask resources for a specified EXCs
+	 * (ar all the registered ones).*/
+	RTLIB_Enable_t Enable;
+	/** Notify synchronization and get the assigned Working Mode.
+	 * Applications call this method, during the initialization or after a
+	 * false returning sync, to get a reference to the new assigned
+	 * working mode. */
+	RTLIB_GetWorkingMode_t GetWorkingMode;
+	/** Constraints assertion on a recipe working modes An execution
+	 * context could set a boundary on a set of working modes to consider
+	 * at run-time for resource scheduling. The Barbeque RTRM resource
+	 * scheduling of working modes should satisfying these requirement. */
+	RTLIB_SetConstraints_t SetConstraints;
+	/** Constraints removal on recipe working modes */
+	RTLIB_ClearConstraints_t ClearConstraints;
+	/** Execution contexts release
+	 * Applications use this function to release resources for a specified
+	 * EXCs (ar all the scheduled ones).*/
+	RTLIB_Disable_t Disable;
+	/** Execution contexts un-registration
+	 * Applications use this function to un-register an "execution
+	 * context" */
+	RTLIB_Unregister_t Unregister;
 
-		/* Performance estimation and notification interface */
-		struct {
-			/** Setup notifier */
-			RTLIB_Notify_Setup Setup;
-			/** Initialization notifier */
-			RTLIB_Notify_Init Init;
-			/** Finalization notifier */
-			RTLIB_Notify_Exit Exit;
-			/** Pre-Configuration notifier */
-			RTLIB_Notify_PreConfigure PreConfigure;
-			/** Post-Configuration notifier */
-			RTLIB_Notify_PostConfigure PostConfigure;
-			/** Pre-Run notifier */
-			RTLIB_Notify_PreRun PreRun;
-			/** Post-Run notifier */
-			RTLIB_Notify_PostRun PostRun;
-			/** Pre-Monitor notifier */
-			RTLIB_Notify_PreMonitor PreMonitor;
-			/** Post-Monitor notifier */
-			RTLIB_Notify_PostMonitor PostMonitor;
-			/** Pre-Suspend notifier */
-			RTLIB_Notify_PreSuspend PreSuspend;
-			/** Post-Suspend notifier */
-			RTLIB_Notify_PostSuspend PostSuspend;
-		} Notify;
+	/* Performance estimation and notification interface */
+	struct {
+		/** Setup notifier */
+		RTLIB_Notify_Setup Setup;
+		/** Initialization notifier */
+		RTLIB_Notify_Init Init;
+		/** Finalization notifier */
+		RTLIB_Notify_Exit Exit;
+		/** Pre-Configuration notifier */
+		RTLIB_Notify_PreConfigure PreConfigure;
+		/** Post-Configuration notifier */
+		RTLIB_Notify_PostConfigure PostConfigure;
+		/** Pre-Run notifier */
+		RTLIB_Notify_PreRun PreRun;
+		/** Post-Run notifier */
+		RTLIB_Notify_PostRun PostRun;
+		/** Pre-Monitor notifier */
+		RTLIB_Notify_PreMonitor PreMonitor;
+		/** Post-Monitor notifier */
+		RTLIB_Notify_PostMonitor PostMonitor;
+		/** Pre-Suspend notifier */
+		RTLIB_Notify_PreSuspend PreSuspend;
+		/** Post-Suspend notifier */
+		RTLIB_Notify_PostSuspend PostSuspend;
+	} Notify;
 };
 
 
