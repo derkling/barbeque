@@ -150,6 +150,16 @@ static void rtlib_notify_post_suspend(
 	rpc->NotifyPostSuspend(ech);
 }
 
+static void rtlib_notify_pre_resume(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPreResume(ech);
+}
+
+static void rtlib_notify_post_resume(
+		RTLIB_ExecutionContextHandler_t ech) {
+	rpc->NotifyPostResume(ech);
+}
+
 static const char *rtlib_app_name;
 static uint8_t rtlib_initialized = 0;
 
@@ -193,6 +203,8 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.Notify.PostMonitor = rtlib_notify_post_monitor;
 	rtlib_services.Notify.PreSuspend = rtlib_notify_pre_suspend;
 	rtlib_services.Notify.PostSuspend = rtlib_notify_post_suspend;
+	rtlib_services.Notify.PreResume = rtlib_notify_pre_resume;
+	rtlib_services.Notify.PostResume = rtlib_notify_post_resume;
 
 	// Building a communication channel
 	rpc = br::BbqueRPC::GetInstance();

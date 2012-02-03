@@ -147,6 +147,12 @@ public:
 	void NotifyPostSuspend(
 		RTLIB_ExecutionContextHandler_t ech);
 
+	void NotifyPreResume(
+		RTLIB_ExecutionContextHandler_t ech);
+
+	void NotifyPostResume(
+		RTLIB_ExecutionContextHandler_t ech);
+
 protected:
 
 	typedef struct PerfEventAttr {

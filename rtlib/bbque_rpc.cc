@@ -1747,6 +1747,18 @@ void BbqueRPC::NotifyPostSuspend(
 	(void)ech;
 }
 
+void BbqueRPC::NotifyPreResume(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("===> NotifyResume\n")));
+	(void)ech;
+}
+
+void BbqueRPC::NotifyPostResume(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("<=== NotifyResume\n")));
+	(void)ech;
+}
+
 } // namespace rtlib
 
 } // namespace bbque

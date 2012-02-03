@@ -102,7 +102,7 @@ extern "C" {
  * The mainor version is increased at each internal library updated which do
  * not preclude backward compatibilities.
  */
-#define RTLIB_VERSION_MINOR 1
+#define RTLIB_VERSION_MINOR 2
 
 /**
  * @brief The maximum length for an "application" name
@@ -753,6 +753,32 @@ typedef void (*RTLIB_Notify_PreSuspend)(
 typedef void (*RTLIB_Notify_PostSuspend)(
 		RTLIB_ExecutionContextHandler_t ech);
 
+/**
+ * @brief Notify the RTLib a "resume" is starting
+ *
+ * Once a working mode resume is starting, an application is encouraged to
+ * notify the run-time library by calling this method. This could be used by
+ * the RTLib implementation to collect suitable information and statistics on
+ * application resume overheads.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PreResume)(
+		RTLIB_ExecutionContextHandler_t ech);
+
+
+/**
+ * @brief Notify the RTLib a "resume" has completed
+ *
+ * Once a working mode resume has been completed, an application is
+ * encouraged to notify the run-time library by calling this method. This
+ * could be used by the RTLib implementation to collect suitable information
+ * and statistics on application resume overheads.
+ *i
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_PostResume)(
+		RTLIB_ExecutionContextHandler_t ech);
 
 /*******************************************************************************
  *    RTLib Services Descriptor (RSD)
@@ -822,6 +848,10 @@ struct RTLIB_Services {
 		RTLIB_Notify_PreSuspend PreSuspend;
 		/** Post-Suspend notifier */
 		RTLIB_Notify_PostSuspend PostSuspend;
+		/** Pre-Resume notifier */
+		RTLIB_Notify_PreResume PreResume;
+		/** Post-Resume notifier */
+		RTLIB_Notify_PostResume PostResume;
 	} Notify;
 };
 

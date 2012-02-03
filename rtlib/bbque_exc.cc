@@ -361,7 +361,9 @@ RTLIB_ExitCode_t BbqueEXC::Configure(uint8_t awm_id, RTLIB_ExitCode_t event) {
 
 	if (suspended || (event == RTLIB_EXC_GWM_START)) {
 		// Call the user-defined resuming procedure
+		rtlib->Notify.PreResume(exc_hdl);
 		onResume();
+		rtlib->Notify.PostResume(exc_hdl);
 
 		// Set this EXC as NOT SUSPENDED
 		suspended = false;
