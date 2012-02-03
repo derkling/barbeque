@@ -68,6 +68,8 @@ protected:
 
 	RTLIB_ExitCode_t _Clear(pregExCtx_t prec);
 
+	RTLIB_ExitCode_t _GGap(pregExCtx_t prec, uint8_t gap);
+
 	void _Exit();
 
 	inline uint32_t RpcMsgToken() {

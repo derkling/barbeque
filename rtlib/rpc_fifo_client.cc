@@ -587,6 +587,39 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Clear(pregExCtx_t prec) {
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
+RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_GGap(pregExCtx_t prec, uint8_t gap) {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
+	rpc_fifo_EXC_GGAP_t rf_EXC_GGAP = {
+		{
+			FIFO_PKT_SIZE(EXC_GGAP),
+			FIFO_PYL_OFFSET(EXC_GGAP),
+			RPC_EXC_GGAP
+		},
+		{
+			{
+				RPC_EXC_GGAP,
+				RpcMsgToken(),
+				chTrdPid,
+				prec->exc_id
+			},
+			gap,
+		}
+	};
+
+	DB(fprintf(stderr, FMT_DBG("Set Goal-Gap for EXC [%d:%d]...\n"),
+				rf_EXC_GGAP.pyl.hdr.app_pid,
+				rf_EXC_GGAP.pyl.hdr.exc_id));
+
+	// Sending RPC Request
+	RPC_FIFO_SEND(EXC_GGAP);
+
+	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
+
+	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	return (RTLIB_ExitCode_t)chResp.result;
+
+}
+
 RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	rpc_fifo_EXC_SCHEDULE_t rf_EXC_SCHEDULE = {
