@@ -90,6 +90,11 @@ static RTLIB_ExitCode_t rtlib_clear(
 	return rpc->Clear(ech);
 }
 
+static RTLIB_ExitCode_t rtlib_ggap(
+		RTLIB_ExecutionContextHandler_t ech,
+		uint8_t gap) {
+	return rpc->GGap(ech, gap);
+}
 
 /*******************************************************************************
  *    Performance Monitoring Support
@@ -188,6 +193,7 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.GetWorkingMode = rtlib_getwm;
 	rtlib_services.SetConstraints = rtlib_set;
 	rtlib_services.ClearConstraints = rtlib_clear;
+	rtlib_services.SetGoalGap = rtlib_ggap;
 	rtlib_services.Disable = rtlib_disable;
 	rtlib_services.Unregister = rtlib_unregister;
 

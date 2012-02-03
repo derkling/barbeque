@@ -102,7 +102,7 @@ extern "C" {
  * The mainor version is increased at each internal library updated which do
  * not preclude backward compatibilities.
  */
-#define RTLIB_VERSION_MINOR 2
+#define RTLIB_VERSION_MINOR 3
 
 /**
  * @brief The maximum length for an "application" name
@@ -550,6 +550,35 @@ typedef RTLIB_ExitCode_t (*RTLIB_ClearConstraints_t)(
 		RTLIB_ExecutionContextHandler_t ech);
 
 /**
+ * @brief Pointer to an EXC Goal Gap assert function.
+ *
+ * An execution context (EXC) could assert a "Goal Gap" relative to the
+ * current assigned AWM if the expected QoS level is lower that its actual
+ * value. Thus, the Barbeque RTRM could do the best to schedule for this EXC a
+ * working mode which tries to assign more resources to to its in order to
+ * compensate the asserted gap. This API is completely agnostic on how a goal
+ * is computed and makes just one assumption: by increasing the resources
+ * assigned to the demanding task we could try to compensate the asserted gap.
+ * The more the gap, the more resources are required in addition by the
+ * application.
+ *
+ * The "Goal Gap" (GG) is represented as an integer percentage, i.e. an
+ * integer number in the range (0,100]. The higer the gap the more resources
+ * are required by the application, with repsect to the resoures corresponding
+ * to the currently assigned AWM.
+ *
+ * By issuing such a call, the applicaiton is giving just an hit to the
+ * Barbeque RTRM scheduler. This means that, as soon as it will be possible,
+ * it will try to assign an higer value AWM to the demanding application.
+ *
+ * @paran gap the Goal Gap (GG) percentage, to be represented as a number in
+ * the range (0,100].
+ */
+typedef RTLIB_ExitCode_t (*RTLIB_SetGoalGap_t)(
+		RTLIB_ExecutionContextHandler_t ech,
+		uint8_t gap);
+
+/**
  * @brief Synchronization point notification and AWM authorization.
  *
  * An execution context (EXC) is enchouraged to support the Barbeque RTRM by
@@ -815,6 +844,10 @@ struct RTLIB_Services {
 	RTLIB_SetConstraints_t SetConstraints;
 	/** Constraints removal on recipe working modes */
 	RTLIB_ClearConstraints_t ClearConstraints;
+	/** Goal Gap (GG) assertion on recipe working modes An execution
+	 * context could sssert a goal gap relative to the currently assigned
+	 * AWM if the expected QoS level is lower that its actual value. */
+	RTLIB_SetGoalGap_t SetGoalGap;
 	/** Execution contexts release
 	 * Applications use this function to release resources for a specified
 	 * EXCs (ar all the scheduled ones).*/
