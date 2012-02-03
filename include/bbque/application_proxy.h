@@ -335,6 +335,8 @@ private:
 
 	void RpcExcClear(prqsSn_t prqs);
 
+	void RpcExcGoalGap(prqsSn_t prqs);
+
 
 	void RpcExcStart(prqsSn_t prqs);
 
