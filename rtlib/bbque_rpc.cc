@@ -1083,6 +1083,41 @@ RTLIB_ExitCode_t BbqueRPC::Clear(
 	return RTLIB_OK;
 }
 
+RTLIB_ExitCode_t BbqueRPC::GGap(
+		const RTLIB_ExecutionContextHandler_t ech,
+		uint8_t percent) {
+	RTLIB_ExitCode_t result;
+	pregExCtx_t prec;
+
+	assert(ech);
+
+	// Enforce the Goal-Gap domain
+	if (unlikely(percent > 100)) {
+		fprintf(stderr, FMT_ERR("Set Gaol-Gap for EXC [%p] "
+				"(Error: out-of-bound)\n"), (void*)ech);
+		return RTLIB_ERROR;
+	}
+
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Set Gaol-Gap for EXC [%p] "
+				"(Error: EXC not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+
+	// Calling the low-level enable function
+	result = _GGap(prec, percent);
+	if (result != RTLIB_OK) {
+		DB(fprintf(stderr, FMT_ERR("Set Goal-Gap for EXC [%p:%s] FAILED "
+				"(Error %d: %s)\n"),
+				(void*)ech, prec->name.c_str(), result,
+				RTLIB_ErrorStr(result)));
+		return RTLIB_EXC_ENABLE_FAILED;
+	}
+
+	return RTLIB_OK;
+}
+
 RTLIB_ExitCode_t BbqueRPC::StopExecution(
 		RTLIB_ExecutionContextHandler_t ech,
 		struct timespec timeout) {

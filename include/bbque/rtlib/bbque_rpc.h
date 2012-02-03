@@ -105,6 +105,10 @@ public:
 	RTLIB_ExitCode_t Clear(
 			const RTLIB_ExecutionContextHandler_t ech);
 
+	RTLIB_ExitCode_t GGap(
+			const RTLIB_ExecutionContextHandler_t ech,
+			uint8_t percent);
+
 	RTLIB_ExitCode_t GetWorkingMode(
 			RTLIB_ExecutionContextHandler_t ech,
 			RTLIB_WorkingModeParams_t *wm,
@@ -438,6 +442,8 @@ protected:
 			RTLIB_Constraint_t* constraints, uint8_t count) = 0;
 
 	virtual RTLIB_ExitCode_t _Clear(pregExCtx_t prec) = 0;
+
+	virtual RTLIB_ExitCode_t _GGap(pregExCtx_t prec, uint8_t percent) = 0;
 
 	virtual RTLIB_ExitCode_t _ScheduleRequest(pregExCtx_t prec) = 0;
 
