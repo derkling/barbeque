@@ -22,9 +22,9 @@
 #include <map>
 #include <string>
 #include <vector>
-#include "bbque/app/constraints.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/attributes_container.h"
+#include "bbque/res/resource_constraints.h"
 
 #define RECIPE_NAMESPACE "rcp"
 
@@ -32,6 +32,7 @@
 #define MAX_NUM_AWM 	255
 
 using bbque::plugins::LoggerIF;
+using bbque::res::ResourceConstraint;
 using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace app {

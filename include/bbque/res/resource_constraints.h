@@ -21,18 +21,13 @@
 #include <limits>
 #include <memory>
 
-
 namespace bbque { namespace res {
-	// Forward declaration
-	class Resource;
-	// Shared pointer to Resource descriptor
-	typedef std::shared_ptr<res::Resource> ResourcePtr_t;
-}}
-
-using bbque::res::ResourcePtr_t;
 
 
-namespace bbque { namespace app {
+// Forward declaration
+class Resource;
+// Shared pointer to Resource descriptor
+typedef std::shared_ptr<Resource> ResourcePtr_t;
 
 /**
  * @brief Constraints asserted on resources
@@ -94,7 +89,7 @@ struct ResourceConstraint {
 };
 
 
-} // namespace app
+} // namespace res
 
 } // namespace bbque
 

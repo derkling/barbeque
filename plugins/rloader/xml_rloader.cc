@@ -23,13 +23,13 @@
 #include <boost/filesystem/operations.hpp>
 
 #include "bbque/app/application.h"
-#include "bbque/app/constraints.h"
 #include "bbque/app/working_mode.h"
+#include "bbque/res/resource_constraints.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
 
-
 namespace ba = bbque::app;
+namespace br = bbque::res;
 namespace po = boost::program_options;
 
 namespace bbque { namespace plugins {
