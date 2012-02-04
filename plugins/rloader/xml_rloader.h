@@ -152,7 +152,7 @@ private:
 	 * @param xml_elem The XML element from which start searching the
 	 * expected section tag
 	 */
-	ExitCode_t loadWorkingModes(ticpp::Element * xml_elem);
+	ExitCode_t LoadWorkingModes(ticpp::Element * xml_elem);
 
 	/**
 	 * @brief Parse the section containing resource usages data.
@@ -162,7 +162,7 @@ private:
 	 * @param res_path Resource path (i.e. "arch.clusters.mem0")
 	 * expected section tag
 	 */
-	uint8_t loadResources(ticpp::Element * xml_elem, AwmPtr_t & wm,
+	uint8_t LoadResources(ticpp::Element * xml_elem, AwmPtr_t & wm,
 			std::string const & res_path);
 
 	/**
@@ -173,7 +173,7 @@ private:
 	 * @param res_usage Resource usage value
 	 * @return An internal error code
 	 */
-	uint8_t appendToWorkingMode(AwmPtr_t & wm, std::string const & res_path,
+	uint8_t AppendToWorkingMode(AwmPtr_t & wm, std::string const & res_path,
 			uint64_t res_usage);
 
 	/**
@@ -183,7 +183,7 @@ private:
 	 * @param wm The working mode to which add the resource usage
 	 * @param res_path Resource path
 	 */
-	uint8_t getResourceAttributes(ticpp::Element * res_elem, AwmPtr_t & wm,
+	uint8_t GetResourceAttributes(ticpp::Element * res_elem, AwmPtr_t & wm,
 			std::string & res_path);
 
 	/**
@@ -195,7 +195,7 @@ private:
 	 * expected section tag
 	 */
 	template<class T>
-	void loadPluginsData(T container, ticpp::Element * xml_elem);
+	void LoadPluginsData(T container, ticpp::Element * xml_elem);
 
 	/**
 	 * @brief Parse data from <plugin> element
@@ -205,7 +205,7 @@ private:
 	 * which add the plugin specific data)
 	 */
 	template<class T>
-	void parsePluginTag(T container, ticpp::Element * plugin_elem);
+	void ParsePluginTag(T container, ticpp::Element * plugin_elem);
 
 	/**
 	 * @brief Parse the data nested under <plugin>
@@ -216,7 +216,7 @@ private:
 	 * @param plugin_name The name of the plugin
 	 */
 	template<class T>
-	void getPluginData(T container, ticpp::Node * plugdata_node,
+	void GetPluginData(T container, ticpp::Node * plugdata_node,
 			std::string const & plugin_name);
 
 	/**
@@ -224,7 +224,7 @@ private:
 	 * @param xml_elem The XML element from which start searching the
 	 * expected section tag
 	 */
-	void loadConstraints(ticpp::Element * xml_elem);
+	void LoadConstraints(ticpp::Element * xml_elem);
 
 };
 
