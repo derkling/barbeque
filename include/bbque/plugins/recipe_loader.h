@@ -25,7 +25,6 @@
 
 #define RECIPE_LOADER_NAMESPACE "bq.rl."
 
-using bbque::app::Application;
 using bbque::app::Recipe;
 
 namespace bbque { namespace plugins {
@@ -76,7 +75,7 @@ public:
 	 * @return An exit code indicating the loading status
 	 */
 	virtual	ExitCode_t LoadRecipe(std::string const & rname,
-				std::shared_ptr<Recipe> recipe)	= 0;
+			std::shared_ptr<Recipe> recipe)	= 0;
 
 	/**
 	 * @brief The last modified time of the recipe
