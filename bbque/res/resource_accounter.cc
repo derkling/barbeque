@@ -29,11 +29,9 @@
 #include <string>
 #include <sstream>
 
-#include "bbque/system_view.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/platform_services.h"
-#include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 
 namespace bbque { namespace res {
