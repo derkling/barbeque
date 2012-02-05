@@ -97,7 +97,7 @@ public:
 	/**
 	 * @brief Set the priority value
 	 */
-	void SetPriority(uint8_t prio) {
+	inline void SetPriority(uint8_t prio) {
 		priority = prio;
 	}
 
