@@ -53,11 +53,6 @@
 namespace bbque { namespace res {
 
 
-/** Shared pointer to Resource descriptor */
-typedef std::shared_ptr<Resource> ResourcePtr_t;
-/** List of shared pointer to Resource*/
-typedef std::list<ResourcePtr_t> ResourcePtrList_t;
-
 /**
  * @brief Resource accounting data
  *
