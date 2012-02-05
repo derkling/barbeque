@@ -24,7 +24,6 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/app/recipe.h"
 #include "bbque/plugins/recipe_loader.h"
-#include "bbque/res/resources.h"
 
 #include "bbque/application_manager.h"
 #include "bbque/res/resource_accounter.h"

@@ -23,7 +23,6 @@
 #include <mutex>
 
 #include "bbque/application_manager_conf.h"
-#include "bbque/app/application.h"
 #include "bbque/plugins/logger.h"
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
