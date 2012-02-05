@@ -40,7 +40,7 @@
   * Recipies could define the priority of the corresponding Application.
   *
   */
-# define BBQUE_APP_PRIO_LEVELS 10
+#define BBQUE_APP_PRIO_LEVELS 10
 #endif
 
 using bbque::app::Application;
