@@ -35,7 +35,7 @@
 #define RSRC_PLAT_MEM 	"arch.mem"
 
 /** Set of clusters */
-#define RSRC_TILE 	"arch.tile"
+#define RSRC_TILE   	"arch.tile"
 
 /** Memory at Tile scope */
 #define RSRC_TILE_MEM 	"arch.tile.mem"
