@@ -21,7 +21,7 @@
 #include <ctime>
 #include <memory>
 
-#include "bbque/app/application.h"
+#include "bbque/app/recipe.h"
 
 #define RECIPE_LOADER_NAMESPACE "bq.rl."
 
@@ -29,11 +29,6 @@ using bbque::app::Application;
 using bbque::app::Recipe;
 
 namespace bbque { namespace plugins {
-
-
-/** Shared pointer to Recipe */
-typedef std::shared_ptr<Recipe> RecipePtr_t;
-
 
 /**
  * @brief Basic interface for application recipe loading plugins.

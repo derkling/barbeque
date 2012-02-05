@@ -44,14 +44,11 @@
 #endif
 
 using bbque::app::Application;
-using bbque::app::Recipe;
+using bbque::app::RecipePtr_t;
 using bbque::plugins::LoggerIF;
 using bbque::plugins::RecipeLoaderIF;
 
 namespace bbque {
-
-/** Shared pointer to Recipe object */
-typedef std::shared_ptr<Recipe> RecipePtr_t;
 
 
 /**

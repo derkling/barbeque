@@ -28,7 +28,6 @@
 #include <ticpp.h>
 #include <tinyxml.h>
 
-#include "bbque/app/recipe.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/plugins/logger.h"
@@ -38,7 +37,6 @@
 using bbque::app::Application;
 using bbque::app::AppPtr_t;
 using bbque::app::AwmPtr_t;
-using bbque::app::Recipe;
 using bbque::app::WorkingMode;
 using bbque::utils::AttributesContainer;
 
