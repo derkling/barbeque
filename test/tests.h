@@ -67,6 +67,8 @@
 # define DB(x)
 #endif
 
+using bbque::rtlib::BbqueEXC;
+
 /**
  * @brief A pointer to an EXC
  */

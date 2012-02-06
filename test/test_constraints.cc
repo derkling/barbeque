@@ -26,6 +26,8 @@
 #define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "CONSTR     [WRN]", fmt)
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "CONSTR     [ERR]", fmt)
 
+using bbque::rtlib::BbqueEXC;
+
 // The RTLib context;
 extern RTLIB_Services_t *rtlib;
 
