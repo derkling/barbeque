@@ -290,9 +290,21 @@ template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	bool result = true;
 	typename std::vector<Target>::iterator it;
+	double dfResult;
+	double goalValue;
+
 	for (it = goalTargets->begin(); it != goalTargets->end(); ++it) {
-		gaps.push_back((it->dataFunction(this) - it->goalValue) /
-				it->goalValue);
+		/*
+		 * Forced promotion to double to avoid problems with unsigned
+		 * types.
+		 * This variables will be used just to compute gaps. The
+		 * uncasted values will be used instead to have a more accurate
+		 * evaluation of the goal.
+		 */
+		dfResult = it->dataFunction(this);
+		goalValue = it->goalValue;
+
+		gaps.push_back((dfResult - goalValue) / goalValue);
 		result = result && it->comparisonFunction(
 					it->dataFunction(this),
 					it->goalValue);

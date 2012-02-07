@@ -36,6 +36,13 @@ class TimeMonitor : public Monitor <uint32_t> {
 public:
 
 	/**
+	 * @brief Constructor of the class
+	 */
+	TimeMonitor() :
+		started(false) {
+	}
+
+	/**
 	 * @brief Creates a new monitor with a window containing an history of
 	 * previous values
 	 *
