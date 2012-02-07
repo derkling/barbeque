@@ -1,24 +1,19 @@
-/**
- *       @file  dummy_plugin.cc
- *      @brief  A static plugin example
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This defines an example of static C++ plugin which instantiate an object
- * implementing the TestingObjectIF interface.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  01/28/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "dummy_plugin.h"
 #include "dummy_test.h"
 #include "bbque/plugins/static_plugin.h"

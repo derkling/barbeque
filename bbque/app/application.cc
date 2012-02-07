@@ -1,26 +1,19 @@
-/**
-*       @file  application.cc
-*      @brief  Application descriptor implementation
-*
-* This implements the application descriptor.
-* Such descriptor includes static and dynamic information upon application
-* execution. It embeds usual information about name, priority, user, PID
-* (could be different from the one given by OS) plus a reference to the
-* recipe object, the list of enabled working modes and resource constraints.
-*
-*     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
-*
-*   @internal
-*     Created  06/04/2011
-*    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
-*    Compiler  gcc/g++
-*     Company  Politecnico di Milano
-*   Copyright  Copyright (c) 2011, Giuseppe Massari
-*
-* This source code is released for free distribution under the terms of the
-* GNU General Public License as published by the Free Software Foundation.
-* ============================================================================
-*/
+/*
+ * Copyright (C) 2012  Politecnico di Milano
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 #include "bbque/app/application.h"
 

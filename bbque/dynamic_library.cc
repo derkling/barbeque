@@ -1,23 +1,18 @@
-/**
- *       @file  dynamic_library.cc
- *      @brief  A generic class to manage shared libraries
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This class provides a generic interface to manage shared libraries.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- * Detailed description starts here.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
- *
- *   @internal
- *     Created  01/27/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =====================================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include "bbque/dynamic_library.h"
