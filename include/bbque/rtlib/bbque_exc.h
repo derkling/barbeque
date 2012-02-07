@@ -29,6 +29,8 @@
 #include <string>
 #include <thread>
 
+namespace bbque { namespace rtlib {
+
 class BbqueEXC {
 
 public:
@@ -137,5 +139,8 @@ private:
 	void ControlLoop();
 };
 
-#endif // BBQUE_EXC_H_
+} // namespace rtlib
 
+} // namespace bbque
+
+#endif // BBQUE_EXC_H_
