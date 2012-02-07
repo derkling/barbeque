@@ -38,6 +38,8 @@
 #define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_EXC  [WRN]", fmt)
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_EXC  [ERR]", fmt)
 
+namespace bbque { namespace rtlib {
+
 BbqueEXC::BbqueEXC(std::string const & name,
 		std::string const & recipe,
 		RTLIB_Services_t * const rtl) :
@@ -492,3 +494,6 @@ void BbqueEXC::ControlLoop() {
 
 }
 
+} // namespace rtlib
+
+} // namespace bbque
