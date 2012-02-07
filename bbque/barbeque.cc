@@ -1,5 +1,5 @@
 /**
- *       @file  main.cc
+ *       @file  barbeque.cc
  *      @brief  Tyhe RTRM protorype implementation for 2PARMA EU FP7 project
  *
  * Detailed description starts here.

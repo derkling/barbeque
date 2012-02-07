@@ -1,5 +1,5 @@
 /**
- *       @file  plugin.cc
+ *       @file  log4cpp_plugin.cc
  *      @brief  A static Logger plugin based on Log4CPP
  *
  * This defines a static Log4CPP based plugin which instantiate an object

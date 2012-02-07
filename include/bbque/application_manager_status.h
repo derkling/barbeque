@@ -140,15 +140,14 @@ private:
  ******************************************************************************/
 
 /**
- * @class ApplicationManagerStatusIF
- * @brief "Read-only" interface for ApplicationManager status
+ * @brief "Status" interface for ApplicationManager.
  */
 class ApplicationManagerStatusIF {
 
 public:
 
 	/**
-	 * @enum Exit code to return
+	 * @brief Exit code to return
 	 */
 	enum ExitCode_t {
 		/** Success */
@@ -231,7 +230,7 @@ public:
 	/**
 	 * @brief Get the next element of STATUS queue using an ILES iterator.
 	 *
-	 * @param prio the status queue to visit
+	 * @param state the status queue to visit
 	 * @param ait an ILES iterator instance, this is the same ILES iterator to
 	 * be used to get the next elements
 	 *
@@ -244,7 +243,7 @@ public:
 	/**
 	 * @brief Get the next element of STATUS queue using an ILES iterator.
 	 *
-	 * @param prio the status queue to visit
+	 * @param state the status queue to visit
 	 * @param ait an ILES iterator instance, this is the same ILES iterator
 	 * used to get the first elements
 	 *
@@ -257,7 +256,7 @@ public:
 	/**
 	 * @brief Get the next element of SYNC queue using an ILES iterator.
 	 *
-	 * @param prio the sync queue to visit
+	 * @param state the sync queue to visit
 	 * @param ait an ILES iterator instance, this is the same ILES iterator to
 	 * be used to get the next elements
 	 *
@@ -270,7 +269,7 @@ public:
 	/**
 	 * @brief Get the next element of SYNC queue using an ILES iterator.
 	 *
-	 * @param prio the sync queue to visit
+	 * @param state the sync queue to visit
 	 * @param ait an ILES iterator instance, this is the same ILES iterator
 	 * used to get the first elements
 	 *

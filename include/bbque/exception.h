@@ -1,5 +1,5 @@
 /**
- *       @file  Exception.h
+ *       @file  exception.h
  *      @brief  A generic execption.
  *
  * This provides support for the generation of a generic exception defining
@@ -58,48 +58,36 @@ private:
 public:
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	Exception(const std::string file = "", uint32_t line = 0) :
 		std::runtime_error(""),
 		file_name(file),
 		line_number(line),
 		str_stream(std::shared_ptr<std::stringstream> (
-			new std::stringstream()))
-	{
+			new std::stringstream())) {
 	}
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
-	~Exception() throw()
-	{
+	~Exception() throw() {
 
 	}
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	template <typename T>
-	Exception & operator << (const T & t)
-	{
+	Exception & operator << (const T & t) {
 		(*str_stream) << t;
 		return *this;
 	}
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
-	virtual const char * what() const throw()
-	{
+	virtual const char * what() const throw() {
 		str = str_stream->str();
 		return str.c_str();
 	}

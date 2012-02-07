@@ -75,7 +75,7 @@ class ResourceAccounterStatusIF {
 public:
 
 	/**
-	 * @enum Exit codes
+	 * @brief Exit codes
 	 */
 	enum ExitCode_t {
 		/** Successful return  */
@@ -175,7 +175,7 @@ public:
 	 * @return The amount of resource available
 	 */
 	virtual uint64_t Available(ResourcePtrList_t & rsrc_list,
-			RViewToken_t vtok = 0, AppPtr_t = AppPtr_t()) const = 0;
+			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const = 0;
 
 	/**
 	 * @brief Amount of resources used

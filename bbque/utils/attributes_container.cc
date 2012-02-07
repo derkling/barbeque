@@ -1,5 +1,5 @@
 /**
- *       @file  attributes.cc
+ *       @file  attributes_container.cc
  *      @brief  Classes for managing specific data to attach to descriptors as
  *      Application, WorkingMode, Recipe and so on.
  *

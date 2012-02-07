@@ -51,7 +51,6 @@ public:
 
 	/**
 	 * @brief Constructor with parameters
-	 * @param app Application owning the working mode
 	 * @param id Working mode ID
 	 * @param name Working mode descripting name
 	 * @param value The QoS value read from the recipe

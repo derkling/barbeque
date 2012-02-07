@@ -1,5 +1,5 @@
 /**
- *       @file  ttr_app.cc
+ *       @file  tutorial/app.cc
  *      @brief  Demo class implementation
  *
  * This implements the class used in the demo/tutorial application.

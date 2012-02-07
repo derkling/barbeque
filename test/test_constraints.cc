@@ -1,5 +1,5 @@
 /**
- *       @file  constraints.cc
+ *       @file  test_constraints.cc
  *      @brief  Test for constraints assertion/removal
  *
  * This provides a testcase for the AWM constraints assertion and removal API.

@@ -1,7 +1,6 @@
 /**
  *       @file  rtlib.h
- *      @brief  The Run-Time Library (RTLib) to access the Barbeque RTRM
- *      framework
+ *      @brief  The Barbeque Run-Time Library (RTLib)
  *
  * The Barbeque RTRM is a modular and efficient resource allocator for
  * many-core clustered accelerator engines, which provide support for:
@@ -83,7 +82,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 /**
  * @brief The RTLib main version
@@ -571,7 +569,7 @@ typedef RTLIB_ExitCode_t (*RTLIB_ClearConstraints_t)(
  * Barbeque RTRM scheduler. This means that, as soon as it will be possible,
  * it will try to assign an higer value AWM to the demanding application.
  *
- * @paran gap the Goal Gap (GG) percentage, to be represented as a number in
+ * @param gap the Goal Gap (GG) percentage, to be represented as a number in
  * the range (0,100].
  */
 typedef RTLIB_ExitCode_t (*RTLIB_SetGoalGap_t)(
@@ -776,7 +774,7 @@ typedef void (*RTLIB_Notify_PreSuspend)(
  * encouraged to notify the run-time library by calling this method. This
  * could be used by the RTLib implementation to collect suitable information
  * and statistics on application suspension overheads.
- *i
+ *
  * @param ech the handler of the EXC to configure
  */
 typedef void (*RTLIB_Notify_PostSuspend)(

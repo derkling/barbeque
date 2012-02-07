@@ -1,5 +1,5 @@
 /**
- *       @file  utility.h
+ *       @file  rtlib/utility.h
  *      @brief  A set of utility functions
  *
  * This provide a set of utility functions and definitions common to all other

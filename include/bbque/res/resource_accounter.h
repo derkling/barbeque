@@ -359,8 +359,8 @@ public:
 private:
 
 	/**
-	 * @enum This is used for selecting the state attribute to return from
-	 * <tt>QueryStatus()</tt>
+	 * @brief This is used for selecting the state attribute to return from
+	 * QueryStatus
 	 */
 	enum QueryOption_t {
 		/** Amount of resource available */

@@ -68,23 +68,23 @@ namespace bbque { namespace plugins {
  * XML files.
  *
  * @note Depends on TinyXML++ (TiCPP) library (tested with version 2.5.3).
- * For library installation (on Ubuntu):<br>
+ * For library installation (on Ubuntu):
  * <ul>
- * <li> Be sure TinyXML library is UNINSTALLED
- * <li> Checkout the project website at:
- * 		http://code.google.com/p/ticpp/issues/detail?id=20
+ *   <li> Be sure TinyXML library is UNINSTALLED
+ *   <li> Checkout the project website at:
+ *        http://code.google.com/p/ticpp/issues/detail?id=20
+ *   <li> Download and install the two debian packages (libticpp_<version_arch>.dev
+ *        and libticpp-dev_<version<arch>.deb))
+ * </ul><br>
  *
- * <li>Download and install the two debian packages (libticpp_<version_arch>.dev
- *   and libticpp-dev_<version<arch>.deb))
- *
- * <br>The library should be ready to use.
+ * The library should be ready to use.
  */
 class XMLRecipeLoader : public RecipeLoaderIF {
 
 public:
 
 	/**
-	 * @struct Attribute structure for plugin specific data
+	 * @brief Attribute structure for plugin specific data
 	 */
 	typedef struct PluginAttr: public AttributesContainer::Attribute {
 		/** Constructor */

@@ -223,7 +223,7 @@ public:
 	/**
 	 * @brief Get a string ID for this Execution Context
 	 * This method build a string ID according to this format:
-	 * <PID>:<TASK_NAME>:<EXC_ID>
+	 * PID:TASK_NAME:EXC_ID
 	 * @return String ID
 	 */
 	virtual const char *StrId() const = 0;

@@ -66,8 +66,8 @@ public:
 
 	/**
 	 * @brief   Parse configuration file
-	 * @param   opt_desc the description of supported configuration parameters
-	 * @param 	opts the map of configuration parameters values returned
+	 * @param   opts_desc the description of supported configuration parameters
+	 * @param   opts the map of configuration parameters values returned
 	 */
 	void ParseConfigurationFile(
 			options_description const & opts_desc,

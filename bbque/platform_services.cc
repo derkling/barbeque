@@ -1,5 +1,5 @@
 /**
- *       @file  platform_services.h
+ *       @file  platform_services.cc
  *      @brief  The services provide to plugins by the barbeque core
  *
  * This class provides a set of services to barbeuqe modules throughout the

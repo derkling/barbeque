@@ -1,5 +1,5 @@
 /**
- *       @file  rpc_fifo.h
+ *       @file  rpc_fifo_client.h
  *      @brief  A message passing based RPC framework based on UNIX FIFO
  *
  * Definition of the RPC protocol based on UNIX FIFOs to implement the

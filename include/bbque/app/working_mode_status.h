@@ -57,7 +57,7 @@ class WorkingModeStatusIF: public AttributesContainer {
 public:
 
 	/**
-	 * @enum Error codes returned by methods
+	 * @brief Error codes returned by methods
 	 */
 	enum ExitCode_t {
 		/** Success */

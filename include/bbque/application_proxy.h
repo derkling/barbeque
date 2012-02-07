@@ -44,6 +44,10 @@ using namespace bbque::app;
 
 namespace bbque {
 
+/**
+ * @brief A common interface to access application specific data and
+ * functionalities.
+ */
 class ApplicationProxy {
 
 private:

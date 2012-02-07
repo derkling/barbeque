@@ -1,5 +1,5 @@
 /**
- *       @file  test.cc
+ *       @file  test_test.cc
  *      @brief  Test the regression test system
  *
  * This provides a dummy example testcase for the regression test system.

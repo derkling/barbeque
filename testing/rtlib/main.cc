@@ -1,5 +1,5 @@
 /**
- *       @file  main.cc
+ *       @file  rtlib/main.cc
  *      @brief  A toy example application using the Barbque RTRM
  *
  * This provide a really simple (toy example) implementation for an application
@@ -77,7 +77,7 @@ excMap_t exc_map;
 /**
  * @brief Register the required EXCs and enable them
  *
- * @param name the recipe to use
+ * @param num_exc the number of EXCs to register
  */
 RTLIB_ExitCode_t SetupEXCs(uint8_t num_exc) {
 	char rcp_name[] = RCP_BASENAME "_00";

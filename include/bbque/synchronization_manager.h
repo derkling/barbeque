@@ -50,10 +50,9 @@ using bbque::utils::MetricsCollector;
 
 namespace bbque {
 
-	/**
-	 * @class SynchronizationManager
-	 * @brief The class implementing the glue logic for status synchronization.
-	 */
+/**
+ * @brief The class implementing the glue logic for status synchronization.
+ */
 class SynchronizationManager {
 
 public:

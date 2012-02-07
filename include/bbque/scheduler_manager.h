@@ -1,6 +1,6 @@
 /**
- *       @file  schedule_manager.h
- *      @brief  The resource scheduler component of Barbque
+ *       @file  scheduler_manager.h
+ *      @brief  The BarbqueRTRM resources scheduler module
  *
  * This module defines the Barbeque interface to resource scheduling policies.
  * The core framework view only methods exposed by this component, which is on
@@ -54,9 +54,7 @@ using bbque::utils::MetricsCollector;
 namespace bbque {
 
 /**
- * @class SchedulerManager
- * @brief The class implementing the glue code to bind Barbeque with resource
- * scheduling policies.
+ * @brief The class implementing the glue logic for resources scheduling.
  */
 class SchedulerManager {
 

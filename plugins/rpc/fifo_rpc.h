@@ -1,9 +1,8 @@
 /**
- *       @file  static_plugin.h
- *      @brief  An example of static C++ plugin
+ *       @file  fifo_rpc.h
+ *      @brief  A FIFO based RPC Channel plugin
  *
- * This defines a simple example of static C++ plugin which is intended both to
- * demostrate how to write them and to test the PluginManager implementation.
+ * This defines an RPC channel based on FIFO
  *
  *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
@@ -58,16 +57,12 @@ public:
 //----- static plugin interface
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static void * Create(PF_ObjectParams *);
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static int32_t Destroy(void *);
 

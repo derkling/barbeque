@@ -107,7 +107,6 @@ public:
 	/**
 	 * @brief Insert an application working mode
 	 *
-	 * @param app Application owning the working mode
 	 * @param id Working mode ID
 	 * @param name Working mode descripting name
 	 * @param value The user QoS value of the working mode

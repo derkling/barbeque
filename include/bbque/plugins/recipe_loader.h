@@ -36,7 +36,7 @@ using bbque::app::Recipe;
 namespace bbque { namespace plugins {
 
 
-/** Shared pointer to @ref Recipe */
+/** Shared pointer to Recipe */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
 
 
@@ -58,7 +58,7 @@ class RecipeLoaderIF {
 public:
 
 	/**
-	 * @enum Recipe load exit codes
+	 * @brief Recipe load exit codes
 	 */
 	enum ExitCode_t {
 		//--- Success load
@@ -82,8 +82,7 @@ public:
 
 	/**
 	 * @brief Load the recipe of the application
-	 * @param app Pointer to the application using the recipe
-	 * @param recipe_name The recipe name. We expect to find the recipe in the
+	 * @param rname The recipe name. We expect to find the recipe in the
 	 * path:<br><default-dir>/<i>recipe_name</i>.recipe.
 	 * @param recipe The recipe object to fill with the data to parse
 	 * @return An exit code indicating the loading status

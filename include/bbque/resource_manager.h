@@ -44,15 +44,15 @@ using bbque::utils::MetricsCollector;
 
 namespace bbque {
 
-	/**
-	 * @class ResourceManager
-	 * @brief The class implementing the glue logic of Barbeque
-	 * This class provides the glue logic of the Barbeque RTRM. Its 'Go'
-	 * method represents the entry point of the run-time manager and it is
-	 * called by main right after some playground preparation activities.
-	 * This class is in charge to load all needed modules and run the control
-	 * loop.
-	 */
+/**
+ * @brief The class implementing the glue logic of Barbeque
+ *
+ * This class provides the glue logic of the Barbeque RTRM. Its 'Go'
+ * method represents the entry point of the run-time manager and it is
+ * called by main right after some playground preparation activities.
+ * This class is in charge to load all needed modules and run the control
+ * loop.
+ */
 class ResourceManager {
 
 public:

@@ -85,7 +85,6 @@ struct ResourceState {
 
 	/**
 	 * @brief Constructor
-	 * @param tot The total amount to set
 	 */
 	ResourceState():
 		used(0) {
@@ -389,7 +388,7 @@ public:
 
 	/**
 	 * @brief Constructor
-	 * @param The amount of resource usage
+	 * @param usage_value The amount of resource usage
 	 */
 	ResourceUsage(uint64_t usage_value):
 		value(usage_value) {
@@ -528,7 +527,7 @@ public:
 	 * the Application/EXC, to satisfy the last quota of the usage request.
 	 *
 	 * @param papp The Application/EXC requiring the resource
-	 * @param first_it The list iterator of the resource binding to track
+	 * @param last_it The list iterator of the resource binding to track
 	 * @param vtok The token of the resource state view into which the
 	 * assignment has been performed.
 	 *

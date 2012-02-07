@@ -1,5 +1,5 @@
 /**
- *       @file  signals.h
+ *       @file  signals_manager.h
  *      @brief  The Barbeque Signals Management
  *
  * This class provides the implementation of Signals Management and Signals

@@ -55,6 +55,9 @@ using namespace boost::accumulators;
 
 namespace bbque { namespace rtlib {
 
+/**
+ * @brief The class implementing the RTLib plain API
+ */
 class BbqueRPC {
 
 public:
@@ -727,7 +730,7 @@ private:
 	void PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes);
 
 	pPerfEventStats_t PerfGetEventStats(pAwmStats_t pstats, perf_type_id type,
-										uint64_t config);
+			uint64_t config);
 
 	void PerfPrintMissesRatio(double avg_missed, double tot_branches,
 			const char *text);

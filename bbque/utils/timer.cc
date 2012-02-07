@@ -1,8 +1,8 @@
 /**
- *       @file  timer.cpp
+ *       @file  utils/timer.cc
  *      @brief  High Resolution Timer support
  *
- * This class provides basic service to measure elapres time with microseconds
+ * This class provides basic service to measure elapsed time with microseconds
  * accuracy.
  *
  *     @author  Patrick Bellasi (derkling), derkling@gmail.com

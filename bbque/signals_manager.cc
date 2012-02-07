@@ -1,6 +1,6 @@
 /**
- *       @file  signals.h
- *      @brief  The Barbeque Signals Management
+ *       @file  signals_manager.h
+ *      @brief  The BarbequeRTRM signals manager module
  *
  * This class provides the implementation of Signals Management and Signals
  * Handlers for the main Baebque handled signals

@@ -63,7 +63,7 @@ public:
 	 * Set the time estimated / measured during the application
 	 * reconfiguration from its current working mode to the new one scheduled
 	 *
-	 * @param _time The reconfiguration time measured
+	 * @param time The reconfiguration time measured
 	 */
 	inline void SetSwitchTime(double time) {
 		// Set last switch time

@@ -1,11 +1,9 @@
 /**
  *       @file  scheduler_policy.h
- *      @brief  The interface for channel to communicate with applications
+ *      @brief  The interface for a resources scheduling policy
  *
- * This defines the common interface for interaction between Barbeque and
- * applications.  This interface defines also the calls to implement a
- * three-way Synchronization Protocol which is used to sync the RTRM status
- * with the effective applications status.
+ * This defines an abstract class for interaction between the BarbequeRTRM and
+ * a policy for scheduling of available resources.
  *
  *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
@@ -35,7 +33,6 @@ namespace bbque {
 namespace bbque { namespace plugins {
 
 /**
- * @class SchedulerPolicyIF
  * @brief A module interface to implement resource scheduler policies.
  *
  * This class could be used to implement resource scheduling alghoritms and
@@ -46,7 +43,6 @@ class SchedulerPolicyIF {
 public:
 
 	/**
-	 * @enum ExitCode_t
 	 * @brief Scheduling result
 	 */
 	typedef enum ExitCode {

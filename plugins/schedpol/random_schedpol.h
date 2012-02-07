@@ -53,16 +53,12 @@ public:
 //----- static plugin interface
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static void * Create(PF_ObjectParams *);
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static int32_t Destroy(void *);
 

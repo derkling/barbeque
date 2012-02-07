@@ -72,7 +72,7 @@ public:
 	};
 
 	/**
-	 * @enum SearchOptions_t
+	 * @brief SearchOptions_t
 	 *
 	 * Enumerate all the possible search options for the resource descriptors
 	 * in the tree

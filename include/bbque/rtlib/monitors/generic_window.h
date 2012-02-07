@@ -195,7 +195,7 @@ public:
 	/**
 	 * @brief Sets a goal for the window of data
 	 *
-	 * @param target List of Target elements
+	 * @param targets List of Target elements
 	 */
 	void setGoal(TargetsPtr targets);
 
@@ -210,7 +210,7 @@ public:
 	 * @brief Sets the number of elements used by mathematical function
 	 * (average, max, min, variance)
 	 *
-	 * @param resultSize Number of elements used to compute the result
+	 * @param resultsSize Number of elements used to compute the result
 	 */
 	void setResultsWindow(uint16_t resultsSize);
 

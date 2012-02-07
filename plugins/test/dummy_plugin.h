@@ -1,5 +1,5 @@
 /**
- *       @file  static_test_plugin.h
+ *       @file  dummy_plugin.h
  *      @brief  A static plugin example
  *
  * This defines an example of static C++ plugin which instantiate an object

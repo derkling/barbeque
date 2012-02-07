@@ -30,7 +30,7 @@
 namespace bbque {
 
 /**
- * @class ApplicationManagerConfIF
+ * @brief The "Configuration" interface for the ApplicationManager.
  *
  * The interface exposes the ApplicationManager methods for applications
  * lifecycle manipulation.
@@ -93,6 +93,8 @@ public:
 	 * specified constraints.
 	 *
 	 * @param papp pointer to the application to enable
+	 * @param constraints the array of constraints to be processed
+	 * @param count the total number of constraints in the array
 	 */
 	virtual ExitCode_t SetConstraintsEXC(AppPtr_t papp,
 			RTLIB_Constraint_t *constraints, uint8_t count) = 0;
@@ -105,6 +107,8 @@ public:
 	 *
 	 * @param pid the processi ID of the application
 	 * @param exc_id the Execution Context ID to enable
+	 * @param constraints the array of constraints to be processed
+	 * @param count the total number of constraints in the array
 	 */
 	virtual ExitCode_t SetConstraintsEXC(AppPid_t pid, uint8_t exc_id,
 			RTLIB_Constraint_t *constraints, uint8_t count) = 0;

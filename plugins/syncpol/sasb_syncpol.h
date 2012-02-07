@@ -1,5 +1,5 @@
 /**
- *       @file  sasb_schedpol.h
+ *       @file  sasb_syncpol.h
  *      @brief  The SASB synchronization policy
  *
  * This defines a dynamic C++ plugin which implements the "Starvation Avoidance
@@ -53,16 +53,12 @@ public:
 //----- static plugin interface
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static void * Create(PF_ObjectParams *);
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static int32_t Destroy(void *);
 

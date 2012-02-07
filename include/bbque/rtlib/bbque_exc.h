@@ -31,6 +31,12 @@
 
 namespace bbque { namespace rtlib {
 
+/**
+ * @brief The AEM base-class
+ *
+ * This is a base class suitable for the implementation of an EXC that should
+ * be managed by the Barbeque RTRM.
+ */
 class BbqueEXC {
 
 public:

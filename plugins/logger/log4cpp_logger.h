@@ -1,6 +1,6 @@
 /**
- *       @file  log4cpp.h
- *      @biief  A Logger plugin based on Log4Cpp library
+ *       @file  log4cpp_logger.h
+ *      @brief  A Logger plugin based on Log4Cpp library
  *
  * This defines a Log4CPP based Logger plugin.
  *
@@ -45,23 +45,17 @@ public:
 //----- static plugin interface
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static void * Create(PF_ObjectParams * params);
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	static int32_t Destroy(void * logger);
 
 	/**
-	 * @brief   
-	 * @param   
-	 * @return  
+	 *
 	 */
 	~Log4CppLogger();
 
@@ -70,50 +64,50 @@ public:
 #ifdef BBQUE_DEBUG
 	/**
 	 * \brief Send a log message with the priority DEBUG
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Debug(const char *fmt, ...);
 #endif
 
 	/**
 	 * \brief Send a log message with the priority INFO
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Info(const char *fmt, ...);
 
 	/**
 	 * \brief Send a log message with the priority NOTICE
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Notice(const char *fmt, ...);
 
 	/**
 	 * \brief Send a log message with the priority WARN
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Warn(const char *fmt, ...);
 
 	/**
 	 * \brief Send a log message with the priority ERROR
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Error(const char *fmt, ...);
 
 	/**
 	 * \brief Send a log message with the priority CRIT
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Crit(const char *fmt, ...);
 
 	/**
 	 * \brief Send a log message with the priority ALERT
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Alert(const char *fmt, ...);
 
 	/**
 	 * \brief Send a log message with the priority FATAL
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	void Fatal(const char *fmt, ...);
 

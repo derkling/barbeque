@@ -158,8 +158,8 @@ typedef int32_t (*PF_ExitFunc)();
  * runtime services - allocate memory, log messages and of course register
  * node types.
  *
- * @param  [const PF_PlatformServices *] params - the platform services struct
- * @retval [PF_ExitFunc] the exit func of the plugin or NULL if initialization failed.
+ * @param  params the platform services struct
+ * @return the exit func of the plugin or NULL if initialization failed.
  */
 typedef PF_ExitFunc (*PF_InitFunc)(const PF_PlatformServices *);
 
@@ -174,8 +174,8 @@ typedef PF_ExitFunc (*PF_InitFunc)(const PF_PlatformServices *);
  * The plugin's initialization function MUST be called "PF_initPlugin" (and
  * conform to the signature of course).
  *
- * @param  [const PF_PlatformServices *] params - the platform services struct
- * @retval [PF_ExitFunc] the exit func of the plugin or NULL if initialization failed.
+ * @param  params the platform services struct
+ * @return the exit func of the plugin or NULL if initialization failed.
  */
 #ifdef  __cplusplus
 extern "C" PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params);

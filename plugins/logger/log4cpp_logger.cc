@@ -1,5 +1,5 @@
 /**
- *       @file  log4cpp.cpp
+ *       @file  log4cpp_logger.cc
  *      @brief  A logger plugin based on Log4Cpp library
  *
  * Detailed description here.

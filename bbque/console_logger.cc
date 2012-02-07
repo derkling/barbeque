@@ -1,6 +1,6 @@
 /**
  *       @file  console_logger.h
- *      @biief  A (dummy) console based logger
+ *      @brief  A (dummy) console based logger
  *
  * This defines a console based logger to be used for logging if a more
  * advanced logger module is not available

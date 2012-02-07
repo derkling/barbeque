@@ -61,7 +61,7 @@ public:
 	} ExitCode_t;
 
 	/**
-	 * @ibrief The supported kinds of metrics
+	 * @brief The supported kinds of metrics
 	 */
 	typedef enum {
 		/** A generic "u64" event counter */

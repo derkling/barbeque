@@ -1,5 +1,5 @@
 /**
- *       @file  object.cpp
+ *       @file  object.cc
  *      @brief  The basic class for all Barbeque RTRM components
  *
  * This implements the basic class providing common supports for all Barbeque

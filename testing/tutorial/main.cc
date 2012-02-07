@@ -1,5 +1,5 @@
 /**
- *       @file  main.cc
+ *       @file  tutorial/main.cc
  *      @brief  A toy example application using the Barbque RTRM
  *
  * This provide a really simple (toy example) implementation for an application

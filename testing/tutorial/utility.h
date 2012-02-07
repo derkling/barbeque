@@ -1,5 +1,5 @@
 /**
- *       @file  demo_tutorial.h
+ *       @file  tutorial/utility.h
  *      @brief  Support for tutorial mode execution
  *
  * Provide functions for managing the execution of the demo in tutorial mode.

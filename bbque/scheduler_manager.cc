@@ -1,13 +1,6 @@
 /**
- *       @file  resoruce_scheduler.cc
- *      @brief  The resource scheduler component of Barbque
- *
- * This module defines the Barbeque interface to resource scheduling policies.
- * The core framework view only methods exposed by this component, which is on
- * charge to find, select and load a proper optimization policy, to run it when
- * required by new events happening (e.g. applications starting/stopping,
- * resources state/availability changes) and considering its internal
- * configurabile policy.
+ *       @file  scheduler_manager.cc
+ *      @brief  The BarbqueRTRM resources scheduler module
  *
  *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *

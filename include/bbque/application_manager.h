@@ -64,9 +64,8 @@ typedef std::shared_ptr<Recipe> RecipePtr_t;
 
 
 /**
-* @class ApplicationManager
-* @brief The class provides interfaces for managing the applications lifecycle.
-*/
+ * @brief The class provides interfaces for managing the applications lifecycle.
+ */
 class ApplicationManager: public ApplicationManagerConfIF {
 
 public:

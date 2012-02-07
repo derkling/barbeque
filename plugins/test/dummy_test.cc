@@ -1,5 +1,5 @@
 /**
- *       @file  static_plugin.cc
+ *       @file  dummy_test.cc
  *      @brief  An example of static C++ plugin
  *
  * This defines a simple example of static C++ plugin which is intended both to

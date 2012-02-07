@@ -1,5 +1,5 @@
 /**
- *       @file  timer.h
+ *       @file  rtlib/timer.h
  *      @brief  High Resolution Timer support
  *
  * This class provides basic service to measure elapres time with microseconds

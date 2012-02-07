@@ -1,5 +1,5 @@
 /**
- *       @file  test_module_adapter.h
+ *       @file  test_adapter.h
  *      @brief  A C++ wrapper class for C based TestModules
  *
  * This class provides a wrapper to adapt Test modules written in C.

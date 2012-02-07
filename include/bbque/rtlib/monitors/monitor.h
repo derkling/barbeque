@@ -51,7 +51,7 @@ public:
 	 * @param cType ComparisonFunction to use for the evaluation of the goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	virtual uint16_t newGoal(DataFunction sType,
+	virtual uint16_t newGoal(DataFunction fType,
 				 ComparisonFunction cType,
 				 dataType goal,
 				 uint16_t windowSize = defaultWindowSize);

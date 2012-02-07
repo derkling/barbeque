@@ -1,12 +1,9 @@
 /**
  *       @file  synchronization_policy.h
- *      @brief  The interface provided by a Synchronization Policy plugin
+ *      @brief  The interface for an applications synchronization policy
  *
- * This defines the interface which should be supported by synchronization
- * policy plugins. Such a policy is used by the SynchronizationManager (SM) to
- * identify the set of EXCs which should be synchronized. The policy should
- * just select the EXCs and than pass them back to the SM to perform the
- * actual synchronization.
+ * This defines an abstract class for interaction between the BarbequeRTRM and
+ * a policy for synchronizing applications status.
  *
  *     @author  Patrick Bellasi (derkling), derkling@gmail.com
  *
@@ -36,11 +33,10 @@ using bbque::app::ApplicationStatusIF;
 namespace bbque { namespace plugins {
 
 /**
- * @class SynchronizationPolicyIF
  * @brief A module interface to implement resource scheduler policies.
  *
- * This class could be used to implement resource scheduling alghoritms and
- * heuristics.
+ * This class could be used to implement applications synchronization
+ * alghoritms and heuristics.
  */
 class SynchronizationPolicyIF {
 
@@ -83,7 +79,7 @@ public:
 	 *
 	 * @param system a reference to the system view which exposes information
 	 * related to both resources and applications.
-	 * @params restart set true to reset the synchroniztion policy internal
+	 * @param restart set true to reset the synchroniztion policy internal
 	 * state machine, thus requesting to restart from scratch the synchronization
 	 * of all the applications.
 	 *

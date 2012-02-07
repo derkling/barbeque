@@ -1,5 +1,5 @@
 /**
- *       @file  dummy_app.h
+ *       @file  rtlib/app.h
  *      @brief  A dummy application which interact with the barbeque RTRM
  *
  * This is a really simple application which could be used as a template to

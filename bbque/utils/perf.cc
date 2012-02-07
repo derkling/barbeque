@@ -1,5 +1,5 @@
 /**
- *       @file  perf.cpp
+ *       @file  perf.cc
  *      @brief  Performance Counters support
  *
  * This class provides basic service to use Linux performance counters.

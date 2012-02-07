@@ -50,7 +50,7 @@ namespace bbque { namespace app {
 struct ResourceConstraint {
 
 	/**
-	 * @enum Type of constraint bounds
+	 * @brief Type of constraint bounds
 	 */
 	enum BoundType_t {
 		/** Lower bound constraint */

@@ -1,5 +1,5 @@
 /**
- *       @file  timer.cpp
+ *       @file  rtlib/timer.cc
  *      @brief  High Resolution Timer support
  *
  * This class provides basic service to measure elapres time with microseconds

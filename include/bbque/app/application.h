@@ -75,7 +75,6 @@ public:
 	/**
 	 * @brief Constructor with parameters name and priority class
 	 * @param name Application name
-	 * @param user The user who has launched the application
 	 * @param pid Process ID
 	 * @param exc_id The ID of the Execution Context (assigned from the application)
 	 */
@@ -119,7 +118,7 @@ public:
 	/**
 	 * @brief Get a string ID for this Execution Context
 	 * This method build a string ID according to this format:
-	 * <PID>:<TASK_NAME>:<EXC_ID>
+	 * PID:TASK_NAME:EXC_ID
 	 * @return String ID
 	 */
 	inline const char *StrId() const {

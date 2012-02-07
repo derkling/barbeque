@@ -68,14 +68,14 @@ inline uint64_t ConvertValue(uint64_t value, std::string const & units) {
  *
  * The function is especially used to get the head of a path (the first
  * level/namespace).For instance, if the resource path is
- * "arch.clusters.mem0", the function returns "arch" and set <i>next_path</i>
+ * "arch.clusters.mem0", the function returns "arch" and set <em>next_path</em>
  * to "clusters.mem0".
  *
  * Moreover it is used for path template construction too.
  *
  * @param tail The resource path to split
  * @param pattern The pattern of the separator char
- * @return The head of the path, and set <i>next_path</> with the tail path
+ * @return The head of the path, and set <em>next_path</em> with the tail path
  * left.
  */
 inline std::string SplitAndPop(std::string & tail,

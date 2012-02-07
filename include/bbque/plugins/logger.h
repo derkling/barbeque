@@ -72,7 +72,7 @@ public:
 #ifdef BBQUE_DEBUG
 	/**
 	 * \brief Send a log message with the priority DEBUG
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Debug(const char *fmt, ...) = 0;
 #else
@@ -80,43 +80,43 @@ public:
 #endif
 	/**
 	 * \brief Send a log message with the priority INFO
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Info(const char *fmt, ...) = 0;
 
 	/**
 	 * \brief Send a log message with the priority NOTICE
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Notice(const char *fmt, ...) = 0;
 
 	/**
 	 * \brief Send a log message with the priority WARN
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Warn(const char *fmt, ...) = 0;
 
 	/**
 	 * \brief Send a log message with the priority ERROR
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Error(const char *fmt, ...) = 0;
 
 	/**
 	 * \brief Send a log message with the priority CRIT
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Crit(const char *fmt, ...) = 0;
 
 	/**
 	 * \brief Send a log message with the priority ALERT
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Alert(const char *fmt, ...) = 0;
 
 	/**
 	 * \brief Send a log message with the priority FATAL
-	 * \param message the message to log
+	 * \param fmt the message to log
 	 */
 	virtual void Fatal(const char *fmt, ...) = 0;
 

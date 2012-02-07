@@ -1,5 +1,5 @@
 /**
- *       @file  attributes.h
+ *       @file  attributes_container.h
  *      @brief  Class for managing specific attributes
  *
  * This defines a class for managing specific data.
@@ -76,7 +76,7 @@ public:
 	typedef std::multimap<std::string, AttrPtr_t> AttributesMap_t;
 
 	/**
-	 * @enum ExitCode_t
+	 * @brief ExitCode_t
 	 *
 	 * Exit codes used in the class methods
 	 */

@@ -106,8 +106,8 @@ public:
 	 * Alternatively to the LoadAll, the application could loads a single
 	 * plugin thus allowing a fine-grained control about what plugins are
 	 * loaded exactly.
-	 * @param  The path of the plugin to load
-	 * @return  0 on success, a negative value on error.
+	 * @param  path The path of the plugin to load
+	 * @return 0 on success, a negative value on error.
 	 */
 	int32_t LoadByPath(const std::string & path);
 
@@ -124,9 +124,10 @@ public:
 	 * will match either "logger.console" and "logger.log4cpp"; when both
 	 * objects are registered the first matching in alphabetical order is
 	 * built end returned.
-	 * @param   id the string name of the required object
-	 * @data    the initialization data defined by the plugin interface
-	 * @return  a reference to the required object, NULL on error.
+	 * @param  id the string name of the required object
+	 * @param  data the initialization data defined by the plugin interface
+	 * @param  adapter a C object adapter
+	 * @return a reference to the required object, NULL on error.
 	 */
 	void * CreateObject(const std::string & id,
 				 void * data = NULL, ObjectAdapterIF * adapter = NULL);
