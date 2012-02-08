@@ -1,26 +1,18 @@
-/**
- *       @file  test_platform_data.cc
- *      @brief  A dummy loader of test platform data
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This file provides a descritpion of platform resoruces suitable for testing
- * purposes while a real implementation of the ResourceAbstraction module is
- * missing. The platform defined by this module can be configured using
- * command lines parameters to define the number of clusters, PEs for each
- * cluster, the amount of cluster-shared memory and the amount of PE-private
- * memory.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  06/22/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_TEST_PLATFORM_DATA_H_
@@ -34,6 +26,16 @@
 
 namespace bbque {
 
+/**
+ * @brief Testing platform data
+ *
+ * This class provides a descritpion of platform resoruces suitable for testing
+ * purposes while a real implementation of the ResourceAbstraction module is
+ * missing. The platform defined by this module can be configured using
+ * command lines parameters to define the number of clusters, PEs for each
+ * cluster, the amount of cluster-shared memory and the amount of PE-private
+ * memory.
+ */
 class TestPlatformData {
 
 public:
@@ -83,4 +85,3 @@ private:
 } // namespace bbque
 
 #endif // BBQUE_TEST_PLATFORM_DATA
-

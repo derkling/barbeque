@@ -1,76 +1,18 @@
-/**
- *       @file  rtlib.h
- *      @brief  The Barbeque Run-Time Library (RTLib)
- *    @ingroup  rtlib_sec03_plain
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * The Barbeque RTRM is a modular and efficient resource allocator for
- * many-core clustered accelerator engines, which provide support for:
- * <ul>
- *  <li>mixed workload management</li>
- *  <li>dynamic resource partitioning</li>
- *  <li>resources abstraction</li>
- *  <li>multi-objectve optimization policy</li>
- *  <li>low-overheads run-time management</li>
- * </ul>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- * Modern many-core computing platform are targeted to the execution of a
- * <i>mixed-workload</i> where multiple applications, with different
- * requirements and criticality levels, run concurrently thus competing on
- * accessing a reduce set of shared resource. Provided that each of these
- * application is associated with a proper description, which should specify
- * the mapping between an expected Quality-of-Service (QoS) level and the
- * correposnding resources demand, the Barbeque RTRM allows to arrange for an
- * "optimal" resources allocation to all the active applications.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * The main goal of the <i>dynamic resource partitioning</i> support is to
- * grant resources to critical workloads while dynamically yield these
- * resources to best-effort workloads when (and only while) they are not
- * required by critical ones, thus optimize resource usage and fairness.
- *
- * In order to improve applications portability among different acceleration
- * platforms, the Barbeque RTRM provides support for <i>resource
- * abstraction</i> which allows to exploit a decoupled perspective of the
- * resources between the users and the underlying hardware.  The user
- * applications will see virtual resources, e.g., the number of processing
- * elements available, but they will not be aware of which of the physical
- * resources are effectively available. At run-time the RTRM will perform
- * the virtual-to-physical mapping according to the current <i>multi-objective
- * optimization function</i> (low power, high performance, etc..) and run-time
- * phenomena (process variation, temporal and spatial temperature gradients,
- * hardware failures and, above all, workload variation).
- *
- * Finally, introducing a low overhead on managing resource at run-time, while
- * still granting a valuable solution for the aformentioned issues is one more
- * goal of the Barbeque RTRM framework. This goals also as required the
- * development if this RTLib run-time library which applications should
- * exploit in order to take advantages from the Barbeque RTRM.
- *
- * This document provides the definition of the interface and related services
- * exported by the Barbeque Run-Time library (RTLib). This library is provided
- * to be linked by application that needs to interact with the Barbeque (BBQ)
- * Run-Time Resource Manager (RTRM). The library not only defines the set of
- * services accessable by applications, but allows also to mask the platform
- * specific communication channel between controlled applications and the
- * run-time manager. Moreover, the library provides some of the functional
- * supports required for a proper integration of an application with the RTRM,
- * thus offloading the application developer as much as possible from the
- * Run-Time management required boilerplate integration code. Indeed, form an
- * application developer perspective this library enforeces just the
- * conformance to a properly define "Application Lifecycle", by specifying a
- * set of calls and the order on which these should be performed.
- *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
- *
- *   @internal
- *     Created  01/13/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_RTLIB_H_
@@ -1013,6 +955,20 @@ inline char const *RTLIB_ErrorStr(RTLIB_ExitCode_t result) {
 
 /**
  * @defgroup rtlib_sec03_plain RTLib Low-Level (plain) API
+ *
+ * This document provides the definition of the interface and related services
+ * exported by the Barbeque Run-Time library (RTLib). This library is provided
+ * to be linked by application that needs to interact with the Barbeque (BBQ)
+ * Run-Time Resource Manager (RTRM). The library not only defines the set of
+ * services accessable by applications, but allows also to mask the platform
+ * specific communication channel between controlled applications and the
+ * run-time manager. Moreover, the library provides some of the functional
+ * supports required for a proper integration of an application with the RTRM,
+ * thus offloading the application developer as much as possible from the
+ * Run-Time management required boilerplate integration code. Indeed, form an
+ * application developer perspective this library enforeces just the
+ * conformance to a properly define "Application Lifecycle", by specifying a
+ * set of calls and the order on which these should be performed.
  *
  * ADD MORE DETAILS HERE (RTLib Low-Level (plain) API)
  *

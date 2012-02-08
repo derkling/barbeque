@@ -1,25 +1,18 @@
-/**
- *       @file  application.h
- *      @brief  Application descriptor
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This defines the application descriptor.
- * Such descriptor includes static and dynamic information upon application
- * execution. It embeds usual information about name, priority, user, PID
- * (could be different from the one given by OS) plus a reference to the
- * recipe object, the list of enabled working modes and resource constraints.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  05/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_APPLICATION_H
@@ -60,13 +53,12 @@ typedef std::pair<std::string, ConstrPtr_t> ConstrPair_t;
 
 
 /**
- * @class Application
- * @brief Application descriptor object
+ * @brief Application configuration
  *
- * When an application enter the RTRM it should specify sets of informations
- * as name, pid, priority,... working modes (resources requirements),
- * constraints. This very basic needs to let the RTRM doing policy-driven
- * choices upon resource assignments to the applications.
+ * Such descriptor includes static and dynamic information upon application
+ * execution. It embeds usual information about name, priority, user, PID
+ * (could be different from the one given by OS) plus a reference to the
+ * recipe object, the list of enabled working modes and resource constraints.
  */
 class Application: public ApplicationConfIF {
 
@@ -683,4 +675,3 @@ private:
 } // namespace bbque
 
 #endif // BBQUE_APPLICATION_H
-

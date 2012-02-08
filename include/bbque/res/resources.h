@@ -1,23 +1,18 @@
-/**
- *       @file  resources.h
- *      @brief  Classes for managing resource information
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This defines the classes for instancing objects which manage the resource
- * information: total amount, availability, how many resource are use, which
- * applications are using a specific resource.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  01/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_RESOURCES_H_
@@ -70,7 +65,7 @@ typedef std::unordered_map<RViewToken_t, ResourceStatePtr_t> RSHashMap_t;
 
 
 /**
- * @struct ResourceState
+ * @brief The status of a resource
  *
  * It syntetizes the concept of resource state:
  * How many resources are used/available? Which application is using the
@@ -110,7 +105,7 @@ struct ResourceState {
 
 
 /**
- * @class Resource
+ * @brief A generi resource
  *
  * Of course the "Resource" is the fundamental entity for Barbeque RTRM.
  * To access a resource is a matter of using a "path". A resource path is
@@ -347,7 +342,7 @@ private:
 
 
 /**
- * @class ResourceUsage
+ * @brief The usages of a resource
  *
  * An application working modes defines a set of this resource requests
  * (usages).

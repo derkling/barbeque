@@ -1,24 +1,18 @@
-/**
- *       @file  application_manager_conf.h
- *      @brief  ApplicationManager runtime updating interface
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This provides the interface of the application manager for updating
- * applications runtime information.
- * Currently the only feature provided by this interface is the application
- * recipe loading.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  04/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_APPLICATION_MANAGER_CONF_IF_H_
@@ -33,8 +27,11 @@ namespace bbque {
  * @brief The "Configuration" interface for the ApplicationManager.
  * @ingroup sec03_am
  *
- * The interface exposes the ApplicationManager methods for applications
- * lifecycle manipulation.
+ * This provides the interface of the ApplicationManager for updating
+ * applications runtime information.
+ * Currently the only feature provided by this interface is the application
+ * recipe loading.
+
  */
 class ApplicationManagerConfIF: public ApplicationManagerStatusIF {
 

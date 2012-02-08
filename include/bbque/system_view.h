@@ -1,23 +1,18 @@
-/**
- *       @file  system_view.h
- *      @brief  System view interface
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This provides the interface to query applications and resources runtime
- * status accordingly to the interfaces exposed by ApplicationManager and
- * ResourceAccounter components.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  06/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_SYSTEM_VIEW_H_
@@ -37,13 +32,14 @@ using bbque::res::ResourcePtrList_t;
 namespace bbque {
 
 /**
- * @class SystemView
+ * @brief A unified view on system status
  *
- * This is as an aggregated view of the system status, where under "system" we
- * put the set of applications and resources managed by the RTRM.
- * When instanced, the class get references to the ApplicationManager and
- * ResourceAccounter instances and it provides a set of methods for making
- * queries upon applications and resources status.
+ * This class provides all the methods necessary to get an aggregated view of
+ * the system status, where under "system" we put the set of applications and
+ * resources managed by the RTRM.  When instanced, the class get references to
+ * the ApplicationManager and ResourceAccounter instances and it provides a
+ * simplified set of methods for making queries upon applications and
+ * resources status.
  */
 class SystemView {
 
@@ -232,4 +228,3 @@ private:
 } // namespace bbque
 
 #endif  // BBQUE_SYSTEM_VIEW_H_
-

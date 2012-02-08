@@ -1,19 +1,18 @@
-/**
- *       @file  resource_utils.h
- *      @brief  A set of utility functions for resources management
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *   @internal
- *     Created  01/17/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_RESOURCE_UTILS_H_
@@ -213,4 +212,3 @@ inline ResID_t GetResourceID(std::string const & rsrc_path,
 }
 
 #endif // BBQUE_RESOURCE_UTILS_H_
-

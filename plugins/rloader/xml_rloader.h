@@ -1,21 +1,18 @@
-/**
- *       @file  xml_rloader.h
- *      @brief Recipe loader for XML file formats
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
-* This defines the plugin for making recipe loading from an XML file
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  31/03/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_XML_RLOADER_H_
@@ -59,8 +56,6 @@ namespace bbque { namespace plugins {
 #define PDATA_MAX_LEN 	20
 
 /**
- * @class XMLRecipeLoader
- *
  * @brief Loader for recipes based on XML files
  *
  * The class provides methods for loading and parsing informations of
@@ -69,13 +64,11 @@ namespace bbque { namespace plugins {
  *
  * @note Depends on TinyXML++ (TiCPP) library (tested with version 2.5.3).
  * For library installation (on Ubuntu):
- * <ul>
- *   <li> Be sure TinyXML library is UNINSTALLED
- *   <li> Checkout the project website at:
- *        http://code.google.com/p/ticpp/issues/detail?id=20
- *   <li> Download and install the two debian packages (libticpp_<version_arch>.dev
- *        and libticpp-dev_<version<arch>.deb))
- * </ul><br>
+ * - Be sure TinyXML library is UNINSTALLED
+ * - Checkout the project website at:
+ *    http://code.google.com/p/ticpp/issues/detail?id=20
+ * - Download and install the two debian packages (libticpp_<version_arch>.dev
+ *    and libticpp-dev_<version<arch>.deb))
  *
  * The library should be ready to use.
  */
@@ -242,4 +235,3 @@ private:
 } // namespace bbque
 
 #endif // BBQUE_XML_RLOADER_H_
-

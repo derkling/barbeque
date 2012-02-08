@@ -1,22 +1,18 @@
-/**
- *       @file  rpc_channel_c.h
- *      @brief  The C object model for barbeque RPCChannel plugins
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This defines the interface for RPCChannel barbque C based plugin. This file
- * provided the C based object model for RPCChannel plugins.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  01/28/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_RPC_CHANNEL_C_H_
@@ -24,6 +20,12 @@
 
 //----- TestModule C interface
 typedef struct C_RPCChannelHandle_ { char c; } * C_RPCChannelHandle;
+
+/**
+ * @brief A C coded RPC Channel
+ *
+ * A C based object model for RPCChannelIF plugins.
+ */
 typedef struct C_RPCChannel_ {
 	int    (*Init)(void);
 	size_t (*RecvMessage)(void *buff_ptr);
@@ -35,4 +37,3 @@ typedef struct C_RPCChannel_ {
 } C_RPCChannel;
 
 #endif // BBQUE_RPC_CHANNEL_C_H_
-

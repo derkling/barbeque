@@ -1,26 +1,18 @@
-/**
- *       @file  coreint_test.h
- *      @brief  CoreInteractions test plugin
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * It simulates the registering of a set of resources, and the start of an
- * application. Here a recipe is loaded and all the check upon correctness of
- * resource usages defined in are made.
- * Once the ApplicationManager confirms the application has loaded, the test
- * print out their working modes details and then trigger some scheduling
- * status and working mode changes (passing overheads info too).
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  07/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_COREINT_TEST_H_
@@ -46,10 +38,16 @@ struct PF_ObjectParams;
 namespace bbque { namespace plugins {
 
 /**
- * @class CoreInteractionsTest
+ * @brief A TEST for the Application-BBQ interaction
  *
  * This test class simulate core interactions between applications and
  * Barbeque RTRM.
+ * It simulates the registering of a set of resources, and the start of an
+ * application. Here a recipe is loaded and all the check upon correctness of
+ * resource usages defined in are made.
+ * Once the ApplicationManager confirms the application has loaded, the test
+ * print out their working modes details and then trigger some scheduling
+ * status and working mode changes (passing overheads info too).
  *
  * By using the term "core" we are excluding the part regarding the
  * communication interface with the RTLib. Indeed the focus of the test is to
@@ -152,4 +150,3 @@ private:
 } // namespace bbque
 
 #endif // BBQUE_COREINT_TEST_H_
-

@@ -1,24 +1,18 @@
-/**
- *       @file  working_mode.h
- *      @brief  Application Working Mode for supporting application execution
- *      in Barbeque RTRM
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * The class defines the set of resource requirements of an application
- * execution profile (labeled "Application Working Mode") and a value of
- * Quality of Service.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Giuseppe Massari (jumanix), joe.massanga@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  01/04/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Giuseppe Massari
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_WORKING_MODE_H_
@@ -33,7 +27,6 @@ namespace bbque { namespace app {
 
 
 /**
- * @class WorkingMode
  * @brief Profile for supporting the application execution.
  *
  * Each Application object should be filled with a list of WorkingMode.
@@ -351,4 +344,3 @@ private:
 } // namespace bbque
 
 #endif	// BBQUE_WORKING_MODE_H_
-

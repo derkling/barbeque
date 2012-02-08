@@ -1,22 +1,18 @@
-/**
- *       @file  signals_manager.h
- *      @brief  The Barbeque Signals Management
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This class provides the implementation of Signals Management and Signals
- * Handlers for the main Baebque handled signals
- * 
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *   @internal
- *     Created  05/27/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_SIGNALS_MANAGER_H_
@@ -32,6 +28,11 @@
 
 namespace bbque {
 
+/**
+ * @brief A system signal handler
+ *
+ * This class provides a C++ abstraction for system sygnals.
+ */
 class SignalHandler {
 
 public:
@@ -44,6 +45,13 @@ public:
 };
 
 
+/**
+ * @brief A notifyer of a single system signal
+ *
+ * An event notifier allows to bind a BarbqueRTRM event to a system signal, in
+ * such a way that once that signal is received the corresponding BBQ events
+ * are notified to the main event processing queue.
+ */
 class EventNotifier : public SignalHandler {
 
 public:
@@ -75,27 +83,31 @@ private:
 
 /**
  * @brief The Barbeque signal management module
+ *
+ * This class provides a unified interface to register handlers for system
+ * signals and to properly dispatch signals to them once a signal is sent to
+ * the BarbequeRTRM.
  */
 class SignalsManager {
 
 public:
 
 	static SignalsManager & GetInstance();
-	
+
 	/**
 	 * @brief Register a SignalHandler for the specified signal number
 	 *
 	 * Allows to register an handler for a specified signal number
 	 * and return a pointer to any pre-existing handler.
 	 */
-	 SignalHandler *RegisterHandler(int signum, SignalHandler *sh);
+	SignalHandler *RegisterHandler(int signum, SignalHandler *sh);
 
-	 /**
-	  * @brief Remove a previsously registered handler
-	  *
-	  * Remove any SignalHandler for the specified signal number.
-	  */
-	  int RemoveHandler(int signum);
+	/**
+	 * @brief Remove a previsously registered handler
+	 *
+	 * Remove any SignalHandler for the specified signal number.
+	 */
+	int RemoveHandler(int signum);
 
 private:
 
@@ -143,7 +155,7 @@ private:
 	  ~SignalsManager();
 
 	  /**
-	   * #brief Entry point adapter installed into <sigaction>
+	   * @brief Entry point adapter installed into <sigaction>
 	   */
 	  static void Dispatcher(int signum);
 
@@ -154,4 +166,3 @@ private:
 } // namespace bbque
 
 #endif // BBQUE_SIGNALS_MANAGER_H_
-

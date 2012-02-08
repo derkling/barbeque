@@ -1,28 +1,18 @@
-/**
- *       @file  synchronization_manager.h
- *      @brief  The module to synchronize applicaitons status
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This module provides a unified interface to access application status
- * synchronization primitives. Once a new resource scheduling has been
- * computed, the status of registered application should be updated according
- * to the new schedule. This update requires to communicate each Execution
- * Context its new assigned set of resources and to verify that the actual
- * resources usage by each application match the schedule. Some of these operations
- * are delagated to module plugins, while the core glue code for status
- * synchronization is defined by this class
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  06/03/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_SYNCHRONIZATION_MANAGER_H_
@@ -52,6 +42,16 @@ namespace bbque {
 
 /**
  * @brief The class implementing the glue logic for status synchronization.
+ *
+ * This module provides a unified interface to access application status
+ * synchronization primitives. Once a new resource scheduling has been
+ * computed, the status of registered application should be updated according
+ * to the new schedule. This update requires to communicate each Execution
+ * Context its new assigned set of resources and to verify that the actual
+ * resources usage by each application match the schedule. Some of these
+ * operations are delagated to module plugins, while the core glue code for
+ * status synchronization is defined by this class
+
  * @ingroup sec06_ym
  */
 class SynchronizationManager {

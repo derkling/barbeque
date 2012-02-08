@@ -1,30 +1,26 @@
-/**
- *       @file  platform_services.h
- *      @brief  The services provided to plugins by the Barbeque framework
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * This class provides a set of services to barbeuqe modules throughout the
- * single InvokeServices method.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@gmail.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  02/01/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * ============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 
 #ifndef BBQUE_PLATFORM_SERVICES_H_
 #define BBQUE_PLATFORM_SERVICES_H_
 
 /**
- * Defines the set of supported platform services.
+ * @brief Set of supported platform services.
+ *
  * Each platform service could be associated to a corresponding service params
  * data structure defined thereafter. Some values are for internal use only
  * and do not correspond to an actual offered service.
@@ -54,7 +50,7 @@ typedef enum PF_PlatformServiceID {
 } PF_PlatformServiceID;
 
 /**
- * Defines the data exchange protocol between modules and service dispatcher.
+ * @brief Data exchange protocol between modules and service dispatcher.
  * Modules could request services defined by the PF_PlatformServiceID enum and
  * must provide a reference to a PF_ServiceData structure. This last allows to
  * define a set of service specific input data and expected return results.
@@ -116,8 +112,8 @@ namespace bbque {
 
 
 /**
- * @class PlatformServices
  * @brief Module implemeting supported for offered platform services
+ *
  * This class defines the interface to access all the services that the
  * platform provides to plugin. Offered services have a unique identifyer
  * defined by PF_PlatformServiceID and requires a corresponding set of input
@@ -183,4 +179,3 @@ private:
 #endif // __cplusplus
 
 #endif // BBQUE_PLATFORM_SERVICE_H_
-
