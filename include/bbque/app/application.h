@@ -425,6 +425,14 @@ private:
 	} awms;
 
 	/**
+	 * The following map keeps track of the constraints on resources.
+	 * It is used by function UsageOutOfBounds() (see below) to check if a working
+	 * mode includes a resource usages that violates a bounds contained in this
+	 * map.
+	 **/
+	ConstrMap_t rsrc_constraints;
+
+	/**
 	 * @brief Init working modes by reading the recipe
 	 *
 	 * @param papp Pointer to the current Application, allocated by
@@ -546,6 +554,15 @@ private:
 	 * restored accordingly.
 	 */
 	ExitCode_t RemoveWorkingModeConstraint(RTLIB_Constraint & constraint);
+
+	/**
+	 * @brief Check if an AWM violates resource constraints
+	 *
+	 * @param awm Shared pointer to the AWM object
+	 *
+	 * @return true if it violates, false otherwise
+	 */
+	bool UsageOutOfBounds(AwmPtr_t & awm);
 
 	/**
 	 * @brief Rebuild the list of enabled working modes

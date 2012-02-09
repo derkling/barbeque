@@ -58,16 +58,6 @@ bool AwmIdLesser(const AwmPtr_t & wm1, const AwmPtr_t & wm2) {
 		return wm1->Id() < wm2->Id();
 }
 
-
-/**
- * The following map keeps track of the constraints on resources.
- * It is used by function UsageOutOfBounds() (see below) to check if a working
- * mode includes a resource usages that violates a bounds contained in this
- * map.
- **/
-static ConstrMap_t rsrc_constraints;
-
-
 Application::Application(std::string const & _name, AppPid_t _pid,
 		uint8_t _exc_id) :
 	name(_name),
@@ -995,9 +985,6 @@ Application::ExitCode_t Application::SetGoalGap(uint8_t percent) {
 	return APP_SUCCESS;
 }
 
-// Forward function declaration
-bool UsageOutOfBounds(const AwmPtr_t & awm);
-
 void Application::RebuildEnabledWorkingModes() {
 	// Clear the list
 	awms.enabled_list.clear();
@@ -1034,7 +1021,7 @@ void Application::FinalizeEnabledWorkingModes() {
 
 /************************** Resource Constraints ****************************/
 
-bool UsageOutOfBounds(const AwmPtr_t & awm) {
+bool Application::UsageOutOfBounds(AwmPtr_t & awm) {
 	ConstrMap_t::iterator rsrc_constr_it;
 	ConstrMap_t::iterator end_rsrc_constr(rsrc_constraints.end());
 	UsagesMap_t::const_iterator usage_it(awm->RecipeResourceUsages().begin());
@@ -1057,8 +1044,15 @@ bool UsageOutOfBounds(const AwmPtr_t & awm) {
 }
 
 void Application::UpdateEnabledWorkingModes() {
-	// Remove working modes that violate resources constraints
-	awms.enabled_list.remove_if(UsageOutOfBounds);
+	// Remove AWMs violating resources constraints
+	AwmPtrList_t::iterator awms_it(awms.enabled_list.begin());
+	for (; awms_it != awms.enabled_list.end(); awms_it++) {
+		if (!UsageOutOfBounds(*awms_it))
+			continue;
+
+		// This AWM must be removed
+		awms.enabled_list.remove(*awms_it);
+	}
 
 	// Check current AWM and re-order the list
 	FinalizeEnabledWorkingModes();
