@@ -278,9 +278,9 @@ uint8_t XMLRecipeLoader::LoadResources(ticpp::Element * _xml_elem,
 }
 
 
-inline uint8_t XMLRecipeLoader::AppendToWorkingMode(AwmPtr_t & wm,
-				std::string const & _res_path,
-				uint64_t _res_usage) {
+uint8_t XMLRecipeLoader::AppendToWorkingMode(AwmPtr_t & wm,
+		std::string const & _res_path,
+		uint64_t _res_usage) {
 	// Add the resource usage to the working mode
 	WorkingModeStatusIF::ExitCode_t result;
 	result = wm->AddResourceUsage(_res_path, _res_usage);
@@ -305,14 +305,14 @@ inline uint8_t XMLRecipeLoader::AppendToWorkingMode(AwmPtr_t & wm,
 	}
 }
 
+uint8_t XMLRecipeLoader::GetResourceAttributes(
+		ticpp::Element * _res_elem,
+		AwmPtr_t & _wm,
+		std::string & _res_path) {
 	uint64_t res_usage = 0;
 	std::string res_units;
 	std::string res_id;
 
-inline uint8_t XMLRecipeLoader::GetResourceAttributes(
-				ticpp::Element * _res_elem,
-				AwmPtr_t & _wm,
-				std::string & _res_path) {
 	// Resource ID
 	_res_elem->GetAttribute("id", &res_id, false);
 
@@ -374,7 +374,7 @@ void XMLRecipeLoader::LoadPluginsData(T _container,
 
 
 template<class T>
-inline void XMLRecipeLoader::ParsePluginTag(T _container,
+void XMLRecipeLoader::ParsePluginTag(T _container,
 		ticpp::Element * _plug_elem) {
 	std::string name;
 	ticpp::Node * plugdata_node;
@@ -397,7 +397,7 @@ inline void XMLRecipeLoader::ParsePluginTag(T _container,
 
 
 template<class T>
-inline void XMLRecipeLoader::GetPluginData(T _container,
+void XMLRecipeLoader::GetPluginData(T _container,
 		ticpp::Node * plugdata_node,
 		std::string const & _plug_name) {
 	std::string key;
