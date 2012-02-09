@@ -37,11 +37,7 @@ using bbque::plugins::LoggerIF;
 
 namespace bbque { namespace app {
 
-// Forward declaration
-class Application;
 
-/** Shared pointer to an Application descriptor */
-typedef std::shared_ptr<Application> AppPtr_t;
 /** Shared pointer to Recipe object */
 typedef std::shared_ptr<Recipe> RecipePtr_t;
 /** Shared pointer to ResourceConstraint object */
