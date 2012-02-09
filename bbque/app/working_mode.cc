@@ -164,7 +164,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 
 	// Null name check
 	if (rsrc_name.empty()) {
-		logger->Error("Binding: Missing resource name");
+		logger->Error("Binding [AWM%d]: Missing resource name", id);
 		return WM_RSRC_ERR_NAME;
 	}
 
@@ -218,10 +218,12 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
 
-			logger->Debug("Binding: {%s} \t[amount = %llu #binds = %d]",
-					rcp_path.c_str(), pusage->GetAmount(),
+			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %llu binds: %d]",
+					id, rcp_path.c_str(), pusage->GetAmount(),
 					pusage->GetBindingList().size());
 		}
+		logger->Debug("Binding [AWM%d]: %d resources bound", id,
+			resources.on_sched[bid]->size());
 	);
 
 	// Are all the resource usages bound ?
@@ -256,7 +258,8 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(uint8_t bid) {
 
 		// A mismatch of path template means an error
 		if (bind_tmpl.compare(recp_tmpl) != 0) {
-			logger->Error("SetBinding: %s resource path mismatch");
+			logger->Error("SetBinding [AWM%d]: %s resource path mismatch %s",
+					id, bind_tmpl.c_str(), recp_tmpl.c_str());
 			return WM_RSRC_MISS_BIND;
 		}
 
@@ -266,13 +269,17 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(uint8_t bid) {
 			continue;
 
 		// Set the bit in the clusters bitset
-		logger->Debug("SetBinding: Bound into cluster %d", cl_id);
+		logger->Debug("SetBinding [AWM%d]: Bound into cluster %d", id, cl_id);
 		clust_tmp.set(cl_id);
 	}
 
 	// Update the clusters bitset
 	clusters.prev = clusters.curr;
 	clusters.curr = clust_tmp;
+	logger->Debug("SetBinding [AWM%d]: previous cluster set: %s", id,
+			clusters.prev.to_string().c_str());
+	logger->Debug("SetBinding [AWM%d]: current cluster set: %s", id,
+			clusters.curr.to_string().c_str());
 
 	// Cluster set changed?
 	clusters.changed = clusters.prev != clusters.curr;
