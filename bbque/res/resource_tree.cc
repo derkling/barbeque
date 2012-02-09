@@ -47,10 +47,11 @@ ResourcePtr_t & ResourceTree::insert(std::string const & _rsrc_path) {
 	// Extract the first namespace level in the resource path
 	ResourceNode_t * curr_node = root;
 	std::string ns_path(_rsrc_path);
-	std::string curr_ns(SplitAndPop(ns_path));
+	std::string curr_ns(ResourcePathUtils::SplitAndPop(ns_path));
 
 	// For each namespace level...
-	for (; !curr_ns.empty(); curr_ns = SplitAndPop(ns_path)) {
+	for (; !curr_ns.empty();
+			curr_ns = ResourcePathUtils::SplitAndPop(ns_path)) {
 
 		// If the resource has not children create the first child using the
 		// current namespace level
@@ -96,7 +97,7 @@ bool ResourceTree::find_node(ResourceNode_t * curr_node,
 
 	// Extract the first node in the path, and save the remaining path string
 	std::string next_path(rsrc_path);
-	std::string curr_ns(SplitAndPop(next_path));
+	std::string curr_ns(ResourcePathUtils::SplitAndPop(next_path));
 	if (curr_ns.empty())
 		return false;
 

@@ -157,7 +157,7 @@ public:
 	inline ResourcePtrList_t GetResources(std::string const & path) const {
 		// If the path is a template find all the resources matching the
 		// template. Otherwise do an "hybrid" path based search.
-		if (IsPathTemplate(path))
+		if (ResourcePathUtils::IsTemplate(path))
 			return resources.findAll(path);
 		return resources.findSet(path);
 	}
@@ -166,7 +166,7 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline bool ExistResource(std::string const & path) const {
-		std::string _temp_path = PathTemplate(path);
+		std::string _temp_path = ResourcePathUtils::GetTemplate(path);
 		return resources.existPath(_temp_path);
 	}
 

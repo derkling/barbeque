@@ -24,7 +24,7 @@
 #include <string>
 
 #include "bbque/plugins/logger.h"
-#include "bbque/res/resources.h"
+#include "bbque/res/resource_utils.h"
 
 #define RESOURCE_TREE_NAMESPACE "rt"
 

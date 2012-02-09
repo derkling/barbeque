@@ -30,6 +30,8 @@
 namespace br = bbque::res;
 namespace bp = bbque::plugins;
 
+using br::ResourcePathUtils;
+
 namespace bbque { namespace app {
 
 
@@ -98,7 +100,7 @@ uint64_t WorkingMode::ResourceUsageAmount(
 		std::string const & rsrc_path) const {
 	UsagePtr_t pusage;
 
-	if (IsPathTemplate(rsrc_path))
+	if (ResourcePathUtils::IsTemplate(rsrc_path))
 		pusage = ResourceUsageTempRef(rsrc_path);
 	else
 		pusage = ResourceUsageRef(rsrc_path);
@@ -119,7 +121,8 @@ WorkingMode::ResourceUsageTempRef(std::string const & temp_path) const {
 	// Iterate over the map of resource usages retrieved from the recipe
 	for (; rsrc_it != it_end; ++rsrc_it) {
 		// Compare the path with the template of the current resource path
-		if (temp_path.compare(PathTemplate(rsrc_it->first)) != 0)
+		if (temp_path.compare(
+					ResourcePathUtils::GetTemplate(rsrc_it->first)) != 0)
 			continue;
 
 		// Return the pointer to the ResourceUsage object
@@ -189,8 +192,9 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		// Replace resource name+src_ID with resource_name+dst_ID in the
 		// resource path
 		std::string bind_path(
-				ReplaceResourceID(rcp_path, rsrc_name, src_ID, dst_ID));
-		logger->Debug("Binding: 'recipe' [%s] => 'bbque' [%s]",
+				ResourcePathUtils::ReplaceID(rcp_path, rsrc_name, src_ID,
+					dst_ID));
+		logger->Debug("Binding [AWM%d]: 'recipe' [%s] => 'bbque' [%s]", id,
 				rcp_path.c_str(), bind_path.c_str());
 
 		// Create a new ResourceUsage object and set the binding list
@@ -245,8 +249,10 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(uint8_t bid) {
 
 	// Check the correctness of the binding
 	for(; bind_it != end_bind, recp_it != end_recp; ++recp_it, ++bind_it) {
-		std::string const & bind_tmpl(PathTemplate(bind_it->first));
-		std::string const & recp_tmpl(PathTemplate(recp_it->first));
+		std::string const & bind_tmpl(
+				ResourcePathUtils::GetTemplate(bind_it->first));
+		std::string const & recp_tmpl(
+				ResourcePathUtils::GetTemplate(recp_it->first));
 
 		// A mismatch of path template means an error
 		if (bind_tmpl.compare(recp_tmpl) != 0) {
@@ -255,7 +261,7 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(uint8_t bid) {
 		}
 
 		// Retrieve the bound cluster[s]
-		ResID_t cl_id = GetResourceID(bind_it->first, "cluster");
+		ResID_t cl_id = ResourcePathUtils::GetID(bind_it->first, "cluster");
 		if (cl_id == RSRC_ID_NONE)
 			continue;
 
