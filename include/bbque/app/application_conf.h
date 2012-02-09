@@ -39,6 +39,12 @@ using bbque::res::RViewToken_t;
 
 namespace bbque { namespace app {
 
+
+class ApplicationConfIF;
+/** Shared pointer to the class here defined */
+typedef std::shared_ptr<ApplicationConfIF> AppCPtr_t;
+
+
 /**
  * @brief Interface to configure application status
  *
