@@ -81,7 +81,7 @@ public:
 	/**
 	 * @see WorkingModeStatusIF
 	 */
-	inline AppPtr_t const & Owner() const {
+	inline AppSPtr_t const & Owner() const {
 		return owner;
 	}
 
@@ -89,7 +89,7 @@ public:
 	 * @brief Set the application owning the AWM
 	 * @param papp Application descriptor pointer
 	 */
-	inline void SetOwner(AppPtr_t const & papp) {
+	inline void SetOwner(AppSPtr_t const & papp) {
 		owner = papp;
 	}
 
@@ -271,7 +271,7 @@ private:
 	 * A pointer to the Application descriptor containing the
 	 * current working mode
 	 */
-	AppPtr_t owner;
+	AppSPtr_t owner;
 
 	/** A numerical ID  */
 	uint8_t id;

@@ -579,7 +579,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	std::unique_lock<std::recursive_mutex> schedule_ul(schedule.mtx);
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t booking;
-	AppPtr_t papp(awm->Owner());
+	AppSPtr_t papp(awm->Owner());
 	ExitCode_t result;
 
 	// App is SYNC/BLOCKED for a previously failed scheduling.

@@ -88,7 +88,7 @@ public:
 	 * @brief Get the application owning the working mode
 	 * @return A shared pointer to the application descriptor
 	 */
-	virtual AppPtr_t const & Owner() const = 0;
+	virtual AppSPtr_t const & Owner() const = 0;
 
 	/**
 	 * @brief Get the QoS value associated to the working mode
