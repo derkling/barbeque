@@ -21,7 +21,8 @@
 #include <bitset>
 #include <list>
 #include <map>
-#include "bbque/res/resource_accounter.h"
+
+#include "bbque/res/resources.h"
 #include "bbque/utils/attributes_container.h"
 
 #define MAX_NUM_CLUSTERS 	8
@@ -31,6 +32,7 @@ using bbque::res::ResID_t;
 using bbque::res::ResourceUsage;
 using bbque::res::UsagePtr_t;
 using bbque::res::UsagesMap_t;
+using bbque::res::UsagesMapPtr_t;
 using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace app {

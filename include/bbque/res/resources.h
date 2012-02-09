@@ -39,15 +39,16 @@ using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace res {
 
-/** Type for ID used in resource path */
-typedef int16_t ResID_t;
-
 // Forward declarations
-struct Resource;
-struct ResourceUsage;
+class Resource;
 struct ResourceState;
+class ResourceUsage;
 class ResourceAccounter;
 
+/** Type for ID used in resource path */
+typedef int16_t ResID_t;
+/** Resource state view token data type */
+typedef size_t RViewToken_t;
 /** Shared pointer to Resource descriptor */
 typedef std::shared_ptr<Resource> ResourcePtr_t;
 /** List of shared pointers to Resource descriptors */
@@ -58,10 +59,14 @@ typedef ResourcePtrList_t::iterator ResourcePtrListIterator_t;
 typedef std::shared_ptr<ResourceState> ResourceStatePtr_t;
 /** Map of amounts of resource used by applications. Key: Application UID */
 typedef std::map<AppUid_t, uint64_t> AppUseQtyMap_t;
-/** Numeric value used as token for the resource views */
-typedef size_t RViewToken_t;
 /** Hash map collecting the state views of a resource */
 typedef std::unordered_map<RViewToken_t, ResourceStatePtr_t> RSHashMap_t;
+/** Shared pointer to ResourceUsage object */
+typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
+/** Map of ResourceUsage descriptors. Key: resource path */
+typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
+/** Constant pointer to the map of ResourceUsage descriptors */
+typedef std::shared_ptr<UsagesMap_t> UsagesMapPtr_t;
 
 
 /**

@@ -19,22 +19,9 @@
 #define BBQUE_APPLICATION_CONF_IF_H_
 
 #include "bbque/app/application_status.h"
+#include "bbque/app/working_mode_status.h"
 #include "bbque/rtlib.h"
 
-namespace bbque { namespace res {
-/** Numeric value used as token for the resource views */
-typedef size_t RViewToken_t;
-
-struct ResourceUsage;
-/** Shared pointer to ResourceUsage object */
-typedef std::shared_ptr<ResourceUsage> UsagePtr_t;
-/** Map of ResourceUsage descriptors. Key: resource path */
-typedef std::map<std::string, UsagePtr_t> UsagesMap_t;
-/** Constant pointer to the map of ResourceUsage descriptors */
-typedef std::shared_ptr<UsagesMap_t> UsagesMapPtr_t;
-}}
-
-using bbque::res::UsagesMapPtr_t;
 using bbque::res::RViewToken_t;
 
 namespace bbque { namespace app {
