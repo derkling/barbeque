@@ -38,9 +38,11 @@ using bbque::utils::AttributesContainer;
 namespace bbque { namespace app {
 
 
+class WorkingModeStatusIF;
+/** Shared pointer to the class here defined */
+typedef std::shared_ptr<WorkingModeStatusIF> AwmSPtr_t;
 /** Bitset for clusters use monitoring */
 typedef std::bitset<MAX_NUM_CLUSTERS> ClustersBitSet;
-
 
 /**
  * @brief Working mode status interface
