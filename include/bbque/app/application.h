@@ -125,17 +125,22 @@ public:
 	}
 
 	/**
-	 * @see ApplicationConfIF
+	 * @brief Set the priority of the application
 	 */
 	void SetPriority(AppPrio_t prio);
 
 	/**
-	 * @see ApplicationConfIF
+	 * @brief Enable the application for resources assignment
+	 *
+	 * A newly created application is disabled by default, thus it will not be
+	 * considered for resource scheduling until it is enabled.
 	 */
 	ExitCode_t Enable();
 
 	/**
-	 * @see ApplicationConfIF
+	 * @brief Disabled the application for resources assignment
+	 *
+	 * A disabled application will not be considered for resources scheduling.
 	 */
 	ExitCode_t Disable();
 

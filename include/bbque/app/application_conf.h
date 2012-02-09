@@ -56,26 +56,6 @@ class ApplicationConfIF: public ApplicationStatusIF {
 public:
 
 	/**
-	 * @brief Set the priority of the application
-	 */
-	virtual void SetPriority(AppPrio_t prio) = 0;
-
-	/**
-	 * @brief Enable the application for resources assignment
-	 *
-	 * A newly created application is disabled by default, thus it will not be
-	 * considered for resource scheduling until it is enabled.
-	 */
-	virtual ExitCode_t Enable() = 0;
-
-	/**
-	 * @brief Disabled the application for resources assignment
-	 *
-	 * A disabled application will not be considered for resources scheduling.
-	 */
-	virtual ExitCode_t Disable() = 0;
-
-	/**
 	 * @brief Request to re-schedule this application into a new configuration
 	 *
 	 * The Optimizer call this method when an AWM is selected for this
@@ -98,18 +78,6 @@ public:
 	 */
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t tok,
 			uint8_t bid = 0) = 0;
-
-	/**
-	 * @brief Terminate this EXC by releasing all resources.
-	 *
-	 * This method requires to mark the EXC as terminated and to prepare the
-	 * ground for releasing all resources as soon as possible. Due to
-	 * asynchronous nature of this event and the activation of Optimized and
-	 * Synchronizer, a valid reference to the object is granted to be keept
-	 * alive until all of its users have terminated.
-	 */
-	virtual ExitCode_t Terminate() = 0;
-
 };
 
 } // namespace app
