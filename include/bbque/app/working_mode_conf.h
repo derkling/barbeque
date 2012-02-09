@@ -24,6 +24,12 @@ using bbque::res::ResID_t;
 
 namespace bbque { namespace app {
 
+
+class WorkingModeConfIF;
+/** Shared pointer to the class here defined */
+typedef std::shared_ptr<WorkingModeConfIF> AwmCPtr_t;
+
+
 /**
  * @brief Working Mode configureation interfaace
  *
