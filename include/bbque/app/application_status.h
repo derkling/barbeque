@@ -26,12 +26,10 @@
 #include "bbque/app/recipe.h"
 #include "bbque/utils/attributes_container.h"
 
-using bbque::utils::AttributesContainer;
-
-
 #define BBQUE_UID_SHIFT 5
 #define BBQUE_UID_MASK 0x1F
 
+using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace app {
 
@@ -39,15 +37,13 @@ namespace bbque { namespace app {
 class ApplicationStatusIF;
 /** Shared pointer to the class here defined */
 typedef std::shared_ptr<ApplicationStatusIF> AppSPtr_t;
+
 /** The application identifier type */
 typedef uint32_t AppPid_t;
-
 /** The application UID type */
 typedef uint32_t AppUid_t;
-
 /** The application priority type */
 typedef uint16_t AppPrio_t;
-
 /** List of WorkingMode pointers */
 typedef std::list<AwmPtr_t> AwmPtrList_t;
 

@@ -346,7 +346,6 @@ public:
 	inline bool CurrentAWMNotValid() const {
 		return awms.curr_inv;
 	}
-
 	
 	/**
 	 * @brief Dump on logger a list of valid AWMs
@@ -508,7 +507,8 @@ private:
 	 *
 	 * @param awm_list Working modes list
 	 * @param wmId The working mode ID
-	 * @return A shared pointer to WorkingMode descriptor
+	 *
+	 * @return The list iterator of the Working Mode found
 	 */
 	AwmPtrList_t::iterator FindWorkingModeIter(AwmPtrList_t & awm_list,
 			uint16_t wmId);
