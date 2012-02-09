@@ -236,41 +236,6 @@ public:
 	ExitCode_t UsedBy(AppUid_t & app_uid, uint64_t & amount, uint8_t idx = 0,
 			RViewToken_t vtok = 0); 
 
-	/**
-	 * @brief Acquire a given amount of resource
-	 *
-	 * @param papp The application requiring the resource
-	 * @param amount How much resource is required
-	 * @param vtok The token referencing the resource view
-	 * @return The amount of resource acquired if success, 0 otherwise.
-	 */
-	 uint64_t Acquire(AppPtr_t const & papp, uint64_t amount,
-			 RViewToken_t vtok = 0);
-
-	/**
-	 * @brief Release the resource
-	 *
-	 * Release the specific amount of resource used by an application
-	 *
-	 * @param papp The application releasing the resource
-	 * @param vtok The token referencing the resource view
-	 * @return The amount of resource released
-	 */
-	uint64_t Release(AppPtr_t const & papp, RViewToken_t vtok = 0);
-
-	/**
-	 * @brief Delete a state view
-	 *
-	 * If the token refers to the default view, the method returns doing
-	 * nothing. This control is ahead of safety and consistency purposes.
-	 * Indeed if the default view was removed, what state should be picked as
-	 * the new default one?
-	 * Thus, this constraint force the caller to set a new default view, before
-	 * delete the current one.
-	 *
-	 * @param vtok The token of the view to delete
-	 */
-	void DeleteView(RViewToken_t vtok);
 
 	/**
 	 * @brief The number of state views of the resource
@@ -315,6 +280,28 @@ private:
 	}
 
 	/**
+	 * @brief Acquire a given amount of resource
+	 *
+	 * @param papp The application requiring the resource
+	 * @param amount How much resource is required
+	 * @param vtok The token referencing the resource view
+	 * @return The amount of resource acquired if success, 0 otherwise.
+	 */
+	 uint64_t Acquire(AppSPtr_t const & papp, uint64_t amount,
+			 RViewToken_t vtok = 0);
+
+	/**
+	 * @brief Release the resource
+	 *
+	 * Release the specific amount of resource used by an application
+	 *
+	 * @param papp The application releasing the resource
+	 * @param vtok The token referencing the resource view
+	 * @return The amount of resource released
+	 */
+	uint64_t Release(AppSPtr_t const & papp, RViewToken_t vtok = 0);
+
+	/**
 	 * @brief Apps/EXCs using the resource
 	 *
 	 * @param apps_map Reference to the map of App/EXC to get
@@ -343,6 +330,20 @@ private:
 	 * @return The ResourceState fo the referenced view
 	 */
 	ResourceStatePtr_t GetStateView(RViewToken_t vtok);
+
+	/**
+	 * @brief Delete a state view
+	 *
+	 * If the token refers to the default view, the method returns doing
+	 * nothing. This control is ahead of safety and consistency purposes.
+	 * Indeed if the default view was removed, what state should be picked as
+	 * the new default one?
+	 * Thus, this constraint force the caller to set a new default view, before
+	 * delete the current one.
+	 *
+	 * @param vtok The token of the view to delete
+	 */
+	void DeleteView(RViewToken_t vtok);
 };
 
 
