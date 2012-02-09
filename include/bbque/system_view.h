@@ -169,15 +169,17 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF::Used()
 	 */
-	inline uint64_t ResourceUsed(std::string const & path) const {
-		return ra.Used(path);
+	inline uint64_t ResourceUsed(std::string const & path,
+			RViewToken_t vtok = 0) const {
+		return ra.Used(path, vtok);
 	}
 
 	/**
 	 * @see ResourceAccounterStatusIF::Used()
 	 */
-	inline uint64_t ResourceUsed(ResourcePtrList_t & rsrc_list) const {
-		return ra.Used(rsrc_list);
+	inline uint64_t ResourceUsed(ResourcePtrList_t & rsrc_list,
+			RViewToken_t vtok = 0) const {
+		return ra.Used(rsrc_list, vtok);
 	}
 
 	/**
