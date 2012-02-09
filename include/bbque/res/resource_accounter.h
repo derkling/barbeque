@@ -29,7 +29,7 @@
 
 using bbque::ApplicationManager;
 using bbque::plugins::LoggerIF;
-using bbque::app::AppPtr_t;
+using bbque::app::AppSPtr_t;
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
 
@@ -110,7 +110,7 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Available(std::string const & path,
-			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
+			RViewToken_t vtok = 0, AppSPtr_t papp = AppSPtr_t()) const {
 		ResourcePtrList_t matches = GetResources(path);
 		return QueryStatus(matches, RA_AVAIL, vtok, papp);
 	}
@@ -119,7 +119,7 @@ public:
 	 * @see ResourceAccounterStatusIF
 	 */
 	inline uint64_t Available(ResourcePtrList_t & rsrc_list,
-			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const {
+			RViewToken_t vtok = 0, AppSPtr_t papp = AppSPtr_t()) const {
 		if (rsrc_list.empty())
 			return 0;
 		return QueryStatus(rsrc_list, RA_AVAIL, vtok, papp);
@@ -180,7 +180,7 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	AppPtr_t const AppUsingPE(std::string const & path,
+	AppSPtr_t const AppUsingPE(std::string const & path,
 			RViewToken_t vtok = 0) const;
 
 	/**
@@ -240,7 +240,7 @@ public:
 	 * RA_ERR_USAGE_EXC if the resource set required is not completely
 	 * available.
 	 */
-	ExitCode_t BookResources(AppPtr_t papp,
+	ExitCode_t BookResources(AppSPtr_t papp,
 			UsagesMapPtr_t const & rsrc_usages, RViewToken_t vtok = 0,
 			bool do_check = true);
 
@@ -255,7 +255,7 @@ public:
 	 * @param papp The application holding the resources
 	 * @param vtok The token referencing the resource state view
 	 */
-	void ReleaseResources(AppPtr_t papp, RViewToken_t vtok = 0);
+	void ReleaseResources(AppSPtr_t papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @see ResourceAccounterConfIF
@@ -334,7 +334,7 @@ public:
 	 *
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t SyncAcquireResources(AppPtr_t const & papp);
+	ExitCode_t SyncAcquireResources(AppSPtr_t const & papp);
 
 	/**
 	 * @brief Abort a synchronized mode session
@@ -474,7 +474,7 @@ private:
 	 */
 	uint64_t QueryStatus(ResourcePtrList_t const & rsrc_list,
 				QueryOption_t q_opt, RViewToken_t vtok = 0,
-				AppPtr_t papp =	AppPtr_t()) const;
+				AppSPtr_t papp = AppSPtr_t()) const;
 
 	/**
 	 * @brief Check the resource availability for a whole set
@@ -486,7 +486,7 @@ private:
 	 * RA_ERR_USAGE_EXC otherwise.
 	 */
 	ExitCode_t CheckAvailability(UsagesMapPtr_t const & usages,
-			RViewToken_t vtok = 0, AppPtr_t papp = AppPtr_t()) const;
+			RViewToken_t vtok = 0, AppSPtr_t papp = AppSPtr_t()) const;
 
 	/**
 	 * @brief Get a pointer to the map of applications resource usages
@@ -515,7 +515,7 @@ private:
 	 * @param vtok The token referencing the resource state view
 	 */
 	void IncBookingCounts(UsagesMapPtr_t const & app_usages,
-			AppPtr_t const & papp, RViewToken_t vtok = 0);
+			AppSPtr_t const & papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Book a single resource
@@ -530,7 +530,7 @@ private:
 	 * @return RA_ERR_USAGE_EXC if the usage required overcome the
 	 * availability. RA_SUCCESS otherwise.
 	 */
-	ExitCode_t DoResourceBooking(AppPtr_t const & papp,
+	ExitCode_t DoResourceBooking(AppSPtr_t const & papp,
 			UsagePtr_t & pusage, RViewToken_t vtok);
 
 	/**
@@ -544,7 +544,7 @@ private:
 	 * @param usage_val The amount of resource required
 	 * @param vtok The token referencing the resource state view
 	 */
-	void SchedResourceBooking(AppPtr_t const & papp, ResourcePtr_t & rsrc,
+	void SchedResourceBooking(AppSPtr_t const & papp, ResourcePtr_t & rsrc,
 			uint64_t & usage_val, RViewToken_t vtok);
 
 	/**
@@ -558,7 +558,7 @@ private:
 	 * @param rsrc The resource descriptor of the resource binding
 	 * @param usage_val The amount of resource required
 	 */
-	void SyncResourceBooking(AppPtr_t const & papp, ResourcePtr_t & rsrc,
+	void SyncResourceBooking(AppSPtr_t const & papp, ResourcePtr_t & rsrc,
 			uint64_t & usage_val);
 
 	/**
@@ -572,7 +572,7 @@ private:
 	 * @param vtok The token referencing the resource state view
 	 */
 	void DecBookingCounts(UsagesMapPtr_t const & app_usages,
-			AppPtr_t const & app, RViewToken_t vtok = 0);
+			AppSPtr_t const & app, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Unbook a single resource
@@ -584,7 +584,7 @@ private:
 	 * @param pusage ResourceUsage object
 	 * @param vtok The token referencing the resource state view
 	 */
-	void UndoResourceBooking(AppPtr_t const & papp, UsagePtr_t & pusage,
+	void UndoResourceBooking(AppSPtr_t const & papp, UsagePtr_t & pusage,
 			RViewToken_t vtok);
 
 	/**

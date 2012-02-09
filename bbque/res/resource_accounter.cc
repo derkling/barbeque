@@ -117,32 +117,32 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	}
 }
 
-AppPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
+AppSPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
 		RViewToken_t vtok) const {
 	Resource::ExitCode_t rsrc_ret;
 	AppUid_t app_uid;
-	AppPtr_t papp;
+	AppSPtr_t papp;
 	uint64_t amount;
 
 	// Get the Resource decriptor
 	ResourcePtr_t rsrc(GetResource(path));
 	if (!rsrc) {
 		logger->Error("Cannot find PE: '%s'", path.c_str());
-		return AppPtr_t();
+		return AppSPtr_t();
 	}
 
 	// Get the App/EXC descriptor
 	rsrc_ret = rsrc->UsedBy(app_uid, amount, 0, vtok);
 	if (rsrc_ret != Resource::RS_SUCCESS)
-		return AppPtr_t();
+		return AppSPtr_t();
 
 	papp = am.GetApplication(app_uid);
 	if (!papp)
-		return AppPtr_t();
+		return AppSPtr_t();
 
 	// Skip if the App/EXC hasn't an AWM or the resource is not a PE
 	if (!papp->CurrentAWM() || (rsrc->Name().compare("pe") < 0))
-		return AppPtr_t();
+		return AppSPtr_t();
 
 	return papp;
 }
@@ -151,7 +151,7 @@ inline char const * ResourceAccounter::StrAppUsingPE(std::string const & path,
 		char * buff, size_t size, RViewToken_t vtok) const {
 
 	// Lookup the App/EXC
-	AppPtr_t papp(AppUsingPE(path, vtok));
+	AppSPtr_t papp(AppUsingPE(path, vtok));
 	if (!papp) {
 		buff[0] = 0;
 		return NULL;
@@ -190,7 +190,7 @@ uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_list,
 		QueryOption_t _att,
 		RViewToken_t vtok,
-		AppPtr_t papp) const {
+		AppSPtr_t papp) const {
 	// Cumulative value to return
 	uint64_t val = 0;
 
@@ -223,7 +223,7 @@ uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_list,
 ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		UsagesMapPtr_t const & usages,
 		RViewToken_t vtok,
-		AppPtr_t papp) const {
+		AppSPtr_t papp) const {
 	uint64_t avail = 0;
 	UsagesMap_t::const_iterator usages_it(usages->begin());
 	UsagesMap_t::const_iterator usages_end(usages->end());
@@ -308,7 +308,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 	return RA_SUCCESS;
 }
 
-ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
+ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppSPtr_t papp,
 		UsagesMapPtr_t const & rsrc_usages,
 		RViewToken_t vtok,
 		bool do_check) {
@@ -362,7 +362,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	return RA_SUCCESS;
 }
 
-void ResourceAccounter::ReleaseResources(AppPtr_t papp, RViewToken_t vtok) {
+void ResourceAccounter::ReleaseResources(AppSPtr_t papp, RViewToken_t vtok) {
 	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
 
 	// Check to avoid null pointer seg-fault
@@ -533,7 +533,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 	ResourceAccounter::ExitCode_t result;
 	AppsUidMapIt apps_it;
-	AppPtr_t papp;
+	AppSPtr_t papp;
 
 	// Running Applications/ExC
 	papp = am.GetFirst(ApplicationStatusIF::RUNNING, apps_it);
@@ -559,7 +559,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncAcquireResources(
-		AppPtr_t const & papp) {
+		AppSPtr_t const & papp) {
 	// Check next AWM
 	if (!papp->NextAWM()) {
 		logger->Fatal("SyncMode [%d]: [%s] missing the next AWM",
@@ -610,7 +610,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
  ************************************************************************/
 
 void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
-		AppPtr_t const & papp,
+		AppSPtr_t const & papp,
 		RViewToken_t vtok) {
 	ExitCode_t result;
 
@@ -646,7 +646,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
-		AppPtr_t const & papp,
+		AppSPtr_t const & papp,
 		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
 	// When the first resource bind has been tracked this is set false
@@ -702,7 +702,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	return RA_SUCCESS;
 }
 
-inline void ResourceAccounter::SchedResourceBooking(AppPtr_t const & papp,
+inline void ResourceAccounter::SchedResourceBooking(AppSPtr_t const & papp,
 		ResourcePtr_t & rsrc,
 		uint64_t & usage_val,
 		RViewToken_t vtok) {
@@ -720,7 +720,7 @@ inline void ResourceAccounter::SchedResourceBooking(AppPtr_t const & papp,
 			papp->StrId(), rsrc->Name().c_str(), usage_val);
 }
 
-inline void ResourceAccounter::SyncResourceBooking(AppPtr_t const & papp,
+inline void ResourceAccounter::SyncResourceBooking(AppSPtr_t const & papp,
 		ResourcePtr_t & rsrc,
 		uint64_t & usage_val) {
 	// Skip the resource binding if the not assigned by the scheduler
@@ -736,7 +736,7 @@ inline void ResourceAccounter::SyncResourceBooking(AppPtr_t const & papp,
 }
 
 void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
-		AppPtr_t const & papp,
+		AppSPtr_t const & papp,
 		RViewToken_t vtok) {
 	// Maps of resource usages per Application/EXC
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
@@ -754,7 +754,7 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 	}
 }
 
-void ResourceAccounter::UndoResourceBooking(AppPtr_t const & papp,
+void ResourceAccounter::UndoResourceBooking(AppSPtr_t const & papp,
 		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
 	// Get the set of resources referenced in the view
