@@ -36,6 +36,9 @@ using bbque::utils::AttributesContainer;
 namespace bbque { namespace app {
 
 
+class ApplicationStatusIF;
+/** Shared pointer to the class here defined */
+typedef std::shared_ptr<ApplicationStatusIF> AppSPtr_t;
 /** The application identifier type */
 typedef uint32_t AppPid_t;
 
