@@ -239,7 +239,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 
 		// If the availability is less than the amount required...
 		if (avail < pusage->GetAmount()) {
-			logger->Debug("ChkAvail: Exceeding request for {%s}"
+			logger->Warn("ChkAvail: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
 					rsrc_path.c_str(), pusage->GetAmount(), avail,
 					QueryStatus(pusage->GetBindingList(), RA_TOTAL));
@@ -338,7 +338,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	// Each application can hold just one resource usages set
 	AppUsagesMap_t::iterator usemap_it(apps_usages->find(papp->Uid()));
 	if (usemap_it != apps_usages->end()) {
-		logger->Debug("Booking: [%s] currently using a resource set yet",
+		logger->Warn("Booking: [%s] currently using a resource set yet",
 				papp->StrId());
 		return RA_ERR_APP_USAGES;
 	}
@@ -346,7 +346,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppPtr_t papp,
 	// Check resource availability (if this is not a sync session)
 	if ((do_check) && !(sync_ssn.started)) {
 		if (CheckAvailability(rsrc_usages, vtok) == RA_ERR_USAGE_EXC) {
-			logger->Debug("Booking: Cannot allocate the resource set");
+			logger->Warn("Booking: Cannot allocate the resource set");
 			return RA_ERR_USAGE_EXC;
 		}
 	}
