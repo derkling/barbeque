@@ -52,7 +52,7 @@ uint64_t Resource::Used(RViewToken_t vtok) {
 	return view->used;
 }
 
-uint64_t Resource::Available(AppPtr_t papp, RViewToken_t vtok) {
+uint64_t Resource::Available(AppSPtr_t papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view) {
@@ -71,7 +71,7 @@ uint64_t Resource::Available(AppPtr_t papp, RViewToken_t vtok) {
 	return (total - view->used);
 }
 
-uint64_t Resource::ApplicationUsage(AppPtr_t const & papp, RViewToken_t vtok) {
+uint64_t Resource::ApplicationUsage(AppSPtr_t const & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view)
@@ -113,7 +113,7 @@ Resource::ExitCode_t Resource::UsedBy(AppUid_t & app_uid,
 	return RS_NO_APPS;
 }
 
-uint64_t Resource::Acquire(AppPtr_t const & papp, uint64_t amount,
+uint64_t Resource::Acquire(AppSPtr_t const & papp, uint64_t amount,
 		RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
@@ -133,7 +133,7 @@ uint64_t Resource::Acquire(AppPtr_t const & papp, uint64_t amount,
 	return amount;
 }
 
-uint64_t Resource::Release(AppPtr_t const & papp, RViewToken_t vtok) {
+uint64_t Resource::Release(AppSPtr_t const & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
 	if (!view)
@@ -173,7 +173,7 @@ uint16_t Resource::ApplicationsCount(AppUseQtyMap_t & apps_map,
 	return apps_map.size();
 }
 
-uint64_t Resource::ApplicationUsage(AppPtr_t const & papp,
+uint64_t Resource::ApplicationUsage(AppSPtr_t const & papp,
 		AppUseQtyMap_t & apps_map) {
 	// Retrieve the application from the map
 	AppUseQtyMap_t::iterator app_using_it(apps_map.find(papp->Uid()));

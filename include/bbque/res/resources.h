@@ -26,14 +26,14 @@
 #include <string>
 #include <unordered_map>
 
-#include "bbque/app/application.h"
+#include "bbque/app/application_status.h"
 #include "bbque/utils/utility.h"
 
 /** @see WorkingMode BindResource */
 #define RSRC_ID_ANY 	-1
 #define RSRC_ID_NONE 	-2
 
-using bbque::app::AppPtr_t;
+using bbque::app::AppSPtr_t;
 using bbque::app::AppUid_t;
 using bbque::utils::AttributesContainer;
 
@@ -196,7 +196,7 @@ public:
 	 * @return How much resource is still available including the amount of
 	 * resource used by the given application
 	 */
-	uint64_t Available(AppPtr_t papp = AppPtr_t(), RViewToken_t vtok = 0);
+	uint64_t Available(AppSPtr_t papp = AppSPtr_t(), RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Count of applications using the resource
@@ -217,7 +217,7 @@ public:
 	 *
 	 * @return The 'quota' of resource used by the application
 	 */
-	uint64_t ApplicationUsage(AppPtr_t const & papp, RViewToken_t vtok = 0);
+	uint64_t ApplicationUsage(AppSPtr_t const & papp, RViewToken_t vtok = 0);
 
 	/**
 	 * @brief Get the Uid of the idx-th App/EXC using the resource
@@ -329,7 +329,7 @@ private:
 	 *
 	 * @return The 'quota' of resource used by the application
 	 */
-	uint64_t ApplicationUsage(AppPtr_t const & papp, AppUseQtyMap_t & apps_map);
+	uint64_t ApplicationUsage(AppSPtr_t const & papp, AppUseQtyMap_t & apps_map);
 
 	/**
 	 * @brief Get the view referenced by the token
@@ -501,7 +501,7 @@ public:
 	 * @return RU_OK if success. RU_ERR_NULL_POINTER if the pointer to the
 	 * application is null.
 	 */
-	inline ExitCode_t TrackFirstBinding(AppPtr_t const & papp,
+	inline ExitCode_t TrackFirstBinding(AppSPtr_t const & papp,
 			ResourcePtrListIterator_t & first_it, RViewToken_t vtok) {
 		if (!papp)
 			return RU_ERR_NULL_POINTER;
@@ -533,7 +533,7 @@ public:
 	 * RU_ERR_VIEW_MISMATCH if the state view token does not match the one set
 	 * in TrackFirstBinding().
 	 */
-	inline ExitCode_t TrackLastBinding(AppPtr_t const & papp,
+	inline ExitCode_t TrackLastBinding(AppSPtr_t const & papp,
 			ResourcePtrListIterator_t & last_it, RViewToken_t vtok) {
 		if (!papp)
 			return RU_ERR_NULL_POINTER;
@@ -556,7 +556,7 @@ public:
 	ResourcePtrList_t binds;
 
 	/** The application/EXC owning this resource usage */
-	AppPtr_t own_app;
+	AppSPtr_t own_app;
 
 	/** The token referencing the state view of the resource usage */
 	RViewToken_t view_tk;
