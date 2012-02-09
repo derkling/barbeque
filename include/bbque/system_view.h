@@ -210,14 +210,6 @@ public:
 		return ra.GetTotalNumOfResources();
 	}
 
-	/**
-	 * @brief Resource clustering factor
-	 * @see ClusteringFactor
-	 */
-	inline uint16_t ResourceClusterFactor(std::string const & path) {
-		return ra.ClusteringFactor(path);
-	}
-
 private:
 
 	/** ApplicationManager instance */

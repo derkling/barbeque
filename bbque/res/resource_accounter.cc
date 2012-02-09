@@ -167,26 +167,6 @@ inline char const * ResourceAccounter::StrAppUsingPE(std::string const & path,
  *                   QUERY METHODS                                      *
  ************************************************************************/
 
-uint16_t ResourceAccounter::ClusteringFactor(std::string const & path) {
-	uint16_t clustering_factor;
-
-	// Check if the resource exists
-	if (!ExistResource(path))
-		return 0;
-
-	// Check if the resource is clustered
-	int16_t clust_patt_pos = path.find(RSRC_CLUSTER);
-	if (clust_patt_pos < 0)
-		return 1;
-
-	// Compute the clustering factor
-	clustering_factor = Total(RSRC_CLUSTER);
-	if (clustering_factor == 0)
-		++clustering_factor;
-
-	return clustering_factor;
-}
-
 uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_list,
 		QueryOption_t _att,
 		RViewToken_t vtok,

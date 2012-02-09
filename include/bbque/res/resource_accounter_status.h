@@ -247,18 +247,6 @@ public:
 			RViewToken_t vtok = 0) const;
 
 	/**
-	 * @brief Clustering factor
-	 *
-	 * Check if the resource is a clustered one and return the clustering
-	 * factor.
-	 *
-	 * @param path Resource path
-	 * @return The number of clusters in the platform if the resource is a
-	 * clustered one, 1 if there are no clusters, 0 otherwise.
-	 */
-	virtual uint16_t ClusteringFactor(std::string const & path) = 0;
-
-	/**
 	 * @brief Show the system resources status
 	 *
 	 * This is an utility function for debug purpose that print out all the

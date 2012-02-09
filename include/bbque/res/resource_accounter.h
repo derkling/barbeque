@@ -186,11 +186,6 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	uint16_t ClusteringFactor(std::string const & path);
-
-	/**
-	 * @see ResourceAccounterStatusIF
-	 */
 	void PrintStatusReport(RViewToken_t vtok = 0, bool verbose = false) const;
 
 	/**
