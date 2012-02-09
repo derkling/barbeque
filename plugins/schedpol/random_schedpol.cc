@@ -65,7 +65,7 @@ char const * RandomSchedPol::Name() {
  */
 std::mt19937 rng_engine(time(0));
 
-void RandomSchedPol::ScheduleApp(AppPtr_t papp) {
+void RandomSchedPol::ScheduleApp(AppCPtr_t papp) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ba::WorkingMode::ExitCode_t bindResult;
 	ba::AwmPtrList_t::const_iterator it;
@@ -115,7 +115,7 @@ RandomSchedPol::Schedule(bbque::SystemView & sv, RViewToken_t &rav) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	br::ResourceAccounter::ExitCode_t viewResult;
 	AppsUidMapIt app_it;
-	AppPtr_t papp;
+	AppCPtr_t papp;
 
 	if (!logger) {
 		assert(logger);

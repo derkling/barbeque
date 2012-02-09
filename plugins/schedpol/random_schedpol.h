@@ -29,7 +29,7 @@
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
 
-using bbque::app::AppPtr_t;
+using bbque::app::AppCPtr_t;
 using bbque::res::RViewToken_t;
 
 namespace bbque { namespace plugins {
@@ -98,7 +98,7 @@ private:
 	/**
 	 * @brief Randonly select an AWM for the application
 	 */
-	void ScheduleApp(AppPtr_t papp);
+	void ScheduleApp(AppCPtr_t papp);
 };
 
 } // namespace plugins
