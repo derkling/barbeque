@@ -34,7 +34,7 @@ using namespace bbque::app;
 using namespace bbque::res;
 
 using bbque::app::AppPrio_t;
-using bbque::app::AppPtr_t;
+using bbque::app::AppCPtr_t;
 using bbque::app::AwmPtr_t;
 
 using bbque::res::RViewToken_t;
@@ -50,7 +50,7 @@ struct PF_ObjectParams;
 namespace bbque { namespace plugins {
 
 /** The scheduling entity*/
-typedef std::pair<AppPtr_t, AwmPtr_t> SchedEntity_t;
+typedef std::pair<AppCPtr_t, AwmPtr_t> SchedEntity_t;
 /** Map for ordering the scheduling entities */
 typedef std::multimap<float, SchedEntity_t> SchedEntityMap_t;
 
@@ -191,10 +191,10 @@ private:
 	 * @param cl_id The current cluster for the clustered resources
 	 */
 	ExitCode_t InsertWorkingModes(SchedEntityMap_t & sched_map,
-			AppPtr_t const & papp, int cl_id);
+			AppCPtr_t const & papp, int cl_id);
 
 	ExitCode_t EvalWorkingMode(SchedEntityMap_t * sched_map,
-			AppPtr_t const & papp, AwmPtr_t const & wm,
+			AppCPtr_t const & papp, AwmPtr_t const & wm,
 			int cl_id);
 	/**
 	 * @brief Schedule the entities
@@ -214,7 +214,7 @@ private:
 	 * @param papp Application/EXC pointer
 	 * @return true if the Application/EXC must be skipped, false otherwise
 	 */
-	bool CheckSkipConditions(AppPtr_t const & papp);
+	bool CheckSkipConditions(AppCPtr_t const & papp);
 
 	/**
 	 * @brief Metrics computation
@@ -228,7 +228,7 @@ private:
 	 * @param metrics Metrics value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t MetricsComputation(AppPtr_t const & papp,
+	ExitCode_t MetricsComputation(AppCPtr_t const & papp,
 			AwmPtr_t const & wm, int cl_id, float & metrics);
 
 	/**
@@ -244,7 +244,7 @@ private:
 	 * @param cont_level The contention level value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t GetContentionLevel(AppPtr_t const & papp, AwmPtr_t const & wm,
+	ExitCode_t GetContentionLevel(AppCPtr_t const & papp, AwmPtr_t const & wm,
 			int cl_id, float & cont_level);
 
 	/**
@@ -255,7 +255,7 @@ private:
 	 * @param cont_level The contention level value to return
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t ComputeContentionLevel(AppPtr_t const & papp,
+	ExitCode_t ComputeContentionLevel(AppCPtr_t const & papp,
 			UsagesMapPtr_t const & rsrc_usages, float & cont_level);
 
 };

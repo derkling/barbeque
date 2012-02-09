@@ -241,7 +241,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		AppPrio_t prio,
 		int cl_id) {
 	AppsUidMapIt app_it;
-	AppPtr_t papp;
+	AppCPtr_t papp;
 
 	// Applications to be scheduled
 	papp = sv.GetFirstWithPrio(prio, app_it);
@@ -277,7 +277,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 
 	// Pick the entity and set the new Application Working Mode
 	for (; se_it != end_se; ++se_it) {
-		AppPtr_t & papp = (se_it->second).first;
+		AppCPtr_t & papp = (se_it->second).first;
 		AwmPtr_t const & eval_awm((se_it->second).second);
 
 		// Check a set of conditions accordingly to skip current
@@ -318,7 +318,7 @@ void YamcaSchedPol::SelectWorkingModes(SchedEntityMap_t & sched_map) {
 }
 
 
-inline bool YamcaSchedPol::CheckSkipConditions(AppPtr_t const & papp) {
+inline bool YamcaSchedPol::CheckSkipConditions(AppCPtr_t const & papp) {
 
 	// Skip if the application has been rescheduled yet (with success) or
 	// disabled in the meanwhile
@@ -348,7 +348,7 @@ void join_thread(std::thread & t) {
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 		SchedEntityMap_t & sched_map,
-		AppPtr_t const & papp,
+		AppCPtr_t const & papp,
 		int cl_id) {
 	std::list<std::thread> awm_thds;
 
@@ -375,7 +375,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InsertWorkingModes(
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::EvalWorkingMode(
 				SchedEntityMap_t * sched_map,
-				AppPtr_t const & papp,
+				AppCPtr_t const & papp,
 				AwmPtr_t const & wm,
 				int cl_id) {
 	std::unique_lock<std::mutex> sched_ul(sched_mtx, std::defer_lock);
@@ -429,13 +429,13 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::EvalWorkingMode(
 
 // Functions used by MetricsComputation() to get the migration and
 // reconfiguration overhead
-float GetMigrationOverhead(AppPtr_t const & papp, AwmPtr_t const & wm,
+float GetMigrationOverhead(AppCPtr_t const & papp, AwmPtr_t const & wm,
 		int cl_id);
-float GetReconfigOverhead(AppPtr_t const & papp, AwmPtr_t const & wm);
+float GetReconfigOverhead(AppCPtr_t const & papp, AwmPtr_t const & wm);
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
-		AppPtr_t const & papp,
+		AppCPtr_t const & papp,
 		AwmPtr_t const & wm,
 		int cl_id,
 		float & metrics) {
@@ -468,7 +468,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::MetricsComputation(
 }
 
 
-inline float GetMigrationOverhead(AppPtr_t const & papp,
+inline float GetMigrationOverhead(AppCPtr_t const & papp,
 		AwmPtr_t const & wm,
 		int cl_id) {
 	// Silence args warnings
@@ -482,7 +482,7 @@ inline float GetMigrationOverhead(AppPtr_t const & papp,
 }
 
 
-inline float GetReconfigOverhead(AppPtr_t const & papp,
+inline float GetReconfigOverhead(AppCPtr_t const & papp,
 		AwmPtr_t const & wm) {
 	// Silence args warnings
 	(void) papp;
@@ -494,7 +494,7 @@ inline float GetReconfigOverhead(AppPtr_t const & papp,
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
-		AppPtr_t const & papp,
+		AppCPtr_t const & papp,
 		AwmPtr_t const & wm,
 		int cl_id,
 		float & cont_level) {
@@ -526,7 +526,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
-		AppPtr_t const & papp,
+		AppCPtr_t const & papp,
 		UsagesMapPtr_t const & rsrc_usages,
 		float & cont_level) {
 	uint64_t rsrc_avail;
