@@ -24,8 +24,8 @@
 #include <cstdint>
 
 #include "bbque/system_view.h"
-#include "bbque/app/application_status.h"
-#include "bbque/app/working_mode_status.h"
+#include "bbque/app/application_conf.h"
+#include "bbque/app/working_mode.h"
 #include "bbque/res/resource_accounter_status.h"
 
 #include "bbque/scheduler_manager.h"
