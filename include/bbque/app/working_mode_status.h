@@ -37,11 +37,7 @@ using bbque::utils::AttributesContainer;
 
 namespace bbque { namespace app {
 
-// Forward declarations
-class Application;
 
-/** Shared pointer to Application  */
-typedef std::shared_ptr<Application> AppPtr_t;
 /** Bitset for clusters use monitoring */
 typedef std::bitset<MAX_NUM_CLUSTERS> ClustersBitSet;
 
