@@ -295,6 +295,19 @@ AwmPtr_t const & Application::NextAWM() {
 	return _NextAWM();
 }
 
+bool Application::_SwitchingAWM() const {
+	if (schedule.state != SYNC)
+		return false;
+	if (schedule.awm->Id() == schedule.next_awm->Id())
+		return false;
+	return true;
+}
+
+bool Application::SwitchingAWM() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
+	return _SwitchingAWM();
+}
+
 // NOTE: this requires a lock on schedule.mtx
 void Application::SetSyncState(SyncState_t sync) {
 

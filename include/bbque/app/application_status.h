@@ -296,6 +296,13 @@ public:
 	virtual AwmPtr_t const & NextAWM() = 0;
 
 	/**
+	 * @brief Check if the current AWM is going to be changed
+	 * @return true if the application is going to be reconfigured with
+	 * 	also a change of the current AWM
+	 */
+	virtual bool SwitchingAWM() = 0;
+
+	/**
 	 * @brief The enabled working modes
 	 * @return All the schedulable working modes of the application
 	 */

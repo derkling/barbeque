@@ -214,6 +214,11 @@ public:
 	/**
 	 * @see ApplicationStatusIF
 	 */
+	bool SwitchingAWM();
+
+	/**
+	 * @see ApplicationStatusIF
+	 */
 	inline AwmPtrList_t const * WorkingModes() {
 		return &awms.enabled_list;
 	}
@@ -465,6 +470,8 @@ private:
 	AwmPtr_t const & _CurrentAWM() const;
 
 	AwmPtr_t const & _NextAWM() const;
+
+	bool _SwitchingAWM() const;
 
 	/**
 	 * @brief Assert a specific resource constraint.
