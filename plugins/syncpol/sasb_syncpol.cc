@@ -254,7 +254,15 @@ do_sync:
 }
 
 bool SasbSyncPol::DoSync(AppPtr_t papp) {
-	(void)papp;
+
+	// TODO this check should be conditioned to a BBQ configuration option
+	// Avoid RESHUFFLING notification on application being RECONF just for
+	// resources reshuffling
+	if ((papp->SyncState() == ApplicationStatusIF::RECONF)) {
+		DB(logger->Notice("Force jump reshuffled EXC"));
+		return papp->SwitchingAWM();
+	}
+
 	return true;
 }
 
