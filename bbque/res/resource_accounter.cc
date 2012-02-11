@@ -637,7 +637,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
 	// When the first resource bind has been tracked this is set false
-	bool first_resource = true;
+	bool first_resource = false;
 
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
@@ -646,6 +646,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 	// Amount of resource to book
 	uint64_t usage_val = pusage->GetAmount();
+	uint64_t request_val = usage_val;
 
 	// Get the list of resource binds
 	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
@@ -668,12 +669,12 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 		// Scheduling: allocate required resource among its bindings
 		SchedResourceBooking(papp, rsrc, usage_val, vtok);
-		if (!first_resource)
+		if ((request_val == usage_val) || first_resource)
 			continue;
 
 		// Keep track of the first resource granted from the bindings
 		pusage->TrackFirstBinding(papp, it_bind, vtok);
-		first_resource = false;
+		first_resource = true;
 	}
 
 	// Keep track of the last resource granted from the bindings (only if we
