@@ -29,7 +29,7 @@
 #define BBQUE_LINUXPP_SILOS 			BBQUE_LINUXPP_CGROUP"/silos"
 
 #define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
-#define BBQUE_LINUXPP_MEMS_PARAM 		"cpuset.mems"
+#define BBQUE_LINUXPP_MEMN_PARAM 		"cpuset.mems"
 #define BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM 	"cpuset.cpu_exclusive"
 #define BBQUE_LINUXPP_MEM_EXCLUSIVE_PARAM 	"cpuset.mem_exclusive"
 #define BBQUE_LINUXPP_PROCS_PARAM		"cgroup.procs"
@@ -478,7 +478,7 @@ LinuxPP::BuildSilosCG(CGroupDataPtr_t &pcgd) {
 	cgroup_set_value_string(pcgd->pc_cpuset,
 			BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
 	cgroup_set_value_string(pcgd->pc_cpuset,
-			BBQUE_LINUXPP_MEMS_PARAM, prlb->mems);
+			BBQUE_LINUXPP_MEMN_PARAM, prlb->mems);
 
 	// Updating silos constraints
 	logger->Notice("PLAT LNX: Updating kernel CGroup [%s]", pcgd->cgpath);
@@ -538,7 +538,7 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 	if (prlb->cpus[0]) {
 		snprintf(mnode, 3, "%d", prlb->socket_id);
 		cgroup_set_value_string(pcgd->pc_cpuset,
-				BBQUE_LINUXPP_MEMS_PARAM, mnode);
+				BBQUE_LINUXPP_MEMN_PARAM, mnode);
 	}
 
 	// Setting CPUs as EXCLUSIVE if required
