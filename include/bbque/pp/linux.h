@@ -42,10 +42,22 @@
 /**
  * @brief The CGroup expected to assigne resources to BBQ
  *
- * Resources which are assignet to Barbeque for Run-Time Management
+ * Resources which are assigned to Barbeque for Run-Time Management
  * are expected to be define under this control group.
+ * @note this CGroup should be given both "task" and "admin" permissions to
+ * the UID used to run the BarbequeRTRM
  */
-#define BBQUE_LINUXPP_RESOURCES "bbque"
+#define BBQUE_LINUXPP_CGROUP "bbque"
+
+/**
+ * @brief The CGroup expected to define resources clusterization
+ *
+ * Resources assigned to Barbeque can be grouped into clusters, in a NUMA
+ * machine a cluster usually correspond to a "node". The BarbequeRTRM will
+ * consider this clusterization when scheduling applications by trying to keep
+ * each application within a single cluster.
+ */
+#define BBQUE_LINUXPP_RESOURCES BBQUE_LINUXPP_CGROUP"/res"
 
 /**
  * @brief The CGroup expected to define Clusters
@@ -135,7 +147,7 @@ private:
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
 			papp(pa), pcg(NULL), pc_cpuset(NULL) {
 			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
-					BBQUE_LINUXPP_RESOURCES"/%s",
+					BBQUE_LINUXPP_CGROUP"/%s",
 					papp->StrId());
 		}
 
