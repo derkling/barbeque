@@ -105,7 +105,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 
 		// Get a CPU id, and register the corresponding resource path
 		sscanf(p, "%hu", &first_cpu_id);
-		snprintf(resourcePath+18, 8, "%hu.pe%d",
+		snprintf(resourcePath+18, 10, "%hu.pe%d",
 				prlb->socket_id, first_cpu_id);
 		logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
 		ra.RegisterResource(resourcePath, "", 100);
@@ -165,7 +165,7 @@ LinuxPP::ExitCode_t
 LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		RLinuxBindingsPtr_t prlb) {
 	char group_name[] = BBQUE_LINUXPP_RESOURCES "/" BBQUE_LINUXPP_CLUSTER "123";
-	struct cgroup_controller *cg_cpuset = NULL;
+	struct cgroup_controller *cg_controller = NULL;
 	struct cgroup *bbq_node = NULL;
 	ExitCode_t pp_result = OK;
 	int cg_result;
@@ -199,9 +199,13 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		goto parsing_failed;
 	}
 
+	/**********************************************************************
+	 *    CPUSET Controller
+	 **********************************************************************/
+
 	// Get "cpuset" controller info
-	cg_cpuset = cgroup_get_controller(bbq_node, "cpuset");
-	if (cg_cpuset == NULL) {
+	cg_controller = cgroup_get_controller(bbq_node, "cpuset");
+	if (cg_controller == NULL) {
 		logger->Error("PLAT LNX: Getting controller FAILED! "
 				"(Error: Cannot find controller \"cpuset\" "
 				"in group [%s])", entry.path);
@@ -209,8 +213,8 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		goto parsing_failed;
 	}
 
-	// Getting the value fot the "cpuset.cpus" attribute
-	cg_result = cgroup_get_value_string(cg_cpuset, "cpuset.cpus",
+	// Getting the value for the "cpuset.cpus" attribute
+	cg_result = cgroup_get_value_string(cg_controller, BBQUE_LINUXPP_CPUS_PARAM,
 			&(prlb->cpus));
 	if (cg_result) {
 		logger->Error("PLAT LNX: Getting CPUs attribute FAILED! "
@@ -301,7 +305,7 @@ LinuxPP::_LoadPlatformData() {
 	// Scan all "nodeN" assignment
 	while (!cg_result && (pp_result == OK)) {
 		// That's fine here, since we want also to skip the root group [bbq_resources]
-		cg_result =	cgroup_walk_tree_next(1, &node_it, &entry, level);
+		cg_result = cgroup_walk_tree_next(1, &node_it, &entry, level);
 		pp_result = ParseNode(entry);
 	}
 
@@ -371,7 +375,7 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 		case RLINUX_TYPE_CPU:
 			prlb->amount_cpus += usage;
 			strcat(prlb->cpus, buff);
-			logger->Debug("PLAT LNX: adding CPU %d, "
+			logger->Debug("PLAT LNX: Adding CPU %d, "
 					"+%llu %, total %llu %",
 					rid, usage, prlb->amount_cpus);
 			break;
@@ -434,6 +438,8 @@ LinuxPP::ExitCode_t
 LinuxPP::BuildCGroup(CGroupDataPtr_t &pcgd) {
 	int result;
 
+	logger->Debug("PLAT LNX: Building CGroup [%s]...", pcgd->cgpath);
+
 	// Setup CGroup path for this application
 	pcgd->pcg = cgroup_new_cgroup(pcgd->cgpath);
 	if (!pcgd->pcg) {
@@ -473,6 +479,8 @@ LinuxPP::BuildSilosCG(CGroupDataPtr_t &pcgd) {
 				MaxCpusCount, MaxMemsCount));
 	ExitCode_t result;
 	int error;
+
+	logger->Debug("PLAT LNX: Building SILOS CGroup...");
 
 	// Build new CGroup data
 	pcgd = CGroupDataPtr_t(new CGroupData_t(BBQUE_LINUXPP_SILOS));
