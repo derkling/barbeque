@@ -418,8 +418,10 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 		// Set the resource Type
 		switch (GetRLinuxType(pres)) {
 		case RLINUX_TYPE_SMEM:
-			strcat(prlb->mems, buff);
-			logger->Debug("PLAT LNX: adding MEMORY %d", rid);
+			prlb->amount_memb += usage;
+			logger->Debug("PLAT LNX: Adding MEMORY %d, "
+					"+%llu, total %llu Bytes",
+					rid, usage, prlb->amount_memb);
 			break;
 		case RLINUX_TYPE_CPU:
 			prlb->amount_cpus += usage;
@@ -448,8 +450,9 @@ LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 	br::UsagePtr_t pusage;
 	const char *pname;
 
-	// Reset CPUs amounts
+	// Reset CPUs and MEMORY amounts
 	prlb->amount_cpus = 0;
+	prlb->amount_memb = 0;
 
 	uit = pum->begin();
 	for ( ; uit != pum->end(); ++uit) {
@@ -475,8 +478,10 @@ LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 	prlb->cpus[strlen(prlb->cpus)-1] = 0;
 	prlb->mems[strlen(prlb->mems)-1] = 0;
 
-	logger->Debug("PLAT LNX: [%s] => {cpus [%s], mnode[%d]}",
-			papp->StrId(), prlb->cpus, prlb->socket_id);
+	logger->Debug("PLAT LNX: [%s] => {cpus [%s: %llu %], "
+			"mnode[%d: %llu Bytes]}",
+			papp->StrId(), prlb->cpus, prlb->amount_cpus,
+			prlb->socket_id, prlb->amount_memb);
 
 	return OK;
 
@@ -502,6 +507,14 @@ LinuxPP::BuildCGroup(CGroupDataPtr_t &pcgd) {
 	if (!pcgd->pc_cpuset) {
 		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
 				"(Error: libcgroup, [cpuset] \"controller\" "
+				"creation failed)");
+		return MAPPING_FAILED;
+	}
+	// Add "memory" controller
+	pcgd->pc_memory = cgroup_add_controller(pcgd->pcg, "memory");
+	if (!pcgd->pc_memory) {
+		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
+				"(Error: libcgroup, [memory] \"controller\" "
 				"creation failed)");
 		return MAPPING_FAILED;
 	}
@@ -595,6 +608,7 @@ LinuxPP::GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd) {
 LinuxPP::ExitCode_t
 LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 		bool excl, bool move) {
+	char memory_limit[] = "9223372036854775807";
 	char mnode[] = "\09"; // Empty memory node (by default)
 	int result;
 
@@ -613,13 +627,22 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 		cgroup_set_value_string(pcgd->pc_cpuset,
 			BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM, "1");
 	}
+	// Set the assigned MEMORY amount
+	sprintf(memory_limit, "%lu", prlb->amount_memb);
+	cgroup_set_value_string(pcgd->pc_memory,
+			BBQUE_LINUXPP_MEMB_PARAM, memory_limit);
+
 
 	logger->Debug("PLAT LNX: Setup CGroup for [%s]: {cpus [%s], mnode[%s]}",
 			pcgd->papp->StrId(), prlb->cpus, mnode);
 
 	if (move) {
-		logger->Notice("PLAT LNX: [%s] => {cpus [%s], mnode [%s]}",
-				pcgd->papp->StrId(), prlb->cpus, mnode);
+
+		logger->Notice("PLAT LNX: [%s] => {cpus [%s: %llu %], "
+				"mnode[%d: %llu B]}",
+				pcgd->papp->StrId(),
+				prlb->cpus, prlb->amount_cpus,
+				prlb->socket_id, prlb->amount_memb);
 		cgroup_set_value_uint64(pcgd->pc_cpuset,
 				BBQUE_LINUXPP_PROCS_PARAM,
 				pcgd->papp->Pid());

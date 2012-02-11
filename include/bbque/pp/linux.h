@@ -121,9 +121,11 @@ private:
 		char *memb;
 		/** The percentage of CPUs time assigned */
 		uint16_t amount_cpus;
+		/** The bytes amount of Socket MEMORY assigned */
+		uint64_t amount_memb;
 		RLinuxBindings(const uint8_t MaxCpusCount, const uint8_t MaxMemsCount) :
 			cpus(NULL), mems(NULL), memb(NULL),
-			amount_cpus(0) {
+			amount_cpus(0), amount_memb(0) {
 			// 3 chars are required for each CPU/MEM resource if formatted
 			// with syntax: "nn,". This allows for up-to 99 resources per
 			// cluster
