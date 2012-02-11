@@ -112,6 +112,7 @@ void PlatformProxy::Monitor() {
 
 PlatformProxy::ExitCode_t
 PlatformProxy::LoadPlatformData() {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ExitCode_t result = OK;
 
 #if BBQUE_TEST_PLATFORM_DATA
@@ -144,6 +145,10 @@ PlatformProxy::LoadPlatformData() {
 
 	logger->Notice("PLAT PRX: Platform [%s] initialization COMPLETED",
 			GetPlatformID());
+
+	// Dump status of registered resource
+	ra.PrintStatusReport(0, true);
+
 	return result;
 }
 
