@@ -68,7 +68,7 @@ SasbSyncPol::SasbSyncPol() :
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(
-			SYNCHRONIZATION_POLICY_NAMESPACE
+			SYNCHRONIZATION_POLICY_NAMESPACE"."
 			SYNCHRONIZATION_POLICY_NAME);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
