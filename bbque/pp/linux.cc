@@ -436,17 +436,19 @@ LinuxPP::BuildCGroup(CGroupDataPtr_t &pcgd) {
 
 	// Add "cpuset" controller
 	pcgd->pc_cpuset = cgroup_add_controller(pcgd->pcg, "cpuset");
-	if (!pcgd->pcg) {
+	if (!pcgd->pc_cpuset) {
 		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
 				"(Error: libcgroup, [cpuset] \"controller\" "
 				"creation failed)");
 		return MAPPING_FAILED;
 	}
 
-	// Create the kernel-sapce CGroup
+	// Create the kernel-space CGroup
+	// NOTE: the current libcg API is quite confuse and unclear
+	// regarding the "ignore_ownership" second parameter
 	logger->Notice("PLAT LNX: Create kernel CGroup [%s]", pcgd->cgpath);
 	result = cgroup_create_cgroup(pcgd->pcg, 0);
-	if (result) {
+	if (result && errno) {
 		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
 				"(Error: libcgroup, kernel cgroup creation "
 				"[%d: %s]", errno, strerror(errno));
