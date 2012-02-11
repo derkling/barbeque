@@ -30,6 +30,7 @@
 
 #define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
 #define BBQUE_LINUXPP_MEMN_PARAM 		"cpuset.mems"
+#define BBQUE_LINUXPP_MEMB_PARAM 		"memory.limit_in_bytes"
 #define BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM 	"cpuset.cpu_exclusive"
 #define BBQUE_LINUXPP_MEM_EXCLUSIVE_PARAM 	"cpuset.mem_exclusive"
 #define BBQUE_LINUXPP_PROCS_PARAM		"cgroup.procs"
@@ -147,6 +148,22 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 }
 
 LinuxPP::ExitCode_t
+LinuxPP::RegisterClusterMEMs(RLinuxBindingsPtr_t prlb) {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	char resourcePath[] = "arch.tile0.cluster256.mem256";
+	uint64_t limit_in_bytes = atol(prlb->memb);
+
+	// Setup resource path
+	snprintf(resourcePath+18, 11, "%hu.mem0", prlb->socket_id);
+
+	logger->Debug("PLAT LNX: Registering [%s: %llu Bytes]...",
+			resourcePath, limit_in_bytes);
+	ra.RegisterResource(resourcePath, "Bytes", limit_in_bytes);
+
+	return OK;
+}
+
+LinuxPP::ExitCode_t
 LinuxPP::RegisterCluster(RLinuxBindingsPtr_t prlb) {
 	ExitCode_t pp_result = OK;
 
@@ -157,6 +174,13 @@ LinuxPP::RegisterCluster(RLinuxBindingsPtr_t prlb) {
 	// The CPUs are generally represented with a syntax like this:
 	// 1-3,4,5-7
 	pp_result = RegisterClusterCPUs(prlb);
+	if (pp_result != OK)
+		return pp_result;
+
+	// The MEMORY amount is represented in Bytes
+	pp_result = RegisterClusterMEMs(prlb);
+	if (pp_result != OK)
+		return pp_result;
 
 	return pp_result;
 }
@@ -219,6 +243,31 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 	if (cg_result) {
 		logger->Error("PLAT LNX: Getting CPUs attribute FAILED! "
 				"(Error: 'cpuset.cpus' not configured or not readable)");
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	/**********************************************************************
+	 *    MEMORY Controller
+	 **********************************************************************/
+
+	// Get "memory" controller info
+	cg_controller = cgroup_get_controller(bbq_node, "memory");
+	if (cg_controller == NULL) {
+		logger->Error("PLAT LNX: Getting controller FAILED! "
+				"(Error: Cannot find controller \"memory\" "
+				"in group [%s])", entry.path);
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	// Getting the value for the "memory.limit_in_bytes" attribute
+	cg_result = cgroup_get_value_string(cg_controller, BBQUE_LINUXPP_MEMB_PARAM,
+			&(prlb->memb));
+	if (cg_result) {
+		logger->Error("PLAT LNX: Getting MEMORY attribute FAILED! "
+				"(Error: 'memory.limit_in_bytes' not configured "
+				"or not readable)");
 		pp_result = PLATFORM_NODE_PARSING_FAILED;
 		goto parsing_failed;
 	}

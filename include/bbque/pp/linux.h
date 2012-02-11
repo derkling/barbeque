@@ -118,10 +118,12 @@ private:
 		unsigned short socket_id; ///> Maps a "cluster" on SMP Linux machine
 		char *cpus;
 		char *mems;
+		char *memb;
 		/** The percentage of CPUs time assigned */
 		uint16_t amount_cpus;
 		RLinuxBindings(const uint8_t MaxCpusCount, const uint8_t MaxMemsCount) :
-			cpus(NULL), mems(NULL), amount_cpu(0) {
+			cpus(NULL), mems(NULL), memb(NULL),
+			amount_cpus(0) {
 			// 3 chars are required for each CPU/MEM resource if formatted
 			// with syntax: "nn,". This allows for up-to 99 resources per
 			// cluster
@@ -133,6 +135,7 @@ private:
 		~RLinuxBindings() {
 			free(cpus);
 			free(mems);
+			free(memb);
 		}
 	} RLinuxBindings_t;
 
@@ -144,10 +147,11 @@ private:
 		char cgpath[BBQUE_LINUXPP_CGROUP_PATH_MAX];
 		struct cgroup *pcg;
 		struct cgroup_controller *pc_cpuset;
+		struct cgroup_controller *pc_memory;
 
 		CGroupData(AppPtr_t pa) :
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
-			papp(pa), pcg(NULL), pc_cpuset(NULL) {
+			papp(pa), pcg(NULL), pc_cpuset(NULL), pc_memory(NULL) {
 			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
 					BBQUE_LINUXPP_CGROUP"/%s",
 					papp->StrId());
@@ -155,7 +159,7 @@ private:
 
 		CGroupData(const char *cgp) :
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
-			pcg(NULL), pc_cpuset(NULL) {
+			pcg(NULL), pc_cpuset(NULL), pc_memory(NULL) {
 			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
 					"%s", cgp);
 		}
@@ -217,6 +221,7 @@ private:
 
 	ExitCode_t RegisterCluster(RLinuxBindingsPtr_t prlb);
 	ExitCode_t RegisterClusterCPUs(RLinuxBindingsPtr_t prlb);
+	ExitCode_t RegisterClusterMEMs(RLinuxBindingsPtr_t prlb);
 	ExitCode_t ParseNode(struct cgroup_file_info &entry);
 	ExitCode_t ParseNodeAttributes(struct cgroup_file_info &entry,
 			RLinuxBindingsPtr_t prlb);
