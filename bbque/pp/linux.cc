@@ -346,18 +346,14 @@ LinuxPP::GetRLinuxId(br::ResourcePtr_t pres) {
 LinuxPP::ExitCode_t
 LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 		RLinuxBindingsPtr_t prlb, br::UsagePtr_t pusage) {
-	br::ResourcePtrList_t::iterator rit;
+	br::ResourcePtrListIterator_t pres_it;
 	char buff[] = "123456789,";
 	br::ResourcePtr_t pres;
 	unsigned char rid;
 
-	rit = pusage->binds.begin();
-	for ( ; rit != pusage->binds.end(); ++rit) {
-		pres = (*rit);
 
-		// Jump resources not assigned to this application
-		if (!pres->ApplicationUsage(papp, rvt))
-			continue;
+	pres = pusage->GetFirstResource(pres_it);
+	while (pres) {
 
 		// Get the resource ID
 		rid = GetRLinuxId(pres);
@@ -377,6 +373,9 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 			// Just to mute compiler warnings..
 			break;
 		}
+
+		// Get next binded resource
+		pres = pusage->GetNextResource(pres_it);
 	}
 
 	return OK;
