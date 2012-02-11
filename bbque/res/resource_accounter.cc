@@ -690,6 +690,49 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	return RA_SUCCESS;
 }
 
+bool ResourceAccounter::IsReshuffling(UsagesMapPtr_t const & pum_current,
+		UsagesMapPtr_t const & pum_next) {
+	ResourcePtrListIterator_t presa_it, presc_it;
+	UsagesMap_t::iterator auit, cuit;
+	ResourcePtr_t presa, presc;
+	UsagePtr_t pua, puc;
+
+	// Loop on resources
+	for ( cuit = pum_current->begin(), auit = pum_next->begin();
+		cuit != pum_current->end() && auit != pum_next->end();
+			++cuit, ++auit) {
+
+		// Get the resource usages
+		puc = (*cuit).second;
+		pua = (*auit).second;
+
+		// Loop on bindings
+		presc = puc->GetFirstResource(presc_it);
+		presa = pua->GetFirstResource(presa_it);
+		while (presc && presa) {
+			logger->Debug("Checking: curr [%s:%d] vs next [%s:%d]",
+				presc->Name().c_str(),
+				presc->ApplicationUsage(
+					puc->own_app, 0),
+				presa->Name().c_str(),
+				presc->ApplicationUsage(
+					puc->own_app, pua->view_tk));
+			// Check for resource binding differences
+			if (presc->ApplicationUsage(puc->own_app, 0) !=
+				presc->ApplicationUsage(puc->own_app,
+					pua->view_tk)) {
+				logger->Debug("AWM Shuffling detected");
+				return true;
+			}
+			// Check next resource
+			presc = puc->GetNextResource(presc_it);
+			presa = pua->GetNextResource(presa_it);
+		}
+	}
+
+	return false;
+}
+
 inline void ResourceAccounter::SchedResourceBooking(AppSPtr_t const & papp,
 		ResourcePtr_t & rsrc,
 		uint64_t & usage_val,

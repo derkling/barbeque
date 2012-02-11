@@ -268,6 +268,20 @@ public:
 	void ReleaseResources(AppSPtr_t papp, RViewToken_t vtok = 0);
 
 	/**
+	 * @brief Check if resources are being reshuffled
+	 *
+	 * Resources reshuffling happens when two resources bindings are not
+	 * the same, i.e. different kind or amount of resources.
+	 *
+	 * @param pum_current the "current" resources bindings
+	 * @param pum_next the "next" resources bindings
+	 *
+	 * @return true when resources are being reshuffled
+	 */
+	bool IsReshuffling(UsagesMapPtr_t const & pum_current,
+			UsagesMapPtr_t const & pum_next);
+
+	/**
 	 * @see ResourceAccounterConfIF
 	 */
 	ExitCode_t GetView(std::string who_req, RViewToken_t & tok);
