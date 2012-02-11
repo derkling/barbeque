@@ -669,6 +669,21 @@ private:
 	SyncState_t SyncRequired(AwmPtr_t const & awm);
 
 	/**
+	 * @brief Check if this is a reshuffling
+	 *
+	 * Resources reshuffling happens when two resources bindings are not
+	 * the same, i.e. different kind or amount of resources, while the
+	 * application is not being reconfigured or migrated.
+	 *
+	 * This method check if the specified AWM will produce a reshuffling.
+	 *
+	 * @param next_awm the AWM to compare with current
+	 * @return true if the specified next_awm will produce a resources
+	 * reshuffling
+	 */
+	bool Reshuffling(AwmPtr_t const & next_awm);
+
+	/**
 	 * @brief Notify the EXC being run
 	 *
 	 * This method is called by ScheduleCommit once an EXC has been

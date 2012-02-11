@@ -496,6 +496,25 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 
 }
 
+bool
+Application::Reshuffling(AwmPtr_t const & next_awm) {
+	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	br::UsagesMapPtr_t pumc = _CurrentAWM()->GetResourceBinding();
+	br::UsagesMapPtr_t puma = next_awm->GetResourceBinding();
+
+	// NOTE: This method is intended to be called if we already know we
+	// are in a RECONF state.
+	assert(_CurrentAWM()->ClusterSet() == next_awm->ClusterSet());
+	assert(_CurrentAWM()->Id() == next_awm->Id());
+
+	if (ra.IsReshuffling(pumc, puma)) {
+		logger->Notice("AWM Shuffling on [%s]", StrId());
+		return true;
+	}
+
+	return false;
+}
+
 Application::SyncState_t
 Application::SyncRequired(AwmPtr_t const & awm) {
 
@@ -518,6 +537,12 @@ Application::SyncRequired(AwmPtr_t const & awm) {
 
 	if (_CurrentAWM()->Id() != awm->Id()) {
 		logger->Debug("SynchRequired: [%s] to RECONF", StrId());
+		return RECONF;
+	}
+
+	// Check for inter-cluster resources re-assignement
+	if (Reshuffling(awm)) {
+		logger->Debug("SynchRequired: [%s] to AWM-RECONF", StrId());
 		return RECONF;
 	}
 
