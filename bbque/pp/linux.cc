@@ -108,7 +108,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 		snprintf(resourcePath+18, 8, "%hu.pe%d",
 				prlb->socket_id, first_cpu_id);
 		logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
-		ra.RegisterResource(resourcePath, "", 1);
+		ra.RegisterResource(resourcePath, "", 100);
 
 		// Look-up for next CPU id
 		while (*p && (*p != ',') && (*p != '-')) {
@@ -131,7 +131,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 			snprintf(resourcePath+18, 8, "%hu.pe%d",
 					prlb->socket_id, first_cpu_id);
 			logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
-			ra.RegisterResource(resourcePath, "", 1);
+			ra.RegisterResource(resourcePath, "", 100);
 		}
 
 		// Look-up for next CPU id
@@ -350,7 +350,7 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 	char buff[] = "123456789,";
 	br::ResourcePtr_t pres;
 	unsigned char rid;
-
+	uint64_t usage;
 
 	pres = pusage->GetFirstResource(pres_it);
 	while (pres) {
@@ -359,6 +359,9 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 		rid = GetRLinuxId(pres);
 		sprintf(buff, "%d,", rid);
 
+		// Get resource usage amount
+		usage = pres->ApplicationUsage(papp, rvt);
+
 		// Set the resource Type
 		switch (GetRLinuxType(pres)) {
 		case RLINUX_TYPE_SMEM:
@@ -366,8 +369,11 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 			logger->Debug("PLAT LNX: adding MEMORY %d", rid);
 			break;
 		case RLINUX_TYPE_CPU:
+			prlb->amount_cpus += usage;
 			strcat(prlb->cpus, buff);
-			logger->Debug("PLAT LNX: adding CPU %d", rid);
+			logger->Debug("PLAT LNX: adding CPU %d, "
+					"+%llu %, total %llu %",
+					rid, usage, prlb->amount_cpus);
 			break;
 		default:
 			// Just to mute compiler warnings..
@@ -388,6 +394,9 @@ LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 	br::UsagesMap_t::iterator uit;
 	br::UsagePtr_t pusage;
 	const char *pname;
+
+	// Reset CPUs amounts
+	prlb->amount_cpus = 0;
 
 	uit = pum->begin();
 	for ( ; uit != pum->end(); ++uit) {

@@ -118,8 +118,10 @@ private:
 		unsigned short socket_id; ///> Maps a "cluster" on SMP Linux machine
 		char *cpus;
 		char *mems;
+		/** The percentage of CPUs time assigned */
+		uint16_t amount_cpus;
 		RLinuxBindings(const uint8_t MaxCpusCount, const uint8_t MaxMemsCount) :
-			cpus(NULL), mems(NULL) {
+			cpus(NULL), mems(NULL), amount_cpu(0) {
 			// 3 chars are required for each CPU/MEM resource if formatted
 			// with syntax: "nn,". This allows for up-to 99 resources per
 			// cluster
