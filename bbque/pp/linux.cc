@@ -612,6 +612,10 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 	char mnode[] = "\09"; // Empty memory node (by default)
 	int result;
 
+	/**********************************************************************
+	 *    CPUSET Controller
+	 **********************************************************************/
+
 	// Set the assigned CPUs
 	cgroup_set_value_string(pcgd->pc_cpuset,
 			BBQUE_LINUXPP_CPUS_PARAM, prlb->cpus);
@@ -632,19 +636,35 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 	excl = false;
 #endif
 
+	logger->Debug("PLAT LNX: Setup CPUSET for [%s]: "
+			"{cpus [%s: %s], mems[%s]}",
+			pcgd->papp->StrId(),
+			excl ? 'E' : 'S',
+			prlb->cpus, mnode);
+
+
+	/**********************************************************************
+	 *    MEMORY Controller
+	 **********************************************************************/
+
 	// Set the assigned MEMORY amount
 	sprintf(quota, "%lu", prlb->amount_memb);
 	cgroup_set_value_string(pcgd->pc_memory,
 			BBQUE_LINUXPP_MEMB_PARAM, quota);
 
+	logger->Debug("PLAT LNX: Setup MEMORY for [%s]: "
+			"{bytes_limit [%lu]}",
+			pcgd->papp->StrId(), prlb->amount_memb);
 
-	logger->Debug("PLAT LNX: Setup CGroup for [%s]: {cpus [%s], mnode[%s]}",
-			pcgd->papp->StrId(), prlb->cpus, mnode);
+
+	/**********************************************************************
+	 *    CGroup Configuraiton and Task Assignement
+	 **********************************************************************/
 
 	if (move) {
 
-		logger->Notice("PLAT LNX: [%s] => {cpus [%s: %llu %], "
-				"mnode[%d: %llu B]}",
+		logger->Notice("PLAT LNX: [%s] => "
+				"{cpu [%s: %llu %], mem[%d: %llu B]}",
 				pcgd->papp->StrId(),
 				prlb->cpus, prlb->amount_cpus,
 				prlb->socket_id, prlb->amount_memb);
