@@ -622,11 +622,16 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 				BBQUE_LINUXPP_MEMN_PARAM, mnode);
 	}
 
+#if 0
 	// Setting CPUs as EXCLUSIVE if required
 	if (excl) {
 		cgroup_set_value_string(pcgd->pc_cpuset,
 			BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM, "1");
 	}
+#else
+	excl = false;
+#endif
+
 	// Set the assigned MEMORY amount
 	sprintf(memory_limit, "%lu", prlb->amount_memb);
 	cgroup_set_value_string(pcgd->pc_memory,
