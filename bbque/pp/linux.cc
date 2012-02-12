@@ -608,7 +608,7 @@ LinuxPP::GetCGroupData(AppPtr_t papp, CGroupDataPtr_t &pcgd) {
 LinuxPP::ExitCode_t
 LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 		bool excl, bool move) {
-	char memory_limit[] = "9223372036854775807";
+	char quota[] = "9223372036854775807";
 	char mnode[] = "\09"; // Empty memory node (by default)
 	int result;
 
@@ -633,9 +633,9 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 #endif
 
 	// Set the assigned MEMORY amount
-	sprintf(memory_limit, "%lu", prlb->amount_memb);
+	sprintf(quota, "%lu", prlb->amount_memb);
 	cgroup_set_value_string(pcgd->pc_memory,
-			BBQUE_LINUXPP_MEMB_PARAM, memory_limit);
+			BBQUE_LINUXPP_MEMB_PARAM, quota);
 
 
 	logger->Debug("PLAT LNX: Setup CGroup for [%s]: {cpus [%s], mnode[%s]}",
