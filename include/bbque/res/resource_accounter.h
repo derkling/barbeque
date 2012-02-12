@@ -173,8 +173,23 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
-	inline uint16_t GetTotalNumOfResources() const {
-		return rsrc_counter;
+	inline uint16_t GetNumResources(std::string const & type="") const {
+		// Return 0 if the type cannot be found
+		std::map<std::string, uint16_t>::const_iterator
+			rsrc_found_it(rsrc_count_map.find(type));
+
+		if (rsrc_found_it == rsrc_count_map.end())
+			return 0;
+
+		// Return the num of resource of the type requested
+		return rsrc_found_it->second;
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	inline uint16_t GetNumResourceTypes() const {
+		return rsrc_count_map.size();
 	}
 
 	/**
@@ -399,7 +414,7 @@ private:
 	uint8_t path_max_len;
 
 	/** Counter for the total number of registered resources */
-	uint16_t rsrc_counter;
+	std::map<std::string, uint16_t> rsrc_count_map;
 
 	/**
 	 * Map containing the pointers to the map of resource usages specified in

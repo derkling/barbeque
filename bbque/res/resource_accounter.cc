@@ -55,7 +55,6 @@ ResourceAccounter::ResourceAccounter() :
 	sys_view_token = 0;
 	usages_per_views[sys_view_token] = sys_usages_view;
 	rsrc_per_views[sys_view_token] = ResourceSetPtr_t(new ResourceSet_t);
-	rsrc_counter = 0;
 
 	// Init sync session info
 	sync_ssn.count = 0;
@@ -263,6 +262,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 		std::string const & _path,
 		std::string const & _units,
 		uint64_t _amount) {
+	std::string rsrc_type;
+
 	// Check arguments
 	if(_path.empty()) {
 		logger->Fatal("Registering: Invalid resource path");
@@ -282,8 +283,14 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 
 	// Insert the path in the paths set
 	paths.insert(_path);
-	++rsrc_counter;
 	path_max_len = std::max((int) path_max_len, (int) _path.length());
+
+	// Track the number of resources per type
+	rsrc_type = ResourcePathUtils::GetNameTemplate(_path);
+	if (rsrc_count_map.find(rsrc_type) == rsrc_count_map.end())
+		rsrc_count_map.insert(std::pair<std::string, uint16_t>(rsrc_type, 1));
+	else
+		++rsrc_count_map[rsrc_type];
 
 	return RA_SUCCESS;
 }
