@@ -19,9 +19,11 @@
 #define BBQUE_GENERIC_WINDOW_H_
 
 #include <mutex>
+#include <cmath>
 #include <vector>
 #include <memory>
 #include <cstdint>
+#include <algorithm>
 #include <functional>
 #include <boost/circular_buffer.hpp>
 #include <boost/accumulators/accumulators.hpp>
@@ -170,10 +172,10 @@ public:
 	/**
 	 * @brief Checks whether the goal has been respected or not
 	 *
-	 * @param gaps Output parameter representing the difference between
-	 * the goal's targets and their current values (expressed in percentage)
+	 * @param naps Output parameter representing a normalised value for the
+	 * penalty in the range [0,1]
 	 */
-	virtual bool checkGoal(std::vector<float> &gaps);
+	virtual bool checkGoal(std::vector<float> &naps);
 
 	/**
 	 * @brief Removes all values from the window
@@ -287,20 +289,31 @@ inline bool GenericWindow<dataType>::checkGoal() {
 }
 
 template <typename dataType>
-inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
-	bool result = true;
+inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &naps) {
 	typename std::vector<Target>::iterator it;
+	bool result = true;
+	double goalValue;
+	double dfResult;
 
 	// Forces a removal of all the content, in order to prevent
 	// unpredictability of the output
-	gaps.clear();
+	naps.clear();
 
 	for (it = goalTargets->begin(); it != goalTargets->end(); ++it) {
-		gaps.push_back((it->dataFunction(this) - it->goalValue) /
-							 it->goalValue);
-		result = result &&
-				(it->comparisonFunction (
-				 it->dataFunction(this), it->goalValue));
+		/*
+		 * Forced promotion to double to avoid problems with unsigned
+		 * types.
+		 * This variables will be used just to compute naps. The
+		 * uncasted values will be used instead to have a more accurate
+		 * evaluation of the goal.
+		 */
+		dfResult = it->dataFunction(this);
+		goalValue = it->goalValue;
+
+		naps.push_back(fabs((dfResult - goalValue) /
+				    (dfResult + goalValue)));
+
+		result = result && it->comparisonFunction(dfResult, goalValue);
 	}
 
 	return result;

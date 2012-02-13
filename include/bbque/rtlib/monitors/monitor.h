@@ -75,10 +75,10 @@ public:
 	 * @brief Checks whether the goal has been respected or not
 	 *
 	 * @param id Identifies monitor and corresponding list
-	 * @param gaps Output parameter representing the difference between
-	 * the goal's targets and their current values (expressed in percentage)
+	 * @param naps Output parameter representing normalised values for the
+	 * penalties regarding each target of the goal in the range [0,1]
 	 */
-	virtual bool checkGoal(uint16_t id, std::vector<float> &gaps);
+	virtual bool checkGoal(uint16_t id, std::vector<float> &naps);
 
 	/**
 	 * @brief Resets current goal
@@ -175,15 +175,16 @@ inline bool Monitor <dataType>::checkGoal(uint16_t id) {
 }
 
 template <typename dataType>
-inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &gaps) {
+inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &naps) {
 	if (goalList.find(id) == goalList.end()) {
-		gaps.clear();
-		gaps.push_back(0);
+		naps.clear();
+		naps.push_back(0);
 		return false;
 	}
 
-	return (goalList[id]->checkGoal(gaps));
+	return (goalList[id]->checkGoal(naps));
 }
+
 
 template <typename dataType>
 inline void Monitor <dataType>::deleteGoal(uint16_t id) {
