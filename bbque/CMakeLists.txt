@@ -108,5 +108,5 @@ install (FILES "${PROJECT_BINARY_DIR}/config/default/bbqued"
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/config/pil/"
 		DESTINATION ${BBQUE_PATH_PILS}
 		COMPONENT BarbequeRTRM
-		FILES_MATCHING PATTERN "*.cgroup")
+		FILES_MATCHING PATTERN "*.bpl")
 

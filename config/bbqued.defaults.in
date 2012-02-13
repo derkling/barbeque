@@ -16,16 +16,22 @@ PIDFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_PIDFILE}'
 # The BBQ daemon lock file
 LOCKFILE='${CMAKE_INSTALL_PREFIX}/${BBQUE_DAEMON_LOCKFILE}'
 #
-# The mountpoint of the BBQ CGroup hierarchy
-MOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
+# The folder containing PIL Layouts
+PILSETUPS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PILS}'
 #
-# The folder containing CGroups configuration
-CGSETUPS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_PILS}'
+# The PIL Layout to use (if an host specific one is not available)
+PILLAYOUT='default'
 #
-# The CGroups configuration to use (if an host specific one is not available)
-CGLAYOUT='default'
+# The PIL Layout parser (distributed with BarbequeRTRM)
+PILPARSER='${CMAKE_INSTALL_PREFIX}/sbin/bbque-plp'
+#
+# The folder containing (compiled) CGroups configuration
+CGCONFS='${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_VAR}'
 #
 # The CGroup configuration parser (part of libcgroup library)
 CGPARSER='${CMAKE_INSTALL_PREFIX}/sbin/cgconfigparser'
+#
+# The mountpoint of the BBQ CGroup hierarchy
+CGMOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
 #
 # vim: set tabstop=4:

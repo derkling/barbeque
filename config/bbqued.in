@@ -28,14 +28,21 @@ fi
 . ${CMAKE_INSTALL_PREFIX}/etc/default/bbqued
 
 # Setup actual value (env overriding allowed)
+
+# Daemon Configuration
 BBQUE_BIN="${BBQUE_BIN:-$BIN}"
 BBQUE_CONF="${BBQUE_CONF:-$CONF}"
 BBQUE_PIDFILE="${BBQUE_PIDFILE:-$PIDFILE}"
 BBQUE_LOCKFILE="${BBQUE_LOCKFILE:-$LOCKFILE}"
 
-BBQUE_MOUNT="${BBQUE_MOUNT:-$MOUNT}"
-BBQUE_CGSETUPS="${BBQUE_CGSETUPS:-$CGSETUPS}"
-BBQUE_CGLAYOUT="${BBQUE_CGLAYOUT:-$CGLAYOUT}"
+# PIL Layouts and Tools
+BBQUE_PILSETUPS="${BBQUE_PILSETUPS:-$PILSETUPS}"
+BBQUE_PILLAYOUT="${BBQUE_PILLAYOUT:-$PILLAYOUT}"
+BBQUE_PILPARSER="${BBQUE_PILPARSER:-$PILPARSER}"
+
+# CGroups Configurations and Tools
+BBQUE_CGMOUNT="${BBQUE_CGMOUNT:-$CGMOUNT}"
+BBQUE_CGCONFS="${BBQUE_CGCONFS:-$CGCONFS}"
 BBQUE_CGPARSER="${BBQUE_CGPARSER:-$CGPARSER}"
 
 # Check root permission
@@ -70,25 +77,40 @@ setup() {
 	# Check for required ROOT permissions
 	check_root
 
-	# Lookup for host specific configuration
-	CGSETUP="$BBQUE_CGSETUPS/`hostname`.cgroup"
-	if [ ! -f $CGSETUP ]; then
-		# if not provided: revert to default configuration
-		CGSETUP="$BBQUE_CGSETUPS/$BBQUE_CGLAYOUT.cgroup"
+	# Lookup for host specific PIL Layout and
+	# setup the corresponing CGgroup configuration
+	PILSETUP="$BBQUE_PILSETUPS/`hostname`.bpl"
+	CGSETUP="$BBQUE_CGCONFS/`hostname`.cgroup"
+	if [ ! -f $PILSETUP ]; then
+		# if not provided: revert to default PIL Layout
+		PILSETUP="$BBQUE_PILSETUPS/$BBQUE_PILLAYOUT.bpl"
+		CGSETUP="$BBQUE_CGCONFS/$BBQUE_PILLAYOUT.cgroup"
 	fi
 
 	# Check if the CGroup hierarcy is already mounted
-	if [ ! -f $BBQUE_MOUNT/tasks ]; then
-		echo "Mounting CGroups on [$BBQUE_MOUNT]..."
-		mkdir -p $BBQUE_MOUNT >/dev/null 2>&1
+	if [ ! -f $BBQUE_CGMOUNT/tasks ]; then
+		echo "Mounting CGroups on [$BBQUE_CGMOUNT]..."
+		mkdir -p $BBQUE_CGMOUNT >/dev/null 2>&1
 
 		mount -t cgroup -o cpuset,memory,cpu bbque_cgroups \
-				$BBQUE_MOUNT >/dev/null 2>&1
+				$BBQUE_CGMOUNT >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 				echo "Mounting hierarchies [cpuset,memory,cpu] FAILED"
 				check_controllers
 				exit 1
 		fi
+	fi
+
+	# Getting the total platform available CPUs and MEMs
+	PLAT_CPUS=`cat $BBQUE_CGMOUNT/cpuset.cpus`
+	PLAT_MEMS=`cat $BBQUE_CGMOUNT/cpuset.mems`
+
+	if [ ! -f $CGSETUP -o $PILSETUP -nt $CGSETUP ]; then
+		echo "Compiling PIL Layout [$PILSETUP]..."
+		$BBQUE_PILPARSER \
+				-v BBQUE_PLAT_CPUS="$PLAT_CPUS" \
+				-v BBQUE_PLAT_MEMS="$PLAT_MEMS" \
+				$PILSETUP > $CGSETUP
 	fi
 
 	echo "Loading CGroups configuration [$CGSETUP]..."
