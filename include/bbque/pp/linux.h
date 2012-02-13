@@ -153,12 +153,14 @@ private:
 #define BBQUE_LINUXPP_CGROUP_PATH_MAX 22 // "bbque/12345:ABCDEF:00";
 		char cgpath[BBQUE_LINUXPP_CGROUP_PATH_MAX];
 		struct cgroup *pcg;
+		struct cgroup_controller *pc_cpu;
 		struct cgroup_controller *pc_cpuset;
 		struct cgroup_controller *pc_memory;
 
 		CGroupData(AppPtr_t pa) :
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
-			papp(pa), pcg(NULL), pc_cpuset(NULL), pc_memory(NULL) {
+			papp(pa), pcg(NULL), pc_cpu(NULL),
+			pc_cpuset(NULL), pc_memory(NULL) {
 			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
 					BBQUE_LINUXPP_CGROUP"/%s",
 					papp->StrId());
@@ -166,7 +168,8 @@ private:
 
 		CGroupData(const char *cgp) :
 			Attribute(PLAT_LNX_ATTRIBUTE, "cgroup"),
-			pcg(NULL), pc_cpuset(NULL), pc_memory(NULL) {
+			pcg(NULL), pc_cpu(NULL),
+			pc_cpuset(NULL), pc_memory(NULL) {
 			snprintf(cgpath, BBQUE_LINUXPP_CGROUP_PATH_MAX,
 					"%s", cgp);
 		}
