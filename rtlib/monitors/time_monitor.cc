@@ -58,6 +58,17 @@ uint16_t TimeMonitor::newGoal(TimeWindow::TargetsPtr targets,
 	return id;
 }
 
+uint16_t TimeMonitor::newEmptyGoal(uint16_t windowSize) {
+	TimeWindow * tWindow = new TimeWindow(windowSize);
+
+	tWindow->started = false;
+
+	uint16_t id = getUniqueId();
+	goalList[id] = tWindow;
+
+	return id;
+}
+
 void TimeMonitor::resetGoal(uint16_t id) {
 	Monitor<uint32_t>::resetGoal(id);
 	dynamic_cast<TimeWindow*>(goalList[id])->started = false;

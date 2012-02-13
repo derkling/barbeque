@@ -35,10 +35,20 @@ public:
 	typedef std::vector<ThroughputWindow::Target> Targets;
 	typedef std::shared_ptr<Targets> TargetsPtr;
 
+	/**
+	 * @brief Initializes internal variables
+	 */
 	ThroughputWindow(TargetsPtr targets,
 			 uint16_t windowSize = defaultWindowSize):
 				GenericWindow<double>(targets, windowSize) {
-			}
+	}
+
+	/**
+	 * @brief Initializes internal variables
+	 */
+	ThroughputWindow(uint16_t windowSize = defaultWindowSize):
+		GenericWindow<double>(windowSize) {
+	}
 
 	/**
 	 * @brief Indicates whether a starting time has been set or not

@@ -34,10 +34,20 @@ public:
 	typedef std::vector<TimeWindow::Target> Targets;
 	typedef std::shared_ptr<Targets> TargetsPtr;
 
+	/**
+	 * @brief Initializes internal variables
+	 */
 	TimeWindow(TargetsPtr targets,
 		   uint16_t windowSize = defaultWindowSize) :
 			   GenericWindow<uint32_t>(targets, windowSize) {
-		}
+	}
+
+	/**
+	 * @brief Initializes internal variables
+	 */
+	TimeWindow(uint16_t windowSize = defaultWindowSize) :
+			GenericWindow<uint32_t>(windowSize) {
+	}
 	/**
 	 * @brief The start time of the basic time monitor
 	 */

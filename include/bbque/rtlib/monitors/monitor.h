@@ -65,6 +65,14 @@ public:
 				 uint16_t windowSize = defaultWindowSize);
 
 	/**
+	 * @brief Creates a monitor (without goals) with a window keeping track
+	 * of old values
+	 *
+	 * @param windowSize Number of elements in the window of values
+	 */
+	virtual uint16_t newEmptyGoal(uint16_t windowSize = defaultWindowSize);
+
+	/**
 	 * @brief Checks whether the goal has been respected or not
 	 *
 	 * @param id Identifies monitor and corresponding list
@@ -159,6 +167,16 @@ inline uint16_t Monitor <dataType>::newGoal(
 		uint16_t windowSize) {
 	GenericWindow<dataType>* gWindow =
 			new GenericWindow<dataType>(targets, windowSize);
+
+	uint16_t id = getUniqueId();
+	goalList[id] = gWindow;
+
+	return id;
+}
+
+template <typename dataType>
+inline uint16_t Monitor <dataType>::newEmptyGoal(uint16_t windowSize) {
+	GenericWindow<dataType>* gWindow = new GenericWindow<dataType>(windowSize);
 
 	uint16_t id = getUniqueId();
 	goalList[id] = gWindow;

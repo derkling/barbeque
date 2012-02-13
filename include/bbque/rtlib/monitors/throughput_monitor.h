@@ -71,6 +71,14 @@ public:
 			 uint16_t windowSize = defaultWindowSize);
 
 	/**
+	 * @brief Creates a monitor (without goals) with a window keeping track
+	 * of old values
+	 *
+	 * @param windowSize Number of elements in the window of values
+	 */
+	uint16_t newEmptyGoal(uint16_t windowSize = defaultWindowSize);
+
+	/**
 	 * @brief Deletes all the values previously saved
 	 *
 	 * @param id Identifies monitor and corresponding list

@@ -145,6 +145,13 @@ public:
 	}
 
 	/**
+	 * @brief Initializes internal variables
+	 */
+	GenericWindow(uint16_t windowSize = defaultWindowSize) {
+		setCapacity(windowSize);
+	}
+
+	/**
 	 * @brief Returns the maximum value from the window
 	 */
 	virtual dataType getMax() const;

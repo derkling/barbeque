@@ -55,6 +55,17 @@ uint16_t ThroughputMonitor::newGoal(ThroughputWindow::TargetsPtr targets,
 	return id;
 }
 
+uint16_t ThroughputMonitor::newEmptyGoal(uint16_t windowSize) {
+	ThroughputWindow * tWindow = new ThroughputWindow(windowSize);
+
+	tWindow->started = false;
+
+	uint16_t id = getUniqueId();
+	goalList[id] = tWindow;
+
+	return id;
+}
+
 void ThroughputMonitor::resetGoal(uint16_t id) {
 	Monitor<double>::resetGoal(id);
 	dynamic_cast<ThroughputWindow*> (goalList[id])->started = false;
