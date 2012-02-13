@@ -112,6 +112,43 @@ public:
 	 */
 	GenericWindow<dataType>* getWindow(uint16_t id);
 
+	/**
+	 * @brief Returns the maximum value from the window
+	 *
+	 * @param id Identifies a monitor and its corresponding window
+	 */
+	dataType getMax(uint16_t id) const;
+
+	/**
+	 * @brief Returns the minimum value from the window
+	 *
+	 * @param id Identifies a monitor and its corresponding window
+	 */
+	dataType getMin(uint16_t id) const;
+
+	/**
+	 * @brief Returns the average value from the window
+	 *
+	 * @param id Identifies a monitor and its corresponding window
+	 */
+	dataType getAverage(uint16_t id) const;
+
+	/**
+	 * @brief Returns the variance of the values inside the window
+	 *
+	 * @param id Identifies a monitor and its corresponding window
+	 */
+	dataType getVariance(uint16_t id) const;
+
+	/**
+	 * @brief Adds an element into the window
+	 *
+	 * @param element Element to be inserted
+	 * @param id Identifies a monitor and its corresponding window
+	 *
+	 */
+	void addElement(uint16_t id, dataType element);
+
 protected:
 
 	/**
@@ -213,6 +250,59 @@ inline void Monitor <dataType>::deleteGoal(uint16_t id) {
 template <typename dataType>
 inline void Monitor <dataType>::resetGoal(uint16_t id) {
 	goalList[id]->clear();
+}
+
+template <typename dataType>
+inline dataType Monitor <dataType>::getMax(uint16_t id) const {
+	typename std::map<uint16_t, GenericWindow<dataType>*>::const_iterator it;
+	it = goalList.find(id);
+	if (it != goalList.end())
+		return it->second->getMax();
+	//TODO think about a better way
+	fprintf(stderr,"Goal not found! Return value has no meaning!\n");
+	return 0;
+}
+
+template <typename dataType>
+inline dataType Monitor <dataType>::getMin(uint16_t id) const {
+	typename std::map<uint16_t, GenericWindow<dataType>*>::const_iterator it;
+	it = goalList.find(id);
+	if (it != goalList.end())
+		return it->second->getMin();
+	//TODO think about a better way
+	fprintf(stderr,"Goal not found! Return value has no meaning!\n");
+	return 0;
+}
+
+template <typename dataType>
+inline dataType Monitor <dataType>::getAverage(uint16_t id) const {
+	typename std::map<uint16_t, GenericWindow<dataType>*>::const_iterator it;
+	it = goalList.find(id);
+	if (it != goalList.end())
+		return it->second->getAverage();
+	//TODO think about a better way
+	fprintf(stderr,"Goal not found! Return value has no meaning!\n");
+	return 0;
+}
+
+template <typename dataType>
+inline dataType Monitor <dataType>::getVariance(uint16_t id) const {
+	typename std::map<uint16_t, GenericWindow<dataType>*>::const_iterator it;
+	it = goalList.find(id);
+	if (it != goalList.end())
+		return it->second->getVariance();
+	//TODO think about a better way
+	fprintf(stderr,"Goal not found! Return value has no meaning!\n");
+	return 0;
+}
+
+template <typename dataType>
+inline void Monitor <dataType>::addElement(uint16_t id, dataType element) {
+	typename std::map<uint16_t, GenericWindow<dataType>*>::const_iterator it;
+	it = goalList.find(id);
+	if (it == goalList.end())
+		return;
+	it->second->addElement(element);
 }
 
 /*******************************************************************************
