@@ -28,7 +28,23 @@
 # Scheduler Manager Options
 ################################################################################
 [SchedulerManager]
-#policy = yamca
+#policy = yams
+
+################################################################################
+# Yams Scheduling Policy: Metrics Contribute weights
+################################################################################
+[MetricsContribute]
+# Global parameters [0,100]
+msl.pe       = 	90
+msl.mem      = 	70
+# Contribute specific parameters
+awmvalue.weight        = 2
+congestion.weight      = 1
+congestion.expbase     = 2
+congestion.penalty.pe  = 75
+congestion.penalty.mem = 50
+reconfig.weight        = 1
+reconfig.migfact       = 4
 
 ################################################################################
 # Synchronization Manager Options
