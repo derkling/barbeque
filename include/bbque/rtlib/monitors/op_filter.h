@@ -39,6 +39,17 @@ const ComparisonFunctor GreaterOrEqual = std::greater_equal<double>();
 
 }
 
+/**
+ * @brief Filter class definition
+ * @ingroup rtlib_sec04_op
+ *
+ * @details
+ * This class provides a definition of a general filter on operating points.
+ * Each filter consist of the name of a metric, a comparison function and a
+ * value (eg. "Power" LessOrEqual 10). Using a list of filters such as
+ * OP_FilterList, it's possible to filter out from a set of operating poins the
+ * unwanted ones.
+ */
 class OP_Filter{
 public:
 	/**

@@ -28,7 +28,9 @@
 /**
  * @brief A generic monitor
  * @ingroup rtlib_sec04_mon
+ * @ingroup rtlib_sec04_mon_generic
  *
+ * @details
  * This class provides a general monitor which functions are common to many
  * classes of metrics specific monitors such as time and throughput monitors.
  */
@@ -310,10 +312,10 @@ inline void Monitor <dataType>::addElement(uint16_t id, dataType element) {
  ******************************************************************************/
 
 /**
- * @defgroup rtlib_sec04_mon Application-Specific Monitoring Support
- * @ingroup rtlib
+ * @defgroup rtlib_sec04_mon_generic Generic Monitoring
+ * @ingroup rtlib_sec04_mon
  *
- * ADD MORE DETAILS HERE (Monitors)
+ * ADD MORE DETAILS HERE (Memory Monitoring)
  *
  */
 

@@ -60,6 +60,14 @@ namespace bac = boost::accumulators;
  */
 const uint16_t defaultWindowSize = 100;
 
+
+/**
+ * @brief GenericWindow interface class
+ * @ingroup rtlib_sec04_mon
+ *
+ * @details
+ * This class provides a general interface common for every GenericWindow class
+ */
 class GenericWindowIF {
 
 public:
@@ -83,6 +91,7 @@ public:
  * @brief A generic data window
  * @ingroup rtlib_sec04_mon
  *
+ * @details
  * This class provides a general window able to contain different types of
  * values and manage them by provided utility functions.
  */
@@ -419,5 +428,17 @@ template <typename dataType>
 inline void GenericWindow <dataType>::resetResultsWindow() {
 	resultsWindowSize = windowBuffer.capacity;
 }
+
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @defgroup rtlib_sec04_mon Application-Specific Monitoring Support
+ * @ingroup rtlib_sec04_rtrm
+ *
+ * ADD MORE DETAILS HERE (Monitors)
+ *
+ */
 
 #endif /* BBQUE_GENERIC_WINDOW_H_ */

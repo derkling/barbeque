@@ -28,6 +28,7 @@
  * @brief A THROUGHPUT monitor
  * @ingroup rtlib_sec04_mon_thgpt
  *
+ * @details
  * This class is a specialization of the general monitor class which provides
  * tools to manage throughput monitors.  In addition to the monitors with the
  * complete handling of previous old values, it also offers a basic monitor

@@ -22,6 +22,15 @@
 #include <string>
 #include <vector>
 
+/**
+ * @brief  Operating point class definition
+ * @ingroup rtlib_sec04_op
+ *
+ * @details
+ * This class provides a definition of a general operating point.
+ * Every operating point is defined by its own application parameters and a set
+ * of metrics that describe the performance/behavior obtained using that set.
+ */
 class OperatingPoint{
 public:
 	/**

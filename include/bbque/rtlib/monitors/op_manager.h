@@ -29,6 +29,17 @@
 #include "op_filter.h"
 
 
+/**
+ * @brief Operating points manager
+ * @ingroup rtlib_sec04_op
+ *
+ * @details
+ * This class provides a definition of a manager of operating points.
+ * It is used to handle a structure with all the operating points and order it
+ * according to different metrics. When such a structure is created, it is
+ * possible to move between different operating points according to priorities
+ * and filters given by the user.
+ */
 class OP_Manager {
 
 public:
@@ -118,7 +129,10 @@ public:
 	 */
 	bool getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters);
 
-	//TODO Add description
+	/**
+	 * @brief Returns if the OP_Manager is pointing to the highest OP
+	 * available
+	 */
 	bool highestOP() {
 		return isHighestOP;
 	}

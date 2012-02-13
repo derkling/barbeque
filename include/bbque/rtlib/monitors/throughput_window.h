@@ -26,6 +26,7 @@
  * @brief A THROUGHPUT data window
  * @ingroup rtlib_sec04_mon_thgpt
  *
+ * @details
  * This class provides a window specifically created for the throughpput
  * monitor.
  */

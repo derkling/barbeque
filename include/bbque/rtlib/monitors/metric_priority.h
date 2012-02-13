@@ -35,6 +35,15 @@ const SortingFunction HighestToLowest = std::greater<double>();
 
 }
 
+/**
+ * @brief Sorting order for metrics
+ * @ingroup rtlib_sec04_op
+ *
+ * @details
+ * This class provides a definition of an object used to define a sorting order
+ * for metrics. Using a list of these elements, it is possible to define a full
+ * ordering of operating points, useful for runtime management purposes.
+ */
 class MetricPriority{
 public:
 	/**

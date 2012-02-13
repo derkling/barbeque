@@ -26,6 +26,7 @@
  * @brief A TIME data window
  * @ingroup rtlib_sec04_mon_time
  *
+ * @details
  * This class provides a window specifically created for the time monitor.
  */
 class TimeWindow : public GenericWindow <uint32_t> {

@@ -28,6 +28,7 @@
  * @brief A TIME monitor
  * @ingroup rtlib_sec04_mon_time
  *
+ * @details
  * This class is a specialization of the general monitor class, it provides
  * tools to manage the time monitors.  In addition to the monitors with the
  * complete gestion of the windows of old values it also offers a basically

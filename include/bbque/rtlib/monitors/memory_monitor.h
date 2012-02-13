@@ -24,6 +24,7 @@
  * @brief A MEMORY monitor
  * @ingroup rtlib_sec04_mon_memory
  *
+ * @details
  * This class provides a monitor on application memory usage.
  */
 class MemoryMonitor: public Monitor <uint32_t> {
