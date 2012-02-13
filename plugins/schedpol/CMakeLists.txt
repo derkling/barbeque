@@ -14,3 +14,24 @@ install(TARGETS bbque_schedpol_yamca LIBRARY
 		DESTINATION ${BBQUE_PATH_PLUGINS}
 		COMPONENT BarbequeRTRM)
 
+
+#----- Add "yams" target static library
+
+# Subdirectory to include
+add_subdirectory(contrib)
+
+# Compile the plugin as a module
+set(PLUGIN_YAMS_SRC  yams_schedpol yams_plugin)
+add_library(bbque_schedpol_yams MODULE ${PLUGIN_YAMS_SRC})
+
+# Library dependencies
+target_link_libraries(
+	bbque_schedpol_yams
+	sched_metrics
+)
+
+# Install
+install(TARGETS bbque_schedpol_yams LIBRARY
+		DESTINATION ${BBQUE_PATH_PLUGINS}
+		COMPONENT BarbequeRTRM)
+
