@@ -23,17 +23,29 @@
 #include "bbque/res/resource_utils.h"
 
 #include <string.h>
+#include <linux/version.h>
 
 #define BBQUE_LINUXPP_PLATFORM_ID		"org.linux.cgroup"
 
 #define BBQUE_LINUXPP_SILOS 			BBQUE_LINUXPP_CGROUP"/silos"
 
 #define BBQUE_LINUXPP_CPUS_PARAM 		"cpuset.cpus"
+#define BBQUE_LINUXPP_CPUP_PARAM 		"cpu.cfs_period_us"
+#define BBQUE_LINUXPP_CPUQ_PARAM 		"cpu.cfs_quota_us"
 #define BBQUE_LINUXPP_MEMN_PARAM 		"cpuset.mems"
 #define BBQUE_LINUXPP_MEMB_PARAM 		"memory.limit_in_bytes"
 #define BBQUE_LINUXPP_CPU_EXCLUSIVE_PARAM 	"cpuset.cpu_exclusive"
 #define BBQUE_LINUXPP_MEM_EXCLUSIVE_PARAM 	"cpuset.mem_exclusive"
 #define BBQUE_LINUXPP_PROCS_PARAM		"cgroup.procs"
+
+// Checking for kernel version requirements
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
+# error Linux kernel >= 3.0 required by the Platform Integration Layer
+#endif
+#if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
+# warning CPU Quota management disabled, Linux kernel >= 3.2 required
+#endif
+
 
 namespace bb = bbque;
 namespace br = bbque::res;
@@ -101,6 +113,23 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 	unsigned short first_cpu_id;
 	unsigned short last_cpu_id;
 	const char *p = prlb->cpus;
+	uint32_t cpu_quota = 100;
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
+
+	// NOTE: The CPU bandwidth is used to assign the SAME quota to each
+	// processor within the same node/cluster. This is not the intended
+	// behavior of the cfs_quota_us, but simplifies a lot the
+	// configuration and should be just enough for our purposes.
+	// Thus, each CPU will receive a % of CPU time defined by:
+	//   QUOTA = CPU_QUOTA * 100 / CPU_PERIOD
+	if (prlb->amount_cpup) {
+		cpu_quota = (prlb->amount_cpuq * 100) / prlb->amount_cpup;
+		logger->Debug("Registering CPUs of node [%d] with CPU quota of [%lu]%",
+				prlb->socket_id, cpu_quota);
+	}
+
+#endif
 
 	while (*p) {
 
@@ -109,7 +138,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 		snprintf(resourcePath+18, 10, "%hu.pe%d",
 				prlb->socket_id, first_cpu_id);
 		logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
-		ra.RegisterResource(resourcePath, "", 100);
+		ra.RegisterResource(resourcePath, "", cpu_quota);
 
 		// Look-up for next CPU id
 		while (*p && (*p != ',') && (*p != '-')) {
@@ -132,7 +161,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 			snprintf(resourcePath+18, 8, "%hu.pe%d",
 					prlb->socket_id, first_cpu_id);
 			logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
-			ra.RegisterResource(resourcePath, "", 100);
+			ra.RegisterResource(resourcePath, "", cpu_quota);
 		}
 
 		// Look-up for next CPU id
@@ -192,6 +221,7 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 	struct cgroup_controller *cg_controller = NULL;
 	struct cgroup *bbq_node = NULL;
 	ExitCode_t pp_result = OK;
+	char *buff = NULL;
 	int cg_result;
 
 	// Read "cpuset" attributes from kernel
@@ -271,6 +301,72 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		pp_result = PLATFORM_NODE_PARSING_FAILED;
 		goto parsing_failed;
 	}
+
+	/**********************************************************************
+	 *    CPU Quota Controller
+	 **********************************************************************/
+
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
+
+	// Get "cpu" controller info
+	cg_controller = cgroup_get_controller(bbq_node, "cpu");
+	if (cg_controller == NULL) {
+		logger->Error("PLAT LNX: Getting controller FAILED! "
+				"(Error: Cannot find controller \"cpu\" "
+				"in group [%s])", entry.path);
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	// Getting the value for the "cpu.cfs_quota_us" attribute
+	cg_result = cgroup_get_value_string(cg_controller,
+			BBQUE_LINUXPP_CPUQ_PARAM, &buff);
+	if (cg_result) {
+		logger->Error("PLAT LNX: Getting CPU attributes FAILED! "
+				"(Error: 'cpu.cfs_quota_us' not configured "
+				"or not readable)");
+		pp_result = PLATFORM_NODE_PARSING_FAILED;
+		goto parsing_failed;
+	}
+
+	// Check if a quota has been assigned (otherwise a "-1" is expected)
+	if (buff[0] != '-') {
+
+		// Save the "quota" value
+		errno = 0;
+		prlb->amount_cpuq = strtoul(buff, NULL, 10);
+		if (errno != 0) {
+			logger->Error("PLAT LNX: Getting CPU attributes FAILED! "
+					"(Error: 'cpu.cfs_quota_us' convertion)");
+			pp_result = PLATFORM_NODE_PARSING_FAILED;
+			goto parsing_failed;
+		}
+
+		// Getting the value for the "cpu.cfs_period_us" attribute
+		cg_result = cgroup_get_value_string(cg_controller,
+				BBQUE_LINUXPP_CPUP_PARAM,
+				&buff);
+		if (cg_result) {
+			logger->Error("PLAT LNX: Getting CPU attributes FAILED! "
+					"(Error: 'cpu.cfs_period_us' not configured "
+					"or not readable)");
+			pp_result = PLATFORM_NODE_PARSING_FAILED;
+			goto parsing_failed;
+		}
+
+		// Save the "period" value
+		errno = 0;
+		prlb->amount_cpup = strtoul(buff, NULL, 10);
+		if (errno != 0) {
+			logger->Error("PLAT LNX: Getting CPU attributes FAILED! "
+					"(Error: 'cpu.cfs_period_us' convertion)");
+			pp_result = PLATFORM_NODE_PARSING_FAILED;
+			goto parsing_failed;
+		}
+
+	}
+
+#endif
 
 parsing_failed:
 	cgroup_free (&bbq_node);
