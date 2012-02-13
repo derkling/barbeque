@@ -68,6 +68,11 @@
 /** Get a string lenght at compile time (null terminator not counted) */
 #define STRLEN(s) ((sizeof(s)/sizeof(s[0]))-1)
 
+/** Stringify the result of expansion of a macro argument
+ * This requires to use two levels of macros.*/
+#define STR(s) XSTR(s)
+#define XSTR(s) #s
+
 /** Optimize branch prediction for "taken" */
 #define likely(x)       __builtin_expect((x),1)
 /** Optimize branch prediction for "untaken" */
