@@ -725,24 +725,13 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 	char quota[] = "9223372036854775807";
 	char mnode[] = "\09"; // Empty memory node (by default)
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
-	uint64_t cpus_quota;
+	int64_t cpus_quota = -1; // NOTE: use "-1" for no quota assignement
 #endif
 	int result;
 
 	/**********************************************************************
 	 *    CPUSET Controller
 	 **********************************************************************/
-
-	// Set the assigned CPUs
-	cgroup_set_value_string(pcgd->pc_cpuset,
-			BBQUE_LINUXPP_CPUS_PARAM,
-			prlb->cpus ? prlb->cpus : "");
-	// Set the assigned memory NODE (only if we have at least one CPUS)
-	if (prlb->cpus[0]) {
-		snprintf(mnode, 3, "%d", prlb->socket_id);
-		cgroup_set_value_string(pcgd->pc_cpuset,
-				BBQUE_LINUXPP_MEMN_PARAM, mnode);
-	}
 
 #if 0
 	// Setting CPUs as EXCLUSIVE if required
@@ -754,12 +743,28 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 	excl = false;
 #endif
 
-	logger->Debug("PLAT LNX: Setup CPUSET for [%s]: "
+	// Set the assigned CPUs
+	cgroup_set_value_string(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_CPUS_PARAM,
+			prlb->cpus ? prlb->cpus : "");
+	// Set the assigned memory NODE (only if we have at least one CPUS)
+	if (prlb->cpus[0]) {
+		snprintf(mnode, 3, "%d", prlb->socket_id);
+		cgroup_set_value_string(pcgd->pc_cpuset,
+				BBQUE_LINUXPP_MEMN_PARAM, mnode);
+
+		logger->Debug("PLAT LNX: Setup CPUSET for [%s]: "
 			"{cpus [%c: %s], mems[%s]}",
 			pcgd->papp->StrId(),
 			excl ? 'E' : 'S',
 			prlb->cpus ? prlb->cpus : "-",
 			mnode);
+	} else {
+
+		logger->Debug("PLAT LNX: Setup CPUSET for [%s]: "
+			"{cpus [NONE], mems[NONE]}",
+			pcgd->papp->StrId());
+	}
 
 
 	/**********************************************************************
@@ -787,16 +792,29 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 			BBQUE_LINUXPP_CPUP_PARAM,
 			STR(BBQUE_LINUXPP_CPUP_DEFAULT));
 
-	// Set the assigned CPU bandwidth amount, which is defined by:
-	cpus_quota = (BBQUE_LINUXPP_CPUP_DEFAULT / 100) * prlb->amount_cpus;
-	cgroup_set_value_uint64(pcgd->pc_cpu,
-			BBQUE_LINUXPP_CPUQ_PARAM, cpus_quota);
+	// Set the assigned CPU bandwidth amount
+	// NOTE: if a quota is NOT assigned we have amount_cpus="0", but this
+	// is not acceptable by the CFS controller, which requires a negative
+	// number to remove any constraint.
+	assert(cpus_quota == -1);
+	if (prlb->amount_cpus) {
+		cpus_quota = (BBQUE_LINUXPP_CPUP_DEFAULT / 100) *
+				prlb->amount_cpus;
+		cgroup_set_value_int64(pcgd->pc_cpu,
+				BBQUE_LINUXPP_CPUQ_PARAM, cpus_quota);
 
-	logger->Debug("PLAT LNX: Setup CPU for [%s]: "
-			"{period [%s], quota [%lu]",
-			pcgd->papp->StrId(),
-			STR(BBQUE_LINUXPP_CPUP_DEFAULT),
-			cpus_quota);
+		logger->Debug("PLAT LNX: Setup CPU for [%s]: "
+				"{period [%s], quota [%lu]",
+				pcgd->papp->StrId(),
+				STR(BBQUE_LINUXPP_CPUP_DEFAULT),
+				cpus_quota);
+	} else {
+
+		logger->Debug("PLAT LNX: Setup CPU for [%s]: "
+				"{period [%s], quota [-]}",
+				pcgd->papp->StrId(),
+				STR(BBQUE_LINUXPP_CPUP_DEFAULT));
+	}
 
 #endif
 
