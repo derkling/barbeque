@@ -39,7 +39,7 @@ using bbque::utils::MetricsCollector;
 #ifdef BBQUE_DEBUG
 # define BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY "random"
 #else
-# define BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY "yamca"
+# define BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY "yams"
 #endif
 
 
