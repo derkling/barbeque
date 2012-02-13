@@ -47,6 +47,23 @@ check_root() {
 		fi
 }
 
+# Check mouting status of required controllers
+check_controllers() {
+
+		# The [cpuset,memory] controller must be mounted on the same hierarchy
+		DIFFH=`awk '/^cpuset/{PH=$2}
+						/^memory/{MH=$2}
+						/^cpu/{CH=$2}
+						END{
+							if(PH!=MH || PH!=CH) print 1;
+							else print 0;
+						}' /proc/cgroups`
+		if [ $DIFFH -ne 0 ]; then
+				echo "[cpuset,memory,cpu] controllers on different hierachies"
+		fi
+
+}
+
 # Setup CGroups if required
 setup() {
 
@@ -68,9 +85,8 @@ setup() {
 		mount -t cgroup -o cpuset,memory,cpu bbque_cgroups \
 				$BBQUE_MOUNT >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
-				echo "Mounting hierarchies [cpuset,memory] FAILED"
-				echo "Check they are not yet mounted with different controllers"
-				cat /proc/cgroups
+				echo "Mounting hierarchies [cpuset,memory,cpu] FAILED"
+				check_controllers
 				exit 1
 		fi
 	fi
