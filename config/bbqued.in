@@ -38,8 +38,20 @@ BBQUE_CGSETUPS="${BBQUE_CGSETUPS:-$CGSETUPS}"
 BBQUE_CGLAYOUT="${BBQUE_CGLAYOUT:-$CGLAYOUT}"
 BBQUE_CGPARSER="${BBQUE_CGPARSER:-$CGPARSER}"
 
+# Check root permission
+check_root() {
+		# Make sure only root can run our script
+		if [ "x`id -u`" != "x0" ]; then
+				echo "This script must be run as root\n\n"
+				exit 1
+		fi
+}
+
 # Setup CGroups if required
 setup() {
+
+	# Check for required ROOT permissions
+	check_root
 
 	# Lookup for host specific configuration
 	CGSETUP="$BBQUE_CGSETUPS/`hostname`.cgroup"
