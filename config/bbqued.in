@@ -64,7 +64,9 @@ setup() {
 	if [ ! -f $BBQUE_MOUNT/tasks ]; then
 		echo "Mounting CGroups on [$BBQUE_MOUNT]..."
 		mkdir -p $BBQUE_MOUNT >/dev/null 2>&1
-		mount -t cgroup -o cpuset,memory bbque_cgroups $BBQUE_MOUNT
+
+		mount -t cgroup -o cpuset,memory,cpu bbque_cgroups \
+				$BBQUE_MOUNT >/dev/null 2>&1
 		if [ $? -ne 0 ]; then
 				echo "Mounting hierarchies [cpuset,memory] FAILED"
 				echo "Check they are not yet mounted with different controllers"
