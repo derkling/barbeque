@@ -84,17 +84,16 @@ start() {
 
 stop() {
 	# Stop the daemon only if there is an instance running
-	if [ ! -f $BBQUE_PIDFILE ]; then
-		exit 0
+	if [ -f $BBQUE_PIDFILE ]; then
+		# Terminating BBQ daemon
+		PID=`cat $BBQUE_PIDFILE`
+		kill -TERM $PID >/dev/null 2>&1
 	fi
 
-	# Terminating BBQ daemon
-	PID=`cat $BBQUE_PIDFILE`
-	kill -TERM $PID >/dev/null 2>&1
-
 	# Cleaning-up CGroup reservations
-	rmdir $BBQUE_MOUNT/bbque/node*
-	rmdir $BBQUE_MOUNT/bbque*
+	if [ -d $BBQUE_CGMOUNT/bbque ]; then
+		find  $BBQUE_CGMOUNT/bbque -type d -delete
+	fi
 
 	# Clean-up lock and PID files
 	rm -f $BBQUE_PIDFILE $BBQUE_LOCKFILE >/dev/null 2>&1
