@@ -60,6 +60,25 @@ namespace bac = boost::accumulators;
  */
 const uint16_t defaultWindowSize = 100;
 
+class GenericWindowIF {
+
+public:
+	/**
+	 * @brief Checks whether the goal has been respected or not
+	 */
+	virtual bool checkGoal() = 0;
+
+	/**
+	 * @brief Checks whether the goal has been respected or not
+	 *
+	 * @param naps Output parameter representing a normalised value for the
+	 * penalty in the range [0,1]
+	 */
+	virtual bool checkGoal(std::vector<float> &naps) = 0;
+
+};
+
+
 /**
  * @brief A generic data window
  * @ingroup rtlib_sec04_mon
@@ -68,7 +87,7 @@ const uint16_t defaultWindowSize = 100;
  * values and manage them by provided utility functions.
  */
 template <typename dataType>
-class GenericWindow {
+class GenericWindow: public GenericWindowIF {
 
 public:
 
