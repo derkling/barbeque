@@ -28,7 +28,6 @@
 /**
  * @brief A generic monitor
  * @ingroup rtlib_sec04_mon
- * @ingroup rtlib_sec04_mon_generic
  *
  * @details
  * This class provides a general monitor which functions are common to many

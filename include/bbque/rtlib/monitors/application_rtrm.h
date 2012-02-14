@@ -89,7 +89,7 @@ public:
 	 * registered goals are not achieved and OP_Manager is already in the
 	 * higher operating point.
 	 *
-	 * @todo Consider having a check also on awm_id
+	 * TODO Consider having a check also on awm_id
 	 */
 	void increaseResources();
 
@@ -116,8 +116,22 @@ private:
  ******************************************************************************/
 
 /**
- * @defgroup rtlib_sec04_rtrm Application-Specific RTRM
+ * @defgroup rtlib_sec04_rtrm RTLib Application-Specific RTRM
  * @ingroup rtlib
+ *
+ * The Application-Specific RTRM (AS-RTRM) provides a conveniente glue code
+ * between the application Metrics Monitors, Operating Point Manager and the
+ * System-Wide RTRM (SW-RTRM), i.e. the BarbqueRTRM.
+ *
+ * By exploiting the knowledge given by a set of registered goals and from the
+ * supporto of the OP Manager, the ApplicationRTRM class is able to take some
+ * decisions, e.g. related to a request for resources increase to be issued to
+ * the BarbequeRTRM.
+ *
+ * This is still an early version of the AS-RTRM and it just communicates with
+ * Barbeque when an increase of resources for the application is suggested but
+ * next releases will have  more features, also on the communication with the
+ * application itself.
  *
  * ADD MORE DETAILS HERE (Monitors)
  *

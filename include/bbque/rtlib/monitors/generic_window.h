@@ -434,7 +434,7 @@ inline void GenericWindow <dataType>::resetResultsWindow() {
  ******************************************************************************/
 
 /**
- * @defgroup rtlib_sec04_mon Application-Specific Monitoring Support
+ * @defgroup rtlib_sec04_mon Metrics Monitoring
  * @ingroup rtlib_sec04_rtrm
  *
  * ADD MORE DETAILS HERE (Monitors)

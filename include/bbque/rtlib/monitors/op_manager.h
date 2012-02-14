@@ -228,7 +228,7 @@ private:
  ******************************************************************************/
 
 /**
- * @defgroup rtlib_sec04_op Application-Specific Operating Points Support
+ * @defgroup rtlib_sec04_op Operating Points Management
  * @ingroup rtlib_sec04_rtrm
  *
  * ADD MORE DETAILS HERE (Monitors)
