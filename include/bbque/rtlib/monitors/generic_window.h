@@ -290,6 +290,11 @@ template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &gaps) {
 	bool result = true;
 	typename std::vector<Target>::iterator it;
+
+	// Forces a removal of all the content, in order to prevent
+	// unpredictability of the output
+	gaps.clear();
+
 	for (it = goalTargets->begin(); it != goalTargets->end(); ++it) {
 		gaps.push_back((it->dataFunction(this) - it->goalValue) /
 							 it->goalValue);
