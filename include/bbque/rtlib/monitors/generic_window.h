@@ -278,10 +278,10 @@ template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal() {
 	bool result = true;
 	typename std::vector<Target>::iterator it = goalTargets.begin();
-	while (it != goalTargets.end() && result) {
-		result = result &&
-				(it->comparisonFunction (
-				 it->dataFunction(this), it->goalValue));
+	while (result && it != goalTargets.end()) {
+		result = it->comparisonFunction(
+				 it->dataFunction(this),
+				 it->goalValue);
 		++it;
 	}
 
