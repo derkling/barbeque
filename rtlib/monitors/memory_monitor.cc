@@ -29,6 +29,7 @@ uint32_t MemoryMonitor::extractMemoryUsage() {
 	//TODO decide whether use VmRSS or VmRSS - sharedPages
 	FILE* fp = fopen("/proc/self/statm","r");
 	fscanf(fp, "%d %d", &temp, &memoryUsageKb);
+	fclose(fp);
 
 	memoryUsageKb = memoryUsageKb * getpagesize() / 1024;
 	return memoryUsageKb;
