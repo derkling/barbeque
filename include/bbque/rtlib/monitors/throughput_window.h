@@ -20,7 +20,7 @@
 
 #include <chrono>
 
-#include "generic_window.h"
+#include <bbque/monitors/generic_window.h>
 
 /**
  * @brief A THROUGHPUT data window

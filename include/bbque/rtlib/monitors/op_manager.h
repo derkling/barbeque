@@ -24,9 +24,9 @@
 #include <algorithm>
 #include <functional>
 
-#include "operating_point.h"
-#include "metric_priority.h"
-#include "op_filter.h"
+#include <bbque/monitors/operating_point.h>
+#include <bbque/monitors/metric_priority.h>
+#include <bbque/monitors/op_filter.h>
 
 
 /**

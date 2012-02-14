@@ -21,8 +21,8 @@
 #include <chrono>
 #include <mutex>
 
-#include "monitor.h"
-#include "throughput_window.h"
+#include <bbque/monitors/monitor.h>
+#include <bbque/monitors/throughput_window.h>
 
 /**
  * @brief A THROUGHPUT monitor

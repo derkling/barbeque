@@ -7,6 +7,11 @@ set (MONITORS_SRC throughput_monitor memory_monitor ${MONITORS_SRC})
 set (MONITORS_SRC application_rtrm ${MONITORS_SRC})
 set (MONITORS_SRC op_manager ${MONITORS_SRC})
 
+# Copy headers where they are expected by applications
+file (COPY "${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors"
+	DESTINATION "${PROJECT_BINARY_DIR}/include/bbque"
+	FILES_MATCHING PATTERN "*.h")
+
 #----- Add "bbque_monitors" target dinamic binary
 add_library(bbque_monitors SHARED ${MONITORS_SRC})
 

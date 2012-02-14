@@ -18,8 +18,8 @@
 #ifndef BBQUE_TIME_MONITOR_H_
 #define BBQUE_TIME_MONITOR_H_
 
-#include "monitor.h"
-#include "time_window.h"
+#include <bbque/monitors/monitor.h>
+#include <bbque/monitors/time_window.h>
 #include <chrono>
 #include <memory>
 #include <mutex>

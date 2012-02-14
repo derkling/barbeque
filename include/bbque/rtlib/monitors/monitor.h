@@ -23,7 +23,7 @@
 #include <cstdint>
 #include <functional>
 
-#include "generic_window.h"
+#include <bbque/monitors/generic_window.h>
 
 /**
  * @brief A generic monitor

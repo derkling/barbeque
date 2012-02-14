@@ -18,7 +18,7 @@
 #ifndef BBQUE_MEMORY_MONITOR_H_
 #define BBQUE_MEMORY_MONITOR_H_
 
-#include "monitor.h"
+#include <bbque/monitors/monitor.h>
 
 /**
  * @brief A MEMORY monitor

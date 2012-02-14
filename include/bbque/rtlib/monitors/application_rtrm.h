@@ -20,10 +20,10 @@
 
 #include <vector>
 
-#include "bbque/rtlib/bbque_exc.h"
+#include <bbque/bbque_exc.h>
 
-#include "op_manager.h"
-#include "generic_window.h"
+#include <bbque/monitors/op_manager.h>
+#include <bbque/monitors/generic_window.h>
 
 using bbque::rtlib::BbqueEXC;
 
