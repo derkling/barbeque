@@ -112,7 +112,7 @@ LinuxPP::~LinuxPP() {
 LinuxPP::ExitCode_t
 LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	char resourcePath[] = "arch.tile0.cluster256.pe256";
+	char resourcePath[] = "tile0.cluster256.pe256";
 	unsigned short first_cpu_id;
 	unsigned short last_cpu_id;
 	const char *p = prlb->cpus;
@@ -138,7 +138,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 
 		// Get a CPU id, and register the corresponding resource path
 		sscanf(p, "%hu", &first_cpu_id);
-		snprintf(resourcePath+18, 10, "%hu.pe%d",
+		snprintf(resourcePath+13, 10, "%hu.pe%d",
 				prlb->socket_id, first_cpu_id);
 		logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
 		ra.RegisterResource(resourcePath, "", cpu_quota);
@@ -161,7 +161,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 		sscanf(++p, "%hu", &last_cpu_id);
 		// Register all the other CPUs of this range
 		while (++first_cpu_id <= last_cpu_id) {
-			snprintf(resourcePath+18, 8, "%hu.pe%d",
+			snprintf(resourcePath+13, 8, "%hu.pe%d",
 					prlb->socket_id, first_cpu_id);
 			logger->Debug("PLAT LNX: Registering [%s]...", resourcePath);
 			ra.RegisterResource(resourcePath, "", cpu_quota);
@@ -182,11 +182,11 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 LinuxPP::ExitCode_t
 LinuxPP::RegisterClusterMEMs(RLinuxBindingsPtr_t prlb) {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	char resourcePath[] = "arch.tile0.cluster256.mem256";
+	char resourcePath[] = "tile0.cluster256.mem256";
 	uint64_t limit_in_bytes = atol(prlb->memb);
 
 	// Setup resource path
-	snprintf(resourcePath+18, 11, "%hu.mem0", prlb->socket_id);
+	snprintf(resourcePath+13, 11, "%hu.mem0", prlb->socket_id);
 
 	logger->Debug("PLAT LNX: Registering [%s: %llu Bytes]...",
 			resourcePath, limit_in_bytes);
