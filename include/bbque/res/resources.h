@@ -363,7 +363,7 @@ private:
  * that the Scheduler/Optimizer has solved the resource binding.
  *
  * In other words, if a working mode specifies a request as
- * "arch.tile.cluster2.pe = 4 ", the scheduler/optimizer must define a
+ * "tile.cluster2.pe = 4 ", the scheduler/optimizer must define a
  * bind between that "cluster2" and the "real" cluster where to allocate the
  * request of 4 processing elements.
  * The list "binds", after such binding, will contain the descriptors of the
@@ -425,7 +425,7 @@ public:
 	 *
 	 * Commonly a ResourceUsage object specifies the request of a specific
 	 * type of resource, which can be bound on a set of platform resources
-	 * (i.e. "arch.tile0,cluster2.pe" -> "...cluster2.pe{0|1|2|...}".
+	 * (i.e. "tile0,cluster2.pe" -> "...cluster2.pe{0|1|2|...}".
 	 * The bindings list includes the pointers to all the resource descriptors
 	 * that can satisfy the request. The method initialises the iterators
 	 * pointing to the set of resource bindings effectively granted to the

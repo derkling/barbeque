@@ -208,15 +208,14 @@ public:
 	 *
 	 * Setup informations about a resource installed into the system.
 	 * Resources can be system-wide or placed on the platform. A resource is
-	 * identified by its pathname. The latters for instance must have the
-	 * "arch." suffix in front. While the formers doesn't show any suffix.
+	 * identified by its pathname.
 	 *
 	 * Thus we could have resource paths as below :
 	 *
-	 * "mem0" 		: system memory
-	 * "arch.mem0 	: internal memory (to the platform)
-	 * "arch.tile.cluster2 		: cluster 2 of the platform
-	 * "arch.tile.cluster0.pe1 	: processing element 1 in cluster 0
+	 * "mem0"               : system memory
+	 * "mem0"               : internal memory (to the platform)
+	 * "tile.cluster2       : cluster 2 of the platform
+	 * "tile.cluster0.pe1   : processing element 1 in cluster 0
 	 *
 	 * @param path Resource path
 	 * @param units Units for the amount value (i.e. "1", "Kbps", "Mb", ...)

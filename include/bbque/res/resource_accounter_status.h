@@ -213,8 +213,8 @@ public:
 	 *
 	 * Given a "template path" the method return all the resource descriptors
 	 * matching such template.
-	 * For instance "arch.clusters.cluster.mem" will return all the
-	 * descriptors having path "arch.clusters.cluster<N>.mem<M>".
+	 * For instance "clusters.cluster.mem" will return all the
+	 * descriptors having path "clusters.cluster<N>.mem<M>".
 	 *
 	 * @param temp_path Template path to match
 	 * @return The list of resource descriptors matching the template path
