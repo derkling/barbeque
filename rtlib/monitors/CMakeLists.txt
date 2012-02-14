@@ -44,3 +44,6 @@ install (TARGETS bbque_monitors LIBRARY
 		DESTINATION ${BBQUE_PATH_RTLIB}
 		PUBLIC_HEADER DESTINATION "${BBQUE_PATH_HEADERS}/monitors"
 		COMPONENT BarbequeRTLib)
+
+# Force RTLib being build before these modules
+add_dependencies(bbque_monitors bbque_rtlib)

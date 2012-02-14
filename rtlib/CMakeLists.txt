@@ -5,6 +5,12 @@ configure_file (
 	"${PROJECT_BINARY_DIR}/bbque/version.cc" @ONLY
 )
 
+## Copy the AEM header file where it is expected by AS-RTRM
+configure_file (
+	"${PROJECT_SOURCE_DIR}/include/bbque/rtlib/bbque_exc.h"
+	"${PROJECT_BINARY_DIR}/include/bbque/bbque_exc.h" COPYONLY
+)
+
 # Add "barbeque" specific flags
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x")
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffunction-sections -fdata-sections")
