@@ -75,7 +75,7 @@ MetricsContribute::Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 
 	_Compute(evl_ent, ctrib);
 
-	logger->Info("%s: %s contrib = %.4f", evl_ent.StrId(), name, ctrib);
+	logger->Info("%s: %s = %.4f", evl_ent.StrId(), name, ctrib);
 	assert((ctrib >= 0) && (ctrib <= 1));
 
 	return MCT_SUCCESS;

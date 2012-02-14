@@ -66,7 +66,7 @@ struct EvalEntity_t {
 		pawm(_pawm),
 		clust_id(_clid) {
 		// Log string
-		snprintf(str_id, 40, "[%s]\t{AWM:%3d}{CL:%3d}", papp->StrId(),
+		snprintf(str_id, 40, "[%s] {AWM:%d, CL:%d}", papp->StrId(),
 				pawm->Id(), clust_id);
 	};
 
