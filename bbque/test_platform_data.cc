@@ -52,9 +52,9 @@ TestPlatformData::ExitCode_t
 TestPlatformData::LoadPlatformData() {
 		ConfigurationManager &cm(ConfigurationManager::GetInstance());
 		br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-		char resourcePath[] = "arch.tile0.cluster256.mem0";
-		//                     ..................^
-		//                            18
+		char resourcePath[] = "tile0.cluster256.mem0";
+		//                     .............^
+		//                            13
 
 		if (platformLoaded)
 				return TPD_SUCCESS;
@@ -67,12 +67,12 @@ TestPlatformData::LoadPlatformData() {
 		// Registering Clusters, per-clusters memory and PEs
 		for (uint8_t c = 0; c < cm.TPD_ClusterCount(); ++c) {
 
-				snprintf(resourcePath+18, 8, "%d.mem0", c);
+				snprintf(resourcePath+13, 8, "%d.mem0", c);
 				printf(" >>> Registering... :%s\n", resourcePath);
 				ra.RegisterResource(resourcePath, "MB", cm.TPD_ClusterMem());
 
 				for (uint8_t p = 0; p < cm.TPD_PEsCount(); ++p) {
-						snprintf(resourcePath+18, 8, "%d.pe%d", c, p);
+						snprintf(resourcePath+13, 8, "%d.pe%d", c, p);
 						printf(" >>> Registering... :%s\n", resourcePath);
 						ra.RegisterResource(resourcePath, " ", 1);
 				}
