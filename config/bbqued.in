@@ -18,14 +18,14 @@
 # daemon. Should be runnable in any distro but won't give any feedback.
 # Avoid bashism since this script runs using /bin/sh, not /bin/bash!
 
-DAEMON_CONF="${CMAKE_INSTALL_PREFIX}/${BBQUE_PATH_DEFAULTS}/bbqued"
+DAEMON_CONF="@CMAKE_INSTALL_PREFIX@/@BBQUE_PATH_DEFAULTS@/bbqued"
 if [ ! -f $DAEMON_CONF ]; then
 		echo "Daemon configuration [$DAEMON_CONF] not found"
 		exit 1
 fi
 
 # Source the daemon configuration settings
-. ${CMAKE_INSTALL_PREFIX}/etc/default/bbqued
+. @CMAKE_INSTALL_PREFIX@/etc/default/bbqued
 
 # Setup actual value (env overriding allowed)
 

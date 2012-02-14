@@ -31,6 +31,7 @@ configure_file (
 configure_file (
 	"${PROJECT_SOURCE_DIR}/config/bbqued.in"
 	"${PROJECT_BINARY_DIR}/config/bbqued"
+	@ONLY
 )
 configure_file (
 	"${PROJECT_SOURCE_DIR}/config/bbqued.defaults.in"
