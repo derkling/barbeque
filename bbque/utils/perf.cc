@@ -181,6 +181,7 @@ uint64_t Perf::Update(int id, bool delta) {
 	// Reading counters
 	bytes = ReadCounter(id, &(prc->count), sizeof(prc->count));
 	assert(bytes == sizeof(prc->count));
+	(void)bytes; // quite compilation warning on RELEASE build
 
 	// Update deltas since last update
 	UPDATE_DELTA(value);

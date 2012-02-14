@@ -132,6 +132,7 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step2(
 
 	default:
 		// We should never got here
+		syncState = ApplicationStatusIF::SYNC_NONE;
 		assert(false);
 	}
 
@@ -166,6 +167,7 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step3(
 
 	default:
 		// We should never got here
+		syncState = ApplicationStatusIF::SYNC_NONE;
 		assert(false);
 	}
 

@@ -151,6 +151,7 @@ int daemonize(const char *name, const char *uid,
 	pid_t pid, sid, parent;
 	int lfd = -1; // Lockfile descriptor
 	int pfd = -1; // PID file descriptor
+	FILE *sfd = NULL; // Streams file descriptors
 
 	/* already a daemon */
 	if (getppid() == 1)
@@ -199,9 +200,22 @@ int daemonize(const char *name, const char *uid,
 	}
 
 	/* Redirect standard files to /dev/null */
-	freopen("/dev/null", "r", stdin);
-	freopen("/dev/null", "w", stdout);
-	freopen("/dev/null", "w", stderr);
+	sfd = freopen("/dev/null", "r", stdin);
+	if (!sfd) goto exit_streams;
+	sfd = freopen("/dev/null", "w", stdout);
+	if (!sfd) goto exit_streams;
+	sfd = freopen("/dev/null", "w", stderr);
+	if (!sfd) goto exit_streams;
+
+	goto go_streams;
+
+exit_streams:
+	syslog(LOG_ERR, "unable to redirect standard streams on /dev/null "
+			"(Error: %d, %s)",
+			errno, strerror(errno) );
+	return -5;
+
+go_streams:
 
 	/* Trap signals that we expect to recieve */
 	signal(SIGCHLD, child_handler);
@@ -217,7 +231,7 @@ int daemonize(const char *name, const char *uid,
 	if (pid < 0) {
 		syslog(LOG_ERR, "unable to fork daemon (Error: %d, %s)",
 				errno, strerror(errno));
-		return -5;
+		return -6;
 	}
 
 	/* If we got a good PID, then we can exit the parent process. */

@@ -49,7 +49,7 @@ MetricsContribute::MetricsContribute(const char * _name,
 
 	// Identifier name of the contribute
 	strncpy(name, _name, MCT_NAME_MAX_LEN);
-	name[MCT_NAME_MAX_LEN] = '\0';
+	name[MCT_NAME_MAX_LEN-1] = '\0';
 
 	// Array of configuration parameters
 	msl_params = params;

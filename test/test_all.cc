@@ -90,6 +90,8 @@ int test_all(int argc, char *argv[]) {
 	fprintf(stderr, FMT_WRN("NOTE: The next test is expected to fails!\n\n"));
 	RUN_TEST(Failed);
 	)
+	(void)test_argv; // quite compilation warning on RELEASE build
+	(void)tresult;   // quite compilation warning on RELEASE build
 
 	//===== START Script-generated tests
 	
