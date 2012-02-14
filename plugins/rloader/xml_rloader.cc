@@ -22,6 +22,7 @@
 #include <iostream>
 #include <boost/filesystem/operations.hpp>
 
+#include "bbque/platform_proxy.h"
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resource_constraints.h"
@@ -140,6 +141,10 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 
 	// Recipe object
 	recipe_ptr = ba::RecipePtr_t(_recipe);
+	std::string platform_id;
+	const char * sys_platform_id;
+	PlatformProxy & pp(PlatformProxy::GetInstance());
+	ticpp::Element * pp_elem;
 
 	// Plugin needs a logger
 	if (!logger) {
@@ -163,13 +168,29 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		app_elem->GetAttribute("priority", &prio, false);
 		recipe_ptr->SetPriority(prio);
 
+		// <platform>
+		pp_elem = app_elem->FirstChildElement("platform", true);
+		pp_elem->GetAttribute("id", &platform_id);
+		logger->Info("Platform required: %s", platform_id.c_str());
+
+		sys_platform_id = pp.GetPlatformID();
+		if (!sys_platform_id)
+			logger->Warn("Unable to get the system platform id");
+
+		if (sys_platform_id && platform_id.compare(sys_platform_id) != 0) {
+			logger->Error("Platform requirement mismatch: "
+					"Looking for %s, found %s",
+					platform_id.c_str(), sys_platform_id);
+			return RL_PLATFORM_MISMATCH;
+		}
+
 		// Application Working Modes
-		result = LoadWorkingModes(app_elem);
+		result = LoadWorkingModes(pp_elem);
 
 		// "Static" constraints and plugins specific data
 		if (result != RL_FORMAT_ERROR) {
-			LoadConstraints(app_elem);
-			LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, app_elem);
+			LoadConstraints(pp_elem);
+			LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
 		}
 
 	} catch(ticpp::Exception &ex) {
