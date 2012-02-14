@@ -32,22 +32,22 @@
 #define RSRC_SYS_MEM 	"mem"
 
 /** Platform internal memory */
-#define RSRC_PLAT_MEM 	"arch.mem"
+#define RSRC_PLAT_MEM 	"mem"
 
 /** Set of clusters */
-#define RSRC_TILE   	"arch.tile"
+#define RSRC_TILE   	"tile"
 
 /** Memory at Tile scope */
-#define RSRC_TILE_MEM 	"arch.tile.mem"
+#define RSRC_TILE_MEM 	"tile.mem"
 
 /** Cluster of processing element */
-#define RSRC_CLUSTER 	"arch.tile.cluster"
+#define RSRC_CLUSTER 	"tile.cluster"
 
 /** Memory at Cluster level */
-#define RSRC_CLUST_MEM 	"arch.tile.cluster.mem"
+#define RSRC_CLUST_MEM 	"tile.cluster.mem"
 
 /** Processing element of the Cluster */
-#define RSRC_CLUST_PE 	"arch.tile.cluster.pe"
+#define RSRC_CLUST_PE 	"tile.cluster.pe"
 
 
 namespace bbque { namespace res {
