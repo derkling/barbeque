@@ -136,20 +136,22 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 				std::string const & _recipe_name,
 				RecipePtr_t _recipe) {
 	RecipeLoaderIF::ExitCode_t result;
+	ticpp::Document doc;
 	ticpp::Node * root_node;
 	ticpp::Element * app_elem;
 	ticpp::Element * bbq_elem;
+	ticpp::Element * pp_elem;
 	uint16_t prio = 0;
 	int maj, min;
 
-	// Recipe object
-	recipe_ptr = ba::RecipePtr_t(_recipe);
 	std::string platform_id;
 	std::string version_id;
 	const char * sys_platform_id;
 	PlatformProxy & pp(PlatformProxy::GetInstance());
 	bool platform_matched = false;
-	ticpp::Element * pp_elem;
+
+	// Recipe object
+	recipe_ptr = ba::RecipePtr_t(_recipe);
 
 	// Plugin needs a logger
 	if (!logger) {
@@ -158,7 +160,6 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		return RL_ABORTED;
 	}
 
-	ticpp::Document doc;
 	try {
 		// Load the recipe parsing an XML file
 		std::string path(recipe_dir + "/" + _recipe_name + ".recipe");
