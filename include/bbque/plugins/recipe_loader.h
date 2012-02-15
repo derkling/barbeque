@@ -25,6 +25,9 @@
 
 #define RECIPE_LOADER_NAMESPACE "bq.rl."
 
+#define RECIPE_MAJOR_VERSION 	0
+#define RECIPE_MINOR_VERSION 	8
+
 using bbque::app::Recipe;
 
 namespace bbque { namespace plugins {
@@ -55,6 +58,9 @@ public:
 		RL_WEAK_LOAD,
 
 		//--- Failed load
+		/** Version level not acceptable */
+		RL_VERSION_MISMATCH,
+		/** Platform mismatch */
 		RL_PLATFORM_MISMATCH,
 		/** Recipe load failed for some reason (generic error) */
 		RL_FAILED,
@@ -84,6 +90,7 @@ public:
 	 * @return A time_t object for timestamp comparison
 	 */
 	virtual std::time_t LastModifiedTime(std::string const & recipe_name) = 0;
+
 };
 
 } // namespace plugins
