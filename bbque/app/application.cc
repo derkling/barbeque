@@ -184,11 +184,10 @@ Application::SetRecipe(RecipePtr_t & _recipe, AppPtr_t & papp) {
 	attributes = AttributesMap_t(recipe->attributes);
 
 	// Debug messages
-	logger->Info("%d working modes (enabled = %d).", awms.recipe_vect.size(),
-			awms.enabled_list.size());
-	logger->Info("%d constraints in the application.",
+	logger->Info("%d working modes", awms.enabled_list.size());
+	logger->Info("%d constraints in the application",
 			rsrc_constraints.size());
-	logger->Info("%d plugins specific attributes.", attributes.size());
+	logger->Info("%d plugins specific attributes", attributes.size());
 
 	return APP_SUCCESS;
 }
