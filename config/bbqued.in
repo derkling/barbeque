@@ -101,6 +101,12 @@ setup() {
 		fi
 	fi
 
+	# Check for CFS quota support
+	if [ ! -f $BBQUE_CGMOUNT/cpu.cfs_quota_us ]; then
+		echo "Disabling CFS Quota suppport (Error: not available)"
+		CGROUP_FEATURES_CPUQ="N"
+	fi
+
 	# Getting the total platform available CPUs and MEMs
 	PLAT_CPUS=`cat $BBQUE_CGMOUNT/cpuset.cpus`
 	PLAT_MEMS=`cat $BBQUE_CGMOUNT/cpuset.mems`
@@ -110,6 +116,7 @@ setup() {
 		$BBQUE_PILPARSER \
 				-v BBQUE_PLAT_CPUS="$PLAT_CPUS" \
 				-v BBQUE_PLAT_MEMS="$PLAT_MEMS" \
+				-v BBQUE_FEAT_CPUQ="$CGROUP_FEATURES_CPUQ" \
 				$PILSETUP > $CGSETUP
 	fi
 

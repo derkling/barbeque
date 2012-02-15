@@ -136,10 +136,12 @@ BEGIN {
 	printf "		cpuset.cpus = \"%s\";\n", BBQUE_NODE_CPUS
 	printf "		cpuset.mems = \"%s\";\n", BBQUE_NODE_MEMS
 	printf "	}\n"
-	printf "	cpu {\n"
-	printf "		cpu.cfs_period_us = \"%s\";\n", BBQUE_CPUP
-	printf "		cpu.cfs_quota_us =  \"%s\";\n", BBQUE_NODE_CPUQ
-	printf "	}\n"
+	if (BBQUE_FEAT_CPUQ != "N") {
+		printf "	cpu {\n"
+		printf "		cpu.cfs_period_us = \"%s\";\n", BBQUE_CPUP
+		printf "		cpu.cfs_quota_us =  \"%s\";\n", BBQUE_NODE_CPUQ
+		printf "	}\n"
+	}
 	printf "	memory {\n"
 	printf "		memory.limit_in_bytes = \"%s\";\n", BBQUE_NODE_MEMB
 	printf "	}\n"
