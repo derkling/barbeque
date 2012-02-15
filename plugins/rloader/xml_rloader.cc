@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 #include <iostream>
 #include <boost/filesystem/operations.hpp>
 
@@ -144,6 +145,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	std::string platform_id;
 	const char * sys_platform_id;
 	PlatformProxy & pp(PlatformProxy::GetInstance());
+	bool platform_matched = false;
 	ticpp::Element * pp_elem;
 
 	// Plugin needs a logger
@@ -168,29 +170,43 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		app_elem->GetAttribute("priority", &prio, false);
 		recipe_ptr->SetPriority(prio);
 
-		// <platform>
-		pp_elem = app_elem->FirstChildElement("platform", true);
-		pp_elem->GetAttribute("id", &platform_id);
-		logger->Info("Platform required: %s", platform_id.c_str());
-
+		// System platfom
 		sys_platform_id = pp.GetPlatformID();
-		if (!sys_platform_id)
-			logger->Warn("Unable to get the system platform id");
-
-		if (sys_platform_id && platform_id.compare(sys_platform_id) != 0) {
-			logger->Error("Platform requirement mismatch: "
-					"Looking for %s, found %s",
-					platform_id.c_str(), sys_platform_id);
-			return RL_PLATFORM_MISMATCH;
+		if (!sys_platform_id) {
+			logger->Error("Unable to get the system platform id");
+			assert(sys_platform_id != NULL);
+			return RL_FAILED;
 		}
 
-		// Application Working Modes
-		result = LoadWorkingModes(pp_elem);
+		// <platform>
+		pp_elem = app_elem->FirstChildElement("platform", true);
+		while (pp_elem && !platform_matched) {
 
-		// "Static" constraints and plugins specific data
-		if (result != RL_FORMAT_ERROR) {
+			// Get the id of the platform required
+			pp_elem->GetAttribute("id", &platform_id, true);
+			if (platform_id.compare(sys_platform_id) != 0) {
+				pp_elem = pp_elem->NextSiblingElement("platform", false);
+				continue;
+			}
+
+			logger->Debug("Platform required: %s", platform_id.c_str());
+			platform_matched = true;
+
+			// Application Working Modes
+			result = LoadWorkingModes(pp_elem);
+			if (result != RL_SUCCESS)
+				return result;
+
+			// "Static" constraints and plugins specific data
 			LoadConstraints(pp_elem);
 			LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
+		}
+
+		// Did a platform required match the system platform?
+		if (!platform_matched) {
+			logger->Error("Platform requirements mismatching: system is %s",
+					sys_platform_id);
+			return RL_PLATFORM_MISMATCH;
 		}
 
 	} catch(ticpp::Exception &ex) {
