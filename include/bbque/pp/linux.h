@@ -194,6 +194,11 @@ private:
 	const char *controller;
 
 	/**
+	 * @brief True if the target system supports CFS quota management
+	 */
+	bool cfsQuotaSupported;
+
+	/**
 	 * @brief The maximum number of CPUs per socket
 	 */
 	uint8_t MaxCpusCount;
@@ -212,6 +217,7 @@ private:
 	 * application to run the RTLib
 	 */
 	CGroupDataPtr_t psilos;
+
 
 /**
  * @defgroup group_plt_prx Platform Proxy

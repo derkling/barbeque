@@ -58,6 +58,7 @@ namespace bbque {
 LinuxPP::LinuxPP() :
 	PlatformProxy(),
 	controller("cpuset"),
+	cfsQuotaSupported(true),
 	MaxCpusCount(DEFAULT_MAX_CPUS),
 	MaxMemsCount(DEFAULT_MAX_MEMS) {
 	ExitCode_t pp_result = OK;
@@ -313,6 +314,9 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
 
+	if (unlikely(!cfsQuotaSupported))
+		goto jump_quota_parsing;
+
 	// Get "cpu" controller info
 	cg_controller = cgroup_get_controller(bbq_node, "cpu");
 	if (cg_controller == NULL) {
@@ -330,8 +334,12 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		logger->Error("PLAT LNX: Getting CPU attributes FAILED! "
 				"(Error: 'cpu.cfs_quota_us' not configured "
 				"or not readable)");
-		pp_result = PLATFORM_NODE_PARSING_FAILED;
-		goto parsing_failed;
+		logger->Warn("PLAT LNX: Disabling CPU Quota management");
+
+		// Disable CFS quota management
+		cfsQuotaSupported = false;
+
+		goto jump_quota_parsing;
 	}
 
 	// Check if a quota has been assigned (otherwise a "-1" is expected)
@@ -370,6 +378,9 @@ LinuxPP::ParseNodeAttributes(struct cgroup_file_info &entry,
 		}
 
 	}
+
+jump_quota_parsing:
+	// Here we jump, if CFS Quota management is not enabled on the target
 
 #endif
 
@@ -787,6 +798,9 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,2,0)
 
+	if (unlikely(!cfsQuotaSupported))
+		goto jump_quota_management;
+
 	// Set the default CPU bandwidth period
 	cgroup_set_value_string(pcgd->pc_cpu,
 			BBQUE_LINUXPP_CPUP_PARAM,
@@ -815,6 +829,9 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 				pcgd->papp->StrId(),
 				STR(BBQUE_LINUXPP_CPUP_DEFAULT));
 	}
+
+jump_quota_management:
+	// Here we jump, if CFS Quota management is not enabled on the target
 
 #endif
 
