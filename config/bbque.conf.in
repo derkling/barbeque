@@ -66,8 +66,8 @@ reconfig.migfact       = 4
 # Set root category priority and its appender
 # By default all logs are only from level greater than or equal to INFO
 ###
-#rootCategory = ERROR, raFile
-rootCategory = ERROR, raConsole
+rootCategory = ERROR, raFile
+#rootCategory = ERROR, raConsole
 #rootCategory = ERROR, raSyslog
 #rootCategory = ERROR, raRSyslog
 ###
@@ -87,7 +87,7 @@ category.bq.mc =	NOTICE
 #category.bq.ym = 	INFO
 #category.bq.ra = 	INFO
 #category.bq.ap = 	INFO
-category.bq.pp = 	DEBUG
+#category.bq.pp = 	INFO
 #category.bq.tpd = 	INFO
 #category.bq.app = 	INFO
 #category.bq.app.awm =	INFO
