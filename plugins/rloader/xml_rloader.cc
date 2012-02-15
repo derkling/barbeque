@@ -138,11 +138,14 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	RecipeLoaderIF::ExitCode_t result;
 	ticpp::Node * root_node;
 	ticpp::Element * app_elem;
+	ticpp::Element * bbq_elem;
 	uint16_t prio = 0;
+	int maj, min;
 
 	// Recipe object
 	recipe_ptr = ba::RecipePtr_t(_recipe);
 	std::string platform_id;
+	std::string version_id;
 	const char * sys_platform_id;
 	PlatformProxy & pp(PlatformProxy::GetInstance());
 	bool platform_matched = false;
@@ -164,6 +167,19 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		// <BarbequeRTRM> - Recipe root tag
 		root_node = doc.FirstChild();
 		root_node = root_node->NextSibling("BarbequeRTRM", true);
+
+		// Recipe version control
+		bbq_elem = root_node->ToElement();
+		bbq_elem->GetAttribute("recipe_version", &version_id);
+		logger->Debug("Recipe version = %s", version_id.c_str());
+		sscanf(version_id.c_str(), "%d.%d", &maj, &min);
+		if (maj < RECIPE_MAJOR_VERSION ||
+				(maj >= RECIPE_MAJOR_VERSION && min < RECIPE_MINOR_VERSION)) {
+			logger->Error("Recipe version mismatch (REQUIRED %d.%d). "
+					"Found %d.%d", RECIPE_MAJOR_VERSION, RECIPE_MINOR_VERSION,
+					maj, min);
+			return RL_VERSION_MISMATCH;
+		}
 
 		// <application>
 		app_elem = root_node->FirstChildElement("application", true);
