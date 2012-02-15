@@ -34,4 +34,7 @@ CGPARSER='${CMAKE_INSTALL_PREFIX}/sbin/cgconfigparser'
 # The mountpoint of the BBQ CGroup hierarchy
 CGMOUNT='${CMAKE_INSTALL_PREFIX}/${BBQUE_PIL_CGROUP_MOUNT}'
 #
+# The prefix for the BBQ installation
+SYSROOT='${CMAKE_INSTALL_PREFIX}'
+#
 # vim: set tabstop=4:
