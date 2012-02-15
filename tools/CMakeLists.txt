@@ -25,3 +25,9 @@ install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueConsole.sh"
 	DESTINATION ${BBQUE_PATH_BBQ}
 	COMPONENT BarbequeUTILS
 	RENAME bbque-console)
+
+#----- Deploy the BBQ OP List generator script
+install(PROGRAMS "${PROJECT_SOURCE_DIR}/tools/bbqueOpListBuilder.awk"
+	DESTINATION ${BBQUE_PATH_BBQ}
+	COMPONENT BarbequeUTILS
+	RENAME bbque-oplb)
