@@ -42,8 +42,8 @@
 #define BBQUE_LINUXPP_CPUP_DEFAULT		100000
 
 // Checking for kernel version requirements
-#if LINUX_VERSION_CODE < KERNEL_VERSION(3,0,0)
-# error Linux kernel >= 3.0 required by the Platform Integration Layer
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
+# error Linux kernel >= 2.6.34 required by the Platform Integration Layer
 #endif
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3,2,0)
 # warning CPU Quota management disabled, Linux kernel >= 3.2 required
