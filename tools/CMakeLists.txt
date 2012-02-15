@@ -16,7 +16,12 @@ install(PROGRAMS bbquePlatformLayoutParser.awk
 # - have a name starting by "bbque-"
 
 #----- Deploy the BBQ Control Console script
-install(PROGRAMS bbqueConsole.sh
+configure_file (
+	"${PROJECT_SOURCE_DIR}/tools/bbqueConsole.sh.in"
+	"${PROJECT_BINARY_DIR}/tools/bbqueConsole.sh"
+	@ONLY
+)
+install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueConsole.sh"
 	DESTINATION ${BBQUE_PATH_BBQ}
 	COMPONENT BarbequeUTILS
 	RENAME bbque-console)

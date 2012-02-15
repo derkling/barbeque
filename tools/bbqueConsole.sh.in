@@ -1,22 +1,26 @@
 #!/bin/bash
 
-BBQUE_SYSROOT="/home/derkling/Documents/Coding/MyBOSP"
-BBQUE_CONF=bbque.conf_testing
-BBQUE_CGLAYOUT=test_root
-SUPDAETE=1
+# Source the daemon configuration settings
+. @CMAKE_INSTALL_PREFIX@/etc/default/bbqued
 
-# - XWindos geometries recoveder using "xwininfo" utility
+# CONSOLE CONFIGURATION
+BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
+BBQUE_CONF="${BBQUE_CONF:-$CONF}"
+BBQUE_PILLAYOUT="${BBQUE_PILLAYOUT:-$PILLAYOUT}"
+BBQUE_SUPDATE="${BBQUE_SUPDATE:-1}"
+
+# - XWindows geometries recoveder using "xwininfo" utility
 # - Font is configured by "-fn" option, to see a list of fonts run:
 #     "xlsfonts | less"
 FONT=-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1
 
 
-cat > $BBQUE_SYSROOT/out/BbqConsole_Resources.sh <<EOF
+cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh <<EOF
 #!/bin/bash
 
 echo "##### Managed EXCs:"
 echo
-for APP in \`find $BBQUE_SYSROOT/out/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
+for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	NAME=\`basename \$APP\`
 	if [ \$NAME == "bbque" -o \$NAME == "silos" -o \$NAME == "res" -o \$NAME == "host" ]; then
 		continue
@@ -36,15 +40,15 @@ for APP in \`find $BBQUE_SYSROOT/out/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	echo "    MEMs: \$MEMB - \${MEMN}n {M: \$MEMU}"
 done
 EOF
-chmod a+x $BBQUE_SYSROOT/out/BbqConsole_Resources.sh
+chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh
 
-cat > $BBQUE_SYSROOT/out/BbqConsole_CGroups.sh <<EOF
+cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh <<EOF
 #!/bin/bash
 
 # Main Targest
 echo "##### Main TARGET:"
 echo
-for TRG in \`find $BBQUE_SYSROOT/out/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
+for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	NAME=\`basename \$TRG\`
 	if [ \$NAME != "bbque" -a \$NAME != "silos" -a \$NAME != "host" -o \$NAME == "res" ]; then
 		continue
@@ -69,7 +73,7 @@ done
 echo
 echo "##### Managed NODES:"
 echo
-for TRG in \`find $BBQUE_SYSROOT/out/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
+for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
 	NAME=\`basename \$TRG\`
 	if [ \$NAME == "res" ]; then
 		continue
@@ -90,32 +94,32 @@ for TRG in \`find $BBQUE_SYSROOT/out/mnt/cgroup/bbque/res -maxdepth 1 -type d\`;
 
 done
 EOF
-chmod a+x $BBQUE_SYSROOT/out/BbqConsole_CGroups.sh
+chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh
 
 aterm +sb -fn $FONT -geometry 136x18+-9+18 -title "Syslog" \
 	-e tail -f /var/log/syslog &
 aterm +sb -fn $FONT -geometry 74x39--9-17 -title "EXCs Resources" \
-	-e watch -n$SUPDAETE "$BBQUE_SYSROOT/out/BbqConsole_Resources.sh 2>/dev/null "&
+	-e watch -n$BBQUE_SUPDATE "$BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh 2>/dev/null "&
 aterm +sb -fn $FONT -geometry 74x57--9+18 -title "BBQ CGroups" \
-	-e watch -n$SUPDAETE "$BBQUE_SYSROOT/out/BbqConsole_CGroups.sh 2>/dev/null "&
+	-e watch -n$BBQUE_SUPDATE "$BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh 2>/dev/null "&
 aterm +sb -fn $FONT -geometry 136x77+-9-18 -title "BBQUE Log" \
-	-e tail -f $BBQUE_SYSROOT/out/var/bbque/bbque.log &
+	-e tail -f $BBQUE_SYSROOT/var/bbque/bbque.log &
 
 # BarbequeRTRM daemon startup
 aterm +sb -fn $FONT -geometry 105x18+816+18 -title "BarbequeRTRM Daemon" &
-cat > $BBQUE_SYSROOT/out/BbqConsole_StartBBQ.sh <<EOF
-sudo BBQUE_CGLAYOUT=$BBQUE_CGLAYOUT \
-	BBQUE_CONF=$BBQUE_SYSROOT/$BBQUE_CONF \
-	./out/etc/init.d/bbqued start
+cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_StartBBQ.sh <<EOF
+sudo BBQUE_PILLAYOUT=$BBQUE_PILLAYOUT \
+	BBQUE_CONF=$BBQUE_CONF \
+	./etc/init.d/bbqued start
 EOF
-chmod a+x $BBQUE_SYSROOT/out/BbqConsole_StartBBQ.sh
+chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_StartBBQ.sh
 
 # First TestApp
 aterm +sb -fn $FONT -geometry 106x25+816+240 -title "FIRST TestApp" &
-#	-e $BBQUE_SYSROOT/out/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly &
+#	-e $BBQUE_SYSROOT/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly &
 aterm +sb -fn $FONT -geometry 107x25+813+530 -title "SECOND TestApp" &
-#	-e $BBQUE_SYSROOT/out/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly &
-cat > $BBQUE_SYSROOT/out/BbqConsole_StartTestApp.sh <<EOF
-$BBQUE_SYSROOT/out/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly
+#	-e $BBQUE_SYSROOT/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly &
+cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_StartTestApp.sh <<EOF
+$BBQUE_SYSROOT/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly
 EOF
-chmod a+x $BBQUE_SYSROOT/out/BbqConsole_StartTestApp.sh
+chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_StartTestApp.sh
