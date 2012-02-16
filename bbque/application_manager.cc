@@ -30,6 +30,21 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+
+#define RP_DIV1 "============================================================="
+#define RP_DIV2 "|------------------+------------+-------------+-------------|"
+#define RP_DIV3 "|..................+............+.............+.............|"
+#define RP_HEAD "|      APP:EXC     | STATE/SYNC |     CURRENT |        NEXT |"
+
+#define PRINT_NOTICE_IF_VERBOSE(verbose, text)\
+	if (verbose)\
+		logger->Notice(text);\
+	else\
+		DB(\
+		logger->Debug(text);\
+		);
+
+
 namespace ba = bbque::app;
 namespace br = bbque::res;
 namespace bp = bbque::plugins;
@@ -507,22 +522,63 @@ ApplicationManager::UpdateStatusMaps(AppPtr_t papp,
 	return AM_SUCCESS;
 }
 
+inline void BuildStateStr(AppPtr_t papp, char * state_str) {
+	ApplicationStatusIF::State_t state;
+	ApplicationStatusIF::SyncState_t sync_state;
+	char st_str[] = "   ";
+	char sy_str[] = "   ";
+
+	state = papp->State();
+	sync_state = papp->SyncState();
+
+	// Sched state
+	switch (state) {
+	case ApplicationStatusIF::DISABLED:
+		strncpy(st_str, "DIS", 3); break;
+	case ApplicationStatusIF::READY:
+		strncpy(st_str, "RDY", 3); break;
+	case ApplicationStatusIF::RUNNING:
+		strncpy(st_str, "RUN", 3); break;
+	case ApplicationStatusIF::FINISHED:
+		strncpy(st_str, "FIN", 3); break;
+	default:
+		// SYNC
+		strncpy(st_str, "SYN", 3); break;
+	}
+
+	// Sync state
+	switch (sync_state) {
+	case ApplicationStatusIF::STARTING:
+		strncpy(sy_str, "STA", 3); break;
+	case ApplicationStatusIF::RECONF:
+		strncpy(sy_str, "RCF", 3); break;
+	case ApplicationStatusIF::MIGREC:
+		strncpy(sy_str, "MCF", 3); break;
+	case ApplicationStatusIF::MIGRATE:
+		strncpy(sy_str, "MGR", 3); break;
+	case ApplicationStatusIF::BLOCKED:
+		strncpy(sy_str, "BLK", 3); break;
+	default:
+		// SYNC_NONE
+		strncpy(sy_str, "---", 3); break;
+	}
+
+	snprintf(state_str, 10, " %s %s ", st_str, sy_str);
+}
+
+
 void ApplicationManager::PrintStatusReport(bool verbose) {
 	AppsUidMapIt app_it;
 	AppPtr_t papp;
-	char line[80];
+	char line[66];
+	char state_str[10];
 	char curr_awm_cl[15];
 	char next_awm_cl[15];
+	char clset[8];
 
-	if (verbose) {
-		logger->Notice(
-				"---- App:EXC ---|---- State |----- Sync |"
-				"-- CurrentAWM |----- NextAWM |");
-	} else {
-		DB(logger->Debug(
-				"---- App:EXC ---|---- State |----- Sync |"
-				"-- CurrentAWM |----- NextAWM |"));
-	}
+	PRINT_NOTICE_IF_VERBOSE(verbose, RP_DIV1);
+	PRINT_NOTICE_IF_VERBOSE(verbose, RP_HEAD);
+	PRINT_NOTICE_IF_VERBOSE(verbose, RP_DIV2);
 
 	papp = GetFirst(app_it);
 	while (papp) {
@@ -533,45 +589,34 @@ void ApplicationManager::PrintStatusReport(bool verbose) {
 		if (awm) {
 			// MIGRATE case => must see previous set of the same AWM
 			if ((awm == next_awm) && (awm->ClustersChanged()))
-				snprintf(curr_awm_cl, 12, "%d:%s", awm->Id(),
-					awm->PrevClusterSet().to_string().c_str());
+				strncpy(clset, awm->PrevClusterSet().to_string().c_str(), 8);
 			else
-				snprintf(curr_awm_cl, 12, "%d:%s", awm->Id(),
-					awm->ClusterSet().to_string().c_str());
+				strncpy(clset, awm->ClusterSet().to_string().c_str(), 8);
+
+			snprintf(curr_awm_cl, 12, "%02d:%s", awm->Id(), clset);
 		}
 		else
 			snprintf(curr_awm_cl, 12, "-");
 
 		// Next AWM
-		if (next_awm)
-			snprintf(next_awm_cl, 12, "%d:%s", next_awm->Id(),
-				next_awm->ClusterSet().to_string().c_str());
+		if (next_awm) {
+			strncpy(clset, next_awm->ClusterSet().to_string().c_str(), 8);
+			snprintf(next_awm_cl, 12, "%02d:%s", next_awm->Id(), clset);
+		}
 		else
 			snprintf(next_awm_cl, 12, "-");
 
-		snprintf(line, 80, "%12s | %9s | %9s | %12s | %12s |",
-				papp->StrId(),
-				papp->StateStr(papp->State()),
-				papp->SyncStateStr(papp->SyncState()),
-				curr_awm_cl,
-				next_awm_cl);
+		// State/Sync
+		BuildStateStr(papp, state_str);
+		snprintf(line, 66, "| %16s | %10s | %11s | %11s |",
+				papp->StrId(), state_str, curr_awm_cl, next_awm_cl);
 
-		if (verbose) {
-			logger->Notice(line);
-		} else {
-			DB(logger->Debug(line));
-		}
-
+		// Print the row
+		PRINT_NOTICE_IF_VERBOSE(verbose, line);
 		papp = GetNext(app_it);
 	}
 
-	if (verbose) {
-		logger->Notice("---------------------------------------------"
-				 "--------------------------");
-	} else {
-		DB(logger->Debug("---------------------------------------------"
-				"--------------------------"));
-	}
+	PRINT_NOTICE_IF_VERBOSE(verbose, RP_DIV1);
 }
 
 ApplicationManager::ExitCode_t
