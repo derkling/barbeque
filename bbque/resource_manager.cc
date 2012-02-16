@@ -57,6 +57,12 @@
 #define RM_GET_PERIOD(METRICS, INDEX, PERIOD) \
 	mc.PeriodSample(METRICS[INDEX].mh, PERIOD);
 
+#define LNSCHB "::::::::::::::::::::: SCHEDULE START ::::::::::::::::::::::::"
+#define LNSCHE ":::::::::::::::::::::  SCHEDULE END  ::::::::::::::::::::::::"
+#define LNSYNB "**********************  SYNC START  *************************"
+#define LNSYNF "*********************  SYNC FAILED  *************************"
+#define LNSYNE "***********************  SYNC END  **************************"
+
 namespace br = bbque::res;
 namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
@@ -199,7 +205,7 @@ void ResourceManager::Optimize() {
 	RM_GET_PERIOD(metrics, RM_SCHED_PERIOD, period);
 
 	//--- Scheduling
-	logger->Notice("====================[ SCHEDULE START ]====================");
+	logger->Notice(LNSCHB);
 	optimization_tmr.start();
 	schedResult = sm.Schedule();
 	optimization_tmr.stop();
@@ -216,7 +222,7 @@ void ResourceManager::Optimize() {
 	default:
 		assert(schedResult == SchedulerManager::DONE);
 	}
-	logger->Info("====================[ SCHEDULE ENDED ]====================");
+	logger->Info(LNSCHE);
 	logger->Notice("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 	am.PrintStatusReport(true);
 	ra.PrintStatusReport(true);
@@ -235,18 +241,18 @@ void ResourceManager::Optimize() {
 		logger->Notice("Schedule Run-time: %9.3f[ms]", period);
 
 	//--- Synchroniztion
-	logger->Notice("====================[ SYNC START ]====================");
+	logger->Notice(LNSYNB);
 	optimization_tmr.start();
 	syncResult = ym.SyncSchedule();
 	optimization_tmr.stop();
 	if (syncResult != SynchronizationManager::OK) {
-		logger->Warn("====================[ SYNC FAILED ]===================");
+		logger->Warn(LNSYNF);
 		RM_COUNT_EVENT(metrics, RM_SYNCH_FAILED);
 		// FIXME here we should implement some counter-meaure to
 		// ensure consistency
 		return;
 	}
-	logger->Info("====================[ SYNC ENDED ]====================");
+	logger->Info(LNSYNE);
 	am.PrintStatusReport(true);
 	ra.PrintStatusReport(0, true);
 	logger->Notice("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
