@@ -23,8 +23,8 @@
 #include "bbque/plugin_manager.h"
 
 #include "bbque/app/application.h"
-#include "bbque/app/recipe.h"
 #include "bbque/res/resource_accounter.h"
+#include "bbque/res/resource_utils.h"
 #include "bbque/utils/utility.h"
 
 namespace br = bbque::res;
