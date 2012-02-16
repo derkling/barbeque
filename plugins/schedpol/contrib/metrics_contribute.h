@@ -315,6 +315,8 @@ protected:
 	 *
 	 * @param rsrc_path Resource path
 	 * @param amount Requested resource usage amount
+	 * @param papp Application to evaluate for scheduling
+	 * @param rl Structure embedding info for region usage division
 	 *
 	 * @return The resulting region of usage of the given resource, whenever
 	 * the scheduling satisfies the given request.

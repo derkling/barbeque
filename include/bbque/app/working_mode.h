@@ -201,7 +201,7 @@ public:
 	 * This method is invoked during the scheduling step to track the set of
 	 * resources to acquire at the end of the synchronization step.
 	 *
-	 * @param s_bid The scheduling binding id to set ready for synchronization
+	 * @param bid The scheduling binding id to set ready for synchronization
 	 * (optional)
 	 *
 	 * @return WM_SUCCESS, or WM_RSRC_MISS_BIND if some bindings are missing
