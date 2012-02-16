@@ -212,13 +212,13 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		// Current ResourceUsage
 		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t const & pusage(usages_it->second);
-	
+
 		// Query the availability of the resources in the list
 		avail = QueryStatus(pusage->GetBindingList(), RA_AVAIL, vtok, papp);
 
 		// If the availability is less than the amount required...
 		if (avail < pusage->GetAmount()) {
-			logger->Warn("ChkAvail: Exceeding request for {%s}"
+			logger->Debug("Check availability: Exceeding request for {%s}"
 					"[USG:%llu | AV:%llu | TOT:%llu] ",
 					rsrc_path.c_str(), pusage->GetAmount(), avail,
 					QueryStatus(pusage->GetBindingList(), RA_TOTAL));
