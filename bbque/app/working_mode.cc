@@ -68,9 +68,12 @@ WorkingMode::~WorkingMode() {
 WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		std::string const & rsrc_path,
 		uint64_t _value) {
+	// Template of the resource path
+	std::string rsrc_path_tpl(ResourcePathUtils::GetTemplate(rsrc_path));
+
 	// Check the total amount of resource
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	uint64_t rsrc_total_qty = ra.Total(rsrc_path);
+	uint64_t rsrc_total_qty = ra.Total(rsrc_path_tpl);
 
 	// Does the resource exist ?
 	if (rsrc_total_qty == 0) {
