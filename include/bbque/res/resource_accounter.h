@@ -193,15 +193,26 @@ public:
 	}
 
 	/**
-	 * @see ResourceAccounterStatusIF
-	 */
-	AppSPtr_t const AppUsingPE(std::string const & path,
-			RViewToken_t vtok = 0) const;
-
-	/**
-	 * @see ResourceAccounterStatusIF
+	 * @brief Show the system resources status
+	 *
+	 * This is an utility function for debug purpose that print out all the
+	 * resources path and values about usage and total amount.
+	 *
+	 * @param vtok Token of the resources state view
+	 * @param verbose print in INFO log level is true, while false in DEBUG
 	 */
 	void PrintStatusReport(RViewToken_t vtok = 0, bool verbose = false) const;
+
+	/**
+	 * @brief Print details about how resource usage is partitioned among
+	 * applications/EXCs
+	 *
+	 * @param path The resource path
+	 * @param vtok The token referencing the resource state view
+	 * @param verbose print in INFO log level is true, while false in DEBUG
+	 */
+	void PrintAppDetails(std::string const & path, RViewToken_t vtok,
+			bool verbose) const;
 
 	/**
 	 * @brief Register a resource
@@ -470,19 +481,6 @@ private:
 	 * Default constructor
 	 */
 	ResourceAccounter();
-
-	/**
-	 * @brief Report string about applications using PEs
-	 *
-	 * @param path The path of the PE resource in use
-	 * @param buff The string buffer to set
-	 * @param size The buffer size
-	 * @param vtok The token referencing the resource state view
-	 * @return A report string with the App/EXC id info, the priority and the
-	 * current AWM
-	 */
-	char const * StrAppUsingPE(std::string const & path, char * buff,
-			size_t	size, RViewToken_t vtok = 0) const;
 
 	/**
 	 * @brief Return a state parameter (availability, resources used, total

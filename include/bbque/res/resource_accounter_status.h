@@ -245,28 +245,6 @@ public:
 	 */
 	virtual uint16_t GetNumResourceTypes() const = 0;
 
-	/**
-	 * @brief App/EXC using a Processing Element resource
-	 *
-	 * @param path The resource path
-	 * @param vtok The token referencing the resource state view
-	 * @return A shared pointer to the App/EXC descriptor using the given PE
-	 */
-	AppSPtr_t const AppUsingPE(std::string const & path,
-			RViewToken_t vtok = 0) const;
-
-	/**
-	 * @brief Show the system resources status
-	 *
-	 * This is an utility function for debug purpose that print out all the
-	 * resources path and values about usage and total amount.
-	 *
-	 * @param vtok Token of the resources state view
-	 * @param verbose print in INFO logleve is ture, in DEBUG if false
-	 */
-	virtual void PrintStatusReport(RViewToken_t vtok = 0,
-			bool verbose = false) const = 0;
-
 };
 
 }   // namespace res

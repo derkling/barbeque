@@ -34,6 +34,21 @@
 #include "bbque/platform_services.h"
 #include "bbque/app/working_mode.h"
 
+#define RP_DIV1 "============================================================="
+#define RP_DIV2 "|-------------------------------+-------------+-------------|"
+#define RP_DIV3 "|                               :             |             |"
+#define RP_HEAD "|             RESOURCES         |        USED |       TOTAL |"
+
+
+#define PRINT_NOTICE_IF_VERBOSE(verbose, text)\
+	if (verbose)\
+		logger->Notice(text);\
+	else\
+		DB(\
+		logger->Debug(text);\
+		);
+
+
 namespace bbque { namespace res {
 
 ResourceAccounter & ResourceAccounter::GetInstance() {
@@ -74,92 +89,89 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 		bool verbose) const {
 	std::set<std::string>::const_iterator path_it(paths.begin());
 	std::set<std::string>::const_iterator end_path(paths.end());
-	char padded_path[30];
-	char app_info[50];
+	char rsrc_path_padded[30];
+	char rsrc_text_row[66];
+	uint64_t rsrc_used;
 
+	// Print the head of the report table
 	if (verbose) {
 		logger->Info("Report on state view: %d", vtok);
-		logger->Notice(
-				"------------- Resources ------------- Used ------ Total -");
-	} else {
+		logger->Notice(RP_DIV1);
+		logger->Notice(RP_HEAD);
+		logger->Notice(RP_DIV2);
+	}
+	else {
 		DB(
 		logger->Debug("Report on state view: %d", vtok);
-		logger->Debug(
-				"------------- Resources ------------- Used ------ Total -");
+		logger->Debug(RP_DIV1);
+		logger->Debug(RP_HEAD);
+		logger->Debug(RP_DIV2);
 		);
 	}
+
 	for (; path_it != end_path; ++path_it) {
-		snprintf(padded_path, 30, "%-30s", (*path_it).c_str());
-		if (verbose) {
-			StrAppUsingPE(*path_it, app_info, 50, vtok);
-			logger->Notice("%s : %10llu | %10llu | %s",
-					padded_path, Used(*path_it, vtok), Total(*path_it),
-					app_info[0] ? app_info : "");
-		} else {
-			DB(
-			StrAppUsingPE(*path_it, app_info, 50, vtok);
-			logger->Debug("%s : %10llu | %10llu | %s",
-				padded_path, Used(*path_it, vtok), Total(*path_it),
-				app_info[0] ? app_info : "");
-			);
-		}
+		// Amount of resource used
+		rsrc_used = Used(*path_it, vtok);
+
+		// Build the resource text row
+		snprintf(rsrc_path_padded, 30, "%-30s", (*path_it).c_str());
+		snprintf(rsrc_text_row, 66, "| %s : %11lu | %11lu |",
+				rsrc_path_padded, rsrc_used, Total(*path_it));
+
+		PRINT_NOTICE_IF_VERBOSE(verbose, rsrc_text_row);
+
+		// No details to print if usage = 0
+		if (rsrc_used == 0)
+			continue;
+
+		// Print details about how usage is partitioned among applications
+		PrintAppDetails(*path_it, vtok, verbose);
 	}
 
-	if (verbose) {
-		logger->Notice(
-				"---------------------------------------------------------");
-	} else {
-		DB(
-		logger->Debug(
-				"---------------------------------------------------------");
-		);
-	}
+	PRINT_NOTICE_IF_VERBOSE(verbose, RP_DIV1);
 }
 
-AppSPtr_t const ResourceAccounter::AppUsingPE(std::string const & path,
-		RViewToken_t vtok) const {
-	Resource::ExitCode_t rsrc_ret;
-	AppUid_t app_uid;
+void ResourceAccounter::PrintAppDetails(std::string const & path,
+		RViewToken_t vtok,
+		bool verbose) const {
+	Resource::ExitCode_t res_result;
 	AppSPtr_t papp;
-	uint64_t amount;
+	AppUid_t app_uid;
+	uint64_t rsrc_amount;
+	uint8_t app_index = 0;
+	char app_info[30];
+	char app_text_row[66];
 
-	// Get the Resource decriptor
+	// Get the resource descriptor
 	ResourcePtr_t rsrc(GetResource(path));
-	if (!rsrc) {
-		logger->Error("Cannot find PE: '%s'", path.c_str());
-		return AppSPtr_t();
-	}
+	if (!rsrc || rsrc->ApplicationsCount(vtok) == 0)
+		return;
 
-	// Get the App/EXC descriptor
-	rsrc_ret = rsrc->UsedBy(app_uid, amount, 0, vtok);
-	if (rsrc_ret != Resource::RS_SUCCESS)
-		return AppSPtr_t();
+	do {
+		// How much does the application/EXC use?
+		res_result = rsrc->UsedBy(app_uid, rsrc_amount, app_index, vtok);
+		if (res_result != Resource::RS_SUCCESS)
+			break;
 
-	papp = am.GetApplication(app_uid);
-	if (!papp)
-		return AppSPtr_t();
+		// Get the App/EXC descriptor
+		papp = am.GetApplication(app_uid);
+		if (!papp || !papp->CurrentAWM())
+			break;
 
-	// Skip if the App/EXC hasn't an AWM or the resource is not a PE
-	if (!papp->CurrentAWM() || (rsrc->Name().compare("pe") < 0))
-		return AppSPtr_t();
+		// Build the row to print
+		snprintf(app_info, 30, "%s,P%02d,AWM%02d", papp->StrId(),
+				papp->Priority(), papp->CurrentAWM()->Id());
+		snprintf(app_text_row, 66, "| %29s : %11lu |             |",
+				app_info, rsrc_amount);
 
-	return papp;
-}
+		PRINT_NOTICE_IF_VERBOSE(verbose, app_text_row);
 
-inline char const * ResourceAccounter::StrAppUsingPE(std::string const & path,
-		char * buff, size_t size, RViewToken_t vtok) const {
+		// Next application/EXC
+		++app_index;
+	} while (papp);
 
-	// Lookup the App/EXC
-	AppSPtr_t papp(AppUsingPE(path, vtok));
-	if (!papp) {
-		buff[0] = 0;
-		return NULL;
-	}
-
-	// Build the string
-	snprintf(buff, size, "%s,%d,%d", papp->StrId(), papp->Priority(),
-			papp->CurrentAWM()->Id());
-	return buff;
+	// Print a separator line
+	PRINT_NOTICE_IF_VERBOSE(verbose, RP_DIV3);
 }
 
 /************************************************************************
