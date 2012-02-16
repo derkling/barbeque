@@ -209,7 +209,7 @@ public:
 	 * @param vtok The token referencing the resource view
 	 * @return Number of applications
 	 */
-	uint16_t ApplicationsCount(RViewToken_t vtok = 0) {
+	inline uint16_t ApplicationsCount(RViewToken_t vtok = 0) {
 		AppUseQtyMap_t apps_map;
 		return ApplicationsCount(apps_map, vtok);
 	}
