@@ -38,6 +38,13 @@ class ThroughputMonitor : public Monitor <double> {
 public:
 
 	/**
+	 * @brief Default constructor of the class
+	 */
+	ThroughputMonitor() :
+		started(false) {
+	}
+
+	/**
 	 * @brief Creates a new monitor with a window containing an history of
 	 * previous values
 	 *
