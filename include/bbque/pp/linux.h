@@ -24,6 +24,7 @@
 #ifndef BBQUE_LINUX_PP_H_
 #define BBQUE_LINUX_PP_H_
 
+#include "bbque/config.h"
 #include "bbque/platform_proxy.h"
 #include "bbque/utils/attributes_container.h"
 

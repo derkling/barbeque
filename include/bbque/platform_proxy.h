@@ -28,6 +28,7 @@
 #ifndef BBQUE_PLATFORM_PROXY_H_
 #define BBQUE_PLATFORM_PROXY_H_
 
+#include "bbque/config.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/app/application.h"
 #include "bbque/res/resource_accounter.h"
@@ -136,6 +137,7 @@ public:
 	 * @return A poiinter to the platform string identifier
 	 */
 	const char* GetPlatformID() const {
+		assert(platformIdentifier != NULL);
 		return platformIdentifier;
 	};
 /**

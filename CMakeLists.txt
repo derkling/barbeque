@@ -118,8 +118,8 @@ option (BBQUE_RPC_FIFO
 	"Build RTLib with FIFO channel support" ON)
 
 # Platform data: use hard-coded TEST configuration (defaulf: YES)
-option (BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of
-		ResourceAbstraction module" OFF)
+option (BBQUE_TEST_PLATFORM_DATA
+	"Use TEST Platform Data instead of ResourceAbstraction module" OFF)
 
 ################################################################################
 # Lookup for library dependencies

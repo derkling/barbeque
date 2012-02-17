@@ -80,6 +80,9 @@
 /** Use FIFO based RPC channel */
 #cmakedefine BBQUE_RPC_FIFO
 
+/** Use Test Platform Data */
+#cmakedefine BBQUE_TEST_PLATFORM_DATA
+
 
 /*******************************************************************************
  * BarbequeRTMR Global Features

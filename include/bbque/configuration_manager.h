@@ -18,6 +18,7 @@
 #ifndef BBQUE_CONFIGURATION_MANAGER_H_
 #define BBQUE_CONFIGURATION_MANAGER_H_
 
+#include "bbque/config.h"
 #include "bbque/barbeque.h"
 
 #include <boost/program_options/options_description.hpp>

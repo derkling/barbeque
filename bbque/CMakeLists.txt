@@ -55,10 +55,7 @@ set (BARBEQUE_SRC signals_manager scheduler_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC synchronization_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC daemonize ${BARBEQUE_SRC})
 if(BBQUE_TEST_PLATFORM_DATA)
-	# This is just a temporary replacement for the still missing
-	# ResourceAbstraction module
 	set (BARBEQUE_SRC test_platform_data ${BARBEQUE_SRC})
-	set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DBBQUE_TEST_PLATFORM_DATA")
 endif(BBQUE_TEST_PLATFORM_DATA)
 
 # This should be converted to a KConfig option

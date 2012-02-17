@@ -61,6 +61,7 @@ LinuxPP::LinuxPP() :
 	cfsQuotaSupported(true),
 	MaxCpusCount(DEFAULT_MAX_CPUS),
 	MaxMemsCount(DEFAULT_MAX_MEMS) {
+#ifndef BBQUE_TEST_PLATFORM_DATA
 	ExitCode_t pp_result = OK;
 	char *mount_path = NULL;
 	int cg_result;
@@ -97,6 +98,7 @@ LinuxPP::LinuxPP() :
 	}
 
 	free(mount_path);
+#endif // !BBQUE_TEST_PLATFORM_DATA
 
 	// Mark the Platform Integration Layer (PIL) as initialized
 	SetPilInitialized();

@@ -48,6 +48,11 @@ PlatformProxy::PlatformProxy() :
 	plugins::LoggerIF::Configuration conf(logger_name.c_str());
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 
+#ifdef BBQUE_TEST_PLATFORM_DATA
+#warning Using TEST PLATFORM DATA
+	return;
+#endif // BBQUE_TEST_PLATFORM_DATA
+
 	// Spawn the platform monitoring thread
 	monitor_thd = std::thread(&PlatformProxy::Monitor, this);
 
@@ -115,24 +120,20 @@ PlatformProxy::LoadPlatformData() {
 	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
 	ExitCode_t result = OK;
 
-#if BBQUE_TEST_PLATFORM_DATA
+#ifdef BBQUE_TEST_PLATFORM_DATA
 	//---------- Loading TEST platform data
 	logger->Debug("PLAT PRX: loading TEST PLATFORM data");
 	// This is just a temporary placeholder for the (still-missing)
 	// ResourceAbstraction module
 	bb::TestPlatformData &tpd(bb::TestPlatformData::GetInstance());
 	tpd.LoadPlatformData();
-	return OK;
-#endif // BBQUE_TEST_PLATFORM_DATA
+#else
 
 	// Return if the PIL has not been properly initialized
 	if (!pilInitialized) {
 		logger->Fatal("PLAT PRX: Platform Integration Layer initialization FAILED");
 		return PLATFORM_INIT_FAILED;
 	}
-
-	// Setup the Platform Specific ID
-	platformIdentifier = _GetPlatformID();
 
 	// Platform specific resources enumeration
 	logger->Debug("PLAT PRX: loading platform data");
@@ -142,6 +143,10 @@ PlatformProxy::LoadPlatformData() {
 				GetPlatformID());
 		return result;
 	}
+#endif // BBQUE_TEST_PLATFORM_DATA
+
+	// Setup the Platform Specific ID
+	platformIdentifier = _GetPlatformID();
 
 	logger->Notice("PLAT PRX: Platform [%s] initialization COMPLETED",
 			GetPlatformID());
@@ -158,7 +163,9 @@ PlatformProxy::Setup(AppPtr_t papp) {
 
 	logger->Debug("PLAT PRX: platform setup for run-time control "
 			"of app [%s]", papp->StrId());
+#ifndef BBQUE_TEST_PLATFORM_DATA
 	result = _Setup(papp);
+#endif // !BBQUE_TEST_PLATFORM_DATA
 	return result;
 }
 
@@ -168,7 +175,9 @@ PlatformProxy::Release(AppPtr_t papp) {
 
 	logger->Debug("PLAT PRX: releasing platform-specific run-time control "
 			"for app [%s]", papp->StrId());
+#ifndef BBQUE_TEST_PLATFORM_DATA
 	result = _Release(papp);
+#endif // !BBQUE_TEST_PLATFORM_DATA
 	return result;
 }
 
@@ -177,7 +186,9 @@ PlatformProxy::ReclaimResources(AppPtr_t papp) {
 	ExitCode_t result = OK;
 
 	logger->Debug("PLAT PRX: Reclaiming resources of app [%s]", papp->StrId());
+#ifndef BBQUE_TEST_PLATFORM_DATA
 	result = _ReclaimResources(papp);
+#endif // !BBQUE_TEST_PLATFORM_DATA
 	return result;
 }
 
@@ -189,7 +200,13 @@ PlatformProxy::MapResources(AppPtr_t papp, UsagesMapPtr_t pres, bool excl) {
 
 	logger->Debug("PLAT PRX: Mapping resources for app [%s], using view [%d]",
 			papp->StrId(), rvt);
+#ifndef BBQUE_TEST_PLATFORM_DATA
 	result = _MapResources(papp, pres, rvt, excl);
+#else
+	// Quite compiler warnings on TEST PLATFORM MODE
+	(void)pres;
+	(void) excl;
+#endif // !BBQUE_TEST_PLATFORM_DATA
 	return result;
 }
 
