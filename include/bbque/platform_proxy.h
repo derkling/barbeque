@@ -1,28 +1,18 @@
-/**
- *       @file  platform_proxy.h
- *      @brief  A proxy to interact with the target platform
+/*
+ * Copyright (C) 2012  Politecnico di Milano
  *
- * Definition of the class used by Barbeque RTRM core modules to communicate
- * with the platform by means of a platforms-specific abstraction and
- * integration layer. This class provides all the basic services which are
- * required by the core modules in order to:
- * <li><i>get a platform description:</i> by collecting a description of
- * resources availability and their run-time sate</li>
- * <li><i>control resource partitioning:</i> by binding resources to the
- * assignee applications</li>
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
  *
- *     @author  Patrick Bellasi (derkling), derkling@google.com
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
  *
- *   @internal
- *     Created  11/23/2011
- *    Revision  $Id: doxygen.templates,v 1.3 2010/07/06 09:20:12 mehner Exp $
- *    Compiler  gcc/g++
- *     Company  Politecnico di Milano
- *   Copyright  Copyright (c) 2011, Patrick Bellasi
- *
- * This source code is released for free distribution under the terms of the
- * GNU General Public License as published by the Free Software Foundation.
- * =============================================================================
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #ifndef BBQUE_PLATFORM_PROXY_H_
