@@ -18,6 +18,7 @@
 #include "bbque/console_logger.h"
 
 #include <cstdarg>
+#include <cstdio>
 
 #define LOG_MAX_SENTENCE 256
 
