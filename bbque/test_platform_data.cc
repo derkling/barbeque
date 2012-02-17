@@ -74,7 +74,7 @@ TestPlatformData::LoadPlatformData() {
 				for (uint8_t p = 0; p < cm.TPD_PEsCount(); ++p) {
 						snprintf(resourcePath+13, 8, "%d.pe%d", c, p);
 						printf(" >>> Registering... :%s\n", resourcePath);
-						ra.RegisterResource(resourcePath, " ", 1);
+						ra.RegisterResource(resourcePath, " ", 100);
 				}
 
 		}
