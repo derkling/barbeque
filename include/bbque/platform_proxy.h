@@ -36,6 +36,7 @@ namespace bbque {
 
 /**
  * @brief The Platform Proxy module
+ * @ingroup sec20_pp
  */
 class PlatformProxy {
 
@@ -303,6 +304,24 @@ protected:
 
 };
 
-} /* bbque */
+} // namespace bbque
 
-#endif /* end of include guard: BBQUE_PLATFORM_PROXY_H_ */
+/*******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+
+/**
+ * @defgroup sec20_pp Platform Proxy
+ *
+ * Definition of the class used by Barbeque RTRM core modules to communicate
+ * with the platform by means of a platforms-specific abstraction and
+ * integration layer. This class provides all the basic services which are
+ * required by the core modules in order to:
+ * - <em>get a platform description:</em> by collecting a description of
+ * resources availability and their run-time sate
+ * - <em>control resource partitioning:</em> by binding resources to the
+ * assignee applications
+ *
+ * ADD MORE DETAILS HERE
+ */
+#endif // BBQUE_PLATFORM_PROXY_H_

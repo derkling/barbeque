@@ -134,6 +134,19 @@ static int switch_user(const char *username, const char *pidfile) {
 	return 0;
 }
 
+/**
+ * @brief Daemonize the calling process
+ *
+ * The following program provides a basic daemon with the following features:
+ * - Logs messages to the system log (via syslog).
+ * - Creates a lock file to prevent the daemon from being run twice.
+ * - Changes the effective user (drops privileges).
+ * - Startup errors are reported to the main process.
+ * Partially based on code of Doug Potter:
+ * http://www.itp.uzh.ch/~dpotter/howto/daemonize
+ * and inspired by the daemonize tool by Brian M. Clapper:
+ * http://software.clapper.org/daemonize/
+ */
 int daemonize(const char *name, const char *uid,
 		const char *lockfile, const char *pidfile,
 		const char *rundir) {
