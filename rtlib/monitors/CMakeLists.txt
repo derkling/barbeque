@@ -18,6 +18,7 @@ add_library(bbque_monitors SHARED ${MONITORS_SRC})
 # Linking dependencies
 target_link_libraries(
 	bbque_monitors
+	bbque_rtlib
 	${Boost_LIBRARIES}
 	-ldl -lrt
 )
