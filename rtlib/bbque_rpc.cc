@@ -78,13 +78,21 @@ BbqueRPC::~BbqueRPC(void) {
 	exc_map.clear();
 }
 
+bool BbqueRPC::envPerfCount = false;
+bool BbqueRPC::envGlobal = false;
+bool BbqueRPC::envOverheads = false;
+int  BbqueRPC::envDetailedRun = 0;
+bool BbqueRPC::envNoKernel = false;
+bool BbqueRPC::envCsvOutput = false;
+bool BbqueRPC::envBigNum = false;
+const char *BbqueRPC::envCsvSep = " ";
+
 RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
 	const char *env;
 	char buff[32];
 	char *opt;
 
 	DB(fprintf(stderr, FMT_DBG("Parsing environment options...\n")));
-	fprintf(stderr, FMT_DBG("Parsing environment options...\n"));
 
 	// Look-for the expected RTLIB configuration variable
 	env = getenv("BBQUE_RTLIB_OPTS");
@@ -92,7 +100,6 @@ RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
 		return RTLIB_OK;
 
 	DB(fprintf(stderr, FMT_DBG("BBQUE_RTLIB_OPTS: [%s]\n"), env));
-	fprintf(stderr, FMT_DBG("BBQUE_RTLIB_OPTS: [%s]\n"), env);
 
 	// Tokenize configuration options
 	strncpy(buff, env, 32);
@@ -1171,15 +1178,6 @@ BbqueRPC::PerfEventAttr_t BbqueRPC::very_very_detailed_events[] = {
 
 };
 
-bool BbqueRPC::envPerfCount = false;
-bool BbqueRPC::envGlobal = false;
-bool BbqueRPC::envOverheads = false;
-int  BbqueRPC::envDetailedRun = 0;
-bool BbqueRPC::envNoKernel = false;
-bool BbqueRPC::envCsvOutput = false;
-bool BbqueRPC::envBigNum = false;
-const char *BbqueRPC::envCsvSep = " ";
-
 BbqueRPC::pPerfEventStats_t BbqueRPC::PerfGetEventStats(pAwmStats_t pstats,
 		perf_type_id type, uint64_t config) {
 	PerfEventStatsMapByConf_t::iterator it;
@@ -1620,6 +1618,10 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 	fprintf(stderr, " )");
 }
 
+/*******************************************************************************
+ *    RTLib Notifiers Support
+ ******************************************************************************/
+
 void BbqueRPC::NotifySetup(
 	RTLIB_ExecutionContextHandler_t ech) {
 	pregExCtx_t prec;
@@ -1636,8 +1638,9 @@ void BbqueRPC::NotifySetup(
 	assert(isRegistered(prec) == true);
 
 	// Add all the required performance counters
-	if (envPerfCount)
+	if (envPerfCount) {
 		PerfSetupEvents(prec);
+	}
 
 }
 
@@ -1716,8 +1719,9 @@ void BbqueRPC::NotifyPreRun(
 		if (unlikely(envOverheads)) {
 			PerfDisable(prec);
 			PerfCollectStats(prec);
-		} else
+		} else {
 			PerfEnable(prec);
+		}
 	}
 
 }
@@ -1740,9 +1744,9 @@ void BbqueRPC::NotifyPostRun(
 	DB(fprintf(stderr, FMT_DBG("<=== NotifyRun\n")));
 
 	if (!envGlobal && PerfRegisteredEvents(prec)) {
-		if (unlikely(envOverheads))
+		if (unlikely(envOverheads)) {
 			PerfEnable(prec);
-		else {
+		} else {
 			PerfDisable(prec);
 			PerfCollectStats(prec);
 		}
