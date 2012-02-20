@@ -133,11 +133,14 @@ RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
 			break;
 		case 'p':
 			// Enabling perf...
-			envPerfCount = true;
+			envPerfCount = BBQUE_RTLIB_PERF_ENABLE;
 			// ... with the specified verbosity level
 			sscanf(opt+1, "%d", &envDetailedRun);
-			fprintf(stderr, "Enabling Perf Counters [verbosity: %d]\n",
-					envDetailedRun);
+			if (envPerfCount) {
+				fprintf(stderr, "Enabling Perf Counters [verbosity: %d]\n", envDetailedRun);
+			} else {
+				fprintf(stderr, "WARN: Perf Counters NOT available\n");
+			}
 			break;
 		case 's':
 			// Setting CSV separator
@@ -1130,6 +1133,7 @@ RTLIB_ExitCode_t BbqueRPC::StopExecution(
 /*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
+#ifdef BBQUE_RTLIB_PERF_SUPPORT
 
 BbqueRPC::PerfEventAttr_t BbqueRPC::default_events[] = {
 
@@ -1617,6 +1621,8 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 	bu::Perf::FPrintf(stderr, color, "+-%6.2f%%", pct);
 	fprintf(stderr, " )");
 }
+
+#endif // BBQUE_RTLIB_PERF_SUPPORT
 
 /*******************************************************************************
  *    RTLib Notifiers Support

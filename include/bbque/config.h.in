@@ -83,6 +83,9 @@
 /** Use Test Platform Data */
 #cmakedefine BBQUE_TEST_PLATFORM_DATA
 
+/** Performance Counters Support */
+#cmakedefine BBQUE_RTLIB_PERF_SUPPORT
+
 
 /*******************************************************************************
  * BarbequeRTMR Global Features

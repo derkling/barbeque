@@ -121,6 +121,10 @@ option (BBQUE_RPC_FIFO
 option (BBQUE_TEST_PLATFORM_DATA
 	"Use TEST Platform Data instead of ResourceAbstraction module" OFF)
 
+# Performance Counters: enabled them on RTLib (defaulf: YES)
+option (BBQUE_RTLIB_PERF_SUPPORT
+	"Build RTLib with Performance Counters support" ON)
+
 ################################################################################
 # Lookup for library dependencies
 ################################################################################
