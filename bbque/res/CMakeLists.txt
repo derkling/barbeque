@@ -10,4 +10,4 @@ set (RESOURCES_SRC resource_tree ${RESOURCES_SRC})
 set (RESOURCES_SRC resources ${RESOURCES_SRC})
 
 #Add as library
-add_library(resource_accounting STATIC ${RESOURCES_SRC})
+add_library(bbque_resources STATIC ${RESOURCES_SRC})

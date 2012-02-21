@@ -27,7 +27,7 @@ add_library(bbque_schedpol_yams MODULE ${PLUGIN_YAMS_SRC})
 # Library dependencies
 target_link_libraries(
 	bbque_schedpol_yams
-	sched_metrics
+	bbque_sched_metrics
 )
 
 # Install

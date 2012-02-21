@@ -8,7 +8,7 @@ include_directories(
 set (APPLICATION_SRC application working_mode recipe)
 
 #Add as library
-add_library(apps STATIC ${APPLICATION_SRC})
+add_library(bbque_apps STATIC ${APPLICATION_SRC})
 
 #Link static library
-target_link_libraries(apps bbque_utils)
+target_link_libraries(bbque_apps bbque_utils)

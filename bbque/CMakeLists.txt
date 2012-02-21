@@ -67,8 +67,8 @@ add_executable (barbeque ${BARBEQUE_SRC})
 target_link_libraries(
 	barbeque
 	bbque_utils
-	resource_accounting
-	apps
+	bbque_resources
+	bbque_apps
 	${Boost_LIBRARIES}
 	${CGroup_LIBRARIES}
 )
