@@ -2,6 +2,10 @@
 # Add "barbeque" specific flags
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++0x")
 
+# FIXME: avoid definition of "NDEBUG" when  compiling on release mode, which
+# produces a segfault on shared_pts and functors usages. To be verified.
+set (CMAKE_CXX_FLAGS_RELEASE "-O3")
+
 set (MONITORS_SRC time_monitor ${PROJECT_BINARY_DIR}/bbque/version.cc)
 set (MONITORS_SRC throughput_monitor memory_monitor ${MONITORS_SRC})
 set (MONITORS_SRC application_rtrm ${MONITORS_SRC})
