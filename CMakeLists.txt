@@ -114,7 +114,8 @@ endif (CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
 ################################################################################
 
 # RPC Channel abstraction: use FIFO implementation (defaulf: YES)
-option (BBQUE_RPC_FIFO "Build RTLib with FIFO channel support" ON)
+option (BBQUE_RPC_FIFO
+	"Build RTLib with FIFO channel support" ON)
 
 # Platform data: use hard-coded TEST configuration (defaulf: YES)
 option (BBQUE_TEST_PLATFORM_DATA "Use TEST Platform Data instead of

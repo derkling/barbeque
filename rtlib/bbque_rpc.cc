@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "bbque/config.h"
 #include "bbque/rtlib/bbque_rpc.h"
 #include "bbque/rtlib/rpc_fifo_client.h"
 #include "bbque/app/application.h"

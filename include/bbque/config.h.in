@@ -73,6 +73,18 @@
 #define BBQUE_PATH_VAR "${BBQUE_PATH_VAR}"
 
 
+/*******************************************************************************
+ * BarbequeRTMR Suppported Features
+ ******************************************************************************/
+
+/** Use FIFO based RPC channel */
+#cmakedefine BBQUE_RPC_FIFO
+
+
+/*******************************************************************************
+ * BarbequeRTMR Global Features
+ ******************************************************************************/
+
 /* A global variable to signal if we are running as a daemon */
 extern unsigned char daemonized;
 
