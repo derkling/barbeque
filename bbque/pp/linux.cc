@@ -836,20 +836,38 @@ jump_quota_management:
 #endif
 
 	/**********************************************************************
-	 *    CGroup Configuraiton and Task Assignement
+	 *    CGroup Configuraiton
 	 **********************************************************************/
 
-	if (move) {
-
-		logger->Notice("PLAT LNX: [%s] => "
-				"{cpu [%s: %llu %], mem[%d: %llu B]}",
-				pcgd->papp->StrId(),
-				prlb->cpus, prlb->amount_cpus,
-				prlb->socket_id, prlb->amount_memb);
-		cgroup_set_value_uint64(pcgd->pc_cpuset,
-				BBQUE_LINUXPP_PROCS_PARAM,
-				pcgd->papp->Pid());
+	logger->Debug("PLAT LNX: Updating kernel CGroup [%s]", pcgd->cgpath);
+	result = cgroup_modify_cgroup(pcgd->pcg);
+	if (result) {
+		logger->Error("PLAT LNX: CGroup resource mapping FAILED "
+				"(Error: libcgroup, kernel cgroup update "
+				"[%d: %s])", errno, strerror(errno));
+		return MAPPING_FAILED;
 	}
+
+	/* If a task has not beed assigned, we are done */
+	if (!move)
+		return OK;
+
+	/**********************************************************************
+	 *    CGroup Task Assignement
+	 **********************************************************************/
+	// NOTE: task assignement must be done AFTER CGroup configuration, to
+	// ensure all the controller have been properly setup to manage the
+	// task. Otherwise a task could be killed if being assigned to a
+	// CGroup not yet configure.
+
+	logger->Notice("PLAT LNX: [%s] => "
+			"{cpu [%s: %llu %], mem[%d: %llu B]}",
+			pcgd->papp->StrId(),
+			prlb->cpus, prlb->amount_cpus,
+			prlb->socket_id, prlb->amount_memb);
+	cgroup_set_value_uint64(pcgd->pc_cpuset,
+			BBQUE_LINUXPP_PROCS_PARAM,
+			pcgd->papp->Pid());
 
 	logger->Debug("PLAT LNX: Updating kernel CGroup [%s]", pcgd->cgpath);
 	result = cgroup_modify_cgroup(pcgd->pcg);
