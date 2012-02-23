@@ -153,7 +153,7 @@ SchedulerManager::CollectStats() {
 
 SchedulerManager::ExitCode_t
 SchedulerManager::Schedule() {
-	br::ResourceAccounter &ra = br::ResourceAccounter::GetInstance();
+	ResourceAccounter &ra = ResourceAccounter::GetInstance();
 	SystemView &sv = SystemView::GetInstance();
 	SchedulerPolicyIF::ExitCode result;
 	RViewToken_t svt;

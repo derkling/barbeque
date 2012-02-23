@@ -50,7 +50,9 @@
 #define RSRC_CLUST_PE 	"tile.cluster.pe"
 
 
-namespace bbque { namespace res {
+using namespace bbque::res;
+
+namespace bbque {
 
 
 /**
@@ -246,8 +248,6 @@ public:
 	virtual uint16_t GetNumResourceTypes() const = 0;
 
 };
-
-}   // namespace res
 
 }   // namespace bbque
 

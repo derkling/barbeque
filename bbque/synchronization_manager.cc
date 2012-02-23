@@ -22,7 +22,7 @@
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/system_view.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
@@ -91,7 +91,7 @@ SynchronizationManager::SynchronizationManager() :
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
 	mc(bu::MetricsCollector::GetInstance()),
-	ra(br::ResourceAccounter::GetInstance()),
+	ra(ResourceAccounter::GetInstance()),
 	pp(PlatformProxy::GetInstance()),
 	sv(SystemView::GetInstance()),
 	sync_count(0) {
@@ -462,8 +462,8 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 
 void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
 	ApplicationManager &am(ApplicationManager::GetInstance());
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	br::ResourceAccounter::ExitCode_t raResult;
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
+	ResourceAccounter::ExitCode_t raResult;
 
 	// Acquiring the resources for RUNNING Applications
 	if (!papp->Blocking()) {
@@ -476,7 +476,7 @@ void SynchronizationManager::DoAcquireResources(AppPtr_t papp) {
 		raResult = ra.SyncAcquireResources(papp);
 
 		// If failed abort the single App/ExC sync
-		if (raResult != br::ResourceAccounter::RA_SUCCESS) {
+		if (raResult != ResourceAccounter::RA_SUCCESS) {
 			logger->Error("SyncAcquire: failed for [%s]. Returned %d",
 					papp->StrId(), raResult);
 			am.SyncAbort(papp);
@@ -587,7 +587,7 @@ SynchronizationManager::SyncApps(ApplicationStatusIF::SyncState_t syncState) {
 SynchronizationManager::ExitCode_t
 SynchronizationManager::SyncSchedule() {
 	ApplicationStatusIF::SyncState_t syncState;
-	br::ResourceAccounter::ExitCode_t raResult;
+	ResourceAccounter::ExitCode_t raResult;
 	bu::Timer syncp_tmr;
 	ExitCode_t result;
 

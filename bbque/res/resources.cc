@@ -16,8 +16,7 @@
  */
 
 #include "bbque/res/resources.h"
-
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 
 namespace bbque { namespace res {

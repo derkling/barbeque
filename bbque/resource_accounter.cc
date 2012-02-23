@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 #include <algorithm>
 #include <cassert>
@@ -49,7 +49,7 @@
 		);
 
 
-namespace bbque { namespace res {
+namespace bbque {
 
 ResourceAccounter & ResourceAccounter::GetInstance() {
 	static ResourceAccounter instance;
@@ -828,7 +828,5 @@ void ResourceAccounter::UndoResourceBooking(AppSPtr_t const & papp,
 	assert(usage_freed == pusage->GetAmount());
 }
 
-}   // namespace res
 
 }   // namespace bbque
-

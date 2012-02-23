@@ -17,7 +17,7 @@
 
 #include "bbque/pp/linux.h"
 
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 #include "bbque/res/resource_utils.h"
 
 #include <string.h>
@@ -112,7 +112,7 @@ LinuxPP::~LinuxPP() {
 
 LinuxPP::ExitCode_t
 LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	char resourcePath[] = "tile0.cluster256.pe256";
 	unsigned short first_cpu_id;
 	unsigned short last_cpu_id;
@@ -182,7 +182,7 @@ LinuxPP::RegisterClusterCPUs(RLinuxBindingsPtr_t prlb) {
 
 LinuxPP::ExitCode_t
 LinuxPP::RegisterClusterMEMs(RLinuxBindingsPtr_t prlb) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	char resourcePath[] = "tile0.cluster256.mem256";
 	uint64_t limit_in_bytes = atol(prlb->memb);
 

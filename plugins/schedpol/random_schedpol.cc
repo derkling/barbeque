@@ -22,7 +22,7 @@
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 #include <iostream>
 #include <random>
@@ -70,7 +70,7 @@ char const * RandomSchedPol::Name() {
 std::mt19937 rng_engine(time(0));
 
 void RandomSchedPol::ScheduleApp(AppCPtr_t papp) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	ba::WorkingMode::ExitCode_t bindResult;
 	ba::AwmPtrList_t::const_iterator it;
 	ba::AwmPtrList_t::const_iterator end;
@@ -116,8 +116,8 @@ void RandomSchedPol::ScheduleApp(AppCPtr_t papp) {
 
 SchedulerPolicyIF::ExitCode_t
 RandomSchedPol::Schedule(bbque::SystemView & sv, RViewToken_t &rav) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	br::ResourceAccounter::ExitCode_t viewResult;
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
+	ResourceAccounter::ExitCode_t viewResult;
 	AppsUidMapIt app_it;
 	AppCPtr_t papp;
 

@@ -19,7 +19,6 @@
 
 #include "bbque/modules_factory.h"
 
-#include "bbque/res/resource_accounter.h"
 #include "bbque/application_manager.h"
 #include "bbque/application_proxy.h"
 #include "bbque/system_view.h"

@@ -21,7 +21,7 @@
 #include "bbque/config.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/app/application.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 #include <memory>
 #include <thread>

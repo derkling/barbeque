@@ -20,10 +20,10 @@
 #include <limits>
 
 #include "bbque/application_manager.h"
+#include "bbque/app/working_mode.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
-#include "bbque/app/working_mode.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 namespace ba = bbque::app;
 namespace br = bbque::res;
@@ -86,7 +86,7 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 }
 
 Application::~Application() {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	logger->Debug("Destroying EXC [%s]", StrId());
 
@@ -375,7 +375,7 @@ void Application::SetState(State_t state, SyncState_t sync) {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Terminate() {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
@@ -432,7 +432,7 @@ Application::ExitCode_t Application::Enable() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Disable() {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex>
 		state_ul(schedule.mtx, std::defer_lock);
@@ -510,7 +510,7 @@ Application::ExitCode_t Application::RequestSync(SyncState_t sync) {
 
 bool
 Application::Reshuffling(AwmPtr_t const & next_awm) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	br::UsagesMapPtr_t pumc = _CurrentAWM()->GetResourceBinding();
 	br::UsagesMapPtr_t puma = next_awm->GetResourceBinding();
 
@@ -614,8 +614,8 @@ Application::ExitCode_t Application::Unschedule() {
 Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 		RViewToken_t vtok, uint8_t bid) {
 	std::unique_lock<std::recursive_mutex> schedule_ul(schedule.mtx);
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
-	br::ResourceAccounter::ExitCode_t booking;
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
+	ResourceAccounter::ExitCode_t booking;
 	AppSPtr_t papp(awm->Owner());
 	ExitCode_t result;
 
@@ -645,7 +645,7 @@ Application::ExitCode_t Application::ScheduleRequest(AwmPtr_t const & awm,
 	booking = ra.BookResources(papp, awm->GetSchedResourceBinding(bid), vtok);
 
 	// If resources are not available, unschedule
-	if (booking != br::ResourceAccounter::RA_SUCCESS) {
+	if (booking != ResourceAccounter::RA_SUCCESS) {
 		logger->Debug("Unscheduling [%s]...", papp->StrId());
 		Unschedule();
 		return APP_WM_REJECTED;
@@ -1099,7 +1099,7 @@ Application::ExitCode_t Application::SetResourceConstraint(
 				std::string const & _rsrc_path,
 				ResourceConstraint::BoundType_t _type,
 				uint64_t _value) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 
 	// Check the existance of the resource
 	if (!ra.ExistResource(_rsrc_path)) {

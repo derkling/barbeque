@@ -26,7 +26,7 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/scheduler_manager.h"
 #include "bbque/synchronization_manager.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/timer.h"
@@ -34,7 +34,6 @@
 
 #include <bitset>
 
-using bbque::res::ResourceAccounter;
 using bbque::plugins::PluginManager;
 using bbque::plugins::LoggerIF;
 using bbque::utils::MetricsCollector;

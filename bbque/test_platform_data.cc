@@ -19,7 +19,7 @@
 
 #include "bbque/configuration_manager.h"
 #include "bbque/modules_factory.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 namespace br = bbque::res;
 
@@ -51,7 +51,7 @@ TestPlatformData::~TestPlatformData() {
 TestPlatformData::ExitCode_t
 TestPlatformData::LoadPlatformData() {
 		ConfigurationManager &cm(ConfigurationManager::GetInstance());
-		br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+		ResourceAccounter &ra(ResourceAccounter::GetInstance());
 		char resourcePath[] = "tile0.cluster256.mem0";
 		//                     .............^
 		//                            13

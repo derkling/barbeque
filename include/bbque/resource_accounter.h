@@ -21,15 +21,11 @@
 #include <set>
 #include <thread>
 #include "bbque/application_manager.h"
-#include "bbque/res/resource_accounter_conf.h"
+#include "bbque/resource_accounter_conf.h"
 #include "bbque/res/resource_utils.h"
 #include "bbque/res/resource_tree.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
-
-using bbque::ApplicationManager;
-using bbque::plugins::LoggerIF;
-using bbque::app::AppSPtr_t;
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
 
@@ -39,7 +35,12 @@ using bbque::app::AppSPtr_t;
 // Max length for the resource view token string
 #define TOKEN_PATH_MAX_LEN 30
 
-namespace bbque { namespace res {
+using bbque::ApplicationManager;
+using bbque::plugins::LoggerIF;
+using bbque::app::AppSPtr_t;
+
+
+namespace bbque {
 
 /** Map of map of ResourceUsage descriptors. Key: Application UID*/
 typedef std::map<AppUid_t, UsagesMapPtr_t> AppUsagesMap_t;
@@ -646,7 +647,6 @@ private:
 
 };
 
-}   // namespace res
 
 }   // namespace bbque
 

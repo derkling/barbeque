@@ -18,10 +18,10 @@
 #ifndef BBQUE_RESOURCE_ACCOUNTER_CONF_IF_H_
 #define BBQUE_RESOURCE_ACCOUNTER_CONF_IF_H_
 
-#include "bbque/res/resource_accounter_status.h"
+#include "bbque/resource_accounter_status.h"
 
 
-namespace bbque { namespace res {
+namespace bbque {
 
 /**
  * @brief Resources accounting configuration
@@ -63,8 +63,6 @@ public:
 	virtual void PutView(RViewToken_t tok) = 0;
 
 };
-
-} // namespace res
 
 } // namespace bbque
 

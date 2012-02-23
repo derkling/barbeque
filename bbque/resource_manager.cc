@@ -124,7 +124,7 @@ ResourceManager::ResourceManager() :
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
 	pm(bp::PluginManager::GetInstance()),
-	ra(br::ResourceAccounter::GetInstance()),
+	ra(ResourceAccounter::GetInstance()),
 	mc(bu::MetricsCollector::GetInstance()),
 	pp(PlatformProxy::GetInstance()) {
 

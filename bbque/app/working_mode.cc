@@ -23,7 +23,7 @@
 #include "bbque/plugin_manager.h"
 
 #include "bbque/app/application.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 #include "bbque/res/resource_utils.h"
 #include "bbque/utils/utility.h"
 
@@ -72,7 +72,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	std::string rsrc_path_tpl(ResourcePathUtils::GetTemplate(rsrc_path));
 
 	// Check the total amount of resource
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	uint64_t rsrc_total_qty = ra.Total(rsrc_path_tpl);
 
 	// Does the resource exist ?
@@ -162,7 +162,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		ResID_t src_ID,
 		ResID_t dst_ID,
 		uint8_t bid) {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	UsagesMap_t::iterator usage_it, it_end;
 
 	// Null name check

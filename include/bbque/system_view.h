@@ -19,14 +19,12 @@
 #define BBQUE_SYSTEM_VIEW_H_
 
 #include "bbque/application_manager.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 using bbque::ApplicationManager;
 using bbque::ApplicationManagerStatusIF;
 using bbque::app::ApplicationStatusIF;
 using bbque::app::AppCPtr_t;
-using bbque::res::ResourceAccounter;
-using bbque::res::ResourceAccounterStatusIF;
 using bbque::res::ResourcePtr_t;
 using bbque::res::ResourcePtrList_t;
 

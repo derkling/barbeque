@@ -37,13 +37,18 @@ using bbque::app::AppSPtr_t;
 using bbque::app::AppUid_t;
 using bbque::utils::AttributesContainer;
 
-namespace bbque { namespace res {
+namespace bbque {
+
+// Forward declaration
+class ResourceAccounter;
+
+
+namespace res {
 
 // Forward declarations
 class Resource;
 struct ResourceState;
 class ResourceUsage;
-class ResourceAccounter;
 
 /** Type for ID used in resource path */
 typedef int16_t ResID_t;
@@ -127,7 +132,7 @@ struct ResourceState {
 class Resource: public AttributesContainer {
 
 // This makes method SetTotal() accessible to RA
-friend class ResourceAccounter;
+friend class bbque::ResourceAccounter;
 
 public:
 

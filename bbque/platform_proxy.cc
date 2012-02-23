@@ -114,7 +114,7 @@ void PlatformProxy::Monitor() {
 
 PlatformProxy::ExitCode_t
 PlatformProxy::LoadPlatformData() {
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	ExitCode_t result = OK;
 
 #ifdef BBQUE_TEST_PLATFORM_DATA
@@ -191,7 +191,7 @@ PlatformProxy::ReclaimResources(AppPtr_t papp) {
 
 PlatformProxy::ExitCode_t
 PlatformProxy::MapResources(AppPtr_t papp, UsagesMapPtr_t pres, bool excl) {
-	br::ResourceAccounter &ra = br::ResourceAccounter::GetInstance();
+	ResourceAccounter &ra = ResourceAccounter::GetInstance();
 	RViewToken_t rvt = ra.GetScheduledView();
 	ExitCode_t result = OK;
 

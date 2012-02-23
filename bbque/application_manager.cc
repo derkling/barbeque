@@ -25,7 +25,7 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/app/recipe.h"
 #include "bbque/plugins/recipe_loader.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
@@ -796,7 +796,7 @@ ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
-	br::ResourceAccounter &ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	PlatformProxy::ExitCode_t pp_result;
 	ExitCode_t result;
 

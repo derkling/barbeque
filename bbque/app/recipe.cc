@@ -21,7 +21,7 @@
 
 #include "bbque/modules_factory.h"
 #include "bbque/app/working_mode.h"
-#include "bbque/res/resource_accounter.h"
+#include "bbque/resource_accounter.h"
 
 namespace ba = bbque::app;
 namespace bp = bbque::plugins;
@@ -78,7 +78,7 @@ void Recipe::AddConstraint(std::string const & rsrc_path,
 				uint64_t lb,
 				uint64_t ub) {
 	// Check resource existance
-	br::ResourceAccounter & ra(br::ResourceAccounter::GetInstance());
+	ResourceAccounter & ra(ResourceAccounter::GetInstance());
 	if (!ra.ExistResource(rsrc_path))
 		return;
 
