@@ -38,6 +38,14 @@ configure_file (
 	"${PROJECT_BINARY_DIR}/config/default/bbqued"
 )
 
+# Setup BOSP shell
+configure_file (
+	"${PROJECT_SOURCE_DIR}/config/bosp_init.env.in"
+	"${PROJECT_BINARY_DIR}/config/bosp_init.env"
+	@ONLY
+)
+
+
 # Build subdirs
 add_subdirectory(utils)
 add_subdirectory(app)
@@ -102,6 +110,10 @@ install (PROGRAMS "${PROJECT_BINARY_DIR}/config/bbqued"
 		COMPONENT BarbequeRTRM)
 install (FILES "${PROJECT_BINARY_DIR}/config/default/bbqued"
 	DESTINATION ${BBQUE_PATH_DEFAULTS}
+		COMPONENT BarbequeRTRM)
+# Install the BOSP Shell environment setup
+install (FILES "${PROJECT_BINARY_DIR}/config/bosp_init.env"
+		DESTINATION ${BBQUE_PATH_CONF}
 		COMPONENT BarbequeRTRM)
 # Install the PIL configurations
 install (DIRECTORY "${PROJECT_SOURCE_DIR}/config/pil/"
