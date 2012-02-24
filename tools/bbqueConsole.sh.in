@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Source the daemon configuration settings
-. @CMAKE_INSTALL_PREFIX@/etc/default/bbqued
+# Source the BOSP Shell configuration
+source @CMAKE_INSTALL_PREFIX@/etc/bbque/bosp_init.env
 
 # CONSOLE CONFIGURATION
 BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
@@ -18,8 +18,13 @@ FONT=-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1
 cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh <<EOF
 #!/bin/bash
 
-echo "##### Managed EXCs:"
-echo
+function bosp_dump_tasks {
+
+echo -ne "\E[30;42m"
+echo "                                                                          "
+echo "                    Managed Applications: EXCs                            "
+echo "                                                                          "
+echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
 for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	NAME=\`basename \$APP\`
 	if [ \$NAME == "bbque" -o \$NAME == "silos" -o \$NAME == "res" -o \$NAME == "host" ]; then
@@ -39,15 +44,33 @@ for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	echo "    CPUs: \$CPUS - \${CPUU}% {P: \$CPUP, Q: \$CPUQ}"
 	echo "    MEMs: \$MEMB - \${MEMN}n {M: \$MEMU}"
 done
+}
+
+while [ 1 ]; do
+	clear
+	printf "BOSP Console :: Tasks Monitor %40s\n\n" "\`date +%c\`"
+	if [ -d $BBQUE_SYSROOT/mnt/cgroup/bbque ]; then
+		bosp_dump_tasks
+	else
+		echo -ne "\nBbqued NOT running\n\n"
+	fi
+	sleep $BBQUE_SUPDATE
+done
+
+
 EOF
 chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh
 
 cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh <<EOF
 #!/bin/bash
 
-# Main Targest
-echo "##### Main TARGET:"
-echo
+function bosp_dump_resources {
+
+echo -ne "\E[30;42m"
+echo "                                                                          "
+echo "                    System Resources: Main TARGET                         "
+echo "                                                                          "
+echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
 for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	NAME=\`basename \$TRG\`
 	if [ \$NAME != "bbque" -a \$NAME != "silos" -a \$NAME != "host" -o \$NAME == "res" ]; then
@@ -65,14 +88,15 @@ for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 
 	echo ".:: \$NAME"
 	echo "    CPUs: \$CPUS - \${CPUU}% {P: \$CPUP, Q: \$CPUQ}"
-	echo "    MEMs: \$MEMB - \${MEMN}n {Max used: \$MEMU}"
+	echo "    MEMs: \$MEMB - \${MEMN}[nodes] {Max used: \$MEMU}"
 
 done
 
-# Main Targest
-echo
-echo "##### Managed NODES:"
-echo
+echo -ne "\n\n\E[30;42m"
+echo "                                                                          "
+echo "                     Managed Resources: NODES                             "
+echo "                                                                          "
+echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
 for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
 	NAME=\`basename \$TRG\`
 	if [ \$NAME == "res" ]; then
@@ -93,33 +117,31 @@ for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
 	echo "    MEMs: \$MEMB - \${MEMN}[nodes] {Max used: \$MEMU}"
 
 done
+
+}
+
+while [ 1 ]; do
+	clear
+	printf "BOSP Console :: Resources Monitor %40s\n\n" "\`date +%c\`"
+	if [ -d $BBQUE_SYSROOT/mnt/cgroup/bbque ]; then
+		bosp_dump_resources
+	else
+		echo -ne "\nBbqued NOT running\n\n"
+	fi
+	sleep $BBQUE_SUPDATE
+done
+
 EOF
 chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh
 
 aterm +sb -fn $FONT -geometry 136x18+-9+18 -title "Syslog" \
 	-e tail -f /var/log/syslog &
-aterm +sb -fn $FONT -geometry 74x39--9-17 -title "EXCs Resources" \
-	-e watch -n$BBQUE_SUPDATE "$BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh 2>/dev/null "&
-aterm +sb -fn $FONT -geometry 74x57--9+18 -title "BBQ CGroups" \
-	-e watch -n$BBQUE_SUPDATE "$BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh 2>/dev/null "&
+aterm +sb -cr black -fn $FONT -geometry 74x55--9-17 \
+	-title "BOSP Shell :: Resources Monitor" \
+	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh &
+aterm +sb -cr black -fn $FONT -geometry 74x40--9+18 \
+	-title "BOSP Shell :: Task Monitor" \
+	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh &
 aterm +sb -fn $FONT -geometry 136x77+-9-18 -title "BBQUE Log" \
 	-e tail -f $BBQUE_SYSROOT/var/bbque/bbque.log &
 
-# BarbequeRTRM daemon startup
-aterm +sb -fn $FONT -geometry 105x18+816+18 -title "BarbequeRTRM Daemon" &
-cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_StartBBQ.sh <<EOF
-sudo BBQUE_PILLAYOUT=$BBQUE_PILLAYOUT \
-	BBQUE_CONF=$BBQUE_CONF \
-	./etc/init.d/bbqued start
-EOF
-chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_StartBBQ.sh
-
-# First TestApp
-aterm +sb -fn $FONT -geometry 106x25+816+240 -title "FIRST TestApp" &
-#	-e $BBQUE_SYSROOT/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly &
-aterm +sb -fn $FONT -geometry 107x25+813+530 -title "SECOND TestApp" &
-#	-e $BBQUE_SYSROOT/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly &
-cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_StartTestApp.sh <<EOF
-$BBQUE_SYSROOT/usr/bin/BbqRTLibTestApp -w 3 -c 150 -r CPUSonly
-EOF
-chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_StartTestApp.sh
