@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Source the daemon configuration settings
+. @CMAKE_INSTALL_PREFIX@/etc/default/bbqued
+
+# STRESS-TEST CONFIGURATION
+BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
+
+# Setup test applications count (max 100)
+APPS=${APPS:-`echo $RANDOM`}
+let APPS=APPS%100
+# Setup the stresstest binary
+STEST=${STEST:-$BBQUE_SYSROOT/var/bbque/BbqStressTest.sh}
+
+
+cat > $STEST <<EOF
+#!/bin/bash
+$BBQUE_SYSROOT/usr/bin/bbque-testapp -w \$1 -c \$2
+EOF
+chmod a+x $STEST
+
+for A in `seq 1 $APPS`; do
+
+	# Get a random Workload in [1,30] seconds
+	let TWL=$RANDOM%30
+	# Get a random Cycles in such that the Cycle frequecy is in the range
+	# [1/s,100/s], thus Cycles_# = Cycles_f * Workload time
+	let CYF=$RANDOM%100 && let CYC=CYF*TWL && let CYP=1000/CYF
+	# Get a random activation delay in [1,5] seconds
+	let TDL=$RANDOM%5
+
+	# Report Test progress
+	printf "\aTestApp[%03d]: WL %2d[s], CC %4d (%3d[Hz], %4d[us])... DL %2d[s]...\n" \
+		$A $TWL $CYC $CYF $CYP $TDL
+
+	$STEST $TWL $CYC &
+
+	sleep $TDL
+done

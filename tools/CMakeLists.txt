@@ -26,6 +26,17 @@ install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueConsole.sh"
 	COMPONENT BarbequeUTILS
 	RENAME bbque-console)
 
+#----- Deploy the BBQ Stress Test script
+configure_file (
+	"${PROJECT_SOURCE_DIR}/tools/bbqueStressTest.sh.in"
+	"${PROJECT_BINARY_DIR}/tools/bbqueStressTest.sh"
+	@ONLY
+)
+install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueStressTest.sh"
+	DESTINATION ${BBQUE_PATH_BBQ}
+	COMPONENT BarbequeUTILS
+	RENAME bbque-stest)
+
 #----- Deploy the BBQ OP List generator script
 install(PROGRAMS "${PROJECT_SOURCE_DIR}/tools/bbqueOpListBuilder.awk"
 	DESTINATION ${BBQUE_PATH_BBQ}
