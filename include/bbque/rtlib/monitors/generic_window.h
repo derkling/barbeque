@@ -180,6 +180,9 @@ public:
 		setCapacity(windowSize);
 	}
 
+	virtual ~GenericWindow() {
+	}
+
 	/**
 	 * @brief Returns the maximum value from the window
 	 */

@@ -40,7 +40,7 @@ public:
 	/**
 	 * @brief Deletes all structures and variables
 	 */
-	~Monitor();
+	virtual ~Monitor();
 
 	/**
 	 * @brief Creates a new monitor with a window keeping track of old
