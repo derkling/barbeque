@@ -39,15 +39,15 @@ uint32_t MemoryMonitor::extractMemoryUsage() {
 
 	//The second number in /proc/self/statm is VmRSS in pages
 	//TODO decide whether use VmRSS or VmRSS - sharedPages
-	FILE* fp = fopen("/proc/self/statm","r");
+	FILE* fp = fopen("/proc/self/statm", "r");
 	result = ::fscanf(fp, "%*d %u", &memoryUsageKb);
 	if (result == EOF) {
 		perror("MemoryMonitor read FAILED");
 		fclose(fp);	//Is it safe to close it here? Is fp valid?
 		return 0;
 	}
-	fclose(fp);
 
+	fclose(fp);
 	return (memoryUsageKb * getpagesize() / 1024);
 }
 
@@ -55,4 +55,26 @@ uint32_t MemoryMonitor::extractMemoryUsage(uint16_t id) {
 	uint32_t memoryUsageKb = extractMemoryUsage();
 	goalList[id]->addElement(memoryUsageKb);
 	return memoryUsageKb;
+}
+
+uint32_t MemoryMonitor::extractVmPeakSize() {
+	uint32_t vmPeak_Kb = 0;
+	char buf[256];
+
+	FILE* fp = fopen("/proc/self/status", "r");
+	while (!feof(fp)) {
+		if (fgets(buf, 256, fp) == NULL) {
+			perror("MemoryMonitor read FAILED");
+			fclose(fp);	//Is it safe to close it here? Is fp valid?
+			return 0;
+		}
+		if (strncmp(buf, "VmPeak:", 7))
+			continue;
+		sscanf(buf, "%*s %d", &vmPeak_Kb);
+		fclose(fp);
+		return vmPeak_Kb ;
+	}
+
+	fclose(fp);
+	return vmPeak_Kb;
 }

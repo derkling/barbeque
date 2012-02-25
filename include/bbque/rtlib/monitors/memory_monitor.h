@@ -66,6 +66,14 @@ public:
 	 */
 	uint32_t extractMemoryUsage(uint16_t id);
 
+	/**
+	 * @brief Extracts Virtual memory peak size
+	 *
+	 * This function can be used to get the maximum amount of virtual memory
+	 * allocated for the current process.
+	 */
+	uint32_t extractVmPeakSize();
+
 };
 
 /*******************************************************************************
