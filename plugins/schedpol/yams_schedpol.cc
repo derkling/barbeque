@@ -97,8 +97,7 @@ YamsSchedPol::YamsSchedPol():
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(
-			SCHEDULER_MANAGER_NAMESPACE"."
-			SCHEDULER_POLICY_NAME);
+			SCHEDULER_POLICY_NAMESPACE SCHEDULER_POLICY_NAME);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 
 	if (logger)
