@@ -202,13 +202,9 @@ public:
 	 */
 	struct LParams_t {
 		/** Scale:     SCALE * x       */
-		float xscale;
+		float scale;
 		/** XOffset:   f(x +/- OFFSET) */
 		float xoffset;
-		/** YOffset:   f(x) +/- OFFSET */
-		float yoffset;
-		/** YScale :   SCALE * f(x)    */
-		float yscale;
 	};
 
 	/**
@@ -223,8 +219,6 @@ public:
 		float xscale;
 		/** YScale:    SCALE * base ^ (x)      */
 		float yscale;
-		/** YOffset:   {base ^ (x)} +/- OFFSET */
-		float yoffset;
 	};
 
 	/**

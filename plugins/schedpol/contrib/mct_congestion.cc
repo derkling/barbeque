@@ -84,8 +84,6 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 
 	// Fixed function parameters
 	params.k = 1.0;
-	params.lin.yscale = -1.0;
-	params.lin.yoffset = 1.0;
 	params.exp.base = expbase;
 
 	// Iterate the whole set of resource usage
@@ -122,17 +120,13 @@ void MCTCongestion::SetIndexParameters(RegionLevels_t const & rl, float & penalt
 		CLEParams_t & params) {
 
 	// Linear parameters
-	if (rl.free > 0) {
-		params.lin.xoffset = -rl.usage;
-		params.lin.xscale = penalty / rl.free;
-	}
 	params.lin.xoffset = static_cast<float>(rl.sat_lack);
+	params.lin.scale = penalty / static_cast<float>(rl.free - rl.sat_lack);
 
 	// Exponential parameters
 	params.exp.yscale = (1.0 - penalty) / (params.exp.base - 1.0);
-	params.exp.xscale = 1.0 / (rl.saturate - rl.total);
-	params.exp.xoffset = -rl.total;
-	params.exp.yoffset = -params.exp.yscale;
+	params.exp.xscale = static_cast<float>(rl.free - rl.total);
+	params.exp.xoffset = static_cast<float>(rl.total);
 }
 
 

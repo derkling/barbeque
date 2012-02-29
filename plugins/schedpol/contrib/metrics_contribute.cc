@@ -15,7 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <algorithm>
 #include <cmath>
 
 #include "metrics_contribute.h"
@@ -42,6 +41,7 @@ uint16_t const MetricsContribute::ConfigParamsDefault[MCT_CPT_COUNT] = {
 	90,
 	70,
 };
+
 
 MetricsContribute::MetricsContribute(const char * _name,
 		uint16_t const params[]):
@@ -149,11 +149,19 @@ float MetricsContribute::ComputeCLEIndex(Region_t region,
 }
 
 float MetricsContribute::FuncLinear(float x, LParams_t const & p) {
-	return p.yscale * (p.xscale * (x + p.xoffset)) + p.yoffset;
+	DB(
+		fprintf(stderr, "LIN ==== 1 - %.6f * (%.2f - %.2f)\n",
+			p.scale, x, p.xoffset);
+	  );
+	return 1 - p.scale * (x - p.xoffset);
 }
 
 float MetricsContribute::FuncExponential(float x, EParams_t const & p) {
-	return p.yscale * pow(p.base, (p.xscale * (x + p.xoffset))) + p.yoffset;
+	DB(
+		fprintf(stderr, "EXP ==== %.4f * (%.4f ^ ((%.4f - %.4f) / %.4f) - 1)\n",
+			p.yscale, p.base, x, p.xoffset, p.xscale);
+	  );
+	return p.yscale * (pow(p.base, ((x - p.xoffset) / p.xscale)) - 1);
 }
 
 
