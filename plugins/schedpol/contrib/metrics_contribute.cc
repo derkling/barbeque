@@ -51,8 +51,9 @@ MetricsContribute::MetricsContribute(const char * _name,
 	strncpy(name, _name, MCT_NAME_MAX_LEN);
 	name[MCT_NAME_MAX_LEN-1] = '\0';
 
-	// Array of configuration parameters
-	msl_params = params;
+	// Array of Maximum Saturation Levels parameters
+	for (int i = 0; i < MCT_RSRC_COUNT; ++i)
+		msl_params[i] = static_cast<float> (params[i]) / 100.0;
 
 	// Get a logger instance
 	char logname[18];
@@ -89,11 +90,12 @@ MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
 
 	// Get the max saturation level
 	rl.total = sv->ResourceTotal(rsrc_path);
+	// Get the max saturation level of the resource
 	std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
 	if (rsrc_name.compare(rsrc_types_str[0]) == 0)
-		rl.saturate = rl.total * msl_params[0] / 100;
+		rl.saturate = rl.total * msl_params[0];
 	else
-		rl.saturate = rl.total * msl_params[1] / 100;
+		rl.saturate = rl.total * msl_params[1];
 
 	// Resource availability (system resource state view)
 	rl.usage = std::min<uint64_t>(

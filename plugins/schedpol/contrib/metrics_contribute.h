@@ -290,9 +290,8 @@ protected:
 	 /** Contribute identifier name */
 	 char name[MCT_NAME_MAX_LEN];
 
-
 	 /** Maximum Saturation Levels per resource */
-	 uint16_t const * msl_params;
+	 float msl_params[MCT_RSRC_COUNT];
 
 	 /** Resource type strings */
 	 static char const * rsrc_types_str[MCT_RSRC_COUNT];
