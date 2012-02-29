@@ -314,14 +314,14 @@ protected:
 	 *
 	 * @param rsrc_path Resource path
 	 * @param amount Requested resource usage amount
-	 * @param papp Application to evaluate for scheduling
+	 * @param evl_ent Entity to evaluate for scheduling
 	 * @param rl Structure embedding info for region usage division
 	 *
 	 * @return The resulting region of usage of the given resource, whenever
 	 * the scheduling satisfies the given request.
 	 */
-	 Region_t GetUsageRegion(std::string const & rsrc_path,
-			 uint64_t amount, AppCPtr_t papp, RegionLevels_t & rl);
+	 Region_t GetUsageRegion(std::string const & rsrc_path, uint64_t amount,
+			 EvalEntity_t const & evl_ent, RegionLevels_t & rl);
 
 	 /**
 	  * @brief Filter function for resource usage index computation

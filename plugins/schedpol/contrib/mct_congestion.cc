@@ -95,8 +95,7 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 		logger->Debug("%s: {%s}", evl_ent.StrId(), rsrc_path.c_str());
 
 		// Get the region of the (next) resource usage
-		region = GetUsageRegion(rsrc_path, pusage->GetAmount(),
-				evl_ent.papp, rl);
+		region = GetUsageRegion(rsrc_path, pusage->GetAmount(), evl_ent, rl);
 
 		// 1. Get the congestion penalty to use
 		// 2. Finish to set the parameters for the index computation

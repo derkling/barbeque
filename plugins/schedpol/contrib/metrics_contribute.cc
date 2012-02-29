@@ -85,7 +85,7 @@ MetricsContribute::Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 MetricsContribute::Region_t
 MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
 		uint64_t rsrc_amount,
-		AppCPtr_t papp,
+		EvalEntity_t const & evl_ent,
 		RegionLevels_t & rl) {
 	// Total amount of resource
 	rl.total = sv->ResourceTotal(rsrc_path);
