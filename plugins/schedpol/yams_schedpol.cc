@@ -451,10 +451,8 @@ void YamsSchedPol::EvalWorkingMode(SchedEntityPtr_t pschd) {
 	// Insert the SchedEntity in the scheduling list
 	sched_ul.lock();
 	entities.push_back(pschd);
-	logger->Debug("Insert [%d]: EXC{%s} \tAWM{%d} CLS{%d} ....: metrics %1.3f",
-			entities.size(),
-			pschd->papp->StrId(), pschd->pawm->Id(), pschd->clust_id,
-			pschd->metrics);
+	logger->Debug("Insert [%d]: %s: ..:: metrics %1.3f",
+			entities.size(), pschd->StrId(), pschd->metrics);
 }
 
 void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
