@@ -67,7 +67,7 @@ MCTCongestion::MCTCongestion(const char * _name, uint16_t const cfg_params[]):
 					penalties_int[i], penalties_default[i]);
 			penalties_int[i] = penalties_default[i];
 		}
-		penalties[i] = (float) penalties_int[i] / 100;
+		penalties[i] = static_cast<float>(penalties_int[i]) / 100.0;
 		logger->Debug("penalty.%s \t= %.2f", rsrc_types_str[i], penalties[i]);
 	}
 }
