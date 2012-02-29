@@ -212,13 +212,13 @@ private:
 	static char const * mct_str[YAMS_MCT_COUNT];
 
 	/** Metrics contributes weights */
-	uint16_t mct_weights[YAMS_MCT_COUNT];
+	static uint16_t mct_weights[YAMS_MCT_COUNT];
 
 	/** Normalized metrics contributes weights */
 	float mct_weights_norm[YAMS_MCT_COUNT];
 
 	/** Global config parameters for metrics contributes */
-	uint16_t mct_cfg_params[MetricsContribute::MCT_CPT_COUNT];
+	static uint16_t mct_cfg_params[MetricsContribute::MCT_CPT_COUNT];
 
 
 	/**

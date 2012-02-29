@@ -72,6 +72,8 @@ YamsSchedPol::coll_mct_metrics[YAMS_MCT_COUNT] = {
 };
 
 // :::::::::::::::::::::: Static plugin interface ::::::::::::::::::::::::::::
+uint16_t YamsSchedPol::mct_weights[YAMS_MCT_COUNT] = {0};
+uint16_t YamsSchedPol::mct_cfg_params[MetricsContribute::MCT_CPT_COUNT]= {0};
 
 void * YamsSchedPol::Create(PF_ObjectParams *) {
 	return new YamsSchedPol();
@@ -94,6 +96,7 @@ YamsSchedPol::YamsSchedPol():
 	cm(ConfigurationManager::GetInstance()),
 	ra(ResourceAccounter::GetInstance()),
 	mc(bu::MetricsCollector::GetInstance()) {
+	char conf_opts[YAMS_MCT_COUNT+MetricsContribute::MCT_CPT_COUNT][40];
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(
@@ -108,11 +111,10 @@ YamsSchedPol::YamsSchedPol():
 
 	// Load the weights of the metrics contributes
 	po::options_description opts_desc("Metrics contributes parameters");
-	char conf_opt[40];
 	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
-		snprintf(conf_opt, 40, "MetricsContribute.%s.weight", mct_str[i]);
+		snprintf(conf_opts[i], 40, "MetricsContribute.%s.weight", mct_str[i]);
 		opts_desc.add_options()
-			(conf_opt,
+			(conf_opts[i],
 			 po::value<uint16_t> (&mct_weights[i])->default_value(0),
 			"Single metrics contribute weight");
 		;
@@ -120,8 +122,10 @@ YamsSchedPol::YamsSchedPol():
 
 	// Global MetricsContribute config parameters
 	for (int i = 0; i < MetricsContribute::MCT_CPT_COUNT; ++i) {
+		snprintf(conf_opts[YAMS_MCT_COUNT+i], 40, "MetricsContribute.%s",
+				MetricsContribute::ConfigParamsStr[i]);
 		opts_desc.add_options()
-			(MetricsContribute::ConfigParamsStr[i],
+			(conf_opts[YAMS_MCT_COUNT+i],
 			 po::value<uint16_t>
 			 (&mct_cfg_params[i])->default_value(
 				 MetricsContribute::ConfigParamsDefault[i]),
