@@ -189,10 +189,10 @@ public:
 		uint64_t saturate;
 		/** Current usage level (system resource state)*/
 		uint64_t usage;
-		/** Track difference between saturation and usage */
-		int64_t free;
-		/** New resource usage level (scheduling state) */
-		uint64_t new_usage;
+		/** Amount of resource remaining before reaching the saturation */
+		uint64_t free;
+		/** Difference between saturation and free resources */
+		uint64_t sat_lack;
 		/** Total amount of resource */
 		uint64_t total;
 	};

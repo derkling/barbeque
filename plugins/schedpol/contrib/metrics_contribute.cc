@@ -87,9 +87,9 @@ MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
 		uint64_t rsrc_amount,
 		AppCPtr_t papp,
 		RegionLevels_t & rl) {
-
-	// Get the max saturation level
+	// Total amount of resource
 	rl.total = sv->ResourceTotal(rsrc_path);
+
 	// Get the max saturation level of the resource
 	std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
 	if (rsrc_name.compare(rsrc_types_str[0]) == 0)
@@ -98,24 +98,26 @@ MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
 		rl.saturate = rl.total * msl_params[1];
 
 	// Resource availability (system resource state view)
-	rl.usage = std::min<uint64_t>(
-			rl.saturate, rl.total - sv->ResourceAvailable(rsrc_path, 0, papp));
+	rl.free = sv->ResourceAvailable(rsrc_path, vtok);
+	rl.usage = rl.total - rl.free;
 
-	// Amount of resource available before reach the saturation
-	rl.free = rl.saturate - rl.usage;
+	// Amount of resource remaining before reaching the saturation
+	rl.sat_lack = 0;
+	if (rl.free > rl.total - rl.saturate)
+		rl.sat_lack = rl.saturate - rl.total + rl.free;
 
-	// Resource used (schedule resource state view) + current request
-	rl.new_usage = sv->ResourceUsed(rsrc_path, vtok) + rsrc_amount;
-
-	logger->Debug("Region thres: usg = %llu| sat = %llu| free = %llu| x = %llu",
-			rl.usage, rl.saturate, rl.free, rl.new_usage);
+	assert(rl.sat_lack <= rl.free);
+	logger->Debug("%s: Regions => usg: %lu| sat: %lu| sat-lack: %lu| "
+			"free: %lu| req: %lu|",
+			evl_ent.StrId(),
+			rl.usage, rl.saturate, rl.sat_lack, rl.free, rsrc_amount);
 
 	// SSR: Sub-Saturation Region
-	if ((rl.free > 0) && (rl.new_usage <= rl.usage))
+	if (rsrc_amount <= rl.sat_lack)
 		return MCT_RU_SSR;
 
 	// ISR: In-Saturation Region
-	if (rl.new_usage < rl.saturate)
+	if (rsrc_amount <= rl.free)
 		return MCT_RU_ISR;
 
 	// OSR: Over-Saturation Region

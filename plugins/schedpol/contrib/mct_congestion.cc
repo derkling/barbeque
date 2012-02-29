@@ -107,7 +107,7 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 			SetIndexParameters(rl, penalties[MCT_RSRC_MEM], params);
 
 		// Compute the region index
-		ru_index = ComputeCLEIndex(region, rl.new_usage, params);
+		ru_index = ComputeCLEIndex(region, pusage->GetAmount(), params);
 		logger->Debug("%s: {%s} index = %.4f", evl_ent.StrId(),
 				rsrc_path.c_str(), ru_index);
 
@@ -127,11 +127,7 @@ void MCTCongestion::SetIndexParameters(RegionLevels_t const & rl, float & penalt
 		params.lin.xoffset = -rl.usage;
 		params.lin.xscale = penalty / rl.free;
 	}
-	else {
-		// In this case the result should be y(x) = 1 - penalty
-		params.lin.xoffset = 0.0;
-		params.lin.xscale = penalty / rl.new_usage;
-	}
+	params.lin.xoffset = static_cast<float>(rl.sat_lack);
 
 	// Exponential parameters
 	params.exp.yscale = (1.0 - penalty) / (params.exp.base - 1.0);
