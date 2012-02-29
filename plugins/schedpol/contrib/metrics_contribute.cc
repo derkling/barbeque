@@ -62,7 +62,6 @@ MetricsContribute::MetricsContribute(const char * _name,
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (logger)
 		logger->Info("yams: MetricsContribute[%s] ready to log\n", name);
-
 }
 
 MetricsContribute::ExitCode_t

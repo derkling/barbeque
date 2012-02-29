@@ -235,6 +235,9 @@ public:
 
 	/**
 	 * @brief Constructor
+	 *
+	 * @param name A name identifying the specific contribute
+	 * @param cfg_params Global configuration parameters
 	 */
 	MetricsContribute(const char * name, uint16_t const cfg_params[]);
 
