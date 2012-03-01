@@ -27,7 +27,12 @@ namespace po = boost::program_options;
 namespace bbque { namespace plugins {
 
 
-char const * MetricsContribute::rsrc_types_str[] = {
+char const * MetricsContribute::ResourceGenPaths[MCT_RSRC_COUNT] = {
+	RSRC_CLUST_PE,
+	RSRC_CLUST_MEM
+};
+
+char const * MetricsContribute::ResourceNames[MCT_RSRC_COUNT] = {
 	"pe",
 	"mem"
 };
@@ -91,7 +96,7 @@ MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
 
 	// Get the max saturation level of the resource
 	std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
-	if (rsrc_name.compare(rsrc_types_str[0]) == 0)
+	if (rsrc_name.compare(ResourceNames[0]) == 0)
 		rl.saturate = rl.total * msl_params[0];
 	else
 		rl.saturate = rl.total * msl_params[1];

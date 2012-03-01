@@ -175,12 +175,6 @@ public:
 		MCT_CPT_COUNT
 	};
 
-	/** Global configuration parameters string */
-	static char const * ConfigParamsStr[MCT_CPT_COUNT];
-
-	 /** Default values for configuration parameters */
-	static uint16_t const ConfigParamsDefault[MCT_CPT_COUNT];
-
 	/**
 	 * @brief Levels of resource usage determining the region boundaries
 	 */
@@ -232,6 +226,19 @@ public:
 		/** Parameters for the exponential functional */
 		EParams_t exp;
 	};
+
+
+	/** Resource names */
+	static char const * ResourceNames[MCT_RSRC_COUNT];
+
+	/** Resource path templates */
+	static char const * ResourceGenPaths[MCT_RSRC_COUNT];
+
+	/** Global configuration parameters string */
+	static char const * ConfigParamsStr[MCT_CPT_COUNT];
+
+	 /** Default values for configuration parameters */
+	static uint16_t const ConfigParamsDefault[MCT_CPT_COUNT];
 
 	/**
 	 * @brief Constructor
@@ -290,8 +297,6 @@ protected:
 	 /** Maximum Saturation Levels per resource */
 	 float msl_params[MCT_RSRC_COUNT];
 
-	 /** Resource type strings */
-	 static char const * rsrc_types_str[MCT_RSRC_COUNT];
 
 	/**
 	 * @brief Resource usage region due to a request

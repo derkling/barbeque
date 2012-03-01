@@ -45,7 +45,7 @@ MCTCongestion::MCTCongestion(const char * _name, uint16_t const cfg_params[]):
 	// Congestion penalties
 	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
 		snprintf(conf_str, 50, MCT_CONF_BASE_STR"%s.penalty.%s",
-				name, rsrc_types_str[i]);
+				name, ResourceNames[i]);
 
 		logger->Debug("%s", conf_str);
 		opts_desc.add_options()
@@ -63,12 +63,12 @@ MCTCongestion::MCTCongestion(const char * _name, uint16_t const cfg_params[]):
 	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
 		if (penalties_int[i] > 100) {
 			logger->Warn("Parameter penalty.%s out of range [0,100]: "
-					"found %d. Setting to %d", rsrc_types_str[i],
+					"found %d. Setting to %d", ResourceNames[i],
 					penalties_int[i], penalties_default[i]);
 			penalties_int[i] = penalties_default[i];
 		}
 		penalties[i] = static_cast<float>(penalties_int[i]) / 100.0;
-		logger->Debug("penalty.%s \t= %.2f", rsrc_types_str[i], penalties[i]);
+		logger->Debug("penalty.%s \t= %.2f", ResourceNames[i], penalties[i]);
 	}
 }
 
@@ -98,7 +98,7 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 		// 1. Get the congestion penalty to use
 		// 2. Finish to set the parameters for the index computation
 		std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
-		if (rsrc_name.compare(rsrc_types_str[MCT_RSRC_PE]) == 0)
+		if (rsrc_name.compare(ResourceNames[MCT_RSRC_PE]) == 0)
 			SetIndexParameters(rl, penalties[MCT_RSRC_PE], params);
 		else
 			SetIndexParameters(rl, penalties[MCT_RSRC_MEM], params);
