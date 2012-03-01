@@ -298,6 +298,11 @@ public:
 	virtual bool HasApplications (ApplicationStatusIF::SyncState_t state) = 0;
 
 	/**
+	 * @brief The number of applications having the given PRIORITY
+	 */
+	virtual uint16_t AppsCount (AppPrio_t prio) = 0;
+
+	/**
 	 * @brief The number of applications in the specified STATE
 	 */
 	uint16_t AppsCount (ApplicationStatusIF::State_t state);

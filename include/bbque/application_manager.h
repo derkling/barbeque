@@ -224,6 +224,11 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
+	uint16_t AppsCount (AppPrio_t prio);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
 	uint16_t AppsCount (ApplicationStatusIF::State_t state);
 
 	/**
