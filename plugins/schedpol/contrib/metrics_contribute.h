@@ -228,6 +228,8 @@ public:
 	};
 
 
+	/************************ Static data ****************************/
+
 	/** Resource names */
 	static char const * ResourceNames[MCT_RSRC_COUNT];
 
@@ -239,6 +241,9 @@ public:
 
 	 /** Default values for configuration parameters */
 	static uint16_t const ConfigParamsDefault[MCT_CPT_COUNT];
+
+
+	/*********************** Public methods **************************/
 
 	/**
 	 * @brief Constructor
@@ -361,6 +366,10 @@ protected:
 	  * @return A floating point value
 	  */
 	 static float FuncExponential(float x, EParams_t const & params);
+
+
+	 /******************* To be implemented by derived classes **********/
+
 
 	 /**
 	  * @brief Compute the contribute (override required)
