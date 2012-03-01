@@ -66,6 +66,14 @@ MCTReconfig::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 				uint32_t(log(clset)/log(2)), to_mig);
 	}
 
+	// Reconfiguration index = 1 if scheduled in the same AWM, without
+	// migration
+	if (!to_mig && evl_ent.papp->CurrentAWM() &&
+			evl_ent.papp->CurrentAWM()->Id() == evl_ent.pawm->Id()) {
+		ctrib = 1.0;
+		return MCT_SUCCESS;
+	}
+
 	// Resource usages of the current entity (AWM + Cluster)
 	for_each_sched_resource_usage(evl_ent, usage_it) {
 		std::string const & rsrc_path(usage_it->first);
