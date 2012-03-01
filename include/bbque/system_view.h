@@ -125,6 +125,27 @@ public:
 	}
 
 	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	inline uint16_t ApplicationsCount(AppPrio_t prio) {
+		return am.AppsCount(prio);
+	}
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	inline uint16_t ApplicationsCount(ApplicationStatusIF::State_t state) {
+		return am.AppsCount(state);
+	}
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	inline uint16_t ApplicationsCount(ApplicationStatusIF::SyncState_t state) {
+		return am.AppsCount(state);
+	}
+
+	/**
 	 * @brief Maximum integer value for the minimum application priority
 	 */
 	inline uint16_t ApplicationLowestPriority() const {
