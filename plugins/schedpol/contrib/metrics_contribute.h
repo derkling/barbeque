@@ -108,6 +108,8 @@ public:
 	enum ExitCode_t {
 		/** Success */
 		MCT_SUCCESS,
+		/** Generic fail during initialization */
+		MCT_INIT_FAILED,
 		/** No more processing element in a given cluster */
 		MCT_RSRC_NO_PE,
 		/** A specific resource is not available */
@@ -265,6 +267,19 @@ public:
 	}
 
 	/**
+	 * @brief Perform setup operations
+	 *
+	 * A metrics contribute can implement this method to place some work that
+	 * should be done once during a scheduling run. instead of being repeated
+	 * at each Compute() call.
+	 *
+	 * @param Pointer to generic parameters
+	 *
+	 * @return An exit code defined in @see ExitCode_t
+	 */
+	 virtual ExitCode_t Init(void * params) = 0;
+
+	/**
 	 * @brief Metrics computation
 	 *
 	 * Compute the scheduling metrics for the application, taking into account
@@ -279,7 +294,6 @@ public:
 	 * @return @see ExitCode_t
 	 */
 	 ExitCode_t Compute(EvalEntity_t const & evl_ent, float & ctrib);
-
 
 protected:
 

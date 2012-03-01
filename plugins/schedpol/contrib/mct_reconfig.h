@@ -37,6 +37,8 @@ public:
 	 */
 	MCTReconfig(const char * _name, uint16_t cfg_params[]);
 
+	ExitCode_t Init(void * params);
+
 private:
 
 	/**

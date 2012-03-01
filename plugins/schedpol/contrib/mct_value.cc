@@ -21,6 +21,12 @@ using namespace bbque::res;
 
 namespace bbque { namespace plugins {
 
+MetricsContribute::ExitCode_t
+MCTValue::Init(void * params) {
+	(void) params;
+
+	return MCT_SUCCESS;
+}
 
 MetricsContribute::ExitCode_t
 MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {

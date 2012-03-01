@@ -43,6 +43,13 @@ MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
 }
 
 MetricsContribute::ExitCode_t
+MCTReconfig::Init(void * params) {
+	(void) params;
+
+	return MCT_SUCCESS;
+}
+
+MetricsContribute::ExitCode_t
 MCTReconfig::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
 	float reconf_cost = 0.0;

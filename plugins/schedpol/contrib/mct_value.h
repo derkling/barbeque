@@ -35,6 +35,8 @@ public:
 		MetricsContribute(_name, cfg_params) {
 	};
 
+	ExitCode_t Init(void * params);
+
 private:
 
 	/**

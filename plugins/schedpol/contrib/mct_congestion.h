@@ -34,6 +34,8 @@ public:
 	 */
 	MCTCongestion(const char * _name, uint16_t const cfg_params[]);
 
+	ExitCode_t Init(void * params);
+
 private:
 
 	/**
