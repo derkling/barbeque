@@ -86,11 +86,10 @@ MetricsContribute::Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	return MCT_SUCCESS;
 }
 
-MetricsContribute::Region_t
-MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
+void MetricsContribute::GetResourceThresholds(std::string const & rsrc_path,
 		uint64_t rsrc_amount,
 		EvalEntity_t const & evl_ent,
-		RegionLevels_t & rl) {
+		ResourceThresholds_t & rl) {
 	// Total amount of resource
 	rl.total = sv->ResourceTotal(rsrc_path);
 
@@ -115,41 +114,27 @@ MetricsContribute::GetUsageRegion(std::string const & rsrc_path,
 			"free: %lu| req: %lu|",
 			evl_ent.StrId(),
 			rl.usage, rl.saturate, rl.sat_lack, rl.free, rsrc_amount);
-
-	// SSR: Sub-Saturation Region
-	if (rsrc_amount <= rl.sat_lack)
-		return MCT_RU_SSR;
-
-	// ISR: In-Saturation Region
-	if (rsrc_amount <= rl.free)
-		return MCT_RU_ISR;
-
-	// OSR: Over-Saturation Region
-	return MCT_RU_OSR;
 }
 
-float MetricsContribute::ComputeCLEIndex(Region_t region,
-		float rsrc_usage,
+float MetricsContribute::CLEIndex(uint64_t c_thresh,
+		uint64_t l_thresh,
+		float rsrc_amount,
 		CLEParams_t const & params) {
-
-	logger->Debug("Region = %d", region);
-
-	switch(region) {
-	case MCT_RU_SSR:
-		// Constant
+	// SSR: Sub-Saturation Region
+	if (rsrc_amount <= c_thresh) {
+		logger->Debug("Region: ""Constant""");
 		return params.k;
-
-	case MCT_RU_ISR:
-		// Linear
-		return FuncLinear(rsrc_usage, params.lin);
-
-	case MCT_RU_OSR:
-		// Exponential
-		return FuncExponential(rsrc_usage, params.exp);
-
-	default:
-		return 0;
 	}
+
+	// ISR: In-Saturation Region
+	if (rsrc_amount <= l_thresh) {
+		logger->Debug("Region: ""Linear""");
+		return FuncLinear(rsrc_amount, params.lin);
+	}
+
+	// OSR: Over-Saturation Region
+	logger->Debug("Region: ""Exponential""");
+	return FuncExponential(rsrc_amount, params.exp);
 }
 
 float MetricsContribute::FuncLinear(float x, LParams_t const & p) {

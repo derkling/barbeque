@@ -130,28 +130,6 @@ public:
 		MCT_METRICS_COUNT
 	};
 
-	/**
-	 * @brief Region_t
-	 *
-	 * According to the current usage level of a resource, we distinguish
-	 * among different regions in order to provide a coarse-grained
-	 * information about it, that derived class implementing the metrics
-	 * contribute computation, could exploit for their evaluations.To be
-	 * precise, the idea is to bind a specific function to each region, to
-	 * evaluate the impact of a resource requirement. The regions are
-	 * distinguished since it is reasonable to think about the aim of penalize
-	 * a request the closer it gets the 100% of usage.
-	 */
-	enum Region_t {
-		/** Sub-Saturation Region */
-		MCT_RU_SSR,
-		/** In-Saturation Region */
-		MCT_RU_ISR,
-		/** Over-Saturation Region */
-		MCT_RU_OSR,
-
-		MCT_RU_COUNT
-	};
 
 	/**
 	  * @brief Type of resource to manage
@@ -179,8 +157,17 @@ public:
 
 	/**
 	 * @brief Levels of resource usage determining the region boundaries
+	 *
+	 * According to the current usage level of a resource, we distinguish
+	 * among different regions in order to provide a coarse-grained
+	 * information about it, that derived class implementing the metrics
+	 * contribute computation, could exploit for their evaluations.To be
+	 * precise, the idea is to bind a specific function to each region, to
+	 * evaluate the impact of a resource requirement. The regions are
+	 * distinguished since it is reasonable to think about the aim of penalize
+	 * a request the closer it gets the 100% of usage.
 	 */
-	struct RegionLevels_t {
+	struct ResourceThresholds_t {
 		/** Maximum Saturation Level */
 		uint64_t saturate;
 		/** Current usage level (system resource state)*/
@@ -318,12 +305,11 @@ protected:
 
 
 	/**
-	 * @brief Resource usage region due to a request
+	 * @brief Resource usage thresholds
 	 *
-	 * Return the usage region of a resource consequent to the approval of
-	 * the given request. This means that the method expresses how the
-	 * resource usage level of resource would eventually change. To this
-	 * purpose, three region are distinguished:
+	 * Return the resource thresholds related to the usage in the current
+	 * scheduling state view. This information are usually exploited to
+	 * distinguish among three regions:
 	 *
 	 * 1. SUB-SATURATION: The new resource usage would be included between 0
 	 * and the previously scheduled usage level.
@@ -336,13 +322,11 @@ protected:
 	 * @param rsrc_path Resource path
 	 * @param amount Requested resource usage amount
 	 * @param evl_ent Entity to evaluate for scheduling
-	 * @param rl Structure embedding info for region usage division
-	 *
-	 * @return The resulting region of usage of the given resource, whenever
-	 * the scheduling satisfies the given request.
+	 * @param rt The structure filled with the information regarding the
+	 * resource thresholds information
 	 */
-	 Region_t GetUsageRegion(std::string const & rsrc_path, uint64_t amount,
-			 EvalEntity_t const & evl_ent, RegionLevels_t & rl);
+	 void GetResourceThresholds(std::string const & rsrc_path, uint64_t amount,
+			 EvalEntity_t const & evl_ent, ResourceThresholds_t & rt);
 
 	 /**
 	  * @brief Filter function for resource usage index computation
@@ -350,13 +334,25 @@ protected:
 	  * Give a resource request, the method returns an index of the goodness
 	  * of performing a given resource allocation.
 	  *
-	  * @brief region The region of the new resource usage
-	  * @brief rsrc_usage The new resource usage amount
-	  * @brief params The parameters for the internal functions
+	  * Index
+	  * ^
+	  * |----------       Constant
+	  * |          \
+	  * |           \     Linear
+	  * |            .
+	  * |             .   Exponential
+	  * |_________._.__`-.___________
+	  *          /   \
+	  *         c     l
+	  *
+	  * @param c_thresh Threshold of constant index
+	  * @param l_thresh Threshold of linear decreasing index
+	  * @param rsrc_usage Amount of resource request
+	  * @param params The parameters for the internal functions
 	  *
 	  * @return The index value
 	  */
-	 float ComputeCLEIndex(Region_t region, float rsrc_usage,
+	 float CLEIndex(uint64_t c_thresh, uint64_t l_thresh, float rsrc_usage,
 			 CLEParams_t const & params);
 
 	 /***  Static mathematical functions ***/

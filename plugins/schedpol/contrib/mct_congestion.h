@@ -76,7 +76,7 @@ private:
 	 * @param penalty The congestion penalty of the given resource request
 	 * @param params Parameters structure to fill
 	 */
-	void SetIndexParameters(RegionLevels_t const & rl, float & penalty,
+	void SetIndexParameters(ResourceThresholds_t const & rl, float & penalty,
 			CLEParams_t & params);
 
 };

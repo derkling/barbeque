@@ -82,8 +82,7 @@ MCTCongestion::Init(void * params) {
 MetricsContribute::ExitCode_t
 MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
-	Region_t region;
-	RegionLevels_t rl;
+	ResourceThresholds_t rl;
 	CLEParams_t params;
 	float ru_index;
 
@@ -100,7 +99,7 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 		logger->Debug("%s: {%s}", evl_ent.StrId(), rsrc_path.c_str());
 
 		// Get the region of the (next) resource usage
-		region = GetUsageRegion(rsrc_path, pusage->GetAmount(), evl_ent, rl);
+		GetResourceThresholds(rsrc_path, pusage->GetAmount(), evl_ent, rl);
 
 		// 1. Get the congestion penalty to use
 		// 2. Finish to set the parameters for the index computation
@@ -111,7 +110,7 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 			SetIndexParameters(rl, penalties[MCT_RSRC_MEM], params);
 
 		// Compute the region index
-		ru_index = ComputeCLEIndex(region, pusage->GetAmount(), params);
+		ru_index = CLEIndex(rl.sat_lack, rl.free, pusage->GetAmount(), params);
 		logger->Debug("%s: {%s} index = %.4f", evl_ent.StrId(),
 				rsrc_path.c_str(), ru_index);
 
@@ -123,7 +122,8 @@ MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	return MCT_SUCCESS;
 }
 
-void MCTCongestion::SetIndexParameters(RegionLevels_t const & rl, float & penalty,
+void MCTCongestion::SetIndexParameters(ResourceThresholds_t const & rl,
+		float & penalty,
 		CLEParams_t & params) {
 
 	// Linear parameters
