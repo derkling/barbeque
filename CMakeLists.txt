@@ -126,6 +126,10 @@ option (BBQUE_TEST_PLATFORM_DATA
 option (BBQUE_RTLIB_PERF_SUPPORT
 	"Build RTLib with Performance Counters support" ON)
 
+# YaMS Scheduling Policy: enable parallelized metrics computation (defaulf: YES)
+option (BBQUE_SP_YAMS_PARALLEL
+	"Enable YaMS scheduling policy parallel execution" ON)
+
 ################################################################################
 # Lookup for library dependencies
 ################################################################################

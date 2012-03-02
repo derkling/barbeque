@@ -86,6 +86,9 @@
 /** Performance Counters Support */
 #cmakedefine BBQUE_RTLIB_PERF_SUPPORT
 
+/** Enabled YaMS Scheduling policy parallel execution */
+#cmakedefine BBQUE_SP_YAMS_PARALLEL
+
 
 /*******************************************************************************
  * BarbequeRTMR Global Features

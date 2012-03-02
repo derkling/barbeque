@@ -414,14 +414,19 @@ void YamsSchedPol::InsertWorkingModes(AppCPtr_t const & papp, uint16_t cl_id) {
 	for (; awm_it != end_awm; ++awm_it) {
 		AwmPtr_t const & pawm(*awm_it);
 		SchedEntityPtr_t pschd(new SchedEntity_t(papp, pawm, cl_id, metrics));
+#ifdef BBQUE_SP_YAMS_PARALLEL
 		awm_thds.push_back(
 				std::thread(&YamsSchedPol::EvalWorkingMode, this, pschd)
 		);
+#else
+		EvalWorkingMode(pschd);
+#endif
 	}
 
+#ifdef BBQUE_SP_YAMS_PARALLEL
 	for_each(awm_thds.begin(), awm_thds.end(), join_thread);
 	awm_thds.clear();
-
+#endif
 	logger->Debug("Schedule table size = %d", entities.size());
 }
 
