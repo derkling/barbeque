@@ -30,6 +30,7 @@ set (BBQUE_PATH_HEADERS    "include/bbque")
 set (BBQUE_PATH_RTLIB      "lib/bbque")
 set (BBQUE_PATH_PLUGINS    "lib/bbque/plugins")
 set (BBQUE_PATH_DOCS       "usr/share/bbque")
+set (BBQUE_PATH_CMAKE      "usr/share/bbque")
 set (BBQUE_PATH_VAR        "var/bbque")
 
 # Barbeque configuration file
@@ -49,7 +50,7 @@ set (BBQUE_PIL_CGROUP_MOUNT "mnt/cgroup")
 # Load additional CMake modules
 list (APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/.cmake/")
 install(DIRECTORY "${PROJECT_SOURCE_DIR}/.cmake"
-			DESTINATION "${BBQUE_PATH_RTLIB}"
+			DESTINATION "${BBQUE_PATH_CMAKE}"
 			FILES_MATCHING PATTERN "*.cmake*")
 
 # Make sure the compiler can find include files
