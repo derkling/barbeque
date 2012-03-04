@@ -238,6 +238,12 @@ public:
 	}
 
 	/**
+	 * @see ApplicationStatusIF
+	 */
+	uint64_t GetResourceUsageStat(std::string const & rsrc_path,
+			ResourceUsageStatType_t ru_stat);
+
+	/**
 	 * @see ApplicationConfIF
 	 */
 	ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t vtok,
@@ -303,7 +309,6 @@ public:
 	 * working modes loaded from the recipe.
 	 */
 	void ClearWorkingModeConstraints();
-
 
 	/**
 	 * @brief Set the current Goal-Gap

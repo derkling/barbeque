@@ -172,6 +172,15 @@ public:
 	};
 
 	/**
+	 * @brief Type of resource usage statistics
+	 */
+	enum ResourceUsageStatType_t {
+		RU_STAT_MIN,
+		RU_STAT_AVG,
+		RU_STAT_MAX
+	};
+
+	/**
 	 * @brief Get the name of the application
 	 * @return The name string
 	 */
@@ -321,6 +330,19 @@ public:
 	 * value
 	 */
 	virtual AwmPtr_t const & HighValueAWM() = 0;
+
+
+	/**
+	 * @brief Statics about a specific resource usage requirement
+	 *
+	 * @param rsrc_path The path of the resource
+	 * @param ru_stat The statistics type
+	 *
+	 * @return The minimum, maximum or average value of a resource usage,
+	 * among all the enabled working modes
+	 */
+	virtual uint64_t GetResourceUsageStat(std::string const & rsrc_path,
+			ResourceUsageStatType_t ru_stat) = 0;
 
 private:
 

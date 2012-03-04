@@ -1175,6 +1175,59 @@ Application::ExitCode_t Application::ClearResourceConstraint(
 	return APP_SUCCESS;
 }
 
+
+uint64_t Application::GetResourceUsageStat(std::string const & rsrc_path,
+		ResourceUsageStatType_t ru_stat) {
+	uint64_t min_usage  = UINT64_MAX;
+	uint64_t max_usage  = 0;
+	uint64_t usages_sum = 0;
+
+	AwmPtrList_t::iterator awm_it(awms.enabled_list.begin());
+	AwmPtrList_t::iterator awm_end(awms.enabled_list.end());
+
+	// AWMs (enabled)
+	for (; awm_it != awm_end; ++awm_it) {
+		// Map of resource usages
+		UsagesMap_t const & awm_usages = (*awm_it)->RecipeResourceUsages();
+
+		UsagesMap_t::const_iterator rsrc_it(awm_usages.begin());
+		UsagesMap_t::const_iterator rsrc_end(awm_usages.end());
+
+		// Resources
+		for (; rsrc_it != rsrc_end; ++rsrc_it) {
+			std::string const &rp((*rsrc_it).first);
+			uint64_t curr_usage = ((*rsrc_it).second)->GetAmount();
+
+			// Is current resource the one required?
+			if (rsrc_path.compare(ResourcePathUtils::GetTemplate(rp)) != 0)
+				continue;
+
+			// Cumulate the resource usage
+			usages_sum += curr_usage;
+
+			// Update min?
+			curr_usage < min_usage ? min_usage = curr_usage: min_usage;
+
+			// Update max?
+			curr_usage > max_usage ? max_usage = curr_usage: max_usage;
+		}
+	}
+
+	// Return the resource usage statistics required
+	switch (ru_stat) {
+	case RU_STAT_MIN:
+		return min_usage;
+
+	case RU_STAT_AVG:
+		return usages_sum / awms.enabled_list.size();
+
+	case RU_STAT_MAX:
+		return max_usage;
+	};
+
+	return 0;
+}
+
 } // namespace app
 
 } // namespace bbque
