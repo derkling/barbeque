@@ -74,7 +74,7 @@
 
 
 /*******************************************************************************
- * BarbequeRTMR Suppported Features
+ * BarbequeRTRM Supported Features
  ******************************************************************************/
 
 /** Use FIFO based RPC channel */
