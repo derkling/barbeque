@@ -30,6 +30,9 @@
 #include "contrib/mct_value.h"
 #include "contrib/mct_reconfig.h"
 #include "contrib/mct_congestion.h"
+#include "contrib/mct_fairness.h"
+// ...:: ADD_MCT ::...
+
 
 namespace bu = bbque::utils;
 namespace po = boost::program_options;
@@ -40,7 +43,8 @@ namespace bbque { namespace plugins {
 char const * YamsSchedPol::mct_str[YAMS_MCT_COUNT] = {
 	"awmvalue",
 	"reconfig",
-	"congestion"
+	"congestion",
+	"fairness"
 	//"power",
 	//"thermal",
 	//"stability",
@@ -67,7 +71,9 @@ YamsSchedPol::coll_mct_metrics[YAMS_MCT_COUNT] = {
 	YAMS_SAMPLE_METRIC("recf.comp",
 			"Reconfiguration contribute computing time [ms]"),
 	YAMS_SAMPLE_METRIC("cgst.comp",
-			"Congestion contribute computing time [ms]")
+			"Congestion contribute computing time [ms]"),
+	YAMS_SAMPLE_METRIC("fair.comp",
+			"Fairness contribute computing time [ms]")
 	// ...:: ADD_MCT ::...
 };
 
@@ -164,6 +170,9 @@ YamsSchedPol::YamsSchedPol():
 					mct_cfg_params));
 	mcts[YAMS_CONGESTION] =
 		MetricsContribPtr_t(new MCTCongestion(mct_str[YAMS_CONGESTION],
+					mct_cfg_params));
+	mcts[YAMS_FAIRNESS] =
+		MetricsContribPtr_t(new MCTFairness(mct_str[YAMS_FAIRNESS],
 					mct_cfg_params));
 	// ...:: ADD_MCT ::...
 
@@ -298,6 +307,9 @@ void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 
 	// Reset timer
 	YAMS_RESET_TIMING(yams_tmr);
+
+	// Init fairness contribute
+	mcts[YAMS_FAIRNESS]->Init(&prio);
 
 	for (; ids_it != end_ids; ++ids_it) {
 		ResID_t & cl_id(*ids_it);
