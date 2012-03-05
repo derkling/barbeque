@@ -70,6 +70,12 @@ public:
 		return done;
 	}
 
+	int8_t CurrentAWM() const {
+		if (suspended)
+			return -1;
+		return wmp.awm_id;
+	}
+
 protected:
 
 	std::string const exc_name;
