@@ -40,6 +40,10 @@
 #define YAMS_GET_TIMING(METRICS, INDEX, TIMER) \
 	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs());
 
+/* Get a new samplefor the metrics */
+#define YAMS_GET_SAMPLE(METRICS, INDEX, VALUE) \
+	mc.AddSample(METRICS[INDEX].mh, VALUE);
+
 using namespace bbque::app;
 using namespace bbque::res;
 
@@ -138,6 +142,7 @@ private:
 		YAMS_ORDERING_TIME,
 		YAMS_SELECTING_TIME,
 		YAMS_METRICS_COMP_TIME,
+		YAMS_METRICS_AWMVALUE,
 
 		YAMS_METRICS_COUNT
 	};

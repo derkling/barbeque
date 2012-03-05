@@ -60,7 +60,9 @@ YamsSchedPol::coll_metrics[YAMS_METRICS_COUNT] = {
 	YAMS_SAMPLE_METRIC("sel",
 			"Time to select AWMs/Clusters for the EXC [ms]"),
 	YAMS_SAMPLE_METRIC("mcomp",
-			"Time for computing a single metrics [ms]")
+			"Time for computing a single metrics [ms]"),
+	YAMS_SAMPLE_METRIC("awmvalue",
+			"AWM value of the scheduled entity")
 };
 
 /* Definition of time metrics per contribute */
@@ -408,6 +410,11 @@ void YamsSchedPol::SelectSchedEntities() {
 
 		// Set the application value (scheduling metrics)
 		pschd->papp->SetValue(pschd->metrics);
+
+		// Sample the AWM value of the scheduled application for evaluation of
+		// the scheduling results
+		YAMS_GET_SAMPLE(coll_metrics, YAMS_METRICS_AWMVALUE,
+				pschd->pawm->Value());
 	}
 
 	logger->Debug("========================| DONE |======================");
