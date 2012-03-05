@@ -405,6 +405,9 @@ void YamsSchedPol::SelectSchedEntities() {
 
 		logger->Notice("Selecting: scheduled %s [metrics: %.4f]",
 				pschd->StrId(), pschd->metrics);
+
+		// Set the application value (scheduling metrics)
+		pschd->papp->SetValue(pschd->metrics);
 	}
 
 	logger->Debug("========================| DONE |======================");
