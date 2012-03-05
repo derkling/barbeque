@@ -30,10 +30,11 @@ public:
 
 	/**
 	 * @brief Constructor
+	 *
+	 * @param name A name identifying the specific contribute
+	 * @param cfg_params Global configuration parameters
 	 */
-	MCTValue(const char * _name, uint16_t const cfg_params[]):
-		MetricsContribute(_name, cfg_params) {
-	};
+	MCTValue(const char * _name, uint16_t const cfg_params[]);
 
 	ExitCode_t Init(void * params);
 

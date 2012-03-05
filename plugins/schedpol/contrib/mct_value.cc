@@ -21,6 +21,10 @@ using namespace bbque::res;
 
 namespace bbque { namespace plugins {
 
+MCTValue::MCTValue(const char * _name, uint16_t const cfg_params[]):
+	MetricsContribute(_name, cfg_params) {
+}
+
 MetricsContribute::ExitCode_t
 MCTValue::Init(void * params) {
 	(void) params;
