@@ -113,6 +113,7 @@
  * -# @ref sec04_rm
  * -# @ref sec05_sm
  * -# @ref sec06_ym
+ * -# @ref sec07_pm
  *
  * The internals of the integration with applications, the integration with
  * target platforms as well as some utility functions available both for the
