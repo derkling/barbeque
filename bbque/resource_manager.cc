@@ -67,6 +67,8 @@
 #define LNSYNB "**********************  SYNC START  *************************"
 #define LNSYNF "*********************  SYNC FAILED  *************************"
 #define LNSYNE "***********************  SYNC END  **************************"
+#define LNPROB "~~~~~~~~~~~~~~~~~~~  PROFILING START  ~~~~~~~~~~~~~~~~~~~~~~~"
+#define LNPROE "~~~~~~~~~~~~~~~~~~~~  PROFILING END  ~~~~~~~~~~~~~~~~~~~~~~~~"
 
 namespace br = bbque::res;
 namespace bu = bbque::utils;
@@ -130,6 +132,7 @@ ResourceManager::ResourceManager() :
 	ps(PlatformServices::GetInstance()),
 	sm(SchedulerManager::GetInstance()),
 	ym(SynchronizationManager::GetInstance()),
+	om(ProfileManager::GetInstance()),
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
 	pm(PluginManager::GetInstance()),
@@ -197,6 +200,7 @@ void ResourceManager::Optimize() {
 	std::unique_lock<std::mutex> pendingEvts_ul(pendingEvts_mtx);
 	SynchronizationManager::ExitCode_t syncResult;
 	SchedulerManager::ExitCode_t schedResult;
+	ProfileManager::ExitCode_t profResult;
 	static bu::Timer optimization_tmr;
 	double period;
 
@@ -242,7 +246,7 @@ void ResourceManager::Optimize() {
 	if (!am.HasApplications(Application::SYNC)) {
 		logger->Debug("NO EXC in SYNC state, synchronization not required");
 		RM_COUNT_EVENT(metrics, RM_SCHED_EMPTY);
-		return;
+		goto sched_profile;
 	}
 
 	// Account for a new synchronizaiton activation
@@ -267,6 +271,19 @@ void ResourceManager::Optimize() {
 	ra.PrintStatusReport(0, true);
 	am.PrintStatusReport(true);
 	logger->Notice("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
+
+sched_profile:
+
+	//--- Profiling
+	logger->Notice(LNPROB);
+	optimization_tmr.start();
+	profResult = om.ProfileSchedule();
+	optimization_tmr.stop();
+	if (profResult != ProfileManager::OK) {
+		logger->Warn("Scheduler profiling FAILED");
+	}
+	logger->Info(LNPROE);
+	logger->Notice("Prof Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 
 }
 

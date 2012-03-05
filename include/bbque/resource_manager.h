@@ -26,6 +26,7 @@
 #include "bbque/plugin_manager.h"
 #include "bbque/scheduler_manager.h"
 #include "bbque/synchronization_manager.h"
+#include "bbque/profile_manager.h"
 #include "bbque/resource_accounter.h"
 
 #include "bbque/plugins/logger.h"
@@ -143,6 +144,11 @@ private:
 	 * @brief The Synchronization Manager module
 	 */
 	SynchronizationManager & ym;
+
+	/**
+	 * @brief The Profiling Manager module
+	 */
+	ProfileManager & om;
 
 	/**
 	 * @brief The Application Proxy module
