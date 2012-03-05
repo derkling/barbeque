@@ -42,6 +42,18 @@ private:
 
 	/**
 	 * @brief Compute the AWM value contribute
+	 *
+	 * The contribute starts from the static value associated to the AWM to
+	 * evaluate. If a "goal gap" has been set, a "target" resource usage is
+	 * considered accordingly. If the AWM to evaluate provides a resource
+	 * usage greater or equal to the target usage, the static AWM value is
+	 * returned as contribute index, otherwise the index will be a
+	 * "penalization" of the static value.
+	 *
+	 * @param evl_ent The scheduling entity to evaluate
+	 * @ctrib ctrib The contribute index to return
+	 *
+	 * @return MCT_SUCCESS. No error conditions expected.
 	 */
 	ExitCode_t _Compute(EvalEntity_t const & evl_ent, float & ctrib);
 
