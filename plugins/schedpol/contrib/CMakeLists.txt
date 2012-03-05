@@ -11,6 +11,7 @@ set (METRICS_CONTRIB_SRC metrics_contribute)
 set (METRICS_CONTRIB_SRC mct_value ${METRICS_CONTRIB_SRC})
 set (METRICS_CONTRIB_SRC mct_reconfig ${METRICS_CONTRIB_SRC})
 set (METRICS_CONTRIB_SRC mct_congestion ${METRICS_CONTRIB_SRC})
+set (METRICS_CONTRIB_SRC mct_fairness ${METRICS_CONTRIB_SRC})
 
 # Add as library
 add_library(bbque_sched_metrics STATIC ${METRICS_CONTRIB_SRC})
