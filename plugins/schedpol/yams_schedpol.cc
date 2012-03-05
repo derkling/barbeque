@@ -403,7 +403,8 @@ void YamsSchedPol::SelectSchedEntities() {
 			continue;
 		}
 
-		logger->Info("Selecting: scheduled << %s >>", pschd->StrId());
+		logger->Notice("Selecting: scheduled %s [metrics: %.4f]",
+				pschd->StrId(), pschd->metrics);
 	}
 
 	logger->Debug("========================| DONE |======================");
@@ -475,6 +476,8 @@ void YamsSchedPol::EvalWorkingMode(SchedEntityPtr_t pschd) {
 void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
 	MetricsContribute::ExitCode_t mct_result;
 	float ctrb = 0.0;
+	char metrics_log[255];
+	uint8_t len = 0;
 
 	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
 		// If weight == 0 or the metrics contribute instance is missing
@@ -498,8 +501,14 @@ void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
 		YAMS_GET_TIMING(coll_mct_metrics, i, comp_tmr);
 
 		// Cumulate the contribute
+		len += sprintf(metrics_log+len,  "%c: %5.4f, ", mct_str[i][0],
+				mct_weights_norm[i] * ctrb);
 		pschd->metrics += mct_weights_norm[i] * ctrb;
 	}
+
+	metrics_log[len-2] = '\0';
+	logger->Notice("%s App_value: (%s) => %5.4f",
+			pschd->StrId(), metrics_log, pschd->metrics);
 }
 
 YamsSchedPol::ExitCode_t YamsSchedPol::BindCluster(SchedEntityPtr_t pschd) {
