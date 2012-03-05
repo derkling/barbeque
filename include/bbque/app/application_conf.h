@@ -65,6 +65,15 @@ public:
 	 */
 	virtual ExitCode_t ScheduleRequest(AwmPtr_t const & awm, RViewToken_t tok,
 			uint8_t bid = 0) = 0;
+
+	/**
+	 * @brief Set the scheduling metrics value
+	 *
+	 * The usage of this method should be in charge of the scheduling policy
+	 *
+	 * @param sched_metrics The scheduling metrics computed by the policy
+	 */
+	virtual void SetValue(float sched_metrics) = 0;
 };
 
 } // namespace app

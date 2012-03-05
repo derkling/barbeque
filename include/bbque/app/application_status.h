@@ -251,6 +251,13 @@ public:
 	virtual AppPrio_t Priority() const = 0;
 
 	/**
+	 * @brief The value set by the scheduling policy
+	 *
+	 * @return An index value
+	 */
+	virtual float Value() const = 0;
+
+	/**
 	 * @brief Get the schedule state
 	 * @return The current scheduled state
 	 */

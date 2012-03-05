@@ -126,6 +126,20 @@ public:
 	void SetPriority(AppPrio_t prio);
 
 	/**
+	 * @see ApplicationStatusIF
+	 */
+	inline float Value() const {
+		return value;
+	}
+
+	/**
+	 * @see ApplicationConfIF
+	 */
+	inline void SetValue(float sched_metrics) {
+		value = sched_metrics;
+	}
+
+	/**
 	 * @brief Enable the application for resources assignment
 	 *
 	 * A newly created application is disabled by default, thus it will not be
@@ -404,6 +418,13 @@ private:
 
 	/** The current Goal-Gap value, must be in [0,100] */
 	uint8_t ggap_percent;
+
+	/**
+	 * The metrics value set by the scheduling policy. The purpose of this
+	 * attribute is to provide a support for the evaluation of the schedule
+	 * results.
+	 */
+	float value;
 
 	/**
 	 * Recipe pointer for the current application instance.
