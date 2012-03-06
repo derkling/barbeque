@@ -214,9 +214,9 @@ private:
 	/**
 	 * @brief Perform the AWM values normalization
 	 *
-	 *                    recipe_value - min
+	 *                       recipe_value
 	 * norm_value =  ------------------------------
-	 *                        (max - min)
+	 *                         max_value
 	 *
 	 */
 	void NormalizeValues();
