@@ -27,7 +27,8 @@
 
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\
- {SCHEDULER_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::COUNTER, 0}
+ {SCHEDULER_MANAGER_NAMESPACE"."NAME, DESC, \
+	 MetricsCollector::COUNTER, 0, NULL, 0}
 /** Increase counter for the specified metric */
 #define SM_COUNT_EVENT(METRICS, INDEX) \
 	mc.Count(METRICS[INDEX].mh);
@@ -37,7 +38,8 @@
 
 /** Metrics (class SAMPLE) declaration */
 #define SM_SAMPLE_METRIC(NAME, DESC)\
- {SCHEDULER_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::SAMPLE, 0}
+ {SCHEDULER_MANAGER_NAMESPACE"."NAME, DESC, \
+	 MetricsCollector::SAMPLE, 0, NULL, 0}
 /** Reset the timer used to evaluate metrics */
 #define SM_RESET_TIMING(TIMER) \
 	TIMER.start();

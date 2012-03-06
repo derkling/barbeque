@@ -27,7 +27,8 @@
 
 /** Metrics (class VALUE) declaration */
 #define YAMCA_VALUE_METRIC(NAME, DESC)\
- {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, MetricsCollector::VALUE, 0}
+ {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, \
+	 MetricsCollector::VALUE, 0, NULL, 0}
 /** Increase value for the specified metric */
 #define YAMCA_ADD_VALUE(METRICS, INDEX, AMOUNT) \
 	mc.Add(METRICS[INDEX].mh, AMOUNT);
@@ -37,7 +38,8 @@
 
 /** Metrics (class SAMPLE) declaration */
 #define YAMCA_SAMPLE_METRIC(NAME, DESC)\
- {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, MetricsCollector::SAMPLE, 0}
+ {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, \
+	 MetricsCollector::SAMPLE, 0, NULL, 0}
 /** Reset the timer used to evaluate metrics */
 #define YAMCA_RESET_TIMING(TIMER) \
 	TIMER.start();

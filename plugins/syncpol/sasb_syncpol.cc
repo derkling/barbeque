@@ -26,7 +26,7 @@
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\
  {SYNCHRONIZATION_MANAGER_NAMESPACE"."SYNCHRONIZATION_POLICY_NAME"."NAME,\
-	 DESC, MetricsCollector::COUNTER, 0}
+	 DESC, MetricsCollector::COUNTER, 0, NULL, 0}
 /** Increase counter for the specified metric */
 #define SM_COUNT_EVENT(METRICS, INDEX) \
 	mc.Count(METRICS[INDEX].mh);
@@ -34,7 +34,7 @@
 /** Metrics (class SAMPLE) declaration */
 #define SM_SAMPLE_METRIC(NAME, DESC)\
  {SYNCHRONIZATION_MANAGER_NAMESPACE"."SYNCHRONIZATION_POLICY_NAME"."NAME,\
-	 DESC, MetricsCollector::SAMPLE, 0}
+	 DESC, MetricsCollector::SAMPLE, 0, NULL, 0}
 /** Reset the timer used to evaluate metrics */
 #define SM_START_TIMER(TIMER) \
 	TIMER.start();

@@ -31,7 +31,8 @@
 
 /** Metrics (class COUNTER) declaration */
 #define RM_COUNTER_METRIC(NAME, DESC)\
- {RESOURCE_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::COUNTER, 0}
+ {RESOURCE_MANAGER_NAMESPACE"."NAME, DESC, \
+	 MetricsCollector::COUNTER, 0, NULL, 0}
 /** Increase counter for the specified metric */
 #define RM_COUNT_EVENT(METRICS, INDEX) \
 	mc.Count(METRICS[INDEX].mh);
@@ -41,7 +42,8 @@
 
 /** Metrics (class SAMPLE) declaration */
 #define RM_SAMPLE_METRIC(NAME, DESC)\
- {RESOURCE_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::SAMPLE, 0}
+ {RESOURCE_MANAGER_NAMESPACE"."NAME, DESC, \
+	 MetricsCollector::SAMPLE, 0, NULL, 0}
 /** Reset the timer used to evaluate metrics */
 #define RM_RESET_TIMING(TIMER) \
 	TIMER.start();
@@ -54,7 +56,8 @@
 
 /** Metrics (class PERIDO) declaration */
 #define RM_PERIOD_METRIC(NAME, DESC)\
- {RESOURCE_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::PERIOD, 0}
+ {RESOURCE_MANAGER_NAMESPACE"."NAME, DESC, \
+	 MetricsCollector::PERIOD, 0, NULL, 0}
 /** Acquire a new time sample */
 #define RM_GET_PERIOD(METRICS, INDEX, PERIOD) \
 	mc.PeriodSample(METRICS[INDEX].mh, PERIOD);
