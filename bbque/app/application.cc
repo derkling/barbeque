@@ -709,6 +709,15 @@ Application::ExitCode_t Application::ScheduleCommit() {
 	case RECONF:
 	case MIGREC:
 	case MIGRATE:
+		// Reset GoalGap whether the Application has been scheduled into a AWM
+		// having a value higher than the previous one
+		if (schedule.awm &&
+				(schedule.awm->Value() < schedule.next_awm->Value())) {
+			logger->Debug("Resetting GoalGap (%d%c) on [%s]",
+					ggap_percent, '%', StrId());
+			ggap_percent = 0;
+		}
+
 		schedule.awm = schedule.next_awm;
 		schedule.next_awm.reset();
 		SetRunning();
