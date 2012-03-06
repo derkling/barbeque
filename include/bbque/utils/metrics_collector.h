@@ -352,6 +352,19 @@ private:
 	/** A string representation of metric classes */
 	static const char *metricClassName[CLASSES_COUNT];
 
+	template<typename T>
+	class MetricStats {
+	public:
+		T min, max, avg, var;
+		char name[21], desc[64];
+		MetricStats() :
+			min(0), max(0), avg(0), var(0) {
+			name[0] = 0;
+			desc[0] = 0;
+		}
+	};
+
+
 	/**
 	 * @brief The logger to use.
 	 */

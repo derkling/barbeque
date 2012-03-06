@@ -350,50 +350,50 @@ MetricsCollector::DumpCounter(CounterMetric *m) {
 
 void
 MetricsCollector::DumpValue(ValueMetric *m) {
-	uint64_t _min = 0, _max = 0;
+	MetricStats<uint64_t> ms;
 
 	if (count(m->stat)) {
-		_min = min(m->stat);
-		_max = max(m->stat);
+		ms.min = min(m->stat);
+		ms.max = max(m->stat);
 	}
 	logger->Notice(
 		" %-20s | %9llu | %9llu | %9llu : %s",
-		m->name, m->value, _min, _max, m->desc);
+		m->name, m->value, ms.min, ms.max, m->desc);
 }
 
 void
 MetricsCollector::DumpSample(SamplesMetric *m) {
-	double _min = 0, _max = 0, _avg = 0, _var = 0;
+	MetricStats<double> ms;
 
 	if (count(m->stat)) {
-		_min = min(m->stat);
-		_max = max(m->stat);
-		_avg = mean(m->stat);
-		_var = variance(m->stat);
+		ms.min = min(m->stat);
+		ms.max = max(m->stat);
+		ms.avg = mean(m->stat);
+		ms.var = variance(m->stat);
 	}
 	logger->Notice(
 		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
-		m->name, _min, _max, _avg, ::sqrt(_var), m->desc);
+		m->name, ms.min, ms.max, ms.avg, ::sqrt(ms.var), m->desc);
 
 }
 
 void
 MetricsCollector::DumpPeriod(PeriodMetric *m) {
-	double _min = 0, _max = 0, _avg = 0, _var = 0;
+	MetricStats<double> ms;
 
 	if (count(m->stat)) {
-		_min = min(m->stat);
-		_max = max(m->stat);
-		_avg = mean(m->stat);
-		_var = variance(m->stat);
+		ms.min = min(m->stat);
+		ms.max = max(m->stat);
+		ms.avg = mean(m->stat);
+		ms.var = variance(m->stat);
 	}
 	logger->Notice(
 		" %-20s | %10.3f %10.3f | %10.3f %10.3f | %10.3f %10.3f |    %10.3f %10.3f : %s",
 		m->name,
-		_min, 1000.0/_min,
-		_max, 1000.0/_max,
-		_avg, 1000.0/_avg,
-		::sqrt(_var), 1000.0/::sqrt(_var),
+		ms.min, 1000.0/ms.min,
+		ms.max, 1000.0/ms.max,
+		ms.avg, 1000.0/ms.avg,
+		::sqrt(ms.var), 1000.0/::sqrt(ms.var),
 		m->desc);
 
 }
