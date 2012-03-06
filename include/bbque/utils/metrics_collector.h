@@ -22,6 +22,7 @@
 #include "bbque/utils/timer.h"
 
 #include <map>
+#include <vector>
 #include <memory>
 #include <mutex>
 
@@ -95,10 +96,18 @@ public:
 		const char *name;
 		/** A textual description of the metric */
 		const char *desc;
+
 		/** The class of this metirc */
 		MetricClass_t mc;
+
+		/** The submetrics count */
+		uint8_t sm_count;
+		/** The sumbetrics descriptions */
+		const char **sm_desc;
+
 		/** A metric handler returned by the registration method */
 		MetricHandler_t mh;
+
 	} MetricsCollection_t;
 
 	/**
@@ -108,25 +117,37 @@ public:
 	 * common to all metric classes. Specific metrics are specified by
 	 * deriving this class.
 	 */
-	typedef struct Metric {
+	class Metric {
+	public:
 		/** The name of the metric */
 		const char *name;
 		/** A textual description of the metric */
 		const char *desc;
+
 		/** The class of this metirc */
 		MetricClass_t mc;
+
+		/** The number of registered submetrics */
+		uint8_t sm_count;
+		/** A textual description of the sub-metrics */
+		const char **sm_desc;
 
 		/** Mutex protecting concurrent access to statistical data */
 		std::mutex mtx;
 
-		Metric(const char *name, const char *desc, MetricClass_t mc) :
-			name(name), desc(desc), mc(mc) {
+		Metric(const char *name, const char *desc, MetricClass_t mc,
+				uint8_t sm_count = 0, const char **sm_desc = NULL) :
+			name(name), desc(desc), mc(mc),
+			sm_count(sm_count), sm_desc(sm_desc) {
 		};
 
-	} Metric_t;
+		bool HasSubmetrics() const {
+			return (sm_count != 0);
+		}
+	};
 
 	/** A pointer to a (base class) registered metrics */
-	typedef std::shared_ptr<Metric_t> pMetric_t;
+	typedef std::shared_ptr<Metric> pMetric_t;
 
 	/**
 	 * @brief A counting metric
@@ -134,14 +155,14 @@ public:
 	 * This is a simple metric which could be used to count events. Indeed
 	 * this metrics supports only the "increment" operation.
 	 */
-	typedef struct CounterMetric : public Metric {
-		uint64_t count;
+	class CounterMetric : public Metric {
+	public:
+		uint64_t cnt;
+		std::vector<uint64_t> sm_cnt;
 
-		CounterMetric(const char *name, const char *desc) :
-			Metric(name, desc, COUNTER),
-			count(0) {};
-
-	} CounterMetric_t;
+		CounterMetric(const char *name, const char *desc,
+				uint8_t sm_count = 0, const char **sm_desc = NULL);
+	};
 
 	/**
 	 * @brief A value accounting metrics
@@ -151,18 +172,22 @@ public:
 	 * increment or decrement of a specified value. The metrics keep track
 	 * also of the "maximum" and "minimum" value for the metric.
 	 */
-	typedef struct ValueMetric : public Metric {
+	class ValueMetric : public Metric {
+	public:
 		/** The current value */
 		uint64_t value;
+		std::vector<uint64_t> sm_value;
+
 		/** Statistics on Value */
-		accumulator_set<uint64_t,
-			stats<tag::count, tag::min, tag::max>> stat;
+		typedef accumulator_set<uint64_t,
+			stats<tag::count, tag::min, tag::max>> statMetric_t;
+		statMetric_t stat;
+		std::vector<statMetric_t> sm_stat;
 
-		ValueMetric(const char *name, const char *desc) :
-			Metric(name, desc, VALUE),
-			value(0) {};
+		ValueMetric(const char *name, const char *desc,
+				uint8_t sm_count = 0, const char **sm_desc = NULL);
 
-	} ValueMetric_t;
+	};
 
 	/**
 	 * @brief A statistic collection metrics
@@ -175,15 +200,18 @@ public:
 	 * Mean and variance are computed on the <i>complete population</i>, i.e.
 	 * considering all the samples collected so far.
 	 */
-	typedef struct SamplesMetric : public Metric {
+	class SamplesMetric : public Metric {
+	public:
 		/** Statistics on collected Samples */
-		accumulator_set<double,
-			stats<tag::min, tag::max, tag::variance>> stat;
+		typedef accumulator_set<double,
+			stats<tag::min, tag::max, tag::variance>> statMetric_t;
+		statMetric_t stat;
+		std::vector<statMetric_t> sm_stat;
 
-		SamplesMetric(const char *name, const char *desc) :
-			Metric(name, desc, SAMPLE) {};
+		SamplesMetric(const char *name, const char *desc,
+				uint8_t sm_count = 0, const char **sm_desc = NULL);
 
-	} SamplesMetric_t;
+	};
 
 	/**
 	 * @brief A period/frequency accounting metrics
@@ -193,17 +221,22 @@ public:
 	 * measured timeframes. The metrics keep track also of the "maximum" and
 	 * "minimum" value for time intervals.
 	 */
-	typedef struct PeriodMetric : public Metric {
+	class PeriodMetric : public Metric {
+	public:
 		/** The timer used for period computation */
 		Timer period_tmr;
+		std::vector<Timer> sm_period_tmr;
+
 		/** Statistics on Value */
-		accumulator_set<double,
-			stats<tag::min, tag::max, tag::variance>> stat;
+		typedef accumulator_set<double,
+			stats<tag::min, tag::max, tag::variance>> statMetric_t;
+		statMetric_t stat;
+		std::vector<statMetric_t> sm_stat;
 
-		PeriodMetric(const char *name, const char *desc) :
-			Metric(name, desc, PERIOD) {};
+		PeriodMetric(const char *name, const char *desc,
+				uint8_t sm_count = 0, const char **sm_desc = NULL);
 
-	} PeriodMetric_t;
+	};
 
 	/**
 	 * @brief Get a reference to the metrics collector
@@ -227,11 +260,16 @@ public:
 	 * a metric name, which is used to uniquely identify it, as well as the
 	 * metric class. This method returns, on success, a "metrics handler"
 	 * which is required by many other access/modification methods.
+	 * The 'count' parameters defines the number of such metrics to be
+	 * instantiated, if count>1, that an index is appended to the metric name
+	 * and 'count' metrics are actually registered.
 	 */
 	ExitCode_t Register(const char *name,
 			const char *desc,
 			MetricClass_t mc,
-			MetricHandler_t & mh);
+			MetricHandler_t & mh,
+			uint8_t sm_count = 0,
+			const char **sm_desc = NULL);
 
 	/**
 	 * @brief Register the sepcified set of metrics
@@ -240,7 +278,7 @@ public:
 	 * which requires a pointer to a MetricsCollection, i.e. a pre-loaded
 	 * vector of metrics descriptors.
 	 */
-	ExitCode_t Register(MetricsCollection_t *mc, uint8_t count);
+	ExitCode_t Register(MetricsCollection_t *mc, uint8_t m_count);
 
 	/**
 	 * @brief Increase the specified counter metric
@@ -248,7 +286,8 @@ public:
 	 * This method is reserved to metrics of COUNT class and allows to
 	 * increment the counter by the specified amount (by default 1).
 	 */
-	ExitCode_t Count(MetricHandler_t mh, uint64_t amount = 1);
+	ExitCode_t Count(MetricHandler_t mh, uint64_t amount = 1,
+			uint8_t sm_idx = 0);
 
 	/**
 	 * @brief Add the specified amount to a value metric
@@ -256,7 +295,7 @@ public:
 	 * This method is reserved to metrics of VALUE class and allows to augment
 	 * the current metric value by the specified amount.
 	 */
-	ExitCode_t Add(MetricHandler_t mh, double amount);
+	ExitCode_t Add(MetricHandler_t mh, double amount, uint8_t sm_idx = 0);
 
 	/**
 	 * @brief Subtract the specified amount to a value metric
@@ -264,7 +303,7 @@ public:
 	 * This method is reserved to metrics of VALUE class and allows to
 	 * decrease the current metric value by the specified amount.
 	 */
-	ExitCode_t Remove(MetricHandler_t mh, double amount);
+	ExitCode_t Remove(MetricHandler_t mh, double amount, uint8_t sm_idx = 0);
 
 	/**
 	 * @brief Reset the specified value metric
@@ -272,7 +311,7 @@ public:
 	 * This method is reserved to metrics of VALUE class and allows to reset
 	 * the current value of the specified metric.
 	 */
-	ExitCode_t Reset(MetricHandler_t mh);
+	ExitCode_t Reset(MetricHandler_t mh, uint8_t sm_idx = 0);
 
 	/**
 	 * @brief Add a new sample to a SAMPLE metric
@@ -280,7 +319,7 @@ public:
 	 * This method is reserved to metrics of SAMPLE class and allows to collect
 	 * one more sample, thus updating the metrics statistics.
 	 */
-	ExitCode_t AddSample(MetricHandler_t mh, double sample);
+	ExitCode_t AddSample(MetricHandler_t mh, double sample, uint8_t sm_idx = 0);
 
 	/**
 	 * @brief Add a new time sample to a PERIDO metric
@@ -288,7 +327,8 @@ public:
 	 * This method is reserved to metrics of SAMPLE class and allows to collect
 	 * one more sample, thus updating the metrics statistics.
 	 */
-	ExitCode_t PeriodSample(MetricHandler_t mh, double & last_period);
+	ExitCode_t PeriodSample(MetricHandler_t mh, double & last_period,
+			uint8_t sm_idx = 0);
 
 	/**
 	 * @brief Dump on screen a report of all the registered metrics
@@ -368,27 +408,29 @@ private:
 	 * The specified amount is added/removed for the metrics, the metrics is
 	 * reset if amount is ZERO.
 	 */
-	ExitCode_t UpdateValue(MetricHandler_t mh, double amount);
+	ExitCode_t UpdateValue(MetricHandler_t mh, double amount,
+			uint8_t sm_idx = 0);
+
 
 	/**
 	 * @brief Dump the current value for a metric of class COUNT
 	 */
-	void DumpCounter(CounterMetric_t *m);
+	void DumpCounter(CounterMetric *m);
 
 	/**
 	 * @brief Dump the current value for a metric of class VALUE
 	 */
-	void DumpValue(ValueMetric_t *m);
+	void DumpValue(ValueMetric *m);
 
 	/**
 	 * @brief Dump the current value for a metric of class SAMPLE
 	 */
-	void DumpSample(SamplesMetric_t *m);
+	void DumpSample(SamplesMetric *m);
 
 	/**
 	 * @brief Dump the current value for a metric of class PERIOD
 	 */
-	void DumpPeriod(PeriodMetric_t *m);
+	void DumpPeriod(PeriodMetric *m);
 };
 
 } // namespace utils

@@ -25,6 +25,38 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace utils {
 
+MetricsCollector::CounterMetric::CounterMetric(
+		const char *name, const char *desc,
+		uint8_t sm_count, const char **sm_desc) :
+	Metric(name, desc, COUNTER, sm_count, sm_desc),
+	cnt(0), sm_cnt(sm_count) {
+
+}
+
+MetricsCollector::ValueMetric::ValueMetric(
+		const char *name, const char *desc,
+		uint8_t sm_count, const char **sm_desc) :
+	Metric(name, desc, VALUE, sm_count, sm_desc),
+	value(0), sm_value(sm_count), sm_stat(sm_count) {
+
+}
+
+MetricsCollector::SamplesMetric::SamplesMetric(
+		const char *name, const char *desc,
+		uint8_t sm_count, const char **sm_desc) :
+	Metric(name, desc, SAMPLE, sm_count, sm_desc),
+	sm_stat(sm_count) {
+
+}
+
+MetricsCollector::PeriodMetric::PeriodMetric(
+		const char *name, const char *desc,
+		uint8_t sm_count, const char **sm_desc) :
+	Metric(name, desc, PERIOD, sm_count, sm_desc),
+	sm_period_tmr(sm_count), sm_stat(sm_count) {
+
+}
+
 MetricsCollector & MetricsCollector::GetInstance() {
 	static MetricsCollector mc;
 	return mc;
@@ -70,7 +102,8 @@ MetricsCollector::GetMetric(const char *name) {
 
 MetricsCollector::ExitCode_t
 MetricsCollector::Register(const char *name, const char *desc,
-		MetricClass_t mc, MetricHandler_t & mh) {
+		MetricClass_t mc, MetricHandler_t & mh,
+		uint8_t count, const char **pdescs) {
 	std::unique_lock<std::mutex> metrics_ul(metrics_mtx);
 	pMetric_t pm = GetMetric(name);
 
@@ -86,16 +119,16 @@ MetricsCollector::Register(const char *name, const char *desc,
 	assert(!pm);
 	switch(mc) {
 	case COUNTER:
-		pm = pMetric_t(new CounterMetric(name, desc));
+		pm = pMetric_t(new CounterMetric(name, desc, count, pdescs));
 		break;
 	case VALUE:
-		pm = pMetric_t(new ValueMetric(name, desc));
+		pm = pMetric_t(new ValueMetric(name, desc, count, pdescs));
 		break;
 	case SAMPLE:
-		pm = pMetric_t(new SamplesMetric(name, desc));
+		pm = pMetric_t(new SamplesMetric(name, desc, count, pdescs));
 		break;
 	case PERIOD:
-		pm = pMetric_t(new PeriodMetric(name, desc));
+		pm = pMetric_t(new PeriodMetric(name, desc, count, pdescs));
 		break;
 	default:
 		logger->Error("Metric [%s] registration FAILED "
@@ -111,8 +144,10 @@ MetricsCollector::Register(const char *name, const char *desc,
 	metricsMap.insert(MetricsMapEntry_t(mh, pm));
 	metricsVec[mc].insert(MetricsMapEntry_t(mh, pm));
 
-	logger->Debug("New metrics [%s:%s => %s] registered",
-			metricClassName[pm->mc], pm->name, pm->desc);
+	logger->Debug("New metric [%s:%s => %s] registered, "
+			"with [%d] sub-metrics",
+			metricClassName[pm->mc], pm->name,
+			pm->desc, pm->sm_count);
 
 	return OK;
 }
@@ -124,7 +159,8 @@ MetricsCollector::Register(MetricsCollection_t *mc, uint8_t count) {
 
 	for (idx = 0; idx < count; idx++) {
 		result = Register(mc[idx].name, mc[idx].desc,
-				mc[idx].mc, mc[idx].mh);
+				mc[idx].mc, mc[idx].mh,
+				mc[idx].sm_count, mc[idx].sm_desc);
 		if (result != OK) {
 			logger->Error("Metrics collection registration FAILED");
 			return result;
@@ -135,9 +171,9 @@ MetricsCollector::Register(MetricsCollection_t *mc, uint8_t count) {
 }
 
 MetricsCollector::ExitCode_t
-MetricsCollector::Count(MetricHandler_t mh, uint64_t amount) {
+MetricsCollector::Count(MetricHandler_t mh, uint64_t amount, uint8_t idx) {
 	pMetric_t pm = GetMetric(mh);
-	CounterMetric_t *m;
+	CounterMetric *m;
 
 	// Check if the metric has not yet been registered
 	if (!pm) {
@@ -158,18 +194,19 @@ MetricsCollector::Count(MetricHandler_t mh, uint64_t amount) {
 	std::unique_lock<std::mutex> ul(pm->mtx);
 
 	// Get the SAMPLE metrics
-	m = (CounterMetric_t*)pm.get();
+	m = (CounterMetric*)pm.get();
 
 	// Increase the counter for the specified value
-	m->count += amount;
+	m->cnt += amount;
 
 	return OK;
 }
 
 MetricsCollector::ExitCode_t
-MetricsCollector::UpdateValue(MetricHandler_t mh, double amount) {
+MetricsCollector::UpdateValue(MetricHandler_t mh, double amount,
+		uint8_t idx) {
 	pMetric_t pm = GetMetric(mh);
-	ValueMetric_t *m;
+	ValueMetric *m;
 
 	// Check if the metric has not yet been registered
 	if (!pm) {
@@ -189,14 +226,15 @@ MetricsCollector::UpdateValue(MetricHandler_t mh, double amount) {
 	// Lock this metric
 	std::unique_lock<std::mutex> ul(pm->mtx);
 
-	// Get the SAMPLE metrics
-	m = (ValueMetric_t*)pm.get();
+	// Get the VALUE metric
+	m = (ValueMetric*)pm.get();
 
 	// Update the value if not zero, otherwise reset it
-	if (amount)
+	if (amount) {
 		m->value += amount;
-	else
+	} else {
 		m->value = 0;
+	}
 
 	m->stat(m->value);
 	return OK;
@@ -204,32 +242,32 @@ MetricsCollector::UpdateValue(MetricHandler_t mh, double amount) {
 
 
 MetricsCollector::ExitCode_t
-MetricsCollector::Add(MetricHandler_t mh, double amount) {
+MetricsCollector::Add(MetricHandler_t mh, double amount, uint8_t idx) {
 	if (!amount)
 		return OK;
 
-	return UpdateValue(mh, amount);
+	return UpdateValue(mh, amount, idx);
 }
 
 MetricsCollector::ExitCode_t
-MetricsCollector::Remove(MetricHandler_t mh, double amount) {
+MetricsCollector::Remove(MetricHandler_t mh, double amount, uint8_t idx) {
 	if (!amount)
 		return OK;
 
-	return UpdateValue(mh, -amount);
+	return UpdateValue(mh, -amount, idx);
 }
 
 MetricsCollector::ExitCode_t
-MetricsCollector::Reset(MetricHandler_t mh) {
-	return UpdateValue(mh, 0);
+MetricsCollector::Reset(MetricHandler_t mh, uint8_t idx) {
+	return UpdateValue(mh, 0, idx);
 }
 
 
-
 MetricsCollector::ExitCode_t
-MetricsCollector::AddSample(MetricHandler_t mh, double sample) {
+MetricsCollector::AddSample(MetricHandler_t mh,
+		double sample, uint8_t idx) {
 	pMetric_t pm = GetMetric(mh);
-	SamplesMetric_t *m;
+	SamplesMetric *m;
 
 	// Check if the metric has not yet been registered
 	if (!pm) {
@@ -250,7 +288,7 @@ MetricsCollector::AddSample(MetricHandler_t mh, double sample) {
 	std::unique_lock<std::mutex> ul(pm->mtx);
 
 	// Get the SAMPLE metrics
-	m = (SamplesMetric_t*)pm.get();
+	m = (SamplesMetric*)pm.get();
 
 	// Push-in the new sample into the accumulator
 	m->stat(sample);
@@ -259,9 +297,10 @@ MetricsCollector::AddSample(MetricHandler_t mh, double sample) {
 }
 
 MetricsCollector::ExitCode_t
-MetricsCollector::PeriodSample(MetricHandler_t mh, double & last_period) {
+MetricsCollector::PeriodSample(MetricHandler_t mh,
+		double & last_period, uint8_t idx) {
 	pMetric_t pm = GetMetric(mh);
-	PeriodMetric_t *m;
+	PeriodMetric *m;
 
 	// Check if the metric has not yet been registered
 	if (!pm) {
@@ -282,7 +321,7 @@ MetricsCollector::PeriodSample(MetricHandler_t mh, double & last_period) {
 	std::unique_lock<std::mutex> ul(pm->mtx);
 
 	// Get the SAMPLE metrics
-	m = (PeriodMetric_t*)pm.get();
+	m = (PeriodMetric*)pm.get();
 
 	// Just start the sampling timer (if not already)
 	if (unlikely(!m->period_tmr.Running())) {
@@ -303,14 +342,14 @@ MetricsCollector::PeriodSample(MetricHandler_t mh, double & last_period) {
 
 
 void
-MetricsCollector::DumpCounter(CounterMetric_t *m) {
+MetricsCollector::DumpCounter(CounterMetric *m) {
 	logger->Notice(
 		" %-20s | %9llu : %s",
-		m->name, m->count, m->desc);
+		m->name, m->cnt, m->desc);
 }
 
 void
-MetricsCollector::DumpValue(ValueMetric_t *m) {
+MetricsCollector::DumpValue(ValueMetric *m) {
 	uint64_t _min = 0, _max = 0;
 
 	if (count(m->stat)) {
@@ -323,7 +362,7 @@ MetricsCollector::DumpValue(ValueMetric_t *m) {
 }
 
 void
-MetricsCollector::DumpSample(SamplesMetric_t *m) {
+MetricsCollector::DumpSample(SamplesMetric *m) {
 	double _min = 0, _max = 0, _avg = 0, _var = 0;
 
 	if (count(m->stat)) {
@@ -339,7 +378,7 @@ MetricsCollector::DumpSample(SamplesMetric_t *m) {
 }
 
 void
-MetricsCollector::DumpPeriod(PeriodMetric_t *m) {
+MetricsCollector::DumpPeriod(PeriodMetric *m) {
 	double _min = 0, _max = 0, _avg = 0, _var = 0;
 
 	if (count(m->stat)) {
@@ -393,7 +432,7 @@ MetricsCollector::DumpMetrics() {
 	logger->Notice(METRICS_COUNTER_SEPARATOR);
 	it = metricsVec[COUNTER].begin();
 	for ( ; it != metricsVec[COUNTER].end(); ++it) {
-		DumpCounter((CounterMetric_t*)(((*it).second).get()));
+		DumpCounter((CounterMetric*)(((*it).second).get()));
 	}
 	logger->Notice(METRICS_COUNTER_SEPARATOR);
 
@@ -408,7 +447,7 @@ MetricsCollector::DumpMetrics() {
 	logger->Notice(METRICS_VALUE_SEPARATOR);
 	it = metricsVec[VALUE].begin();
 	for ( ; it != metricsVec[VALUE].end(); ++it) {
-		DumpValue((ValueMetric_t*)(((*it).second).get()));
+		DumpValue((ValueMetric*)(((*it).second).get()));
 	}
 	logger->Notice(METRICS_VALUE_SEPARATOR);
 
@@ -423,7 +462,7 @@ MetricsCollector::DumpMetrics() {
 	logger->Notice(METRICS_SAMPLES_SEPARATOR);
 	it = metricsVec[SAMPLE].begin();
 	for ( ; it != metricsVec[SAMPLE].end(); ++it) {
-		DumpSample((SamplesMetric_t*)(((*it).second).get()));
+		DumpSample((SamplesMetric*)(((*it).second).get()));
 	}
 	logger->Notice(METRICS_SAMPLES_SEPARATOR);
 
@@ -438,7 +477,7 @@ MetricsCollector::DumpMetrics() {
 	logger->Notice(METRICS_PERIOD_SEPARATOR);
 	it = metricsVec[PERIOD].begin();
 	for ( ; it != metricsVec[PERIOD].end(); ++it) {
-		DumpPeriod((PeriodMetric_t*)(((*it).second).get()));
+		DumpPeriod((PeriodMetric*)(((*it).second).get()));
 	}
 	logger->Notice(METRICS_PERIOD_SEPARATOR);
 
