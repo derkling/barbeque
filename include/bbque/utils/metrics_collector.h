@@ -431,9 +431,21 @@ private:
 	void DumpCounter(CounterMetric *m);
 
 	/**
+	 * @brief Dump the current value for a sub-metric of class COUNT
+	 */
+	void DumpCountSM(CounterMetric *m, uint8_t idx);
+
+
+	/**
 	 * @brief Dump the current value for a metric of class VALUE
 	 */
 	void DumpValue(ValueMetric *m);
+
+	/**
+	 * @brief Dump the current value for a sub-metric of class SAMPLE
+	 */
+	void DumpValueSM(ValueMetric *m, uint8_t idx, MetricStats<uint64_t> &ms);
+
 
 	/**
 	 * @brief Dump the current value for a metric of class SAMPLE
@@ -441,9 +453,21 @@ private:
 	void DumpSample(SamplesMetric *m);
 
 	/**
+	 * @brief Dump the current value for a sub-metric of class SAMPLE
+	 */
+	void DumpSampleSM(SamplesMetric *m, uint8_t idx, MetricStats<double> &ms);
+
+
+	/**
 	 * @brief Dump the current value for a metric of class PERIOD
 	 */
 	void DumpPeriod(PeriodMetric *m);
+
+	/**
+	 * @brief Dump the current value for a sub-metric of class PERIOD
+	 */
+	void DumpPeriodSM(PeriodMetric *m, uint8_t idx, MetricStats<double> &ms);
+
 };
 
 } // namespace utils

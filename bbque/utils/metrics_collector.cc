@@ -340,12 +340,77 @@ MetricsCollector::PeriodSample(MetricHandler_t mh,
 	return OK;
 }
 
+void
+MetricsCollector::DumpCountSM(CounterMetric *m, uint8_t idx) {
+	char _name[21], _desc[64];
+	uint8_t i;
+
+	// Setup sub-metric name
+	snprintf(_name, 21, "%s[%02hu]", m->name, idx);
+
+	// By default use main metrics description
+	if ((m->sm_desc == NULL) || (m->sm_desc[0] == NULL)) {
+		snprintf(_desc, 64, "%s [%02d]", m->desc, idx);
+		goto dump_count_sm;
+	}
+
+	// Use the last valid provided description
+	for (i = 0; m->sm_desc[i] && (i < idx); ++i) {}
+	// This is needed to handle the special case of just one
+	// submetric description provided
+	if (i < idx || !m->sm_desc[i]) --i;
+
+	// Setup the sub-metric description
+	snprintf(_desc, 64, "%s [%02d]", m->sm_desc[i], idx);
+
+dump_count_sm:
+	// Dump sub-metric
+	logger->Notice(
+		" %-20s | %9llu : %s",
+		_name, m->sm_cnt[idx], _desc);
+}
 
 void
 MetricsCollector::DumpCounter(CounterMetric *m) {
 	logger->Notice(
 		" %-20s | %9llu : %s",
 		m->name, m->cnt, m->desc);
+}
+
+void
+MetricsCollector::DumpValueSM(ValueMetric *m, uint8_t idx,
+		MetricStats<uint64_t> &ms) {
+	uint8_t i;
+
+	// Setup sub-metric name
+	snprintf(ms.name, 21, "%s[%02hu]", m->name, idx);
+
+	// Get sub-metrics statistics
+	if (count(m->sm_stat[idx])) {
+		ms.min = min(m->sm_stat[idx]);
+		ms.max = max(m->sm_stat[idx]);
+	}
+
+	// By default use main metrics description
+	if ((m->sm_desc == NULL) || (m->sm_desc[0] == NULL)) {
+		snprintf(ms.desc, 64, "%s [%02d]", m->desc, idx);
+		goto dump_value_sm;
+	}
+
+	// Use the last valid provided description
+	for (i = 0; m->sm_desc[i] && (i < idx); ++i) {}
+	// This is needed to handle the special case of just one
+	// submetric description provided
+	if (i < idx || !m->sm_desc[i]) --i;
+
+	// Setup the sub-metric description
+	snprintf(ms.desc, 64, "%s [%02d]", m->sm_desc[i], idx);
+
+dump_value_sm:
+	// Dump sub-metric
+	logger->Notice(
+		" %-20s | %9llu | %9llu | %9llu : %s",
+		ms.name, m->sm_value[idx], ms.min, ms.max, ms.desc);
 }
 
 void
@@ -362,6 +427,47 @@ MetricsCollector::DumpValue(ValueMetric *m) {
 }
 
 void
+MetricsCollector::DumpSampleSM(SamplesMetric *m, uint8_t idx,
+		MetricStats<double> &ms) {
+	uint8_t i;
+
+	// Setup sub-metric name
+	snprintf(ms.name, 21, "%s[%02hu]", m->name, idx);
+
+	// Get sub-metrics statistics
+	if (count(m->sm_stat[idx])) {
+		ms.min = min(m->sm_stat[idx]);
+		ms.max = max(m->sm_stat[idx]);
+		ms.avg = mean(m->sm_stat[idx]);
+		ms.var = variance(m->sm_stat[idx]);
+	} else {
+		ms.min = 0; ms.max = 0; ms.avg = 0; ms.var = 0;
+	}
+
+	// By default use main metrics description
+	if ((m->sm_desc == NULL) || (m->sm_desc[0] == NULL)) {
+		snprintf(ms.desc, 64, "%s [%02d]", m->desc, idx);
+		goto dump_samples_sm;
+	}
+
+	// Use the last valid provided description
+	for (i = 0; m->sm_desc[i] && (i < idx); ++i) {}
+	// This is needed to handle the special case of just one
+	// submetric description provided
+	if (i < idx || !m->sm_desc[i]) --i;
+
+	// Setup the sub-metric description
+	snprintf(ms.desc, 64, "%s [%02d]", m->sm_desc[i], idx);
+
+dump_samples_sm:
+	// Dump sub-metric
+	logger->Notice(
+			" %-20s | %9.3f | %9.3f | %9.3f | %9.3f :   %s",
+			ms.name, ms.min, ms.max, ms.avg, ::sqrt(ms.var), ms.desc);
+
+}
+
+void
 MetricsCollector::DumpSample(SamplesMetric *m) {
 	MetricStats<double> ms;
 
@@ -375,6 +481,51 @@ MetricsCollector::DumpSample(SamplesMetric *m) {
 		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
 		m->name, ms.min, ms.max, ms.avg, ::sqrt(ms.var), m->desc);
 
+}
+
+void
+MetricsCollector::DumpPeriodSM(PeriodMetric *m, uint8_t idx,
+		MetricStats<double> &ms) {
+	uint8_t i;
+
+	// Setup sub-metric name
+	snprintf(ms.name, 21, "%s[%02hu]", m->name, idx);
+
+	// Get sub-metrics statistics
+	if (count(m->sm_stat[idx])) {
+		ms.min = min(m->sm_stat[idx]);
+		ms.max = max(m->sm_stat[idx]);
+		ms.avg = mean(m->sm_stat[idx]);
+		ms.var = variance(m->sm_stat[idx]);
+	} else {
+		ms.min = 0; ms.max = 0; ms.avg = 0; ms.var = 0;
+	}
+
+	// By default use main metrics description
+	if ((m->sm_desc == NULL) || (m->sm_desc[0] == NULL)) {
+		snprintf(ms.desc, 64, "%s [%02d]", m->desc, idx);
+		goto dump_period_sm;
+	}
+
+	// Use the last valid provided description
+	for (i = 0; m->sm_desc[i] && (i < idx); ++i) {}
+	// This is needed to handle the special case of just one
+	// submetric description provided
+	if (i < idx || !m->sm_desc[i]) --i;
+
+	// Setup the sub-metric description
+	snprintf(ms.desc, 64, "%s [%02d]", m->sm_desc[i], idx);
+
+dump_period_sm:
+	// Dump sub-metric
+	logger->Notice(
+			" %-20s | %10.3f %10.3f | %10.3f %10.3f | %10.3f %10.3f |    %10.3f %10.3f :   %s",
+			ms.name,
+			ms.min, 1000.0/ms.min,
+			ms.max, 1000.0/ms.max,
+			ms.avg, 1000.0/ms.avg,
+			::sqrt(ms.var), 1000.0/::sqrt(ms.var),
+			ms.desc);
 }
 
 void
