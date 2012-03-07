@@ -120,6 +120,12 @@ MCTFairness::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 		logger->Debug("%s: R{%s} resource availability: %lu", evl_ent.StrId(),
 				rsrc_path.c_str(), clust_rsrc_avl);
 
+		// If there are no free resources the index contribute is equal to 0
+		if (clust_rsrc_avl == 0) {
+			ctrib = 0;
+			return MCT_SUCCESS;
+		}
+
 		// Compute the cluster factor (resource type related)
 		std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
 		if (rsrc_name.compare(ResourceNames[MCT_RSRC_PE]) == 0) {
