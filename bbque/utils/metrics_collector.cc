@@ -198,6 +198,8 @@ MetricsCollector::Count(MetricHandler_t mh, uint64_t amount, uint8_t idx) {
 
 	// Increase the counter for the specified value
 	m->cnt += amount;
+	if (m->HasSubmetrics())
+		m->sm_cnt[idx] += amount;
 
 	return OK;
 }
@@ -232,11 +234,18 @@ MetricsCollector::UpdateValue(MetricHandler_t mh, double amount,
 	// Update the value if not zero, otherwise reset it
 	if (amount) {
 		m->value += amount;
+		if (m->HasSubmetrics())
+			m->sm_value[idx] += amount;
 	} else {
 		m->value = 0;
+		if (m->HasSubmetrics())
+			m->sm_value[idx] = 0;
 	}
 
 	m->stat(m->value);
+	if (m->HasSubmetrics())
+		m->sm_stat[idx](m->sm_value[idx]);
+
 	return OK;
 }
 
@@ -292,6 +301,8 @@ MetricsCollector::AddSample(MetricHandler_t mh,
 
 	// Push-in the new sample into the accumulator
 	m->stat(sample);
+	if (m->HasSubmetrics())
+		m->sm_stat[idx](sample);
 
 	return OK;
 }
@@ -323,6 +334,12 @@ MetricsCollector::PeriodSample(MetricHandler_t mh,
 	// Get the SAMPLE metrics
 	m = (PeriodMetric*)pm.get();
 
+	// Start the submetrics sampling timer (if not already)
+	if (m->HasSubmetrics() &&
+		unlikely(!m->sm_period_tmr[idx].Running())) {
+		m->sm_period_tmr[idx].start();
+	}
+
 	// Just start the sampling timer (if not already)
 	if (unlikely(!m->period_tmr.Running())) {
 		m->period_tmr.start();
@@ -333,9 +350,16 @@ MetricsCollector::PeriodSample(MetricHandler_t mh,
 	// Push-in the new timer into the accumulator
 	last_period = m->period_tmr.getElapsedTimeMs();
 	m->stat(last_period);
+	if (m->HasSubmetrics()) {
+		last_period = m->sm_period_tmr[idx].getElapsedTimeMs();
+		m->sm_stat[idx](last_period);
+	}
 
 	// Reset timer for next period computation
 	m->period_tmr.start();
+	if (m->HasSubmetrics()) {
+		m->sm_period_tmr[idx].start();
+	}
 
 	return OK;
 }
@@ -375,6 +399,12 @@ MetricsCollector::DumpCounter(CounterMetric *m) {
 	logger->Notice(
 		" %-20s | %9llu : %s",
 		m->name, m->cnt, m->desc);
+
+	if (!m->HasSubmetrics())
+		return;
+
+	for (uint8_t idx = 0; idx < m->sm_count; ++idx)
+		DumpCountSM(m, idx);
 }
 
 void
@@ -424,6 +454,12 @@ MetricsCollector::DumpValue(ValueMetric *m) {
 	logger->Notice(
 		" %-20s | %9llu | %9llu | %9llu : %s",
 		m->name, m->value, ms.min, ms.max, m->desc);
+
+	if (!m->HasSubmetrics())
+		return;
+
+	for (uint8_t idx = 0; idx < m->sm_count; ++idx)
+		DumpValueSM(m, idx, ms);
 }
 
 void
@@ -480,6 +516,12 @@ MetricsCollector::DumpSample(SamplesMetric *m) {
 	logger->Notice(
 		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
 		m->name, ms.min, ms.max, ms.avg, ::sqrt(ms.var), m->desc);
+
+	if (!m->HasSubmetrics())
+		return;
+
+	for (uint8_t idx = 0; idx < m->sm_count; ++idx)
+		DumpSampleSM(m, idx, ms);
 
 }
 
@@ -546,6 +588,12 @@ MetricsCollector::DumpPeriod(PeriodMetric *m) {
 		ms.avg, 1000.0/ms.avg,
 		::sqrt(ms.var), 1000.0/::sqrt(ms.var),
 		m->desc);
+
+	if (!m->HasSubmetrics())
+		return;
+
+	for (uint8_t idx = 0; idx < m->sm_count; ++idx)
+		DumpPeriodSM(m, idx, ms);
 
 }
 
