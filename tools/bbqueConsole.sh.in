@@ -38,12 +38,13 @@ for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	MEMN=\`cat \$APP/cpuset.mems\`
 	MEMB=\`cat \$APP/memory.limit_in_bytes\`
 	MEMU=\`cat \$APP/memory.max_usage_in_bytes\`
+	MEMC=\`cat \$APP/memory.stat | grep rss | head -n1 | cut -d" " -f2\`
 
 	let CPUU=(CPUQ * 100)/CPUP
 
 	echo ".:: \$NAME"
 	echo "    CPUs: \$CPUS - \${CPUU}% {P: \$CPUP, Q: \$CPUQ}"
-	echo "    MEMs: \$MEMB - \${MEMN}n {M: \$MEMU}"
+	echo "    MEMs: \$MEMB - \${MEMN}[nodes] {C: \$MEMC, M: \$MEMU}"
 done
 }
 
