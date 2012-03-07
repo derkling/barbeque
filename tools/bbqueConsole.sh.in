@@ -15,6 +15,7 @@ BBQUE_SUPDATE="${BBQUE_SUPDATE:-1}"
 FONT=-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1
 
 
+mkdir -p $BBQUE_SYSROOT/var/bbque 2>/dev/null
 cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh <<EOF
 #!/bin/bash
 
