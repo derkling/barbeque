@@ -91,7 +91,7 @@ private:
 	typedef enum ResMgrMetrics {
 
 		//----- Sample statistics
-		PM_SCHED_VALUE,
+		PM_SCHED_APP_VALUE,
 		PM_SCHED_FAIRNESS,
 		PM_SCHED_WORKLOAD_MIX,
 

@@ -47,7 +47,7 @@ MetricsCollector::MetricsCollection_t
 ProfileManager::metrics[PM_METRICS_COUNT] = {
 
 	//----- Sampling statistics
-	PM_SAMPLE_METRIC("sch.val",  "Schedule value"),
+	PM_SAMPLE_METRIC("sch.appv", "Schedule applications value"),
 	PM_SAMPLE_METRIC("sch.frns", "Schedule fairness"),
 	PM_SAMPLE_METRIC("sch.wmix", "Schedule workload mix")
 
@@ -87,11 +87,11 @@ ProfileManager::~ProfileManager() {
 
 ProfileManager::ExitCode_t
 ProfileManager::ProfileScheduleClass(uint16_t prio) {
-	accumulator_set<double, stats<tag::min, tag::max, tag::variance>> stats;
+	accumulator_set<double, stats<tag::min, tag::max, tag::variance>>
+		appValueStats;
 	uint16_t actives_count = 0;
 	uint16_t running_count = 0;
-	double sched_avg = 0;
-	double sched_var = 0;
+	double app_avg = 0, app_var = 0;
 	double wmix_idx = 0;
 	double fnes_idx = 0;
 	AppsUidMapIt app_it;
@@ -114,7 +114,7 @@ ProfileManager::ProfileScheduleClass(uint16_t prio) {
 
 		//logger->Debug("Prio[%d], adding [%s] to stats, value [%.4f]",
 		//		prio, papp->StrId(), papp->Value());
-		stats(papp->Value());
+		appValueStats(papp->Value());
 loop_continue:
 		papp = am.GetNext(prio, app_it);
 	}
@@ -124,19 +124,19 @@ loop_continue:
 	if (actives_count == 0)
 		return OK;
 
-	// Computing statistics on Schedule Value
-	sched_avg = mean(stats);
-	sched_var = variance(stats);
+	// Computing statistics on Applications Value
+	app_avg = mean(appValueStats);
+	app_var = variance(appValueStats);
 
 	// Workload Mix INDEX: WMix = Apps[RUNNING] / Apps[ACTIVE]
 	wmix_idx = static_cast<double>(running_count) / actives_count;
 
 	// Fairness INDEX: F = WMix / (1 + Sched[VARIANCE])
-	fnes_idx = wmix_idx / (1 + sched_var);
+	fnes_idx = wmix_idx / (1 + app_var);
 
 
 	// Adding SAMPLES to metrics collector
-	PM_ADD_SAMPLE(metrics, PM_SCHED_VALUE, sched_avg,
+	PM_ADD_SAMPLE(metrics, PM_SCHED_APP_VALUE, app_avg,
 			static_cast<uint8_t>(prio));
 	PM_ADD_SAMPLE(metrics, PM_SCHED_FAIRNESS, fnes_idx,
 			static_cast<uint8_t>(prio));
@@ -145,7 +145,11 @@ loop_continue:
 
 	logger->Notice(
 		"|  %3d | %9.3f | %9.3f | %9.3f | %9.3f |",
-		prio, sched_avg, sched_var, wmix_idx, fnes_idx);
+		prio,
+		app_avg, app_var,
+		wmix_idx,
+		fnes_idx
+	);
 
 	return OK;
 }
