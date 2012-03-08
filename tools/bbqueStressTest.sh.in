@@ -9,6 +9,10 @@ BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
 # Setup test applications count (max 100)
 APPS=${APPS:-`echo $RANDOM`}
 let APPS=APPS%100
+# Setup test upper-bound for the minimum execution time (min 30[s])
+EXCT=${EXCT:-30}
+
+
 # Setup the stresstest binary
 STEST=${STEST:-$BBQUE_SYSROOT/var/bbque/BbqStressTest.sh}
 
@@ -22,7 +26,7 @@ chmod a+x $STEST
 for A in `seq 1 $APPS`; do
 
 	# Get a random Workload in [1,30] seconds
-	let TWL=$RANDOM%30
+	let TWL=$RANDOM%$EXCT
 	# Get a random Cycles in such that the Cycle frequecy is in the range
 	# [1/s,100/s], thus Cycles_# = Cycles_f * Workload time
 	let CYF=$RANDOM%100 && let CYC=CYF*TWL && let CYP=1000/CYF
