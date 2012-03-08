@@ -17,6 +17,7 @@
 
 #include "bbque/profile_manager.h"
 #include "bbque/modules_factory.h"
+#include "bbque/app/working_mode.h"
 #include "bbque/app/application.h"
 
 #include "bbque/utils/utility.h"
@@ -48,6 +49,7 @@ ProfileManager::metrics[PM_METRICS_COUNT] = {
 
 	//----- Sampling statistics
 	PM_SAMPLE_METRIC("sch.appv", "Schedule applications value"),
+	PM_SAMPLE_METRIC("sch.awmv", "Schedule AWMs value"),
 	PM_SAMPLE_METRIC("sch.frns", "Schedule fairness"),
 	PM_SAMPLE_METRIC("sch.wmix", "Schedule workload mix")
 
@@ -88,10 +90,11 @@ ProfileManager::~ProfileManager() {
 ProfileManager::ExitCode_t
 ProfileManager::ProfileScheduleClass(uint16_t prio) {
 	accumulator_set<double, stats<tag::min, tag::max, tag::variance>>
-		appValueStats;
+		appValueStats, awmValueStats;
 	uint16_t actives_count = 0;
 	uint16_t running_count = 0;
 	double app_avg = 0, app_var = 0;
+	double awm_avg = 0, awm_var = 0;
 	double wmix_idx = 0;
 	double fnes_idx = 0;
 	AppsUidMapIt app_it;
@@ -115,6 +118,7 @@ ProfileManager::ProfileScheduleClass(uint16_t prio) {
 		//logger->Debug("Prio[%d], adding [%s] to stats, value [%.4f]",
 		//		prio, papp->StrId(), papp->Value());
 		appValueStats(papp->Value());
+		awmValueStats(papp->CurrentAWM()->Value());
 loop_continue:
 		papp = am.GetNext(prio, app_it);
 	}
@@ -128,6 +132,10 @@ loop_continue:
 	app_avg = mean(appValueStats);
 	app_var = variance(appValueStats);
 
+	// Computing statistics on AWMs Value
+	awm_avg = mean(awmValueStats);
+	awm_var = variance(awmValueStats);
+
 	// Workload Mix INDEX: WMix = Apps[RUNNING] / Apps[ACTIVE]
 	wmix_idx = static_cast<double>(running_count) / actives_count;
 
@@ -138,15 +146,18 @@ loop_continue:
 	// Adding SAMPLES to metrics collector
 	PM_ADD_SAMPLE(metrics, PM_SCHED_APP_VALUE, app_avg,
 			static_cast<uint8_t>(prio));
+	PM_ADD_SAMPLE(metrics, PM_SCHED_AWM_VALUE, awm_avg,
+			static_cast<uint8_t>(prio));
 	PM_ADD_SAMPLE(metrics, PM_SCHED_FAIRNESS, fnes_idx,
 			static_cast<uint8_t>(prio));
 	PM_ADD_SAMPLE(metrics, PM_SCHED_WORKLOAD_MIX, wmix_idx,
 			static_cast<uint8_t>(prio));
 
 	logger->Notice(
-		"|  %3d | %9.3f | %9.3f | %9.3f | %9.3f |",
+		"|  %3d | %5.3f | %5.3f | %5.3f | %5.3f | %5.3f | %5.3f |",
 		prio,
 		app_avg, app_var,
+		awm_avg, awm_var,
 		wmix_idx,
 		fnes_idx
 	);
@@ -161,11 +172,11 @@ ProfileManager::ProfileSchedule() {
 	logger->Notice(
 		"========================================================");
 	logger->Notice(
-		"|      |   Application Value   |  Workload |  Fairness |");
+		"|      |  Apps Values  |  AWMs Values  | WLMix | Fness |");
 	logger->Notice(
-		"| Prio |       AVG |       VAR |   Mix Idx |       Idx |");
+		"| Prio |  Avg  |  Var  |  Avg  |  Var  |   Idx |   Idx |");
 	logger->Notice(
-		"|------+-----------+-----------+-----------+-----------+");
+		"|------+-------+-------+-------+-------+-------+-------+");
 
 	// Compute per-priority classes scheduler profiling statistics
 	for (prio = 0; prio <= am.LowestPriority(); ++prio) {
