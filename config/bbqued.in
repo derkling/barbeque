@@ -71,6 +71,39 @@ check_controllers() {
 
 }
 
+# Build up the Shield my moving all tasks into HOST node
+ShieldBuild() {
+	echo "Moving all (user-space) tasks into HOST node..."
+	local rotate='|/-\'
+
+	printf "Moving tasks to HOST ";
+	for D in `find /proc/ -maxdepth 1 -type d`; do
+			P=`basename $D`
+			# jumping kernel thread which should not be moved
+			readlink $D/exe >/dev/null 2>&1 || continue
+
+			rotate="${rotate#?}${rotate%???}"
+			printf "[%5d]... %.1s\b\b\b\b\b\b\b\b\b\b\b\b" $P  $rotate;
+			echo $P > $BBQUE_CGMOUNT/bbque/host/tasks
+	done
+	echo
+}
+
+# Release the HOST shiled by moving back tasks to ROOT node
+ShieldRelease() {
+	echo "Moving all (user-space) tasks back to ROOT node..."
+	local rotate='|/-\'
+
+	printf "Moving tasks to ROOT ";
+	for P in `cat $BBQUE_CGMOUNT/bbque/host/tasks`; do
+
+			rotate="${rotate#?}${rotate%???}"
+			printf "[%5d]... %.1s\b\b\b\b\b\b\b\b\b\b\b\b" $P  $rotate;
+			echo $P > $BBQUE_CGMOUNT/tasks
+	done
+}
+
+
 # Setup CGroups if required
 setup() {
 
@@ -122,6 +155,10 @@ setup() {
 
 	echo "Loading CGroups configuration [$CGSETUP]..."
 	$BBQUE_CGPARSER -l $CGSETUP || exit 1
+
+	echo "Setup CGroups shiled..."
+	ShieldBuild
+
 }
 
 start() {
@@ -151,6 +188,9 @@ stop() {
 
 	# Cleaning-up CGroup reservations
 	if [ -d $BBQUE_CGMOUNT/bbque ]; then
+		echo "Releasing CGroups shiled..."
+		ShieldRelease
+		echo "Releasing BBQ CGroups..."
 		find  $BBQUE_CGMOUNT/bbque -type d -delete
 	fi
 
