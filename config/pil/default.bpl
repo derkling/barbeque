@@ -22,13 +22,12 @@
 --------+---------------+---------------+---------------------------------------
 	| CPUs IDs	| Memory Nodes	| Description
 --------+---------------+---------------+---------------------------------------
-HOST	| 0		| 0		| BBQUE Generic 1Core Host
-MDEV	| 0-3		| 0		| BBQUE Generic 4Core Managed Device
+HOST	| 0-1		| 0		| BBQUE Generic 2Core Host
+MDEV	| 2-3		| 0		| BBQUE Generic 2Core Managed Device
 --------+---------------+---------------+---------------------------------------
 #
 # Resources clusterization for MANAGED resources
 --------+---------------+---------------+---------------+-----------------------
 	| CPUs IDs	| Time Quota	| Memory Nodes	| Memory (MB)
 --------+---------------+---------------+---------------+-----------------------
-NODE	| 0-3		| 50		| 0		| 200
-NODE	| 0-3		| 50		| 0		| 200
+NODE	| 2-3		| 100		| 0		| 800
