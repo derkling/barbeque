@@ -17,7 +17,7 @@
 
 #include "mct_fairness.h"
 
-#include <algorithm>
+#include <cmath>
 
 namespace po = boost::program_options;
 
