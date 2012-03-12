@@ -145,6 +145,8 @@ aterm +sb -cr black -fn $FONT -geometry 74x55--9-17 \
 aterm +sb -cr black -fn $FONT -geometry 74x40--9+18 \
 	-title "BOSP Shell :: Task Monitor" \
 	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh &
-aterm +sb -fn $FONT -geometry 136x77+-9-18 -title "BBQUE Log" \
+aterm +sb -fn $FONT -geometry 118x77+-9-17 -title "BBQUE Log" \
 	-e tail -f $BBQUE_LOGFILE &
+aterm +sb -fn $FONT -geometry 103x20+825+18 -title "BBQUE HTOP" \
+	-e htop &
 
