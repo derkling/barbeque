@@ -196,8 +196,8 @@ void ResourceManager::Optimize() {
 		return;
 	}
 
-	am.PrintStatusReport();
 	ra.PrintStatusReport();
+	am.PrintStatusReport();
 	logger->Info("Running Optimization...");
 
 	// Account for a new schedule activation
@@ -224,8 +224,8 @@ void ResourceManager::Optimize() {
 	}
 	logger->Info(LNSCHE);
 	logger->Notice("Schedule Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
-	am.PrintStatusReport(true);
 	ra.PrintStatusReport(true);
+	am.PrintStatusReport(true);
 
 	// Check if there is at least one application to synchronize
 	if (!am.HasApplications(Application::SYNC)) {
@@ -253,8 +253,8 @@ void ResourceManager::Optimize() {
 		return;
 	}
 	logger->Info(LNSYNE);
-	am.PrintStatusReport(true);
 	ra.PrintStatusReport(0, true);
+	am.PrintStatusReport(true);
 	logger->Notice("Sync Time: %11.3f[us]", optimization_tmr.getElapsedTimeUs());
 
 }
@@ -330,17 +330,17 @@ void ResourceManager::EvtBbqUsr1() {
 
 	logger->Notice("");
 	logger->Notice("");
-	logger->Notice("==========[ EXCs Status ]=============="
-			"========================================");
-	logger->Notice("");
-	am.PrintStatusReport(true);
-
-	logger->Notice("");
-	logger->Notice("");
 	logger->Notice("==========[ Resources Status ]========="
 			"========================================");
 	logger->Notice("");
 	ra.PrintStatusReport(0, true);
+
+	logger->Notice("");
+	logger->Notice("");
+	logger->Notice("==========[ EXCs Status ]=============="
+			"========================================");
+	logger->Notice("");
+	am.PrintStatusReport(true);
 
 	// Clear the corresponding event flag
 	logger->Notice("");
