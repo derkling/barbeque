@@ -83,7 +83,7 @@ MCTReconfig::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 		// Query resource availability
 		rsrc_avl = sv->ResourceAvailable(rsrc_bind, vtok, evl_ent.papp);
 		if (rsrc_avl < pusage->GetAmount()) {
-			logger->Warn("%s: {%s} RQ:%llu| AVL:%llu", evl_ent.StrId(),
+			logger->Debug("%s: {%s} RQ:%llu| AVL:%llu", evl_ent.StrId(),
 					rsrc_path.c_str(), pusage->GetAmount(), rsrc_avl);
 			// Resource allocation is completely discouraged
 			ctrib = 0.0;
