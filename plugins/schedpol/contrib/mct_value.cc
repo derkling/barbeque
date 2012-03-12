@@ -19,10 +19,51 @@
 
 using namespace bbque::res;
 
+namespace po = boost::program_options;
+
 namespace bbque { namespace plugins {
+
+/** Set default congestion penalties values */
+uint16_t MCTValue::penalties_default[MCT_RSRC_COUNT] = {
+	10,
+	10
+};
 
 MCTValue::MCTValue(const char * _name, uint16_t const cfg_params[]):
 	MetricsContribute(_name, cfg_params) {
+	char conf_str[50];
+
+	// Configuration parameters
+	po::options_description opts_desc("AWM value contribute parameters");
+
+	// Congestion penalties
+	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
+		snprintf(conf_str, 50, MCT_CONF_BASE_STR"%s.penalty.%s",
+				name, ResourceNames[i]);
+
+		logger->Debug("%s", conf_str);
+		opts_desc.add_options()
+			(conf_str,
+			 po::value<uint16_t>
+				(&penalties_int[i])->default_value(penalties_default[i]),
+			 "AWM value penalty per resource");
+		;
+	}
+
+	po::variables_map opts_vm;
+	cm.ParseConfigurationFile(opts_desc, opts_vm);
+
+	// Boundaries enforcement (0 <= penalty <= 100)
+	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
+		if (penalties_int[i] > 100) {
+			logger->Warn("Parameter penalty.%s out of range [0,100]: "
+					"found %d. Setting to %d", ResourceNames[i],
+					penalties_int[i], penalties_default[i]);
+			penalties_int[i] = penalties_default[i];
+		}
+		penalties[i] = static_cast<float>(penalties_int[i]) / 100.0;
+		logger->Debug("penalty.%s \t= %.2f", ResourceNames[i], penalties[i]);
+	}
 }
 
 MetricsContribute::ExitCode_t
@@ -40,6 +81,7 @@ MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	uint8_t ggap = 0;
 	uint64_t curr_awm_rsrc_usage;
 	float target_usage = 0.0;
+	float penalty = 0.0;
 	float index;
 
 	// Pre-set the index contribute to the AWM static value
@@ -63,6 +105,13 @@ MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 				evl_ent.StrId(), rsrc_tmp_path.c_str(),
 				curr_awm_rsrc_usage, pusage->GetAmount());
 
+		// Get the penalty (per resource type)
+		std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
+		if (rsrc_name.compare(ResourceNames[MCT_RSRC_PE]) == 0)
+			penalty = penalties[MCT_RSRC_PE];
+		else
+			penalty = penalties[MCT_RSRC_MEM];
+
 		// Target resource usage due to the goal gap assertion
 		target_usage = static_cast<float>(curr_awm_rsrc_usage) *
 			(1.0 + static_cast<float>(ggap) / 100.0);
@@ -74,7 +123,9 @@ MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 			continue;
 
 		// Compute the contribute index (with penalization)
-		index = evl_ent.pawm->Value() * pusage->GetAmount() / target_usage;
+		index = static_cast<float>(evl_ent.pawm->Value()) * (1.0 - penalty)
+			* pusage->GetAmount()
+			/ target_usage;
 		logger->Debug("%s: R{%s} index: %.4f", evl_ent.StrId(),
 				rsrc_tmp_path.c_str(), index);
 
