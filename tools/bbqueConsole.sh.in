@@ -8,6 +8,7 @@ BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
 BBQUE_CONF="${BBQUE_CONF:-$CONF}"
 BBQUE_PILLAYOUT="${BBQUE_PILLAYOUT:-$PILLAYOUT}"
 BBQUE_SUPDATE="${BBQUE_SUPDATE:-1}"
+BBQUE_LOGFILE="${BBQUE_LOGFILE:-$BBQUE_SYSROOT/var/bbque/bbque.log}"
 
 # - XWindows geometries recoveder using "xwininfo" utility
 # - Font is configured by "-fn" option, to see a list of fonts run:
@@ -145,5 +146,5 @@ aterm +sb -cr black -fn $FONT -geometry 74x40--9+18 \
 	-title "BOSP Shell :: Task Monitor" \
 	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh &
 aterm +sb -fn $FONT -geometry 136x77+-9-18 -title "BBQUE Log" \
-	-e tail -f $BBQUE_SYSROOT/var/bbque/bbque.log &
+	-e tail -f $BBQUE_LOGFILE &
 
