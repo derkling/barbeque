@@ -1031,7 +1031,8 @@ ApplicationManager::EnableEXC(AppPid_t pid, uint8_t exc_id) {
 	papp = GetApplication(Application::Uid(pid, exc_id));
 	if (!papp) {
 		logger->Warn("Enable EXC [%d:*:%d] FAILED "
-				"(Error: EXC not found)");
+				"(Error: EXC not found)",
+				pid, exc_id);
 		assert(papp);
 		return AM_EXC_NOT_FOUND;
 	}
