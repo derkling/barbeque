@@ -345,7 +345,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppSPtr_t papp,
 	// Check resource availability (if this is not a sync session)
 	if ((do_check) && !(sync_ssn.started)) {
 		if (CheckAvailability(rsrc_usages, vtok) == RA_ERR_USAGE_EXC) {
-			logger->Warn("Booking: Cannot allocate the resource set");
+			logger->Debug("Booking: Cannot allocate the resource set");
 			return RA_ERR_USAGE_EXC;
 		}
 	}
