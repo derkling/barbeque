@@ -72,6 +72,9 @@
 /** The 'var' installation path */
 #define BBQUE_PATH_VAR "${BBQUE_PATH_VAR}"
 
+/** The RPC channel TIMEOUT */
+#define BBQUE_RPC_TIMEOUT ${BBQUE_RPC_TIMEOUT}
+
 
 /*******************************************************************************
  * BarbequeRTRM Supported Features
