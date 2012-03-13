@@ -19,6 +19,7 @@
 
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
+#include "bbque/config.h"
 
 #include <sys/stat.h>
 #include <errno.h>
@@ -225,6 +226,13 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 				chTrdPid));
 }
 
+#define WAIT_RPC_RESP \
+	chResp.result = RTLIB_BBQUE_CHANNEL_TIMEOUT; \
+	chResp_cv.wait_for(chCommand_ul, \
+			std::chrono::milliseconds(BBQUE_RPC_TIMEOUT)); \
+	if (chResp.result == RTLIB_BBQUE_CHANNEL_TIMEOUT) {\
+		fprintf(stderr, FMT_WRN("RTLIB response TIMEOUT\n")); \
+	}
 
 RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
@@ -258,7 +266,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelPair(const char *name) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
@@ -389,7 +397,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Register(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 
 }
@@ -425,7 +433,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Unregister(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 
 }
@@ -457,7 +465,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Enable(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
@@ -488,7 +496,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Disable(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
@@ -542,7 +550,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
@@ -573,7 +581,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Clear(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
@@ -605,7 +613,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_GGap(pregExCtx_t prec, uint8_t gap) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 
 }
@@ -637,7 +645,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_ScheduleRequest(pregExCtx_t prec) {
 
 	DB(fprintf(stderr, FMT_DBG("Waiting BBQUE response...\n")));
 
-	chResp_cv.wait_for(chCommand_ul, std::chrono::milliseconds(500));
+	WAIT_RPC_RESP;
 	return (RTLIB_ExitCode_t)chResp.result;
 }
 
