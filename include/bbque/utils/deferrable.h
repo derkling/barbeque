@@ -21,6 +21,7 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
+#include <functional>
 
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
@@ -49,6 +50,7 @@ class Deferrable {
 public:
 
 	typedef time_point<system_clock> DeferredTime_t;
+	typedef std::function<void(void)> DeferredFunction_t;
 
 	/**
 	 * @brief Build a new "on-demand" or "repetitive" deferrable object
@@ -58,7 +60,8 @@ public:
 	 * @param period when not null, the minimum execution period [ms] for
 	 * each execution
 	 */
-	Deferrable(const char *name, milliseconds period = milliseconds(0));
+	Deferrable(const char *name, DeferredFunction_t func = NULL,
+			milliseconds period = milliseconds(0));
 
 	/**
 	 * @brief Release all deferrable resources
@@ -75,7 +78,10 @@ public:
 	 * This should be implemeted by derived classes with the set of
 	 * operations to be executed at the next nearest scheduled time.
 	 */
-	virtual void Execute() = 0;
+	virtual void Execute() {
+		fprintf(stderr, "Deferrable::Execute\n");
+		if (func) func();
+	}
 
 #define SCHEDULE_NOW  milliseconds(0)
 	/**
@@ -109,6 +115,12 @@ protected:
 	LoggerIF *logger;
 
 private:
+
+	/**
+	 * @brief
+	 */
+	DeferredFunction_t func;
+
 	/**
 	 * @brief The minimum "repetition" period [ms] for the execution
 	 *

@@ -24,8 +24,11 @@ namespace bp = bbque::plugins;
 
 namespace bbque { namespace utils {
 
-Deferrable::Deferrable(const char *name, milliseconds period) :
+Deferrable::Deferrable(const char *name,
+		DeferredFunction_t func,
+		milliseconds period) :
 	name(name),
+	func(func),
 	max_time(period),
 	next_time(system_clock::now()),
 	done(false) {
