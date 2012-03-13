@@ -17,6 +17,8 @@
 
 #include "bbque/resource_manager.h"
 
+#include <chrono>
+
 #include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/modules_factory.h"
@@ -67,6 +69,8 @@ namespace br = bbque::res;
 namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
+
+using std::chrono::milliseconds;
 
 namespace bbque {
 
@@ -126,7 +130,8 @@ ResourceManager::ResourceManager() :
 	pm(bp::PluginManager::GetInstance()),
 	ra(ResourceAccounter::GetInstance()),
 	mc(bu::MetricsCollector::GetInstance()),
-	pp(PlatformProxy::GetInstance()) {
+	pp(PlatformProxy::GetInstance()),
+	opt("rm.opt", std::bind(&ResourceManager::Optimize, this)) {
 
 	//---------- Setup all the module metrics
 	mc.Register(metrics, RM_METRICS_COUNT);
@@ -268,7 +273,7 @@ void ResourceManager::EvtExcStart() {
 
 	// TODO add here a suitable policy to trigger the optimization
 
-	Optimize();
+	opt.Schedule();
 	
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_START, rm_tmr);
@@ -286,9 +291,7 @@ void ResourceManager::EvtExcStop() {
 	// FIXME right now we wait a small timeframe before to trigger a
 	// reschedule, in order to avoid a run while an Application is removing a
 	// certamin amount of EXC
-	::usleep(500000);
-
-	Optimize();
+	opt.Schedule(milliseconds(500));
 
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_STOP, rm_tmr);
@@ -303,7 +306,7 @@ void ResourceManager::EvtBbqOpts() {
 
 	// TODO add here a suitable policy to trigger the optimization
 
-	Optimize();
+	opt.Schedule();
 
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_OPTS, rm_tmr);

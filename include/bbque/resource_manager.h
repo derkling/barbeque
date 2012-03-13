@@ -30,6 +30,7 @@
 
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/timer.h"
+#include "bbque/utils/deferrable.h"
 #include "bbque/utils/metrics_collector.h"
 
 #include <bitset>
@@ -37,6 +38,7 @@
 using bbque::plugins::PluginManager;
 using bbque::plugins::LoggerIF;
 using bbque::utils::MetricsCollector;
+using bbque::utils::Deferrable;
 
 namespace bbque {
 
@@ -233,6 +235,15 @@ private:
 	 * @brief   Build a new instance of the resource manager
 	 */
 	ResourceManager();
+
+	/**
+	 * @brief Resource optimizer deferrable
+	 *
+	 * This is usded to collect and aggregate optimization requests.
+	 * The optimization will be performed by a call of the Optimize
+	 * method.
+	 */
+	Deferrable opt;
 
 	/**
 	 * @brief   Run on optimization cycle (i.e. Schedule and Synchronization)
