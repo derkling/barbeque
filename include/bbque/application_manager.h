@@ -239,6 +239,16 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
+	AppPtr_t HighestPrio(ApplicationStatusIF::State_t state);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
+	AppPtr_t HighestPrio(ApplicationStatusIF::SyncState_t syncState);
+
+	/**
+	 * @see ApplicationManagerStatusIF
+	 */
 	AppPtr_t const GetApplication(AppPid_t pid, uint8_t exc_id);
 
 	/**

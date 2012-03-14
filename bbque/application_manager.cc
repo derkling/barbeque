@@ -409,6 +409,70 @@ uint16_t ApplicationManager::AppsCount (
 	return sync_vec[state].size();
 }
 
+AppPtr_t ApplicationManager::HighestPrio(
+		ApplicationStatusIF::State_t state) {
+	AppPtr_t papp, papp_hp;
+	AppsUidMapIt apps_it;
+
+	assert(state < Application::STATE_COUNT);
+
+	logger->Debug("Looking for Highest prio [%s] apps...",
+			ApplicationStatusIF::StateStr(state));
+
+	if (!HasApplications(state)) {
+		logger->Debug("No apps found in [%s]",
+			ApplicationStatusIF::StateStr(state));
+		return AppPtr_t();
+	}
+
+	papp_hp = papp = GetFirst(state, apps_it);
+	while (papp) {
+		papp = GetNext(state, apps_it);
+		if (papp &&
+			(papp->Priority() > papp_hp->Priority()))
+			papp_hp = papp;
+	}
+
+	logger->Debug("Highest [%s] prio [%d] app [%s]",
+			ApplicationStatusIF::StateStr(state),
+			papp_hp->Priority(),
+			papp_hp->StrId());
+
+	return papp_hp;
+
+}
+
+AppPtr_t ApplicationManager::HighestPrio(
+		ApplicationStatusIF::SyncState_t syncState) {
+	AppPtr_t papp, papp_hp;
+	AppsUidMapIt apps_it;
+
+	assert(syncState < Application::SYNC_STATE_COUNT);
+
+	logger->Debug("Looking for Highest prio [%s] apps...",
+			ApplicationStatusIF::SyncStateStr(syncState));
+
+	if (!HasApplications(syncState)) {
+		logger->Debug("No apps found in [%s]",
+			ApplicationStatusIF::SyncStateStr(syncState));
+		return AppPtr_t();
+	}
+
+	papp_hp = papp = GetFirst(syncState, apps_it);
+	while (papp) {
+		papp = GetNext(syncState, apps_it);
+		if (papp &&
+			(papp->Priority() > papp_hp->Priority()))
+			papp_hp = papp;
+	}
+
+	logger->Debug("Highest [%s] prio [%d] app [%s]",
+			ApplicationStatusIF::SyncStateStr(syncState),
+			papp_hp->Priority(),
+			papp_hp->StrId());
+
+	return papp_hp;
+}
 
 /*******************************************************************************
  *  Get EXC handlers

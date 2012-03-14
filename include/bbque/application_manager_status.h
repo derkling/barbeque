@@ -313,6 +313,26 @@ public:
 	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state);
 
 	/**
+	 * @brief One of the highest PRIORITY applications in the the
+	 * specified state.
+	 *
+	 * @return a pointer to one of the highest priority application, which
+	 * is currently on the specified state, or NULL if not applications
+	 * are on this state.
+	 */
+	AppPtr_t HighestPrio(ApplicationStatusIF::State_t state);
+
+	/**
+	 * @brief One of the highest PRIORITY applications in the the
+	 * specified synchronization state.
+	 *
+	 * @return a pointer to one of the highest priority application, which
+	 * is currently on the specified state, or NULL if not applications
+	 * are on this state.
+	 */
+	AppPtr_t HighestPrio(ApplicationStatusIF::SyncState_t syncState);
+
+	/**
 	 * @brief Retrieve an application descriptor (shared pointer) by PID and
 	 * Excution Context
 	 * @param pid Application PID
