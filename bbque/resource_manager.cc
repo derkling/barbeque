@@ -265,48 +265,71 @@ void ResourceManager::Optimize() {
 }
 
 void ResourceManager::EvtExcStart() {
+	uint32_t timeout = 0;
+	AppPtr_t papp;
 
 	logger->Info("EXC Enabled");
 
 	// Reset timer for START event execution time collection
 	RM_RESET_TIMING(rm_tmr);
 
-	// TODO add here a suitable policy to trigger the optimization
-
-	opt.Schedule();
+	// This is a simple optimization triggering policy based on the
+	// current priority level of READY applications.
+	// When an application issue a Working Mode request it is expected to
+	// be in ready state. The optimization will be triggered in a
+	// timeframe which is _invese proportional_ to the highest priority
+	// ready application.
+	// This should allows to have short latencies for high priority apps
+	// while still allowing for reduced rescheduling on applications
+	// startup burst.
+	// TODO: make this policy more tunable via the configuration file
+	papp = am.HighestPrio(ApplicationStatusIF::READY);
+	timeout = 100 + (100 * papp->Priority());
+	opt.Schedule(milliseconds(timeout));
 	
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_START, rm_tmr);
 }
 
 void ResourceManager::EvtExcStop() {
+	uint32_t timeout = 0;
+	AppPtr_t papp;
 
 	logger->Info("EXC Disabled");
 
 	// Reset timer for START event execution time collection
 	RM_RESET_TIMING(rm_tmr);
 
-	// TODO add here a suitable policy to trigger the optimization
-	
-	// FIXME right now we wait a small timeframe before to trigger a
-	// reschedule, in order to avoid a run while an Application is removing a
-	// certamin amount of EXC
-	opt.Schedule(milliseconds(500));
+	// This is a simple oprimization triggering policy based on the
+	// current priority level of READY applications.
+	// When an application terminates we check for the presence of READY
+	// applications waiting to start, if there are a new optimization run
+	// is scheduled before than the case in which all applications are
+	// runnig.
+	// TODO: make this policy more tunable via the configuration file
+	timeout = 500 - (50 * (am.AppsCount(ApplicationStatusIF::READY) % 8));
+	opt.Schedule(milliseconds(timeout));
 
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_STOP, rm_tmr);
 }
 
 void ResourceManager::EvtBbqOpts() {
+	uint32_t timeout = 0;
 
 	logger->Info("BBQ Optimization Request");
 
 	// Reset timer for START event execution time collection
 	RM_RESET_TIMING(rm_tmr);
 
-	// TODO add here a suitable policy to trigger the optimization
-
-	opt.Schedule();
+	// Explicit applications requests for optimization are delayed by
+	// default just to increase the chance for aggregation of multiple
+	// requests
+	// TODO: make this policy more tunable via the configuration file
+	timeout = 500;
+	if (am.AppsCount(ApplicationStatusIF::READY))
+		timeout = 250;
+	opt.Schedule(milliseconds(timeout));
 
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_OPTS, rm_tmr);
