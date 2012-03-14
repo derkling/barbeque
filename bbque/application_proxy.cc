@@ -222,6 +222,7 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	conCtxMap_t::iterator it;
 	AppPtr_t papp = pcs->papp;
 	pconCtx_t pcon;
+	ssize_t result;
 	rpc_msg_BBQ_SYNCP_PRECHANGE_t syncp_prechange_msg = {
 		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid, papp->Pid(), papp->ExcId()},
 		(uint8_t)papp->SyncState(),
@@ -254,8 +255,14 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &syncp_prechange_msg.hdr,
+	result = rpc->SendMessage(pcon->pd, &syncp_prechange_msg.hdr,
 			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_PRECHANGE));
+	if (result == -1) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_PRECHANGE] "
+				"to EXC [%s] FAILED (Error: write failed)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
 
 	return RTLIB_OK;
 }
@@ -413,6 +420,7 @@ ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 	conCtxMap_t::iterator it;
 	AppPtr_t papp = pcs->papp;
 	pconCtx_t pcon;
+	ssize_t result;
 	rpc_msg_BBQ_SYNCP_SYNCCHANGE_t syncp_syncchange_msg = {
 		{RPC_BBQ_SYNCP_SYNCCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
 	};
@@ -436,8 +444,14 @@ ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
+	result = rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
 			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_SYNCCHANGE));
+	if (result == -1) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_SYNCCHANGE] "
+				"to EXC [%s] FAILED (Error: write failed)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
 
 	return RTLIB_OK;
 }
@@ -599,6 +613,7 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 	conCtxMap_t::iterator it;
 	AppPtr_t papp = pcs->papp;
 	pconCtx_t pcon;
+	ssize_t result;
 	rpc_msg_BBQ_SYNCP_DOCHANGE_t syncp_syncchange_msg = {
 		{RPC_BBQ_SYNCP_DOCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
 	};
@@ -622,8 +637,14 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
+	result = rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
 			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_DOCHANGE));
+	if (result == -1) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_DOCHANGE] "
+				"to EXC [%s] FAILED (Error: write failed)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
 
 	return RTLIB_OK;
 }
@@ -668,6 +689,7 @@ ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 	conCtxMap_t::iterator it;
 	AppPtr_t papp = pcs->papp;
 	pconCtx_t pcon;
+	ssize_t result;
 	rpc_msg_BBQ_SYNCP_POSTCHANGE_t syncp_syncchange_msg = {
 		{RPC_BBQ_SYNCP_POSTCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
 	};
@@ -691,8 +713,14 @@ ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 
 	// Sending message on the application connection context
 	pcon = (*it).second;
-	rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
+	result = rpc->SendMessage(pcon->pd, &syncp_syncchange_msg.hdr,
 			(size_t)RPC_PKT_SIZE(BBQ_SYNCP_POSTCHANGE));
+	if (result == -1) {
+		logger->Error("APPs PRX: Send Command [RPC_BBQ_SYNCP_POSTCHANGE] "
+				"to EXC [%s] FAILED (Error: write failed)",
+				papp->StrId());
+		return RTLIB_BBQUE_CHANNEL_WRITE_FAILED;
+	}
 
 	return RTLIB_OK;
 }
