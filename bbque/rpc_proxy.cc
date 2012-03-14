@@ -144,7 +144,7 @@ int RPCProxy::Init() {
 	return 0;
 }
 
-size_t RPCProxy::RecvMessage(rpc_msg_ptr_t & msg) {
+ssize_t RPCProxy::RecvMessage(rpc_msg_ptr_t & msg) {
 	std::unique_lock<std::mutex> queue_status_ul(msg_queue_mtx);
 	channel_msg_t ch_msg;
 	size_t size = msg_queue.size();
@@ -181,7 +181,7 @@ void RPCProxy::ReleasePluginData(plugin_data_t & pd) {
 	return rpc_channel->ReleasePluginData(pd);
 }
 
-size_t RPCProxy::SendMessage(plugin_data_t & pd,
+ssize_t RPCProxy::SendMessage(plugin_data_t & pd,
 		rpc_msg_ptr_t msg, size_t count) {
 
 	// Collect stats on TX messages

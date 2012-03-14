@@ -47,7 +47,7 @@ public:
 		return rc->Init();
 	}
 
-	size_t RecvMessage(rpc_msg_ptr_t & msg) {
+	ssize_t RecvMessage(rpc_msg_ptr_t & msg) {
 		return rc->RecvMessage((void*)msg);
 	}
 
@@ -59,7 +59,7 @@ public:
 		rc->ReleasePluginData(pd.get());
 	}
 
-	size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
+	ssize_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 			size_t count) {
 		return rc->SendMessage(pd.get(), msg, count);
 	}

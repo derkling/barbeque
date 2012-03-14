@@ -28,10 +28,10 @@ typedef struct C_RPCChannelHandle_ { char c; } * C_RPCChannelHandle;
  */
 typedef struct C_RPCChannel_ {
 	int    (*Init)(void);
-	size_t (*RecvMessage)(void *buff_ptr);
+	ssize_t (*RecvMessage)(void *buff_ptr);
 	void*  (*GetPluginData)(void *buff_ptr);
 	void   (*ReleasePluginData)(void *pd);
-	size_t (*SendMessage)(void *pd, void *buff_ptr, size_t count);
+	ssize_t (*SendMessage)(void *pd, void *buff_ptr, size_t count);
 	void   (*FreeMessage)(void *buff_ptr);
 	C_RPCChannelHandle handle;
 } C_RPCChannel;

@@ -61,7 +61,7 @@ public:
 	 * then return a pointer to the beginning of the message buffer and the
 	 * size of the returned buffer.
 	 */
-	virtual size_t RecvMessage(rpc_msg_ptr_t & msg) = 0;
+	virtual ssize_t RecvMessage(rpc_msg_ptr_t & msg) = 0;
 
 	/**
 	 * @brief Get a pointer to plugins data.
@@ -104,7 +104,7 @@ public:
 	 * This method blocks the caller until the specified message buffer could
 	 * be accepted for delivery to the specified application.
 	 */
-	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
+	virtual ssize_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 								size_t count) = 0;
 
 	/**

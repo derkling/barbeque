@@ -72,7 +72,7 @@ public:
 	 * returned depends on the dequeuing rules defined by the implementation
 	 * of this class.
 	 */
-	virtual size_t RecvMessage(rpc_msg_ptr_t & msg);
+	virtual ssize_t RecvMessage(rpc_msg_ptr_t & msg);
 
 	/**
 	 * @brief Get a pointer to plugins data.
@@ -121,7 +121,7 @@ public:
 	 *
 	 * @note this call is forwarded directly to the low-level channel module.
 	 */
-	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
+	virtual ssize_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 								size_t count);
 
 	/**
