@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <csignal>
 
 namespace br = bbque::rtlib;
 namespace fs = boost::filesystem;
@@ -48,6 +49,11 @@ FifoRPC::FifoRPC(std::string const & fifo_dir) :
 			fprintf(stdout, FMT_INFO("Build FIFO rpc plugin [%p] FAILED "
 					"(Error: missing logger module)\n"), (void*)this);
 	}
+
+	// Ignore SIGPIPE, which will otherwise result into a BBQ termination.
+	// Indeed, in case of write errors the timeouts allows BBQ to react to
+	// the application not responding or disappearing.
+	signal(SIGPIPE, SIG_IGN);
 
 	assert(logger);
 	logger->Debug("Built FIFO rpc object @%p", (void*)this);
