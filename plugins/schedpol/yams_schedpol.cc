@@ -549,19 +549,23 @@ YamsSchedPol::ExitCode_t YamsSchedPol::BindCluster(SchedEntityPtr_t pschd) {
 
 bool YamsSchedPol::CompareEntities(SchedEntityPtr_t & se1,
 		SchedEntityPtr_t & se2) {
-		if (se1->metrics < se2->metrics)
-			return false;
+	// Metrics (primary sorting key)
+	if (se1->metrics <= se2->metrics)
+		return false;
+	if (se1->metrics > se2->metrics)
+		return true;
 
-		if (se1->metrics > se2->metrics)
-			return true;
+	// Apps asserting a NAP should be considered first
+	if ((se1->papp->GetGoalGap() > 0) && (se2->papp->GetGoalGap() == 0))
+		return true;
+	if ((se1->papp->GetGoalGap() == 0) && (se2->papp->GetGoalGap() > 0))
+		return false;
 
-		if (se1->papp->Priority() < se1->papp->Priority())
-			return true;
+	// Higher value AWM first
+	if (se1->pawm->Value() > se2->pawm->Value())
+		return true;
 
-		if (se1->pawm->Value() > se2->pawm->Value())
-			return true;
-
-		return (se1->clust_id < se2->clust_id);
+	return false;
 }
 
 
