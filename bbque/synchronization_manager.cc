@@ -216,6 +216,16 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 			continue;
 		}
 
+		if (result == RTLIB_BBQUE_CHANNEL_WRITE_FAILED) {
+			logger->Warn("STEP 1: <------ WERROR -- [%s]",
+					papp->StrId());
+			// TODO: disappeared applications could be killed
+			papp->Disable();
+			// Remove the respose future
+			rsp_map.erase(resp_it);
+			continue;
+		}
+
 		if (result != RTLIB_OK) {
 			logger->Warn("STEP 1: <----- FAILED -- [%s]", papp->StrId());
 			// FIXME This case should be handled
@@ -319,6 +329,20 @@ SynchronizationManager::Sync_SyncChange(
 			SM_COUNT_EVENT(metrics, SM_SYNCP_SYNC_MISS);
 			continue;
 		}
+
+		if (result == RTLIB_BBQUE_CHANNEL_WRITE_FAILED) {
+			logger->Warn("STEP 1: <------ WERROR -- [%s]",
+					papp->StrId());
+			// TODO: disappeared applications could be killed
+			papp->Disable();
+			// Remove the respose future
+			rsp_map.erase(resp_it);
+
+			// Accounting for syncpoints missed
+			SM_COUNT_EVENT(metrics, SM_SYNCP_SYNC_MISS);
+			continue;
+		}
+
 
 		if (result != RTLIB_OK) {
 			logger->Warn("STEP 2: <----- FAILED -- [%s]", papp->StrId());
@@ -425,6 +449,14 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 			logger->Warn("STEP 4: <---- TIMEOUT -- [%s]",
 					papp->StrId());
 			// Disabling not responding applications
+			papp->Disable();
+			continue;
+		}
+
+		if (result == RTLIB_BBQUE_CHANNEL_WRITE_FAILED) {
+			logger->Warn("STEP 1: <------ WERROR -- [%s]",
+					papp->StrId());
+			// TODO: disappeared applications could be killed
 			papp->Disable();
 			continue;
 		}
