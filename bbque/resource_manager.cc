@@ -70,6 +70,8 @@ namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 
+using bp::PluginManager;
+using bu::MetricsCollector;
 using std::chrono::milliseconds;
 
 namespace bbque {
@@ -127,9 +129,9 @@ ResourceManager::ResourceManager() :
 	ym(SynchronizationManager::GetInstance()),
 	am(ApplicationManager::GetInstance()),
 	ap(ApplicationProxy::GetInstance()),
-	pm(bp::PluginManager::GetInstance()),
+	pm(PluginManager::GetInstance()),
 	ra(ResourceAccounter::GetInstance()),
-	mc(bu::MetricsCollector::GetInstance()),
+	mc(MetricsCollector::GetInstance()),
 	pp(PlatformProxy::GetInstance()),
 	opt("rm.opt", std::bind(&ResourceManager::Optimize, this)) {
 
