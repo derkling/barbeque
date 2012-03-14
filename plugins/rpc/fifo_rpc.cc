@@ -144,19 +144,19 @@ int FifoRPC::Init() {
 	return 0;
 }
 
-size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
+ssize_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 	br::rpc_fifo_header_t hdr;
 	void *fifo_buff_ptr;
 	ssize_t result;
-	size_t bytes;
+	ssize_t bytes;
 
 	logger->Debug("FIFO RPC: waiting message...");
 
 	// Wait for the next message being available
 	// ... which always starts with the FIFO header
 	bytes = ::read(rpc_fifo_fd, (void*)&hdr, FIFO_PKT_SIZE(header));
-	if (bytes<=0) {
-		if (bytes==EINTR)
+	if (bytes <= 0) {
+		if (bytes == EINTR)
 			logger->Debug("FIFO RPC: exiting FIFO read...");
 		else
 			logger->Error("FIFO RPC: fifo read error");
@@ -179,10 +179,10 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 			// header message... a proper clean-up procedure
 			// should be activated, e.g. lookup for the next
 			// HEADER.
-			logger->Error("FIFO RPC: read FAILED (Error: %s)",
-					::strerror(errno));
+			logger->Error("FIFO RPC: read FAILED (Error %d: %s)",
+					errno, strerror(errno));
 		}
-		return 0;
+		return -errno;
 	}
 
 	// Save header into new buffer
@@ -241,13 +241,13 @@ size_t FifoRPC::RecvMessage(rpc_msg_ptr_t & msg) {
 
 exit_read_failed:
 
-	logger->Error("FIFO RPC: read RPC message FAILED (Error: %s)",
-			::strerror(errno));
+	logger->Error("FIFO RPC: read RPC message FAILED (Error %d: %s)",
+			errno, strerror(errno));
 
 	free(fifo_buff_ptr);
 	msg = NULL;
 
-	return 0;
+	return -errno;
 }
 
 RPCChannelIF::plugin_data_t FifoRPC::GetPluginData(
@@ -338,7 +338,7 @@ void FifoRPC::ReleasePluginData(plugin_data_t & pd) {
 
 }
 
-size_t FifoRPC::SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
+ssize_t FifoRPC::SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 		size_t count) {
 	fifo_data_t * ppd = (fifo_data_t*)pd.get();
 	br::rpc_fifo_GENERIC_t *fifo_msg;
@@ -374,7 +374,7 @@ size_t FifoRPC::SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 	if (error == -1) {
 		logger->Error("FIFO RPC: send massage (header) FAILED (Error %d: %s)",
 				errno, strerror(errno));
-		return -1;
+		return -errno;
 	}
 
 	return fifo_msg->hdr.fifo_msg_size;

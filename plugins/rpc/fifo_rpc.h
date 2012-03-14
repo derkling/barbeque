@@ -68,13 +68,13 @@ public:
 //----- RPCChannelIF module interface
 
 
-	virtual size_t RecvMessage(rpc_msg_ptr_t & msg);
+	virtual ssize_t RecvMessage(rpc_msg_ptr_t & msg);
 
 	virtual plugin_data_t GetPluginData(rpc_msg_ptr_t & msg);
 
 	virtual void ReleasePluginData(plugin_data_t & pd);
 
-	virtual size_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
+	virtual ssize_t SendMessage(plugin_data_t & pd, rpc_msg_ptr_t msg,
 								size_t count);
 
 	virtual void FreeMessage(rpc_msg_ptr_t & msg);
