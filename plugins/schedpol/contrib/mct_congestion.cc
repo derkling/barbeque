@@ -128,11 +128,12 @@ void MCTCongestion::SetIndexParameters(ResourceThresholds_t const & rl,
 
 	// Linear parameters
 	params.lin.xoffset = static_cast<float>(rl.sat_lack);
-	params.lin.scale = penalty / static_cast<float>(rl.free - rl.sat_lack);
+	params.lin.scale = penalty /
+		(static_cast<float>(rl.free) - static_cast<float>(rl.sat_lack));
 
 	// Exponential parameters
 	params.exp.yscale = (1.0 - penalty) / (params.exp.base - 1.0);
-	params.exp.xscale = static_cast<float>(rl.free - rl.total);
+	params.exp.xscale = static_cast<float>(rl.free) - static_cast<float>(rl.total);
 	params.exp.xoffset = static_cast<float>(rl.total);
 }
 
