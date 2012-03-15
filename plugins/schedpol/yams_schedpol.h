@@ -366,6 +366,14 @@ private:
 			return true;
 		}
 
+		// Avoid double AWM selection for SYNCH applications with an already
+		// assigned AWM.
+		if ((papp->State() == Application::SYNC) && papp->NextAWM()) {
+			logger->Debug("Skipping [%s]. AWM already assigned. (AWM=%d)",
+					papp->StrId(), papp->NextAWM()->Id());
+			return true;
+		}
+
 		return false;
 	}
 
