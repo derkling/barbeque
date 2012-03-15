@@ -133,7 +133,7 @@ ResourceManager::ResourceManager() :
 	ra(ResourceAccounter::GetInstance()),
 	mc(MetricsCollector::GetInstance()),
 	pp(PlatformProxy::GetInstance()),
-	opt("rm.opt", std::bind(&ResourceManager::Optimize, this)) {
+	optimize_dfr("rm.opt", std::bind(&ResourceManager::Optimize, this)) {
 
 	//---------- Setup all the module metrics
 	mc.Register(metrics, RM_METRICS_COUNT);
@@ -288,7 +288,7 @@ void ResourceManager::EvtExcStart() {
 	// TODO: make this policy more tunable via the configuration file
 	papp = am.HighestPrio(ApplicationStatusIF::READY);
 	timeout = 100 + (100 * papp->Priority());
-	opt.Schedule(milliseconds(timeout));
+	optimize_dfr.Schedule(milliseconds(timeout));
 	
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_START, rm_tmr);
@@ -304,14 +304,14 @@ void ResourceManager::EvtExcStop() {
 	RM_RESET_TIMING(rm_tmr);
 
 	// This is a simple oprimization triggering policy based on the
-	// current priority level of READY applications.
+	// number of applications READY to run.
 	// When an application terminates we check for the presence of READY
 	// applications waiting to start, if there are a new optimization run
 	// is scheduled before than the case in which all applications are
 	// runnig.
 	// TODO: make this policy more tunable via the configuration file
 	timeout = 500 - (50 * (am.AppsCount(ApplicationStatusIF::READY) % 8));
-	opt.Schedule(milliseconds(timeout));
+	optimize_dfr.Schedule(milliseconds(timeout));
 
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_STOP, rm_tmr);
@@ -332,7 +332,7 @@ void ResourceManager::EvtBbqOpts() {
 	timeout = 500;
 	if (am.AppsCount(ApplicationStatusIF::READY))
 		timeout = 250;
-	opt.Schedule(milliseconds(timeout));
+	optimize_dfr.Schedule(milliseconds(timeout));
 
 	// Collecing execution metrics
 	RM_GET_TIMING(metrics, RM_EVT_TIME_OPTS, rm_tmr);

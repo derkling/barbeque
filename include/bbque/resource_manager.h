@@ -243,7 +243,7 @@ private:
 	 * The optimization will be performed by a call of the Optimize
 	 * method.
 	 */
-	Deferrable opt;
+	Deferrable optimize_dfr;
 
 	/**
 	 * @brief   Run on optimization cycle (i.e. Schedule and Synchronization)
