@@ -367,7 +367,7 @@ uint8_t YamsSchedPol::OrderSchedEntities(AppPrio_t prio, uint16_t cl_id) {
 	return naps_count;
 }
 
-void YamsSchedPol::SelectSchedEntities() {
+bool YamsSchedPol::SelectSchedEntities(uint8_t naps_count) {
 	Application::ExitCode_t app_result;
 
 	logger->Debug("=================| Scheduling entities |=================");
@@ -422,9 +422,19 @@ void YamsSchedPol::SelectSchedEntities() {
 		// the scheduling results
 		YAMS_GET_SAMPLE(coll_metrics, YAMS_METRICS_AWMVALUE,
 				pschd->pawm->Value());
+
+		// Break as soon as all NAPped apps have been scheduled
+		if (naps_count && (--naps_count == 0))
+			break;
+	}
+
+	if (se_it != end_se) {
+		logger->Debug("======================| NAP Break |===================");
+		return true;
 	}
 
 	logger->Debug("========================| DONE |======================");
+	return false;
 }
 
 

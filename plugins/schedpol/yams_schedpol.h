@@ -326,9 +326,17 @@ private:
 	/**
 	 * @brief Require the scheduling of the entities
 	 *
-	 * For each application pick the next working mode to schedule
+	 * For each application pick the next working mode to schedule.
+	 * If a number of applications with NAP asserted has been specified,
+	 * than this method return (with a true) as soon as all the "NAPped"
+	 * applications have been already scheduled.
+	 *
+	 * @param naps_count the number of EXC, among those to be selected,
+	 * which have a NAP value asserted.
+	 * @return true if the schedule for these entities has not been
+	 * competed
 	 */
-	void SelectSchedEntities();
+	bool SelectSchedEntities(uint8_t naps_count);
 
 	/**
 	 * @brief Check if an application/EXC must be skipped
