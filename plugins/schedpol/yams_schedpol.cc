@@ -339,7 +339,8 @@ void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 	YAMS_GET_TIMING(coll_metrics, YAMS_SELECTING_TIME, yams_tmr);
 }
 
-void YamsSchedPol::OrderSchedEntities(AppPrio_t prio, uint16_t cl_id) {
+uint8_t YamsSchedPol::OrderSchedEntities(AppPrio_t prio, uint16_t cl_id) {
+	uint8_t naps_count = 0;
 	AppsUidMapIt app_it;
 	AppCPtr_t papp;
 
@@ -354,10 +355,16 @@ void YamsSchedPol::OrderSchedEntities(AppPrio_t prio, uint16_t cl_id) {
 		// Compute the metrics for all the working modes, binding the
 		// resources to the current cluster (cl_id)
 		InsertWorkingModes(papp, cl_id);
+
+		// Keep track of NAPped apps
+		if (papp->GetGoalGap())
+			++naps_count;
 	}
 
 	// Order the scheduling entities list
 	entities.sort(CompareEntities);
+
+	return naps_count;
 }
 
 void YamsSchedPol::SelectSchedEntities() {

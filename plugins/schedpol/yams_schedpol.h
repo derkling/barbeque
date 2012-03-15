@@ -302,8 +302,11 @@ private:
 	 *
 	 * @param prio The priority queue to schedule
 	 * @param cl_id The current cluster for the clustered resources
+	 *
+	 * @return the number of EXCs in this priority queue which have a
+	 * NAP value asserted
 	 */
-	void OrderSchedEntities(AppPrio_t prio,	uint16_t cl_id);
+	uint8_t OrderSchedEntities(AppPrio_t prio, uint16_t cl_id);
 
 	/**
 	 * @brief Metrics of all the AWMs of an Application
