@@ -370,7 +370,7 @@ private:
 	/**
 	 * Mutex to protect concurrent access to the map of applications UIDs.
 	 */
-	std::mutex uids_mtx;
+	std::recursive_mutex uids_mtx;
 
 	/**
 	 * Array of iterator retainers for "in loop erase" support on UID map

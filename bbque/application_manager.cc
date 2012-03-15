@@ -214,7 +214,7 @@ ApplicationManager::UpdateIterators(AppsUidMapItRetainer_t & ret,
 }
 
 AppPtr_t ApplicationManager::GetFirst(AppsUidMapIt & ait) {
-	std::unique_lock<std::mutex> uids_ul(uids_mtx);
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx);
 	AppPtr_t papp;
 
 	ait.Init(uids, uids_ret);
@@ -233,7 +233,7 @@ AppPtr_t ApplicationManager::GetFirst(AppsUidMapIt & ait) {
 }
 
 AppPtr_t ApplicationManager::GetNext(AppsUidMapIt & ait) {
-	std::unique_lock<std::mutex> uids_ul(uids_mtx);
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx);
 	AppPtr_t papp;
 
 	ait++;
@@ -479,7 +479,7 @@ AppPtr_t ApplicationManager::HighestPrio(
  ******************************************************************************/
 
 AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) {
-	std::unique_lock<std::mutex> uids_ul(uids_mtx);
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx);
 	AppsUidMap_t::const_iterator it = uids.find(uid);
 	AppPtr_t papp;
 
@@ -739,7 +739,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 		std::string const & _rcp_name, app::AppPrio_t _prio,
 		bool _weak_load) {
 	std::unique_lock<std::mutex> prio_ul(prio_mtx[_prio], std::defer_lock);
-	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
 	Application::ExitCode_t app_result;
@@ -856,7 +856,7 @@ ApplicationManager::AppsRemove(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPtr_t papp) {
-	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	PlatformProxy::ExitCode_t pp_result;
@@ -910,6 +910,7 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	AppPtr_t papp;
 
 	// Find the required EXC
