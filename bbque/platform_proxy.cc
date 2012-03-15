@@ -197,9 +197,30 @@ PlatformProxy::MapResources(AppPtr_t papp, UsagesMapPtr_t pres, bool excl) {
 
 	logger->Debug("PLAT PRX: Mapping resources for app [%s], using view [%d]",
 			papp->StrId(), rvt);
+
 #ifndef BBQUE_TEST_PLATFORM_DATA
+
+	// Platform Specific Data (PSD) should be initialized the first time
+	// an application is scheduled for execution
+	if (unlikely(!papp->HasPlatformData())) {
+
+		// Setup PSD
+		result = Setup(papp);
+		if (result != OK) {
+			logger->Error("Setup PSD for EXC [%s] FAILED",
+					papp->StrId());
+			return result;
+		}
+
+		// Mark PSD as correctly initialized
+		papp->SetPlatformData();
+	}
+
+	// Map resources
 	result = _MapResources(papp, pres, rvt, excl);
+
 #else
+
 	// Quite compiler warnings on TEST PLATFORM MODE
 	(void)pres;
 	(void) excl;

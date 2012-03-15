@@ -180,6 +180,26 @@ public:
 	 */
 	ExitCode_t SetRecipe(RecipePtr_t & recipe, AppPtr_t & papp);
 
+
+	/**
+	 * @brief Set Platform Specific Data initialized
+	 *
+	 * Mark the Platform Specific Data as initialized for this application
+	 */
+	void SetPlatformData() {
+		platform_data = true;
+	}
+
+	/**
+	 * @biref Check Platform Specific Data initialization
+	 *
+	 * Return true if this application has already a properly configured
+	 * set of Platform Specific Data.
+	 */
+	bool HasPlatformData() const {
+		return platform_data;
+	}
+
 	/**
 	 * @see ApplicationStatuIF
 	 */
@@ -425,6 +445,11 @@ private:
 	 * results.
 	 */
 	float value;
+
+	/**
+	 * Platform Specifica Data properly initialized
+	 */
+	bool platform_data;
 
 	/**
 	 * Recipe pointer for the current application instance.

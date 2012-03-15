@@ -145,17 +145,6 @@ public:
  */
 
 	/**
-	 * @brief Setup platform data required to manage the specified application
-	 *
-	 * Once a new application enter the system, a set of platform specific
-	 * applications data could be require in order to properly set-up the
-	 * platform for run-time management. This method should be called to
-	 * perpare the groud for run-time platform control.
-	 */
-	ExitCode_t Setup(AppPtr_t papp);
-
-
-	/**
 	 * @brief Release platform data used to manage the specified application
 	 *
 	 * Once an application exit the system, this method should be called to
@@ -234,6 +223,15 @@ private:
 	 */
 	void Monitor();
 
+	/**
+	 * @brief Setup platform data required to manage the specified application
+	 *
+	 * Once a new application enter the system, a set of platform specific
+	 * applications data could be require in order to properly set-up the
+	 * platform for run-time management. This method should be called to
+	 * perpare the groud for run-time platform control.
+	 */
+	ExitCode_t Setup(AppPtr_t papp);
 
 protected:
 

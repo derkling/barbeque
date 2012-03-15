@@ -64,7 +64,8 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 	pid(_pid),
 	exc_id(_exc_id),
 	ggap_percent(0),
-	value(0.0) {
+	value(0.0),
+	platform_data(false) {
 
 	// Init the working modes vector
 	awms.recipe_vect.resize(MAX_NUM_AWM);

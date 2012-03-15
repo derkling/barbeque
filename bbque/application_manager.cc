@@ -742,7 +742,6 @@ AppPtr_t ApplicationManager::CreateEXC(
 	std::unique_lock<std::mutex> uids_ul(uids_mtx, std::defer_lock);
 	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
-	PlatformProxy::ExitCode_t pp_result;
 	Application::ExitCode_t app_result;
 	RecipePtr_t rcp_ptr;
 	AppPtr_t papp;
@@ -768,14 +767,6 @@ AppPtr_t ApplicationManager::CreateEXC(
 	if (app_result != Application::APP_SUCCESS) {
 		logger->Error("Create EXC [%s] FAILED "
 				"(Error: recipe rejected)",
-				papp->StrId());
-		return AppPtr_t();
-	}
-
-	// Setup platform specific data
-	pp_result = pp.Setup(papp);
-	if (pp_result != PlatformProxy::OK) {
-		logger->Error("Create EXC [%s] FAILED (Error: platform data setup)",
 				papp->StrId());
 		return AppPtr_t();
 	}
