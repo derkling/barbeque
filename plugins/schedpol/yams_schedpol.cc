@@ -304,16 +304,21 @@ error:
 
 void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 	// Order scheduling entities
-	std::vector<ResID_t>::iterator ids_it(cl_info.ids.begin());
-	std::vector<ResID_t>::iterator end_ids(cl_info.ids.end());
+	std::vector<ResID_t>::iterator ids_it;
+	std::vector<ResID_t>::iterator end_ids;
+	bool sched_incomplete;
+	uint8_t naps_count = 0;
 
 	// Reset timer
 	YAMS_RESET_TIMING(yams_tmr);
 
+do_schedule:
+
 	// Init fairness contribute
 	mcts[YAMS_FAIRNESS]->Init(&prio);
 
-	for (; ids_it != end_ids; ++ids_it) {
+	ids_it = cl_info.ids.begin();
+	for (; ids_it != cl_info.ids.end(); ++ids_it) {
 		ResID_t & cl_id(*ids_it);
 		logger->Debug("Schedule: :::::::::::::::::::::: Cluster %d:", cl_id);
 
@@ -324,7 +329,7 @@ void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 		}
 
 		// Order schedule entities by metrics
-		OrderSchedEntities(prio, cl_id);
+		naps_count = OrderSchedEntities(prio, cl_id);
 	}
 
 	// Collect "ordering step" metrics
@@ -332,8 +337,11 @@ void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 	YAMS_RESET_TIMING(yams_tmr);
 
 	// Selection: for each application schedule a working mode
-	SelectSchedEntities();
+	sched_incomplete = SelectSchedEntities(naps_count);
 	entities.clear();
+
+	if (sched_incomplete)
+		goto do_schedule;
 
 	// Stop timing metrics
 	YAMS_GET_TIMING(coll_metrics, YAMS_SELECTING_TIME, yams_tmr);
