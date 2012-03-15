@@ -86,10 +86,10 @@ MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	float index = 1.0;
 
 	// Pre-set the index contribute to the AWM static value
-	ctrib = 0.2 * evl_ent.pawm->Value();
+	ctrib = 0.4 * evl_ent.pawm->Value();
 	logger->Notice("####### %s: AWM Value part: %.4f", evl_ent.StrId(), ctrib);
 
-	ggap = 0.8 * static_cast<float>(evl_ent.papp->GetGoalGap()) / 100.0;
+	ggap = 0.6 * static_cast<float>(evl_ent.papp->GetGoalGap()) / 100.0;
 
 
 	// Goal-Gap set?
