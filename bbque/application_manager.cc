@@ -871,10 +871,13 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	PlatformProxy::ExitCode_t pp_result;
 	ExitCode_t result;
 
-	logger->Debug("Removing EXC [%s] ...", papp->StrId());
-
 	// Mark the EXC as finished
-	papp->Terminate();
+	if (papp->Terminate() == Application::APP_FINISHED) {
+		// This EXC has already been (or is going to be) finished
+		return AM_SUCCESS;
+	}
+
+	logger->Debug("Removing EXC [%s]...", papp->StrId());
 
 	// Remove platform specific data
 	pp_result = pp.Release(papp);

@@ -68,6 +68,8 @@ public:
 		APP_SUCCESS = 0,
 		/** Application being DISABLED */
 		APP_DISABLED,
+		/** Application being FINISHED */
+		APP_FINISHED,
 		/** Null recipe object passed */
 		APP_RECP_NULL,
 		/** Application working mode not found */

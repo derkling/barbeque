@@ -380,6 +380,15 @@ Application::ExitCode_t Application::Terminate() {
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
+	// This is to enforce a single removal of an EXC, indeed, due to
+	// parallelized execution of commands, it could happen that (e.g. due
+	// to timeout) the same command is issued a second time while it's
+	// being served by BBQ
+	if (_State() == FINISHED) {
+		logger->Warn("Multiple termination of EXC [%s]", StrId());
+		return APP_FINISHED;
+	}
+
 	// Release resources
 	if (_CurrentAWM())
 		ra.ReleaseResources(am.GetApplication(Uid()));
