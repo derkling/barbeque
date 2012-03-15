@@ -30,6 +30,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
 
+#include <chrono>
 
 #define RP_DIV1 "============================================================="
 #define RP_DIV2 "|------------------+------------+-------------+-------------|"
@@ -49,6 +50,8 @@ namespace ba = bbque::app;
 namespace br = bbque::res;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
+
+using std::chrono::milliseconds;
 
 namespace bbque {
 
@@ -911,8 +914,10 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
-	PlatformProxy::ExitCode_t pp_result;
+	uint32_t timeout = 0;
 	ExitCode_t result;
+
+	logger->Debug("Destroying EXC [%s]...", papp->StrId());
 
 	// Mark the EXC as finished
 	if (papp->Terminate() == Application::APP_FINISHED) {
@@ -920,22 +925,8 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 		return AM_SUCCESS;
 	}
 
-	logger->Debug("Removing EXC [%s]...", papp->StrId());
-
-	// Remove platform specific data
-	pp_result = pp.Release(papp);
-	if (pp_result != PlatformProxy::OK) {
-		logger->Error("Create EXC [%s] FAILED (Error: platform data cleanup)",
-				papp->StrId());
-		return AM_PLAT_PROXY_ERROR;
-	}
-
-	// Remove execution context form priority and status maps
+	// Remove execution context form priority and apps maps
 	result = PriorityRemove(papp);
-	if (result != AM_SUCCESS)
-		return result;
-
-	result = StatusRemove(papp);
 	if (result != AM_SUCCESS)
 		return result;
 
@@ -943,15 +934,16 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 	if (result != AM_SUCCESS)
 		return result;
 
-	logger->Debug("Releasing [%s] EXC from UIDs map...",
-			papp->StrId());
+	// This is a simple cleanup triggering policy based on the
+	// number of applications READY to run.
+	// When an EXC is destroyed we check for the presence of READY
+	// applications waiting to start, if there are a new optimization run
+	// is scheduled before than the case in which all applications are
+	// runnig.
+	timeout = 100 - (10 * (AppsCount(ApplicationStatusIF::READY) % 5));
+	cleanup_dfr.Schedule(milliseconds(timeout));
 
-	uids_ul.lock();
-	UpdateIterators(uids_ret, papp);
-	uids.erase(papp->Uid());
-	uids_ul.unlock();
-
-	logger->Info("EXC Released [%s]", papp->StrId());
+	logger->Info("EXC Finished [%s]", papp->StrId());
 	ReportStatusQ();
 	ReportSyncQ();
 	am.PrintStatusReport();
