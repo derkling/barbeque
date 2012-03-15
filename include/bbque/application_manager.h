@@ -23,6 +23,7 @@
 #include <mutex>
 
 #include "bbque/application_manager_conf.h"
+#include "bbque/utils/deferrable.h"
 #include "bbque/plugins/logger.h"
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
@@ -44,9 +45,9 @@
 
 using bbque::app::Application;
 using bbque::app::RecipePtr_t;
+using bbque::utils::Deferrable;
 using bbque::plugins::LoggerIF;
 using bbque::plugins::RecipeLoaderIF;
-
 
 namespace bbque {
 
@@ -455,6 +456,14 @@ private:
 	 */
 	AppsUidMapItRetainer_t sync_ret[Application::SYNC_STATE_COUNT];
 
+	/**
+	 * @brief EXC cleaner deferrable
+	 *
+	 * This is used to collect and aggregate EXC cleanup requests.
+	 * The cleanup will be performed by a call of the Cleanup
+	 * method.
+	 */
+	Deferrable cleanup_dfr;
 
 	/** The constructor */
 	ApplicationManager();
@@ -525,6 +534,29 @@ private:
 	 * @param papp the application to synchronize
 	 */
 	void SyncAdd(AppPtr_t papp);
+
+
+	/**
+	 * @brief Clean-up the specified EXC
+	 *
+	 * Release all resources associated with the specified EXC.
+	 */
+	ExitCode_t CleanupEXC(AppPtr_t papp);
+
+	/**
+	 * @brief Clean-up all disabled EXCs
+	 *
+	 * Once an EXC is disabled and released, all the time consuming
+	 * operations realted to releasing internal data structures (e.g.
+	 * platform specific data) are performed by an anynchronous call to
+	 * this method.
+	 * An exeution of this method, which is managed as a deferrable task,
+	 * is triggered by the DestroyEXC, this approach allows to:
+	 * 1. keep short the critical path related to respond to an RTLib command
+	 * 2. aggregate time consuming operations to be performed
+	 * asynchronously
+	 */
+	void Cleanup();
 };
 
 } // namespace bbque

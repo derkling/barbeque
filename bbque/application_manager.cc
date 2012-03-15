@@ -59,7 +59,8 @@ ApplicationManager & ApplicationManager::GetInstance() {
 
 
 ApplicationManager::ApplicationManager() :
-	pp(PlatformProxy::GetInstance()) {
+	pp(PlatformProxy::GetInstance()),
+	cleanup_dfr("am.cln", std::bind(&ApplicationManager::Cleanup, this)) {
 
 	// Get a logger
 	bp::LoggerIF::Configuration conf(APPLICATION_MANAGER_NAMESPACE);
@@ -852,6 +853,57 @@ ApplicationManager::AppsRemove(AppPtr_t papp) {
 	apps.erase(it);
 
 	return AM_SUCCESS;
+}
+
+ApplicationManager::ExitCode_t
+ApplicationManager::CleanupEXC(AppPtr_t papp) {
+	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
+	PlatformProxy::ExitCode_t pp_result;
+	ExitCode_t am_result;
+
+	am_result = StatusRemove(papp);
+	if (am_result != AM_SUCCESS) {
+		logger->Error("Cleanup EXC [%s] FAILED "
+				"(Error: status map cleanup)",
+				papp->StrId());
+		return am_result;
+	}
+
+	// Remove platform specific data
+	pp_result = pp.Release(papp);
+	if (pp_result != PlatformProxy::OK) {
+		logger->Error("Cleanup EXC [%s] FAILED "
+				"(Error: platform data cleanup)",
+				papp->StrId());
+		return AM_PLAT_PROXY_ERROR;
+	}
+
+	logger->Debug("Releasing [%s] EXC from UIDs map...",
+			papp->StrId());
+
+	uids_ul.lock();
+	UpdateIterators(uids_ret, papp);
+	uids.erase(papp->Uid());
+	uids_ul.unlock();
+
+	logger->Info("EXC [%s] released", papp->StrId());
+
+	return AM_SUCCESS;
+}
+
+void ApplicationManager::Cleanup() {
+	AppsUidMapIt apps_it;
+	AppPtr_t papp;
+
+	logger->Debug("Cleanup EXCs...");
+
+	// Loop on FINISHED apps to release all resources
+	papp = GetFirst(ApplicationStatusIF::FINISHED, apps_it);
+	while (papp) {
+		CleanupEXC(papp);
+		papp = GetNext(ApplicationStatusIF::FINISHED, apps_it);
+	}
+
 }
 
 ApplicationManager::ExitCode_t
