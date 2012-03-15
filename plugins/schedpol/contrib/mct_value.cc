@@ -78,20 +78,32 @@ MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 	std::string rsrc_tmp_path;
 	UsagesMap_t::const_iterator usage_it;
 	AwmPtr_t const & curr_awm(evl_ent.papp->CurrentAWM());
-	uint8_t ggap = 0;
+	//uint8_t ggap = 0;
+	float ggap = 0;
 	uint64_t curr_awm_rsrc_usage;
 	float target_usage = 0.0;
 	float penalty = 0.0;
-	float index;
+	float index = 1.0;
 
 	// Pre-set the index contribute to the AWM static value
-	ctrib = evl_ent.pawm->Value();
+	ctrib = 0.2 * evl_ent.pawm->Value();
+	logger->Notice("####### %s: AWM Value part: %.4f", evl_ent.StrId(), ctrib);
+
+	ggap = 0.8 * static_cast<float>(evl_ent.papp->GetGoalGap()) / 100.0;
+
 
 	// Goal-Gap set?
-	ggap = evl_ent.papp->GetGoalGap();
-	logger->Debug("%s: Goal Gap: %d", evl_ent.StrId(), ggap);
-	if (!curr_awm || (ggap == 0))
+	//ggap = evl_ent.papp->GetGoalGap();
+	//logger->Debug("%s: Goal Gap: %d", evl_ent.StrId(), ggap);
+	if (!curr_awm || (ggap == 0) ||
+			(curr_awm->Value() >= evl_ent.pawm->Value()))
 		return MCT_SUCCESS;
+
+	logger->Notice("####### %s: AWM Goal Gap (Nap = %d/100): %.4f", evl_ent.StrId(),
+			evl_ent.papp->GetGoalGap(), ggap);
+	ctrib += ggap;
+
+#if 0	
 
 	// Resource usages of the current entity (AWM + Cluster)
 	for_each_sched_resource_usage(evl_ent, usage_it) {
@@ -122,18 +134,23 @@ MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 		if (pusage->GetAmount() >= target_usage)
 			continue;
 
+		/*
 		// Compute the contribute index (with penalization)
 		index = static_cast<float>(evl_ent.pawm->Value()) * (1.0 - penalty)
 			* pusage->GetAmount()
 			/ target_usage;
 		logger->Debug("%s: R{%s} index: %.4f", evl_ent.StrId(),
 				rsrc_tmp_path.c_str(), index);
+*/
+
 
 		// Get the index related to the most penalizing resource usage
 		if (index < ctrib)
 			ctrib = index;
 	}
-
+#endif
+	logger->Notice("####### %s: AWM Value index: %.4f", evl_ent.StrId(),
+				ctrib);
 	return MCT_SUCCESS;
 }
 
