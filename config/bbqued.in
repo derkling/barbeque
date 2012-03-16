@@ -192,6 +192,7 @@ stop() {
 	if [ -d $BBQUE_CGMOUNT/bbque ]; then
 		echo "Releasing CGroups shiled..."
 		ShieldRelease
+		sleep 1
 		echo "Releasing BBQ CGroups..."
 		find  $BBQUE_CGMOUNT/bbque -type d -delete
 	fi
