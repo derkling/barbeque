@@ -760,7 +760,7 @@ LinuxPP::SetupCGroup(CGroupDataPtr_t &pcgd, RLinuxBindingsPtr_t prlb,
 			prlb->cpus ? prlb->cpus : "");
 	// Set the assigned memory NODE (only if we have at least one CPUS)
 	if (prlb->cpus[0]) {
-		snprintf(mnode, 3, "%d", prlb->socket_id);
+		snprintf(mnode, 3, "%d", prlb->node_id);
 		cgroup_set_value_string(pcgd->pc_cpuset,
 				BBQUE_LINUXPP_MEMN_PARAM, mnode);
 
