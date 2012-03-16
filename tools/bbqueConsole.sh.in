@@ -20,13 +20,23 @@ mkdir -p $BBQUE_SYSROOT/var/bbque 2>/dev/null
 cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh <<EOF
 #!/bin/bash
 
-function bosp_dump_tasks {
+function cleanup {
+local LINES_TO_FILL=\$1
+for i in \`seq \$LINES_TO_FILL\`; do
+	printf "%74s\n"
+done
+}
 
+function bosp_dump_tasks {
+local LINES_TO_FILL=\$1
 echo -ne "\E[30;42m"
 echo "                                                                          "
 echo "                    Managed Applications: EXCs                            "
 echo "                                                                          "
 echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
+
+let LINES_TO_FILL=LINES_TO_FILL-6
+
 for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	NAME=\`basename \$APP\`
 	if [ \$NAME == "bbque" -o \$NAME == "silos" -o \$NAME == "res" -o \$NAME == "host" ]; then
@@ -42,20 +52,35 @@ for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	MEMC=\`cat \$APP/memory.stat | grep rss | head -n1 | cut -d" " -f2\`
 
 	let CPUU=(CPUQ * 100)/CPUP
+	let MEMMB=(MEMB/1024)/1024
+	if [ \$MEMMB -gt 102400 ]; then
+		# We don't expexct more than 100GB memory
+		MEMMB=-1
+	fi
 
-	echo ".:: \$NAME"
-	echo "    CPUs: \$CPUS - \${CPUU}% {P: \$CPUP, Q: \$CPUQ}"
-	echo "    MEMs: \$MEMB - \${MEMN}[nodes] {C: \$MEMC, M: \$MEMU}"
+	printf "\\
+.:: \$NAME                                                 \n\\
+CPUs: %9s      - %3d [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
+MEMs: %9d [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
+	\${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMMB} \${MEMN} \${MEMC} \${MEMU}
+
+	let LINES_TO_FILL=LINES_TO_FILL-3
 done
+
+cleanup \$LINES_TO_FILL
+
 }
 
+TERMINAL_LINES=\`tput lines\`
+let REMAINING_LINES=TERMINAL_LINES-6
 while [ 1 ]; do
-	clear
-	printf "BOSP Console :: Tasks Monitor %40s\n\n" "\`date +%c\`"
+	echo -ne "\E[0;0H"
+	printf "BOSP Console :: Tasks Monitor %40s\n%74s\n" "\`date +%c\`" ""
 	if [ -d $BBQUE_SYSROOT/mnt/cgroup/bbque ]; then
-		bosp_dump_tasks
+		bosp_dump_tasks \$TERMINAL_LINES
 	else
-		echo -ne "\nBbqued NOT running\n\n"
+		printf "%74s\n%-74s\n%74s\n" "" "     BarbequeRTRM daemon NOT running" ""
+		cleanup \$REMAINING_LINES
 	fi
 	sleep $BBQUE_SUPDATE
 done
@@ -67,13 +92,23 @@ chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh
 cat > $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh <<EOF
 #!/bin/bash
 
-function bosp_dump_resources {
+function cleanup {
+local LINES_TO_FILL=\$1
+for i in \`seq \$LINES_TO_FILL\`; do
+	printf "%74s\n"
+done
+}
 
+function bosp_dump_resources {
+local LINES_TO_FILL=\$1
 echo -ne "\E[30;42m"
 echo "                                                                          "
 echo "                    System Resources: Main TARGET                         "
 echo "                                                                          "
 echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
+
+let LINES_TO_FILL=LINES_TO_FILL-6
+
 for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	NAME=\`basename \$TRG\`
 	if [ \$NAME != "bbque" -a \$NAME != "silos" -a \$NAME != "host" -o \$NAME == "res" ]; then
@@ -88,18 +123,32 @@ for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	MEMU=\`cat \$TRG/memory.max_usage_in_bytes\`
 
 	let CPUU=(CPUQ * 100)/CPUP
+	let MEMMB=(MEMB/1024)/1024
+	if [ \$MEMMB -gt 102400 ]; then
+		# We don't expexct more than 100GB memory
+		MEMMB=-1
+	fi
 
-	echo ".:: \$NAME"
-	echo "    CPUs: \$CPUS - \${CPUU}% {P: \$CPUP, Q: \$CPUQ}"
-	echo "    MEMs: \$MEMB - \${MEMN}[nodes] {Max used: \$MEMU}"
+	printf "\\
+.:: \$NAME                                                 \n\\
+CPUs: %9s      - %3d [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
+MEMs: %9d [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
+	\${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMMB} \${MEMN} \${MEMC} \${MEMU}
+
+	let LINES_TO_FILL=LINES_TO_FILL-3
 
 done
 
-echo -ne "\n\n\E[30;42m"
+echo "                                                                          "
+echo "                                                                          "
+echo -ne "\E[30;42m"
 echo "                                                                          "
 echo "                     Managed Resources: NODES                             "
 echo "                                                                          "
 echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
+
+let LINES_TO_FILL=LINES_TO_FILL-6
+
 for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
 	NAME=\`basename \$TRG\`
 	if [ \$NAME == "res" ]; then
@@ -114,22 +163,36 @@ for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
 	MEMU=\`cat \$TRG/memory.max_usage_in_bytes\`
 
 	let CPUU=(CPUQ * 100)/CPUP
+	let MEMMB=(MEMB/1024)/1024
+	if [ \$MEMMB -gt 102400 ]; then
+		# We don't expexct more than 100GB memory
+		MEMMB=-1
+	fi
 
-	echo ".:: \$NAME"
-	echo "    CPUs: \$CPUS - \${CPUU}[%] {P: \$CPUP, Q: \$CPUQ}"
-	echo "    MEMs: \$MEMB - \${MEMN}[nodes] {Max used: \$MEMU}"
+	printf "\\
+.:: \$NAME                                                 \n\\
+CPUs: %9s      - %3d [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
+MEMs: %9d [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
+	\${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMMB} \${MEMN} \${MEMC} \${MEMU}
+
+	let LINES_TO_FILL=LINES_TO_FILL-3
 
 done
 
+cleanup \$LINES_TO_FILL
+
 }
 
+TERMINAL_LINES=\`tput lines\`
+let REMAINING_LINES=TERMINAL_LINES-6
 while [ 1 ]; do
-	clear
-	printf "BOSP Console :: Resources Monitor %40s\n\n" "\`date +%c\`"
+	echo -ne "\E[0;0H"
+	printf "BOSP Console :: Resources Monitor %40s\n%74s\n" "\`date +%c\`" ""
 	if [ -d $BBQUE_SYSROOT/mnt/cgroup/bbque ]; then
-		bosp_dump_resources
+		bosp_dump_resources \$TERMINAL_LINES
 	else
-		echo -ne "\nBbqued NOT running\n\n"
+		printf "%74s\n%-74s\n%74s\n" "" "     BarbequeRTRM daemon NOT running" ""
+		cleanup \$REMAINING_LINES
 	fi
 	sleep $BBQUE_SUPDATE
 done
