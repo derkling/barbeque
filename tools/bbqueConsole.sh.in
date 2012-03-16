@@ -137,16 +137,27 @@ done
 EOF
 chmod a+x $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh
 
-aterm +sb -fn $FONT -geometry 136x18+-9+18 -title "Syslog" \
+################################################################################
+#     Left Panel
+################################################################################
+
+# The System log
+aterm +sb -fn $FONT -geometry 115x18+-9+18 -title "Syslog" \
 	-e tail -f /var/log/syslog &
-aterm +sb -cr black -fn $FONT -geometry 74x55--9-17 \
-	-title "BOSP Shell :: Resources Monitor" \
-	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh &
-aterm +sb -cr black -fn $FONT -geometry 74x40--9+18 \
-	-title "BOSP Shell :: Task Monitor" \
+
+################################################################################
+#     Right Panel
+################################################################################
+
+# Display CGROUPs configuration
+aterm +sb -cr black -fn $FONT -geometry 74x30--9+18 \
+	-title "BOSP Resources Monitor" \
 	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_CGroups.sh &
-aterm +sb -fn $FONT -geometry 118x77+-9-17 -title "BBQUE Log" \
-	-e tail -f $BBQUE_LOGFILE &
-aterm +sb -fn $FONT -geometry 103x20+825+18 -title "BBQUE HTOP" \
+# Display of managed TASKSs configuration
+aterm +sb -cr black -fn $FONT -geometry 74x41--8+363 \
+	-title "BOSP Tasks Monitor" \
+	-e $BBQUE_SYSROOT/var/bbque/BbqConsole_Resources.sh &
+# Display CPUs usages (by HTOP)
+aterm +sb -fn $FONT -geometry 74x20--7-30 -title "CPUs usages" \
 	-e htop &
 
