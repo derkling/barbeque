@@ -9,6 +9,8 @@ BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
 BBQUE_LOGFILE="${BBQUE_LOGFILE:-$BBQUE_SYSROOT/var/bbque/bbque.log}"
 
 BBQUE_START_DELAY="${BBQUE_START_DELAY:-3}"
+BBQUE_HOST="${1:-Numa}"
+
 
 # - XWindows geometries recoveder using "xwininfo" utility
 # - Font is configured by "-fn" option, to see a list of fonts run:
@@ -90,26 +92,26 @@ read KEY
 
 echo "A.1 - Starting 2 High-Prio apps..."
 aterm +sb -fn $FONT -geometry 102x16+9+18 -title "DemoApp #01 (HP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemoNuma_0B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16+9+224 -title "DemoApp #02 (HP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 2 -t 4 -r BbqDemoNuma_0B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 2 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
 echo "Press a KEY to continue..."
 read KEY
 
 
 echo "A.2 - Starting 4 Mid-Prio apps..."
 aterm +sb -fn $FONT -geometry 102x16+675+18 -title "DemoApp #11 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 3 -t 4 -r BbqDemoNuma_1B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 3 -t 4 -r BbqDemo${BBQUE_HOST}_1B  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16+675+224 -title "DemoApp #12 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 4 -t 4 -r BbqDemoNuma_1B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 4 -t 4 -r BbqDemo${BBQUE_HOST}_1B  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16+675+421 -title "DemoApp #13 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 5 -t 4 -r BbqDemoNuma_1B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 5 -t 4 -r BbqDemo${BBQUE_HOST}_1B  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16+675+618 -title "DemoApp #14 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 6 -t 4 -r BbqDemoNuma_1B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 6 -t 4 -r BbqDemo${BBQUE_HOST}_1B  &
 sleep $BBQUE_START_DELAY
 echo "Press a KEY to continue..."
 read KEY
@@ -168,16 +170,16 @@ read KEY
 
 echo "D.1 - Starting 4 Low-Prio apps..."
 aterm +sb -fn $FONT -geometry 102x16--9+18 -title "DemoApp #21 (LP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 7 -t 4 -r BbqDemoNuma_2S  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 7 -t 4 -r BbqDemo${BBQUE_HOST}_2S  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16--9+224 -title "DemoApp #22 (LP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 8 -t 4 -r BbqDemoNuma_2S  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 8 -t 4 -r BbqDemo${BBQUE_HOST}_2S  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16--9+421 -title "DemoApp #23 (LP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 9 -t 4 -r BbqDemoNuma_2S  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 9 -t 4 -r BbqDemo${BBQUE_HOST}_2S  &
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16--9+618  -title "DemoApp #24 (LP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 10 -t 4 -r BbqDemoNuma_2S  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 10 -t 4 -r BbqDemo${BBQUE_HOST}_2S  &
 sleep $BBQUE_START_DELAY
 echo "Press a KEY to continue..."
 read KEY
@@ -197,7 +199,7 @@ read KEY
 
 echo "E.1 - Starting a new HP application"
 aterm +sb -fn $FONT -geometry 102x16+-9+18 -title "DemoApp #03 (HP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemoNuma_0B  &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
 sleep $BBQUE_START_DELAY
 
 
