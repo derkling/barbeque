@@ -172,16 +172,18 @@ start() {
 	fi
 
 	# Setup CGroups
+	echo "System setup..."
 	setup
 
 	# Run the daemon
+	echo "Starting BBQ Daemon..."
 	"$BBQUE_BIN" -c $BBQUE_CONF -d
 }
 
 stop() {
 	# Stop the daemon only if there is an instance running
 	if [ -f $BBQUE_PIDFILE ]; then
-		# Terminating BBQ daemon
+		echo "Stopping BBQ Daemon..."
 		PID=`cat $BBQUE_PIDFILE`
 		kill -TERM $PID >/dev/null 2>&1
 	fi
