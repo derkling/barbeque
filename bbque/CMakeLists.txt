@@ -26,6 +26,10 @@ configure_file (
 	"${PROJECT_SOURCE_DIR}/config/bbque.conf_dbg.in"
 	"${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
 )
+configure_file (
+	"${PROJECT_SOURCE_DIR}/config/bbque_2parma_demo2.conf.in"
+	"${PROJECT_BINARY_DIR}/config/bbque_2parma_demo2.conf"
+)
 
 # Setup the daemon initialization script
 configure_file (
@@ -104,6 +108,9 @@ install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf"
 install (FILES "${PROJECT_BINARY_DIR}/config/bbque.conf_dbg"
 		DESTINATION ${BBQUE_PATH_CONF}
 		COMPONENT BarbequeRTRM)
+install (FILES "${PROJECT_BINARY_DIR}/config/bbque_2parma_demo2.conf"
+		DESTINATION ${BBQUE_PATH_CONF}
+		COMPONENT BarbequeDEMOS)
 # Install the daemon init script and its configuration file
 install (PROGRAMS "${PROJECT_BINARY_DIR}/config/bbqued"
 	DESTINATION ${BBQUE_PATH_INIT}

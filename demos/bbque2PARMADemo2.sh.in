@@ -1,0 +1,214 @@
+#!/bin/bash
+
+# Source the BOSP Shell configuration
+source @CMAKE_INSTALL_PREFIX@/etc/bbque/bosp_init.env
+
+# DEMO CONFIGURATION
+BBQUE_CONF="${BBQUE_CONF:-$CONF}"
+BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
+BBQUE_LOGFILE="${BBQUE_LOGFILE:-$BBQUE_SYSROOT/var/bbque/bbque.log}"
+
+BBQUE_START_DELAY="${BBQUE_START_DELAY:-3}"
+
+# - XWindows geometries recoveder using "xwininfo" utility
+# - Font is configured by "-fn" option, to see a list of fonts run:
+#     "xlsfonts | less"
+FONT=-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1
+
+print_splash() {
+clear
+
+echo -ne "\n\n\E[1m\E[30;42m"
+echo "                                                                          "
+echo "                  BarbequeRTRM v0.8 (Betty Bacon)  -  Demo                "
+echo "                         https://bitbucket.org/bosp/                      "
+echo -ne "\E[0m\E[30;42m"
+echo "                                                                          "
+echo "                   2PARMA Project - FP7-ICT-2009-4-248716                 "
+echo "        PARallel PAradigms and Run-time MAnagement techniques for         "
+echo "                         Many-core Architectures                          "
+echo "                           http://www.2parma.eu/                          "
+echo "                                                                          "
+echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
+}
+
+print_title() {
+print_splash
+echo -e "\n\n\E[1m.:: $1\E[0m\n"
+}
+
+###############################################################################
+#     Demo Splash-Screen
+################################################################################
+
+print_title "Demo introduction"
+echo "TO BE DONE..."
+
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#     BBQUE Console
+################################################################################
+
+print_title "BBQ Console startup"
+echo "Press a KEY to start the BBQ Console"
+read KEY
+
+bbque-console
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#     BBQUE Daemon Startup
+################################################################################
+
+print_title "System Initialization"
+echo "First of all we need to configure the system for Run-Time Resource Management"
+echo "and start the BBQ daemon."
+echo "NOTE: Starting the daemon requires root priviledges: enter the passowrd when required"
+echo
+echo "Press a KEY to start the BBQ Daemon"
+read KEY
+
+bbque-startd $BBQUE_SYSROOT/etc/bbque/bbque_2parma_demo2.conf
+bbque-log $BBQUE_SYSROOT/var/bbque/bbque.log
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#    Priority based resources allocation
+################################################################################
+
+print_title "DemoA - Priority based resources allocation"
+
+echo "Press a KEY to start demo A"
+read KEY
+
+echo "A.1 - Starting 2 High-Prio apps..."
+aterm +sb -fn $FONT -geometry 102x16+9+18 -title "DemoApp #01 (HP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemoNuma_0B  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+9+224 -title "DemoApp #02 (HP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 2 -t 4 -r BbqDemoNuma_0B  &
+echo "Press a KEY to continue..."
+read KEY
+
+
+echo "A.2 - Starting 4 Mid-Prio apps..."
+aterm +sb -fn $FONT -geometry 102x16+675+18 -title "DemoApp #11 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 3 -t 4 -r BbqDemoNuma_1B  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+675+224 -title "DemoApp #12 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 4 -t 4 -r BbqDemoNuma_1B  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+675+421 -title "DemoApp #13 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 5 -t 4 -r BbqDemoNuma_1B  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+675+618 -title "DemoApp #14 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 6 -t 4 -r BbqDemoNuma_1B  &
+sleep $BBQUE_START_DELAY
+echo "Press a KEY to continue..."
+read KEY
+
+
+
+################################################################################
+#    Fairness resources allocation
+################################################################################
+
+print_title "DemoB - Fairness resources allocation"
+
+echo "Press a KEY to start demo B"
+read KEY
+
+
+echo "B.1 - Make one HP app to exit"
+echo "Press a KEY once done"
+read KEY
+
+
+echo "B.2 - Exit the reamining HP apps"
+echo "Press a KEY once done"
+read KEY
+
+
+
+################################################################################
+#    NAP resources allocation
+################################################################################
+
+print_title "DemoC - NAP resources allocation"
+
+echo "Press a KEY to start demo C"
+read KEY
+
+echo "C.1 - Assert a NAP on one of the MP app"
+echo "Press a KEY once done"
+read KEY
+
+echo "C.2 - Exit 2 HP app"
+echo "Press a KEY once done"
+read KEY
+
+
+
+################################################################################
+#    NAP resources allocation
+################################################################################
+
+print_title "DemoD - NAP resources allocation (with saturated resources)"
+
+echo "Press a KEY to start demo D"
+read KEY
+
+
+echo "D.1 - Starting 4 Low-Prio apps..."
+aterm +sb -fn $FONT -geometry 102x16--9+18 -title "DemoApp #21 (LP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 7 -t 4 -r BbqDemoNuma_2S  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16--9+224 -title "DemoApp #22 (LP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 8 -t 4 -r BbqDemoNuma_2S  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16--9+421 -title "DemoApp #23 (LP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 9 -t 4 -r BbqDemoNuma_2S  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16--9+618  -title "DemoApp #24 (LP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 10 -t 4 -r BbqDemoNuma_2S  &
+sleep $BBQUE_START_DELAY
+echo "Press a KEY to continue..."
+read KEY
+
+echo "D.2 - Assert a NAP on one of the LP apps"
+echo "Press a KEY once done"
+read KEY
+
+################################################################################
+#    Resources reclaiming
+################################################################################
+
+print_title "DemoE - Resources reclaiming"
+
+echo "Press a KEY to start demo E"
+read KEY
+
+echo "E.1 - Starting a new HP application"
+aterm +sb -fn $FONT -geometry 102x16+-9+18 -title "DemoApp #03 (HP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemoNuma_0B  &
+sleep $BBQUE_START_DELAY
+
+
+################################################################################
+#    Demo wrap-up
+################################################################################
+
+echo "Press a KEY to end the demo"
+read KEY
+
+killall bbque-demoapp
+bbque-stopd
+bosp-cleanup
+
