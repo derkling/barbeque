@@ -4,3 +4,5 @@ build/
 tmp/
 tags
 api-doc
+.vim*
+cscope*
