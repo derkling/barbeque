@@ -39,20 +39,6 @@ public:
 	ExitCode_t Init(void * params);
 
 private:
-	/**
-	 * AWM Value penalties per resource type. This stores the values parsed
-	 * from the configuration file.
-	 *
-	 * 0 = "pe"
-	 * 1 = "mem"
-	 */
-	uint16_t penalties_int[MCT_RSRC_COUNT];
-
-	/** Default values for the AWM value penalties */
-	static uint16_t penalties_default[MCT_RSRC_COUNT];
-
-	/** Penalty indices */
-	float penalties[MCT_RSRC_COUNT];
 
 	/**
 	 * @brief Compute the AWM value contribute
