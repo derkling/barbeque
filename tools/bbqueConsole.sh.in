@@ -27,6 +27,12 @@ for i in \`seq \$LINES_TO_FILL\`; do
 done
 }
 
+function separator {
+printf "\\
+__________________________________________________________________________\r\\
+_____[ %s ]\n" \$1
+}
+
 function bosp_dump_tasks {
 local LINES_TO_FILL=\$1
 echo -ne "\E[30;42m"
@@ -52,19 +58,22 @@ for APP in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	MEMC=\`cat \$APP/memory.stat | grep rss | head -n1 | cut -d" " -f2\`
 
 	let CPUU=(CPUQ * 100)/CPUP
-	let MEMMB=(MEMB/1024)/1024
-	if [ \$MEMMB -gt 102400 ]; then
+	[ \$CPUQ -eq -1 ] && CPUU=-1
+	let MEMB_MB=(MEMB/1024)/1024
+	if [ \$MEMB_MB -gt 102400 ]; then
 		# We don't expexct more than 100GB memory
-		MEMMB=-1
+		MEMB_MB=-1
 	fi
+	let MEMC_MB=(MEMC/1024)/1024
+	let MEMU_MB=(MEMU/1024)/1024
 
 	printf "\\
-.:: \$NAME                                                 \n\\
-CPUs: %9s      - %3d [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
-MEMs: %9d [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
-	\${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMMB} \${MEMN} \${MEMC} \${MEMU}
+____[ \E[1m%-26s\E[0m ]________________________________________\n\\
+CPUs: %9s      - \E[33;49m%3d\E[39;49m [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
+MEMs: \E[33;49m%9d\E[39;49m [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
+	\${NAME} \${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMB_MB} \${MEMN} \${MEMC_MB} \${MEMU_MB}
 
-	let LINES_TO_FILL=LINES_TO_FILL-3
+let LINES_TO_FILL=LINES_TO_FILL-3
 done
 
 cleanup \$LINES_TO_FILL
@@ -99,6 +108,12 @@ for i in \`seq \$LINES_TO_FILL\`; do
 done
 }
 
+function separator {
+printf "\\
+__________________________________________________________________________\r\\
+_____[ %s ]\n" \$1
+}
+
 function bosp_dump_resources {
 local LINES_TO_FILL=\$1
 echo -ne "\E[30;42m"
@@ -121,19 +136,23 @@ for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/ -maxdepth 1 -type d\`; do
 	MEMN=\`cat \$TRG/cpuset.mems\`
 	MEMB=\`cat \$TRG/memory.limit_in_bytes\`
 	MEMU=\`cat \$TRG/memory.max_usage_in_bytes\`
+	MEMC=\`cat \$TRG/memory.stat | grep rss | head -n1 | cut -d" " -f2\`
 
 	let CPUU=(CPUQ * 100)/CPUP
-	let MEMMB=(MEMB/1024)/1024
-	if [ \$MEMMB -gt 102400 ]; then
+	[ \$CPUQ -eq -1 ] && CPUU=-1
+	let MEMB_MB=(MEMB/1024)/1024
+	if [ \$MEMB_MB -gt 102400 ]; then
 		# We don't expexct more than 100GB memory
-		MEMMB=-1
+		MEMB_MB=-1
 	fi
+	let MEMC_MB=(MEMC/1024)/1024
+	let MEMU_MB=(MEMU/1024)/1024
 
 	printf "\\
-.:: \$NAME                                                 \n\\
-CPUs: %9s      - %3d [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
-MEMs: %9d [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
-	\${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMMB} \${MEMN} \${MEMC} \${MEMU}
+____[ \E[1m%-26s\E[0m ]________________________________________\n\\
+CPUs: %9s      - \E[33;49m%3d\E[39;49m [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
+MEMs: \E[33;49m%9d\E[39;49m [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
+	\${NAME} \${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMB_MB} \${MEMN} \${MEMC_MB} \${MEMU_MB}
 
 	let LINES_TO_FILL=LINES_TO_FILL-3
 
@@ -161,19 +180,23 @@ for TRG in \`find $BBQUE_SYSROOT/mnt/cgroup/bbque/res -maxdepth 1 -type d\`; do
 	MEMN=\`cat \$TRG/cpuset.mems\`
 	MEMB=\`cat \$TRG/memory.limit_in_bytes\`
 	MEMU=\`cat \$TRG/memory.max_usage_in_bytes\`
+	MEMC=\`cat \$TRG/memory.stat | grep rss | head -n1 | cut -d" " -f2\`
 
 	let CPUU=(CPUQ * 100)/CPUP
-	let MEMMB=(MEMB/1024)/1024
-	if [ \$MEMMB -gt 102400 ]; then
+	[ \$CPUQ -eq -1 ] && CPUU=-1
+	let MEMB_MB=(MEMB/1024)/1024
+	if [ \$MEMB_MB -gt 102400 ]; then
 		# We don't expexct more than 100GB memory
-		MEMMB=-1
+		MEMB_MB=-1
 	fi
+	let MEMC_MB=(MEMC/1024)/1024
+	let MEMU_MB=(MEMU/1024)/1024
 
 	printf "\\
-.:: \$NAME                                                 \n\\
-CPUs: %9s      - %3d [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
-MEMs: %9d [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
-	\${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMMB} \${MEMN} \${MEMC} \${MEMU}
+____[ \E[1m%-26s\E[0m ]________________________________________\n\\
+CPUs: %9s      - \E[33;49m%3d\E[39;49m [%%]     {P: %9d [us] - Q: %7d [us]}  \n\\
+MEMs: \E[33;49m%9d\E[39;49m [MB] - %3s [nodes] {C: %9d [MB] - M: %7d [MB]}  \n"\\
+	\${NAME} \${CPUS} \${CPUU} \${CPUP} \${CPUQ} \${MEMB_MB} \${MEMN} \${MEMC_MB} \${MEMU_MB}
 
 	let LINES_TO_FILL=LINES_TO_FILL-3
 
