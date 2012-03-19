@@ -40,6 +40,7 @@
 #define BBQUE_LINUXPP_CPUP_DEFAULT		100000
 
 // Checking for kernel version requirements
+#define LINUX_VERSION_CODE 200000
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,34)
 # error Linux kernel >= 2.6.34 required by the Platform Integration Layer
 #endif
