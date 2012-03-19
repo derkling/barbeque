@@ -1,0 +1,133 @@
+#!/bin/bash
+
+# Source the BOSP Shell configuration
+source @CMAKE_INSTALL_PREFIX@/etc/bbque/bosp_init.env
+
+# DEMO CONFIGURATION
+BBQUE_CONF="${BBQUE_CONF:-$CONF}"
+BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
+BBQUE_LOGFILE="${BBQUE_LOGFILE:-$BBQUE_SYSROOT/var/bbque/bbque.log}"
+
+BBQUE_START_DELAY="${BBQUE_START_DELAY:-3}"
+BBQUE_HOST="${1:-Numa}"
+
+
+# - XWindows geometries recoveder using "xwininfo" utility
+# - Font is configured by "-fn" option, to see a list of fonts run:
+#     "xlsfonts | less"
+FONT=-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1
+
+print_splash() {
+clear
+
+echo -ne "\n\n\E[1m\E[30;42m"
+echo "                                                                          "
+echo "                  BarbequeRTRM v0.8 (Betty Bacon)  -  Demo 3              "
+echo "                         https://bitbucket.org/bosp/                      "
+echo -ne "\E[0m\E[30;42m"
+echo "                                                                          "
+echo "                   2PARMA Project - FP7-ICT-2009-4-248716                 "
+echo "        PARallel PAradigms and Run-time MAnagement techniques for         "
+echo "                         Many-core Architectures                          "
+echo "                           http://www.2parma.eu/                          "
+echo "                                                                          "
+echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
+}
+
+print_title() {
+print_splash
+echo -e "\n\n\E[1m.:: $1\E[0m\n"
+}
+
+###############################################################################
+#     Demo Splash-Screen
+################################################################################
+
+print_title "Demo introduction"
+echo "TO BE DONE..."
+
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#     BBQUE Console
+################################################################################
+
+print_title "BBQ Console startup"
+echo "Press a KEY to start the BBQ Console"
+read KEY
+
+bbque-console
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#     BBQUE Daemon Startup
+################################################################################
+
+print_title "System Initialization"
+echo "First of all we need to configure the system for Run-Time Resource Management"
+echo "and start the BBQ daemon."
+echo "NOTE: Starting the daemon requires root priviledges: enter the passowrd when required"
+echo
+echo "Press a KEY to start the BBQ Daemon"
+read KEY
+
+bbque-startd $BBQUE_SYSROOT/etc/bbque/bbque_2parma_demo2.conf
+bbque-log $BBQUE_SYSROOT/var/bbque/bbque.log
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#    Priority based resources allocation
+################################################################################
+
+print_title "DemoA - Priority based resources allocation"
+
+echo "Press a KEY to start demo A"
+read KEY
+
+echo "A.1 - Starting 2 High-Prio apps..."
+aterm +sb -fn $FONT -geometry 102x16+9+18 -title "DemoApp #01 (HP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
+sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+9+224 -title "DemoApp #02 (HP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 2 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
+echo "Press a KEY to continue..."
+read KEY
+
+
+VIDEO1=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix.avi
+VIDEO2=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/the_phony_war.mp4
+VIDEO3=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/x-plane_10_by_laminar_research.mp4
+echo "A.2 - Starting 4 Mid-Prio apps..."
+aterm +sb -fn $FONT -geometry 102x16+675+18 -title "DemoApp #11 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
+#sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+675+224 -title "DemoApp #12 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
+#sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+675+421 -title "DemoApp #13 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
+#sleep $BBQUE_START_DELAY
+aterm +sb -fn $FONT -geometry 102x16+675+618 -title "DemoApp #14 (MP)" \
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
+sleep $BBQUE_START_DELAY
+echo "Press a KEY to continue..."
+read KEY
+
+
+#################################################################################
+##    Demo wrap-up
+#################################################################################
+
+echo "Press a KEY to end the demo"
+read KEY
+
+killall bbque-demoapp
+bbque-stopd
+bosp-cleanup
+
