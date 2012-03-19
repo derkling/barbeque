@@ -35,9 +35,9 @@ _____[ %s ]\n" \$1
 
 function bosp_dump_tasks {
 local LINES_TO_FILL=\$1
-echo -ne "\E[30;42m"
+echo -ne "\E[38;43m"
 echo "                                                                          "
-echo "                    Managed Applications: EXCs                            "
+echo -ne "     \E[33;40m Managed Applications: EXCs \E[38;43m                                         "
 echo "                                                                          "
 echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
 
@@ -116,9 +116,9 @@ _____[ %s ]\n" \$1
 
 function bosp_dump_resources {
 local LINES_TO_FILL=\$1
-echo -ne "\E[30;42m"
+echo -ne "\E[38;42m"
 echo "                                                                          "
-echo "                    System Resources: Main TARGET                         "
+echo -ne "     \E[32;49m System Resources: Main TARGET \E[38;42m                                      "
 echo "                                                                          "
 echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
 
@@ -160,9 +160,9 @@ done
 
 echo "                                                                          "
 echo "                                                                          "
-echo -ne "\E[30;42m"
+echo -ne "\E[38;44m"
 echo "                                                                          "
-echo "                     Managed Resources: NODES                             "
+echo -ne "     \E[34;49m Managed Resources: NODES \E[38;44m                                           "
 echo "                                                                          "
 echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
 
