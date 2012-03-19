@@ -32,6 +32,7 @@ fi
 # Daemon Configuration
 BBQUE_BIN="${BBQUE_BIN:-$BIN}"
 BBQUE_CONF="${BBQUE_CONF:-$CONF}"
+BBQUE_BRTF="${BBQUE_BRTF:-$BRTF}"
 BBQUE_PIDFILE="${BBQUE_PIDFILE:-$PIDFILE}"
 BBQUE_LOCKFILE="${BBQUE_LOCKFILE:-$LOCKFILE}"
 
@@ -174,6 +175,10 @@ start() {
 	# Setup CGroups
 	echo "System setup..."
 	setup
+
+	# Ensure the run-time BBQ folder exists and it is world writable
+	mkdir -p $BBQUE_BRTF 2>/dev/null
+	chmod a+w $BBQUE_BRTF
 
 	# Run the daemon
 	echo "Starting BBQ Daemon..."
