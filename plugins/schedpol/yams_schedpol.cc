@@ -575,7 +575,7 @@ YamsSchedPol::ExitCode_t YamsSchedPol::BindCluster(SchedEntityPtr_t pschd) {
 bool YamsSchedPol::CompareEntities(SchedEntityPtr_t & se1,
 		SchedEntityPtr_t & se2) {
 	// Metrics (primary sorting key)
-	if (se1->metrics <= se2->metrics)
+	if (se1->metrics < se2->metrics)
 		return false;
 	if (se1->metrics > se2->metrics)
 		return true;
