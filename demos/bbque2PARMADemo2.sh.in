@@ -44,7 +44,14 @@ echo -e "\n\n\E[1m.:: $1\E[0m\n"
 ################################################################################
 
 print_title "Demo introduction"
-echo "TO BE DONE..."
+
+echo "This demo shows the setup of a BBQ controlled generic x86 NUMA platform and"
+echo "different scenarios of workload management."
+echo "The goal of the demo is to show the BBQ capabilities on:"
+echo " 1. resource scheduling considering multiple optimization metrics (i.e."
+echo "    performances, reconfiguration overheads, congestion control and fairness)"
+echo " 2. resources assignement and enforcement by means of CGroups dynamic"
+echo "    configuration"
 
 echo "Press a KEY to continue..."
 read KEY
@@ -55,10 +62,25 @@ read KEY
 ################################################################################
 
 print_title "BBQ Console startup"
+
+echo "The BarbequeRTRM framework comes with \"management shell\" which provides not"
+echo "only a set of simplified command to interact with the framework but also a"
+echo "\"monitoring console\" to easily verify resources assignement."
+
 echo "Press a KEY to start the BBQ Console"
 read KEY
 
 bbque-console
+
+echo "The BBQ console consists of 4 main windows, which represent, starting from the"
+echo "top left corner and rotating clockwise:"
+echo "1. a system logger viewer, where daemon startup is reported"
+echo "2. a \"Resources Monitor\" viewer, where availability of HOST and MANAGED"
+echo "   resources is monitored"
+echo "3. a \"Task Monitor\" viewer, which show a list of managed applications and the"
+echo "   resources being assigned to them"
+echo "4. a \"CPU Usages\" viewer, which show the actual usage of available processor"
+
 echo "Press a KEY to continue..."
 read KEY
 
@@ -68,8 +90,14 @@ read KEY
 ################################################################################
 
 print_title "System Initialization"
-echo "First of all we need to configure the system for Run-Time Resource Management"
-echo "and start the BBQ daemon."
+
+echo "The multi-core machine is initially configured, by the BBQ deamon startup"
+echo "script, to reserve a set of resources for run-time managed applications."
+echo "The 4 nodes NUMA machine is partitioned into:"
+echo "a. 1 host device, where all generic tasks are moved and will run"
+echo "b. 3 clusters of 4 CPU each one, where BBQ managed applications will be"
+echo "   deploied a set of workloads with different priorities are started"
+echo "   concurrently."
 echo "NOTE: Starting the daemon requires root priviledges: enter the passowrd when required"
 echo
 echo "Press a KEY to start the BBQ Daemon"
@@ -77,6 +105,13 @@ read KEY
 
 bbque-startd $BBQUE_SYSROOT/etc/bbque/bbque_2parma_demo2.conf
 bbque-log $BBQUE_SYSROOT/var/bbque/bbque.log
+
+echo "Now you should be able to check the set of managed resources looking at the"
+echo "\"Resources Monitor\"."
+echo "Moreover, by looking a <the \"CPU Usages\" you should notice that all actively"
+echo "running applications have been moved into the HOST device, which is represented"
+echo "(in this configuration) by the 4 CPUs of the first NUMA node."
+
 echo "Press a KEY to continue..."
 read KEY
 
@@ -87,7 +122,11 @@ read KEY
 
 print_title "DemoA - Priority based resources allocation"
 
-echo "Press a KEY to start demo A"
+echo "This is the first scenarios to be demostrated. We starte, first a couple of"
+echo "high-priority applications, and then some other lower priority applications."
+echo "GOAL: low-prio applications should not impact on high-prio ones."
+
+echo "Press a KEY to continue"
 read KEY
 
 echo "A.1 - Starting 2 High-Prio apps..."
@@ -96,9 +135,20 @@ aterm +sb -fn $FONT -geometry 102x16+9+18 -title "DemoApp #01 (HP)" \
 sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16+9+224 -title "DemoApp #02 (HP)" \
 	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 2 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
+sleep $BBQUE_START_DELAY
+
+
+echo "The high-priority should be running on their higher-value AWM, being allocated"
+echo "each one on a complete node."
+echo ""
+echo "Now we start a set of 4 lower-priority applicatons, the first one entering"
+echo "should use all the remaining cluster.  As long as new apps enter the system,"
+echo "they are competing on the same set of resources: the CPUs of a single cluster,"
+echo "thus already running applications are scaled down to less resources deamnding"
+echo "working modes."
+
 echo "Press a KEY to continue..."
 read KEY
-
 
 echo "A.2 - Starting 4 Mid-Prio apps..."
 aterm +sb -fn $FONT -geometry 102x16+675+18 -title "DemoApp #11 (MP)" \
@@ -113,6 +163,11 @@ sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16+675+618 -title "DemoApp #14 (MP)" \
 	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 6 -t 4 -r BbqDemo${BBQUE_HOST}_1B  &
 sleep $BBQUE_START_DELAY
+
+echo "Check on the \"Task monitor\" that all 6 application are running and:"
+echo "1. high-prio apps have not been re-scheduled to a lower AWM"
+echo "2. mid-prio apps are sharing resources of a single cluster"
+
 echo "Press a KEY to continue..."
 read KEY
 
@@ -124,19 +179,37 @@ read KEY
 
 print_title "DemoB - Fairness resources allocation"
 
+echo "In this second scenario we demostrate the scheduler fairness on resources"
+echo "allocation: multiple instances of the same application are expected to get same"
+echo "resources (in normal conditions)."
+
 echo "Press a KEY to start demo B"
 read KEY
 
-
 echo "B.1 - Make one HP app to exit"
+
+echo "You are required to terminate one of the 2 high-prio apps by inserting a 'q'"
+echo "into its console.  By doing this, the selected application will terminate and"
+echo "its resources released."
+
 echo "Press a KEY once done"
 read KEY
 
+echo "Check that he resources being freed-up by the exited application be equally"
+echo "distributed among mid-prio applications."
 
 echo "B.2 - Exit the reamining HP apps"
+
+echo "Now exit the remaining hig-prio app..."
+
 echo "Press a KEY once done"
 read KEY
 
+echo "Check that the frred-up resources are NOT redistributed to the ramaining"
+echo "applicaitions since this distribution will be not faire."
+
+echo "Press a KEY to start demo B"
+read KEY
 
 
 ################################################################################
@@ -145,14 +218,31 @@ read KEY
 
 print_title "DemoC - NAP resources allocation"
 
+echo "In this schenario, we have some free resources while 4 apps are running with a"
+echo "fair partitioning.  Applications which need more resources could assert a"
+echo "\"Normalized Actual Penalty\" (NAP). This index is a representation of how far"
+echo "an application is from its goal and ask BBQ for a proportional increment of"
+echo "resources assigned to it in order to fill this gap."
+echo "GOAL: an application asserting a NAP receive more resources if they are"
+echo "available."
+
 echo "Press a KEY to start demo C"
 read KEY
 
 echo "C.1 - Assert a NAP on one of the MP app"
+
+echo "You are required to make an application to assert a NAP by inserting a 'n' into"
+echo "its console. By doing this, the selected application will assert this request"
+echo "to BBQ and should switch to an higher value AWM."
+
 echo "Press a KEY once done"
 read KEY
 
 echo "C.2 - Exit 2 HP app"
+
+echo "Check that the application asserted the NAP has received more resources."
+echo "Than pres a key to continue with next scenarios."
+
 echo "Press a KEY once done"
 read KEY
 
@@ -164,9 +254,15 @@ read KEY
 
 print_title "DemoD - NAP resources allocation (with saturated resources)"
 
+echo "This scenarios is similar to the previous one, we have a set of applications"
+echo "sharing a fair amount of resource, but now the system is saturated: all"
+echo "resources are assigned."
+echo "The goal is to demostrate that, if multiple istances of the same application"
+echo "fill up all the resources and one of them assert a NAP, we could reclaim some"
+echo "resources from other applications to give them to the penalized one."
+
 echo "Press a KEY to start demo D"
 read KEY
-
 
 echo "D.1 - Starting 4 Low-Prio apps..."
 aterm +sb -fn $FONT -geometry 102x16--9+18 -title "DemoApp #21 (LP)" \
@@ -181,10 +277,20 @@ sleep $BBQUE_START_DELAY
 aterm +sb -fn $FONT -geometry 102x16--9+618  -title "DemoApp #24 (LP)" \
 	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 10 -t 4 -r BbqDemo${BBQUE_HOST}_2S  &
 sleep $BBQUE_START_DELAY
+
+echo "Now a saturated system condition has been established, 6 apps are running, two"
+echo "of them are mid-priority while the last 4 started are low-priority."
+echo "Check that all resources are in use: thus the system is saturated."
+
 echo "Press a KEY to continue..."
 read KEY
 
 echo "D.2 - Assert a NAP on one of the LP apps"
+
+echo "You are required to make a low-priority application to assert a NAP by"
+echo "inserting a 'n' into its console. By doing this, the selected application will"
+echo "assert this request to BBQ and should switch to an higher value AWM."
+
 echo "Press a KEY once done"
 read KEY
 
@@ -194,6 +300,12 @@ read KEY
 
 print_title "DemoE - Resources reclaiming"
 
+echo "This is the final sceario, we are on a saturated system with all resources"
+echo "assigned to mid- and low-priority applications."
+echo "In this scenario we demostrate the framework capability to reclaim resources"
+echo "from lower priority applications, by suspending them, to allows an higher"
+echo "priority application to run."
+
 echo "Press a KEY to start demo E"
 read KEY
 
@@ -202,6 +314,12 @@ aterm +sb -fn $FONT -geometry 102x16+-9+18 -title "DemoApp #03 (HP)" \
 	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
 sleep $BBQUE_START_DELAY
 
+
+echo "Check that the new started high-prio application has been started, while"
+echo "low-prio apps have been suspended."
+
+echo "Press a KEY to start demo E"
+read KEY
 
 ################################################################################
 #    Demo wrap-up
