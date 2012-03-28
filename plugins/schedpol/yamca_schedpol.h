@@ -45,10 +45,6 @@ struct PF_ObjectParams;
 
 namespace bbque { namespace plugins {
 
-/** The scheduling entity*/
-typedef std::pair<AppCPtr_t, AwmPtr_t> SchedEntity_t;
-/** Map for ordering the scheduling entities */
-typedef std::multimap<float, SchedEntity_t> SchedEntityMap_t;
 
 // Forward declaration
 class LoggerIF;
@@ -61,6 +57,12 @@ class LoggerIF;
 class YamcaSchedPol: public SchedulerPolicyIF {
 
 public:
+
+	/** The scheduling entity*/
+	typedef std::pair<AppCPtr_t, AwmPtr_t> SchedEntity_t;
+
+	/** Map for ordering the scheduling entities */
+	typedef std::multimap<float, SchedEntity_t> SchedEntityMap_t;
 
 //----- static plugin interface
 
