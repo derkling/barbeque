@@ -36,7 +36,8 @@ MCTValue::Init(void * params) {
 }
 
 MetricsContribute::ExitCode_t
-MCTValue::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
+MCTValue::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+		float & ctrib) {
 	std::string rsrc_tmp_path;
 	UsagesMap_t::const_iterator usage_it;
 	AwmPtr_t const & curr_awm(evl_ent.papp->CurrentAWM());

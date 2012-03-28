@@ -70,7 +70,8 @@ MetricsContribute::MetricsContribute(const char * _name,
 }
 
 MetricsContribute::ExitCode_t
-MetricsContribute::Compute(EvalEntity_t const & evl_ent, float & ctrib) {
+MetricsContribute::Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+		float & ctrib) {
 
 	// A valid token for the resource state view is mandatory
 	if (vtok == 0) {
@@ -88,7 +89,7 @@ MetricsContribute::Compute(EvalEntity_t const & evl_ent, float & ctrib) {
 
 void MetricsContribute::GetResourceThresholds(std::string const & rsrc_path,
 		uint64_t rsrc_amount,
-		EvalEntity_t const & evl_ent,
+		SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		ResourceThresholds_t & rl) {
 	// Total amount of resource
 	rl.total = sv->ResourceTotal(rsrc_path);

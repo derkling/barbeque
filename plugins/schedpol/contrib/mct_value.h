@@ -55,7 +55,8 @@ private:
 	 *
 	 * @return MCT_SUCCESS. No error conditions expected.
 	 */
-	ExitCode_t _Compute(EvalEntity_t const & evl_ent, float & ctrib);
+	ExitCode_t _Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+			float & ctrib);
 
 };
 

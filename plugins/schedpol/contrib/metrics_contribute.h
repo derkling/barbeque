@@ -39,46 +39,6 @@ namespace bbque { namespace plugins {
 
 
 /**
- * @brief The scheduling entity to evaluate
- *
- * A scheduling entity is characterized by the Application/EXC to schedule, a
- * Working Mode, and a Cluster ID referencing the resource binding
- */
-struct EvalEntity_t {
-
-	/**
-	 * @brief Constructor
-	 *
-	 * @param _papp Application/EXC to schedule
-	 * @param _pawm AWM to evaluate
-	 * @param _clid Cluster ID for resource binding
-	 */
-	EvalEntity_t(AppCPtr_t _papp, AwmPtr_t _pawm, uint8_t _clid):
-		papp(_papp),
-		pawm(_pawm),
-		clust_id(_clid) {
-		// Log string
-		snprintf(str_id, 40, "[%s] {AWM:%02d,CL:%02d}", papp->StrId(),
-				pawm->Id(), clust_id);
-	};
-
-	/** Application/EXC to schedule */
-	AppCPtr_t papp;
-	/** Candidate AWM */
-	AwmPtr_t pawm;
-	/** Candidate cluster for resource binding */
-	ResID_t clust_id;
-	/** Identifier string */
-	char str_id[40];
-
-	/** Return the identifier string */
-	inline const char * StrId() const {
-		return str_id;
-	}
-};
-
-
-/**
  * @brief Base class for the implementation of scheduling metrics contribute
  *
  * The scheduling policy "YaMS" bases its decision on a modular metrics, made
@@ -121,7 +81,6 @@ public:
 
 		MCT_METRICS_COUNT
 	};
-
 
 	/**
 	  * @brief Type of resource to manage
@@ -272,7 +231,8 @@ public:
 	 *
 	 * @return @see ExitCode_t
 	 */
-	 ExitCode_t Compute(EvalEntity_t const & evl_ent, float & ctrib);
+	 ExitCode_t Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+			 float & ctrib);
 
 protected:
 
@@ -318,7 +278,8 @@ protected:
 	 * resource thresholds information
 	 */
 	 void GetResourceThresholds(std::string const & rsrc_path, uint64_t amount,
-			 EvalEntity_t const & evl_ent, ResourceThresholds_t & rt);
+			 SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+			 ResourceThresholds_t & rt);
 
 	 /**
 	  * @brief Filter function for resource usage index computation
@@ -384,8 +345,9 @@ protected:
 	  *
 	  * @return @see ExitCode_t
 	  */
-	 virtual ExitCode_t _Compute(EvalEntity_t const & evl_ent, float & ctrib) =
-		 0;
+	 virtual ExitCode_t _Compute(
+			 SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+			 float & ctrib) = 0;
 
 };
 

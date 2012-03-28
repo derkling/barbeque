@@ -149,24 +149,6 @@ private:
 		// ...:: ADD_MCT ::...
 	};
 
-	/**
-	 * @brief Scheduling entity
-	 *
-	 * This embodies all the information needed in the "selection" step to require
-	 * a scheduling for an application into a specific AWM, with the resource set
-	 * bound into a chosen cluster
-	 */
-	struct SchedEntity_t: public EvalEntity_t {
-
-		SchedEntity_t(AppCPtr_t _papp, AwmPtr_t _pawm, uint8_t _clid,
-				float _metr):
-			EvalEntity_t(_papp, _pawm, _clid),
-			metrics(_metr) {
-			};
-
-		/** Metrics computed */
-		float metrics;
-	};
 
 	/** Shared pointer to a scheduling entity */
 	typedef std::shared_ptr<SchedEntity_t> SchedEntityPtr_t;

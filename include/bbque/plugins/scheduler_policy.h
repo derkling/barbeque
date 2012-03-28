@@ -61,6 +61,74 @@ public:
 		SCHED_ERROR
 	} ExitCode_t;
 
+
+	/**
+	 * @brief The scheduling entity to evaluate
+	 *
+	 * A scheduling entity is characterized by the Application/EXC to schedule, a
+	 * Working Mode, and a Cluster ID referencing the resource binding
+	 */
+	struct EvalEntity_t {
+
+		/**
+		 * @brief Constructor
+		 *
+		 * @param _papp Application/EXC to schedule
+		 * @param _pawm AWM to evaluate
+		 * @param _clid Cluster ID for resource binding
+		 */
+		EvalEntity_t(AppCPtr_t _papp, AwmPtr_t _pawm, uint8_t _clid):
+			papp(_papp),
+			pawm(_pawm),
+			clust_id(_clid) {
+			// Log string
+			snprintf(str_id, 40, "[%s] {AWM:%02d,CL:%02d}", papp->StrId(),
+					pawm->Id(), clust_id);
+		};
+
+		/** Application/EXC to schedule */
+		AppCPtr_t papp;
+		/** Candidate AWM */
+		AwmPtr_t pawm;
+		/** Candidate cluster for resource binding */
+		ResID_t clust_id;
+		/** Identifier string */
+		char str_id[40];
+
+		/** Return the identifier string */
+		inline const char * StrId() const {
+			return str_id;
+		}
+	};
+
+	/**
+	 * @brief Scheduling entity
+	 *
+	 * This embodies all the information needed in the "selection" step to require
+	 * a scheduling for an application into a specific AWM, with the resource set
+	 * bound into a chosen cluster
+	 */
+	struct SchedEntity_t: public EvalEntity_t {
+
+		/**
+		 * @brief Constructor
+		 *
+		 * @param _papp Application/EXC to schedule
+		 * @param _pawm AWM to evaluate
+		 * @param _clid Cluster ID for resource binding
+		 * @param _metr The related scheduling metrics (also "application
+		 * value")
+		 */
+		SchedEntity_t(AppCPtr_t _papp, AwmPtr_t _pawm, uint8_t _clid,
+				float _metr):
+			EvalEntity_t(_papp, _pawm, _clid),
+			metrics(_metr) {
+		};
+
+		/** Metrics computed */
+		float metrics;
+	};
+
 	/**
 	 * @brief Return the name of the optimization policy
 	 * @return The name of the optimization policy

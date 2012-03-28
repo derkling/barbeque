@@ -80,7 +80,8 @@ MCTCongestion::Init(void * params) {
 }
 
 MetricsContribute::ExitCode_t
-MCTCongestion::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
+MCTCongestion::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
 	ResourceThresholds_t rl;
 	CLEParams_t params;

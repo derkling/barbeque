@@ -66,7 +66,8 @@ private:
 	 *
 	 * @return MCT_SUCCESS for success
 	 */
-	ExitCode_t _Compute(EvalEntity_t const & evl_ent, float & ctrib);
+	ExitCode_t _Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+			float & ctrib);
 
 	/**
 	 * @brief Set the parameters for the filter function

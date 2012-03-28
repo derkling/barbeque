@@ -95,7 +95,8 @@ MCTFairness::Init(void * params) {
 }
 
 MetricsContribute::ExitCode_t
-MCTFairness::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
+MCTFairness::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
 	CLEParams_t params;
 	float ru_index;

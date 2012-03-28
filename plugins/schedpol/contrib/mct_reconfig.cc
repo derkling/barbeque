@@ -50,7 +50,8 @@ MCTReconfig::Init(void * params) {
 }
 
 MetricsContribute::ExitCode_t
-MCTReconfig::_Compute(EvalEntity_t const & evl_ent, float & ctrib) {
+MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
 	float reconf_cost = 0.0;
 	uint8_t to_mig    = 0;
