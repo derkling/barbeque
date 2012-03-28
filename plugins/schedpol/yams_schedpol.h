@@ -22,10 +22,7 @@
 
 #include "bbque/configuration_manager.h"
 #include "bbque/scheduler_manager.h"
-#include "bbque/system_view.h"
-#include "bbque/plugins/scheduler_policy.h"
 #include "bbque/plugins/plugin.h"
-
 #include "contrib/metrics_contribute.h"
 
 #define SCHEDULER_POLICY_NAME "yams"
@@ -44,12 +41,6 @@
 #define YAMS_GET_SAMPLE(METRICS, INDEX, VALUE) \
 	mc.AddSample(METRICS[INDEX].mh, VALUE);
 
-using namespace bbque::app;
-using namespace bbque::res;
-
-using bbque::app::AppPrio_t;
-using bbque::app::AppCPtr_t;
-using bbque::app::AwmPtr_t;
 using bbque::res::RViewToken_t;
 using bbque::utils::Timer;
 using bbque::utils::MetricsCollector;

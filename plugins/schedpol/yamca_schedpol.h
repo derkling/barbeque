@@ -20,21 +20,12 @@
 
 #include <cstdint>
 
-#include "bbque/system_view.h"
-#include "bbque/app/application_conf.h"
-#include "bbque/app/working_mode.h"
-
 #include "bbque/scheduler_manager.h"
 #include "bbque/plugins/scheduler_policy.h"
 #include "bbque/plugins/plugin.h"
 
 #define SCHEDULER_POLICY_NAME "yamca"
-using namespace bbque::app;
-using namespace bbque::res;
 
-using bbque::app::AppPrio_t;
-using bbque::app::AppCPtr_t;
-using bbque::app::AwmPtr_t;
 
 using bbque::res::RViewToken_t;
 using bbque::utils::Timer;

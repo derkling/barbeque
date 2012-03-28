@@ -18,13 +18,15 @@
 #ifndef BBQUE_SCHEDULER_POLICY_H_
 #define BBQUE_SCHEDULER_POLICY_H_
 
+#include "bbque/system_view.h"
+#include "bbque/app/application_conf.h"
+#include "bbque/app/working_mode.h"
 #include "bbque/res/resources.h"
 
 #define SCHEDULER_POLICY_NAMESPACE "bq.sp."
 
-namespace bbque {
-	class SystemView;
-}
+using namespace bbque::app;
+using namespace bbque::res;
 
 namespace bbque { namespace plugins {
 

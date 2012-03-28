@@ -21,10 +21,7 @@
 #include <cstring>
 
 #include "bbque/configuration_manager.h"
-#include "bbque/system_view.h"
-#include "bbque/app/application_conf.h"
-#include "bbque/app/working_mode.h"
-#include "bbque/res/resources.h"
+#include "bbque/plugins/scheduler_policy.h"
 #include "bbque/plugins/logger.h"
 
 #define MCT_CONF_BASE_STR 	"MetricsContribute."
@@ -37,11 +34,6 @@
 	for (usage_it = rsrc_usages->begin();                           \
 			usage_it != end_usage; ++usage_it)
 
-
-using namespace bbque::app;
-using namespace bbque::res;
-
-using bbque::app::AwmPtr_t;
 
 namespace bbque { namespace plugins {
 
