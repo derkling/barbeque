@@ -21,8 +21,6 @@
 #include "bbque/application_manager.h"
 #include "bbque/resource_accounter.h"
 
-using bbque::ApplicationManager;
-using bbque::ApplicationManagerStatusIF;
 using bbque::app::ApplicationStatusIF;
 using bbque::app::AppCPtr_t;
 using bbque::res::ResourcePtr_t;
@@ -237,13 +235,28 @@ public:
 		return ra.GetNumResourceTypes();
 	}
 
+	/**
+	 * @see ResourceAccounterConfIF::GetView()
+	 */
+	inline ResourceAccounterStatusIF::ExitCode_t GetResourceStateView(
+			std::string req_id, RViewToken_t & tok) {
+		return ra.GetView(req_id, tok);
+	}
+
+	/**
+	 * @see ResourceAccounterConfIF::PutView()
+	 */
+	inline void PutResourceStateView(RViewToken_t tok) {
+		return ra.PutView(tok);
+	}
+
 private:
 
 	/** ApplicationManager instance */
 	ApplicationManagerStatusIF & am;
 
 	/** ResourceAccounter instance */
-	ResourceAccounterStatusIF & ra;
+	ResourceAccounterConfIF & ra;
 
 	/** Constructor */
 	SystemView() :
