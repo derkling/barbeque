@@ -18,9 +18,6 @@
 #ifndef BBQUE_YAMCA_SCHEDPOL_H_
 #define BBQUE_YAMCA_SCHEDPOL_H_
 
-#include "bbque/plugins/scheduler_policy.h"
-#include "bbque/plugins/plugin.h"
-
 #include <cstdint>
 
 #include "bbque/system_view.h"
@@ -28,7 +25,10 @@
 #include "bbque/app/working_mode.h"
 
 #include "bbque/scheduler_manager.h"
+#include "bbque/plugins/scheduler_policy.h"
+#include "bbque/plugins/plugin.h"
 
+#define SCHEDULER_POLICY_NAME "yamca"
 using namespace bbque::app;
 using namespace bbque::res;
 
@@ -37,11 +37,8 @@ using bbque::app::AppCPtr_t;
 using bbque::app::AwmPtr_t;
 
 using bbque::res::RViewToken_t;
-
 using bbque::utils::Timer;
 using bbque::utils::MetricsCollector;
-
-#define SCHEDULER_POLICY_NAME "yamca"
 
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
@@ -61,7 +58,7 @@ class LoggerIF;
  *
  * A dynamic C++ plugin which implements the YaMCA resource scheduler heuristic.
  */
-class YamcaSchedPol : public SchedulerPolicyIF {
+class YamcaSchedPol: public SchedulerPolicyIF {
 
 public:
 

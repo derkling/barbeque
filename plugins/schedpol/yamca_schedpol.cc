@@ -24,8 +24,6 @@
 #include <thread>
 
 #include "bbque/modules_factory.h"
-#include "bbque/plugins/logger.h"
-
 
 /** Metrics (class VALUE) declaration */
 #define YAMCA_VALUE_METRIC(NAME, DESC)\
