@@ -287,6 +287,12 @@ void ResourceManager::EvtExcStart() {
 	// startup burst.
 	// TODO: make this policy more tunable via the configuration file
 	papp = am.HighestPrio(ApplicationStatusIF::READY);
+	if (!papp) {
+		// In this case the application has exited before the start
+		// event has had the change to be processed
+		DB(logger->Warn("Overdue processing of a START event"));
+		return;
+	}
 	timeout = 100 + (100 * papp->Priority());
 	optimize_dfr.Schedule(milliseconds(timeout));
 	
