@@ -27,11 +27,11 @@ import sys
 from pyx import *
 
 metrics = [ \
-("bq.sp.syncp.avg.time", "SyncP",                   "Time [ms]"), \
-("bq.sp.syncp.avg.pre",  "PreChange",               "Time [ms]"), \
-("bq.sp.syncp.avg.sync", "SyncChange",              "Time [ms]"), \
-("bq.sp.syncp.avg.do",   "DoChange",                "Time [ms]"), \
-("bq.sp.syncp.avg.post", "PostChange",              "Time [ms]"), \
+("bq.ym.syncp.avg.time", "SyncP",                   "Time [ms]"), \
+("bq.ym.syncp.avg.pre",  "PreChange",               "Time [ms]"), \
+("bq.ym.syncp.avg.sync", "SyncChange",              "Time [ms]"), \
+("bq.ym.syncp.avg.do",   "DoChange",                "Time [ms]"), \
+("bq.ym.syncp.avg.post", "PostChange",              "Time [ms]"), \
 ("bq.sm.time",           "Scheduler",               "Time [ms]"), \
 ("bq.sm.yamca.map",      "Scheduler Data",          "Size [Bytes]"), \
 ("bq.sm.yamca.entities", "Entities",                "Count"), \
@@ -41,10 +41,10 @@ metrics = [ \
 ]
 
 #recipes = ["1Awm1PEPrio1"]
-recipes = ["r05Awm01Pe", "r10Awm01Pe"]
-cores = [1, 2, 4]
-clusters = [1, 4]
-pes = [4, 8, 16, 32, 64]
+recipes = ["BbqRTLibTestApp01AWM", "BbqRTLibTestApp03AWM", "BbqRTLibTestApp06AWM", "BbqRTLibTestApp10AWM"]
+cores = [4]
+clusters = [3]
+pes = [4]
 
 
 """
@@ -69,7 +69,7 @@ def plotXexcYmetZcls(m, r, h, c, p):
     # Add dataset to be plotted
     plots = []
     for Ci in c:
-        dataset = "graph-%s-%s-HC%02d-w001c010-C%03dPE%03d.dat" % (mk,r,h,Ci,p)
+	dataset = "graph-%s-%s-HC%02d-w006c060-C%03dPE%03d.dat" % (mk,r,h,Ci,p)
         print "Adding dataset: %s ..." % (dataset)
         dataset_key = "%02d Clusters" % (Ci)
         plots.append(graph.data.file(dataset, x="EXCs", y="Avg", dy="StdDev",
@@ -86,7 +86,7 @@ def plotXexcYmetZcls(m, r, h, c, p):
     g.text(g.width/2, g.height + 0.2, graph_title,
             [text.halign.center, text.valign.bottom, text.size.large])
 
-    graph_name = "graph-%s-%s-HC%02d-w001c010-PE%03d.pdf" % (mk,r,h,p)
+    graph_name = "graph-%s-%s-HC%02d-w006c060-PE%03d.pdf" % (mk,r,h,p)
     print "Plot graph %s ..." % (graph_name)
     g.writePDFfile(graph_name)
     g.pipeGS(filename=string.replace(graph_name, "pdf", "png"))
@@ -113,7 +113,7 @@ def plotXexcYmetZpes(m, r, h, c, p):
     # Add dataset to be plotted
     plots = []
     for Pi in p:
-        dataset = "graph-%s-%s-HC%02d-w001c010-C%03dPE%03d.dat" % (mk,r,h,c,Pi)
+	dataset = "graph-%s-%s-HC%02d-w006c060-C%03dPE%03d.dat" % (mk,r,h,c,Pi)
         print "Adding dataset: %s ..." % (dataset)
         dataset_key = "%02d PEs" % (Pi)
         plots.append(graph.data.file(dataset, x="EXCs", y="Avg", dy="StdDev",
@@ -130,7 +130,7 @@ def plotXexcYmetZpes(m, r, h, c, p):
     g.text(g.width/2, g.height + 0.2, graph_title,
             [text.halign.center, text.valign.bottom, text.size.large])
 
-    graph_name = "graph-%s-%s-HC%02d-w001c010-C%03d.pdf" % (mk,r,h,c)
+    graph_name = "graph-%s-%s-HC%02d-w006c060-C%03d.pdf" % (mk,r,h,c)
     print "Plot graph %s ..." % (graph_name)
     g.writePDFfile(graph_name)
     string.replace(graph_name, "pdf", "png")
@@ -159,7 +159,7 @@ def plotXexcYmetZhc(m, r, h, c, p):
     # Add dataset to be plotted
     plots = []
     for Hi in h:
-        dataset = "graph-%s-%s-HC%02d-w001c010-C%03dPE%03d.dat" % (mk,r,Hi,c,p)
+	dataset = "graph-%s-%s-HC%02d-w006c060-C%03dPE%03d.dat" % (mk,r,Hi,c,p)
         print "Adding dataset: %s ..." % (dataset)
         dataset_key = "%02d HCores" % (Hi)
         plots.append(graph.data.file(dataset, x="EXCs", y="Avg", dy="StdDev",
@@ -176,7 +176,7 @@ def plotXexcYmetZhc(m, r, h, c, p):
     g.text(g.width/2, g.height + 0.2, graph_title,
             [text.halign.center, text.valign.bottom, text.size.large])
 
-    graph_name = "graph-%s-%s-w001c010-C%03dPE%03d.pdf" % (mk,r,c,p)
+    graph_name = "graph-%s-%s-w006c060-C%03dPE%03d.pdf" % (mk,r,c,p)
     print "Plot graph %s ..." % (graph_name)
     g.writePDFfile(graph_name)
     string.replace(graph_name, "pdf", "png")
