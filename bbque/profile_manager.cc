@@ -154,8 +154,10 @@ loop_continue:
 			static_cast<uint8_t>(prio));
 
 	logger->Notice(
-		"|  %3d | %5.3f | %5.3f | %5.3f | %5.3f | %5.3f | %5.3f |",
+		"|  %3d | %3d | %3d | %5.3f | %5.3f | %5.3f | %5.3f | %5.3f | %5.3f |",
 		prio,
+		actives_count,
+		running_count,
 		app_avg, app_var,
 		awm_avg, awm_var,
 		wmix_idx,
@@ -170,13 +172,13 @@ ProfileManager::ProfileSchedule() {
 	uint16_t prio;
 
 	logger->Notice(
-		"========================================================");
+		"====================================================================");
 	logger->Notice(
-		"|      |  Apps Values  |  AWMs Values  | WLMix | Fness |");
+		"|      |  Apps Cnt |  Apps Values  |  AWMs Values  | WLMix | Fness |");
 	logger->Notice(
-		"| Prio |  Avg  |  Var  |  Avg  |  Var  |   Idx |   Idx |");
+		"| Prio | Act | Run |  Avg  |  Var  |  Avg  |  Var  |   Idx |   Idx |");
 	logger->Notice(
-		"|------+-------+-------+-------+-------+-------+-------+");
+		"|------+-----+-----+-------+-------+-------+-------+-------+-------+");
 
 	// Compute per-priority classes scheduler profiling statistics
 	for (prio = 0; prio <= am.LowestPriority(); ++prio) {
@@ -186,7 +188,7 @@ ProfileManager::ProfileSchedule() {
 	}
 
 	logger->Notice(
-		"========================================================");
+		"====================================================================");
 	return OK;
 }
 
