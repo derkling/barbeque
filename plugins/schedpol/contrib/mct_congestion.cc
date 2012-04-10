@@ -102,6 +102,12 @@ MCTCongestion::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		// Get the region of the (next) resource usage
 		GetResourceThresholds(rsrc_path, pusage->GetAmount(), evl_ent, rl);
 
+		// If there are no free resources the index contribute is equal to 0
+		if (rl.free < pusage->GetAmount()) {
+			ctrib = 0;
+			return MCT_SUCCESS;
+		}
+
 		// 1. Get the congestion penalty to use
 		// 2. Finish to set the parameters for the index computation
 		std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
