@@ -54,6 +54,15 @@
 #define SM_ADD_SAMPLE(METRICS, INDEX, COUNT) \
 	mc.AddSample(METRICS[INDEX].mh, COUNT);
 
+/** SyncState Metrics (class SAMPLE) declaration */
+#define SM_SAMPLE_METRIC_SYNCSTATE(NAME, DESC)\
+ {SYNCHRONIZATION_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::SAMPLE, \
+	 bbque::app::ApplicationStatusIF::SYNC_STATE_COUNT, \
+	 bbque::app::ApplicationStatusIF::syncStateStr, 0}
+/** Acquire a new completion time sample for SyncState Metrics*/
+#define SM_GET_TIMING_SYNCSTATE(METRICS, INDEX, TIMER, STATE) \
+	mc.AddSample(METRICS[INDEX].mh, TIMER.getElapsedTimeMs(), STATE);
+
 namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
@@ -71,13 +80,13 @@ SynchronizationManager::metrics[SM_METRICS_COUNT] = {
 	SM_COUNTER_METRIC("sync_hit",  "Syncs HIT count"),
 	SM_COUNTER_METRIC("sync_miss", "Syncs MISS count"),
 	//----- Timing metrics
-	SM_SAMPLE_METRIC("syncp.avg.time",  "Avg SyncP execution t[ms]"),
-	SM_SAMPLE_METRIC("syncp.avg.pre",   "  PreChange  exe t[ms]"),
-	SM_SAMPLE_METRIC("syncp.avg.lat",   "  Pre-Sync Lat   t[ms]"),
-	SM_SAMPLE_METRIC("syncp.avg.sync",  "  SyncChange exe t[ms]"),
-	SM_SAMPLE_METRIC("syncp.avg.synp",  "  SyncPlatform exe t[ms]"),
-	SM_SAMPLE_METRIC("syncp.avg.do",    "  DoChange   exe t[ms]"),
-	SM_SAMPLE_METRIC("syncp.avg.post",  "  PostChange exe t[ms]"),
+	SM_SAMPLE_METRIC("sp.a.time",  "Avg SyncP execution t[ms]"),
+	SM_SAMPLE_METRIC("sp.a.lat",   " Pre-Sync Lat   t[ms]"),
+	SM_SAMPLE_METRIC_SYNCSTATE("sp.a.pre",   " PreChange  exe t[ms]"),
+	SM_SAMPLE_METRIC_SYNCSTATE("sp.a.sync",  " SyncChange exe t[ms]"),
+	SM_SAMPLE_METRIC_SYNCSTATE("sp.a.synp",  " SyncPlatform exe t[ms]"),
+	SM_SAMPLE_METRIC_SYNCSTATE("sp.a.do",    " DoChange   exe t[ms]"),
+	SM_SAMPLE_METRIC_SYNCSTATE("sp.a.post",  " PostChange exe t[ms]"),
 	//----- Couting statistics
 	SM_SAMPLE_METRIC("avge", "Average EXCs reconf"),
 	SM_SAMPLE_METRIC("app.SyncLat", "Average SyncLatency declared"),
@@ -249,7 +258,8 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_TIME_PRECHANGE, sm_tmr);
+	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_PRECHANGE,
+			sm_tmr, syncState);
 	logger->Debug("STEP 1: preChange() DONE");
 
 	return OK;
@@ -368,7 +378,8 @@ SynchronizationManager::Sync_SyncChange(
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_TIME_SYNCCHANGE, sm_tmr);
+	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_SYNCCHANGE,
+			sm_tmr, syncState);
 	logger->Debug("STEP 2: syncChange() DONE");
 
 	return OK;
@@ -408,7 +419,8 @@ SynchronizationManager::Sync_DoChange(ApplicationStatusIF::SyncState_t syncState
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_TIME_DOCHANGE, sm_tmr);
+	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_DOCHANGE,
+			sm_tmr, syncState);
 	logger->Debug("STEP 3: doChange() DONE");
 
 	return OK;
@@ -482,7 +494,8 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 	}
 
 	// Collecing execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_TIME_POSTCHANGE, sm_tmr);
+	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_POSTCHANGE,
+			sm_tmr, syncState);
 	logger->Debug("STEP 4: postChange() DONE");
 
 	// Account for total reconfigured EXCs
@@ -568,7 +581,7 @@ SynchronizationManager::Sync_Platform(ApplicationStatusIF::SyncState_t syncState
 	}
 
 	// Collecting execution metrics
-	SM_GET_TIMING(metrics, SM_SYNCP_TIME_SYNCPLAT, sm_tmr);
+	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_SYNCPLAT, sm_tmr, syncState);
 	logger->Debug("STEP M: SyncPlatform() DONE");
 
 	if (result == PlatformProxy::OK)
