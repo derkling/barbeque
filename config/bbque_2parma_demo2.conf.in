@@ -79,6 +79,7 @@ rootCategory = ERROR, raFile
 category.bq.rm =        NOTICE
 category.bq.am =        NOTICE
 category.bq.ra =        NOTICE
+category.bq.om =        NOTICE
 
 ###
 # Root Appender
