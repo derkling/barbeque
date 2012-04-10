@@ -181,8 +181,9 @@ public:
 		/** Statistics on Value */
 		typedef accumulator_set<uint64_t,
 			stats<tag::count, tag::min, tag::max>> statMetric_t;
-		statMetric_t stat;
-		std::vector<statMetric_t> sm_stat;
+		typedef std::shared_ptr<statMetric_t> pStatMetric_t;
+		pStatMetric_t pstat;
+		std::vector<pStatMetric_t> sm_pstat;
 
 		ValueMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);
@@ -205,8 +206,9 @@ public:
 		/** Statistics on collected Samples */
 		typedef accumulator_set<double,
 			stats<tag::min, tag::max, tag::variance>> statMetric_t;
-		statMetric_t stat;
-		std::vector<statMetric_t> sm_stat;
+		typedef std::shared_ptr<statMetric_t> pStatMetric_t;
+		pStatMetric_t pstat;
+		std::vector<pStatMetric_t> sm_pstat;
 
 		SamplesMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);
@@ -230,8 +232,9 @@ public:
 		/** Statistics on Value */
 		typedef accumulator_set<double,
 			stats<tag::min, tag::max, tag::variance>> statMetric_t;
-		statMetric_t stat;
-		std::vector<statMetric_t> sm_stat;
+		typedef std::shared_ptr<statMetric_t> pStatMetric_t;
+		pStatMetric_t pstat;
+		std::vector<pStatMetric_t> sm_pstat;
 
 		PeriodMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);

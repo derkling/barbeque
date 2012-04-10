@@ -37,7 +37,13 @@ MetricsCollector::ValueMetric::ValueMetric(
 		const char *name, const char *desc,
 		uint8_t sm_count, const char **sm_desc) :
 	Metric(name, desc, VALUE, sm_count, sm_desc),
-	value(0), sm_value(sm_count), sm_stat(sm_count) {
+	value(0), sm_value(sm_count), sm_pstat(sm_count) {
+	pstat = pStatMetric_t(new statMetric_t);
+	for (uint8_t i = 0; i < sm_pstat.size(); ++i) {
+		sm_value[i] = 0;
+		sm_pstat[i] = pStatMetric_t(new statMetric_t);
+	}
+}
 
 }
 
@@ -45,7 +51,12 @@ MetricsCollector::SamplesMetric::SamplesMetric(
 		const char *name, const char *desc,
 		uint8_t sm_count, const char **sm_desc) :
 	Metric(name, desc, SAMPLE, sm_count, sm_desc),
-	sm_stat(sm_count) {
+	sm_pstat(sm_count) {
+	pstat = pStatMetric_t(new statMetric_t);
+	for (uint8_t i = 0; i < sm_pstat.size(); ++i) {
+		sm_pstat[i] = pStatMetric_t(new statMetric_t);
+	}
+}
 
 }
 
@@ -53,7 +64,12 @@ MetricsCollector::PeriodMetric::PeriodMetric(
 		const char *name, const char *desc,
 		uint8_t sm_count, const char **sm_desc) :
 	Metric(name, desc, PERIOD, sm_count, sm_desc),
-	sm_period_tmr(sm_count), sm_stat(sm_count) {
+	sm_period_tmr(sm_count), sm_pstat(sm_count) {
+	pstat = pStatMetric_t(new statMetric_t);
+	for (uint8_t i = 0; i < sm_pstat.size(); ++i) {
+		sm_pstat[i] = pStatMetric_t(new statMetric_t);
+	}
+}
 
 }
 
@@ -242,9 +258,9 @@ MetricsCollector::UpdateValue(MetricHandler_t mh, double amount,
 			m->sm_value[idx] = 0;
 	}
 
-	m->stat(m->value);
+	(*m->pstat)(m->value);
 	if (m->HasSubmetrics())
-		m->sm_stat[idx](m->sm_value[idx]);
+		(*m->sm_pstat[idx])(m->sm_value[idx]);
 
 	return OK;
 }
@@ -300,9 +316,9 @@ MetricsCollector::AddSample(MetricHandler_t mh,
 	m = (SamplesMetric*)pm.get();
 
 	// Push-in the new sample into the accumulator
-	m->stat(sample);
+	(*m->pstat)(sample);
 	if (m->HasSubmetrics())
-		m->sm_stat[idx](sample);
+		(*m->sm_pstat[idx])(sample);
 
 	return OK;
 }
@@ -349,10 +365,10 @@ MetricsCollector::PeriodSample(MetricHandler_t mh,
 
 	// Push-in the new timer into the accumulator
 	last_period = m->period_tmr.getElapsedTimeMs();
-	m->stat(last_period);
+	(*m->pstat)(last_period);
 	if (m->HasSubmetrics()) {
 		last_period = m->sm_period_tmr[idx].getElapsedTimeMs();
-		m->sm_stat[idx](last_period);
+		(*m->sm_pstat[idx])(last_period);
 	}
 
 	// Reset timer for next period computation
@@ -416,9 +432,9 @@ MetricsCollector::DumpValueSM(ValueMetric *m, uint8_t idx,
 	snprintf(ms.name, 21, "%s[%02hu]", m->name, idx);
 
 	// Get sub-metrics statistics
-	if (count(m->sm_stat[idx])) {
-		ms.min = min(m->sm_stat[idx]);
-		ms.max = max(m->sm_stat[idx]);
+	if (count(*m->sm_pstat[idx])) {
+		ms.min = min(*m->sm_pstat[idx]);
+		ms.max = max(*m->sm_pstat[idx]);
 	}
 
 	// By default use main metrics description
@@ -447,9 +463,9 @@ void
 MetricsCollector::DumpValue(ValueMetric *m) {
 	MetricStats<uint64_t> ms;
 
-	if (count(m->stat)) {
-		ms.min = min(m->stat);
-		ms.max = max(m->stat);
+	if (count(*m->pstat)) {
+		ms.min = min(*m->pstat);
+		ms.max = max(*m->pstat);
 	}
 	logger->Notice(
 		" %-20s | %9llu | %9llu | %9llu : %s",
@@ -471,11 +487,11 @@ MetricsCollector::DumpSampleSM(SamplesMetric *m, uint8_t idx,
 	snprintf(ms.name, 21, "%s[%02hu]", m->name, idx);
 
 	// Get sub-metrics statistics
-	if (count(m->sm_stat[idx])) {
-		ms.min = min(m->sm_stat[idx]);
-		ms.max = max(m->sm_stat[idx]);
-		ms.avg = mean(m->sm_stat[idx]);
-		ms.var = variance(m->sm_stat[idx]);
+	if (count(*m->sm_pstat[idx])) {
+		ms.min = min(*m->sm_pstat[idx]);
+		ms.max = max(*m->sm_pstat[idx]);
+		ms.avg = mean(*m->sm_pstat[idx]);
+		ms.var = variance(*m->sm_pstat[idx]);
 	} else {
 		ms.min = 0; ms.max = 0; ms.avg = 0; ms.var = 0;
 	}
@@ -507,11 +523,11 @@ void
 MetricsCollector::DumpSample(SamplesMetric *m) {
 	MetricStats<double> ms;
 
-	if (count(m->stat)) {
-		ms.min = min(m->stat);
-		ms.max = max(m->stat);
-		ms.avg = mean(m->stat);
-		ms.var = variance(m->stat);
+	if (count(*m->pstat)) {
+		ms.min = min(*m->pstat);
+		ms.max = max(*m->pstat);
+		ms.avg = mean(*m->pstat);
+		ms.var = variance(*m->pstat);
 	}
 	logger->Notice(
 		" %-20s | %9.3f | %9.3f | %9.3f | %9.3f : %s",
@@ -534,11 +550,11 @@ MetricsCollector::DumpPeriodSM(PeriodMetric *m, uint8_t idx,
 	snprintf(ms.name, 21, "%s[%02hu]", m->name, idx);
 
 	// Get sub-metrics statistics
-	if (count(m->sm_stat[idx])) {
-		ms.min = min(m->sm_stat[idx]);
-		ms.max = max(m->sm_stat[idx]);
-		ms.avg = mean(m->sm_stat[idx]);
-		ms.var = variance(m->sm_stat[idx]);
+	if (count(*m->sm_pstat[idx])) {
+		ms.min = min(*m->sm_pstat[idx]);
+		ms.max = max(*m->sm_pstat[idx]);
+		ms.avg = mean(*m->sm_pstat[idx]);
+		ms.var = variance(*m->sm_pstat[idx]);
 	} else {
 		ms.min = 0; ms.max = 0; ms.avg = 0; ms.var = 0;
 	}
@@ -574,11 +590,11 @@ void
 MetricsCollector::DumpPeriod(PeriodMetric *m) {
 	MetricStats<double> ms;
 
-	if (count(m->stat)) {
-		ms.min = min(m->stat);
-		ms.max = max(m->stat);
-		ms.avg = mean(m->stat);
-		ms.var = variance(m->stat);
+	if (count(*m->pstat)) {
+		ms.min = min(*m->pstat);
+		ms.max = max(*m->pstat);
+		ms.avg = mean(*m->pstat);
+		ms.var = variance(*m->pstat);
 	}
 	logger->Notice(
 		" %-20s | %10.3f %10.3f | %10.3f %10.3f | %10.3f %10.3f |    %10.3f %10.3f : %s",
