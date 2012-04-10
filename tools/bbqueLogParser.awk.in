@@ -26,6 +26,8 @@ BEGIN {
 	FS=":"
 	if (parse_metrics) {
 		parse_metrics = 0;
+		print metrics_act;
+		print metrics_run;
 		print metrics_awm;
 		print metrics_app;
 		print metrics_wlm;
@@ -42,6 +44,8 @@ BEGIN {
 		getline;
 	# Set the Filed Separator to "|"
 	FS="|"
+	metrics_act = "PROF_AACT: ";
+	metrics_run = "PROF_ARUN: ";
 	metrics_awm = "PROF_AWMV: ";
 	metrics_app = "PROF_APPV: ";
 	metrics_wlm = "PROF_WLMI: ";
@@ -53,10 +57,12 @@ function metricsParser() {
 	#print "Metrics: " $0 "["$2", "$3", "$4"]";
 	#printf "Prio%02d AppsAvg %.4f AppsVar %.4f AWMsAvg %.4f AWMsVar %.4f WLM %.4f FNS %.4f\n", $2, $3, $4, $5, $6, $7, $8
 	#printf "Prio%02d AppsAvg %.4f AWMsAvg %.4f WLM %.4f FNS %.4f\n", $2, $3, $5, $7, $8
-	metrics_awm=sprintf("%s Prio_%02d %.4f", metrics_awm, $2, $3);
-	metrics_app=sprintf("%s Prio_%02d %.4f", metrics_app, $2, $5);
-	metrics_wlm=sprintf("%s Prio_%02d %.4f", metrics_wlm, $2, $7);
-	metrics_fns=sprintf("%s Prio_%02d %.4f", metrics_fns, $2, $8);
+	metrics_act=sprintf("%s Prio_%02d %d", metrics_act, $2, $3);
+	metrics_run=sprintf("%s Prio_%02d %d", metrics_run, $2, $4);
+	metrics_awm=sprintf("%s Prio_%02d %.4f", metrics_awm, $2, $5);
+	metrics_app=sprintf("%s Prio_%02d %.4f", metrics_app, $2, $7);
+	metrics_wlm=sprintf("%s Prio_%02d %.4f", metrics_wlm, $2, $9);
+	metrics_fns=sprintf("%s Prio_%02d %.4f", metrics_fns, $2, $10);
 	#print "Metrics: " metrics_awm
 }
 
