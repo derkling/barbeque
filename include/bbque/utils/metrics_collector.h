@@ -343,6 +343,15 @@ public:
 	ExitCode_t PeriodSample(MetricHandler_t mh, double & last_period,
 			uint8_t sm_idx = 0);
 
+
+	/**
+	 * @brief Reset all metrics.
+	 *
+	 * This method reset all metrics collected so far to their initial
+	 * value, thus discarding all statistics
+	 */
+	void ResetAll();
+
 	/**
 	 * @brief Dump on screen a report of all the registered metrics
 	 *
@@ -437,6 +446,14 @@ private:
 	ExitCode_t UpdateValue(MetricHandler_t mh, double amount,
 			uint8_t sm_idx = 0);
 
+	/**
+	 * @brief Reset all metrics of the specified class
+	 *
+	 * This method reset all metrics, of the specified class, collected so
+	 * far to their initial value, thus discarding all statistics
+	 * @note this method requires a look on the metrics maps
+	 */
+	void _ResetAll(uint8_t mc);
 
 	/**
 	 * @brief Dump the current value for a metric of class COUNT

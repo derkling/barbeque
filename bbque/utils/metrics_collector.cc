@@ -404,6 +404,32 @@ MetricsCollector::PeriodSample(MetricHandler_t mh,
 }
 
 void
+MetricsCollector::_ResetAll(uint8_t mc) {
+	MetricsMap_t::iterator it;
+	pMetric_t pm;
+
+	assert(mc < CLASSES_COUNT);
+	it = metricsVec[mc].begin();
+	for ( ; it != metricsVec[mc].end(); ++it) {
+		pm = it->second;
+		pm->Reset();
+	}
+
+}
+
+void
+MetricsCollector::ResetAll() {
+	std::unique_lock<std::mutex> metrics_ul(metrics_mtx);
+	uint8_t mc;
+
+	for (mc = 0; mc < CLASSES_COUNT; ++mc) {
+		logger->Info("Resetting metrics of class [%d]", mc);
+		_ResetAll(mc);
+	}
+
+}
+
+void
 MetricsCollector::DumpCountSM(CounterMetric *m, uint8_t idx) {
 	char _name[21], _desc[64];
 	uint8_t i;
