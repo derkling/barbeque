@@ -357,8 +357,6 @@ public:
 	virtual uint64_t GetResourceUsageStat(std::string const & rsrc_path,
 			ResourceUsageStatType_t ru_stat) = 0;
 
-private:
-
 	/**
 	 * @brief Verbose application state names
 	 */
