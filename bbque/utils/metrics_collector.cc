@@ -33,6 +33,12 @@ MetricsCollector::CounterMetric::CounterMetric(
 
 }
 
+void MetricsCollector::CounterMetric::Reset() {
+	cnt = 0;
+	for (uint8_t i = 0; i < sm_cnt.size(); ++i)
+		sm_cnt[i] = 0;
+}
+
 MetricsCollector::ValueMetric::ValueMetric(
 		const char *name, const char *desc,
 		uint8_t sm_count, const char **sm_desc) :
@@ -45,6 +51,13 @@ MetricsCollector::ValueMetric::ValueMetric(
 	}
 }
 
+void MetricsCollector::ValueMetric::Reset() {
+	value = 0;
+	pstat = pStatMetric_t(new statMetric_t);
+	for (uint8_t i = 0; i < sm_pstat.size(); ++i) {
+		sm_value[i] = 0;
+		sm_pstat[i] = pStatMetric_t(new statMetric_t);
+	}
 }
 
 MetricsCollector::SamplesMetric::SamplesMetric(
@@ -58,6 +71,11 @@ MetricsCollector::SamplesMetric::SamplesMetric(
 	}
 }
 
+void MetricsCollector::SamplesMetric::Reset() {
+	pstat = pStatMetric_t(new statMetric_t);
+	for (uint8_t i = 0; i < sm_pstat.size(); ++i) {
+		sm_pstat[i] = pStatMetric_t(new statMetric_t);
+	}
 }
 
 MetricsCollector::PeriodMetric::PeriodMetric(
@@ -71,6 +89,11 @@ MetricsCollector::PeriodMetric::PeriodMetric(
 	}
 }
 
+void MetricsCollector::PeriodMetric::Reset() {
+	pstat = pStatMetric_t(new statMetric_t);
+	for (uint8_t i = 0; i < sm_pstat.size(); ++i) {
+		sm_pstat[i] = pStatMetric_t(new statMetric_t);
+	}
 }
 
 MetricsCollector & MetricsCollector::GetInstance() {

@@ -144,6 +144,8 @@ public:
 		bool HasSubmetrics() const {
 			return (sm_count != 0);
 		}
+
+		virtual void Reset() = 0;
 	};
 
 	/** A pointer to a (base class) registered metrics */
@@ -162,6 +164,8 @@ public:
 
 		CounterMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);
+
+		void Reset();
 	};
 
 	/**
@@ -188,6 +192,8 @@ public:
 		ValueMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);
 
+		void Reset();
+
 	};
 
 	/**
@@ -212,6 +218,8 @@ public:
 
 		SamplesMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);
+
+		void Reset();
 
 	};
 
@@ -238,6 +246,8 @@ public:
 
 		PeriodMetric(const char *name, const char *desc,
 				uint8_t sm_count = 0, const char **sm_desc = NULL);
+
+		void Reset();
 
 	};
 
