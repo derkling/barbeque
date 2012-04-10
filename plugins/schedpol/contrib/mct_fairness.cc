@@ -122,7 +122,7 @@ MCTFairness::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 				rsrc_path.c_str(), clust_rsrc_avl);
 
 		// If there are no free resources the index contribute is equal to 0
-		if (clust_rsrc_avl == 0) {
+		if (clust_rsrc_avl < pusage->GetAmount()) {
 			ctrib = 0;
 			return MCT_SUCCESS;
 		}
