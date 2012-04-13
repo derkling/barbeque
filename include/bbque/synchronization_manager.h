@@ -107,7 +107,7 @@ private:
 	MetricsCollector & mc;
 	ResourceAccounter & ra;
 	PlatformProxy & pp;
-	SystemView & sv;
+	System & sv;
 
 	/**
 	 * @brief The number of synchronization cycles

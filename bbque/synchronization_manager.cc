@@ -21,8 +21,8 @@
 #include "bbque/configuration_manager.h"
 #include "bbque/modules_factory.h"
 #include "bbque/plugin_manager.h"
-#include "bbque/system_view.h"
 #include "bbque/resource_accounter.h"
+#include "bbque/system.h"
 
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
@@ -93,7 +93,7 @@ SynchronizationManager::SynchronizationManager() :
 	mc(bu::MetricsCollector::GetInstance()),
 	ra(ResourceAccounter::GetInstance()),
 	pp(PlatformProxy::GetInstance()),
-	sv(SystemView::GetInstance()),
+	sv(System::GetInstance()),
 	sync_count(0) {
 	std::string sync_policy;
 

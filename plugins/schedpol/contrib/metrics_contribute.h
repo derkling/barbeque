@@ -196,10 +196,10 @@ public:
 	/**
 	 * @brief Set information for referencing the current state view
 	 *
-	 * @param _sv Pointer to the SystemView instance
+	 * @param _sv Pointer to the System instance
 	 * @param _vtok The token of scheduling resource state view
 	 */
-	inline void SetViewInfo(SystemView * _sv, RViewToken_t _vtok) {
+	inline void SetViewInfo(System * _sv, RViewToken_t _vtok) {
 		sv = _sv;
 		vtok = _vtok;
 	}
@@ -243,8 +243,8 @@ protected:
 	 ConfigurationManager & cm;
 
 
-	 /** Pointer to the SystemView instance */
-	 SystemView * sv;
+	 /** Pointer to the System instance */
+	 System * sv;
 
 	 /** The token of scheduling resource state view */
 	 RViewToken_t vtok;

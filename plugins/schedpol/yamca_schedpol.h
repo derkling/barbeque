@@ -83,7 +83,7 @@ public:
 	 * @see ScheduerPolicyIF
 	 */
 	SchedulerPolicyIF::ExitCode_t
-		Schedule(bbque::SystemView & sv, RViewToken_t & rav);
+		Schedule(bbque::System & sv, RViewToken_t & rav);
 
 private:
 
@@ -148,12 +148,12 @@ private:
 	/**
 	 * @brief Schedule applications from a priority queue
 	 *
-	 * @param sv the SystemView
+	 * @param sv the System interfaces
 	 * @param prio The priority queue to schedule
 	 *
 	 * @return @see ExitCode_t
 	 */
-	ExitCode_t SchedulePrioQueue(bbque::SystemView & sv,
+	ExitCode_t SchedulePrioQueue(bbque::System & sv,
 			AppPrio_t prio);
 
 	/**
@@ -164,11 +164,12 @@ private:
 	 * value computed)
 	 *
 	 * @param sched_map Multimap for scheduling entities ordering
+	 * @param sv the System interfaces
 	 * @param prio The priority queue to schedule
 	 * @param cl_id The current cluster for the clustered resources
 	 */
 	ExitCode_t OrderSchedEntity(SchedEntityMap_t & sched_map,
-			bbque::SystemView & sv,
+			bbque::System & sv,
 			AppPrio_t prio,
 			int cl_id);
 

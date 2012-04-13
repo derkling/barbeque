@@ -18,7 +18,7 @@
 #ifndef BBQUE_SCHEDULER_POLICY_H_
 #define BBQUE_SCHEDULER_POLICY_H_
 
-#include "bbque/system_view.h"
+#include "bbque/system.h"
 #include "bbque/app/application_conf.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resources.h"
@@ -138,12 +138,12 @@ public:
 	/**
 	 * @brief Schedule a new set of applciation on available resources.
 	 *
-	 * @param system a reference to the system view which exposes information
-	 * related to both resources and applications.
+	 * @param system a reference to the system interfaces for retrieving
+	 * information related to both resources and applications.
 	 * @param rvt a token representing the view on resource allocation, if
 	 * the scheduling has been successfull.
 	 */
-	virtual ExitCode_t Schedule(bbque::SystemView & system,
+	virtual ExitCode_t Schedule(bbque::System & system,
 			bbque::res::RViewToken_t &rvt) = 0;
 
 };

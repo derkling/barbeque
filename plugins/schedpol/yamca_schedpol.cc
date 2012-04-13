@@ -109,7 +109,7 @@ char const * YamcaSchedPol::Name() {
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::Schedule(
-		bbque::SystemView & sv, RViewToken_t & rav) {
+		bbque::System & sv, RViewToken_t & rav) {
 	ExitCode_t result;
 
 	logger->Debug(
@@ -181,7 +181,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
-		bbque::SystemView & sv,
+		bbque::System & sv,
 		AppPrio_t prio) {
 	ExitCode_t result;
 
@@ -233,7 +233,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::SchedulePrioQueue(
 
 SchedulerPolicyIF::ExitCode_t YamcaSchedPol::OrderSchedEntity(
 		SchedEntityMap_t & sched_map,
-		bbque::SystemView & sv,
+		bbque::System & sv,
 		AppPrio_t prio,
 		int cl_id) {
 	AppsUidMapIt app_it;

@@ -66,7 +66,7 @@ public:
 	char const * Name();
 
 	SchedulerPolicyIF::ExitCode_t
-		Schedule(bbque::SystemView & sv, RViewToken_t & rav);
+		Schedule(bbque::System & sv, RViewToken_t & rav);
 
 private:
 

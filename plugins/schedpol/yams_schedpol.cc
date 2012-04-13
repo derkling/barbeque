@@ -259,12 +259,12 @@ void YamsSchedPol::NormalizeMCTWeights() {
 }
 
 SchedulerPolicyIF::ExitCode_t
-YamsSchedPol::Schedule(SystemView & sview, RViewToken_t & rav) {
+YamsSchedPol::Schedule(System & sys_if, RViewToken_t & rav) {
 	ExitCode_t result;
 	logger->Debug("@@@@@@@@@@@@@@@@ Scheduling policy starting @@@@@@@@@@@@");
 
-	// Save a poiner to the SystemView instance;
-	sv = &sview;
+	// Save a poiner to the System interface instance;
+	sv = &sys_if;
 
 	// Get a resources view from Resource Accounter
 	result = Init();

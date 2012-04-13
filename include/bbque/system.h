@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_SYSTEM_VIEW_H_
-#define BBQUE_SYSTEM_VIEW_H_
+#ifndef BBQUE_SYSTEM_H_
+#define BBQUE_SYSTEM_H_
 
 #include "bbque/application_manager.h"
 #include "bbque/resource_accounter.h"
@@ -38,15 +38,15 @@ namespace bbque {
  * simplified set of methods for making queries upon applications and
  * resources status.
  */
-class SystemView {
+class System {
 
 public:
 
 	/**
 	 * @brief Get the SystemVIew instance
 	 */
-	static SystemView & GetInstance() {
-		static SystemView instance;
+	static System & GetInstance() {
+		static System instance;
 		return instance;
 	}
 
@@ -259,7 +259,7 @@ private:
 	ResourceAccounterConfIF & ra;
 
 	/** Constructor */
-	SystemView() :
+	System() :
 		am(ApplicationManager::GetInstance()),
 		ra(ResourceAccounter::GetInstance()) {
 	}
@@ -268,4 +268,4 @@ private:
 
 } // namespace bbque
 
-#endif  // BBQUE_SYSTEM_VIEW_H_
+#endif  // BBQUE_SYSTEM_H_

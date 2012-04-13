@@ -93,7 +93,7 @@ public:
 	/**
 	 * @see SchedulerPolicyIF
 	 */
-	ExitCode_t Schedule(SystemView & sview, RViewToken_t & rav);
+	ExitCode_t Schedule(System & sys_if, RViewToken_t & rav);
 
 private:
 
@@ -173,7 +173,7 @@ private:
 	LoggerIF *logger;
 
 	/** System view instance */
-	SystemView * sv;
+	System * sv;
 
 	/** Token for accessing a resources view */
 	RViewToken_t vtok;

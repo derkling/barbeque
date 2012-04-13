@@ -99,7 +99,7 @@ char const *SasbSyncPol::Name() {
 
 
 ApplicationStatusIF::SyncState_t SasbSyncPol::step1(
-			bbque::SystemView & sv) {
+			bbque::System & sv) {
 
 	logger->Debug("STEP 1.0: Running => Blocked");
 	if (sv.HasApplications(ApplicationStatusIF::BLOCKED))
@@ -111,7 +111,7 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step1(
 }
 
 ApplicationStatusIF::SyncState_t SasbSyncPol::step2(
-			bbque::SystemView & sv) {
+			bbque::System & sv) {
 	ApplicationStatusIF::SyncState_t syncState;
 
 	switch(status) {
@@ -146,7 +146,7 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step2(
 
 
 ApplicationStatusIF::SyncState_t SasbSyncPol::step3(
-			bbque::SystemView & sv) {
+			bbque::System & sv) {
 	ApplicationStatusIF::SyncState_t syncState;
 
 	switch(status) {
@@ -180,7 +180,7 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step3(
 }
 
 ApplicationStatusIF::SyncState_t SasbSyncPol::step4(
-			bbque::SystemView & sv) {
+			bbque::System & sv) {
 
 	logger->Debug("STEP 4.0: Ready   => Running");
 	if (sv.HasApplications(ApplicationStatusIF::STARTING))
@@ -192,7 +192,7 @@ ApplicationStatusIF::SyncState_t SasbSyncPol::step4(
 }
 
 ApplicationStatusIF::SyncState_t SasbSyncPol::GetApplicationsQueue(
-			bbque::SystemView & sv, bool restart) {
+			bbque::System & sv, bool restart) {
 	static ApplicationStatusIF::SyncState_t servedSyncState;
 	ApplicationStatusIF::SyncState_t syncState;
 

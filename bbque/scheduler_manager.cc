@@ -20,7 +20,7 @@
 #include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"
 #include "bbque/modules_factory.h"
-#include "bbque/system_view.h"
+#include "bbque/system.h"
 
 #include "bbque/utils/utility.h"
 
@@ -154,7 +154,7 @@ SchedulerManager::CollectStats() {
 SchedulerManager::ExitCode_t
 SchedulerManager::Schedule() {
 	ResourceAccounter &ra = ResourceAccounter::GetInstance();
-	SystemView &sv = SystemView::GetInstance();
+	System &sv = System::GetInstance();
 	SchedulerPolicyIF::ExitCode result;
 	RViewToken_t svt;
 

@@ -20,7 +20,7 @@
 
 #include "bbque/application_manager.h"
 #include "bbque/app/application.h"
-#include "bbque/system_view.h"
+#include "bbque/system.h"
 
 #define SYNCHRONIZATION_POLICY_NAMESPACE "bq.ym.sp"
 
@@ -76,8 +76,8 @@ public:
 	 * selected applications: those returned by this call.  Moreover, for each
 	 * applicaiton returne, a condition is checked using the DoSync method.
 	 *
-	 * @param system a reference to the system view which exposes information
-	 * related to both resources and applications.
+	 * @param system a reference to the system interfaces for retrieving
+	 * information related to both resources and applications.
 	 * @param restart set true to reset the synchroniztion policy internal
 	 * state machine, thus requesting to restart from scratch the synchronization
 	 * of all the applications.
@@ -88,7 +88,7 @@ public:
 	 * @see DoSync
 	 */
 	virtual ApplicationStatusIF::SyncState_t GetApplicationsQueue(
-			bbque::SystemView & system, bool restart = false) = 0;
+			bbque::System & system, bool restart = false) = 0;
 
 	/**
 	 * @brief Check if the application should be synched

@@ -18,7 +18,7 @@
 #include "random_schedpol.h"
 
 #include "bbque/modules_factory.h"
-#include "bbque/system_view.h"
+#include "bbque/system.h"
 #include "bbque/app/application.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
@@ -115,7 +115,7 @@ void RandomSchedPol::ScheduleApp(AppCPtr_t papp) {
 
 
 SchedulerPolicyIF::ExitCode_t
-RandomSchedPol::Schedule(bbque::SystemView & sv, RViewToken_t &rav) {
+RandomSchedPol::Schedule(bbque::System & sv, RViewToken_t &rav) {
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	ResourceAccounter::ExitCode_t viewResult;
 	AppsUidMapIt app_it;

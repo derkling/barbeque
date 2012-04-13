@@ -66,7 +66,7 @@ public:
 	char const * Name();
 
 	ApplicationStatusIF::SyncState_t GetApplicationsQueue(
-			bbque::SystemView & system, bool restart = false);
+			bbque::System & system, bool restart = false);
 
 	bool DoSync(AppPtr_t papp);
 
@@ -131,13 +131,13 @@ private:
 	 */
 	SasbSyncPol();
 
-	ApplicationStatusIF::SyncState_t step1(bbque::SystemView & system);
+	ApplicationStatusIF::SyncState_t step1(bbque::System & system);
 
-	ApplicationStatusIF::SyncState_t step2(bbque::SystemView & system);
+	ApplicationStatusIF::SyncState_t step2(bbque::System & system);
 
-	ApplicationStatusIF::SyncState_t step3(bbque::SystemView & system);
+	ApplicationStatusIF::SyncState_t step3(bbque::System & system);
 
-	ApplicationStatusIF::SyncState_t step4(bbque::SystemView & system);
+	ApplicationStatusIF::SyncState_t step4(bbque::System & system);
 
 };
 
