@@ -41,6 +41,7 @@ set_property (TARGET bbque_monitors PROPERTY
 
 set_property (TARGET bbque_monitors PROPERTY PUBLIC_HEADER
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/monitor.h
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/goal_info.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/generic_window.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/time_monitor.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/time_window.h
