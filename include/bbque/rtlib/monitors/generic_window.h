@@ -524,7 +524,7 @@ void GenericWindow<dataType>::setCapacity(uint16_t windowSize) {
 
 template <typename dataType>
 inline void GenericWindow <dataType>::resetResultsWindow() {
-	resultsWindowSize = windowBuffer.capacity;
+	resultsWindowSize = windowBuffer.capacity();
 }
 
 /*******************************************************************************
