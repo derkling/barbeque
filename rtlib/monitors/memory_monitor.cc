@@ -19,15 +19,18 @@
 
 #include "bbque/rtlib/monitors/memory_monitor.h"
 
-uint16_t MemoryMonitor::newGoal(uint32_t goal) {
-	return Monitor::newGoal(DataFunction::Average,
+uint16_t MemoryMonitor::newGoal(std::string metricName, uint32_t goal) {
+	return Monitor::newGoal(metricName,
+				DataFunction::Average,
 				ComparisonFunction::LessOrEqual,
 				goal,
 				defaultWindowSize);
 }
 
-uint16_t MemoryMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
-	return Monitor::newGoal(DataFunction::Average,
+uint16_t MemoryMonitor::newGoal(std::string metricName, uint32_t goal,
+				uint16_t windowSize) {
+	return Monitor::newGoal(metricName,
+				DataFunction::Average,
 				ComparisonFunction::LessOrEqual,
 				goal,
 				windowSize);

@@ -34,18 +34,21 @@ public:
 	 * @brief Creates a new monitor with a window containing an history of
 	 * previous values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param goal Value of goal required
 	 */
-	uint16_t newGoal(uint32_t goal);
+	uint16_t newGoal(std::string metricName, uint32_t goal);
 
 	/**
 	 * @brief Creates a new monitor with a window containing an history of
 	 * previous values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param goal Value of goal required
 	 * @param windowSize Number of elements in the window of values
 	 */
-	uint16_t newGoal(uint32_t goal, uint16_t windowSize);
+	uint16_t newGoal(std::string metricName, uint32_t goal,
+			 uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Extracts current memory usage

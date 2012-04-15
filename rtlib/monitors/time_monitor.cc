@@ -23,7 +23,8 @@ using std::chrono::duration_cast;
 using std::chrono::duration;
 typedef std::chrono::monotonic_clock chr_mc;
 
-uint16_t TimeMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
+uint16_t TimeMonitor::newGoal(std::string metricName, uint32_t goal,
+			      uint16_t windowSize) {
 	TimeWindow::Target target(DataFunction::Average,
 			ComparisonFunction::LessOrEqual,
 			goal);
@@ -31,10 +32,11 @@ uint16_t TimeMonitor::newGoal(uint32_t goal, uint16_t windowSize) {
 	TimeWindow::TargetsPtr targets (new TimeWindow::Targets());
 	targets->push_back(target);
 
-	return TimeMonitor::newGoal(targets, windowSize);
+	return TimeMonitor::newGoal(metricName, targets, windowSize);
 }
 
-uint16_t TimeMonitor::newGoal(DataFunction fType,
+uint16_t TimeMonitor::newGoal(std::string metricName,
+		DataFunction fType,
 		ComparisonFunction cType,
 		uint32_t goal,
 		uint16_t windowSize) {
@@ -42,13 +44,14 @@ uint16_t TimeMonitor::newGoal(DataFunction fType,
 	TimeWindow::TargetsPtr targets (new TimeWindow::Targets());
 	targets->push_back(target);
 
-	return TimeMonitor::newGoal(targets, windowSize);
+	return TimeMonitor::newGoal(metricName, targets, windowSize);
 }
 
-uint16_t TimeMonitor::newGoal(TimeWindow::TargetsPtr targets,
+uint16_t TimeMonitor::newGoal(std::string metricName,
+		TimeWindow::TargetsPtr targets,
 		uint16_t windowSize) {
 
-	TimeWindow * tWindow = new TimeWindow(targets, windowSize);
+	TimeWindow * tWindow = new TimeWindow(metricName, targets, windowSize);
 
 	tWindow->started = false;
 

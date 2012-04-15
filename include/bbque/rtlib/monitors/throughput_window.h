@@ -39,9 +39,12 @@ public:
 	/**
 	 * @brief Initializes internal variables
 	 */
-	ThroughputWindow(TargetsPtr targets,
+	ThroughputWindow(std::string metricName,
+			 TargetsPtr targets,
 			 uint16_t windowSize = defaultWindowSize):
-				GenericWindow<double>(targets, windowSize) {
+				GenericWindow<double>(metricName,
+						      targets,
+						      windowSize) {
 	}
 
 	/**

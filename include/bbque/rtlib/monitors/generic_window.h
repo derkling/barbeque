@@ -167,8 +167,10 @@ public:
 	/**
 	 * @brief Initializes internal variables
 	 */
-	GenericWindow(TargetsPtr targets,
+	GenericWindow(std::string metricName,
+		      TargetsPtr targets,
 		      uint16_t windowSize = defaultWindowSize) :
+		metricName(metricName),
 		goalTargets(targets) {
 			setCapacity(windowSize);
 	}
@@ -272,6 +274,11 @@ protected:
 	 * @brief Buffer for the window of values
 	 */
 	boost::circular_buffer<dataType> windowBuffer;
+
+	/**
+	 * Name of the metric associated to the goal
+	 */
+	std::string metricName;
 
 	/**
 	 * List of targets that need to be satisfied to achieve the goal

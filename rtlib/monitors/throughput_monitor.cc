@@ -22,17 +22,19 @@ using std::chrono::duration_cast;
 using std::chrono::duration;
 typedef std::chrono::monotonic_clock chr_mc;
 
-uint16_t ThroughputMonitor::newGoal(double goal, uint16_t windowSize) {
+uint16_t ThroughputMonitor::newGoal(std::string metricName, double goal,
+				    uint16_t windowSize) {
 	ThroughputWindow::Target target(DataFunction::Average,
 			ComparisonFunction::GreaterOrEqual,
 			goal);
 	ThroughputWindow::TargetsPtr targets (new ThroughputWindow::Targets());
 	targets->push_back(target);
 
-	return ThroughputMonitor::newGoal(targets, windowSize);
+	return ThroughputMonitor::newGoal(metricName, targets, windowSize);
 }
 
-uint16_t ThroughputMonitor::newGoal(DataFunction fType,
+uint16_t ThroughputMonitor::newGoal(std::string metricName,
+		DataFunction fType,
 		ComparisonFunction cType,
 		double goal,
 		uint16_t windowSize) {
@@ -40,12 +42,15 @@ uint16_t ThroughputMonitor::newGoal(DataFunction fType,
 	ThroughputWindow::TargetsPtr targets (new ThroughputWindow::Targets());
 	targets->push_back(target);
 
-	return ThroughputMonitor::newGoal(targets, windowSize);
+	return ThroughputMonitor::newGoal(metricName, targets, windowSize);
 }
 
-uint16_t ThroughputMonitor::newGoal(ThroughputWindow::TargetsPtr targets,
+uint16_t ThroughputMonitor::newGoal(std::string metricName,
+		ThroughputWindow::TargetsPtr targets,
 		uint16_t windowSize) {
-	ThroughputWindow * tWindow = new ThroughputWindow(targets, windowSize);
+	ThroughputWindow * tWindow = new ThroughputWindow(metricName,
+							  targets,
+							  windowSize);
 
 	tWindow->started = false;
 

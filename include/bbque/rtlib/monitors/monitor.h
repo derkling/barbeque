@@ -46,12 +46,14 @@ public:
 	 * @brief Creates a new monitor with a window keeping track of old
 	 * values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param goal Required goal value
 	 * @param fType DataFunction to use for the evaluation of the goal
 	 * @param cType ComparisonFunction to use for the evaluation of the goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	virtual uint16_t newGoal(DataFunction fType,
+	virtual uint16_t newGoal(std::string metricName,
+				 DataFunction fType,
 				 ComparisonFunction cType,
 				 dataType goal,
 				 uint16_t windowSize = defaultWindowSize);
@@ -59,10 +61,12 @@ public:
 	/**
 	 * @brief Creates a new monitor with a window keeping track of old values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param targets List of targets for the current goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	virtual uint16_t newGoal(typename GenericWindow<dataType>::TargetsPtr targets,
+	virtual uint16_t newGoal(std::string metricName,
+				 typename GenericWindow<dataType>::TargetsPtr targets,
 				 uint16_t windowSize = defaultWindowSize);
 
 	/**
@@ -187,7 +191,8 @@ Monitor <dataType>::~Monitor() {
 }
 
 template <typename dataType>
-inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
+inline uint16_t Monitor <dataType>::newGoal(std::string metricName,
+					    DataFunction fType,
 					    ComparisonFunction cType,
 					    dataType goal,
 					    uint16_t windowSize) {
@@ -196,15 +201,15 @@ inline uint16_t Monitor <dataType>::newGoal(DataFunction fType,
 			new typename GenericWindow<dataType>::Targets());
 	targets->push_back(target);
 
-	return Monitor::newGoal(targets, windowSize);
+	return Monitor::newGoal(metricName, targets, windowSize);
 }
 
 template <typename dataType>
-inline uint16_t Monitor <dataType>::newGoal(
+inline uint16_t Monitor <dataType>::newGoal(std::string metricName,
 		typename GenericWindow<dataType>::TargetsPtr targets,
 		uint16_t windowSize) {
 	GenericWindow<dataType>* gWindow =
-			new GenericWindow<dataType>(targets, windowSize);
+		new GenericWindow<dataType>(metricName, targets, windowSize);
 
 	uint16_t id = getUniqueId();
 	goalList[id] = gWindow;

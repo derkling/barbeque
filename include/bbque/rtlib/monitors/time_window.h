@@ -38,9 +38,12 @@ public:
 	/**
 	 * @brief Initializes internal variables
 	 */
-	TimeWindow(TargetsPtr targets,
+	TimeWindow(std::string metricName,
+		   TargetsPtr targets,
 		   uint16_t windowSize = defaultWindowSize) :
-			   GenericWindow<uint32_t>(targets, windowSize) {
+			   GenericWindow<uint32_t>(metricName,
+						   targets,
+						   windowSize) {
 	}
 
 	/**

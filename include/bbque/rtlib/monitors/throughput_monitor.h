@@ -47,22 +47,26 @@ public:
 	 * @brief Creates a new monitor with a window containing an history of
 	 * previous values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param goal Value of goal required
 	 * @param windowSize Number of elements in the window of values
 	 */
-	uint16_t newGoal(double goal, uint16_t windowSize = defaultWindowSize);
+	uint16_t newGoal(std::string metricName, double goal,
+			 uint16_t windowSize = defaultWindowSize);
 
 	/**
 	 * @brief Creates a new monitor with a window containing an history of
 	 * previous values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param goal Value of goal required
 	 * @param fType Selects the DataFunction for the evaluation of goal
-	 * @param cType Selects the ComparisionFunction for the evaluation of
+	 * @param cType Selects the ComparisonFunction for the evaluation of
 	 * goal
 	 * @param windowSize Number of elements in window of values
 	 */
-	uint16_t newGoal(DataFunction fType,
+	uint16_t newGoal(std::string metricName,
+			 DataFunction fType,
 			 ComparisonFunction cType,
 			 double goal,
 			 uint16_t windowSize = defaultWindowSize);
@@ -71,10 +75,12 @@ public:
 	 * @brief Creates a new monitor with a window keeping track of previous
 	 * values
 	 *
+	 * @param metricName Name of the metric associated to the goal
 	 * @param targets List of targets for the current goal
 	 * @param windowSize Number of elements in the window of values
 	 */
-	uint16_t newGoal(ThroughputWindow::TargetsPtr targets,
+	uint16_t newGoal(std::string metricName,
+			 ThroughputWindow::TargetsPtr targets,
 			 uint16_t windowSize = defaultWindowSize);
 
 	/**
