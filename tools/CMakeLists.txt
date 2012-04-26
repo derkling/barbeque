@@ -42,3 +42,15 @@ install(PROGRAMS "${PROJECT_SOURCE_DIR}/tools/bbqueOpListBuilder.awk"
 	DESTINATION ${BBQUE_PATH_BBQ}
 	COMPONENT BarbequeUTILS
 	RENAME bbque-oplb)
+
+#----- Deploy the BBQ Metrics Plotting scripts
+configure_file (
+	"${PROJECT_SOURCE_DIR}/tools/bbqueLogParser.awk.in"
+	"${PROJECT_BINARY_DIR}/tools/bbqueLogParser.awk"
+	@ONLY
+)
+
+install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueLogParser.awk"
+	DESTINATION ${BBQUE_PATH_BBQ}
+	COMPONENT BarbequeUTILS
+	RENAME bbque-logparser)

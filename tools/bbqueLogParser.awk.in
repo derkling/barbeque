@@ -1,0 +1,67 @@
+#!/usr/bin/awk -f
+
+
+###############################################################################
+# Scheduler Metrics
+###############################################################################
+#
+# Log format:
+#
+# ~~~~~~~~~~~~~~~~~~~  PROFILING START  ~~~~~~~~~~~~~~~~~~~~~~~
+# ========================================================
+# |      |  Apps Values  |  AWMs Values  | WLMix | Fness |
+# | Prio |  Avg  |  Var  |  Avg  |  Var  |   Idx |   Idx |
+# |------+-------+-------+-------+-------+-------+-------+
+# |    3 | 0.824 | 0.000 | 0.444 | 0.000 | 1.000 | 1.000 |
+# ========================================================
+# Prof Time:      52.440[us]
+#
+
+BEGIN {
+	FS=":"
+	parse_metrics = 0;
+}
+
+/=====/ {
+	FS=":"
+	if (parse_metrics) {
+		parse_metrics = 0;
+		print metrics_awm;
+		print metrics_app;
+		print metrics_wlm;
+		print metrics_fns;
+	}
+	next;
+}
+
+/ PROFILING START / {
+	#print "Match [ PROFILE START ] @ " $0
+	parse_metrics = 1;
+	# Discard 4 rows of table header
+	for (i=0; i<4; ++i)
+		getline;
+	# Set the Filed Separator to "|"
+	FS="|"
+	metrics_awm = "PROF_AWMV: ";
+	metrics_app = "PROF_APPV: ";
+	metrics_wlm = "PROF_WLMI: ";
+	metrics_fns = "PROF_FNSI: ";
+	next;
+}
+
+function metricsParser() {
+	#print "Metrics: " $0 "["$2", "$3", "$4"]";
+	#printf "Prio%02d AppsAvg %.4f AppsVar %.4f AWMsAvg %.4f AWMsVar %.4f WLM %.4f FNS %.4f\n", $2, $3, $4, $5, $6, $7, $8
+	#printf "Prio%02d AppsAvg %.4f AWMsAvg %.4f WLM %.4f FNS %.4f\n", $2, $3, $5, $7, $8
+	metrics_awm=sprintf("%s Prio_%02d %.4f", metrics_awm, $2, $3);
+	metrics_app=sprintf("%s Prio_%02d %.4f", metrics_app, $2, $5);
+	metrics_wlm=sprintf("%s Prio_%02d %.4f", metrics_wlm, $2, $7);
+	metrics_fns=sprintf("%s Prio_%02d %.4f", metrics_fns, $2, $8);
+	#print "Metrics: " metrics_awm
+}
+
+{
+	if (parse_metrics) {
+		metricsParser();
+	}
+}
