@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Source the BOSP Shell configuration
+source @CMAKE_INSTALL_PREFIX@/etc/bbque/bosp_init.env
+
+# CONSOLE CONFIGURATION
+BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
+BBQUE_LOGFILE="${BBQUE_LOGFILE:-$BBQUE_SYSROOT/var/bbque/bbque.log}"
+
+BBQUE_GNUPLOT_PARAMS="--dataid --autolegend --stream --xlen 50 -ymin 0 -ymax 1.3 --lines"
+
+BBQUE_METRICS_AWM="$BBQUE_SYSROOT/var/bbque/metrics_awm.fifo"
+BBQUE_METRICS_APP="$BBQUE_SYSROOT/var/bbque/metrics_app.fifo"
+BBQUE_METRICS_WLM="$BBQUE_SYSROOT/var/bbque/metrics_wlm.fifo"
+BBQUE_METRICS_FNS="$BBQUE_SYSROOT/var/bbque/metrics_fns.fifo"
+
+# Initialize a Metrics plotter and attach it to its data source
+# Params:
+# $1 - The Data source FIFO
+# $2 - The Graph Title
+function setup_metric_plot {
+	mkfifo $1 >/dev/null 2>&1
+	cat $1 | grep --line-buffered "$2" | \
+		stdbuf -oL tee $BBQUE_SYSROOT/var/bbque/$2.dat | \
+		$BBQUE_SYSROOT/bin/feedgnuplot \
+		--lines --points \
+		--nodomain --dataid \
+		--xlabel "Scheduling Events" \
+		--ylabel "$2" \
+		--title "$3" \
+		--autolegend \
+		--stream --xlen 40 \
+		--ymin 0 --ymax 1.2 \
+		--geometry $4 &
+}
+
+#
+#function metric_dispatch {
+#	stdbuf -oL tee $1
+##	stdbuf -oL tail -f $1 | $BBQUE_SYSROOT/bin/feedgnuplot --title "$2" &
+#	#stdbuf -oL grep "$1" > $2
+#}
+
+# Startup all the metrics plotter
+setup_metric_plot $BBQUE_METRICS_AWM "PROF_AWMV" \
+	"AWMs Value (per priority class)" 640x313+624+18
+setup_metric_plot $BBQUE_METRICS_APP "PROF_APPV" \
+	"APPs Value (per priority class)" 640x313--9+18
+setup_metric_plot $BBQUE_METRICS_FNS "PROF_FNSI" \
+	"Fairness Index (per priority class)" 640x313+624+361
+setup_metric_plot $BBQUE_METRICS_WLM "PROF_WLMI" \
+	"Workload Mix Index (per priority class)" 640x313--9+361
+sleep 2
+
+touch $BBQUE_LOGFILE >/dev/null 2>&1
+tail -f $BBQUE_LOGFILE | stdbuf -oL $BBQUE_SYSROOT/sbin/bbque-logparser | \
+	stdbuf -oL tee \
+	$BBQUE_METRICS_AWM \
+	$BBQUE_METRICS_APP \
+	$BBQUE_METRICS_WLM \
+	> $BBQUE_METRICS_FNS

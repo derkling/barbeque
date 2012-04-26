@@ -49,8 +49,17 @@ configure_file (
 	"${PROJECT_BINARY_DIR}/tools/bbqueLogParser.awk"
 	@ONLY
 )
+configure_file (
+	"${PROJECT_SOURCE_DIR}/tools/bbqueLogPlots.sh.in"
+	"${PROJECT_BINARY_DIR}/tools/bbqueLogPlots.sh"
+	@ONLY
+)
 
 install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueLogParser.awk"
 	DESTINATION ${BBQUE_PATH_BBQ}
 	COMPONENT BarbequeUTILS
 	RENAME bbque-logparser)
+install(PROGRAMS "${PROJECT_BINARY_DIR}/tools/bbqueLogPlots.sh"
+	DESTINATION ${BBQUE_PATH_BBQ}
+	COMPONENT BarbequeUTILS
+	RENAME bbque-logplots)
