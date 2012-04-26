@@ -52,6 +52,15 @@ function setup_value_plot {
 		--geometry $4 &
 }
 
+function cleanup {
+	kill $(jobs -p)
+	killall bbque-logparser
+	killall feedgnuplot
+}
+
+# Clean-up all background threads on exit
+trap cleanup EXIT
+
 #
 #function metric_dispatch {
 #	stdbuf -oL tee $1
@@ -83,4 +92,10 @@ tail -f $BBQUE_LOGFILE | stdbuf -oL $BBQUE_SYSROOT/sbin/bbque-logparser | \
 	$BBQUE_METRICS_AWM \
 	$BBQUE_METRICS_APP \
 	$BBQUE_METRICS_WLM \
-	> $BBQUE_METRICS_FNS
+	> $BBQUE_METRICS_FNS &
+
+# This is required to properly capture the trap previously defined
+while [ 1 ]; do
+	sleep 60
+	read KEY
+done
