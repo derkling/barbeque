@@ -247,3 +247,8 @@ aterm +sb -cr black -fn $FONT -geometry 74x41--8+363 \
 aterm +sb -fn $FONT -geometry 74x20--7-30 -title "CPUs usages" \
 	-e htop &
 
+################################################################################
+#     Center Panel
+################################################################################
+
+$BBQUE_SYSROOT/sbin/bbque-logplots >/dev/null 2>&1 &
