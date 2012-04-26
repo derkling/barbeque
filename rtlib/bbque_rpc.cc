@@ -627,6 +627,10 @@ RTLIB_ExitCode_t BbqueRPC::GetAssignedWorkingMode(
 
 	if (isSyncMode(prec) && !isAwmValid(prec)) {
 		DB(fprintf(stderr, FMT_DBG("SYNC Pending\n")));
+		// Update AWM statistics
+		// This is required to save the sync_time of the last
+		// completed cycle, thus having a correct cycles count
+		SyncTimeEstimation(prec);
 		return RTLIB_EXC_SYNC_MODE;
 	}
 
