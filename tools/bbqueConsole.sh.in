@@ -252,3 +252,9 @@ aterm +sb -fn $FONT -geometry 74x20--7-30 -title "CPUs usages" \
 ################################################################################
 
 $BBQUE_SYSROOT/sbin/bbque-logplots >/dev/null 2>&1 &
+
+jobs -p > $BBQUE_SYSROOT/var/bbque/bbque-console.pids
+echo
+echo "BBQ Console started!"
+echo "Use \"bbque-console-stop\" to terminate it once done"
+echo
