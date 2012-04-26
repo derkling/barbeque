@@ -83,7 +83,7 @@ inline pid_t gettid() {
 	return syscall(SYS_gettid);
 }
 
-#define BBQUE_MODULE_NAME(STR) "bbque_" STR
+#define BBQUE_MODULE_NAME(STR) "bq." STR
 
 /** The High-Resolution timer exported by either the Barbeque and the RTLib */
 extern bbque::utils::Timer bbque_tmr;
