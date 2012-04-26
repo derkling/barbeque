@@ -19,7 +19,7 @@ STEST=${STEST:-$BBQUE_SYSROOT/var/bbque/BbqStressTest.sh}
 
 cat > $STEST <<EOF
 #!/bin/bash
-$BBQUE_SYSROOT/usr/bin/bbque-testapp -w \$1 -c \$2
+$BBQUE_SYSROOT/usr/bin/bbque-testapp -w \$1 -c \$2 -r \$3
 EOF
 chmod a+x $STEST
 
@@ -33,11 +33,14 @@ for A in `seq 1 $APPS`; do
 	# Get a random activation delay in [1,5] seconds
 	let TDL=$RANDOM%5
 
-	# Report Test progress
-	printf "\aTestApp[%03d]: WL %2d[s], CC %4d (%3d[Hz], %4d[us])... DL %2d[s]...\n" \
-		$A $TWL $CYC $CYF $CYP $TDL
+	# Setup recipe priority
+	let PRIO=$RANDOM%3
+	RCP=`printf "BbqDemoi7_%dB" $PRIO`
 
-	$STEST $TWL $CYC &
+	# Report Test progress
+	printf "\aTestApp[%03d, %s]: WL %2d[s], CC %4d (%3d[Hz], %4d[us])... DL %2d[s]...\n" \
+		$A $RCP $TWL $CYC $CYF $CYP $TDL
+	$STEST $TWL $CYC $RCP &
 
 	sleep $TDL
 done
