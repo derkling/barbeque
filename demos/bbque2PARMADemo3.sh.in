@@ -44,21 +44,31 @@ echo -e "\n\n\E[1m.:: $1\E[0m\n"
 ################################################################################
 
 print_title "Demo introduction"
-echo "TO BE DONE..."
 
-echo "Press a KEY to continue..."
-read KEY
+echo "In this demo, four OpenCV applications are started concurrently. They are"
+echo "multiple instances of the same application code, competing among them on the"
+echo "usage of the available resources, which are represented by a single CPU."
+echo "Each video decoder:"
+echo "- receives a faire amount of 25% of CPU time."
+echo "- run a QoE run-time manager policy which try to keep an actual 23 [FPS] rate."
+echo
+echo "After a while, a FAST feature extraction function is enabled on one of the"
+echo "video decoders.  This kind of processing, while still matching the frame-rate"
+echo "target, requires more resources, which are asked to the BBQ system-wide"
+echo "resource manager, thus triggering a new resource partitioning among the four"
+echo "(equal priority) video streams.  The result is a scheduling decision where the"
+echo "FAST enabled application is given more resources (i.e. processing time, 50%)"
+echo "which are reclaimed from others applications within the same priority level."
+echo "Moreover, these applications scale down their resolution in order to keep in"
+echo "pace with the frame-rate goal."
+echo
+echo "This demo shows that the Barbeque RTRM is able to:"
+echo "- fairly partition remaining resources on mid-prio applications"
+echo "- re-distribute resources within each prio-level based on application"
+echo "  requirements"
+echo "- efficiently support the development of self-adapting applications which tunes"
+echo "  their parameters (e.g. resolution) to meet their QoE goal"
 
-
-################################################################################
-#     BBQUE Console
-################################################################################
-
-print_title "BBQ Console startup"
-echo "Press a KEY to start the BBQ Console"
-read KEY
-
-bbque-console
 echo "Press a KEY to continue..."
 read KEY
 
@@ -68,9 +78,20 @@ read KEY
 ################################################################################
 
 print_title "System Initialization"
-echo "First of all we need to configure the system for Run-Time Resource Management"
-echo "and start the BBQ daemon."
-echo "NOTE: Starting the daemon requires root priviledges: enter the passowrd when required"
+
+echo "The multi-core machine is initially configured, by the BBQ deamon startup"
+echo "script, to reserve a set of resources for run-time managed applications."
+echo "A 4 cores machine is partitioned into:"
+echo "a. 1 host device, where all generic tasks are moved and will run"
+echo "b. 1 clusters of just 1 CPU, where BBQ managed applications will be"
+echo "   deployed"
+echo "NOTE: Starting the daemon requires root priviledges: enter the passowrd when"
+echo "required"
+echo
+echo "NOTE: This demo requires a PIL with just 1 Cluster with a single PE."
+echo "      Please, _verify_ that the loaded configuration match this requirements"
+echo "      otherwise you are required to update the .pil description and restart"
+echo "      the demo."
 echo
 echo "Press a KEY to start the BBQ Daemon"
 read KEY
@@ -80,42 +101,106 @@ bbque-log $BBQUE_SYSROOT/var/bbque/bbque.log
 echo "Press a KEY to continue..."
 read KEY
 
+################################################################################
+#     BBQUE Console
+################################################################################
+
+print_title "BBQ Console startup"
+
+echo "The BarbequeRTRM framework comes with \"management shell\" which provides not"
+echo "only a set of simplified command to interact with the framework but also a"
+echo "\"monitoring console\" to easily verify resources assignement."
+
+echo "Press a KEY to start the BBQ Console"
+read KEY
+
+bbque-console
+
+echo "The BBQ console consists of 4 main windows, which represent, starting from the"
+echo "top left corner and rotating clockwise:"
+echo "1. a system logger viewer, where daemon startup is reported"
+echo "2. a \"Resources Monitor\" viewer, where availability of HOST and MANAGED"
+echo "   resources is monitored"
+echo "3. a \"Task Monitor\" viewer, which show a list of managed applications and the"
+echo "   resources being assigned to them"
+echo "4. a \"CPU Usages\" viewer, which show the actual usage of available processor"
+
+echo "Press a KEY to continue..."
+read KEY
+
 
 ################################################################################
 #    Priority based resources allocation
 ################################################################################
 
-print_title "DemoA - Priority based resources allocation"
+print_title "DemoA - BBQ Controlled Multi-Video Playback"
 
-echo "Press a KEY to start demo A"
+echo "In this demo, four OpenCV applications are started concurrently. They are"
+echo "multiple instances of the same application code, competing among them on the"
+echo "usage of the available resources, which are represented by a single CPU since"
+echo "other resources are allocated to high-priority applications. Each video decoder"
+echo "receives a faire amount of 25% of CPU time.  Each application run a QoE"
+echo "run-time manager policy which try to keep an actual 23 [FPS] rate."
+echo
+echo "This demo shows that the Barbeque RTRM is able to:"
+echo "- grant resources to high-priority applications"
+echo "- fairly partition remaining resources on mid-prio applications"
+echo "- re-distribute resources within each prio-level based on application"
+echo "  requirements"
+echo "- efficiently support the development of self-adapting applications which tunes"
+echo "  their parameters (e.g. resolution) to meet their QoE goal"
+
+echo "Press a KEY to start the demo"
 read KEY
 
-echo "A.1 - Starting 2 High-Prio apps..."
-aterm +sb -fn $FONT -geometry 102x16+9+18 -title "DemoApp #01 (HP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 1 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
-sleep $BBQUE_START_DELAY
-aterm +sb -fn $FONT -geometry 102x16+9+224 -title "DemoApp #02 (HP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-demoapp -e 2 -t 4 -r BbqDemo${BBQUE_HOST}_0B  &
-echo "Press a KEY to continue..."
-read KEY
-
-
+echo "A.1 - Starting 4 Mid-Prio video player..."
 VIDEO1=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix.avi
 VIDEO2=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/the_phony_war.mp4
 VIDEO3=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/x-plane_10_by_laminar_research.mp4
-echo "A.2 - Starting 4 Mid-Prio apps..."
 aterm +sb -fn $FONT -geometry 102x16+675+18 -title "DemoApp #11 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
-#sleep $BBQUE_START_DELAY
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
 aterm +sb -fn $FONT -geometry 102x16+675+224 -title "DemoApp #12 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
-#sleep $BBQUE_START_DELAY
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
 aterm +sb -fn $FONT -geometry 102x16+675+421 -title "DemoApp #13 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
-#sleep $BBQUE_START_DELAY
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
 aterm +sb -fn $FONT -geometry 102x16+675+618 -title "DemoApp #14 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -i $VIDEO1 &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
 sleep $BBQUE_START_DELAY
+echo "Press a KEY to continue..."
+read KEY
+
+echo "A.2 - Enable FAST effect on one video"
+
+echo "After a while, enable the FAST feature extraction function on one of the"
+echo "video decoders by pressing the 'f' key on its window."
+
+echo "Press a KEY once done"
+read KEY
+
+echo "This kind of processing, while still matching the frame-rate target, requires"
+echo "more resources, which are asked to the BBQ system-wide resource manager, thus"
+echo "triggering a new resource partitioning among the four (equal priority) video"
+echo "streams."
+echo "Check that the result has been a scheduling decision where the FAST enabled"
+echo "application is given more resources (i.e. processing time, 50%) which are"
+echo "reclaimed from others applications within the same priority level.  Moreover,"
+echo "these applications scale down their resolution in order to keep in pace with"
+echo "the frame-rate goal."
+
+echo "A.3 - Disable FAST effect"
+
+echo "Now you are required to disable the previously enabled FAST feature extraction"
+echo "function by pressing the 'q' on the same windows as before."
+
+echo "Press a KEY once done"
+read KEY
+
+echo "Check that the CPU time has been re-distributed back in a fair way to all the"
+echo "running plyers and thus now, all the applications run at the same resolution."
+echo
+echo "You could repeat the experiment as much as you want, than exit all the video"
+echo "players before going on with the demo."
+
 echo "Press a KEY to continue..."
 read KEY
 
