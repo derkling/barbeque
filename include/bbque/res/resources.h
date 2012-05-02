@@ -376,6 +376,8 @@ private:
  */
 class ResourceUsage {
 
+friend class bbque::ResourceAccounter;
+
 public:
 
 	/**
@@ -559,6 +561,7 @@ public:
 		return RU_OK;
 	}
 
+private:
 
 	/** Usage value request */
 	uint64_t value;
