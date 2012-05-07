@@ -1,0 +1,24 @@
+config TEST_PLATFORM_DATA
+  bool "Include test platform data"
+  default n if TARGET_RUNNING
+  default y if TARGET_ANDROID_ARM
+  default y if TARGET_ARM
+  help
+	This options allows to build the BarbequeRTRM in Test Platform Mode.
+	When running in this modality, all the target specific platform control
+	facilities are disabled.
+
+	This could be a convenient way to use BBQ for initial application development
+	and integration without worry about daemon setup or running BBQ as root.
+
+config RTLIB_PERF_SUPPORT
+ bool "Enable Perf support on RTLIB"
+ default y if TARGET_RUNNING
+ default y if TARGET_ARM
+ default n if TARGET_ANDROID_ARM
+ help
+	This option has been added to conditionally
+	compile the Performance Counters code within the RTLib.
+
+	This is useful to port easily the RTLib on platforms not supporting
+	performance counters such as some Android devices with older kernels.
