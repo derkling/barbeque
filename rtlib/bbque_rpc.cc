@@ -1591,7 +1591,7 @@ void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
 		avg_value = mean(pstats->samples);
 		std_value = sqrt(variance(pstats->samples));
 
-		fprintf(stderr, " %18.6f seconds time elapsed", avg_value);
+		fprintf(stderr, " %18.6f cycle time [ms]", avg_value);
 		if (count(pstats->samples) > 1) {
 			fprintf(stderr, "                                        ");
 			PrintNoisePct(std_value, avg_value);
