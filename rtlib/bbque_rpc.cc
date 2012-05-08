@@ -486,7 +486,7 @@ void BbqueRPC::DumpStatsHeader() {
 	fprintf(stderr, STATS_HEADER);
 }
 
-void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
+void BbqueRPC::DumpStatsConsole(pregExCtx_t prec, bool verbose) {
 	AwmStatsMap_t::iterator it;
 	pAwmStats_t pstats;
 	uint8_t awm_id;
@@ -497,6 +497,7 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 	double _avg;
 	double _var;
 
+	// Print RTLib stats for each AWM
 	it = prec->stats.begin();
 	for ( ; it != prec->stats.end(); ++it) {
 		awm_id = (*it).first;
@@ -520,11 +521,11 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 				_cycles, pstats->time_processing,
 				_min, _max, _avg, _var);
 		} else {
-			DB(fprintf(stderr, FMT_DBG("%8s-%d %5d %6d %7d "
+			fprintf(stderr, FMT_DBG("%8s-%d %5d %6d %7d "
 					"(%7.3f,%7.3f)(%7.3f,%7.3f)\n"),
 				prec->name.c_str(), awm_id, pstats->count,
 				_cycles, pstats->time_processing,
-				_min, _max, _avg, _var));
+				_min, _max, _avg, _var);
 		}
 
 	}
@@ -532,7 +533,7 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 	if (!PerfRegisteredEvents(prec) || !verbose)
 		return;
 
-	// Print performance counters for this AWM
+	// Print performance counters for each AWM
 	it = prec->stats.begin();
 	for ( ; it != prec->stats.end(); ++it) {
 		awm_id = (*it).first;
@@ -544,6 +545,19 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 		PerfPrintStats(prec, pstats);
 	}
 
+}
+
+void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
+
+	// Statistics should be dumped only if:
+	// - compiled in DEBUG mode, or
+	// - VERBOSE execution is required
+	// This check allows to avoid metrics computation in case the output
+	// should not be generated.
+	if (DB(false &&) !verbose)
+		return;
+
+	DumpStatsConsole(prec, verbose);
 }
 
 void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {

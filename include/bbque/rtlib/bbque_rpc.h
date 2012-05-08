@@ -590,7 +590,12 @@ private:
 	/**
 	 * @brief Log execution statistics collected so far
 	 */
-	void DumpStats(pregExCtx_t prec, bool verbose = false);
+	inline void DumpStats(pregExCtx_t prec, bool verbose = false);
+
+	/**
+	 * @brief Log execution statistics collected so far (Console format)
+	 */
+	void DumpStatsConsole(pregExCtx_t prec, bool verbose = false);
 
 	/**
 	 * @brief Update sync time [ms] estimation for the currently AWM
