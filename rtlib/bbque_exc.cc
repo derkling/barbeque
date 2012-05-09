@@ -280,6 +280,14 @@ RTLIB_ExitCode_t BbqueEXC::onMonitor() {
 	return RTLIB_OK;
 }
 
+RTLIB_ExitCode_t BbqueEXC::onRelease() {
+
+	DB(fprintf(stderr, FMT_WRN("<< Default release of EXC [%s]  >>\n"),
+				exc_name.c_str()));
+	DB(::usleep(10000));
+
+	return RTLIB_OK;
+}
 
 /*******************************************************************************
  *    Constraints Management
@@ -477,6 +485,16 @@ RTLIB_ExitCode_t BbqueEXC::Monitor() {
 	return result;
 }
 
+RTLIB_ExitCode_t BbqueEXC::Release() {
+	RTLIB_ExitCode_t result;
+
+	DB(fprintf(stderr, FMT_DBG("CL 5. Release EXC [%s]...\n"),
+			exc_name.c_str()));
+
+	result = onRelease();
+	return result;
+}
+
 void BbqueEXC::ControlLoop() {
 	std::unique_lock<std::mutex> ctrl_ul(ctrl_mtx);
 	RTLIB_ExitCode_t result;
@@ -534,6 +552,9 @@ void BbqueEXC::ControlLoop() {
 
 	// Disable the EXC (thus notifying waiters)
 	Disable();
+
+	// Releasing all EXC resources
+	Release();
 
 	// Exit notification
 	rtlib->Notify.Exit(exc_hdl);

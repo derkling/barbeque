@@ -94,6 +94,8 @@ protected:
 
 	virtual RTLIB_ExitCode_t onMonitor();
 
+	virtual RTLIB_ExitCode_t onRelease();
+
 	inline uint32_t Cycles() const {
 		return cycles_count;
 	}
@@ -155,6 +157,8 @@ private:
 	RTLIB_ExitCode_t Run();
 
 	RTLIB_ExitCode_t Monitor();
+
+	RTLIB_ExitCode_t Release();
 
 	void ControlLoop();
 };

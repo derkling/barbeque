@@ -159,6 +159,9 @@ public:
 	void NotifyPostResume(
 		RTLIB_ExecutionContextHandler_t ech);
 
+	void NotifyRelease(
+		RTLIB_ExecutionContextHandler_t ech);
+
 protected:
 
 	typedef struct PerfEventAttr {

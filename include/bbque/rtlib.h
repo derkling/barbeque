@@ -779,6 +779,21 @@ typedef void (*RTLIB_Notify_PreResume)(
 typedef void (*RTLIB_Notify_PostResume)(
 		RTLIB_ExecutionContextHandler_t ech);
 
+
+/**
+ * @brief Release the RTLib notification support
+ * @ingroup rtlib_sec03_plain_perf
+ *
+ * Once an application is going to exit, before to release all its resources,
+ * an application is encouraged to notify the run-time library by calling this
+ * method. This could be used by the RTLib implementation to collect suitable
+ * information and statistics immediately before the application termination.
+ *
+ * @param ech the handler of the EXC to configure
+ */
+typedef void (*RTLIB_Notify_Release)(
+		RTLIB_ExecutionContextHandler_t ech);
+
 /**@}*/
 
 /*******************************************************************************
@@ -866,6 +881,8 @@ struct RTLIB_Services {
 		RTLIB_Notify_PreResume PreResume;
 		/** Post-Resume notifier */
 		RTLIB_Notify_PostResume PostResume;
+		/** Release notifier */
+		RTLIB_Notify_Release Release;
 	} Notify;
 };
 

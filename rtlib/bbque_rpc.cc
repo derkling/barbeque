@@ -1816,6 +1816,12 @@ void BbqueRPC::NotifyPostResume(
 	(void)ech;
 }
 
+void BbqueRPC::NotifyRelease(
+	RTLIB_ExecutionContextHandler_t ech) {
+	DB(fprintf(stderr, FMT_DBG("===> NotifyRelease\n")));
+	(void)ech;
+}
+
 } // namespace rtlib
 
 } // namespace bbque
