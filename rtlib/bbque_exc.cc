@@ -41,7 +41,7 @@ BbqueEXC::BbqueEXC(std::string const & name,
 		RTLIB_Services_t * const rtl) :
 	exc_name(name), rpc_name(recipe), rtlib(rtl), cycles_count(0),
 	registered(false), started(false), enabled(false),
-	suspended(false), done(false) {
+	suspended(false), done(false), terminated(false) {
 
 	RTLIB_ExecutionContextParams_t exc_params = {
 		{RTLIB_VERSION_MAJOR, RTLIB_VERSION_MINOR},
@@ -205,7 +205,7 @@ RTLIB_ExitCode_t BbqueEXC::WaitCompletion() {
 	fprintf(stderr, FMT_INF("Waiting for EXC [%s] control "
 				"loop termination...\n"), exc_name.c_str());
 
-	while (!done)
+	while (!terminated)
 		ctrl_cv.wait(ctrl_ul);
 
 	return RTLIB_OK;
@@ -540,6 +540,10 @@ void BbqueEXC::ControlLoop() {
 
 	DB(fprintf(stderr, FMT_ERR("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));
+
+	//--- Notify the control-thread is TERMIANTED
+	terminated = true;
+	ctrl_cv.notify_all();
 
 }
 

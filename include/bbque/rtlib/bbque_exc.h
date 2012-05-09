@@ -136,6 +136,8 @@ private:
 
 	bool done;
 
+	bool terminated;
+
 	RTLIB_ExitCode_t _Enable();
 
 	bool WaitEnable();
