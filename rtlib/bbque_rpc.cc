@@ -351,7 +351,7 @@ void BbqueRPC::UnregisterAll() {
 		return;
 	}
 
-	// Unregistering all the registered EXCs
+	// Unregisterig all the registered EXCs
 	it = exc_map.begin();
 	for ( ; it != exc_map.end(); ++it) {
 		prec = (*it).second;
@@ -1338,13 +1338,13 @@ void BbqueRPC::PerfPrintNsec(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 	pPerfEventAttr_t ppea = ppes->pattr;
 	double avg = mean(ppes->samples);
 	double total, ratio = 0.0;
-    double msecs = avg / 1e6;
+	double msecs = avg / 1e6;
 
     fprintf(stderr, "%19.6f%s%-25s", msecs, envCsvSep,
 			bu::Perf::EventName(ppea->type, ppea->config));
 
 	if (envCsvOutput)
-        return;
+		return;
 
 	if (PerfEventMatch(ppea, PERF_SW(TASK_CLOCK))) {
 		// Get AWM average running time
@@ -1400,8 +1400,8 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 	fprintf(stderr, fmt, avg, envCsvSep,
 			bu::Perf::EventName(ppea->type, ppea->config));
 
-    if (envCsvOutput)
-        return;
+	if (envCsvOutput)
+		return;
 
 	if (PerfEventMatch(ppea, PERF_HW(INSTRUCTIONS))) {
 
@@ -1592,8 +1592,9 @@ void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
 		DB(fprintf(stderr, " (Ena: %20lu, Run: %10lu) ", avg_enabled, avg_running));
 
 		// Print percentage of counter usage
-		if (avg_enabled != avg_running)
+		if (avg_enabled != avg_running) {
 			fprintf(stderr, " [%5.2f%%]", 100.0 * avg_running / avg_enabled);
+		}
 
 		fputc('\n', stderr);
 	}
