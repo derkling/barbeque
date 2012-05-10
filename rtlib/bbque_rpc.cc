@@ -67,7 +67,8 @@ BbqueRPC::~BbqueRPC(void) {
 	it = exc_map.begin();
 	if (it != exc_map.end()) {
 
-		DumpStatsHeader();
+		if (!envMOSTOutput)
+			DumpStatsHeader();
 		for ( ; it != exc_map.end(); ++it) {
 			prec = (*it).second;
 			DumpStats(prec, true);
@@ -737,6 +738,13 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 	if (DB(false &&) !verbose)
 		return;
 
+	// MOST statistics are dumped just at the end of the execution
+	// (i.e. verbose mode)
+	if (envMOSTOutput && verbose) {
+		DumpStatsMOST(prec);
+		return;
+	}
+
 	DumpStatsConsole(prec, verbose);
 }
 
@@ -1386,6 +1394,8 @@ BbqueRPC::PerfEventAttr_t BbqueRPC::very_very_detailed_events[] = {
 
 };
 
+static const char *_perfCounterName = 0;
+
 BbqueRPC::pPerfEventStats_t BbqueRPC::PerfGetEventStats(pAwmStats_t pstats,
 		perf_type_id type, uint64_t config) {
 	PerfEventStatsMapByConf_t::iterator it;
@@ -1525,7 +1535,10 @@ void BbqueRPC::PerfPrintNsec(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 	double total, ratio = 0.0;
 	double msecs = avg / 1e6;
 
-    fprintf(stderr, "%19.6f%s%-25s", msecs, envCsvSep,
+	if (envMOSTOutput)
+		DUMP_MOST_METRIC("perf", _perfCounterName, msecs, "%.6f");
+	else
+		fprintf(stderr, "%19.6f%s%-25s", msecs, envCsvSep,
 			bu::Perf::EventName(ppea->type, ppea->config));
 
 	if (envCsvOutput)
@@ -1537,7 +1550,11 @@ void BbqueRPC::PerfPrintNsec(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 
 		if (total) {
 			ratio = avg / total;
-			fprintf(stderr, " # %8.3f CPUs utilized          ", ratio);
+
+			if (envMOSTOutput)
+				DUMP_MOST_METRIC("perf", "cpu_utiliz", ratio, "%.3f");
+			else
+				fprintf(stderr, " # %8.3f CPUs utilized          ", ratio);
 			return;
 		}
 	}
@@ -1575,15 +1592,19 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 	// shutdown compiler warnings for kernels < 3.1
 	(void)total2;
 
-	if (envCsvOutput)
-		fmt = "%.0f%s%s";
-	else if (envBigNum)
-		fmt = "%'19.0f%s%-25s";
-	else
-		fmt = "%19.0f%s%-25s";
+	if (envMOSTOutput) {
+		DUMP_MOST_METRIC("perf", _perfCounterName, avg, "%.0f");
+	} else {
+		if (envCsvOutput)
+			fmt = "%.0f%s%s";
+		else if (envBigNum)
+			fmt = "%'19.0f%s%-25s";
+		else
+			fmt = "%19.0f%s%-25s";
 
-	fprintf(stderr, fmt, avg, envCsvSep,
-			bu::Perf::EventName(ppea->type, ppea->config));
+		fprintf(stderr, fmt, avg, envCsvSep,
+				bu::Perf::EventName(ppea->type, ppea->config));
+	}
 
 	if (envCsvOutput)
 		return;
@@ -1599,7 +1620,11 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		if (total)
 			ratio = avg / total;
 
-		fprintf(stderr, " #   %5.2f  insns per cycle        ", ratio);
+		if (envMOSTOutput) {
+			DUMP_MOST_METRIC("perf", "ipc", ratio, "%.2f");
+		} else {
+			fprintf(stderr, " #   %5.2f  insns per cycle        ", ratio);
+		}
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,1,0)
 		// Compute "stalled cycles per instruction"
@@ -1617,13 +1642,17 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 
 		if (total && avg) {
 			ratio = total / avg;
-			fprintf(stderr, "\n%45s#   %5.2f  stalled cycles per insn", " ", ratio);
+			if (envMOSTOutput) {
+				DUMP_MOST_METRIC("perf", "stall_cycles_per_inst", avg, "%.0f");
+			} else {
+				fprintf(stderr, "\n%45s#   %5.2f  stalled cycles per insn", " ", ratio);
+			}
 		}
 #endif
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HW(BRANCH_MISSES))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HW(BRANCH_MISSES))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HW(BRANCH_INSTRUCTIONS));
 		if (!ppes2)
 			return;
@@ -1634,7 +1663,7 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HC(L1DC_RM))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HC(L1DC_RM))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HC(L1DC_RA));
 		if (!ppes2)
 			return;
@@ -1645,7 +1674,7 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HC(L1IC_RM))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HC(L1IC_RM))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HC(L1IC_RA));
 		if (!ppes2)
 			return;
@@ -1656,7 +1685,7 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HC(DTLB_RM))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HC(DTLB_RM))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HC(DTLB_RA));
 		if (!ppes2)
 			return;
@@ -1667,7 +1696,7 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HC(ITLB_RM))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HC(ITLB_RM))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HC(ITLB_RA));
 		if (!ppes2)
 			return;
@@ -1678,7 +1707,7 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HC(LLC_RM))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HC(LLC_RM))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HC(LLC_RA));
 		if (!ppes2)
 			return;
@@ -1689,7 +1718,7 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		return;
 	}
 
-	if (PerfEventMatch(ppea, PERF_HW(CACHE_MISSES))) {
+	if (!envMOSTOutput && PerfEventMatch(ppea, PERF_HW(CACHE_MISSES))) {
 		ppes2 = PerfGetEventStats(pstats, PERF_HW(CACHE_REFERENCES));
 		if (!ppes2)
 			return;
@@ -1713,11 +1742,19 @@ void BbqueRPC::PerfPrintAbs(pAwmStats_t pstats, pPerfEventStats_t ppes) {
 		total = mean(ppes2->samples);
 		if (total) {
 			ratio = 1.0 * avg / total;
-			fprintf(stderr, " # %8.3f GHz                    ", ratio);
+			if (envMOSTOutput) {
+				DUMP_MOST_METRIC("perf", "ghz", ratio, "%.3f");
+			} else {
+				fprintf(stderr, " # %8.3f GHz                    ", ratio);
+			}
 		}
 
 		return;
 	}
+
+	// In MOST output mode, here we return
+	if (envMOSTOutput)
+		return;
 
 	// By default print the frequency of the event in [M/sec]
 	ppes2 = PerfGetEventStats(pstats, PERF_SW(TASK_CLOCK));
@@ -1746,6 +1783,7 @@ bool BbqueRPC::IsNsecCounter(pregExCtx_t prec, int fd) {
 void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
 	PerfEventStatsMap_t::iterator it;
 	pPerfEventStats_t ppes;
+	pPerfEventAttr_t ppea;
 	uint64_t avg_enabled, avg_running;
 	double avg_value, std_value;
 	int fd;
@@ -1754,6 +1792,10 @@ void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
 	for (it = pstats->events_map.begin(); it != pstats->events_map.end(); ++it) {
 		ppes = (*it).second;
 		fd = (*it).first;
+
+		// Keep track of current Performance Counter name
+		ppea = prec->events_map[fd];
+		_perfCounterName = bu::Perf::EventName(ppea->type, ppea->config);
 
 		if (IsNsecCounter(prec, fd))
 			PerfPrintNsec(pstats, ppes);
@@ -1774,6 +1816,16 @@ void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
 		avg_enabled = prec->perf.Enabled(ppes->id, false);
 		avg_running = prec->perf.Running(ppes->id, false);
 
+		// In MOST output mode, always dump counter usage percentage
+		if (envMOSTOutput) {
+			char buff[64];
+			snprintf(buff, 64, "%s_pcu", _perfCounterName);
+			DUMP_MOST_METRIC("perf", buff,
+					(100.0 * avg_running / avg_enabled),
+					"%.2f");
+			continue;
+		}
+
 		DB(fprintf(stderr, " (Ena: %20lu, Run: %10lu) ", avg_enabled, avg_running));
 
 		// Print percentage of counter usage
@@ -1783,6 +1835,10 @@ void BbqueRPC::PerfPrintStats(pregExCtx_t prec, pAwmStats_t pstats) {
 
 		fputc('\n', stderr);
 	}
+
+	// In MOST output mode, no more metrics are dumped
+	if (envMOSTOutput)
+		return;
 
 	if (!envCsvOutput) {
 
@@ -1808,6 +1864,14 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 
 	if (avg)
 		pct = 100.0*total/avg;
+
+	if (envMOSTOutput) {
+		char buff[64];
+		snprintf(buff, 64, "%s_pct", _perfCounterName);
+		DUMP_MOST_METRIC("perf", buff, pct, "%.2f");
+		return;
+	}
+
 
 	if (envCsvOutput) {
 		fprintf(stderr, "%s%.2f%%", envCsvSep, pct);
