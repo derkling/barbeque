@@ -192,6 +192,8 @@ typedef enum RTLIB_ExitCode {
 	RTLIB_EXC_SYNCP_FAILED,
 	/** No more workload to process */
 	RTLIB_EXC_WORKLOAD_NONE,
+	/** Unable to identify the CGRoup path */
+	RTLIB_EXC_CGROUP_NONE,
 
 // NOTE The last entry should not overflow a uint8_t, otherwise some of the RPC
 // channel messages should be updated

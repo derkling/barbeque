@@ -93,6 +93,8 @@ const char *RTLIB_errorStr[] = {
 	"A step of the synchronization protocol has failed",
 	//RTLIB_EXC_WORKLOAD_NONE
 	"No more workload to process",
+	//RTLIB_EXC_CGROUP_NONE
+	"Unable to identify the CGroup path"
 
 };
 

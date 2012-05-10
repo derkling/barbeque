@@ -116,6 +116,10 @@ public:
 			RTLIB_WorkingModeParams_t *wm,
 			RTLIB_SyncType_t st);
 
+	const std::string GetCGroupPath() const {
+		return pathCGroup;
+	}
+
 /*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
@@ -571,6 +575,11 @@ private:
 	typedef std::pair<uint8_t, pregExCtx_t> excMapEntry_t;
 
 	/**
+	 * @brief The path of the application CGroup
+	 */
+	std::string pathCGroup;
+
+	/**
 	 * @brief Get the next available (and unique) Execution Context ID
 	 */
 	uint8_t GetNextExcID();
@@ -589,6 +598,11 @@ private:
 	 * @brief Log the header for statistics collection
 	 */
 	void DumpStatsHeader();
+
+	/**
+	 * @brief Setup the path of the application CGroup
+	 */
+	RTLIB_ExitCode_t SetCGroupPath(pregExCtx_t prec);
 
 	/**
 	 * @brief Log execution statistics collected so far

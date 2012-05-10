@@ -21,6 +21,7 @@
 #include "bbque/app/application.h"
 
 #include <cstdio>
+#include <sys/stat.h>
 
 #define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_RPC  [DBG]", fmt)
 #define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_RPC  [INF]", fmt)
@@ -548,6 +549,82 @@ void BbqueRPC::DumpStatsConsole(pregExCtx_t prec, bool verbose) {
 
 }
 
+RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
+	uint8_t count = 0;
+#define BBQUE_RPC_CGOUPS_PATH_MAX 128
+	char cgMount[BBQUE_RPC_CGOUPS_PATH_MAX];
+	char buff[256];
+	char *pd, *ps;
+	FILE *procfd;
+
+	procfd = ::fopen("/proc/mounts", "r");
+	if (!procfd) {
+		fprintf(stderr, FMT_ERR("Mounts read FAILED (Error %d: %s)\n"),
+					errno, strerror(errno));
+		return RTLIB_EXC_CGROUP_NONE;
+	}
+
+	// Find CGroups mount point
+	cgMount[0] = 0;
+	for (;;) {
+		if (!fgets(buff, 256, procfd))
+			break;
+
+		if (strncmp("bbque_cgroups ", buff, 14))
+			continue;
+
+		// copy mountpoint
+		// NOTE: no spaces are allows on mountpoint
+		ps = buff+14;
+		pd = cgMount;
+		while ((count < BBQUE_RPC_CGOUPS_PATH_MAX-1) && (*ps != ' ')) {
+			*pd = *ps;
+			++pd; ++ps;
+			++count;
+		}
+		cgMount[count] = 0;
+		break;
+
+	}
+
+	if (count == BBQUE_RPC_CGOUPS_PATH_MAX) {
+		fprintf(stderr,
+			FMT_ERR("CGroups mount identification FAILED"
+				"(Error: path longer than %d chars)\n"),
+				BBQUE_RPC_CGOUPS_PATH_MAX-1);
+		return RTLIB_EXC_CGROUP_NONE;
+	}
+
+	if (!cgMount[0]) {
+		fprintf(stderr,
+			FMT_ERR("CGroups mount identification FAILED\n"));
+		return RTLIB_EXC_CGROUP_NONE;
+	}
+
+
+	snprintf(buff, 256, "%s/bbque/%05d:%6s:%02d",
+			cgMount,
+			chTrdPid,
+			prec->name.c_str(),
+			prec->exc_id);
+
+	// Check CGroups access
+	struct stat cgstat;
+	if (stat(buff, &cgstat)) {
+		fprintf(stderr,
+			FMT_ERR("CGroup [%s] access FAILED (Error %d: %s)\n"),
+				buff, errno, strerror(errno));
+		return RTLIB_EXC_CGROUP_NONE;
+	}
+
+	pathCGroup = std::string(buff);
+	DB(fprintf(stderr, FMT_DBG("Application CGroup [%s] FOUND\n"),
+				pathCGroup.c_str()));
+
+	return RTLIB_OK;
+
+}
+
 void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 
 	// Statistics should be dumped only if:
@@ -795,6 +872,12 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	// Processing the required reconfiguration action
 	switch(prec->event) {
 	case RTLIB_EXC_GWM_START:
+		// Keep track of the CGroup path
+		// CGroups are created at the first allocation of resources to this
+		// application, thus we could check for them right after the
+		// first AWM has been assinged.
+		SetCGroupPath(prec);
+		// Here, the missing "break" is not an error ;-)
 	case RTLIB_EXC_GWM_RECONF:
 	case RTLIB_EXC_GWM_MIGREC:
 	case RTLIB_EXC_GWM_MIGRATE:
