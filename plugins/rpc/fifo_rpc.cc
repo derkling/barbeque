@@ -137,7 +137,18 @@ int FifoRPC::Init() {
 		return -4;
 	}
 
-	// Marking channel al already initialized
+	// Ensuring the FIFO is R/W to everyone
+	if (fchmod(rpc_fifo_fd, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH)) {
+		logger->Error("FAILED setting permissions on RPC FIFO [%s] "
+				"(Error %d: %s)",
+				fifo_path.string().c_str(),
+				errno, strerror(errno));
+		rpc_fifo_fd = 0;
+		::unlink(fifo_path.string().c_str());
+		return -5;
+	}
+
+	// Marking channel as already initialized
 	initialized = true;
 
 	logger->Info("FIFO RPC: channel initialization DONE");

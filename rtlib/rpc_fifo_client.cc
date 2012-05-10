@@ -323,6 +323,17 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelSetup() {
 		goto err_open;
 	}
 
+	// Ensuring the FIFO is R/W to everyone
+	if (fchmod(client_fifo_fd, S_IRUSR|S_IWUSR|S_IWGRP|S_IWOTH)) {
+		fprintf(stderr,
+			FMT_ERR("FAILED setting permissions on RPC FIFO [%s] "
+				"(Error %d: %s)"),
+				app_fifo_path.c_str(),
+				errno, strerror(errno));
+		result = RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
+		goto err_open;
+	}
+
 	return RTLIB_OK;
 
 err_open:
