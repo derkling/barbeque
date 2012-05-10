@@ -428,6 +428,12 @@ protected:
 	static int  envDetailedRun;
 	static bool envNoKernel;
 	static bool envCsvOutput;
+	static bool envMOSTOutput;
+#define BBQUE_RTLIB_OPTS_TAG_MAX 6
+	// The array +2 is due to:
+	// - the ending namespace separator ":"
+	// - the string NULL terminator
+	static char envMetricsTag[BBQUE_RTLIB_OPTS_TAG_MAX+2];
 	static bool envBigNum;
 	static const char *envCsvSep;
 

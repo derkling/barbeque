@@ -85,6 +85,8 @@ bool BbqueRPC::envOverheads = false;
 int  BbqueRPC::envDetailedRun = 0;
 bool BbqueRPC::envNoKernel = false;
 bool BbqueRPC::envCsvOutput = false;
+bool BbqueRPC::envMOSTOutput = false;
+char BbqueRPC::envMetricsTag[BBQUE_RTLIB_OPTS_TAG_MAX+2] = "";
 bool BbqueRPC::envBigNum = false;
 const char *BbqueRPC::envCsvSep = " ";
 
@@ -127,6 +129,18 @@ RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
 		case 'K':
 			// Disable Kernel and Hipervisor from collected statistics
 			envNoKernel = true;
+			break;
+		case 'M':
+			// Enabling MOST output
+			envMOSTOutput = true;
+			// Check if a TAG has been specified
+			if (opt[1]) {
+				snprintf(envMetricsTag,
+						BBQUE_RTLIB_OPTS_TAG_MAX,
+						"%s:", opt+1);
+			}
+			fprintf(stderr, "Enabling MOST output [tag: %s]\n",
+					envMetricsTag[0] ? envMetricsTag : "-");
 			break;
 		case 'O':
 			// Collect statistics on RTLIB overheads
