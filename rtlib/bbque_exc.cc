@@ -19,6 +19,8 @@
 
 #include "bbque/utils/utility.h"
 
+#include <sys/prctl.h>
+#include <string.h>
 #include <assert.h>
 
 #ifdef BBQUE_DEBUG
@@ -501,6 +503,11 @@ void BbqueEXC::ControlLoop() {
 
 	assert(rtlib);
 	assert(registered == true);
+
+	// Set the thread name
+	if (unlikely(prctl(PR_SET_NAME, "bq.cloop", 0, 0, 0)))
+		fprintf(stderr, "Set name FAILED! (Error: %s)\n",
+				strerror(errno));
 
 	// Wait for the EXC being STARTED
 	while (!started)

@@ -21,7 +21,9 @@
 #include "bbque/utils/utility.h"
 #include "bbque/config.h"
 
+#include <sys/prctl.h>
 #include <sys/stat.h>
+#include <string.h>
 #include <errno.h>
 #include <fcntl.h>
 
@@ -206,6 +208,12 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 
 void BbqueRPC_FIFO_Client::ChannelTrd() {
 	std::unique_lock<std::mutex> trdStatus_ul(trdStatus_mtx);
+
+	// Set the thread name
+	if (unlikely(prctl(PR_SET_NAME, "bq.fifo", 0, 0, 0)))
+		fprintf(stderr, "Set name FAILED! (Error: %s)\n",
+				strerror(errno));
+
 	// Getting client PID
 	chTrdPid = gettid();
 	DB(fprintf(stderr, FMT_INF("channel thread [PID: %d] CREATED\n"),
