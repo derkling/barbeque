@@ -563,6 +563,67 @@ void BbqueRPC::DumpStatsConsole(pregExCtx_t prec, bool verbose) {
 
 }
 
+static char _metricPrefix[64] = "";
+static inline void _setMetricPrefix(const char *exc_name, uint8_t awm_id) {
+	snprintf(_metricPrefix, 64, "%s:%02d", exc_name, awm_id);
+}
+
+#define DUMP_MOST_METRIC(CLASS, NAME, VALUE, FMT)	\
+	fprintf(stderr, "@%s%s:%s:%s="FMT"@\n",		\
+			envMetricsTag,			\
+			_metricPrefix,			\
+			CLASS,				\
+			NAME, 				\
+			VALUE)
+
+void BbqueRPC::DumpStatsMOST(pregExCtx_t prec) {
+	AwmStatsMap_t::iterator it;
+	pAwmStats_t pstats;
+	uint8_t awm_id;
+
+	uint32_t _cycles;
+	double _min;
+	double _max;
+	double _avg;
+	double _var;
+
+	// Print RTLib stats for each AWM
+	it = prec->stats.begin();
+	for ( ; it != prec->stats.end(); ++it) {
+		awm_id = (*it).first;
+		pstats = (*it).second;
+
+		// Ignoring empty statistics
+		_cycles = count(pstats->samples);
+		if (!_cycles)
+			continue;
+
+		// Features extraction
+		_min = min(pstats->samples);
+		_max = max(pstats->samples);
+		_avg = mean(pstats->samples);
+		_var = variance(pstats->samples);
+
+		_setMetricPrefix(prec->name.c_str(), awm_id);
+		fprintf(stderr, "\n\n.:: MOST statistics for AWM [%s]:\n",
+				_metricPrefix);
+
+		DUMP_MOST_METRIC("perf", "cycles_cnt"   , _cycles   , "%d");
+		DUMP_MOST_METRIC("perf", "cycles_min_ms", _min      , "%.3f");
+		DUMP_MOST_METRIC("perf", "cycles_max_ms", _max      , "%.3f");
+		DUMP_MOST_METRIC("perf", "cycles_avg_ms", _avg      , "%.3f");
+		DUMP_MOST_METRIC("perf", "cycles_std_ms", sqrt(_var), "%.3f");
+
+		// Dump Performance Counters for this AWM
+		PerfPrintStats(prec, pstats);
+
+	}
+
+	// Dump Memory Consumption report
+	DumpMemoryReport(prec);
+
+}
+
 RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
 	uint8_t count = 0;
 #define BBQUE_RPC_CGOUPS_PATH_MAX 128
@@ -636,6 +697,33 @@ RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
 				pathCGroup.c_str()));
 
 	return RTLIB_OK;
+
+}
+
+void BbqueRPC::DumpMemoryReport(pregExCtx_t prec) {
+	char metric[32];
+	uint64_t value;
+	char buff[256];
+	FILE *memfd;
+
+	// Check for CGroups being available
+	if (!GetCGroupPath().length())
+		return;
+
+	// Open Memory statistics file
+	snprintf(buff, 256, "%s/memory.stat", GetCGroupPath().c_str());
+	memfd = ::fopen(buff, "r");
+	if (!memfd) {
+		fprintf(stderr, FMT_ERR("Opening MEMORY stats FAILED (Error %d: %s)\n"),
+					errno, strerror(errno));
+		return;
+	}
+
+	while (fgets(buff, 256, memfd)) {
+		DB(fprintf(stderr, FMT_DBG("Memory Read [%s]\n"), buff));
+		sscanf(buff, "%32s %lu", metric, &value);
+		DUMP_MOST_METRIC("memory", metric, value, "%lu");
+	}
 
 }
 

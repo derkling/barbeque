@@ -611,6 +611,11 @@ private:
 	RTLIB_ExitCode_t SetCGroupPath(pregExCtx_t prec);
 
 	/**
+	 * @brief Log memory usage report
+	 */
+	void DumpMemoryReport(pregExCtx_t prec);
+
+	/**
 	 * @brief Log execution statistics collected so far
 	 */
 	inline void DumpStats(pregExCtx_t prec, bool verbose = false);
@@ -619,6 +624,11 @@ private:
 	 * @brief Log execution statistics collected so far (Console format)
 	 */
 	void DumpStatsConsole(pregExCtx_t prec, bool verbose = false);
+
+	/**
+	 * @brief Log execution statistics collected so far (MOST format)
+	 */
+	void DumpStatsMOST(pregExCtx_t prec);
 
 	/**
 	 * @brief Update sync time [ms] estimation for the currently AWM
