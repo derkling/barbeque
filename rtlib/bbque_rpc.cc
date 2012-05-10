@@ -144,7 +144,8 @@ RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
 			break;
 		case 's':
 			// Setting CSV separator
-			envCsvSep = opt+1;
+			if (opt[1])
+				envCsvSep = opt+1;
 			break;
 		}
 
