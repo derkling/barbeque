@@ -678,7 +678,7 @@ RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
 	}
 
 
-	snprintf(buff, 256, "%s/bbque/%05d:%6s:%02d",
+	snprintf(buff, 256, "%s/bbque/%05d:%.6s:%02d",
 			cgMount,
 			chTrdPid,
 			prec->name.c_str(),
