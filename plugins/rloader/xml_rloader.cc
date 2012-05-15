@@ -151,7 +151,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	bool platform_matched = false;
 
 	// Recipe object
-	recipe_ptr = ba::RecipePtr_t(_recipe);
+	recipe_ptr = _recipe;
 
 	// Plugin needs a logger
 	if (!logger) {
