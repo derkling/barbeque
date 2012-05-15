@@ -164,7 +164,6 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 		logger->Error("Load NEW recipe [%s] FAILED "
 				"(Error: weak load not accepted)",
 				recipe_name.c_str());
-		recipe = RecipePtr_t();
 		return result;
 
 	}
@@ -173,7 +172,6 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 		logger->Error("Load NEW recipe [%s] FAILED "
 				"(Error: %d)",
 				recipe_name.c_str(), result);
-		recipe = RecipePtr_t();
 		return result;
 	}
 
@@ -747,6 +745,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
 	Application::ExitCode_t app_result;
+	bp::RecipeLoaderIF::ExitCode_t rcp_result;
 	RecipePtr_t rcp_ptr;
 	AppPtr_t papp;
 
@@ -758,8 +757,8 @@ AppPtr_t ApplicationManager::CreateEXC(
 			papp->StrId(), papp->Priority());
 
 	// Load the required recipe
-	LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
-	if (!rcp_ptr) {
+	rcp_result = LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
+	if (rcp_result != bp::RecipeLoaderIF::RL_SUCCESS) {
 		logger->Error("Create EXC [%s] FAILED "
 				"(Error: unable to load recipe [%s])",
 				papp->StrId(), _rcp_name.c_str());
