@@ -760,7 +760,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 	rcp_result = LoadRecipe(_rcp_name, rcp_ptr, _weak_load);
 	if (rcp_result != bp::RecipeLoaderIF::RL_SUCCESS) {
 		logger->Error("Create EXC [%s] FAILED "
-				"(Error: unable to load recipe [%s])",
+				"(Error while loading recipe [%s])",
 				papp->StrId(), _rcp_name.c_str());
 		return AppPtr_t();
 	}
@@ -769,7 +769,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 	app_result = papp->SetRecipe(rcp_ptr, papp);
 	if (app_result != Application::APP_SUCCESS) {
 		logger->Error("Create EXC [%s] FAILED "
-				"(Error: recipe rejected)",
+				"(Error: recipe rejected by application descriptor)",
 				papp->StrId());
 		return AppPtr_t();
 	}
