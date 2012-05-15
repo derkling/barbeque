@@ -157,7 +157,8 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	if (!logger) {
 		std::cout << "Error: Plugin 'XMLRecipeLoader' needs a logger."
 				  << std::endl;
-		return RL_ABORTED;
+		result = RL_ABORTED;
+		goto error;
 	}
 
 	try {
@@ -179,7 +180,8 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			logger->Error("Recipe version mismatch (REQUIRED %d.%d). "
 					"Found %d.%d", RECIPE_MAJOR_VERSION, RECIPE_MINOR_VERSION,
 					maj, min);
-			return RL_VERSION_MISMATCH;
+			result = RL_VERSION_MISMATCH;
+			goto error;
 		}
 
 		// <application>
@@ -192,7 +194,8 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		if (!sys_platform_id) {
 			logger->Error("Unable to get the system platform id");
 			assert(sys_platform_id != NULL);
-			return RL_FAILED;
+			result = RL_FAILED;
+			goto error;
 		}
 
 		// <platform>
@@ -212,7 +215,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			// Application Working Modes
 			result = LoadWorkingModes(pp_elem);
 			if (result != RL_SUCCESS)
-				return result;
+				goto error;
 
 			// "Static" constraints and plugins specific data
 			LoadConstraints(pp_elem);
@@ -223,14 +226,22 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		if (!platform_matched) {
 			logger->Error("Platform requirements mismatching: system is %s",
 					sys_platform_id);
-			return RL_PLATFORM_MISMATCH;
+			result = RL_PLATFORM_MISMATCH;
+			goto error;
 		}
 
 	} catch(ticpp::Exception &ex) {
 		logger->Error(ex.what());
-		doc.Clear();
-		return RL_ABORTED;
+		result = RL_ABORTED;
+		goto error;
 	}
+
+	// Regular exit
+	return result;
+
+error:
+	doc.Clear();
+	recipe_ptr = ba::RecipePtr_t();
 	return result;
 }
 
