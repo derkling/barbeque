@@ -61,7 +61,8 @@ WorkingMode::WorkingMode(uint8_t _id,
 
 WorkingMode::~WorkingMode() {
 	resources.from_recp.clear();
-	resources.to_sync->clear();
+	if (resources.to_sync)
+		resources.to_sync->clear();
 }
 
 
