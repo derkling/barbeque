@@ -19,10 +19,13 @@
 #define BBQUE_RPC_H_
 
 #include "bbque/rtlib.h"
+#include "bbque/config.h"
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
 #include "bbque/utils/timer.h"
-#include "bbque/utils/perf.h"
+#ifdef BBQUE_RTLIB_PERF_SUPPORT
+# include "bbque/utils/perf.h"
+#endif
 
 #include <map>
 #include <memory>
@@ -169,7 +172,9 @@ public:
 protected:
 
 	typedef struct PerfEventAttr {
+#ifdef BBQUE_RTLIB_PERF_SUPPORT
 		perf_type_id type;
+#endif
 		uint64_t config;
 	} PerfEventAttr_t;
 
