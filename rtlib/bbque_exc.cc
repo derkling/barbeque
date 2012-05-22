@@ -523,7 +523,11 @@ void BbqueEXC::ControlLoop() {
 	rtlib->Notify.Setup(exc_hdl);
 
 	// Setup the EXC
-	Setup();
+	if (Setup() != RTLIB_OK) {
+		fprintf(stderr, FMT_ERR("Setup EXC [%s] FAILED!\n"),
+				exc_name.c_str());
+		goto exit_setup;
+	}
 
 	// Initialize notification
 	rtlib->Notify.Init(exc_hdl);
@@ -556,6 +560,8 @@ void BbqueEXC::ControlLoop() {
 			continue;
 
 	};
+
+exit_setup:
 
 	// Disable the EXC (thus notifying waiters)
 	Disable();
