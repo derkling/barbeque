@@ -92,6 +92,8 @@
 /** Enabled YaMS Scheduling policy parallel execution */
 #cmakedefine BBQUE_SP_YAMS_PARALLEL
 
+/** Target platform support C++11 required features */
+#cmakedefine CONFIG_TARGET_SUPPORT_CPP11
 
 /*******************************************************************************
  * BarbequeRTMR Global Features

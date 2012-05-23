@@ -54,6 +54,10 @@ configure_file (
 add_subdirectory(utils)
 add_subdirectory(app)
 add_subdirectory(res)
+if (NOT CONFIG_TARGET_SUPPORT_CPP11)
+add_subdirectory(cpp11)
+endif (NOT CONFIG_TARGET_SUPPORT_CPP11)
+
 
 # Add "barbeque" target binary
 set (BARBEQUE_SRC barbeque version object configuration_manager console_logger)
