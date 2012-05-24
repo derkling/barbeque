@@ -98,6 +98,10 @@ target_link_libraries(
 # Use link path ad RPATH
 set_property(TARGET barbeque PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+# Install the configuration file
+install(FILES "${PROJECT_BINARY_DIR}/include/bbque/config.h"
+		DESTINATION "${BBQUE_PATH_HEADERS}")
+
 # Install the Barbeque target
 install (TARGETS barbeque RUNTIME
 		DESTINATION ${BBQUE_PATH_BBQ}
