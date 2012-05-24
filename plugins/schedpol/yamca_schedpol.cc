@@ -21,9 +21,9 @@
 #include <cstdlib>
 #include <cstdint>
 #include <iostream>
-#include <thread>
 
 #include "bbque/modules_factory.h"
+#include "bbque/cpp11/thread.h"
 
 /** Metrics (class VALUE) declaration */
 #define YAMCA_VALUE_METRIC(NAME, DESC)\

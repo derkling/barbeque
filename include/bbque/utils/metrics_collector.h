@@ -20,11 +20,11 @@
 
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/timer.h"
+#include "bbque/cpp11/mutex.h"
 
 #include <map>
 #include <vector>
 #include <memory>
-#include <mutex>
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>

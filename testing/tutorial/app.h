@@ -21,7 +21,8 @@
 #include <iostream>
 #include <list>
 #include <vector>
-#include <thread>
+
+#include <bbque/cpp11/thread.h>
 
 #define DEMO_RECIPE_NAME	"simple_1Tl2Cl2Pe"
 #define DEMO_APP_NAME		"BBQDemoApplication"

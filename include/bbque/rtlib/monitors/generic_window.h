@@ -18,7 +18,8 @@
 #ifndef BBQUE_GENERIC_WINDOW_H_
 #define BBQUE_GENERIC_WINDOW_H_
 
-#include <mutex>
+#include <bbque/cpp11/mutex.h>
+
 #include <cmath>
 #include <vector>
 #include <memory>

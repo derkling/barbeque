@@ -23,7 +23,7 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/utils/utility.h"
 
-#include <chrono>
+#include "bbque/cpp11/chrono.h"
 
 namespace ba = bbque::app;
 

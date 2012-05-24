@@ -20,10 +20,10 @@
 
 #include <bbque/rtlib.h>
 #include <bbque/utils/timer.h>
+#include <bbque/cpp11/thread.h>
 
 #include <map>
 #include <string>
-#include <thread>
 
 namespace bbque { namespace rtlib {
 

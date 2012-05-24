@@ -18,9 +18,8 @@
 #ifndef BBQUE_THROUGHPUT_MONITOR_H_
 #define BBQUE_THROUGHPUT_MONITOR_H_
 
-#include <chrono>
-#include <mutex>
-
+#include <bbque/cpp11/chrono.h>
+#include <bbque/cpp11/mutex.h>
 #include <bbque/monitors/monitor.h>
 #include <bbque/monitors/throughput_window.h>
 

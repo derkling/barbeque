@@ -18,9 +18,10 @@
 #ifndef BBQUE_TIMER_H_
 #define BBQUE_TIMER_H_
 
+#include "bbque/cpp11/mutex.h"
+
 #include <time.h>
 #include <unistd.h>
-#include <mutex>
 
 namespace bbque { namespace utils {
 

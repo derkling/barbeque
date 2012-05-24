@@ -23,6 +23,8 @@
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
 #include "bbque/utils/timer.h"
+#include "bbque/cpp11/mutex.h"
+#include "bbque/cpp11/thread.h"
 #ifdef BBQUE_RTLIB_PERF_SUPPORT
 # include "bbque/utils/perf.h"
 #endif
@@ -30,8 +32,6 @@
 #include <map>
 #include <memory>
 #include <string>
-#include <mutex>
-#include <thread>
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/stats.hpp>

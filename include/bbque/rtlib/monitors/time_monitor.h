@@ -20,9 +20,10 @@
 
 #include <bbque/monitors/monitor.h>
 #include <bbque/monitors/time_window.h>
-#include <chrono>
+#include <bbque/cpp11/chrono.h>
+#include <bbque/cpp11/mutex.h>
+
 #include <memory>
-#include <mutex>
 
 /**
  * @brief A TIME monitor

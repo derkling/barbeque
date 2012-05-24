@@ -22,12 +22,11 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/plugins/rpc_channel.h"
 #include "bbque/rtlib/rpc_messages.h"
-
-#include <future>
-#include <memory>
-#include <thread>
+#include "bbque/cpp11/thread.h"
+#include "bbque/cpp11/future.h"
 
 #include <map>
+#include <memory>
 
 #define BBQUE_DEFAULT_SYNCP_TIMEOUT 1000
 

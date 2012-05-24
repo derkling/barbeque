@@ -18,7 +18,7 @@
 #ifndef BBQUE_THROUGHPUT_WINDOW_H_
 #define BBQUE_THROUGHPUT_WINDOW_H_
 
-#include <chrono>
+#include <bbque/cpp11/chrono.h>
 
 #include <bbque/monitors/generic_window.h>
 

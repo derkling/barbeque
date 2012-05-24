@@ -20,7 +20,8 @@
 
 #include <time.h>
 #include <unistd.h>
-#include <mutex>
+
+#include <bbque/cpp11/mutex.h>
 
 namespace rtrm {
 

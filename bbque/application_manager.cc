@@ -26,11 +26,10 @@
 #include "bbque/app/recipe.h"
 #include "bbque/plugins/recipe_loader.h"
 #include "bbque/resource_accounter.h"
+#include "bbque/cpp11/chrono.h"
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
-
-#include <chrono>
 
 #define RP_DIV1 "============================================================="
 #define RP_DIV2 "|------------------+------------+-------------+-------------|"

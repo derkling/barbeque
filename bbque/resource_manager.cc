@@ -17,7 +17,7 @@
 
 #include "bbque/resource_manager.h"
 
-#include <chrono>
+#include "bbque/cpp11/chrono.h"
 
 #include "bbque/configuration_manager.h"
 #include "bbque/plugin_manager.h"

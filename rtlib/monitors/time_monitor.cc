@@ -17,7 +17,7 @@
 
 #include "bbque/rtlib/monitors/time_monitor.h"
 #include "bbque/utils/utility.h"
-#include <ratio>
+#include "bbque/cpp11/ratio.h"
 
 using std::chrono::duration_cast;
 using std::chrono::duration;

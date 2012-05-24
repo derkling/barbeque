@@ -20,11 +20,11 @@
 
 #include <map>
 #include <vector>
-#include <mutex>
 
 #include "bbque/application_manager_conf.h"
 #include "bbque/utils/deferrable.h"
 #include "bbque/plugins/logger.h"
+#include "bbque/cpp11/mutex.h"
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
 

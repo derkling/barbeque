@@ -20,10 +20,10 @@
 
 #include <cassert>
 #include <list>
-#include <mutex>
 #include <string>
 
 #include "bbque/app/recipe.h"
+#include "bbque/cpp11/mutex.h"
 #include "bbque/utils/attributes_container.h"
 
 #define BBQUE_UID_SHIFT 5

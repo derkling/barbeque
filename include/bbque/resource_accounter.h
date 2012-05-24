@@ -19,13 +19,14 @@
 #define BBQUE_RESOURCE_ACCOUNTER_H_
 
 #include <set>
-#include <thread>
+
 #include "bbque/application_manager.h"
 #include "bbque/resource_accounter_conf.h"
 #include "bbque/res/resource_utils.h"
 #include "bbque/res/resource_tree.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/utils/utility.h"
+#include "bbque/cpp11/thread.h"
 
 #define RESOURCE_ACCOUNTER_NAMESPACE "bq.ra"
 

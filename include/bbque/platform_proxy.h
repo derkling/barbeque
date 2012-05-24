@@ -22,9 +22,9 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/app/application.h"
 #include "bbque/resource_accounter.h"
+#include "bbque/cpp11/thread.h"
 
 #include <memory>
-#include <thread>
 
 #define PLATFORM_PROXY_NAMESPACE "bq.pp"
 
