@@ -218,6 +218,11 @@ public:
 	/**
 	 * @see ApplicationStatuIF
 	 */
+	bool Starting();
+
+	/**
+	 * @see ApplicationStatuIF
+	 */
 	bool Blocking();
 
 	/**
@@ -509,6 +514,8 @@ private:
 	bool _Active() const;
 
 	bool _Synching() const;
+
+	bool _Starting() const;
 
 	bool _Blocking() const;
 

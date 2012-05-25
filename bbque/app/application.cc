@@ -247,6 +247,15 @@ bool Application::Synching() {
 	return _Synching();
 }
 
+bool Application::_Starting() const {
+	return (_Synching() && (_SyncState() == STARTING));
+}
+
+bool Application::Starting() {
+	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
+	return _Starting();
+}
+
 bool Application::_Blocking() const {
 	return (_Synching() && (_SyncState() == BLOCKED));
 }

@@ -286,6 +286,11 @@ public:
 	virtual bool Synching()= 0;
 
 	/**
+	 * @brief Check if this EXC is currently STARTING
+	 */
+	virtual bool Starting()= 0;
+
+	/**
 	 * @brief Check if this EXC is being BLOCKED
 	 */
 	virtual bool Blocking() = 0;
