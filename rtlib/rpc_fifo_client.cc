@@ -210,7 +210,7 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 	std::unique_lock<std::mutex> trdStatus_ul(trdStatus_mtx);
 
 	// Set the thread name
-	if (unlikely(prctl(PR_SET_NAME, "bq.fifo", 0, 0, 0)))
+	if (unlikely(prctl(PR_SET_NAME, (long unsigned int)"bq.fifo", 0, 0, 0)))
 		fprintf(stderr, "Set name FAILED! (Error: %s)\n",
 				strerror(errno));
 

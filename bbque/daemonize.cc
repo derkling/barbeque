@@ -298,7 +298,7 @@ go_streams:
 		setenv("PATH","/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin", 1);
 
 	/* Set the daemon process name */
-	if (prctl(PR_SET_NAME, name, 0, 0, 0) != 0) {
+	if (prctl(PR_SET_NAME, (long unsigned int)name, 0, 0, 0) != 0) {
 		syslog(LOG_ERR, "unable to set daemon name [%s] (Error: %d, %s)",
 			name, errno, strerror(errno));
 		exit(EXIT_FAILURE);

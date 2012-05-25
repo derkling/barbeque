@@ -162,7 +162,7 @@ void Deferrable::Executor() {
 	// Set the module name
 	char thdName[64];
 	snprintf(thdName, 64, DEFERRABLE_NAMESPACE".%s", Name());
-	if (prctl(PR_SET_NAME, thdName, 0, 0, 0) != 0) {
+	if (prctl(PR_SET_NAME, (long unsigned int)thdName, 0, 0, 0) != 0) {
 		logger->Error("Set name FAILED! (Error: %s)\n", strerror(errno));
 	}
 

@@ -212,7 +212,7 @@ void RPCProxy::EnqueueMessages() {
 			msg_queue_mtx, std::defer_lock);
 
 	// Set the module name
-	if (prctl(PR_SET_NAME, BBQUE_MODULE_NAME("rpc"), 0, 0, 0) != 0) {
+	if (prctl(PR_SET_NAME, (long unsigned int)BBQUE_MODULE_NAME("rpc"), 0, 0, 0) != 0) {
 		logger->Error("Set name FAILED! (Error: %s)\n", strerror(errno));
 	}
 

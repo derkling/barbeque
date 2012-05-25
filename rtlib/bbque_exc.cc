@@ -505,7 +505,7 @@ void BbqueEXC::ControlLoop() {
 	assert(registered == true);
 
 	// Set the thread name
-	if (unlikely(prctl(PR_SET_NAME, "bq.cloop", 0, 0, 0)))
+	if (unlikely(prctl(PR_SET_NAME, (long unsigned int)"bq.cloop", 0, 0, 0)))
 		fprintf(stderr, "Set name FAILED! (Error: %s)\n",
 				strerror(errno));
 
