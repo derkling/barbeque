@@ -22,14 +22,14 @@
 #include <list>
 #include <map>
 
-#include "bbque/res/resources.h"
+#include "bbque/res/usage.h"
 #include "bbque/utils/attributes_container.h"
 
 #define MAX_NUM_CLUSTERS 	8
 #define MAX_NUM_BINDINGS 	255
 
 using bbque::res::ResID_t;
-using bbque::res::ResourceUsage;
+using bbque::res::Usage;
 using bbque::res::UsagePtr_t;
 using bbque::res::UsagesMap_t;
 using bbque::res::UsagesMapPtr_t;
@@ -126,7 +126,7 @@ public:
 	 * scheduling policy aims to handle more than one binding. Currently the
 	 * range of acceptable values goes from 0 to 255.
 	 *
-	 * @return A map of ResourceUsage objects
+	 * @return A map of Usage objects
 	 */
 	virtual UsagesMapPtr_t GetSchedResourceBinding(uint8_t bid = 0) const = 0;
 

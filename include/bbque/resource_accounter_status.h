@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 
-#include "bbque/res/resources.h"
+#include "bbque/res/usage.h"
 
 // Following macros are defined in order to give a lightweight abstraction
 // upon the path template details of some typical resources. The purpose is
@@ -117,9 +117,9 @@ public:
 	 * This is a slighty more efficient version of method Total(), to invoke
 	 * whenever we have a list of Resource descriptors yet. This usually
 	 * happens when the set of resources required by an AWM has been bound by
-	 * the scheduling policy. Accordingly, a map of ResourceUsage objects
+	 * the scheduling policy. Accordingly, a map of Usage objects
 	 * should be retrievable (by calling AWM->GetSchedResourceBinding() and
-	 * similars). Each bound ResourceUsage provides the list of bound
+	 * similars). Each bound Usage provides the list of bound
 	 * resources through GetBindingList().
 	 *
 	 * @param rsrc_list A list of shared pointer to Resource descriptors (of
@@ -152,9 +152,9 @@ public:
 	 * This is a slighty more efficient version of method Available(), to
 	 * invoke whenever we have a list of Resource descriptors yet. This
 	 * usually happens when the set of resources required by an AWM has been
-	 * bound by the scheduling policy. Accordingly, a map of ResourceUsage
+	 * bound by the scheduling policy. Accordingly, a map of Usage
 	 * objects should be retrievable (by calling
-	 * AWM->GetSchedResourceBinding() and similars). Each bound ResourceUsage
+	 * AWM->GetSchedResourceBinding() and similars). Each bound Usage
 	 * provides the list of bound resources through GetBindingList().
 	 *
 	 * @param rsrc_list A list of shared pointer to Resource descriptors (of
@@ -189,9 +189,9 @@ public:
 	 * This is a slighty more efficient version of method Used(), to invoke
 	 * whenever we have a list of Resource descriptors yet. This usually
 	 * happens when the set of resources required by an AWM has been bound by
-	 * the scheduling policy. Accordingly, a map of ResourceUsage objects
+	 * the scheduling policy. Accordingly, a map of Usage objects
 	 * should be retrievable (by calling AWM->GetSchedResourceBinding() and
-	 * similars). Each bound ResourceUsage provides the list of bound
+	 * similars). Each bound Usage provides the list of bound
 	 * resources through GetBindingList().
 	 *
 	 * @param rsrc_list A list of shared pointer to Resource descriptors (of

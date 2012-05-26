@@ -194,7 +194,7 @@ public:
 	 * @brief Set the resource binding to schedule
 	 *
 	 * This binds the map of resource usages pointed by "resources.on_sched"
-	 * to the WorkingMode. The map will contain ResourceUsage objects
+	 * to the WorkingMode. The map will contain Usage objects
 	 * specifying the the amount of resource requested (value) and a list of
 	 * system resource descriptors to which bind the request.
 	 *
@@ -225,7 +225,7 @@ public:
 	 * It is called by the ResourceAccounter to scroll through the list of
 	 * resources bound to the working mode assigned.
 	 *
-	 * @return A shared pointer to a map of ResourceUsage objects
+	 * @return A shared pointer to a map of Usage objects
 	 */
 	inline UsagesMapPtr_t GetResourceBinding() const {
 		return resources.to_sync;
@@ -326,18 +326,18 @@ private:
 	} clusters;
 
 	/**
-	 * @brief ResourceUsage object referenced by template path
+	 * @brief Usage object referenced by template path
 	 *
 	 * @param temp_path The resource path (template)
-	 * @return The ResourceUsage object from the recipe map.
+	 * @return The Usage object from the recipe map.
 	 */
 	UsagePtr_t ResourceUsageTempRef(std::string const & temp_path) const;
 
 	/**
-	 * @brief ResourceUsage object referenced by ID-based path
+	 * @brief Usage object referenced by ID-based path
 	 *
 	 * @param path The resource path (ID-based)
-	 * @return The ResourceUsage object from the binding map. If this is
+	 * @return The Usage object from the binding map. If this is
 	 * missing, the recipe map is considered.
 	 */
 	UsagePtr_t ResourceUsageRef(std::string const & rsrc_path) const;

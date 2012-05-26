@@ -43,9 +43,9 @@ using bbque::app::AppSPtr_t;
 
 namespace bbque {
 
-/** Map of map of ResourceUsage descriptors. Key: Application UID*/
+/** Map of map of Usage descriptors. Key: Application UID*/
 typedef std::map<AppUid_t, UsagesMapPtr_t> AppUsagesMap_t;
-/** Shared pointer to a map of pair Application/ResourceUsages */
+/** Shared pointer to a map of pair Application/Usages */
 typedef std::shared_ptr<AppUsagesMap_t> AppUsagesMapPtr_t;
 /** Map of AppUsagesMap_t having the resource state view token as key */
 typedef std::map<RViewToken_t, AppUsagesMapPtr_t> AppUsagesViewsMap_t;
@@ -249,7 +249,7 @@ public:
 	 * each resource in the usages map specified, the required quantity.
 	 *
 	 * @param papp The application requiring resource usages
-	 * @param rsrc_usages Map of ResourceUsage objects
+	 * @param rsrc_usages Map of Usage objects
 	 * @param vtok The token referencing the resource state view
 	 * @param do_check If true the controls upon set validity and resources
 	 * availability are enabled
@@ -502,7 +502,7 @@ private:
 	/**
 	 * @brief Check the resource availability for a whole set
 	 *
-	 * @param usages A map of ResourceUsage objects to check
+	 * @param usages A map of Usage objects to check
 	 * @param vtok The token referencing the resource state view
 	 * @param papp The application interested in the query
 	 * @return RA_SUCCESS if all the resources are availables,
@@ -547,7 +547,7 @@ private:
 	 * list.
 	 *
 	 * @param papp The Application/ExC using the resource
-	 * @param pusage ResourceUsage object
+	 * @param pusage Usage object
 	 * @param vtok The token referencing the resource state view
 	 *
 	 * @return RA_ERR_USAGE_EXC if the usage required overcome the
@@ -560,7 +560,7 @@ private:
 	 * @brief Allocate a quota of resource in the scheduling case
 	 *
 	 * Allocate a quota of the required resource in a single resource binding
-	 * taken from the "binds" list of the ResourceUsage associated.
+	 * taken from the "binds" list of the Usage associated.
 	 *
 	 * @param papp The Application/ExC using the resource
 	 * @param rsrc The resource descriptor of the resource binding
@@ -604,7 +604,7 @@ private:
 	 * list.
 	 *
 	 * @param papp The Application/ExC using the resource
-	 * @param pusage ResourceUsage object
+	 * @param pusage Usage object
 	 * @param vtok The token referencing the resource state view
 	 */
 	void UndoResourceBooking(AppSPtr_t const & papp, UsagePtr_t & pusage,

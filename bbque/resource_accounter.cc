@@ -219,9 +219,9 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 	UsagesMap_t::const_iterator usages_it(usages->begin());
 	UsagesMap_t::const_iterator usages_end(usages->end());
 
-	// Check availability for each ResourceUsage object
+	// Check availability for each Usage object
 	for (; usages_it != usages_end; ++usages_it) {
-		// Current ResourceUsage
+		// Current Usage
 		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t const & pusage(usages_it->second);
 
@@ -617,7 +617,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
 	UsagesMap_t::const_iterator usages_end(app_usages->end());
 	for (; usages_it != usages_end;	++usages_it) {
-		// Current required resource (ResourceUsage object)
+		// Current required resource (Usage object)
 		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t pusage(usages_it->second);
 		logger->Debug("Booking: [%s] requires resource {%s}",

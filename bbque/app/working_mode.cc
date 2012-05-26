@@ -90,7 +90,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	}
 
 	// Insert a new resource usage object in the map
-	UsagePtr_t pusage(UsagePtr_t(new ResourceUsage(_value)));
+	UsagePtr_t pusage(UsagePtr_t(new Usage(_value)));
 	resources.from_recp.insert(
 			std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
 
@@ -129,7 +129,7 @@ WorkingMode::ResourceUsageTempRef(std::string const & temp_path) const {
 					ResourcePathUtils::GetTemplate(rsrc_it->first)) != 0)
 			continue;
 
-		// Return the pointer to the ResourceUsage object
+		// Return the pointer to the Usage object
 		return rsrc_it->second;
 	}
 
@@ -153,7 +153,7 @@ WorkingMode::ResourceUsageRef(std::string const & rsrc_path) const {
 	if (rsrc_it != resources.from_recp.end())
 		return UsagePtr_t();
 
-	// Return the ResourceUsage object
+	// Return the Usage object
 	return rsrc_it->second;
 }
 
@@ -201,8 +201,8 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		logger->Debug("Binding [AWM%d]: 'recipe' [%s] => 'bbque' [%s]", id,
 				rcp_path.c_str(), bind_path.c_str());
 
-		// Create a new ResourceUsage object and set the binding list
-		UsagePtr_t bind_pusage(new ResourceUsage(rcp_pusage->GetAmount()));
+		// Create a new Usage object and set the binding list
+		UsagePtr_t bind_pusage(new Usage(rcp_pusage->GetAmount()));
 		bind_pusage->SetBindingList(ra.GetResources(bind_path));
 		assert(!bind_pusage->EmptyBindingList());
 
