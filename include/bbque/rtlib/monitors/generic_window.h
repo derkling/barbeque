@@ -228,7 +228,7 @@ public:
 	 *
 	 * @return true if the goal has been respected, false otherwise
 	 */
-	virtual bool checkGoal();
+	bool checkGoal();
 
 	/**
 	 * @brief Check if the goal has been achieved.
