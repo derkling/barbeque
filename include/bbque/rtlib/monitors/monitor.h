@@ -133,28 +133,28 @@ public:
 	 *
 	 * @param id Identifies a monitor and its corresponding window
 	 */
-	dataType getMax(uint16_t id) const;
+	virtual dataType getMax(uint16_t id) const;
 
 	/**
 	 * @brief Returns the minimum value from the window
 	 *
 	 * @param id Identifies a monitor and its corresponding window
 	 */
-	dataType getMin(uint16_t id) const;
+	virtual dataType getMin(uint16_t id) const;
 
 	/**
 	 * @brief Returns the average value from the window
 	 *
 	 * @param id Identifies a monitor and its corresponding window
 	 */
-	dataType getAverage(uint16_t id) const;
+	virtual dataType getAverage(uint16_t id) const;
 
 	/**
 	 * @brief Returns the variance of the values inside the window
 	 *
 	 * @param id Identifies a monitor and its corresponding window
 	 */
-	dataType getVariance(uint16_t id) const;
+	virtual dataType getVariance(uint16_t id) const;
 
 	/**
 	 * @brief Adds an element into the window
