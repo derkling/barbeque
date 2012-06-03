@@ -31,11 +31,11 @@ using bbque::rtlib::BbqueEXC;
 typedef std::vector<GenericWindowIF*> GoalsList;
 
 /**
- * @brief Application-Specific Runtime Resource Manager
+ * @brief Application-Specific Run-time Manager
  * @ingroup rtlib_sec04_rtrm
  *
  * @details
- * This class provides the ApplicationRTRM, used to communicate between the
+ * This class provides the ApplicationRTM, used to communicate between the
  * applications and Barbeque
  */
 class ApplicationSpecificRTM {
@@ -138,10 +138,10 @@ public:
 	 * opFilters. Returns true if an OP has been found, false otherwise
 	 *
 	 * @param op output parameter in which to save the OP
-	 * @param switchThreshold threshold after which adjust a constraint of
-	 * an achieved goal
 	 * @param opFilters reference to the list of constraints to satisfy.
 	 * it will be adjusted if needed (a goal is not achieved)
+	 * @param switchThreshold threshold after which adjust a constraint of
+	 * an achieved goal
 	 */
 	bool getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
 		       float switchThreshold = 100.0);
@@ -153,11 +153,11 @@ public:
 	 * opFilters. Returns true if an OP has been found, false otherwise
 	 *
 	 * @param op output parameter in which to save the OP
-	 * @param switchThreshold threshold after which adjust a constraint of
-	 * an achieved goal
 	 * @param opFilters reference to the list of constraints to satisfy.
 	 * it will be adjusted if needed (a goal is not achieved)
 	 * @param goalsInfo reference to the the current goal-achievement info
+	 * @param switchThreshold threshold after which adjust a constraint of
+	 * an achieved goal
 	 */
 	bool getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
 		       const GoalInfoList &goalsInfo,
@@ -189,9 +189,9 @@ private:
  * @defgroup rtlib_sec04_rtrm RTLib Application-Specific RTRM
  * @ingroup rtlib
  *
- * The Application-Specific RTRM (AS-RTRM) provides a convenient glue code
+ * The Application-Specific RTM (AS-RTM) provides a convenient glue code
  * between the application Metrics Monitors, Operating Point Manager and the
- * System-Wide RTRM (SW-RTRM), i.e. the BarbqueRTRM.
+ * System-Wide RTRM (SYS-RTRM), i.e. the BarbqueRTRM.
  *
  * By exploiting the knowledge given by a set of registered goals and from the
  * support of the OP Manager, the ApplicationRTRM class is able to take some
