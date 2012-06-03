@@ -101,6 +101,13 @@ public:
 	 * information useful to deal with goal management
 	 */
 	virtual GoalInfoPtr fullCheckGoal() = 0;
+
+	/**
+	 * @brief Checks if the window of data is full (according to the
+	 * resultWindowSize variable)
+	 */
+	virtual bool isFull() = 0;
+
 	/**
 	 * @brief Removes all values from the window
 	 */
@@ -313,6 +320,14 @@ public:
 	 * (average, max, min, variance) as its default size.
 	 */
 	void resetResultsWindow();
+
+	/**
+	 * @brief Checks if the window of data is full (according to the
+	 * resultWindowSize variable)
+	 */
+	bool isFull() {
+		return windowBuffer.size() == resultsWindowSize;
+	}
 
 protected:
 
