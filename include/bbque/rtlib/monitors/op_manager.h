@@ -129,7 +129,13 @@ public:
 	bool getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters);
 
 	/**
+	 * @brief Gets the next OperatingPoint
+	 *
+	 * @param op Reference to an OperatingPoint where to save the result
+	 * @param opFilters Reference to a filter list
+	 * @return True if a point has been found, otherwise False
 	 */
+	bool getNextOP(OperatingPoint &op, const OP_FilterList &opFilters);
 
 	/**
 	 * @brief Set an ordering policy for operating points

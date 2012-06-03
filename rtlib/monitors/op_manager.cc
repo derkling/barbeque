@@ -116,6 +116,15 @@ bool OP_Manager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters)
 	return false;
 }
 
+bool OP_Manager::getNextOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+	/*
+	 * TODO Find a better search strategy. This one could be expensive
+	 * even if it is just O(n)
+	 */
+	vectorId = 0;
+	return getCurrentOP(op, opFilters);
+}
+
 void OP_Manager::setPolicy(PrioritiesList &orderingStrategy) {
 	sort(operatingPoints.begin(),
 	     operatingPoints.end(),
