@@ -6,7 +6,7 @@ set (CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set (MONITORS_SRC time_monitor ${PROJECT_BINARY_DIR}/bbque/version.cc)
 set (MONITORS_SRC throughput_monitor memory_monitor ${MONITORS_SRC})
-set (MONITORS_SRC application_rtrm ${MONITORS_SRC})
+set (MONITORS_SRC application_specific_rtm ${MONITORS_SRC})
 set (MONITORS_SRC op_manager ${MONITORS_SRC})
 
 # Copy headers where they are expected by applications
@@ -52,7 +52,7 @@ set_property (TARGET bbque_monitors PROPERTY PUBLIC_HEADER
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/operating_point.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/op_filter.h
 	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/op_manager.h
-	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/application_rtrm.h)
+	${PROJECT_SOURCE_DIR}/include/bbque/rtlib/monitors/application_specific_rtm.h)
 
 
 # Install Monitors

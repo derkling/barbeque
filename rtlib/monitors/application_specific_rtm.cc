@@ -15,13 +15,17 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <bbque/monitors/application_rtrm.h>
+#include <cmath>
 
-void ApplicationRTRM::setGoals(GoalsList &goalsList) {
+#include <bbque/monitors/application_specific_rtm.h>
+#include <iostream>
+using std::vector;
+
+void ApplicationSpecificRTM::setGoals(GoalsList &goalsList) {
 	this->goalsList = goalsList;
 }
 
-bool ApplicationRTRM::checkGoals(GoalInfoList &goalsInfo) {
+bool ApplicationSpecificRTM::checkGoals(GoalInfoList &goalsInfo) {
 
 	bool result = true;
 	GoalInfoPtr goalInfo;
@@ -87,10 +91,10 @@ if (!found)\
 	opFilters.push_back(OP_Filter(metricName, ComparisonFunctors::Greater, \
 				      newConstraint));
 
-void ApplicationRTRM::adjustConstraints(const OperatingPoint &currentOp,
-					const GoalInfoList &goalsInfo,
-					OP_FilterList &opFilters,
-					float switchThreshold) {
+void ApplicationSpecificRTM::adjustConstraints(const OperatingPoint &currentOp,
+					       const GoalInfoList &goalsInfo,
+					       OP_FilterList &opFilters,
+					       float switchThreshold) {
 
 	bool found;
 	bool achieved;
@@ -158,7 +162,7 @@ void ApplicationRTRM::adjustConstraints(const OperatingPoint &currentOp,
 #endif
 }
 
-void ApplicationRTRM::getNapAndRelativeError(const GoalInfoList &goalsInfo,
+void ApplicationSpecificRTM::getNapAndRelativeError(const GoalInfoList &goalsInfo,
 		uint8_t &maxNap, float &maxRelativeError) {
 
 	vector<uint8_t> maxNaps;
@@ -189,8 +193,9 @@ void ApplicationRTRM::getNapAndRelativeError(const GoalInfoList &goalsInfo,
 
 }
 
-bool ApplicationRTRM::getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
-				float switchThreshold) {
+bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
+				       OP_FilterList &opFilters,
+				       float switchThreshold) {
 	uint8_t maxNap;
 	bool opChanged;
 	bool goalAchieved;
@@ -240,9 +245,10 @@ bool ApplicationRTRM::getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
 	return opChanged;
 }
 
-bool ApplicationRTRM::getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
-				const GoalInfoList &goalsInfo,
-				float switchThreshold) {
+bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
+				       OP_FilterList &opFilters,
+				       const GoalInfoList &goalsInfo,
+				       float switchThreshold) {
 	uint8_t maxNap;
 	bool opChanged;
 	float maxRelativeError;

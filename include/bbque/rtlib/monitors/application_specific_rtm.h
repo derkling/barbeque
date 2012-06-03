@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_APPLICATION_RTRM_H_
-#define BBQUE_APPLICATION_RTRM_H_
+#ifndef BBQUE_APPLICATION_SPECIFIC_RTM_H_
+#define BBQUE_APPLICATION_SPECIFIC_RTM_H_
 
 #include <vector>
 
@@ -38,13 +38,13 @@ typedef std::vector<GenericWindowIF*> GoalsList;
  * This class provides the ApplicationRTRM, used to communicate between the
  * applications and Barbeque
  */
-class ApplicationRTRM {
+class ApplicationSpecificRTM {
 
 public:
 	/**
 	 * @brief Default constructor of the class
 	 */
-	ApplicationRTRM() {
+	ApplicationSpecificRTM() {
 
 	}
 
@@ -56,7 +56,7 @@ public:
 	 * @param opManager Pointer to the OP_Manager of an Execution Context.
 	 * It is used to to have a knowledge of operating points
 	 */
-	ApplicationRTRM(BbqueEXC *bbqexc, OP_Manager &opManager)
+	ApplicationSpecificRTM(BbqueEXC *bbqexc, OP_Manager &opManager)
 			: bbqexc(bbqexc), opManager(opManager) {
 
 	}
@@ -69,9 +69,9 @@ public:
 	 * @param opManager Reference to the OP_Manager of an Execution Context.
 	 * It is used to to have a knowledge of operating points
 	 * @param goalsList Reference to a list of goals to register for the use
-	 * with ApplicationRTRM
+	 * with ApplicationSpecificRTM
 	 */
-	ApplicationRTRM(BbqueEXC *bbqexc, OP_Manager &opManager,
+	ApplicationSpecificRTM(BbqueEXC *bbqexc, OP_Manager &opManager,
 			GoalsList &goalsList)
 			: bbqexc(bbqexc),
 			  opManager(opManager),
@@ -80,7 +80,7 @@ public:
 	}
 
 	/**
-	 * @brief Sets the GoalsList to use inside ApplicationRTRM
+	 * @brief Sets the GoalsList to use inside ApplicationSpecificRTM
 	 * @param goalsList reference to a list of goals
 	 */
 	void setGoals(GoalsList &goalsList);
@@ -203,4 +203,4 @@ private:
  *
  */
 
-#endif /* BBQUE_APPLICATION_RTRM_H_ */
+#endif /* BBQUE_APPLICATION_SPECIFIC_RTM_H_ */
