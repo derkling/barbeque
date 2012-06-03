@@ -101,6 +101,24 @@ public:
 	 * information useful to deal with goal management
 	 */
 	virtual GoalInfoPtr fullCheckGoal() = 0;
+	/**
+	 * @brief Removes all values from the window
+	 */
+	virtual void clear() = 0;
+
+	/**
+	 * @brief Sets the number of elements used by mathematical function
+	 * (average, max, min, variance)
+	 *
+	 * @param resultsSize Number of elements used to compute the result
+	 */
+	virtual void setResultsWindow(uint16_t resultsSize) = 0;
+
+	/**
+	 * @brief Resets the number of elements used by mathematical function
+	 * (average, max, min, variance) as its default size.
+	 */
+	virtual void resetResultsWindow() = 0;
 };
 
 
