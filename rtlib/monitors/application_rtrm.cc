@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bbque/rtlib/monitors/application_rtrm.h"
+#include <bbque/monitors/application_rtrm.h>
 
 void ApplicationRTRM::setGoals(GoalsList &goalsList) {
 	this->goalsList = goalsList;

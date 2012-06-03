@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "bbque/rtlib/monitors/op_manager.h"
+#include <bbque/monitors/op_manager.h>
 
 #ifdef CONFIG_TARGET_ANDROID
 # include <stdint.h>
