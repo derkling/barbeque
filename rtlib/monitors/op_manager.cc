@@ -65,8 +65,9 @@ bool OP_Manager::getHigherOP(OperatingPoint &op) {
 
 bool OP_Manager::isValidOP(const OperatingPoint &op,
 			   const OP_FilterList &opFilters) const {
+
 	bool result = true;
-	OP_FilterList::const_iterator filter = opFilters.begin();;
+	OP_FilterList::const_iterator filter = opFilters.begin();
 	std::map<std::string, double>::const_iterator mappedValue;
 
 	while (result && filter!=opFilters.end()) {

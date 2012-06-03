@@ -128,8 +128,8 @@ public:
 	 * absolute value) relative error of all the goals
 	 */
 	void getNapAndRelativeError(const GoalInfoList &goalsInfo,
-				     uint8_t &maxNap,
-				     float &maxRelativeError);
+				    uint8_t &maxNap,
+				    float &maxRelativeError);
 
 	/**
 	 * @brief Gets next valid OP
