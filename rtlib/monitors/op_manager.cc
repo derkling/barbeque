@@ -72,7 +72,7 @@ bool OP_Manager::isValidOP(const OperatingPoint &op,
 	while (result && filter!=opFilters.end()) {
 		mappedValue = op.metrics.find(filter->name);
 		if (mappedValue == op.metrics.end())
-			continue;
+			return false;
 		result = (filter->cFunction(mappedValue->second, filter->value));
 		++filter;
 	}
