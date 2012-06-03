@@ -85,7 +85,13 @@ bool OP_Manager::getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters
 		op = operatingPoints[vectorId];
 		return true;
 	}
-	return getLowerOP(op,opFilters);
+	/*
+	 * TODO Find a better search strategy. This one could be expensive even
+	 * if it is just O(n)
+	 */
+	if (getLowerOP(op,opFilters))
+		return true;
+	return getHigherOP(op,opFilters);
 }
 
 bool OP_Manager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) {
