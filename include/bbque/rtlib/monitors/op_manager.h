@@ -49,7 +49,6 @@ public:
 	 */
 	OP_Manager() {
 		vectorId = 0;
-		isHighestOP = true;
 	}
 
 	/**
@@ -57,10 +56,10 @@ public:
 	 *
 	 * @param opList List of operating points
 	 */
-	OP_Manager(OperatingPointsList opList)
-			: operatingPoints(opList){
+	OP_Manager(OperatingPointsList opList, PrioritiesList metricsPriorities)
+			: operatingPoints(opList) {
 				vectorId = 0;
-				isHighestOP = true;
+				setPolicy(metricsPriorities);
 	}
 
 	/**
@@ -130,12 +129,7 @@ public:
 	bool getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters);
 
 	/**
-	 * @brief Returns if the OP_Manager is pointing to the highest OP
-	 * available
 	 */
-	bool highestOP() {
-		return isHighestOP;
-	}
 
 	/**
 	 * @brief Set an ordering policy for operating points
@@ -159,12 +153,6 @@ private:
 	 * @brief Current index of the operating points list
 	 */
 	uint16_t vectorId;
-
-	/**
-	 * @brief Shows if the manager is pointing to the highest available
-	 * op in that moment.
-	 */
-	bool isHighestOP;
 
 	/**
 	 * @brief List of references to operating points

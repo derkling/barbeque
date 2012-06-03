@@ -84,15 +84,6 @@ public:
 	 */
 	void setGoals(GoalsList &goalsList);
 
-	/**
-	 * @brief Notifies Barbeque of a need of more resources when the
-	 * registered goals are not achieved and OP_Manager is already in the
-	 * higher operating point.
-	 *
-	 * TODO Consider having a check also on awm_id
-	 */
-	void increaseResources();
-
 private:
 	/**
 	 * Pointer to a BbqueEXC. It is be used to communicate with Barbeque

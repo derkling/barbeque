@@ -20,25 +20,3 @@
 void ApplicationRTRM::setGoals(GoalsList &goalsList) {
 	this->goalsList = goalsList;
 }
-
-void ApplicationRTRM::increaseResources() {
-	bool result;
-	float maxNap;
-
-	GoalsList::const_iterator it;
-	std::vector<float> naps;
-	std::vector<float> maxNaps;
-
-	if (! opManager.highestOP())
-		return;
-
-	for (it = goalsList.begin(); it != goalsList.end(); ++it) {
-		result = (*it)->checkGoal(naps);
-		if (result)
-			return;
-		maxNap = *max_element(naps.begin(), naps.end());
-		maxNaps.push_back(maxNap);
-	}
-	maxNap = *max_element(maxNaps.begin(), maxNaps.end());
-	bbqexc->SetGoalGap(100*maxNap);
-}

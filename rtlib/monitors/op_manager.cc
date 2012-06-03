@@ -52,16 +52,12 @@ bool OP_Manager::getLowerOP(OperatingPoint &op) {
 
 	vectorId++;
 	op = operatingPoints[vectorId];
-	isHighestOP = false;
 	return true;
 }
 
 bool OP_Manager::getHigherOP(OperatingPoint &op) {
 	if (vectorId == 0)
 		return false;
-
-	if(--vectorId == 0)
-		isHighestOP = true;
 
 	op = operatingPoints[vectorId];
 	return true;
@@ -97,7 +93,6 @@ bool OP_Manager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) 
 		if (isValidOP(operatingPoints[id],opFilters)){
 			vectorId = id;
 			op = operatingPoints[id];
-			isHighestOP = false;
 			return true;
 		}
 	}
@@ -109,14 +104,6 @@ bool OP_Manager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters)
 		if (isValidOP(operatingPoints[id], opFilters)){
 			vectorId = id;
 			op = operatingPoints[id];
-			//Check routine for isHighestOP
-			for(int id2 = id; id2 > 0; --id2){
-				if (isValidOP(operatingPoints[id2], opFilters)){
-					isHighestOP = false;
-					return true;
-				}
-			}
-			isHighestOP = true;
 			return true;
 		}
 	}
