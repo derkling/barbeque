@@ -86,3 +86,204 @@ for (itc = opFilters.begin(); itc!=opFilters.end();++itc) {\
 if (!found)\
 	opFilters.push_back(OP_Filter(metricName, ComparisonFunctors::Greater, \
 				      newConstraint));
+
+void ApplicationRTRM::adjustConstraints(const OperatingPoint &currentOp,
+					const GoalInfoList &goalsInfo,
+					OP_FilterList &opFilters,
+					float switchThreshold) {
+
+	bool found;
+	bool achieved;
+	bool adjustAll;
+	double targetGoal;
+	double observedValue;
+	double oldConstraint;
+	double newConstraint;
+	double relativeError;
+	std::string metricName;
+
+	GoalInfoList::const_iterator it;
+	OP_FilterList::iterator itc;
+
+	for (it = goalsInfo.begin(); it != goalsInfo.end(); ++it) {
+		metricName = (*it)->metricName;
+		oldConstraint = currentOp.metrics.find(metricName)->second;
+
+		/*
+		 * If one target of the goal needs to be adjusted proportionally
+		 * to the change of performance, then all the other targets need
+		 * to be adjusted as well
+		 */
+		achieved = (*it)->isAchieved();
+		relativeError = fabs((*it)->getMaxRelativeError());
+
+		adjustAll = false;
+		if (!achieved || (achieved &&  relativeError > switchThreshold))
+			adjustAll = true;
+
+		for (uint8_t i = 0; i < (*it)->targetGoals.size(); ++i) {
+			achieved      = (*it)->achieved.at(i);
+			targetGoal    = (*it)->targetGoals.at(i);
+			observedValue = (*it)->observedValues.at(i);
+			relativeError = (*it)->relativeErrors.at(i);
+
+			newConstraint = targetGoal * oldConstraint / observedValue;
+
+			/*
+			 * Updates all the previous constraints of that metric
+			 * with the same comparison function than the new one
+			 */
+			if (achieved &&
+				(adjustAll || fabs(relativeError) > switchThreshold)) {
+				if (relativeError > 0) {
+					UPDATE_LOWER_BOUND();
+				} else {
+					UPDATE_UPPER_BOUND();
+				}
+
+			} else if (!achieved) {
+				if (relativeError < 0) {
+					UPDATE_LOWER_BOUND();
+				} else {
+					UPDATE_UPPER_BOUND();
+				}
+			}
+		}
+	}
+#ifdef DEBUG
+	for (itc = opFilters.begin(); itc!=opFilters.end();++itc){
+		std::cout<<"\t\t\tName "<<itc->name
+			 <<" Value= "<<itc->value<<std::endl;
+	}
+#endif
+}
+
+void ApplicationRTRM::getNapAndRelativeError(const GoalInfoList &goalsInfo,
+		uint8_t &maxNap, float &maxRelativeError) {
+
+	vector<uint8_t> maxNaps;
+	vector<double> maxRelativeErrors;
+	GoalInfoList::const_iterator it;
+
+	maxNaps.reserve(goalsInfo.size());
+	maxRelativeErrors.reserve(goalsInfo.size());
+
+
+	for (it = goalsInfo.begin(); it != goalsInfo.end(); ++it) {
+		maxNaps.push_back((*it)->getMaxNap());
+		maxRelativeErrors.push_back((*it)->getMaxRelativeError());
+	}
+
+
+	double absRelError;
+	maxRelativeError = 0;
+	std::vector<double>::const_iterator maxRit;
+
+	for (uint8_t i=0;i<maxRelativeErrors.size();++i) {
+		absRelError = fabs(maxRelativeErrors.at(i));
+		if (absRelError > maxRelativeError)
+			maxRelativeError = absRelError;
+	}
+
+	maxNap = *max_element(maxNaps.begin(), maxNaps.end());
+
+}
+
+bool ApplicationRTRM::getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
+				float switchThreshold) {
+	uint8_t maxNap;
+	bool opChanged;
+	bool goalAchieved;
+	float maxRelativeError;
+
+	GoalInfoList goalsInfo;
+
+	if (goalsList.empty())
+		return false;
+
+	opChanged = false;
+
+	goalAchieved = checkGoals(goalsInfo);
+
+	getNapAndRelativeError(goalsInfo, maxNap, maxRelativeError);
+
+	if (goalAchieved && maxRelativeError < switchThreshold)
+		return false;
+	adjustConstraints(op, goalsInfo, opFilters, switchThreshold);
+
+	/*
+	 * We consider that we want an higher point as soon as the goal is not
+	 * achieved, while we could wait a while to switch on a lower point when
+	 * the goal is achieved
+	 * TODO Here the call to SetGoalGap is done when a goal is not achieved
+	 * and there are no other feasible Operating Points in opList. While
+	 * this is correct when a goal is not achieved because of a lack of
+	 * resources, in other cases that could be unuseful and misleading for
+	 * Barbeque. Moreover, the call to SetGoalNap seems to be expensive in
+	 * term of execution time. It's really important to avoid calling it
+	 * when unnecessary
+	 *
+	 * E.g: Consider a goal with a lower bound and an upper bound on
+	 * throughput. While it is correct to call SetGoalGap when the
+	 * throughput is below the lower bound, calling it when we are over the
+	 * upper bound (hence, the goal is not achieved) is useless.
+	 */
+	if (!goalAchieved) {
+		opChanged = opManager.getNextOP(op, opFilters);
+		//TODO make this decision parametric
+		if (!opChanged && maxNap > 20)
+			bbqexc->SetGoalGap(maxNap);
+	}
+	else if (maxRelativeError >= switchThreshold)
+		opChanged = opManager.getNextOP(op, opFilters);
+
+	return opChanged;
+}
+
+bool ApplicationRTRM::getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
+				const GoalInfoList &goalsInfo,
+				float switchThreshold) {
+	uint8_t maxNap;
+	bool opChanged;
+	float maxRelativeError;
+
+	if (goalsList.empty())
+		return false;
+
+	opChanged = false;
+
+	getNapAndRelativeError(goalsInfo, maxNap, maxRelativeError);
+	maxRelativeError = fabs(maxRelativeError);
+
+	if (maxNap == 0 && maxRelativeError < switchThreshold)
+		return false;
+	adjustConstraints(op, goalsInfo, opFilters, switchThreshold);
+
+	/*
+	 * We consider that we want an higher point as soon as the goal is not
+	 * achieved, while we could wait a while to switch on a lower point when
+	 * the goal is achieved
+	 * TODO Here the call to SetGoalGap is done when a goal is not achieved
+	 * and there are no other feasible Operating Points in opList. While
+	 * this is correct when a goal is not achieved because of a lack of
+	 * resources, in other cases that could be unuseful and misleading for
+	 * Barbeque. Moreover, the call to SetGoalNap seems to be expensive in
+	 * term of execution time. It's really important to avoid calling it
+	 * when unnecessary
+	 *
+	 * E.g: Consider a goal with a lower bound and an upper bound on
+	 * throughput. While it is correct to call SetGoalGap when the
+	 * throughput is below the lower bound, calling it when we are over the
+	 * upper bound (hence, the goal is not achieved) is useless.
+	 */
+	if (maxNap > 0) {
+		opChanged = opManager.getNextOP(op, opFilters);
+		//TODO make this decision parametric
+		if (!opChanged && maxNap > 20)
+			bbqexc->SetGoalGap(100*maxNap);
+	}
+	else if (maxRelativeError >= switchThreshold)
+		opChanged = opManager.getNextOP(op, opFilters);
+
+	return opChanged;
+}

@@ -22,6 +22,7 @@
 
 #include <bbque/bbque_exc.h>
 
+#include <bbque/monitors/goal_info.h>
 #include <bbque/monitors/op_manager.h>
 #include <bbque/monitors/generic_window.h>
 
@@ -83,6 +84,84 @@ public:
 	 * @param goalsList reference to a list of goals
 	 */
 	void setGoals(GoalsList &goalsList);
+
+	/**
+	 * @brief Checks the goals registered within the AS-RTM
+	 *
+	 * A GoalInfoList is filled with information about the achievement of
+	 * each goal.
+	 *
+	 * @param goalsInfo output parameter for GoalInfoList. It will be used
+	 * to store the information given by the goal-checking phase
+	 * @return a value indicating whether all the goals have been achieved
+	 * or not
+	 */
+	bool checkGoals(GoalInfoList &goalsInfo);
+
+
+	/**
+	 * @brief Adjusts OP selection contraints
+	 *
+	 * It adjust the previous constraints in order to achieve the current
+	 * goals. It also creates new ones if necessary.
+	 *
+	 * @param currentOp reference to the current Operating Point
+	 * @param goalsInfo reference to the the current goal-achievement info
+	 * @param opFilters reference to the list of constraints to adjust
+	 * @param switchThreshold threshold after which adjust a constraint of
+	 * an achieved goal
+	 */
+	void adjustConstraints(const OperatingPoint &currentOp,
+			       const GoalInfoList &goalsInfo,
+			       OP_FilterList &opFilters,
+			       float switchThreshold = 100.0);
+
+	/**
+	 * @brief Gets the maximum NAP and relative error of goals
+	 *
+	 * This function uses the information given by the goal-checking phase
+	 * to get the max NAP and max relative error.
+	 *
+	 * @param goalsInfo reference to the the current goal-achievement info
+	 * @param maxNap output parameter for the max NAP of all the goals
+	 * @param maxRelativeError output parameter for the max (respect to the
+	 * absolute value) relative error of all the goals
+	 */
+	void getNapAndRelativeError(const GoalInfoList &goalsInfo,
+				     uint8_t &maxNap,
+				     float &maxRelativeError);
+
+	/**
+	 * @brief Gets next valid OP
+	 *
+	 * Gets the next OP that satisfies the contraints given by
+	 * opFilters. Returns true if an OP has been found, false otherwise
+	 *
+	 * @param op output parameter in which to save the OP
+	 * @param switchThreshold threshold after which adjust a constraint of
+	 * an achieved goal
+	 * @param opFilters reference to the list of constraints to satisfy.
+	 * it will be adjusted if needed (a goal is not achieved)
+	 */
+	bool getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
+		       float switchThreshold = 100.0);
+
+	/**
+	 * @brief Gets next valid OP
+	 *
+	 * Gets the next OP that satisfies the contraints given by
+	 * opFilters. Returns true if an OP has been found, false otherwise
+	 *
+	 * @param op output parameter in which to save the OP
+	 * @param switchThreshold threshold after which adjust a constraint of
+	 * an achieved goal
+	 * @param opFilters reference to the list of constraints to satisfy.
+	 * it will be adjusted if needed (a goal is not achieved)
+	 * @param goalsInfo reference to the the current goal-achievement info
+	 */
+	bool getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
+		       const GoalInfoList &goalsInfo,
+		       float switchThreshold = 100.0);
 
 private:
 	/**
