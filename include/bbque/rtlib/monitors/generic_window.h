@@ -34,6 +34,9 @@
 #include <boost/accumulators/statistics/min.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 
+#include <iostream>
+#include <bbque/monitors/goal_info.h>
+
 /**
  * @brief Name of the metric used for goal checking
  */
@@ -85,6 +88,13 @@ public:
 	 */
 	virtual bool checkGoal(std::vector<float> &naps) = 0;
 
+	/**
+	 * @brief Check if the goal has been achieved
+	 *
+	 * It returns a GoalInfoPtr, a pointer to a structure containing all the
+	 * information useful to deal with goal management
+	 */
+	virtual GoalInfoPtr fullCheckGoal() = 0;
 };
 
 
@@ -209,6 +219,14 @@ public:
 	 * @brief Checks whether the goal has been respected or not
 	 */
 	virtual bool checkGoal();
+
+	/**
+	 * @brief Check if the goal has been achieved.
+	 *
+	 * This function returns a GoalInfoPtr, a pointer to a structure
+	 * containing all the information useful to deal with goal management
+	 */
+	GoalInfoPtr fullCheckGoal();
 
 	/**
 	 * @brief Checks whether the goal has been respected or not
@@ -363,6 +381,50 @@ inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &naps) {
 	}
 
 	return result;
+}
+
+template <typename dataType>
+inline GoalInfoPtr GenericWindow<dataType>::fullCheckGoal() {
+	bool result;
+	uint8_t nap = 0;
+	double goalValue;
+	double dfResult;
+	double absoluteError;
+	double relativeError;
+
+	GoalInfoPtr goalInfo(new GoalInfo(goalTargets->size()));
+
+	goalInfo->metricName = metricName;
+
+	typename std::vector<Target>::iterator it;
+
+	for (it = goalTargets->begin(); it != goalTargets->end(); ++it) {
+		/*
+		 * Forced promotion to double to avoid problems with unsigned
+		 * types.
+		 * This variables will be used just to compute naps. The
+		 * uncasted values will be used instead to have a more accurate
+		 * evaluation of the goal.
+		 */
+		goalValue = it->goalValue;
+		dfResult  = it->dataFunction(this);
+
+		absoluteError = dfResult - goalValue;
+		relativeError = absoluteError / goalValue;
+
+		result = it->comparisonFunction(dfResult, goalValue);
+		if (!result)
+			nap = 100*fabs(absoluteError / (dfResult + goalValue));
+
+		goalInfo->achieved.push_back(result);
+		goalInfo->targetGoals.push_back(goalValue);
+		goalInfo->relativeErrors.push_back(relativeError);
+		goalInfo->observedValues.push_back(dfResult);
+		goalInfo->naps.push_back(nap);
+
+	}
+
+	return goalInfo;
 }
 
 #define GW_ACCUMULATE()\

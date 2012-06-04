@@ -92,6 +92,15 @@ public:
 	 * penalties regarding each target of the goal in the range [0,1]
 	 */
 	virtual bool checkGoal(uint16_t id, std::vector<float> &naps);
+	/**
+	 * @brief Check if the goal has been achieved
+	 *
+	 * It returns a GoalInfoPtr, a pointer to a structure containing all the
+	 * information useful to deal with goal management
+	 *
+	 * @param id Identifier of the monitor
+	 */
+	virtual GoalInfoPtr fullCheckGoal(uint16_t id);
 
 	/**
 	 * @brief Resets current goal
@@ -246,6 +255,13 @@ inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &naps)
 	return (goalList[id]->checkGoal(naps));
 }
 
+template <typename dataType>
+inline GoalInfoPtr Monitor <dataType>::fullCheckGoal(uint16_t id) {
+	//TODO add error handling for the case below
+	//if (goalList.find(id) == goalList.end())
+	//	(Time to switch to exceptions?)
+	return (goalList[id]->fullCheckGoal());
+}
 
 template <typename dataType>
 inline void Monitor <dataType>::deleteGoal(uint16_t id) {
