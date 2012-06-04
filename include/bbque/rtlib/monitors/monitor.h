@@ -88,10 +88,12 @@ public:
 	 * @brief Checks whether the goal has been respected or not
 	 *
 	 * @param id Identifies monitor and corresponding list
-	 * @param naps Output parameter representing normalised values for the
-	 * penalties regarding each target of the goal in the range [0,1]
+	 * @param relativeErrors Output parameter for the relative errors of
+	 * each of the targets of the goal
 	 */
-	virtual bool checkGoal(uint16_t id, std::vector<float> &naps);
+	virtual bool checkGoal(uint16_t id, std::vector<float> &relativeErrors);
+
+
 	/**
 	 * @brief Check if the goal has been achieved
 	 *
@@ -245,14 +247,15 @@ inline bool Monitor <dataType>::checkGoal(uint16_t id) {
 }
 
 template <typename dataType>
-inline bool Monitor <dataType>::checkGoal(uint16_t id, std::vector<float> &naps) {
+inline bool Monitor <dataType>::checkGoal(uint16_t id,
+					  std::vector<float> &relativeErrors) {
 	if (goalList.find(id) == goalList.end()) {
-		naps.clear();
-		naps.push_back(0);
+		relativeErrors.clear();
+		relativeErrors.push_back(0);
 		return false;
 	}
 
-	return (goalList[id]->checkGoal(naps));
+	return (goalList[id]->checkGoal(relativeErrors));
 }
 
 template <typename dataType>

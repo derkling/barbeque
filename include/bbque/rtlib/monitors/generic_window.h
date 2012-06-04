@@ -86,7 +86,7 @@ public:
 	 * @param naps Output parameter representing a normalised value for the
 	 * penalty in the range [0,1]
 	 */
-	virtual bool checkGoal(std::vector<float> &naps) = 0;
+	virtual bool checkGoal(std::vector<float> &relativeErrors) = 0;
 
 	/**
 	 * @brief Check if the goal has been achieved
@@ -234,7 +234,7 @@ public:
 	 * @param naps Output parameter representing a normalised value for the
 	 * penalty in the range [0,1]
 	 */
-	virtual bool checkGoal(std::vector<float> &naps);
+	virtual bool checkGoal(std::vector<float> &relativeErrors);
 
 	/**
 	 * @brief Removes all values from the window
@@ -353,15 +353,18 @@ inline bool GenericWindow<dataType>::checkGoal() {
 }
 
 template <typename dataType>
-inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &naps) {
+inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &relativeErrors) {
 	typename std::vector<Target>::iterator it;
 	bool result = true;
 	double goalValue;
 	double dfResult;
+	double absoluteError;
+	double relativeError;
 
 	// Forces a removal of all the content, in order to prevent
 	// unpredictability of the output
-	naps.clear();
+	relativeErrors.clear();
+	relativeErrors.reserve(goalTargets->size());
 
 	for (it = goalTargets->begin(); it != goalTargets->end(); ++it) {
 		/*
@@ -371,13 +374,15 @@ inline bool GenericWindow<dataType>::checkGoal(std::vector<float> &naps) {
 		 * uncasted values will be used instead to have a more accurate
 		 * evaluation of the goal.
 		 */
-		dfResult = it->dataFunction(this);
 		goalValue = it->goalValue;
+		dfResult  = it->dataFunction(this);
 
-		naps.push_back(fabs((dfResult - goalValue) /
-				    (dfResult + goalValue)));
+		absoluteError = dfResult - goalValue;
+		relativeError = absoluteError / goalValue;
 
 		result = result && it->comparisonFunction(dfResult, goalValue);
+
+		relativeErrors.push_back(relativeError);
 	}
 
 	return result;

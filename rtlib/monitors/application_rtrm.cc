@@ -20,6 +20,26 @@
 void ApplicationRTRM::setGoals(GoalsList &goalsList) {
 	this->goalsList = goalsList;
 }
+
+bool ApplicationRTRM::checkGoals(GoalInfoList &goalsInfo) {
+
+	bool result = true;
+	GoalInfoPtr goalInfo;
+
+	goalsInfo.clear();
+	goalsInfo.reserve(goalsList.size());
+
+	GoalsList::const_iterator it;
+
+	for (it = goalsList.begin(); it != goalsList.end(); ++it) {
+		goalInfo = (*it)->fullCheckGoal();
+		goalsInfo.push_back(goalInfo);
+		result = result && goalInfo->isAchieved();
+	}
+
+	return result;
+}
+
 /*
  * The two macros below, check if an upper or lower bound is present in
  * the opFilters structure and updates it with the new contraint calculated by
