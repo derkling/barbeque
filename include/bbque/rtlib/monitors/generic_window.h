@@ -174,6 +174,8 @@ public:
 	typedef std::vector<GenericWindow<dataType>::Target> Targets;
 	typedef std::shared_ptr<Targets> TargetsPtr;
 
+	TargetsPtr getTargets();
+
 	/**
 	 * @brief Initializes internal variables
 	 */
@@ -337,6 +339,11 @@ GenericWindow<dataType>::comparisonFunctions[4] = {
 		std::less<dataType>(),
 		std::less_equal<dataType>()
 };
+
+template <typename dataType>
+inline typename GenericWindow<dataType>::TargetsPtr GenericWindow<dataType>::getTargets() {
+	return goalTargets;
+}
 
 template <typename dataType>
 inline bool GenericWindow<dataType>::checkGoal() {
