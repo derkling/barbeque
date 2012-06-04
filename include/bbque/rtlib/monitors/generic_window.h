@@ -76,15 +76,21 @@ class GenericWindowIF {
 
 public:
 	/**
-	 * @brief Checks whether the goal has been respected or not
+	 * @brief Checks whether the goal has been respected and returns a
+	 * boolean with the result of the check
 	 */
 	virtual bool checkGoal() = 0;
 
 	/**
-	 * @brief Checks whether the goal has been respected or not
+	 * @brief Checks whether the goal has been respected
 	 *
-	 * @param naps Output parameter representing a normalised value for the
-	 * penalty in the range [0,1]
+	 * It returns a boolean with the result of the check.
+	 * Moreover it provides as output the list of all the relative errors
+	 * for the goal. Each target of the goal will have its own relative
+	 * error respect to the target goal.
+	 *
+	 * @param relativeErrors output parameter for the vector of relative
+	 * errors
 	 */
 	virtual bool checkGoal(std::vector<float> &relativeErrors) = 0;
 
@@ -219,6 +225,8 @@ public:
 
 	/**
 	 * @brief Checks whether the goal has been respected or not
+	 *
+	 * @return true if the goal has been respected, false otherwise
 	 */
 	virtual bool checkGoal();
 
@@ -231,10 +239,15 @@ public:
 	GoalInfoPtr fullCheckGoal();
 
 	/**
-	 * @brief Checks whether the goal has been respected or not
+	 * @brief Checks whether the goal has been respected
 	 *
-	 * @param naps Output parameter representing a normalised value for the
-	 * penalty in the range [0,1]
+	 * This method returns a boolean with the result of the check.
+	 * Moreover it provides as output the list of all the relative errors
+	 * for the goal. Each target of the goal will have its own relative
+	 * error respect to the target goal.
+	 *
+	 * @param relativeErrors output parameter for the vector of relative
+	 * errors
 	 */
 	virtual bool checkGoal(std::vector<float> &relativeErrors);
 
