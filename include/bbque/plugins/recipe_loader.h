@@ -58,12 +58,12 @@ public:
 		RL_WEAK_LOAD,
 
 		//--- Failed load
+		/** Recipe load failed for some reason (generic error) */
+		RL_FAILED,
 		/** Version level not acceptable */
 		RL_VERSION_MISMATCH,
 		/** Platform mismatch */
 		RL_PLATFORM_MISMATCH,
-		/** Recipe load failed for some reason (generic error) */
-		RL_FAILED,
 		/** Unable to find recipe loader plugin */
 		RL_MISSING_LOADER,
 		/** Recipe not found */
