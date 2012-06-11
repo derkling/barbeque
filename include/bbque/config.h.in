@@ -107,6 +107,9 @@
 /** Target platform support C++11 required features */
 #cmakedefine CONFIG_TARGET_SUPPORT_CPP11
 
+/** Target architecture */
+#define BBQUE_TARGET_ARCH_${BBQUE_TARGET_ARCH}BIT
+
 /*******************************************************************************
  * BarbequeRTMR Global Features
  ******************************************************************************/
