@@ -110,6 +110,9 @@ if (CMAKE_SIZEOF_VOID_P EQUAL 8)
   set (BBQUE_TARGET_ARCH 64)
 endif (CMAKE_SIZEOF_VOID_P EQUAL 8)
 
+set (BBQUE_BUILD_FLAVOR
+	"${BBQUE_TARGET_OS} (${BBQUE_TARGET_ARCH}bit - ${CMAKE_BUILD_TYPE})")
+
 message("PRE SUBST Linker flags:" ${PLATFORM_EXE_LINKEROPTS})
 string(REPLACE @ = PLATFORM_EXE_LINKEROPTS "${PLATFORM_EXE_LINKEROPTS}")
 set (CMAKE_EXE_LINKER_FLAGS "${PLATFORM_EXE_LINKEROPTS}")
@@ -223,7 +226,7 @@ message ( STATUS )
 message ( STATUS "=====[ Barbeque RTRM - Building System Configuration ]"
                  "==========================" )
 message ( STATUS "Barbeque Version...... ${VERSION}" )
-message ( STATUS "Build type............ ${CMAKE_BUILD_TYPE}" )
+message ( STATUS "Build Flavor.......... ${BBQUE_BUILD_FLAVOR}" )
 message ( STATUS "Installation prefix... ${CMAKE_INSTALL_PREFIX}" )
 message ( STATUS "   Barbeuqe RTRM...... <prefix>/${BBQUE_PATH_BBQ}" )
 message ( STATUS "   Configuration...... <prefix>/${BBQUE_PATH_CONF}/${BBQUE_CONF_FILE}" )

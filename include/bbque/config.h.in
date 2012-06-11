@@ -112,6 +112,9 @@
 /** Target architecture */
 #define BBQUE_TARGET_ARCH_${BBQUE_TARGET_ARCH}BIT
 
+/** Build flavor */
+#define BBQUE_BUILD_FLAVOR "${BBQUE_BUILD_FLAVOR}"
+
 /*******************************************************************************
  * BarbequeRTMR Global Features
  ******************************************************************************/

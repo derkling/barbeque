@@ -137,6 +137,7 @@ void ConfigurationManager::ParseCommandLine(int argc, char *argv[]) {
 		std::cout << "Copyright (C) 2011 Politecnico di Milano\n";
 		std::cout << "\n";
 		std::cout << "Built on " << __DATE__ << " " << __TIME__ << "\n";
+		std::cout << "flavor: " BBQUE_BUILD_FLAVOR << "\n";
 		std::cout << "\n";
 		std::cout << "This is free software; see the source for copying conditions.  There is NO\n";
 		std::cout << "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.";
