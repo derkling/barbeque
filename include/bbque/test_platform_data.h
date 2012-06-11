@@ -85,4 +85,4 @@ private:
 
 } // namespace bbque
 
-#endif // BBQUE_TEST_PLATFORM_DATA
+#endif // BBQUE_TEST_PLATFORM_DATA_H_

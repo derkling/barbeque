@@ -24,6 +24,10 @@
 #include "bbque/resource_accounter.h"
 #include "bbque/cpp11/thread.h"
 
+#ifdef CONFIG_BBQUE_TEST_PLATFORM_DATA
+# include "bbque/test_platform_data.h"
+#endif // CONFIG_BBQUE_TEST_PLATFORM_DATA
+
 #include <memory>
 
 #define PLATFORM_PROXY_NAMESPACE "bq.pp"
@@ -270,34 +274,68 @@ protected:
 	/**
 	 * @brief Return the Platform specific string identifier
 	 */
-	virtual const char* _GetPlatformID() = 0;
+	virtual const char* _GetPlatformID() {
+		logger->Debug("PLAT PRX: default _GetPlatformID()");
+		return "it.polimi.bbque.tpd";
+	};
 
 	/**
 	 * @brief Platform specific resource setup interface.
 	 */
-	virtual ExitCode_t _Setup(AppPtr_t papp) = 0;
+	virtual ExitCode_t _Setup(AppPtr_t papp) {
+		(void)papp;
+		logger->Debug("PLAT PRX: default _Setup()");
+		return OK;
+	};
 
 	/**
 	 * @brief Platform specific resources enumeration
+	 *
+	 * The default implementation of this method loads the TPD, is such a
+	 * function has been enabled
 	 */
-	virtual ExitCode_t _LoadPlatformData() = 0;
+	virtual ExitCode_t _LoadPlatformData() {
+#ifndef CONFIG_BBQUE_TEST_PLATFORM_DATA
+		logger->Debug("PLAT PRX: default _LoadPlatformData()");
+#else // !CONFIG_BBQUE_TEST_PLATFORM_DATA
+		//---------- Loading TEST platform data
+		logger->Debug("PLAT PRX: loading Test Platform Data (TPD)");
+		TestPlatformData &tpd(TestPlatformData::GetInstance());
+		tpd.LoadPlatformData();
+#endif // !CONFIG_BBQUE_TEST_PLATFORM_DATA
+		return OK;
+	};
 
 	/**
 	 * @brief Platform specific resources release interface.
 	 */
-	virtual ExitCode_t _Release(AppPtr_t papp) = 0;
+	virtual ExitCode_t _Release(AppPtr_t papp) {
+		(void)papp;
+		logger->Debug("PLAT PRX: default _Release()");
+		return OK;
+	};
 
 	/**
 	 * @brief Platform specific resource claiming interface.
 	 */
-	virtual ExitCode_t _ReclaimResources(AppPtr_t papp) = 0;
-
+	virtual ExitCode_t _ReclaimResources(AppPtr_t papp) {
+		(void)papp;
+		logger->Debug("PLAT PRX: default _ReclaimResources()");
+		return OK;
+	};
 
 	/**
 	 * @brief Platform specifi resource binding interface.
 	 */
 	virtual ExitCode_t _MapResources(AppPtr_t papp, UsagesMapPtr_t pres,
-			RViewToken_t rvt, bool excl) = 0;
+			RViewToken_t rvt, bool excl) {
+		(void)papp;
+		(void)pres;
+		(void)rvt;
+		(void)excl;
+		logger->Debug("PLAT PRX: default _MapResources()");
+		return OK;
+	};
 
 
 };
