@@ -78,10 +78,12 @@
 /** Optimize branch prediction for "untaken" */
 #define unlikely(x)     __builtin_expect((x),0)
 
+#ifndef CONFIG_TARGET_ANDROID
 /** Return the PID of the calling process/thread */
 inline pid_t gettid() {
 	return syscall(SYS_gettid);
 }
+#endif
 
 #define BBQUE_MODULE_NAME(STR) "bq." STR
 

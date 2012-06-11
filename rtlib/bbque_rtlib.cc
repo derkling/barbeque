@@ -23,6 +23,12 @@
 
 #include "bbque/rtlib/bbque_rpc.h"
 
+#ifdef CONFIG_TARGET_ANDROID
+# include <stdint.h>
+#else
+# include <cstdint>
+#endif
+
 namespace bb = bbque;
 namespace bu = bbque::utils;
 namespace br = bbque::rtlib;

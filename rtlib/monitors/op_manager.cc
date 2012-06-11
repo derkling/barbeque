@@ -17,6 +17,12 @@
 
 #include "bbque/rtlib/monitors/op_manager.h"
 
+#ifdef CONFIG_TARGET_ANDROID
+# include <stdint.h>
+#else
+# include <cstdint>
+#endif
+
 using namespace std;
 
 bool OP_Manager::operatingPointsComparator::operator()(const OperatingPoint &op1,

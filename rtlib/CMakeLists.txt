@@ -44,6 +44,14 @@ target_link_libraries(
 )
 endif (CONFIG_TARGET_LINUX)
 
+# Linking dependencies for Android-Linux targets
+if (CONFIG_TARGET_ANDROID)
+target_link_libraries(
+	bbque_rtlib
+	-Wl,-whole-archive bbque_cpp11 -Wl,-no-whole-archive
+)
+endif (CONFIG_TARGET_ANDROID)
+
 # Use link path ad RPATH
 set_property (TARGET bbque_rtlib PROPERTY
 		INSTALL_RPATH_USE_LINK_PATH TRUE)

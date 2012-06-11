@@ -94,6 +94,12 @@
 /** Target platform: Generic-Linux */
 #cmakedefine CONFIG_TARGET_LINUX
 
+/** Target platform: Android-Linux */
+#cmakedefine CONFIG_TARGET_ANDROID
+
+/** Target platform: ARM Architecture */
+#cmakedefine CONFIG_TARGET_ARM
+
 /** Use FIFO based RPC channel */
 #cmakedefine CONFIG_BBQUE_RPC_FIFO
 

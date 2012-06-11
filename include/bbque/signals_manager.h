@@ -24,7 +24,11 @@
 #include "bbque/plugins/logger.h"
 #include "bbque/resource_manager.h"
 
-#include <sys/signal.h>
+#ifdef CONFIG_TARGET_ANDROID
+# include <linux/signal.h>
+#else
+# include <sys/signal.h>
+#endif
 
 namespace bbque {
 

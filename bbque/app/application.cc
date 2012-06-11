@@ -17,6 +17,11 @@
 
 #include "bbque/app/application.h"
 
+#ifdef CONFIG_TARGET_ANDROID
+# include <stdint.h>
+#else
+# include <cstdint>
+#endif
 #include <limits>
 
 #include "bbque/application_manager.h"
