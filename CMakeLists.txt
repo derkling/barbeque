@@ -105,7 +105,7 @@ message("Linker flags:" ${PLATFORM_EXE_LINKEROPTS})
 message("Linker flags:" ${CMAKE_EXE_LINKER_FLAGS})
 
 # Options for build version: DEBUG
-set (CMAKE_CXX_FLAGS_DEBUG "-g -Wextra -pedantic -DBBQUE_DEBUG")
+set (CMAKE_CXX_FLAGS_DEBUG "-O0 -g -Wextra -pedantic -DBBQUE_DEBUG")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 	set (BBQUE_DEBUG ON)
 endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
