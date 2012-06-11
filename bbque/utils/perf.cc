@@ -62,7 +62,7 @@ int Perf::EventOpen(struct perf_event_attr *attr,
 		unsigned long flags) {
 	int result;
 
-	DB(fprintf(stderr, FMT_DBG("Adding new PERF counter [%d:%llu], GL [%d], "
+	DB(fprintf(stderr, FMT_DBG("Adding new PERF counter [%d:%"PRIu64"], GL [%d], "
 					"for Task [%d] on CPU [%d]...\n"),
 					attr->type, attr->config, group_fd, pid, cpu));
 
@@ -188,7 +188,7 @@ uint64_t Perf::Update(int id, bool delta) {
 	UPDATE_DELTA(time_enabled);
 	UPDATE_DELTA(time_running);
 
-	DB(fprintf(stderr, FMT_DBG("Counter [%d:%u:%llu]: "
+	DB(fprintf(stderr, FMT_DBG("Counter [%d:%u:%"PRIu64"]: "
 					"cV [%lu], cE [%lu], cR [%lu] "
 					"dV [%lu], dE [%lu], dR [%lu]\n"),
 				prc->fd, prc->attr.type, prc->attr.config,

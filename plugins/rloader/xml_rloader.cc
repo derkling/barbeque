@@ -406,7 +406,7 @@ uint8_t XMLRecipeLoader::GetResourceAttributes(
 
 	// The usage requested must be > 0
 	if (!_res_elem->GetAttribute("qty").empty() && res_usage <= 0) {
-		logger->Error("Resource ""%s"": usage value not valid (%llu)",
+		logger->Error("Resource ""%s"": usage value not valid (%"PRIu64")",
 				_res_path.c_str(), res_usage);
 		return __RSRC_FORMAT_ERR;
 	}

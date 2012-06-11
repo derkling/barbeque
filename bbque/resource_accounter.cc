@@ -115,7 +115,7 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 
 		// Build the resource text row
 		snprintf(rsrc_path_padded, 30, "%-30s", (*path_it).c_str());
-		snprintf(rsrc_text_row, 66, "| %s : %11lu | %11lu |",
+		snprintf(rsrc_text_row, 66, "| %s : %11"PRIu64" | %11"PRIu64" |",
 				rsrc_path_padded, rsrc_used, Total(*path_it));
 
 		PRINT_NOTICE_IF_VERBOSE(verbose, rsrc_text_row);
@@ -161,7 +161,7 @@ void ResourceAccounter::PrintAppDetails(std::string const & path,
 		// Build the row to print
 		snprintf(app_info, 30, "%s,P%02d,AWM%02d", papp->StrId(),
 				papp->Priority(), papp->CurrentAWM()->Id());
-		snprintf(app_text_row, 66, "| %29s : %11lu |             |",
+		snprintf(app_text_row, 66, "| %29s : %11"PRIu64" |             |",
 				app_info, rsrc_amount);
 
 		PRINT_NOTICE_IF_VERBOSE(verbose, app_text_row);
@@ -231,7 +231,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::CheckAvailability(
 		// If the availability is less than the amount required...
 		if (avail < pusage->GetAmount()) {
 			logger->Debug("Check availability: Exceeding request for {%s}"
-					"[USG:%llu | AV:%llu | TOT:%llu] ",
+					"[USG:%"PRIu64" | AV:%"PRIu64" | TOT:%"PRIu64"] ",
 					rsrc_path.c_str(), pusage->GetAmount(), avail,
 					QueryStatus(pusage->GetBindingList(), RA_TOTAL));
 			return RA_ERR_USAGE_EXC;
@@ -627,7 +627,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		result = DoResourceBooking(papp, pusage, vtok);
 		if (result != RA_SUCCESS)  {
 			logger->Crit("Booking: unexpected fail! "
-					"%s [USG:%llu | AV:%llu | TOT:%llu]",
+					"%s [USG:%"PRIu64" | AV:%"PRIu64" | TOT:%"PRIu64"]",
 				rsrc_path.c_str(), pusage->GetAmount(),
 				Available(rsrc_path, vtok, papp),
 				Total(rsrc_path));
@@ -637,7 +637,7 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		}
 
 		assert(result == RA_SUCCESS);
-		logger->Info("Booking: SUCCESS - %s [USG:%llu | AV:%llu | TOT:%llu]",
+		logger->Info("Booking: SUCCESS - %s [USG:%"PRIu64" | AV:%"PRIu64" | TOT:%"PRIu64"]",
 				rsrc_path.c_str(), pusage->GetAmount(),
 				Available(rsrc_path, vtok, papp),
 				Total(rsrc_path));
@@ -792,7 +792,7 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t pusage(usages_it->second);
 		UndoResourceBooking(papp, pusage, vtok);
-		logger->Debug("DecCount: [%s] has freed {%s} of %llu", papp->StrId(),
+		logger->Debug("DecCount: [%s] has freed {%s} of %"PRIu64"", papp->StrId(),
 				rsrc_path.c_str(), pusage->GetAmount());
 	}
 }

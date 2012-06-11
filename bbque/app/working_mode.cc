@@ -94,7 +94,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	resources.from_recp.insert(
 			std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
 
-	logger->Debug("AddResUsage: added {%s}\t[usage: %llu]",
+	logger->Debug("AddResUsage: added {%s}\t[usage: %"PRIu64"]",
 			rsrc_path.c_str(), _value);
 	return WM_SUCCESS;
 }
@@ -222,7 +222,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
 
-			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %llu binds: %d]",
+			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %"PRIu64" binds: %d]",
 					id, rcp_path.c_str(), pusage->GetAmount(),
 					pusage->GetBindingList().size());
 		}

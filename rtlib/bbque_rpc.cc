@@ -722,8 +722,8 @@ void BbqueRPC::DumpMemoryReport(pregExCtx_t prec) {
 
 	while (fgets(buff, 256, memfd)) {
 		DB(fprintf(stderr, FMT_DBG("Memory Read [%s]\n"), buff));
-		sscanf(buff, "%32s %lu", metric, &value);
-		DUMP_MOST_METRIC("memory", metric, value, "%lu");
+		sscanf(buff, "%32s %"PRIu64, metric, &value);
+		DUMP_MOST_METRIC("memory", metric, value, "%"PRIu64);
 	}
 
 }

@@ -1146,7 +1146,7 @@ Application::ExitCode_t Application::SetResourceConstraint(
 			rsrc_constraints[_rsrc_path]->upper =
 				std::numeric_limits<uint64_t>::max();
 
-		logger->Debug("SetConstraint (Resources): Set on {%s} LB = %llu",
+		logger->Debug("SetConstraint (Resources): Set on {%s} LB = %"PRIu64"",
 				_rsrc_path.c_str(), _value);
 		break;
 
@@ -1155,7 +1155,7 @@ Application::ExitCode_t Application::SetResourceConstraint(
 		if (rsrc_constraints[_rsrc_path]->lower > _value)
 			rsrc_constraints[_rsrc_path]->lower = 0;
 
-		logger->Debug("SetConstraint (Resources): Set on {%s} UB = %llu",
+		logger->Debug("SetConstraint (Resources): Set on {%s} UB = %"PRIu64"",
 				_rsrc_path.c_str(), _value);
 		break;
 	}

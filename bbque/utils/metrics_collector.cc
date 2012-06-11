@@ -455,14 +455,14 @@ MetricsCollector::DumpCountSM(CounterMetric *m, uint8_t idx) {
 dump_count_sm:
 	// Dump sub-metric
 	logger->Notice(
-		" %-20s | %9llu : %s",
+		" %-20s | %9"PRIu64" : %s",
 		_name, m->sm_cnt[idx], _desc);
 }
 
 void
 MetricsCollector::DumpCounter(CounterMetric *m) {
 	logger->Notice(
-		" %-20s | %9llu : %s",
+		" %-20s | %9"PRIu64" : %s",
 		m->name, m->cnt, m->desc);
 
 	if (!m->HasSubmetrics())
@@ -504,7 +504,7 @@ MetricsCollector::DumpValueSM(ValueMetric *m, uint8_t idx,
 dump_value_sm:
 	// Dump sub-metric
 	logger->Notice(
-		" %-20s | %9llu | %9llu | %9llu : %s",
+		" %-20s | %9"PRIu64" | %9"PRIu64" | %9"PRIu64" : %s",
 		ms.name, m->sm_value[idx], ms.min, ms.max, ms.desc);
 }
 
@@ -517,7 +517,7 @@ MetricsCollector::DumpValue(ValueMetric *m) {
 		ms.max = max(*m->pstat);
 	}
 	logger->Notice(
-		" %-20s | %9llu | %9llu | %9llu : %s",
+		" %-20s | %9"PRIu64" | %9"PRIu64" | %9"PRIu64" : %s",
 		m->name, m->value, ms.min, ms.max, m->desc);
 
 	if (!m->HasSubmetrics())
