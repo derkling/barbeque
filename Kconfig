@@ -61,4 +61,21 @@ config BBQUE_SP_YAMS_PARALLEL
   Select this option if you plan to run the BarbequeRTRM daemon on a multi-core
   host machine.
 
+comment "Synchronization Policies Configuration"
+
+config BBQUE_YP_SASB_ASYNC
+  bool "SASB asynchronous calls"
+  default n if TARGET_ANDROID
+  default y
+  ---help---
+  Build the SASM policy with support for asynchronous protocol calls.
+
+  By selecting this option, the synchronization protocol is executed with
+  asynchronous calls which means that the interaction with applications to be
+  re-configured is parallelized, i.e. each protocol requets is managed by a
+  dedicated thread and all them runs in parallel.
+
+  Select this option if you plan to run the BarbequeRTRM daemon on a multi-core
+  host machine and with a average high number of concurrent applications.
+
 endmenu # Advanced options

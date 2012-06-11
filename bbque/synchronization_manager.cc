@@ -187,7 +187,11 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 		// Start an Async Pre-Change
 		presp = ApplicationProxy::pPreChangeRsp_t(
 				new ApplicationProxy::preChangeRsp_t());
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 		result = ap.SyncP_PreChange_Async(papp, presp);
+#else //!CONFIG_BBQUE_YP_SASB_ASYNC
+		result = ap.SyncP_PreChange(papp, presp);
+#endif
 		if (result != RTLIB_OK)
 			continue;
 
@@ -300,7 +304,11 @@ SynchronizationManager::Sync_SyncChange(
 		// Start an Async Sync-Change
 		presp = ApplicationProxy::pSyncChangeRsp_t(
 				new ApplicationProxy::syncChangeRsp_t());
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 		result = ap.SyncP_SyncChange_Async(papp, presp);
+#else // !CONFIG_BBQUE_YP_SASB_ASYNC
+		result = ap.SyncP_SyncChange(papp, presp);
+#endif
 		if (result != RTLIB_OK)
 			continue;
 
