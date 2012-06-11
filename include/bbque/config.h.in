@@ -89,6 +89,9 @@
  * BarbequeRTRM Supported Features
  ******************************************************************************/
 
+/** Target platform: Generic-Linux */
+#cmakedefine CONFIG_TARGET_LINUX
+
 /** Use FIFO based RPC channel */
 #cmakedefine CONFIG_BBQUE_RPC_FIFO
 

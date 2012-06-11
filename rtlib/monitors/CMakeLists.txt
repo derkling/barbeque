@@ -24,8 +24,15 @@ target_link_libraries(
 	bbque_monitors
 	bbque_rtlib
 	${Boost_LIBRARIES}
+)
+
+# Add "Generic-Linux" specific flags
+if (CONFIG_TARGET_LINUX)
+target_link_libraries(
+	bbque_monitors
 	-ldl -lrt
 )
+endif (CONFIG_TARGET_LINUX)
 
 # Use link path ad RPATH
 set_property (TARGET bbque_monitors PROPERTY

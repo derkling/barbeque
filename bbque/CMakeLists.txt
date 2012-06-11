@@ -67,13 +67,16 @@ set (BARBEQUE_SRC resource_manager application_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC resource_accounter ${BARBEQUE_SRC})
 set (BARBEQUE_SRC application_proxy rpc_proxy ${BARBEQUE_SRC})
 set (BARBEQUE_SRC platform_proxy ${BARBEQUE_SRC})
-set (BARBEQUE_SRC pp/linux ${BARBEQUE_SRC})
 set (BARBEQUE_SRC signals_manager scheduler_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC synchronization_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC profile_manager ${BARBEQUE_SRC})
 set (BARBEQUE_SRC daemonize ${BARBEQUE_SRC})
 if (CONFIG_BBQUE_TEST_PLATFORM_DATA)
 	set (BARBEQUE_SRC test_platform_data ${BARBEQUE_SRC})
+else (CONFIG_BBQUE_TEST_PLATFORM_DATA)
+ if (CONFIG_TARGET_LINUX)
+	set (BARBEQUE_SRC pp/linux ${BARBEQUE_SRC})
+ endif (CONFIG_TARGET_LINUX)
 endif (CONFIG_BBQUE_TEST_PLATFORM_DATA)
 
 
@@ -86,16 +89,24 @@ target_link_libraries(
 	bbque_resources
 	bbque_apps
 	${Boost_LIBRARIES}
-	${CGroup_LIBRARIES}
 )
 
 # Linking static plugins
 target_link_libraries(
 	barbeque
-	-Wl,-whole-archive bbque_logger_log4cpp -Wl,-no-whole-archive
 	-Wl,-whole-archive bbque_recipe_loader_xml -Wl,-no-whole-archive
+)
+
+
+# Linking dependencies for Generic-Linux targets
+if (CONFIG_TARGET_LINUX)
+target_link_libraries(
+	barbeque
+	${CGroup_LIBRARIES}
+	-Wl,-whole-archive bbque_logger_log4cpp -Wl,-no-whole-archive
 	-ldl -lrt
 )
+endif (CONFIG_TARGET_LINUX)
 
 # Use link path ad RPATH
 set_property(TARGET barbeque PROPERTY INSTALL_RPATH_USE_LINK_PATH TRUE)

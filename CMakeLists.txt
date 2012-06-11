@@ -95,8 +95,15 @@ if (NOT CMAKE_BUILD_TYPE)
 	set (CMAKE_BUILD_TYPE RelWithDebInfo)
 endif (NOT CMAKE_BUILD_TYPE)
 
-# Options common to all build version
-set (CMAKE_CXX_FLAGS "-std=c++0x -Wall")
+# Add flags common to all builds
+set (CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+
+# Add "Generic-Linux" specific flags
+if (CONFIG_TARGET_LINUX)
+set (BBQUE_TARGET_OS "Generic-Linux")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+endif (CONFIG_TARGET_LINUX)
+
 message("PRE SUBST Linker flags:" ${PLATFORM_EXE_LINKEROPTS})
 string(REPLACE @ = PLATFORM_EXE_LINKEROPTS "${PLATFORM_EXE_LINKEROPTS}")
 set (CMAKE_EXE_LINKER_FLAGS "${PLATFORM_EXE_LINKEROPTS}")
@@ -139,7 +146,9 @@ set (BOOST_INCLUDEDIR ${CMAKE_INSTALL_PREFIX})
 
 # Check for required libs and packages (headers + lib)
 find_package(Boost 1.45.0 REQUIRED system program_options filesystem)
-find_package(CGroup REQUIRED)
+if (CONFIG_EXTERNAL_LIBCG)
+	find_package(CGroup REQUIRED)
+endif (CONFIG_EXTERNAL_LIBCG)
 
 # Add compilation dependencies
 include_directories(

@@ -21,13 +21,14 @@
 #include "bbque/modules_factory.h"
 #include "bbque/test_platform_data.h"
 
-#if defined BBQUE_PLATFORM_LINUX
-# include "bbque/pp/linux.h"
-# define  PLATFORM_PROXY LinuxPP
-#elif defined BBQUE_PLATFORM_P2012
-# include "bbque/pp/p2012.h"
-# define  PLATFORM_PROXY P2012PP
-#endif
+# ifdef CONFIG_TARGET_LINUX
+#  include "bbque/pp/linux.h"
+#  define  PLATFORM_PROXY LinuxPP
+# endif
+# ifdef CONFIG_TARGET_P2012
+#  include "bbque/pp/p2012.h"
+#  define  PLATFORM_PROXY P2012PP
+# endif
 
 namespace bb = bbque;
 namespace br = bbque::res;
