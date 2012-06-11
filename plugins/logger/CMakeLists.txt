@@ -1,4 +1,7 @@
 
+
+if (CONFIG_EXTERNAL_LOG4CPP)
+
 #----- Check for required LOG4CPP library
 find_package(Log4CPP REQUIRED)
 
@@ -18,4 +21,6 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--gc-sections")
 
 #----- Linking dependencies
 target_link_libraries(bbque_logger_log4cpp ${LOG4CPP_LIBRARIES})
+
+endif (CONFIG_EXTERNAL_LOG4CPP)
 
