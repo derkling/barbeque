@@ -417,7 +417,7 @@ void * FifoRPC::Create(PF_ObjectParams *params) {
 	po::options_description fifo_rpc_opts_desc("FIFO RPC Options");
 	fifo_rpc_opts_desc.add_options()
 		(MODULE_NAMESPACE".dir", po::value<std::string>
-		 (&conf_fifo_dir)->default_value(BBQUE_PUBLIC_FIFO_PATH),
+		 (&conf_fifo_dir)->default_value(BBQUE_PATH_VAR),
 		 "path of the FIFO dir")
 		;
 	static po::variables_map fifo_rpc_opts_value;

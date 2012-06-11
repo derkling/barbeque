@@ -20,6 +20,7 @@
 
 #include "bbque/rtlib.h"
 
+#include "bbque/config.h"
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
 
@@ -28,9 +29,6 @@
 #include <cstdlib>
 #include <cstring>
 
-// NOTE: The Barbeque RTRM public FIFOs is defined by a configuration option of
-// the CMake building system
-#define BBQUE_PUBLIC_FIFO_PATH "${CONFIG_BOSP_RUNTIME_RWPATH}"
 #define BBQUE_PUBLIC_FIFO "rpc_fifo"
 
 #define BBQUE_FIFO_NAME_LENGTH 32
