@@ -52,6 +52,8 @@ public:
 	typedef time_point<system_clock> DeferredTime_t;
 	typedef std::function<void(void)> DeferredFunction_t;
 
+#define SCHEDULE_NONE milliseconds(0)
+
 	/**
 	 * @brief Build a new "on-demand" or "repetitive" deferrable object
 	 *
@@ -61,7 +63,7 @@ public:
 	 * each execution
 	 */
 	Deferrable(const char *name, DeferredFunction_t func = NULL,
-			milliseconds period = milliseconds(0));
+			milliseconds period = SCHEDULE_NONE);
 
 	/**
 	 * @brief Release all deferrable resources
@@ -84,6 +86,7 @@ public:
 	}
 
 #define SCHEDULE_NOW  milliseconds(0)
+
 	/**
 	 * @brief Schedule a new execution
 	 *
@@ -140,7 +143,6 @@ private:
 	 * @brief A timeout for the nearest execution time
 	 */
 	milliseconds next_timeout;
-#define SCHEDULE_NONE milliseconds(0)
 
 	/**
 	 * @brief The deferrable executor thread

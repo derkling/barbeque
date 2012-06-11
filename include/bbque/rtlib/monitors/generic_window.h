@@ -420,7 +420,7 @@ void GenericWindow<dataType>::setGoal(TargetsPtr targets) {
 
 template <typename dataType>
 void GenericWindow<dataType>::setCapacity(uint16_t windowSize) {
-	std::lock_guard <std::mutex> lg(windowMutex);
+	std::lock_guard<std::mutex> lg(windowMutex);
 	windowBuffer.set_capacity(windowSize);
 	resultsWindowSize = windowSize;
 }

@@ -43,17 +43,18 @@ Deferrable::Deferrable(const char *name,
 		assert(logger);
 	}
 
-	if (max_time == SCHEDULE_NONE)
+	if (max_time == SCHEDULE_NONE) {
 		logger->Debug("Starting new \"on-demand\" deferrable [%s]...",
 				Name());
-	else
+	} else {
 		logger->Debug("Starting new \"repetitive\" deferrable [%s], period %d[ms]...",
 				Name(), max_time);
+	}
 
 	// Spawn the executor thread
 	executor_thd = std::thread(&Deferrable::Executor, this);
 
-	// Start "periodis" deferrables
+	// Start "periodic" deferrables
 	Start();
 
 }
