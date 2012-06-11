@@ -327,6 +327,11 @@ ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t presp) {
 	if (presp->result != RTLIB_OK)
 		return presp->result;
 
+	// Give back the result to the calling thread
+	(presp->pcs->resp_prm).set_value(presp->result);
+	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+
 	return RTLIB_OK;
 
 }
@@ -343,12 +348,6 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t presp) {
 	// Run the Command Executor
 	SyncP_PreChange(presp->pcs, presp);
 
-	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
-			presp->pcs->pid, presp->pcs->papp->StrId());
-
-	// Give back the result to the calling thread
-	(presp->pcs->resp_prm).set_value(presp->result);
-
 	logger->Debug("APPs PRX [%05d]: SyncP_PreChangeTrd(%s) END",
 			presp->pcs->pid, presp->pcs->papp->StrId());
 }
@@ -360,6 +359,9 @@ ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp) {
 	assert(presp);
 
 	presp->pcs = SetupCmdSession(papp);
+
+	// Setup the promise
+	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
 
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
@@ -515,6 +517,11 @@ ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t presp) {
 	if (presp->result != RTLIB_OK)
 		return presp->result;
 
+	// Give back the result to the calling thread
+	(presp->pcs->resp_prm).set_value(presp->result);
+	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
+			presp->pcs->pid, presp->pcs->papp->StrId());
+
 	return RTLIB_OK;
 
 }
@@ -533,12 +540,6 @@ ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t presp) {
 	// Run the Command Executor
 	SyncP_SyncChange(presp->pcs, presp);
 
-	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
-			presp->pcs->pid, presp->pcs->papp->StrId());
-
-	// Give back the result to the calling thread
-	(presp->pcs->resp_prm).set_value(presp->result);
-
 	logger->Debug("APPs PRX [%05d]: SyncP_SyncChangeTrd(%s) END",
 			presp->pcs->pid, presp->pcs->papp->StrId());
 }
@@ -551,6 +552,9 @@ ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
 
 	presp->pcs = SetupCmdSession(papp);
 	assert(presp->pcs);
+
+	// Setup the promise
+	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
 
 	// Enqueuing the Command Session Handler
 	EnqueueHandler(presp->pcs);
