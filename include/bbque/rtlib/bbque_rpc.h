@@ -25,7 +25,8 @@
 #include "bbque/utils/timer.h"
 #include "bbque/cpp11/mutex.h"
 #include "bbque/cpp11/thread.h"
-#ifdef BBQUE_RTLIB_PERF_SUPPORT
+
+#ifdef CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 # include "bbque/utils/perf.h"
 #endif
 
@@ -172,7 +173,7 @@ public:
 protected:
 
 	typedef struct PerfEventAttr {
-#ifdef BBQUE_RTLIB_PERF_SUPPORT
+#ifdef CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 		perf_type_id type;
 #endif
 		uint64_t config;
@@ -223,12 +224,12 @@ protected:
 		accumulator_set<double,
 			stats<tag::min, tag::max, tag::variance>> samples;
 
-#ifdef BBQUE_RTLIB_PERF_SUPPORT
+#ifdef CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 		/** Map of registered Perf counters */
 		PerfEventStatsMap_t events_map;
 		/** Map registered Perf counters to their type */
 		PerfEventStatsMapByConf_t events_conf_map;
-#endif // BBQUE_RTLIB_PERF_SUPPORT
+#endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 		/** The mutex protecting concurrent access to statistical data */
 		std::mutex stats_mtx;
@@ -283,12 +284,12 @@ protected:
 		/** The time [ms] spent on processing */
 		uint32_t time_processing;
 
-#ifdef BBQUE_RTLIB_PERF_SUPPORT
+#ifdef CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 		/** Performance counters */
 		utils::Perf perf;
 		/** Map of registered Perf counter IDs */
 		PerfRegisteredEventsMap_t events_map;
-#endif // BBQUE_RTLIB_PERF_SUPPORT
+#endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 		/** Statistics on AWM's of this EXC */
 		AwmStatsMap_t stats;
@@ -730,7 +731,7 @@ private:
 /******************************************************************************
  * Performance Counters
  ******************************************************************************/
-#ifdef BBQUE_RTLIB_PERF_SUPPORT
+#ifdef CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 # define BBQUE_RTLIB_PERF_ENABLE true
 
@@ -794,7 +795,7 @@ private:
 # define PerfDisable(prec) {}
 # define PerfCollectStats(prec) {}
 # define PerfPrintStats(prec, pstats) {}
-#endif // BBQUE_RTLIB_PERF_SUPPORT
+#endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 };
 

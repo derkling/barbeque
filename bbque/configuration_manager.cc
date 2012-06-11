@@ -33,9 +33,9 @@ ConfigurationManager::ConfigurationManager() :
 #ifdef BBQUE_DEBUG
 	//dbg_opts_desc("Debugging Options"),
 #endif
-#ifdef BBQUE_TEST_PLATFORM_DATA
+#ifdef CONFIG_BBQUE_TEST_PLATFORM_DATA
 	tpd_opts_desc("TEST Platform Data Options"),
-#endif // BBQUE_TEST_PLATFORM_DATA
+#endif // CONFIG_BBQUE_TEST_PLATFORM_DATA
 	cmd_opts_desc("") {
 
 	// BBQ core options (exposed to command line)
@@ -85,7 +85,7 @@ ConfigurationManager::ConfigurationManager() :
 	//cmd_opts_desc.add(dbg_opts_desc);
 #endif
 
-#ifdef BBQUE_TEST_PLATFORM_DATA
+#ifdef CONFIG_BBQUE_TEST_PLATFORM_DATA
 	tpd_opts_desc.add_options()
 		("tpd.clusters", po::value<unsigned short>(&tpd_clusters_count)->
 			default_value(3),
@@ -99,7 +99,7 @@ ConfigurationManager::ConfigurationManager() :
 		;
 	all_opts_desc.add(tpd_opts_desc);
 	cmd_opts_desc.add(tpd_opts_desc);
-#endif // BBQUE_TEST_PLATFORM_DATA
+#endif // CONFIG_BBQUE_TEST_PLATFORM_DATA
 
 }
 

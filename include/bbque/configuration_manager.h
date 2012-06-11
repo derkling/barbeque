@@ -157,7 +157,7 @@ public:
 		return plugins_dir;
 	}
 
-#ifdef BBQUE_TEST_PLATFORM_DATA
+#ifdef CONFIG_BBQUE_TEST_PLATFORM_DATA
 	inline uint8_t  TPD_ClusterCount() const {
 		return tpd_clusters_count;
 	}
@@ -167,7 +167,7 @@ public:
 	inline uint8_t  TPD_PEsCount() const {
 		return tpd_pes_count;
 	}
-#endif
+#endif // CONFIG_BBQUE_TEST_PLATFORM_DATA
 
 private:
 
@@ -194,7 +194,7 @@ private:
 	//uint16_t test_run;
 #endif
 
-#ifdef BBQUE_TEST_PLATFORM_DATA
+#ifdef CONFIG_BBQUE_TEST_PLATFORM_DATA
 	/**
 	 * The description of TEST platform data parameters
 	 */
@@ -202,7 +202,7 @@ private:
 	unsigned short tpd_clusters_count;
 	uint16_t tpd_cluster_mem_mb;
 	unsigned short  tpd_pes_count;
-#endif
+#endif // CONFIG_BBQUE_TEST_PLATFORM_DATA
 
 	/**
 	 * The description of command line available parameters

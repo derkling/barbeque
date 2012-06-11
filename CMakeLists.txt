@@ -127,25 +127,6 @@ if (CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
 endif (CMAKE_INSTALL_PREFIX STREQUAL "/usr/local")
 
 
-################################################################################
-# User selectable options
-################################################################################
-
-# RPC Channel abstraction: use FIFO implementation (defaulf: YES)
-option (BBQUE_RPC_FIFO
-	"Build RTLib with FIFO channel support" ON)
-
-# Platform data: use hard-coded TEST configuration (defaulf: YES)
-option (BBQUE_TEST_PLATFORM_DATA
-	"Use TEST Platform Data instead of ResourceAbstraction module" OFF)
-
-# Performance Counters: enabled them on RTLib (defaulf: YES)
-option (BBQUE_RTLIB_PERF_SUPPORT
-	"Build RTLib with Performance Counters support" ON)
-
-# YaMS Scheduling Policy: enable parallelized metrics computation (defaulf: YES)
-option (BBQUE_SP_YAMS_PARALLEL
-	"Enable YaMS scheduling policy parallel execution" ON)
 
 ################################################################################
 # Lookup for library dependencies
@@ -239,11 +220,9 @@ message ( STATUS "   RTLib library...... <prefix>/${BBQUE_PATH_RTLIB}" )
 message ( STATUS "   Documentation...... <prefix>/${BBQUE_PATH_DOCS}" )
 message ( STATUS "Dependencies:")
 message ( STATUS "   Boost library...... ${Boost_LIBRARY_DIRS}" )
-
 message ( STATUS )
-message ( STATUS "Default values could be changes at command line, with:")
-message ( STATUS "  cmake -D<Variable>=<Value>" )
-message ( STATUS "or use the '-i' cmake flag to run in interactive mode" )
+message ( STATUS "To change build settings, run the configuration menu with:")
+message ( STATUS "   make menuconfig")
 message ( STATUS "======================================================"
                  "==========================" )
 message(STATUS)

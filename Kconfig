@@ -1,24 +1,64 @@
-config TEST_PLATFORM_DATA
-  bool "Include test platform data"
-  default n if TARGET_RUNNING
-  default y if TARGET_ANDROID_ARM
-  default y if TARGET_ARM
-  help
-	This options allows to build the BarbequeRTRM in Test Platform Mode.
-	When running in this modality, all the target specific platform control
-	facilities are disabled.
 
-	This could be a convenient way to use BBQ for initial application development
-	and integration without worry about daemon setup or running BBQ as root.
+comment "BarbequeRTRM Daemon Configuration"
 
-config RTLIB_PERF_SUPPORT
- bool "Enable Perf support on RTLIB"
- default y if TARGET_RUNNING
- default y if TARGET_ARM
- default n if TARGET_ANDROID_ARM
- help
-	This option has been added to conditionally
-	compile the Performance Counters code within the RTLib.
+choice
+  prompt "RPC Channel"
 
-	This is useful to port easily the RTLib on platforms not supporting
-	performance counters such as some Android devices with older kernels.
+  config BBQUE_RPC_FIFO
+    bool "FIFO based"
+    ---help---
+    Use the FIFO based RPC channel
+
+endchoice
+
+config BBQUE_TEST_PLATFORM_DATA
+  bool "Use Test Platform Data (TPD)"
+  default n
+  ---help---
+  Build the BarbequeRTRM with support for Test Platform Data.
+  When compiled with this option turned on, all the target specific
+  platform control facilities are disabled.
+
+  This could be a convenient way to use the BarbequeRTRM for initial
+  application development and integration, without worry about daemon
+  setup or requiring to run the daemon as root.
+
+comment "RTLib Configuration"
+
+config BBQUE_RTLIB_PERF_SUPPORT
+  bool "Enable Performance Counters support on RTLib"
+  depends on TARGET_LINUX
+  default y
+  ---help---
+  Build the Run-Time Library (RTLib) with support for Performance Counters.
+  these counters allows an application, which has been integrated with the
+  RTLib, to collect transparently a set of profiling information related
+  to the run-time execution.
+
+  This option is useful to port easily the RTLib on platforms not supporting
+  performance counters, such as some Android devices with older kernels.
+
+
+menu "Advanced options"
+
+config BBQUE_BUILD_DEBUG
+  bool "Build a DEBUG version"
+  default n
+  ---help---
+  Build the BarbequeRTRM with DEBUGGING support enabled.
+
+  This will produce a version of both the daemon and the RTLib with much more
+  logging messages and debug symbols, which is suitable for debugging purposes.
+
+comment "Scheduling Policies Configuration"
+
+config BBQUE_SP_YAMS_PARALLEL
+  bool "YaMS parallelized execution"
+  default y
+  ---help---
+  Build the YaMS policy with support for parallelized metrics computation.
+
+  Select this option if you plan to run the BarbequeRTRM daemon on a multi-core
+  host machine.
+
+endmenu # Advanced options

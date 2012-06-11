@@ -19,9 +19,9 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--gc-sections")
 set (RTLIB_SRC bbque_rtlib bbque_rpc ${PROJECT_BINARY_DIR}/bbque/version.cc)
 set (RTLIB_SRC bbque_exc ${RTLIB_SRC})
 
-if(BBQUE_RPC_FIFO)
+if (CONFIG_BBQUE_RPC_FIFO)
 	set (RTLIB_SRC rpc_fifo_client ${RTLIB_SRC})
-endif(BBQUE_RPC_FIFO)
+endif (CONFIG_BBQUE_RPC_FIFO)
 
 # Build subdirs
 add_subdirectory(monitors)

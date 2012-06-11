@@ -42,12 +42,12 @@ BbqueRPC * BbqueRPC::GetInstance() {
 	// Parse environment configuration
 	ParseOptions();
 
-#ifdef BBQUE_RPC_FIFO
+#ifdef CONFIG_BBQUE_RPC_FIFO
 	DB(fprintf(stderr, FMT_DBG("Using FIFO RPC channel\n")));
 	instance = new BbqueRPC_FIFO_Client();
 #else
 #error RPC Channel NOT defined
-#endif
+#endif // CONFIG_BBQUE_RPC_FIFO
 
 	return instance;
 }
@@ -1345,7 +1345,7 @@ RTLIB_ExitCode_t BbqueRPC::StopExecution(
 /*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
-#ifdef BBQUE_RTLIB_PERF_SUPPORT
+#ifdef CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 BbqueRPC::PerfEventAttr_t BbqueRPC::default_events[] = {
 
@@ -1891,7 +1891,7 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 	fprintf(stderr, " )");
 }
 
-#endif // BBQUE_RTLIB_PERF_SUPPORT
+#endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 /*******************************************************************************
  *    RTLib Notifiers Support
