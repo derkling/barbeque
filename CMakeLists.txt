@@ -186,9 +186,12 @@ link_directories(
 add_subdirectory (rtlib)
 add_subdirectory (plugins)
 add_subdirectory (bbque)
-add_subdirectory (test)
 add_subdirectory (tools)
 add_subdirectory (demos)
+if (CONFIG_BBQUE_BUILD_TESTS)
+add_subdirectory (test)
+endif (CONFIG_BBQUE_BUILD_TESTS)
+
 
 
 ################################################################################

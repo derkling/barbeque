@@ -50,6 +50,17 @@ config BBQUE_BUILD_DEBUG
   This will produce a version of both the daemon and the RTLib with much more
   logging messages and debug symbols, which is suitable for debugging purposes.
 
+config BBQUE_BUILD_TESTS
+  bool "Build the TEST suite"
+  default n
+  ---help---
+  Build the BarbequeRTRM test suite.
+
+  This will build also the set of regression tests used to verify framework
+  stability during development.
+  NOTE: this is an experimental and not completed feaure, leave un-selected is
+  unsure.
+
 comment "Scheduling Policies Configuration"
 
 config BBQUE_SP_YAMS_PARALLEL
