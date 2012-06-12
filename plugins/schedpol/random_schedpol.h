@@ -23,6 +23,7 @@
 #include "bbque/plugins/plugin.h"
 
 #include <cstdint>
+#include <random>
 
 #define SCHEDULER_POLICY_NAME "random"
 

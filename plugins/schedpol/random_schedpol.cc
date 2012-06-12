@@ -25,7 +25,6 @@
 #include "bbque/resource_accounter.h"
 
 #include <iostream>
-#include <random>
 
 namespace ba = bbque::app;
 namespace br = bbque::res;

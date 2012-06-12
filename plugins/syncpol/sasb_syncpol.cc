@@ -21,7 +21,6 @@
 #include "bbque/modules_factory.h"
 
 #include <iostream>
-#include <random>
 
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\

@@ -107,7 +107,7 @@ endif (CONFIG_TARGET_LINUX)
 # Add "Android-Linux" specific flags
 if (CONFIG_TARGET_ANDROID)
 set (BBQUE_TARGET_OS "Android-Linux")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -I../../../out/include -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ -D__STDINT_LIMITS -D__BIONIC__ -Wno-psabi -march=armv5te -mtune=xscale -msoft-float -fexceptions -frtti -mthumb -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++0x -I../../../out/include -D__ARM_ARCH_5__ -D__ARM_ARCH_5T__ -D__ARM_ARCH_5E__ -D__ARM_ARCH_5TE__ -D__STDINT_LIMITS -D_GLIBCXX_USE_C99_STDINT_TR1 -D__BIONIC__ -Wno-psabi -march=armv5te -mtune=xscale -msoft-float -fexceptions -frtti -mthumb -fomit-frame-pointer -fno-strict-aliasing -finline-limit=64 -DANDROID  -Wa,--noexecstack")
 # -ffunction-sections -fdata-sections -Wl,--gc-sections - REMOVED becaus of missing symbols
 endif (CONFIG_TARGET_ANDROID)
 
