@@ -58,24 +58,8 @@ typedef std::map<RViewToken_t, ResourceSetPtr_t> ResourceViewsMap_t;
 
 
 /**
- * @brief Resources accouting
- *
- * This component is used by the RTRM to do accounting of system resources.
- * Thus ResourceAccounter is in charge of estabilish if a resource usages
- * configuration (defined by the Scheduler/Optimizer module) is valid or not.
- *
- * On the front-side of the accounting mechanisms there are methods through
- * which an application can require a set of resources, using the scheduled
- * working mode as reference.
- *
- * ResourceAccounter keeps track of the state of each resource (amount used,
- * availables, total) and exposes methods for making query.
- *
- * Moreover it exploits the multi-view support of the Resource object. Such
- * feature allow a Scheduler/Optimizer module to do accounting, basing its
- * procedure on a temporary (initially empty) view of the resource states.
- * Once defined a valid configuration, a "commit" can be done. Setting the
- * view defined by the configuration found as the new resources system state.
+ * @brief Resources Accouter
+ * @ingroup sec07_ra
  */
 class ResourceAccounter: public ResourceAccounterConfIF {
 
@@ -648,8 +632,29 @@ private:
 
 };
 
-
 }   // namespace bbque
 
-#endif  // BBQUE_RESOURCE_ACCOUNTER_H_
+/******************************************************************************
+ *    Doxygen Module Documentation
+ ******************************************************************************/
+/**
+* @defgroup sec07_ra Resource Accounter
+*
+* ResourceAccounter is the BarbequeRTRM core module focusing the accounting of
+* the system resources, registered at boot time. This means that for each
+* resource this component provides information about total, used and available
+* amounts. One of the key aspects is the capability of handling multiple
+* <em>views</em> of the resource usages state. More in detail, there is a
+* <em>system resource state view</em>, which is the effective usage state of
+* the resources, along with other secondary views supporting the execution of
+* the scheduling policy. In other words, a specific policy can get an "empty"
+* view of resouce usages state and define a new resource assignment schema.
+*
+* To make effective the new resource allocations, the Resource Accounter
+* validate the scheduling decisions through the synchronization step.
+*
+* Basically Resource Accounter provides a set of methods for resource state
+* query, resource request and management of the state views.
+*/
 
+#endif // BBQUE_RESOURCE_ACCOUNTER_H_
