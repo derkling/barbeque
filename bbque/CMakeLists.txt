@@ -113,6 +113,7 @@ if (CONFIG_TARGET_ANDROID)
 target_link_libraries(
 	barbeque
 	-Wl,-whole-archive bbque_cpp11 -Wl,-no-whole-archive
+	-Wl,-whole-archive bbque_logger_android -Wl,-no-whole-archive
 )
 endif (CONFIG_TARGET_ANDROID)
 
