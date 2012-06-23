@@ -548,11 +548,11 @@ private:
 	 *
 	 * @param papp The Application/ExC using the resource
 	 * @param rsrc The resource descriptor of the resource binding
-	 * @param usage_val The amount of resource required
+	 * @param requested The amount of resource required
 	 * @param vtok The token referencing the resource state view
 	 */
 	void SchedResourceBooking(AppSPtr_t const & papp, ResourcePtr_t & rsrc,
-			uint64_t & usage_val, RViewToken_t vtok);
+			uint64_t & requested, RViewToken_t vtok);
 
 	/**
 	 * @brief Allocate a quota of resource in the synchronization case
@@ -563,10 +563,10 @@ private:
 	 *
 	 * @param papp The Application/ExC using the resource
 	 * @param rsrc The resource descriptor of the resource binding
-	 * @param usage_val The amount of resource required
+	 * @param requested The amount of resource required
 	 */
 	void SyncResourceBooking(AppSPtr_t const & papp, ResourcePtr_t & rsrc,
-			uint64_t & usage_val);
+			uint64_t & requested);
 
 	/**
 	 * @brief Decrement the resource usages counts

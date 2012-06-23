@@ -85,8 +85,7 @@ ResourceAccounter::~ResourceAccounter() {
  *                   LOGGER REPORTS                                     *
  ************************************************************************/
 
-void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
-		bool verbose) const {
+void ResourceAccounter::PrintStatusReport(RViewToken_t vtok, bool verbose) const {
 	std::set<std::string>::const_iterator path_it(paths.begin());
 	std::set<std::string>::const_iterator end_path(paths.end());
 	char rsrc_path_padded[30];
@@ -131,7 +130,8 @@ void ResourceAccounter::PrintStatusReport(RViewToken_t vtok,
 	PRINT_NOTICE_IF_VERBOSE(verbose, RP_DIV1);
 }
 
-void ResourceAccounter::PrintAppDetails(std::string const & path,
+void ResourceAccounter::PrintAppDetails(
+		std::string const & path,
 		RViewToken_t vtok,
 		bool verbose) const {
 	Resource::ExitCode_t res_result;
@@ -178,7 +178,8 @@ void ResourceAccounter::PrintAppDetails(std::string const & path,
  *                   QUERY METHODS                                      *
  ************************************************************************/
 
-uint64_t ResourceAccounter::QueryStatus(ResourcePtrList_t const & rsrc_list,
+uint64_t ResourceAccounter::QueryStatus(
+		ResourcePtrList_t const & rsrc_list,
 		QueryOption_t _att,
 		RViewToken_t vtok,
 		AppSPtr_t papp) const {
@@ -307,7 +308,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::RegisterResource(
 	return RA_SUCCESS;
 }
 
-ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppSPtr_t papp,
+ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(
+		AppSPtr_t papp,
 		UsagesMapPtr_t const & rsrc_usages,
 		RViewToken_t vtok,
 		bool do_check) {
@@ -364,7 +366,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(AppSPtr_t papp,
 void ResourceAccounter::ReleaseResources(AppSPtr_t papp, RViewToken_t vtok) {
 	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
 
-	// Check to avoid null pointer seg-fault
+	// Sanity check
 	if (!papp) {
 		logger->Fatal("Release: Null pointer to the application descriptor");
 		return;
@@ -400,7 +402,8 @@ void ResourceAccounter::ReleaseResources(AppSPtr_t papp, RViewToken_t vtok) {
  *                   STATE VIEWS MANAGEMENT                             *
  ************************************************************************/
 
-ResourceAccounter::ExitCode_t ResourceAccounter::GetView(std::string req_path,
+ResourceAccounter::ExitCode_t ResourceAccounter::GetView(
+		std::string req_path,
 		RViewToken_t & token) {
 	// Null-string check
 	if (req_path.empty()) {
@@ -498,6 +501,8 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
  ************************************************************************/
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
+	ResourceAccounter::ExitCode_t result;
+	char tk_path[TOKEN_PATH_MAX_LEN];
 	logger->Info("SyncMode: Start");
 	std::unique_lock<std::mutex>(sync_ssn.mtx);
 	// If the counter has reached the maximum, reset
@@ -507,21 +512,20 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 	}
 
 	// Build the path for getting the resource view token
-	char token_path[TOKEN_PATH_MAX_LEN];
-	snprintf(token_path, TOKEN_PATH_MAX_LEN, SYNC_RVIEW_PATH"%d",
-			++sync_ssn.count);
+	snprintf(tk_path, TOKEN_PATH_MAX_LEN, SYNC_RVIEW_PATH"%d", ++sync_ssn.count);
 	logger->Debug("SyncMode [%d]: Requiring resource state view for %s",
-			sync_ssn.count,	token_path);
+			sync_ssn.count,	tk_path);
 
-	// Set the flag and get the resources sync view
+	// Synchronization has started
 	sync_ssn.started = true;
-	if (GetView(token_path, sync_ssn.view) != RA_SUCCESS) {
+	// Get a resource state view for the synchronization
+	result = GetView(tk_path, sync_ssn.view);
+	if (result != RA_SUCCESS) {
 		logger->Fatal("SyncMode [%d]: Cannot get a resource state view",
 				sync_ssn.count);
 		SyncFinalize();
 		return RA_ERR_SYNC_VIEW;
 	}
-
 	logger->Debug("SyncMode [%d]: Resource state view token = %d",
 			sync_ssn.count,	sync_ssn.view);
 
@@ -543,7 +547,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncInit() {
 
 		// Re-acquire the resources (these should not have a "Next AWM"!)
 		result = BookResources(papp, papp->CurrentAWM()->GetResourceBinding(),
-						sync_ssn.view, false);
+				sync_ssn.view, false);
 		if (result != RA_SUCCESS) {
 			logger->Fatal("SyncInit [%d]: Resource booking failed for %s."
 					" Aborting sync session...", sync_ssn.count, papp->StrId());
@@ -587,19 +591,26 @@ void ResourceAccounter::SyncAbort() {
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
 	ResourceAccounter::ExitCode_t result = RA_SUCCESS;
-	if (SetView(sync_ssn.view) != sync_ssn.view) {
+	RViewToken_t view;
+
+	// Set the synchronization view as the new system one
+	view = SetView(sync_ssn.view);
+	if (view != sync_ssn.view) {
 		logger->Fatal("SyncMode [%d]: Unable to set the new system resource"
 				"state view", sync_ssn.count);
 		result = RA_ERR_SYNC_VIEW;
 	}
 
-	SyncFinalize();
+	// Release the last scheduled view, by setting it to the system view
 	if (result == RA_SUCCESS) {
-		logger->Info("SyncMode [%d]: Session committed", sync_ssn.count);
-		// Release the last scheduled view, by setting it to the system view
 		SetScheduledView(sys_view_token);
+		logger->Info("SyncMode [%d]: Session committed", sync_ssn.count);
 	}
 
+	// Finalize the synchronization
+	SyncFinalize();
+
+	// Log the status report
 	PrintStatusReport();
 	return result;
 }
@@ -608,10 +619,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
  *                   RESOURCE ACCOUNTING                                *
  ************************************************************************/
 
-void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
+void ResourceAccounter::IncBookingCounts(
+		UsagesMapPtr_t const & app_usages,
 		AppSPtr_t const & papp,
 		RViewToken_t vtok) {
-	ExitCode_t result;
+	ResourceAccounter::ExitCode_t result;
 
 	// Book resources for the application
 	UsagesMap_t::const_iterator usages_it(app_usages->begin());
@@ -623,11 +635,11 @@ void ResourceAccounter::IncBookingCounts(UsagesMapPtr_t const & app_usages,
 		logger->Debug("Booking: [%s] requires resource {%s}",
 				papp->StrId(), rsrc_path.c_str());
 
-		// Do booking for this resource
+		// Do booking for the current resource request
 		result = DoResourceBooking(papp, pusage, vtok);
 		if (result != RA_SUCCESS)  {
-			logger->Crit("Booking: unexpected fail! "
-					"%s [USG:%"PRIu64" | AV:%"PRIu64" | TOT:%"PRIu64"]",
+			logger->Crit("Booking: unexpected fail! %s "
+					"[USG:%"PRIu64" | AV:%"PRIu64" | TOT:%"PRIu64"]",
 				rsrc_path.c_str(), pusage->GetAmount(),
 				Available(rsrc_path, vtok, papp),
 				Total(rsrc_path));
@@ -648,8 +660,11 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		AppSPtr_t const & papp,
 		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
+	bool first_resource;
+	uint64_t  requested;
+
 	// When the first resource bind has been tracked this is set false
-	bool first_resource = false;
+	first_resource = false;
 
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
@@ -657,15 +672,14 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 	ResourceSetPtr_t & rsrc_set(rsrc_view->second);
 
 	// Amount of resource to book
-	uint64_t usage_val = pusage->GetAmount();
-	uint64_t request_val = usage_val;
+	requested = pusage->GetAmount();
 
 	// Get the list of resource binds
 	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
 	ResourcePtrListIterator_t end_it(pusage->GetBindingList().end());
 	for (; it_bind != end_it; ++it_bind) {
 		// Break if the required resource has been completely allocated
-		if (usage_val == 0)
+		if (requested == 0)
 			break;
 
 		// Add the current resource binding to the set of resources used in
@@ -675,13 +689,13 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 		// Synchronization: booking according to scheduling decisions
 		if (sync_ssn.started) {
-			SyncResourceBooking(papp, rsrc, usage_val);
+			SyncResourceBooking(papp, rsrc, requested);
 			continue;
 		}
 
 		// Scheduling: allocate required resource among its bindings
-		SchedResourceBooking(papp, rsrc, usage_val, vtok);
-		if ((request_val == usage_val) || first_resource)
+		SchedResourceBooking(papp, rsrc, requested, vtok);
+		if ((requested == pusage->GetAmount()) || first_resource)
 			continue;
 
 		// Keep track of the first resource granted from the bindings
@@ -696,13 +710,14 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 	// Critical error: The availability of resources mismatches the one
 	// checked in the scheduling phase. This should never happen!
-	if (usage_val != 0)
+	if (requested != 0)
 		return RA_ERR_USAGE_EXC;
 
 	return RA_SUCCESS;
 }
 
-bool ResourceAccounter::IsReshuffling(UsagesMapPtr_t const & pum_current,
+bool ResourceAccounter::IsReshuffling(
+		UsagesMapPtr_t const & pum_current,
 		UsagesMapPtr_t const & pum_next) {
 	ResourcePtrListIterator_t presa_it, presc_it;
 	UsagesMap_t::iterator auit, cuit;
@@ -745,27 +760,30 @@ bool ResourceAccounter::IsReshuffling(UsagesMapPtr_t const & pum_current,
 	return false;
 }
 
-inline void ResourceAccounter::SchedResourceBooking(AppSPtr_t const & papp,
+inline void ResourceAccounter::SchedResourceBooking(
+		AppSPtr_t const & papp,
 		ResourcePtr_t & rsrc,
-		uint64_t & usage_val,
+		uint64_t & requested,
 		RViewToken_t vtok) {
 	// Check the available amount in the current resource binding
-	uint64_t avail_amount = rsrc->Available(papp, vtok);
-	if (usage_val < avail_amount)
-		// If it is greater than the required amount, acquire the whole
-		// quantity from the current resource binding
-		usage_val -= rsrc->Acquire(papp, usage_val, vtok);
+	uint64_t available = rsrc->Available(papp, vtok);
+
+	// If it is greater than the required amount, acquire the whole
+	// quantity from the current resource binding, otherwise split
+	// it among sibling resource bindings
+	if (requested < available)
+		requested -= rsrc->Acquire(papp, requested, vtok);
 	else
-		// Otherwise split it among sibling resource bindings
-		usage_val -= rsrc->Acquire(papp, avail_amount, vtok);
+		requested -= rsrc->Acquire(papp, available, vtok);
 
 	logger->Debug("DoResBook: %s scheduled to use %s (%d left)",
-			papp->StrId(), rsrc->Name().c_str(), usage_val);
+			papp->StrId(), rsrc->Name().c_str(), requested);
 }
 
-inline void ResourceAccounter::SyncResourceBooking(AppSPtr_t const & papp,
+inline void ResourceAccounter::SyncResourceBooking(
+		AppSPtr_t const & papp,
 		ResourcePtr_t & rsrc,
-		uint64_t & usage_val) {
+		uint64_t & requested) {
 	// Skip the resource binding if the not assigned by the scheduler
 	uint64_t sched_usage = rsrc->ApplicationUsage(papp, sch_view_token);
 	if (sched_usage == 0)
@@ -773,12 +791,13 @@ inline void ResourceAccounter::SyncResourceBooking(AppSPtr_t const & papp,
 
 	// Acquire the resource according to the amount assigned by the
 	// scheduler
-	usage_val -= rsrc->Acquire(papp, sched_usage, sync_ssn.view);
+	requested -= rsrc->Acquire(papp, sched_usage, sync_ssn.view);
 	logger->Debug("DoResBook: %s acquires %s (%d left)",
-			papp->StrId(), rsrc->Name().c_str(), usage_val);
+			papp->StrId(), rsrc->Name().c_str(), requested);
 }
 
-void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
+void ResourceAccounter::DecBookingCounts(
+		UsagesMapPtr_t const & app_usages,
 		AppSPtr_t const & papp,
 		RViewToken_t vtok) {
 	// Maps of resource usages per Application/EXC
@@ -791,25 +810,28 @@ void ResourceAccounter::DecBookingCounts(UsagesMapPtr_t const & app_usages,
 	for (; usages_it != usages_end; ++usages_it) {
 		std::string const & rsrc_path(usages_it->first);
 		UsagePtr_t pusage(usages_it->second);
+
+		// Release the resources bound to the current request
 		UndoResourceBooking(papp, pusage, vtok);
-		logger->Debug("DecCount: [%s] has freed {%s} of %"PRIu64"", papp->StrId(),
-				rsrc_path.c_str(), pusage->GetAmount());
+		logger->Debug("DecCount: [%s] has freed {%s} of %"PRIu64"",
+				papp->StrId(), rsrc_path.c_str(), pusage->GetAmount());
 	}
 }
 
-void ResourceAccounter::UndoResourceBooking(AppSPtr_t const & papp,
+void ResourceAccounter::UndoResourceBooking(
+		AppSPtr_t const & papp,
 		UsagePtr_t & pusage,
 		RViewToken_t vtok) {
+	// Keep track of the amount of resource freed
+	uint64_t usage_freed = 0;
+
 	// Get the set of resources referenced in the view
 	ResourceViewsMap_t::iterator rsrc_view(rsrc_per_views.find(vtok));
 	ResourceSetPtr_t & rsrc_set(rsrc_view->second);
 
-	// Keep track of the amount of resource freed
-	uint64_t usage_freed = 0;
-
 	// For each resource binding release the amount allocated to the App/EXC
 	ResourcePtrListIterator_t it_bind(pusage->GetBindingList().begin());
-	ResourcePtrListIterator_t end_it(pusage->GetBindingList().end());
+	ResourcePtrListIterator_t  end_it(pusage->GetBindingList().end());
 	for(; usage_freed < pusage->GetAmount(); ++it_bind) {
 		assert(it_bind != end_it);
 
@@ -817,12 +839,9 @@ void ResourceAccounter::UndoResourceBooking(AppSPtr_t const & papp,
 		ResourcePtr_t & rsrc(*it_bind);
 		usage_freed += rsrc->Release(papp, vtok);
 
-		if (!rsrc_set)
-			continue;
-
 		// If no more applications are using this resource, remove it from
-		// the set of resources referenced in the view
-		if (rsrc->ApplicationsCount() == 0)
+		// the set of resources referenced in the resource state view
+		if ((rsrc_set) && (rsrc->ApplicationsCount() == 0))
 			rsrc_set->erase(rsrc);
 	}
 	assert(usage_freed == pusage->GetAmount());
