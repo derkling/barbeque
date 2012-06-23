@@ -345,7 +345,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::BookResources(
 	}
 
 	// Check resource availability (if this is not a sync session)
-	if ((do_check) && !(sync_ssn.started)) {
+	if ((do_check) && !(Synching())) {
 		if (CheckAvailability(rsrc_usages, vtok) == RA_ERR_USAGE_EXC) {
 			logger->Debug("Booking: Cannot allocate the resource set");
 			return RA_ERR_USAGE_EXC;
@@ -570,7 +570,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncAcquireResources(
 	UsagesMapPtr_t const &usages(papp->NextAWM()->GetResourceBinding());
 
 	// Check that we are in a synchronized session
-	if (!sync_ssn.started) {
+	if (!Synching()) {
 		logger->Error("SyncMode [%d]: Session not open", sync_ssn.count);
 		return RA_ERR_SYNC_START;
 	}
@@ -684,7 +684,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 		rsrc_set->insert(rsrc);
 
 		// Synchronization: booking according to scheduling decisions
-		if (sync_ssn.started) {
+		if (Synching()) {
 			SyncResourceBooking(papp, rsrc, requested);
 			continue;
 		}
@@ -701,7 +701,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::DoResourceBooking(
 
 	// Keep track of the last resource granted from the bindings (only if we
 	// are in the scheduling case)
-	if (!sync_ssn.started)
+	if (!Synching())
 		pusage->TrackLastBinding(papp, it_bind, vtok);
 
 	// Critical error: The availability of resources mismatches the one
