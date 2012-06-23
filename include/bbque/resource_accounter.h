@@ -615,6 +615,16 @@ private:
 	inline void SyncFinalize() {
 		sync_ssn.started = false;
 		sync_ssn.mtx.unlock();
+
+	/**
+	 * @brief Thread-safe checking of sychronization step in progress
+	 *
+	 * @return true if the synchronization of the resource accounting is in
+	 * progress, false otherwise
+	 */
+	inline bool Synching() {
+		std::unique_lock<std::mutex> sync_ul(sync_ssn.mtx);
+		return sync_ssn.started;
 	}
 
 	/**
