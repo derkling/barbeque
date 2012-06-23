@@ -585,7 +585,7 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncAcquireResources(
 void ResourceAccounter::SyncAbort() {
 	PutView(sync_ssn.view);
 	SyncFinalize();
-	logger->Info("SyncMode [%d]: Session aborted", sync_ssn.count);
+	logger->Error("SyncMode [%d]: Session aborted", sync_ssn.count);
 }
 
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncCommit() {
