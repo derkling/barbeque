@@ -392,10 +392,6 @@ void ResourceAccounter::ReleaseResources(AppSPtr_t papp, RViewToken_t vtok) {
 	DecBookingCounts(usemap_it->second, papp, vtok);
 	apps_usages->erase(papp->Uid());
 	logger->Debug("Release: [%s] resource release terminated", papp->StrId());
-
-	// Release resources from sync view
-	if ((sync_ssn.started) && (papp->Active()) && (vtok != sync_ssn.view))
-		ReleaseResources(papp, sync_ssn.view);
 }
 
 /************************************************************************
