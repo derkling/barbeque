@@ -499,8 +499,9 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 	ResourceAccounter::ExitCode_t result;
 	char tk_path[TOKEN_PATH_MAX_LEN];
+	std::unique_lock<std::mutex> sync_ul(sync_ssn.mtx);
 	logger->Info("SyncMode: Start");
-	std::unique_lock<std::mutex>(sync_ssn.mtx);
+
 	// If the counter has reached the maximum, reset
 	if (sync_ssn.count == std::numeric_limits<uint32_t>::max()) {
 		logger->Debug("SyncMode: Session counter reset");
@@ -514,6 +515,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::SyncStart() {
 
 	// Synchronization has started
 	sync_ssn.started = true;
+	sync_ul.unlock();
+
 	// Get a resource state view for the synchronization
 	result = GetView(tk_path, sync_ssn.view);
 	if (result != RA_SUCCESS) {

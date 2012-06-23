@@ -613,8 +613,9 @@ private:
 	 * "started" flag.
 	 */
 	inline void SyncFinalize() {
+		std::unique_lock<std::mutex> status_ul(sync_ssn.mtx);
 		sync_ssn.started = false;
-		sync_ssn.mtx.unlock();
+	}
 
 	/**
 	 * @brief Thread-safe checking of sychronization step in progress
