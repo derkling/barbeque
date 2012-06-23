@@ -37,18 +37,20 @@
 # Global parameters [0,100]
 msl.pe               = 75
 msl.mem              = 90
-awmvalue.weight      = 10
-reconfig.weight      = 2
-congestion.weight    = 10
+awmvalue.weight      = 20
+reconfig.weight      = 5
+congestion.weight    = 5
 fairness.weight      = 10
 # Contribute specific parameters
+awmvalue.penalty.pe    = 100
+awmvalue.penalty.mem   = 100
 reconfig.migfact       = 5
 congestion.expbase     = 2
 congestion.penalty.pe  = 25
 congestion.penalty.mem = 25
-fairness.expbase       = 2
-fairness.penalty.pe    = 0
-fairness.penalty.mem   = 0
+fairness.expbase       = 5
+fairness.penalty.pe    = 10
+fairness.penalty.mem   = 10
 
 ################################################################################
 # Synchronization Manager Options
