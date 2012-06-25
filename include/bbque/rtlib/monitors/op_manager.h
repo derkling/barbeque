@@ -28,6 +28,7 @@
 #include <bbque/monitors/metric_priority.h>
 #include <bbque/monitors/op_filter.h>
 
+namespace bbque { namespace rtlib { namespace as {
 
 /**
  * @brief Operating points manager
@@ -216,6 +217,12 @@ private:
 		PrioritiesList metricsPriorities;
 	};
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation

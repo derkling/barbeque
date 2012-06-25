@@ -25,6 +25,8 @@
 
 using namespace std;
 
+namespace bbque { namespace rtlib { namespace as {
+
 bool OPManager::operatingPointsComparator::operator()(const OperatingPoint &op1,
 						       const OperatingPoint &op2) const{
 	double val1;
@@ -133,3 +135,9 @@ void OPManager::setPolicy(PrioritiesList &orderingStrategy) {
 
 	vectorId = 0;
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
