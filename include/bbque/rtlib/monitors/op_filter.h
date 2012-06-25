@@ -47,10 +47,10 @@ const ComparisonFunctor GreaterOrEqual = std::greater_equal<double>();
  * This class provides a definition of a general filter on operating points.
  * Each filter consist of the name of a metric, a comparison function and a
  * value (eg. "Power" LessOrEqual 10). Using a list of filters such as
- * OP_FilterList, it's possible to filter out from a set of operating poins the
+ * OPFilterList, it's possible to filter out from a set of operating poins the
  * unwanted ones.
  */
-class OP_Filter{
+class OPFilter{
 public:
 	/**
 	 * @brief Name of the metric to filter
@@ -76,7 +76,7 @@ public:
 	 *  the filtering process
 	 * @param value Upper or Lower bound for the metric
 	 */
-	OP_Filter(std::string name, ComparisonFunctor cFunction, double value):
+	OPFilter(std::string name, ComparisonFunctor cFunction, double value):
 			 name(name), cFunction(cFunction), value(value) {
 
 	}
@@ -85,6 +85,6 @@ public:
 /**
  * @brief Defines a type for a vector of filters
  */
-typedef std::vector<OP_Filter> OP_FilterList;
+typedef std::vector<OPFilter> OPFilterList;
 
 #endif /* BBQUE_OP_FILTER_H_ */

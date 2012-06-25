@@ -101,7 +101,7 @@ public:
 	 * @param opFilters Reference to a filter list
 	 * @return True if a point has been found, otherwise False
 	 */
-	bool getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters);
+	bool getCurrentOP(OperatingPoint &op, const OPFilterList &opFilters);
 
 	/**
 	 * @brief Returns an higher operating point from the list that respects
@@ -114,7 +114,7 @@ public:
 	 * @param opFilters Reference to a filter list
 	 * @return True if a point has been found, otherwise False
 	 */
-	bool getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters);
+	bool getHigherOP(OperatingPoint &op, const OPFilterList &opFilters);
 
 	/**
 	 * @brief Returns a lower operating point from the list that respects
@@ -127,7 +127,7 @@ public:
 	 * @param opFilters Reference to a filter list
 	 * @return True if a point has been found, otherwise False
 	 */
-	bool getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters);
+	bool getLowerOP(OperatingPoint &op, const OPFilterList &opFilters);
 
 	/**
 	 * @brief Gets the next OperatingPoint
@@ -136,7 +136,7 @@ public:
 	 * @param opFilters Reference to a filter list
 	 * @return True if a point has been found, otherwise False
 	 */
-	bool getNextOP(OperatingPoint &op, const OP_FilterList &opFilters);
+	bool getNextOP(OperatingPoint &op, const OPFilterList &opFilters);
 
 	/**
 	 * @brief Set an ordering policy for operating points
@@ -177,7 +177,7 @@ private:
 	 * @return True if the point is valid, False otherwise
 	 */
 	bool isValidOP(const OperatingPoint &op,
-		       const OP_FilterList &opFilters) const;
+		       const OPFilterList &opFilters) const;
 
 	/**
 	 * @class operatingPointsComparator

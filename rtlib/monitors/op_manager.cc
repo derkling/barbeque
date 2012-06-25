@@ -66,10 +66,10 @@ bool OPManager::getHigherOP(OperatingPoint &op) {
 }
 
 bool OPManager::isValidOP(const OperatingPoint &op,
-			   const OP_FilterList &opFilters) const {
+			   const OPFilterList &opFilters) const {
 
 	bool result = true;
-	OP_FilterList::const_iterator filter = opFilters.begin();
+	OPFilterList::const_iterator filter = opFilters.begin();
 	std::map<std::string, double>::const_iterator mappedValue;
 
 	while (result && filter!=opFilters.end()) {
@@ -83,7 +83,7 @@ bool OPManager::isValidOP(const OperatingPoint &op,
 }
 
 
-bool OPManager::getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getCurrentOP(OperatingPoint &op, const OPFilterList &opFilters) {
 	if (isValidOP(operatingPoints[vectorId], opFilters)){
 		op = operatingPoints[vectorId];
 		return true;
@@ -97,7 +97,7 @@ bool OPManager::getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters)
 	return getHigherOP(op,opFilters);
 }
 
-bool OPManager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getLowerOP(OperatingPoint &op, const OPFilterList &opFilters) {
 	for (unsigned int id = vectorId + 1;id < operatingPoints.size(); ++id) {
 		if (isValidOP(operatingPoints[id],opFilters)){
 			vectorId = id;
@@ -108,7 +108,7 @@ bool OPManager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) {
 	return false;
 }
 
-bool OPManager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getHigherOP(OperatingPoint &op, const OPFilterList &opFilters) {
 	for (int id = vectorId-1;id > 0; --id){
 		if (isValidOP(operatingPoints[id], opFilters)){
 			vectorId = id;
@@ -119,7 +119,7 @@ bool OPManager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters) 
 	return false;
 }
 
-bool OPManager::getNextOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getNextOP(OperatingPoint &op, const OPFilterList &opFilters) {
 	/*
 	 * TODO Find a better search strategy. This one could be expensive
 	 * even if it is just O(n)

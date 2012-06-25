@@ -70,7 +70,7 @@ for (itc = opFilters.begin(); itc!=opFilters.end();++itc){\
 	}\
 }\
 if (!found) \
-	opFilters.push_back(OP_Filter(metricName, ComparisonFunctors::Less, \
+	opFilters.push_back(OPFilter(metricName, ComparisonFunctors::Less, \
 				      newConstraint));
 
 #define UPDATE_LOWER_BOUND()\
@@ -86,12 +86,12 @@ for (itc = opFilters.begin(); itc!=opFilters.end();++itc) {\
 		}\
 }\
 if (!found)\
-	opFilters.push_back(OP_Filter(metricName, ComparisonFunctors::Greater, \
+	opFilters.push_back(OPFilter(metricName, ComparisonFunctors::Greater, \
 				      newConstraint));
 
 void ApplicationSpecificRTM::adjustConstraints(const OperatingPoint &currentOp,
 					       const GoalInfoList &goalsInfo,
-					       OP_FilterList &opFilters,
+					       OPFilterList &opFilters,
 					       float switchThreshold) {
 
 	bool found;
@@ -105,7 +105,7 @@ void ApplicationSpecificRTM::adjustConstraints(const OperatingPoint &currentOp,
 	std::string metricName;
 
 	GoalInfoList::const_iterator it;
-	OP_FilterList::iterator itc;
+	OPFilterList::iterator itc;
 
 	for (it = goalsInfo.begin(); it != goalsInfo.end(); ++it) {
 		metricName = (*it)->metricName;
@@ -192,7 +192,7 @@ void ApplicationSpecificRTM::getNapAndRelativeError(const GoalInfoList &goalsInf
 }
 
 bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
-				       OP_FilterList &opFilters,
+				       OPFilterList &opFilters,
 				       float switchThreshold) {
 	uint8_t maxNap;
 	bool opChanged;
@@ -244,7 +244,7 @@ bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
 }
 
 bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
-				       OP_FilterList &opFilters,
+				       OPFilterList &opFilters,
 				       const GoalInfoList &goalsInfo,
 				       float switchThreshold) {
 	uint8_t maxNap;

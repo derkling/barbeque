@@ -113,7 +113,7 @@ public:
 	 */
 	void adjustConstraints(const OperatingPoint &currentOp,
 			       const GoalInfoList &goalsInfo,
-			       OP_FilterList &opFilters,
+			       OPFilterList &opFilters,
 			       float switchThreshold = 100.0);
 
 	/**
@@ -143,7 +143,7 @@ public:
 	 * @param switchThreshold threshold after which adjust a constraint of
 	 * an achieved goal
 	 */
-	bool getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
+	bool getNextOp(OperatingPoint& op, OPFilterList &opFilters,
 		       float switchThreshold = 100.0);
 
 	/**
@@ -159,7 +159,7 @@ public:
 	 * @param switchThreshold threshold after which adjust a constraint of
 	 * an achieved goal
 	 */
-	bool getNextOp(OperatingPoint& op, OP_FilterList &opFilters,
+	bool getNextOp(OperatingPoint& op, OPFilterList &opFilters,
 		       const GoalInfoList &goalsInfo,
 		       float switchThreshold = 100.0);
 
