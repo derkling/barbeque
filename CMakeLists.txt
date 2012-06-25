@@ -11,7 +11,6 @@ project (BarbequeRTRM)
 
 INCLUDE (${CONFIGPATH})
 
-message ( "Runtime path: " ${CONFIG_BOSP_RUNTIME_PATH} )
 ################################################################################
 # Installation items
 ################################################################################
@@ -50,6 +49,14 @@ endif (CMAKE_BUILD_TYPE STREQUAL "Debug")
 
 # Setup the CGroup-based Platform Integration Layers (PIL)
 set (BBQUE_PIL_CGROUP_MOUNT "mnt/cgroup")
+
+# Setup the RPATH and RWPATH
+if ("${CONFIG_BOSP_RUNTIME_PATH}" STREQUAL "")
+	set (CONFIG_BOSP_RUNTIME_PATH "${PROJECT_SOURCE_DIR}/../out")
+endif ("${CONFIG_BOSP_RUNTIME_PATH}" STREQUAL "")
+if ("${CONFIG_BOSP_RUNTIME_RWPATH}" STREQUAL "")
+	set (CONFIG_BOSP_RUNTIME_RWPATH "${PROJECT_SOURCE_DIR}/../out/var/bbque")
+endif ("${CONFIG_BOSP_RUNTIME_RWPATH}" STREQUAL "")
 
 SET(CMAKE_INSTALL_RPATH "${CONFIG_BOSP_RUNTIME_PATH}/lib")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
