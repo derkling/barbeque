@@ -18,6 +18,7 @@
 #ifndef BBQUE_METRIC_PRIORITY_H_
 #define BBQUE_METRIC_PRIORITY_H_
 
+namespace bbque { namespace rtlib { namespace as {
 
 /**
  * @brief Useful redefinition of a comparison function (via a functor) used by
@@ -71,5 +72,11 @@ public:
  * @brief Defines a type for a vector of MetricPriority
  */
 typedef std::vector<MetricPriority> PrioritiesList;
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 #endif /* BBQUE_METRIC_PRIORITY_H_ */

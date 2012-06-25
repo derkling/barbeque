@@ -24,6 +24,7 @@
 
 #include <bbque/monitors/op_filter.h>
 
+namespace bbque { namespace rtlib { namespace as {
 
 typedef class GoalInfo {
 public:
@@ -124,5 +125,11 @@ inline float GoalInfo::getMaxRelativeError() {
 	}
 	return maxValue;
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 #endif /*BBQUE_GOAL_INFO_H_ */

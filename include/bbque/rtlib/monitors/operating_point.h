@@ -22,6 +22,8 @@
 #include <string>
 #include <vector>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief  Operating point class definition
  * @ingroup rtlib_sec04_op
@@ -59,5 +61,11 @@ public:
  * @brief Defines a type for a vector of OperatingPoint pointers
  */
 typedef std::vector<OperatingPoint> OperatingPointsList;
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 #endif /* BBQUE_OPERATING_POINT_H_ */
