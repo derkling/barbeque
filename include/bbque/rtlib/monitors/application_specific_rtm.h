@@ -28,6 +28,8 @@
 
 using bbque::rtlib::BbqueEXC;
 
+namespace bbque { namespace rtlib { namespace as {
+
 typedef std::vector<GenericWindowIF*> GoalsList;
 
 /**
@@ -180,6 +182,12 @@ private:
 	 */
 	GoalsList goalsList;
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation

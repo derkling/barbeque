@@ -21,6 +21,8 @@
 #include <iostream>
 using std::vector;
 
+namespace bbque { namespace rtlib { namespace as {
+
 void ApplicationSpecificRTM::setGoals(GoalsList &goalsList) {
 	this->goalsList = goalsList;
 }
@@ -291,3 +293,9 @@ bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
 
 	return opChanged;
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
