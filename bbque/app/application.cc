@@ -457,8 +457,6 @@ Application::ExitCode_t Application::Enable() {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Disable() {
-	ResourceAccounter &ra(ResourceAccounter::GetInstance());
-	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex>
 		state_ul(schedule.mtx, std::defer_lock);
 
@@ -470,11 +468,6 @@ Application::ExitCode_t Application::Disable() {
 	}
 
 	state_ul.lock();
-
-	// Release resources
-	if (_CurrentAWM())
-		ra.ReleaseResources(am.GetApplication(Uid()));
-
 	// Mark the application has ready to run
 	SetState(DISABLED);
 	state_ul.unlock();
