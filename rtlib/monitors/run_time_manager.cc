@@ -19,6 +19,7 @@
 
 #include <bbque/monitors/run_time_manager.h>
 #include <iostream>
+
 using std::vector;
 
 namespace bbque { namespace rtlib { namespace as {

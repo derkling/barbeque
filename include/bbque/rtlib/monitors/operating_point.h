@@ -33,7 +33,7 @@ namespace bbque { namespace rtlib { namespace as {
  * Every operating point is defined by its own application parameters and a set
  * of metrics that describe the performance/behavior obtained using that set.
  */
-class OperatingPoint{
+class OperatingPoint {
 public:
 	/**
 	 * @brief List of parameters identified by their names and values
