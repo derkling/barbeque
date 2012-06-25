@@ -952,6 +952,7 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	AppPtr_t papp;
 
@@ -963,6 +964,10 @@ ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
 				"(Error: EXC not found)");
 		return AM_EXC_NOT_FOUND;
 	}
+
+	// Release resources
+	if (papp->CurrentAWM())
+		ra.ReleaseResources(papp);
 
 	return DestroyEXC(papp);
 }

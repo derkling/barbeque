@@ -93,13 +93,7 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 }
 
 Application::~Application() {
-	ResourceAccounter &ra(ResourceAccounter::GetInstance());
-	ApplicationManager &am(ApplicationManager::GetInstance());
 	logger->Debug("Destroying EXC [%s]", StrId());
-
-	// Release resources
-	if (CurrentAWM())
-		ra.ReleaseResources(am.GetApplication(Uid()));
 
 	// Release the recipe used
 	recipe.reset();
