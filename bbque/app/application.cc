@@ -95,12 +95,6 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 Application::~Application() {
 	logger->Debug("Destroying EXC [%s]", StrId());
 
-	// Release the recipe used
-	recipe.reset();
-
-	// Reset scheduling info
-	schedule.awm.reset();
-
 	// Releasing AWMs and ResourceConstraints...
 	awms.recipe_vect.clear();
 	awms.enabled_list.clear();
