@@ -390,8 +390,7 @@ Application::ExitCode_t Application::Terminate() {
 		return APP_FINISHED;
 	}
 
-
-	// Mark the application has finished
+	// Mark the application as finished
 	SetState(FINISHED);
 	state_ul.unlock();
 
@@ -450,8 +449,8 @@ Application::ExitCode_t Application::Disable() {
 		return APP_SUCCESS;
 	}
 
+	// Mark the application as ready to run
 	state_ul.lock();
-	// Mark the application has ready to run
 	SetState(DISABLED);
 	state_ul.unlock();
 
