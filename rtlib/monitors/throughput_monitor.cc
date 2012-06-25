@@ -22,6 +22,8 @@ using std::chrono::duration_cast;
 using std::chrono::duration;
 typedef std::chrono::monotonic_clock chr_mc;
 
+namespace bbque { namespace rtlib { namespace as {
+
 uint16_t ThroughputMonitor::newGoal(std::string metricName, double goal,
 				    uint16_t windowSize) {
 	ThroughputWindow::Target target(DataFunction::Average,
@@ -142,3 +144,9 @@ double ThroughputMonitor::getThroughput(double data) {
 	std::lock_guard<std::mutex> lg(timerMutex);
 	return _getThroughput(data);
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque

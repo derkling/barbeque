@@ -23,6 +23,8 @@
 #include <bbque/monitors/monitor.h>
 #include <bbque/monitors/throughput_window.h>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief A THROUGHPUT monitor
  * @ingroup rtlib_sec04_mon_thgpt
@@ -176,6 +178,12 @@ private:
 	 */
 	void _stop(uint16_t id, const double &data);
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation

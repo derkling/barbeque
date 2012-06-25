@@ -20,6 +20,8 @@
 
 #include <bbque/monitors/monitor.h>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief A MEMORY monitor
  * @ingroup rtlib_sec04_mon_memory
@@ -78,6 +80,12 @@ public:
 	uint32_t extractVmPeakSize();
 
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation

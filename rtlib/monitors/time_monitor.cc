@@ -23,6 +23,8 @@ using std::chrono::duration_cast;
 using std::chrono::duration;
 typedef std::chrono::monotonic_clock chr_mc;
 
+namespace bbque { namespace rtlib { namespace as {
+
 uint16_t TimeMonitor::newGoal(std::string metricName, uint32_t goal,
 			      uint16_t windowSize) {
 	TimeWindow::Target target(DataFunction::Average,
@@ -157,3 +159,9 @@ double TimeMonitor::getElapsedTimeUs() {
 	_stop();
 	return (duration_cast<duration<double, std::micro>>(tStop - tStart).count());
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque

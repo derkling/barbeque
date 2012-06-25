@@ -25,6 +25,8 @@
 
 #include <bbque/monitors/generic_window.h>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief A generic monitor
  * @ingroup rtlib_sec04_mon
@@ -329,6 +331,12 @@ inline void Monitor <dataType>::addElement(uint16_t id, dataType element) {
 		return;
 	it->second->addElement(element);
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation

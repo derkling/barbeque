@@ -19,6 +19,8 @@
 
 #include "bbque/rtlib/monitors/memory_monitor.h"
 
+namespace bbque { namespace rtlib { namespace as {
+
 uint16_t MemoryMonitor::newGoal(std::string metricName, uint32_t goal) {
 	return Monitor::newGoal(metricName,
 				DataFunction::Average,
@@ -78,3 +80,9 @@ uint32_t MemoryMonitor::extractVmPeakSize() {
 
 	return vmPeak_Kb;
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque

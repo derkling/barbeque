@@ -25,6 +25,8 @@
 
 #include <memory>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief A TIME monitor
  * @ingroup rtlib_sec04_mon_time
@@ -188,6 +190,12 @@ private:
 	void _stop(uint16_t id);
 
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation
