@@ -21,6 +21,8 @@
 #include <string>
 #include <vector>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief Useful definition for a comparison function (via a functor)
  */
@@ -86,5 +88,11 @@ public:
  * @brief Defines a type for a vector of filters
  */
 typedef std::vector<OPFilter> OPFilterList;
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 #endif /* BBQUE_OP_FILTER_H_ */
