@@ -43,7 +43,7 @@ uint32_t MemoryMonitor::extractMemoryUsage() {
 	//The second number in /proc/self/statm is VmRSS in pages
 	//TODO decide whether use VmRSS or VmRSS - sharedPages
 	FILE* fp = fopen("/proc/self/statm", "r");
-	result = ::fscanf(fp, "%*d %u", &memoryUsageKb);
+	result = ::fscanf(fp, "%*d %"SCNu32, &memoryUsageKb);
 	if (result == EOF) {
 		perror("MemoryMonitor read FAILED");
 		fclose(fp);	//Is it safe to close it here? Is fp valid?
@@ -73,7 +73,7 @@ uint32_t MemoryMonitor::extractVmPeakSize() {
 		}
 		if (strncmp(buf, "VmPeak:", 7))
 			continue;
-		sscanf(buf, "%*s %d", &vmPeak_Kb);
+		sscanf(buf, "%*s %"SCNu32, &vmPeak_Kb);
 		fclose(fp);
 		return vmPeak_Kb ;
 	}
