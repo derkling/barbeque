@@ -37,20 +37,18 @@ uint16_t MemoryMonitor::newGoal(std::string metricName, uint32_t goal,
 }
 
 uint32_t MemoryMonitor::extractMemoryUsage() {
+	std::shared_ptr<FILE> fp(fopen("/proc/self/statm", "r"), fclose);
 	uint32_t memoryUsageKb = 0;
 	int result;
 
 	//The second number in /proc/self/statm is VmRSS in pages
 	//TODO decide whether use VmRSS or VmRSS - sharedPages
-	FILE* fp = fopen("/proc/self/statm", "r");
-	result = ::fscanf(fp, "%*d %"SCNu32, &memoryUsageKb);
+	result = ::fscanf(fp.get(), "%*d %"SCNu32, &memoryUsageKb);
 	if (result == EOF) {
 		perror("MemoryMonitor read FAILED");
-		fclose(fp);	//Is it safe to close it here? Is fp valid?
 		return 0;
 	}
 
-	fclose(fp);
 	return (memoryUsageKb * getpagesize() / 1024);
 }
 
@@ -61,23 +59,22 @@ uint32_t MemoryMonitor::extractMemoryUsage(uint16_t id) {
 }
 
 uint32_t MemoryMonitor::extractVmPeakSize() {
+	std::shared_ptr<FILE> fp(fopen("/proc/self/status", "r"), fclose);
 	uint32_t vmPeak_Kb = 0;
 	char buf[256];
 
-	FILE* fp = fopen("/proc/self/status", "r");
-	while (!feof(fp)) {
-		if (fgets(buf, 256, fp) == NULL) {
+	while (!feof(fp.get())) {
+		if (fgets(buf, 256, fp.get()) == NULL) {
 			perror("MemoryMonitor read FAILED");
-			fclose(fp);	//Is it safe to close it here? Is fp valid?
 			return 0;
 		}
+
 		if (strncmp(buf, "VmPeak:", 7))
 			continue;
+
 		sscanf(buf, "%*s %"SCNu32, &vmPeak_Kb);
-		fclose(fp);
 		return vmPeak_Kb ;
 	}
 
-	fclose(fp);
 	return vmPeak_Kb;
 }
