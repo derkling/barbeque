@@ -22,6 +22,8 @@
 
 #include <bbque/monitors/generic_window.h>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief A TIME data window
  * @ingroup rtlib_sec04_mon_time
@@ -68,5 +70,11 @@ public:
 	bool started;
 
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 #endif /* BBQUE_TIME_WINDOW_H_ */

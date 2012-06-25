@@ -37,6 +37,10 @@
 #include <iostream>
 #include <bbque/monitors/goal_info.h>
 
+namespace bac = boost::accumulators;
+
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief Name of the metric used for goal checking
  */
@@ -56,8 +60,6 @@ enum class ComparisonFunction:uint8_t {
 	Less,
 	LessOrEqual
 };
-
-namespace bac = boost::accumulators;
 
 /**
  * @brief Default size of the window of samples
@@ -559,6 +561,12 @@ template <typename dataType>
 inline void GenericWindow <dataType>::resetResultsWindow() {
 	resultsWindowSize = windowBuffer.capacity();
 }
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 /*******************************************************************************
  *    Doxygen Module Documentation

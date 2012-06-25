@@ -22,6 +22,8 @@
 
 #include <bbque/monitors/generic_window.h>
 
+namespace bbque { namespace rtlib { namespace as {
+
 /**
  * @brief A THROUGHPUT data window
  * @ingroup rtlib_sec04_mon_thgpt
@@ -70,5 +72,11 @@ public:
 	std::chrono::monotonic_clock::time_point tStop;
 
 };
+
+} // namespace as
+
+} // namespace rtlib
+
+} // namespace bbque
 
 #endif /* BBQUE_THROUGHPUT_WINDOW_H_ */
