@@ -391,8 +391,6 @@ void Application::SetState(State_t state, SyncState_t sync) {
  ******************************************************************************/
 
 Application::ExitCode_t Application::Terminate() {
-	ResourceAccounter &ra(ResourceAccounter::GetInstance());
-	ApplicationManager &am(ApplicationManager::GetInstance());
 	std::unique_lock<std::recursive_mutex> state_ul(schedule.mtx);
 
 	// This is to enforce a single removal of an EXC, indeed, due to
@@ -404,9 +402,6 @@ Application::ExitCode_t Application::Terminate() {
 		return APP_FINISHED;
 	}
 
-	// Release resources
-	if (_CurrentAWM())
-		ra.ReleaseResources(am.GetApplication(Uid()));
 
 	// Mark the application has finished
 	SetState(FINISHED);
