@@ -53,10 +53,10 @@ public:
 	 *
 	 * @param Pointer to a BbqueEXC. It is be used to communicate with
 	 * Barbeque
-	 * @param opManager Pointer to the OP_Manager of an Execution Context.
+	 * @param opManager Pointer to the OPManager of an Execution Context.
 	 * It is used to to have a knowledge of operating points
 	 */
-	ApplicationSpecificRTM(BbqueEXC *bbqexc, OP_Manager &opManager)
+	ApplicationSpecificRTM(BbqueEXC *bbqexc, OPManager &opManager)
 			: bbqexc(bbqexc), opManager(opManager) {
 
 	}
@@ -66,12 +66,12 @@ public:
 	 *
 	 * @param bbqexc Pointer to a BbqueEXC.It is be used to communicate with
 	 * Barbeque
-	 * @param opManager Reference to the OP_Manager of an Execution Context.
+	 * @param opManager Reference to the OPManager of an Execution Context.
 	 * It is used to to have a knowledge of operating points
 	 * @param goalsList Reference to a list of goals to register for the use
 	 * with ApplicationSpecificRTM
 	 */
-	ApplicationSpecificRTM(BbqueEXC *bbqexc, OP_Manager &opManager,
+	ApplicationSpecificRTM(BbqueEXC *bbqexc, OPManager &opManager,
 			GoalsList &goalsList)
 			: bbqexc(bbqexc),
 			  opManager(opManager),
@@ -170,10 +170,10 @@ private:
 	BbqueEXC *bbqexc;
 
 	/**
-	 * OP_Manager of an Execution Context. It is used to have a knowledge of
+	 * OPManager of an Execution Context. It is used to have a knowledge of
 	 * operating points
 	 */
-	OP_Manager opManager;
+	OPManager opManager;
 
 	/**
 	 * List of goals to register for the use with ApplicationRTRM

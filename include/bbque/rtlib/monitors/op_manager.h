@@ -40,14 +40,14 @@
  * possible to move between different operating points according to priorities
  * and filters given by the user.
  */
-class OP_Manager {
+class OPManager {
 
 public:
 
 	/**
 	 * @brief Constructor of the class
 	 */
-	OP_Manager() {
+	OPManager() {
 		vectorId = 0;
 	}
 
@@ -56,7 +56,7 @@ public:
 	 *
 	 * @param opList List of operating points
 	 */
-	OP_Manager(OperatingPointsList opList, PrioritiesList metricsPriorities)
+	OPManager(OperatingPointsList opList, PrioritiesList metricsPriorities)
 			: operatingPoints(opList) {
 				vectorId = 0;
 				setPolicy(metricsPriorities);

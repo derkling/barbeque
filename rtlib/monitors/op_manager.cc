@@ -25,7 +25,7 @@
 
 using namespace std;
 
-bool OP_Manager::operatingPointsComparator::operator()(const OperatingPoint &op1,
+bool OPManager::operatingPointsComparator::operator()(const OperatingPoint &op1,
 						       const OperatingPoint &op2) const{
 	double val1;
 	double val2;
@@ -41,12 +41,12 @@ bool OP_Manager::operatingPointsComparator::operator()(const OperatingPoint &op1
 	return false;
 }
 
-bool OP_Manager::getCurrentOP(OperatingPoint &op) {
+bool OPManager::getCurrentOP(OperatingPoint &op) {
 	op = operatingPoints[vectorId];
 	return true;
 }
 
-bool OP_Manager::getLowerOP(OperatingPoint &op) {
+bool OPManager::getLowerOP(OperatingPoint &op) {
 	if (vectorId >= (operatingPoints.size()-1))
 		return false;
 
@@ -55,7 +55,7 @@ bool OP_Manager::getLowerOP(OperatingPoint &op) {
 	return true;
 }
 
-bool OP_Manager::getHigherOP(OperatingPoint &op) {
+bool OPManager::getHigherOP(OperatingPoint &op) {
 	if (vectorId == 0)
 		return false;
 
@@ -63,7 +63,7 @@ bool OP_Manager::getHigherOP(OperatingPoint &op) {
 	return true;
 }
 
-bool OP_Manager::isValidOP(const OperatingPoint &op,
+bool OPManager::isValidOP(const OperatingPoint &op,
 			   const OP_FilterList &opFilters) const {
 
 	bool result = true;
@@ -81,7 +81,7 @@ bool OP_Manager::isValidOP(const OperatingPoint &op,
 }
 
 
-bool OP_Manager::getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters) {
 	if (isValidOP(operatingPoints[vectorId], opFilters)){
 		op = operatingPoints[vectorId];
 		return true;
@@ -95,7 +95,7 @@ bool OP_Manager::getCurrentOP(OperatingPoint &op, const OP_FilterList &opFilters
 	return getHigherOP(op,opFilters);
 }
 
-bool OP_Manager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) {
 	for (unsigned int id = vectorId + 1;id < operatingPoints.size(); ++id) {
 		if (isValidOP(operatingPoints[id],opFilters)){
 			vectorId = id;
@@ -106,7 +106,7 @@ bool OP_Manager::getLowerOP(OperatingPoint &op, const OP_FilterList &opFilters) 
 	return false;
 }
 
-bool OP_Manager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters) {
 	for (int id = vectorId-1;id > 0; --id){
 		if (isValidOP(operatingPoints[id], opFilters)){
 			vectorId = id;
@@ -117,7 +117,7 @@ bool OP_Manager::getHigherOP(OperatingPoint &op, const OP_FilterList &opFilters)
 	return false;
 }
 
-bool OP_Manager::getNextOP(OperatingPoint &op, const OP_FilterList &opFilters) {
+bool OPManager::getNextOP(OperatingPoint &op, const OP_FilterList &opFilters) {
 	/*
 	 * TODO Find a better search strategy. This one could be expensive
 	 * even if it is just O(n)
@@ -126,7 +126,7 @@ bool OP_Manager::getNextOP(OperatingPoint &op, const OP_FilterList &opFilters) {
 	return getCurrentOP(op, opFilters);
 }
 
-void OP_Manager::setPolicy(PrioritiesList &orderingStrategy) {
+void OPManager::setPolicy(PrioritiesList &orderingStrategy) {
 	sort(operatingPoints.begin(),
 	     operatingPoints.end(),
 	     operatingPointsComparator(orderingStrategy));
