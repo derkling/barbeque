@@ -40,13 +40,13 @@ typedef std::vector<GenericWindowIF*> GoalsList;
  * This class provides the ApplicationRTM, used to communicate between the
  * applications and Barbeque
  */
-class ApplicationSpecificRTM {
+class RunTimeManager {
 
 public:
 	/**
 	 * @brief Default constructor of the class
 	 */
-	ApplicationSpecificRTM() {
+	RunTimeManager() {
 
 	}
 
@@ -58,7 +58,7 @@ public:
 	 * @param opManager Pointer to the OPManager of an Execution Context.
 	 * It is used to to have a knowledge of operating points
 	 */
-	ApplicationSpecificRTM(BbqueEXC *bbqexc, OPManager &opManager)
+	RunTimeManager(BbqueEXC *bbqexc, OPManager &opManager)
 			: bbqexc(bbqexc), opManager(opManager) {
 
 	}
@@ -71,9 +71,9 @@ public:
 	 * @param opManager Reference to the OPManager of an Execution Context.
 	 * It is used to to have a knowledge of operating points
 	 * @param goalsList Reference to a list of goals to register for the use
-	 * with ApplicationSpecificRTM
+	 * with RunTimeManager
 	 */
-	ApplicationSpecificRTM(BbqueEXC *bbqexc, OPManager &opManager,
+	RunTimeManager(BbqueEXC *bbqexc, OPManager &opManager,
 			GoalsList &goalsList)
 			: bbqexc(bbqexc),
 			  opManager(opManager),
@@ -82,7 +82,7 @@ public:
 	}
 
 	/**
-	 * @brief Sets the GoalsList to use inside ApplicationSpecificRTM
+	 * @brief Sets the GoalsList to use inside RunTimeManager
 	 * @param goalsList reference to a list of goals
 	 */
 	void setGoals(GoalsList &goalsList);

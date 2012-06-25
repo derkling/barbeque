@@ -17,17 +17,17 @@
 
 #include <cmath>
 
-#include <bbque/monitors/application_specific_rtm.h>
+#include <bbque/monitors/run_time_manager.h>
 #include <iostream>
 using std::vector;
 
 namespace bbque { namespace rtlib { namespace as {
 
-void ApplicationSpecificRTM::setGoals(GoalsList &goalsList) {
+void RunTimeManager::setGoals(GoalsList &goalsList) {
 	this->goalsList = goalsList;
 }
 
-bool ApplicationSpecificRTM::checkGoals(GoalInfoList &goalsInfo) {
+bool RunTimeManager::checkGoals(GoalInfoList &goalsInfo) {
 
 	bool result = true;
 	GoalInfoPtr goalInfo;
@@ -91,7 +91,7 @@ if (!found)\
 	opFilters.push_back(OPFilter(metricName, ComparisonFunctors::Greater, \
 				      newConstraint));
 
-void ApplicationSpecificRTM::adjustConstraints(const OperatingPoint &currentOp,
+void RunTimeManager::adjustConstraints(const OperatingPoint &currentOp,
 					       const GoalInfoList &goalsInfo,
 					       OPFilterList &opFilters,
 					       float switchThreshold) {
@@ -162,7 +162,7 @@ void ApplicationSpecificRTM::adjustConstraints(const OperatingPoint &currentOp,
 #endif
 }
 
-void ApplicationSpecificRTM::getNapAndRelativeError(const GoalInfoList &goalsInfo,
+void RunTimeManager::getNapAndRelativeError(const GoalInfoList &goalsInfo,
 		uint8_t &maxNap, float &maxRelativeError) {
 
 	vector<uint8_t> maxNaps;
@@ -193,7 +193,7 @@ void ApplicationSpecificRTM::getNapAndRelativeError(const GoalInfoList &goalsInf
 
 }
 
-bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
+bool RunTimeManager::getNextOp(OperatingPoint& op,
 				       OPFilterList &opFilters,
 				       float switchThreshold) {
 	uint8_t maxNap;
@@ -245,7 +245,7 @@ bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
 	return opChanged;
 }
 
-bool ApplicationSpecificRTM::getNextOp(OperatingPoint& op,
+bool RunTimeManager::getNextOp(OperatingPoint& op,
 				       OPFilterList &opFilters,
 				       const GoalInfoList &goalsInfo,
 				       float switchThreshold) {
