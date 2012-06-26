@@ -292,6 +292,22 @@ RTLIB_ExitCode_t BbqueEXC::onRelease() {
 }
 
 /*******************************************************************************
+ *    Cycles Per Second (CPS) Control Support
+ ******************************************************************************/
+
+RTLIB_ExitCode_t BbqueEXC::SetCPS(float cps) {
+	DB(fprintf(stderr, FMT_DBG("Set cycles-rate to [%.3f] [Hz] for EXC [%s] (@%p)...\n"),
+			cps, exc_name.c_str(), (void*)exc_hdl));
+	return rtlib->CPS.Set(exc_hdl, cps);
+}
+
+RTLIB_ExitCode_t BbqueEXC::SetCTimeUs(uint32_t us) {
+	DB(fprintf(stderr, FMT_DBG("Set cycles-time to [%"PRIu32"] [us] for EXC [%s] (@%p)...\n"),
+			us, exc_name.c_str(), (void*)exc_hdl));
+	return rtlib->CPS.SetCTimeUs(exc_hdl, us);
+}
+
+/*******************************************************************************
  *    Constraints Management
  ******************************************************************************/
 
