@@ -2103,8 +2103,24 @@ void BbqueRPC::NotifyPreMonitor(
 
 void BbqueRPC::NotifyPostMonitor(
 	RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	assert(ech);
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return;
+	}
+	assert(isRegistered(prec) == true);
+
 	DB(fprintf(stderr, FMT_DBG("<=== NotifyMonitor\n")));
-	(void)ech;
+
+	// CPS Enforcing
+	if (prec->cps_expect != 0)
+		ForceCPS(prec);
+
+
 }
 
 void BbqueRPC::NotifyPreSuspend(
