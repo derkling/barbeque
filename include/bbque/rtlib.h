@@ -583,6 +583,53 @@ typedef RTLIB_ExitCode_t (*RTLIB_GetWorkingMode_t)(
 
 /**@}*/
 
+
+/*******************************************************************************
+ *    Cycles Per Second (CPS) Control Support
+ ******************************************************************************/
+
+/**
+ * @name CPS Management Functions
+ *
+ * ADD DESCRIPTION HERE
+ *
+ * @{
+ */
+
+/**
+ * @brief Setup the Cycles Per Seconds (CPS) support
+ * @ingroup rtlib_sec03_plain_cps
+ *
+ * The RTLib provides the support to enforce a certain maximum cycles rate.
+ * If a (not null) CPS has been specified, at run-time the library monitors
+ * the time required by a cycle run and eventually add a suitable delay in
+ * order to obtain the required cycles rate.
+ *
+ * @param ech the handler of the EXC to configure
+ * @param cps the required Cycles Per Seconds [Hz]
+ */
+typedef RTLIB_ExitCode_t (*RTLIB_CPS_Set)(
+		RTLIB_ExecutionContextHandler_t ech,
+		float cps);
+
+/**
+ * @brief Setup the Cycles Time [us] support
+ * @ingroup rtlib_sec03_plain_cps
+ *
+ * The RTLib provides the support to enforce a certain minimum cycles time.
+ * If a (not null) [us] timing has been specified, at run-time the library
+ * monitors the time required by a cycle run and eventually add a suitable
+ * delay in order to obtain the required cycles execution time.
+ *
+ * @param ech the handler of the EXC to configure
+ * @param cps the required Cycles Per Seconds [Hz]
+ */
+typedef RTLIB_ExitCode_t (*RTLIB_CPS_CTimeUs)(
+		RTLIB_ExecutionContextHandler_t ech,
+		uint32_t us);
+
+/**@}*/
+
 /*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
@@ -855,6 +902,12 @@ struct RTLIB_Services {
 	 * context" */
 	RTLIB_Unregister_t Unregister;
 
+	/* Cycles Time Control interface */
+	struct {
+		RTLIB_CPS_Set Set;
+		RTLIB_CPS_CTimeUs SetCTimeUs;
+	} CPS;
+
 	/* Performance estimation and notification interface */
 	struct {
 		/** Setup notifier */
@@ -1022,6 +1075,14 @@ inline char const *RTLIB_ErrorStr(RTLIB_ExitCode_t result) {
  * @ingroup rtlib_sec03_plain
  *
  * ADD MORE DETAILS HERE (Run-Time Management)
+ *
+ */
+
+/**
+ * @defgroup rtlib_sec03_plain_cps Cycles Time Control
+ * @ingroup rtlib_sec03_plain
+ *
+ * ADD MORE DETAILS HERE (Cycles Time)
  *
  */
 

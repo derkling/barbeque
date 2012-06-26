@@ -97,6 +97,23 @@ static RTLIB_ExitCode_t rtlib_ggap(
 	return rpc->GGap(ech, gap);
 }
 
+
+/*******************************************************************************
+ *    Cycles Per Second (CPS) Control Support
+ ******************************************************************************/
+
+static RTLIB_ExitCode_t rtlib_cps_set(
+		RTLIB_ExecutionContextHandler_t ech,
+		float cps) {
+	return rpc->SetCPS(ech, cps);
+}
+
+static RTLIB_ExitCode_t rtlib_cps_set_ctime_us(
+		RTLIB_ExecutionContextHandler_t ech,
+		uint32_t us) {
+	return rpc->SetCTimeUs(ech, us);
+}
+
 /*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
@@ -202,6 +219,10 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.SetGoalGap = rtlib_ggap;
 	rtlib_services.Disable = rtlib_disable;
 	rtlib_services.Unregister = rtlib_unregister;
+
+	// Cycles Time Control interface
+	rtlib_services.CPS.Set = rtlib_cps_set;
+	rtlib_services.CPS.SetCTimeUs = rtlib_cps_set_ctime_us;
 
 	// Performance monitoring notifiers
 	rtlib_services.Notify.Setup = rtlib_notify_setup;
