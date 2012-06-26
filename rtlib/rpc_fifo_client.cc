@@ -37,7 +37,7 @@
 #define RPC_FIFO_SEND_SIZE(RPC_MSG, SIZE)\
 DB(fprintf(stderr, FMT_DBG("Tx [" #RPC_MSG "] Request "\
 				"FIFO_HDR [sze: %hd, off: %hd, typ: %hd], "\
-				"RPC_HDR [typ: %d, pid: %d, eid: %hd], Bytes: %"PRIu8"...\n"),\
+				"RPC_HDR [typ: %d, pid: %d, eid: %"PRIu8"], Bytes: %lu...\n"),\
 	rf_ ## RPC_MSG.hdr.fifo_msg_size,\
 	rf_ ## RPC_MSG.hdr.rpc_msg_offset,\
 	rf_ ## RPC_MSG.hdr.rpc_msg_type,\
@@ -548,7 +548,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Set(pregExCtx_t prec,
 	prf_EXC_SET->pyl.hdr.exc_id = prec->exc_id;
 
 	DB(fprintf(stderr, FMT_DBG("Copying [%d] constraints using buffer @%p "
-					"of [%"PRIu32"] Bytes...\n"),
+					"of [%"PRIu64"] Bytes...\n"),
 				count, (void*)&(prf_EXC_SET->pyl.constraints),
 				(count)*sizeof(RTLIB_Constraint_t)));
 
