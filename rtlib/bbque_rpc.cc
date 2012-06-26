@@ -1893,6 +1893,72 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 
 #endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
+
+/*******************************************************************************
+ *    Cycles Per Second (CPS) Control Support
+ ******************************************************************************/
+
+RTLIB_ExitCode_t BbqueRPC::SetCPS(
+	RTLIB_ExecutionContextHandler_t ech,
+	float cps) {
+	pregExCtx_t prec;
+
+	// Get a reference to the EXC to control
+	assert(ech);
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FMT_ERR("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+	assert(isRegistered(prec) == true);
+
+	// Keep track of the maximum required CPS
+	prec->cps_max = cps;
+	prec->cps_expect = 0;
+	if (cps != 0) {
+		prec->cps_expect = static_cast<float>(1e3) / prec->cps_max;
+	}
+
+	fprintf(stderr, FMT_INF("Set cycle-rate @ %.3f[Hz] (%.3f[ms])\n"),
+				prec->cps_max, prec->cps_expect);
+	return RTLIB_OK;
+
+}
+
+void BbqueRPC::ForceCPS(pregExCtx_t prec) {
+	float delay_ms = 0; // [ms] delay to stick with the required FPS
+	uint32_t sleep_us;
+	float cycle_time;
+	double tnow; // [s] at the call time
+
+	// Timing initialization
+	if (unlikely(prec->cps_tstart == 0)) {
+		// The first frame is used to setup the start time
+		prec->cps_tstart = bbque_tmr.getElapsedTimeMs();
+		return;
+	}
+
+	// Compute last cycle run time
+	tnow = bbque_tmr.getElapsedTimeMs();
+	DB(fprintf(stderr, FMT_DBG("TP: %.4f, TN: %.4f\n"),
+				prec->cps_tstart, tnow));
+	cycle_time = tnow - prec->cps_tstart;
+	delay_ms = prec->cps_expect - cycle_time;
+
+	// Enforce CPS if needed
+	if (cycle_time < prec->cps_expect) {
+		sleep_us = 1e3 * static_cast<uint32_t>(delay_ms);
+		DB(fprintf(stderr, FMT_DBG("Cycle Time: %3.3f[ms], ET: %3.3f[ms], "
+						"Sleep time %u [us]\n"),
+					cycle_time, prec->cps_expect, sleep_us));
+		usleep(sleep_us);
+	}
+
+	// Update the start time of the next cycle
+	prec->cps_tstart = bbque_tmr.getElapsedTimeMs();
+}
+
 /*******************************************************************************
  *    RTLib Notifiers Support
  ******************************************************************************/

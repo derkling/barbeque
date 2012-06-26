@@ -125,6 +125,34 @@ public:
 	}
 
 /*******************************************************************************
+ *    Cycles Per Second (CPS) Control Support
+ ******************************************************************************/
+
+	/**
+	 * @brief Set the required Cycles Per Second (CPS)
+	 *
+	 * This allows to define the required and expected cycles rate. If at
+	 * run-time the cycles execution should be faster, a properly computed
+	 * delay will be inserted by the RTLib in order to get the specified
+	 * rate.
+	 */
+	RTLIB_ExitCode_t SetCPS(RTLIB_ExecutionContextHandler_t ech,
+			float cps);
+
+	/**
+	 * @brief Set the required Cycle time [us]
+	 *
+	 * This allows to define the required and expected cycle time. If at
+	 * run-time the cycles execution should be faster, a properly computed
+	 * delay will be inserted by the RTLib in order to get the specified
+	 * duration.
+	 */
+	RTLIB_ExitCode_t SetCTimeUs(RTLIB_ExecutionContextHandler_t ech,
+			uint32_t us) {
+		return SetCPS(ech, static_cast<float>(1e6)/us);
+	}
+
+/*******************************************************************************
  *    Performance Monitoring Support
  ******************************************************************************/
 
@@ -296,9 +324,14 @@ protected:
 		/** Statistics of currently selected AWM */
 		pAwmStats_t pAwmStats;
 
+		double cps_tstart; // [ms] at the last cycle start time
+		float cps_max;     // [Hz] the requried maximum CPS
+		float cps_expect;  // [ms] the expected cycle time
+
 		RegisteredExecutionContext(const char *_name, uint8_t id) :
 			name(_name), ctrlTrdPid(0), flags(0x00),
-			time_blocked(0), time_reconf(0), time_processing(0) {
+			time_blocked(0), time_reconf(0), time_processing(0),
+			cps_tstart(0), cps_max(0) {
 				exc_id = id;
 		}
 
@@ -796,6 +829,14 @@ private:
 # define PerfCollectStats(prec) {}
 # define PerfPrintStats(prec, pstats) {}
 #endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
+
+
+/*******************************************************************************
+ *    Cycles Per Second (CPS) Control Support
+ ******************************************************************************/
+
+	void ForceCPS(pregExCtx_t prec);
+
 
 };
 
