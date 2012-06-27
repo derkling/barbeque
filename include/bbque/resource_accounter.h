@@ -645,27 +645,4 @@ private:
 
 }   // namespace bbque
 
-/******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-/**
-* @defgroup sec07_ra Resource Accounter
-*
-* ResourceAccounter is the BarbequeRTRM core module focusing the accounting of
-* the system resources, registered at boot time. This means that for each
-* resource this component provides information about total, used and available
-* amounts. One of the key aspects is the capability of handling multiple
-* <em>views</em> of the resource usages state. More in detail, there is a
-* <em>system resource state view</em>, which is the effective usage state of
-* the resources, along with other secondary views supporting the execution of
-* the scheduling policy. In other words, a specific policy can get an "empty"
-* view of resouce usages state and define a new resource assignment schema.
-*
-* To make effective the new resource allocations, the Resource Accounter
-* validate the scheduling decisions through the synchronization step.
-*
-* Basically Resource Accounter provides a set of methods for resource state
-* query, resource request and management of the state views.
-*/
-
 #endif // BBQUE_RESOURCE_ACCOUNTER_H_

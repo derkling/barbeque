@@ -252,19 +252,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec02_cm Configuration Manager
- *
- * The ConfigurationManager is a BarbequeRTRM core module which provides a
- * unified interface to access Barbeque run-time configuration options, either
- * on command line and configuration file.
- *
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_CONFIGURATION_MANAGER_H_

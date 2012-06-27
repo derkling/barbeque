@@ -224,16 +224,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_op Operating Points Management
- * @ingroup rtlib_sec04_rtrm
- *
- * ADD MORE DETAILS HERE (Monitors)
- *
- */
-
 #endif /* BBQUE_OP_MANAGER_H_ */

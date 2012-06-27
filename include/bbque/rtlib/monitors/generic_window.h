@@ -568,16 +568,4 @@ inline void GenericWindow <dataType>::resetResultsWindow() {
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_mon Metrics Monitoring
- * @ingroup rtlib_sec04_rtrm
- *
- * ADD MORE DETAILS HERE (Monitors)
- *
- */
-
 #endif /* BBQUE_GENERIC_WINDOW_H_ */

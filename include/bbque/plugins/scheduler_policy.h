@@ -152,23 +152,4 @@ public:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @ingroup sec05_sm
- *
- * The SchedulerPolicyIF is an abstract class which defines the common
- * interface for interaction between the BarbequeRTRM and a resource
- * scheduling policy.
- *
- * Such a policy is used by the SchedulerManager (SM) to setup a new
- * "resource view", identified by a RViewToken_t, where available resources
- * are partitioned and assigned to demanding applications based on a certain
- * "optimization stragery".
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_SCHEDULER_POLICY_H_

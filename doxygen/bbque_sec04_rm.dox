@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_BARBEQUE_H_
-#define BBQUE_BARBEQUE_H_
-
-#include <cstdlib>
-#include <iostream>
-
-#include "bbque/config.h"
-#include "bbque/version.h"
-
-#endif // BBQUE_BARBEQUE_H_
+/**
+ * @defgroup sec04_rm Resource Manager
+ *
+ * The ResourceManager is a BarbequeRTRM core module which provides the
+ * implementation of the Run-Time Resource Manager (RTRM), which is the main
+ * barbeque module implementing its glue code.
+ *
+ *
+ * ADD MORE DETAILS HERE
+ */

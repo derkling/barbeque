@@ -15,13 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_BARBEQUE_H_
-#define BBQUE_BARBEQUE_H_
-
-#include <cstdlib>
-#include <iostream>
-
-#include "bbque/config.h"
-#include "bbque/version.h"
-
-#endif // BBQUE_BARBEQUE_H_
+/**
+ * @defgroup sec03_am Application Manager
+ *
+ * The ApplicationManager is a BarbequeRTRM core module which provides a
+ * unified interface for managing applications registration and keep track of
+ * their schedule status changes. The class provides calls to register
+ * applications, retrieving application descriptors, the maps of application
+ * descriptors given their scheduling status or priority level.  Moreover to
+ * signal the scheduling change of status of an application, and to know which
+ * is lowest priority level (maximum integer value) managed by Barbeque RTRM.
+ *
+ * ADD MORE DETAILS HERE
+ */

@@ -185,16 +185,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_mon_thgpt Throughput Monitoring
- * @ingroup rtlib_sec04_mon
- *
- * ADD MORE DETAILS HERE (Throughput Monitoring)
- *
- */
-
 #endif /* BBQUE_THROUGHPUT_MONITOR_H_ */

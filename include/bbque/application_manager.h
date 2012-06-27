@@ -561,22 +561,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec03_am Application Manager
- *
- * The ApplicationManager is a BarbequeRTRM core module which provides a
- * unified interface for managing applications registration and keep track of
- * their schedule status changes. The class provides calls to register
- * applications, retrieving application descriptors, the maps of application
- * descriptors given their scheduling status or priority level.  Moreover to
- * signal the scheduling change of status of an application, and to know which
- * is lowest priority level (maximum integer value) managed by Barbeque RTRM.
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_APPLICATION_MANAGER_H_

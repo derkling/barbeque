@@ -197,16 +197,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_mon_time Time Monitoring
- * @ingroup rtlib_sec04_mon
- *
- * ADD MORE DETAILS HERE (Time Monitoring)
- *
- */
-
 #endif /* BBQUE_TIME_MONITOR_H_ */

@@ -338,16 +338,4 @@ inline void Monitor <dataType>::addElement(uint16_t id, dataType element) {
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_mon_generic Generic Monitoring
- * @ingroup rtlib_sec04_mon
- *
- * ADD MORE DETAILS HERE (Memory Monitoring)
- *
- */
-
 #endif /* BBQUE_MONITOR_H_ */

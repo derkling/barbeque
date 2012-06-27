@@ -15,13 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_BARBEQUE_H_
-#define BBQUE_BARBEQUE_H_
-
-#include <cstdlib>
-#include <iostream>
-
-#include "bbque/config.h"
-#include "bbque/version.h"
-
-#endif // BBQUE_BARBEQUE_H_
+/**
+ * @defgroup sec02_cm Configuration Manager
+ *
+ * The ConfigurationManager is a BarbequeRTRM core module which provides a
+ * unified interface to access Barbeque run-time configuration options, either
+ * on command line and configuration file.
+ *
+ *
+ * ADD MORE DETAILS HERE
+ */

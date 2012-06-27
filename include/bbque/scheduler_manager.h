@@ -165,22 +165,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec05_sm Scheduler Manager
- *
- * The SchedulerManager is the BarbequeRTRM core  module which defines a
- * unified interface to access resource scheduling policies.  The core
- * framework view only methods exposed by this component, which is on charge
- * to find, select and load a proper optimization policy, to run it when
- * required by new events happening (e.g. applications starting/stopping,
- * resources state/availability changes) and considering its internal
- * configurabile policy.
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_SCHEDULER_MANAGER_H_

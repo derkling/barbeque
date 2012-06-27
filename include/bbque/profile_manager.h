@@ -117,16 +117,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec07_pm Resource Manager
- *
- * The ProfileManager is a BarbequeRTRM core module which provides...
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_PROFILE_MANAGER_H_

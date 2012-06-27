@@ -308,19 +308,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec04_rm Resource Manager
- *
- * The ResourceManager is a BarbequeRTRM core module which provides the
- * implementation of the Run-Time Resource Manager (RTRM), which is the main
- * barbeque module implementing its glue code.
- *
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_RESOURCE_MANAGER_H_

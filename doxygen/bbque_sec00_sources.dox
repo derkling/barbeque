@@ -1,0 +1,118 @@
+/*
+ * Copyright (C) 2012  Politecnico di Milano
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+ * \page sec00_src Getting the Source Code
+ *
+ * To get the Barbeque Open Source Project sources, you’ll need to get familiar
+ * with Git and Repo.<br>
+ * A good reference and starting point is provided by the Android
+ * <a href="http://www.omappedia.org/wiki/Android_Miscellaneous">wiki</a>.
+ *
+ *
+ * \section sec00_src_repo Installing Repo
+ *
+ * You need a working repo binary in order to setup the BOSP repository. You
+ * could get one by downloading it from the Android repository and installing it
+ * locally (e.g. in a @c bin sub-folder of you home directory). Than, ensure to
+ * make it executable:
+ * \verbatim
+ $ curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo
+ $ chmod a+x ~/bin/repo \endverbatim
+ *
+ *
+ * \section sec00_src_wd Creating a Working Directory
+ *
+ * The complete BOSP sources are downloaded and compiled into a user-defined
+ * working directory. Thus, start by creating such a folder, wherever you prefer
+ * and enter it:
+ * \verbatim
+ $ cd ~
+ $ mkdir working-directory-name
+ $ cd working-directory-name \endverbatim
+ *
+ * For the purposes of this tutorial, thereafter I will assume your working
+ * directory is @c /BOSP
+ *
+ *
+ * \section sec00_src_init Initialize repo in your working directory
+ *
+ * To initialize your local repository using the Barbeque Open Source Project
+ * trees, use this command from inside your working directory:
+ * \verbatim
+ $ repo init -u https://bitbucket.org/bosp/manifest.git -b master \endverbatim
+ *
+ * where @c -b is the command line option for branch, and I'm assuming you want the
+ * ‘master’ branch.<br>
+ * This command will download the BOSP manifest file which contains all the
+ * information to download the required source trees.
+ * At the end, this command ask also you some information about your name and
+ * email. These are pre-configured to allows you to submit patches to the
+ * project.
+ *
+ *
+ * \section sec00_src_sync Sync up with the remote repository
+ *
+ * Once the manifest has been initialized, you could /synchronize/ you local
+ * BOSP source tree with the main repository. This allows to download all the
+ * last version of the provided source packages. To that purpose, form within
+ * you working directory, simply run:
+ * \verbatim
+ $ repo sync \endverbatim
+ *
+ * This synchronization downloads all the most recent version of the sources,
+ * for each library and code related to the BOSP.
+ * Once the synchronization has completed, you get a complete building tree of
+ * all required component.
+ *
+ *
+ * \section sec00_src_req Compilation requirements
+ *
+ * The BOSP is quite self-contained, indeed it cares about download,
+ * configure and install not only the Barbeque RTRM framework itself, but also
+ * required libraries as well. However, at least for the time being, some tools
+ * are still required to successfully build all these projects.
+ *
+ * This is a list of mandatory tools:
+ * - Essential builing tools (e.g., the “build-essential” packages on Debian
+ *    based systems)
+ * - GIT
+ * - CMake (&gt;= v2.6)
+ * - Autotools (i.e. autoconf, automake and libtoolize)
+ * - Doxygen
+ * - GCC/G++ and libstdc++-v3 (both not older than v4.5)
+ *
+ * For example, in Ubuntu 11.10 you could get a working environment
+ * suitable for BOSP compilation running this command:
+ * \verbatim
+ $ aptitude install build-essential autoconf automake libtool cmake \
+	 git-core doxygen graphviz \endverbatim
+ *
+ * The provided building system will do a check for these components
+ * at the beginning and should inform you about missing ones.
+
+ * Please \b note that (for the time being) the BOSP
+ * building system does not provide cross compilation support: thus, it
+ * is still possible to cross-compile each component but this must be
+ * done by hand.
+ *
+ * For further instructions on how to compile and use the BOSP, please refers
+ * to the <strong>Readme.txt</strong> file you could find in your working
+ * directory, after a synchronization has completed.  While, to have an
+ * introducetion on the framework architecture have a look at the section
+ * \ref sec01_ow.
+ */

@@ -87,16 +87,4 @@ public:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_mon_memory Memory Monitoring
- * @ingroup rtlib_sec04_mon
- *
- * ADD MORE DETAILS HERE (Memory Monitoring)
- *
- */
-
 #endif /* BBQUE_MEMORY_MONITOR_H_ */

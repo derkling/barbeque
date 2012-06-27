@@ -374,20 +374,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec10_ap Application Proxy
- *
- * The ApplicationProxy is a BarbequeRTRM core module which provides a unified
- * interface to communicate with Barbeque managed applications. From the RTRM
- * prespective, each class exposes a set of functionalities which could be
- * accessed using methods defined by this proxy. Each call requires to specify
- * the application to witch it is addressed and the actual parameters.
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif /* end of include guard: BBQUE_APPLICATION_PROXY_H_ */

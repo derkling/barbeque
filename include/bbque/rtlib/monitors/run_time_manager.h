@@ -189,26 +189,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec04_rtrm RTLib Application-Specific RTRM
- * @ingroup rtlib
- *
- * The Application-Specific RTM (AS-RTM) provides a convenient glue code
- * between the application Metrics Monitors, Operating Point Manager and the
- * System-Wide RTRM (SYS-RTRM), i.e. the BarbqueRTRM.
- *
- * By exploiting the knowledge given by a set of registered goals and from the
- * support of the OP Manager, the ApplicationRTRM class is able to take some
- * decisions, e.g. related to a request for resources increase to be issued to
- * the BarbequeRTRM.
- *
- *
- * ADD MORE DETAILS HERE (Monitors)
- *
- */
-
 #endif /* BBQUE_APPLICATION_SPECIFIC_RTM_H_ */

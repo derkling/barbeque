@@ -285,19 +285,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup sec20_pp_linux Linux CGroup PIL
- *
- * This class provides the platform specific methods of the PlatformProxy
- * class which are suitable for controlling resources of a Linux system. This
- * implementation exploits Control Groups, specifically the cpuset subsystem,
- * to assign CPUSET, MEMORY and CPU resources to Barbeque controlled resources.
- *
- * ADD MORE DETAILS HERE
- */
-
 #endif // BBQUE_PP_LINUX_H_

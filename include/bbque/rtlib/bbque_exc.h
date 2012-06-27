@@ -171,48 +171,4 @@ private:
 
 } // namespace bbque
 
-/*******************************************************************************
- *    Doxygen Module Documentation
- ******************************************************************************/
-
-/**
- * @defgroup rtlib_sec02_aem RTLib Abstract Execution Model (AEM) API
- * @ingroup rtlib
- *
- * ADD MORE DETAILS HERE
- *
- */
-
-/**
- * @defgroup rtlib_sec02_aem_app Application Callbacks
- * @ingroup rtlib_sec02_aem
- *
- * ADD MORE DETAILS HERE (Application Callbacks)
- *
- */
-
-/**
- * @defgroup rtlib_sec02_aem_exc Execution Context Management
- * @ingroup rtlib_sec02_aem
- *
- * ADD MORE DETAILS HERE (Execution Context Management)
- *
- */
-
-/**
- * @defgroup rtlib_sec02_aem_constr Constraints Management
- * @ingroup rtlib_sec02_aem
- *
- * ADD MORE DETAILS HERE (Constraints Management)
- *
- */
-
-/**
- * @defgroup rtlib_sec02_aem_utils Utility
- * @ingroup rtlib_sec02_aem
- *
- * ADD MORE DETAILS HERE (Utility)
- *
- */
-
 #endif // BBQUE_EXC_H_
