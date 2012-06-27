@@ -401,6 +401,8 @@ void ResourceAccounter::ReleaseResources(AppSPtr_t papp, RViewToken_t vtok) {
 ResourceAccounter::ExitCode_t ResourceAccounter::GetView(
 		std::string req_path,
 		RViewToken_t & token) {
+	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
+
 	// Null-string check
 	if (req_path.empty()) {
 		logger->Error("GetView: Missing a valid string");
@@ -423,6 +425,8 @@ ResourceAccounter::ExitCode_t ResourceAccounter::GetView(
 }
 
 void ResourceAccounter::PutView(RViewToken_t vtok) {
+	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
+
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token) {
 		logger->Warn("PutView: Cannot release the system resources view");
@@ -455,6 +459,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 }
 
 RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
+	std::unique_lock<std::recursive_mutex> status_ul(status_mtx);
 	RViewToken_t old_sys_vtok;
 
 	// Do nothing if the token references the system state view
