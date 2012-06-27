@@ -436,8 +436,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	// Get the resource set using the referenced view
 	ResourceViewsMap_t::iterator rviews_it(rsrc_per_views.find(vtok));
 	if (rviews_it == rsrc_per_views.end()) {
-		logger->Error("PutView: Cannot find the resource view"
-				"referenced by %d", vtok);
+		logger->Error("PutView: Cannot find resource view token %d", vtok);
 		return;
 	}
 
@@ -453,8 +452,7 @@ void ResourceAccounter::PutView(RViewToken_t vtok) {
 	rsrc_per_views.erase(vtok);
 
 	logger->Debug("PutView: view %d cleared", vtok);
-	logger->Debug("PutView: %d resource set and %d usages per views"
-			"currently managed",
+	logger->Debug("PutView: %d resource set and %d usages per view currently managed",
 			rsrc_per_views.size(), usages_per_views.erase(vtok));
 }
 
@@ -464,7 +462,7 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 
 	// Do nothing if the token references the system state view
 	if (vtok == sys_view_token) {
-		logger->Debug("SetView: View %d is the system state view yet!", vtok);
+		logger->Debug("SetView: View %d is already the system state!", vtok);
 		return sys_view_token;
 	}
 
@@ -489,8 +487,7 @@ RViewToken_t ResourceAccounter::SetView(RViewToken_t vtok) {
 
 	logger->Info("SetView: View %d is the new system state view.",
 			sys_view_token);
-	logger->Debug("SetView: %d resource set and %d usages per views"
-			"currently managed",
+	logger->Debug("SetView: %d resource set and %d usages per view currently managed",
 			rsrc_per_views.size(), usages_per_views.erase(vtok));
 
 	return sys_view_token;
