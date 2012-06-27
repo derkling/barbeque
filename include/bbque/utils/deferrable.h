@@ -39,9 +39,9 @@ namespace bbque { namespace utils {
 /**
  * @brief Deferrable execution of specified functionalities
  *
- * This class provides the basic support to schedule a deferrable exeuction of
+ * This class provides the basic support to schedule a deferrable execution of
  * a specified task, with the possibility to update the scheduled execution
- * time and also to repete the execution at specified intervals.
+ * time and also to repeat the execution at specified intervals.
  * On each time, the most recent future execution request is executed, by
  * discarding all the (non periodic) older ones.
  */
