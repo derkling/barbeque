@@ -1,0 +1,268 @@
+/*
+ * Copyright (C) 2012  Politecnico di Milano
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+
+\page bbque_sec00_run Running the BarbequeRTRM Framework
+
+Let assume you have successfully downloaded and compiled the BOSP sources, that
+should be pretty straightway by following the directions reported into Getting
+the BarbequeRTRM Sources and Compiling the BOSP Sources. Let also assume that
+you have configured BOSP to run on your own Linux machine, actually this is a
+good starting configuration to discover the framework and becoming confident
+with some of its concepts.
+
+The following sections detail the main steps required to configure and to start
+playing with the RTRM. We will make the assumption that you installed BOSP
+under @c ~/BOSP and you used the default installation prefix, i.e. @c ~/BOSP/out.
+
+
+
+\section bbque_sec00_run_ctp Configuring the Target Platform
+
+Of course, a Run-Time Resource Manager should be aware about the run-time
+environment it has to manage.  When running on a <em>generic Linux
+platform</em>, the BarbequeRTRM provides support for allocation of some
+resources to managed applications. So far it provides control on:
+<ul><li>
+<b>CPUs:</b> you could define a set of CPUs to be managed by BBQ by
+specifying how much CPU time could be assigned to managed applications;
+</li><li>
+<b>Memories:</b> you could define the memory nodes to be managed by BBQ by
+specifying the maximum amount of memory could be assigned to managed
+application;
+</li></ul>
+
+The resources you specify as being managed by the BarbequeRTRM will be
+reserved: only the RTRM could assign such resources to managed applications,
+while all the other applications will see only the remaining resources. This
+partitioning of resources, between BarbequeRTRM managed and not, is named
+\ref sec20_pp_linux_bpl and it is defined by means of a
+<i>"bpl"</i> file.
+
+The BarbequeRTRM has a dedicated configuration folder, which collects all the
+configuration files related to it, deployed by default according to the
+directives of the Linux Standard Base specifications to be under the @c
+etc/bbque.  All the bpl files, describing possible platform layouts, are
+deployed into the @c pil folder of the BarbequeRTRM configuration folder, i.e.
+under @c ~/BOSP/out/etc/bbque/pil in our reference configuration.
+
+This folder contains multiple layout files, the BarbequeRTRM initialization
+script will use, in order:
+-# the one specified at command line, if specified;
+-# the one named against the hostname of the machine, if present;
+-# the @c default.bpl if all the previous options are not valid.
+
+Lets have a look a the "numasaurus-jr.bpl" layout, which is a bit more complete
+since it refers to a 16 cores NUMA machine (4 Quad-Core AMD Opteron™ Processor
+8378):
+\code
+# Main TARGET devices:
+--------+-----------------------+---------------+-------------------------------
+	| CPUs IDs		| Memory Nodes	| Description
+--------+-----------------------+---------------+-------------------------------
+HOST	| 0,4,8,12		| 0		| Not managed Host Device
+MDEV	| 1-3,5-7,9-11,13-15	| 1-3		| 3 NUMA NODE Managed Device
+--------+---------------+---------------+---------------------------------------
+#
+# Resources clusterization for MANAGED resources
+--------+---------------+---------------+---------------+-----------------------
+	| CPUs IDs	| Time Quota	| Memory Nodes	| Memory (MB)
+--------+---------------+---------------+---------------+-----------------------
+NODE	| 1,5,9,13	| 100		| 3		| 6000
+NODE	| 2,6,10,14	| 100		| 2		| 6000
+NODE	| 3,7,11,15	| 100		| 1		| 6000
+\endcode
+
+All lines starting with a ”#” are ignored, than we have two tables.  The first
+table defines the partitioning among BarbequeRTRM managed and non resources,
+there are two lines:
+<ul><li>
+<b>HOST:</b> the host partition, defining all the resources that could be
+used to run the non BarbequeRTRM-managed applications;
+</li><li>
+<b>MDEV:</b> the managed device partition, defining all the resources that
+will be managed by the BarbequeRTRM framework to be assigned to demanding
+managed application.
+</li></ul>
+
+The two columns define the actual resources partitioning:
+<ul><li>
+<b>CPUs IDs:</b> defines the set of CPUs reserved for the corresponding
+partition
+</li><li>
+<b>Memory Nodes:</b> defines the memory nodes (remember that this is a NUMA
+machine) which can be accessed by each partition.
+</li></ul>
+
+The second table defines a possible clusterization of managed resources. The
+BarbequeRTRM allow is able to manage resource which are grouped to form
+clusters. In this scenarios, the RTRM will provides a suitable support to
+ensure that applications are assigned a set of resources which are coherent
+with respect to their clusterization. This allows for instance to avoid to have
+an application with two thread running on two different memory domains.
+
+Each line of this table starts with <i>NODE</i>, in the first column, and
+identify a new cluster. The remaining four columns define the actual resources
+clusterization:
+<ul><li>
+<b>CPUs IDs:</b> defines the set of CPUs belonging to the corresponding cluster;
+</li><li>
+<b>Time Quota:</b> defines the maximum amount of CPU time could assigned to
+managed application for each one of the CPUs specified in the first column;
+</li><li>
+<b>Memory Nodes:</b> defines the memory noews which can be accessed by
+managed applications scheduled on the corresponding cluster;
+</li><li>
+<b>Memory (MB):</b> defines the maximum amount of memory which could be
+assigned to managed applications scheduled on the corresponding cluster.
+</li></ul>
+
+In order to use the BarbequeRTRM you should provide a reasonable layout
+configuration file, by either writing a new one for your host machine or by
+editing the default.bpl one.
+
+
+
+\section bbque_sec00_run_cbd Configuring the BarbequeRTRM
+
+The BarbequeRTRM comes with a configuration file which allows to configure and
+fine tune its run-time behaviors, ranging from logging to specific framework
+modules options. This configuration file is @c ~/BOSP/out/etc/bbque/bbque.conf,
+its default values should be just fine for an initial experimentation
+thus, for this initial phase, just have a look at this file.
+
+Starting the BarbequeRTRM Once everything has been configured for the target
+platform and the required usage, now we could start the Run-Time Resource
+Manager. For this purpose, BOSP provides a set of convenient scripts and also a
+<i>dedicated shell</i> which makes easier to interact with the framework.
+
+
+\subsection bbque_sec00_run_cbd_shell Starting a BOSP Shell
+
+The BOSP Shell could be started by sourcing the environment configuration
+script @c bosp_init.env:
+\code
+$ . ~/BOSP/out/etc/bbque/bosp_init.env
+\endcode
+
+By issuing this command you will find on a customized shell, which appears like this:
+\image html bosp_run_cdb_shell.png
+
+and a new bosp-help command is available to dump a sort list of all the other
+available commands.
+
+<b>Tips:</b> <i>All the BOSP/BarbequeRTRM related commands start with either bosp-
+or bbque-. This allows you to exploit the shell completion to get a list of
+available commands.</i>
+
+Commands starting with @c bosp- target the management of the projects, such as
+compile a different flavor, while @c bbque- starting commands target the
+management of the RTRM, such as starting and stopping the deamon.
+
+
+\subsection bbque_sec00_run_cbd_daemon Starting the BarbequeRTRM Daemon
+
+Among the BOSP commands, one is parliamentary useful since it takes care of
+properly start the BarbeuqeRTRM, without boring about the required syntax. To
+start the BarbequeRTRM daemon you just have to run this command from within a
+BOSP Shell:
+\code
+$ bbque-startd
+\endcode
+
+<b>Warning:</b> <i>Notice the ending 'd', this command start BarbequeRTRM as a
+"daemon". A similar command, bbque-start allows you to start the RTRM in
+foreground, but that's useful only for development and debugging purposes.</i>
+
+A this point a set of actions are triggered, among them:
+<ul><li>
+the PIL layout you defined is "compiled"
+</li><li>
+the required resources partitioning is configured
+</li><li>
+all active applications are moved into the HOST partition
+</li><li>
+and finally… the BarbequeRTRM daemon is started
+</li></ul>
+
+If everything has gone well, now the BarbequeRTRM has got complete control on
+the resources of the managed device, and you should see an output similar to
+this:
+\image html bosp_run_cdb_startd.png
+
+
+\subsection bbque_sec00_run_cbd_logfile The BarbequeRTRM Logfile
+
+Now you could check that everything has been configured correctly and it is
+working properly. This can be achieved by looking at the BarbequeRTRM log file,
+which is produced in the file specified by the daemon configuration file and
+which, by default, is @c ~/BOSP/out/var/bbque/bbque.log).  Otherwise, you could
+issue a bbque-log command which should spawn a new terminal showing a live tail
+of this log file.
+
+<b>Note:</b> <i>The bbque-log terminal, as well as all the BOSP generated
+terminal, make use of the aterm, which is the Afterstep XVT terminal emulator.
+Pleas ensure you have it installed before using commands which should spawn a
+new terminal.</i>
+
+
+\subsection bbque_sec00_run_cbd_console The BarbequeRTRM Console
+Another useful way to keep an eye on what is its going on, under the control of
+the BarbequeRTRM, is by means of the so called BarbequeRTRM Console, which
+could be started by issuing this command:
+\code
+$ bbque-console
+\endcode
+
+What you get is a set of new windows which populate your desktop, something
+like in this screenshot:
+\image html bosp_run_cdb_console.png
+
+Starting from the top-right corner and turning clock-wise, in foreground you
+can see:
+<ul><li>
+<b>Resource Monitor:</b> which displays the active resource partitoning among
+managed and non-managed resources; this should match what you defined in your
+BPL file;
+</li><li>
+<b>Task Monitor:</b> which displays the resources assigned to each of the
+currently active managed applications;
+</li><li>
+<b>CPUs usagess:</b> which display the workload on each of the CPUs of you
+target system
+</li><li>
+<b>A BBQUE Shell:</b> where a set of test applications have been started and
+are producing their output;
+</li><li>
+<b>BBQUE Log:</b> the window displaying information produced by the BabequeRTRM
+daemon
+</li><li>
+<b>A Syslog window:</b> displaying the system log
+</li></ul>
+
+In backckground there are some more windows which show some GNUPlot graph,
+being produced and updated at run-time, which represent a graphical
+representation of some metrics related to the RTRM behavios.
+
+<b>Note:</b> <i>For a detailed description of these plots, as well as the other
+monitors, go to the dedicated section: The BarbequeRTRM console.</i>
+
+Once the BarbequeRTRM daemon has been successfully started, it is possible to
+play with some of the demo application as explained in \ref bbque_sec00_app.
+
+*/
