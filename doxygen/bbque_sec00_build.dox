@@ -1,0 +1,188 @@
+/*
+ * Copyright (C) 2012  Politecnico di Milano
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+
+\page bbque_sec00_bld Compiling a BOSP Configuration
+
+Before starting the compilation you should have a complete and updated local
+repository of the BOSP source trees. This can be easily done by following the
+steps described in ”Getting the BarbequeRTRM Sources”.
+
+
+\section bbque_sec00_bld_cnf Build Configuration
+
+Starting with version v0.8 the BOSP project makes use of the
+<a href="http://www.kernel.org/doc/Documentation/kbuild/kconfig-language.txt">KConfig</a>
+tool to define a "build configuration". This tools provides a GUI to define,
+among others, these options:
+
+<ul><li>
+<b>target platform:</b> so far the “Generic Linux Host” is the only one fully
+supported, while the support for the Android platform is going to be completed;
+</li><li>
+<b>compilation toolchain:</b> with the possibility to configure and build an
+ARM cross-tolchain;
+</li><li>
+<b>installation path:</b> where all the compilation produces will be deployed,
+by default @c ~/BOSP/out
+</li><li>
+<b>framework options:</b> such as the usage of "Test Platform Data" and the
+support for "Performance Counters"
+</li><li>
+<b>build flavor:</b> either DEBUG or RELEASE mode
+</li></ul>
+
+To start this configuration utility, simply move into the BOSP working
+directory and issue the command:
+\code
+$ make menuconfig
+\endcode
+
+This should open the familiar interface where you can set any compile-time
+option. By pressing 'H' you can see the help text of the currently highlighted
+option.
+
+\image html bosp_bld_cnf_main.png
+
+
+
+
+\section bbque_sec00_bld_cmp Build Compilation
+
+After the BOSP has been configured, to run the compilation simply run:
+\code
+  $ make
+\endcode
+This command starts the compilation and installation, in the proper order, of
+all the BOSP components. Please be patient, especially the first compilation
+run requires to build a lot of external compoents! Successive runs should be
+faster.
+
+Each step of the compilation of a Barbeque RTRM related component (e.g. the
+framework itself and the contributed codes), provides a detailed report on how
+it is compiled and where the installation procedure will deploy the generated
+files. This is for example the summary of the default Barbeque RTRM build:
+\code
+-- =====[ Barbeque RTRM - Building System Configuration ]==========================
+-- Barbeque Version...... v0.8-rc3-11-gf6434e1
+-- Build type............ Release
+-- Installation prefix... /home/derkling/Documents/Coding/MyBOSP/out
+--    Barbeuqe RTRM...... <prefix>/sbin
+--    Configuration...... <prefix>/etc/bbque/bbque.conf
+--    Recipes............ <prefix>/etc/bbque/recipes
+--    Plugins............ <prefix>/lib/bbque/plugins
+--    Var(RPC-Channel)... /home/derkling/Documents/Coding/MyBOSP/out/var/bbque
+--    Headers............ <prefix>/include/bbque
+--    RTLib library...... <prefix>/lib/bbque
+--    Documentation...... <prefix>/usr/share/bbque
+-- Dependencies:
+--    Boost library...... /home/derkling/Documents/Coding/MyBOSP/out/lib
+--
+-- Default values could be changes at command line, with:
+--   cmake -D<Variable>=<Value>
+-- or use the '-i' cmake flag to run in interactive mode
+-- ================================================================================
+\endcode
+
+This report show:
+
+<ul><li>
+the <b>build version</b> (v0.8-rc3-11-gf6434e1) which, for example, should be referenced in bug reports
+</li><li>
+the <b>build type</b> (Release) which could be either Debug or Release
+</li><li>
+the complete path for the <b>installation PREFIX</b>, which specify both where
+the build system expect to find the required dependencies (e.g. external
+libraries) and also the root of the installation procedure
+</li><li>
+the specific <b>installation paths</b> of each component which refers to the
+previously defined prefix.
+</li></ul>
+
+
+\section bbque_sec00_bld_ins Sources and Installation Layout
+The BOSP is organized in modules, right now the source tree is composed by
+these folders:
+\code
+  derkling@darkstar:~/BOSP$ ls -l
+  total 20
+  drwxr-xr-x 11 derkling derkling 4096 2011-07-20 16:52 barbeque
+  drwxr-xr-x  4 derkling derkling 4096 2011-07-20 15:51 build
+  drwxr-xr-x  3 derkling derkling 4096 2011-07-20 16:49 contrib
+  drwxr-xr-x  5 derkling derkling 4096 2011-07-20 15:51 external
+  drwxr-xr-x 10 derkling derkling 4096 2011-07-20 15:51 out
+  -r--r--r--  1 derkling derkling   94 2011-07-20 15:51 Makefile
+\endcode
+
+Where, the content of the available folders is:
+<ul><li>
+@c barbeque sources of the Barbeque RTRM framework
+</li><li>
+@c build BOSP building system
+</li><li>
+@c contrib third party contributed software
+</li><li>
+@c external sources of dependency libraries
+</li><li>
+@c out the target installation folder
+</li><li>
+@c Makefile the main building script
+</li></ul>
+
+The installation process starts by compiling and installing all the external
+components, than the Barbeque RTRM and finally all the contributed modules.
+Each component is installed (by default) into the “out” subfolder, which thus,
+at the end, will contains all the binary and libraries generated by the
+building process.
+
+The layout of the output folder is this:
+\code
+  derkling@darkstar:out$ ls -la
+  total 40
+  drwxr-xr-x 10 derkling derkling 4096 2011-07-20 18:44 .
+  drwxr-xr-x  8 derkling derkling 4096 2011-07-20 18:43 ..
+  drwxr-xr-x  2 derkling derkling 4096 2011-07-20 18:44 bin
+  drwxr-xr-x  3 derkling derkling 4096 2011-07-20 18:43 etc
+  drwxr-xr-x  5 derkling derkling 4096 2011-07-20 18:44 include
+  drwxr-xr-x  4 derkling derkling 4096 2011-07-20 18:44 lib
+  drwxr-xr-x  2 derkling derkling 4096 2011-07-20 18:44 sbin
+  drwxr-xr-x  3 derkling derkling 4096 2011-07-20 18:44 share
+  drwxr-xr-x  5 derkling derkling 4096 2011-07-20 18:44 usr
+  drwxr-xr-x  3 derkling derkling 4096 2011-07-20 18:43 var
+\endcode
+
+These are the main interesting folders:
+<ul><li>
+@c etc/bbque/ containing the Barbeque RTRM configuration files
+</li><li>
+@c include/bbque/ containing the header files required for application
+developement using the RTLib
+</li><li>
+@c lib/bbque/ containing the Barbeque RTLib and the framework provided plugins
+</li><li>
+@c sbin/ where the glorious Barbeque binary is deployed
+</li><li>
+@c var/bbque/ where run-time generated Barbeque files are places, e.g. the
+logfile of the cooking in progress
+</li></ul>
+
+Once the compilation and deployment have completed, if you are running on a
+generic Linux host, you could to test the BarbequeRTRM by starting it and
+running some demo application as explained in \ref bbque_sec00_run.
+
+*/
