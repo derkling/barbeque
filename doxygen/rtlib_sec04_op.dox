@@ -16,9 +16,10 @@
  */
 
 /**
- * @defgroup rtlib_sec04_op Operating Points Management
- * @ingroup rtlib_sec04_rtrm
- *
- * ADD MORE DETAILS HERE (Monitors)
- *
- */
+
+@defgroup rtlib_sec04_op Operating Points Management
+@ingroup rtlib_sec04_rtrm
+
+ADD MORE DETAILS HERE (Monitors)
+
+*/

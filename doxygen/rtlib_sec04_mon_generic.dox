@@ -16,9 +16,10 @@
  */
 
 /**
- * @defgroup rtlib_sec04_mon_generic Generic Monitoring
- * @ingroup rtlib_sec04_mon
- *
- * ADD MORE DETAILS HERE (Memory Monitoring)
- *
- */
+
+@defgroup rtlib_sec04_mon_generic Generic Monitoring
+@ingroup rtlib_sec04_mon
+
+ADD MORE DETAILS HERE (Memory Monitoring)
+
+*/

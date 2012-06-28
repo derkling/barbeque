@@ -16,9 +16,10 @@
  */
 
 /**
- * @defgroup rtlib_sec04_mon_thgpt Throughput Monitoring
- * @ingroup rtlib_sec04_mon
- *
- * ADD MORE DETAILS HERE (Throughput Monitoring)
- *
- */
+
+@defgroup rtlib_sec04_mon_thgpt Throughput Monitoring
+@ingroup rtlib_sec04_mon
+
+ADD MORE DETAILS HERE (Throughput Monitoring)
+
+*/

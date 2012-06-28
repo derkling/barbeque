@@ -1,0 +1,49 @@
+/*
+ * Copyright (C) 2012  Politecnico di Milano
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+
+\page rtlib The Barbeque Run-Time Library (RTLib)
+
+@section rtlib_sec01_ow RTLib Overall View
+
+The RTLib is the BarbequeRTRM component which provides the definition of
+the interface and related services exported by the Barbeque Run-Time
+library (RTLib). This library is provided to be linked by application that
+needs to interact with the Barbeque (BBQ) Run-Time Resource Manager (RTRM).
+The library not only defines the set of services accessable by
+applications, but allows also to mask the platform specific communication
+channel between controlled applications and the run-time manager. Moreover,
+the library provides some of the functional supports required for a proper
+integration of an application with the RTRM, thus offloading the
+application developer as much as possible from the Run-Time management
+required boilerplate integration code. Indeed, form an application
+developer perspective this library enforeces just the conformance to a
+properly define "Application Lifecycle", by specifying a set of calls and
+the order on which these should be performed.
+
+ADD MORE DETAILS HERE
+
+@section Run-Time Library Interfaces
+
+If you are interested into the integration of new applications with the
+BarbequeRTRM you could either one of these two interfaces, which correspond
+to different abstraction levels:
+-# @ref rtlib_sec02_aem
+-# @ref rtlib_sec03_plain
+
+*/

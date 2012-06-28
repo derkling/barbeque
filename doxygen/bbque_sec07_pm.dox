@@ -16,9 +16,11 @@
  */
 
 /**
- * @defgroup sec07_pm Profile Manager
- *
- * The ProfileManager is a BarbequeRTRM core module which provides...
- *
- * ADD MORE DETAILS HERE
- */
+
+@defgroup sec07_pm Profile Manager
+
+The ProfileManager is a BarbequeRTRM core module which provides...
+
+ADD MORE DETAILS HERE
+
+*/

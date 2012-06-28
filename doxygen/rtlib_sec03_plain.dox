@@ -16,70 +16,71 @@
  */
 
 /**
- * @defgroup rtlib_sec03_plain RTLib Low-Level (plain) API
- *
- * This document provides the definition of the interface and related services
- * exported by the Barbeque Run-Time library (RTLib). This library is provided
- * to be linked by application that needs to interact with the Barbeque (BBQ)
- * Run-Time Resource Manager (RTRM). The library not only defines the set of
- * services accessable by applications, but allows also to mask the platform
- * specific communication channel between controlled applications and the
- * run-time manager. Moreover, the library provides some of the functional
- * supports required for a proper integration of an application with the RTRM,
- * thus offloading the application developer as much as possible from the
- * Run-Time management required boilerplate integration code. Indeed, form an
- * application developer perspective this library enforeces just the
- * conformance to a properly define "Application Lifecycle", by specifying a
- * set of calls and the order on which these should be performed.
- *
- * ADD MORE DETAILS HERE (RTLib Low-Level (plain) API)
- *
- */
 
-/**
- * @defgroup rtlib_sec03_plain_services Library Services
- * @ingroup rtlib_sec03_plain
- *
- * ADD MORE DETAILS HERE (Library Services)
- *
- */
+@defgroup rtlib_sec03_plain RTLib Low-Level (plain) API
 
-/**
- * @defgroup rtlib_sec03_plain_exc Execution Context Management
- * @ingroup rtlib_sec03_plain
- *
- * ADD MORE DETAILS HERE (Execution Context Management)
- *
- */
+This document provides the definition of the interface and related services
+exported by the Barbeque Run-Time library (RTLib). This library is provided
+to be linked by application that needs to interact with the Barbeque (BBQ)
+Run-Time Resource Manager (RTRM). The library not only defines the set of
+services accessable by applications, but allows also to mask the platform
+specific communication channel between controlled applications and the
+run-time manager. Moreover, the library provides some of the functional
+supports required for a proper integration of an application with the RTRM,
+thus offloading the application developer as much as possible from the
+Run-Time management required boilerplate integration code. Indeed, form an
+application developer perspective this library enforeces just the
+conformance to a properly define "Application Lifecycle", by specifying a
+set of calls and the order on which these should be performed.
 
-/**
- * @defgroup rtlib_sec03_plain_constr Constraints Management
- * @ingroup rtlib_sec03_plain
- *
- * ADD MORE DETAILS HERE (Constraints Management)
- *
- */
+ADD MORE DETAILS HERE (RTLib Low-Level (plain) API)
 
-/**
- * @defgroup rtlib_sec03_plain_rtm Run-Time Management
- * @ingroup rtlib_sec03_plain
- *
- * ADD MORE DETAILS HERE (Run-Time Management)
- *
- */
 
-/**
- * @defgroup rtlib_sec03_plain_cps Cycles Time Control
- * @ingroup rtlib_sec03_plain
- *
- * ADD MORE DETAILS HERE (Cycles Time)
- *
- */
 
-/**
- * @defgroup rtlib_sec03_plain_perf Performances Monitoring
- * @ingroup rtlib_sec03_plain
- *
- * ADD MORE DETAILS HERE (Performances Monitoring)
- *
- */
+
+@defgroup rtlib_sec03_plain_services Library Services
+@ingroup rtlib_sec03_plain
+
+ADD MORE DETAILS HERE (Library Services)
+
+
+
+
+@defgroup rtlib_sec03_plain_exc Execution Context Management
+@ingroup rtlib_sec03_plain
+
+ADD MORE DETAILS HERE (Execution Context Management)
+
+
+
+
+@defgroup rtlib_sec03_plain_constr Constraints Management
+@ingroup rtlib_sec03_plain
+
+ADD MORE DETAILS HERE (Constraints Management)
+
+
+
+
+@defgroup rtlib_sec03_plain_rtm Run-Time Management
+@ingroup rtlib_sec03_plain
+
+ADD MORE DETAILS HERE (Run-Time Management)
+
+
+
+
+@defgroup rtlib_sec03_plain_cps Cycles Time Control
+@ingroup rtlib_sec03_plain
+
+ADD MORE DETAILS HERE (Cycles Time)
+
+
+
+
+@defgroup rtlib_sec03_plain_perf Performances Monitoring
+@ingroup rtlib_sec03_plain
+
+ADD MORE DETAILS HERE (Performances Monitoring)
+
+*/
