@@ -2,6 +2,9 @@
 # Targets provided by this project
 .PHONY: bbque clean_bbque
 
+# Add BarbequeRTRM documentation as dependency of the main doc target
+doc: bbque_doc
+
 ifdef CONFIG_BBQUE_BUILD_DEBUG
   BUILD_TYPE := Debug
   BBQUE_CMAKE_OPTS += " -DBUILD_TYPE=Debug "
@@ -23,6 +26,16 @@ bbque: external
 		exit 1
 	@cd barbeque/build/$(BUILD_TYPE) && make -j$(CPUS) install || \
 		exit 1
+
+bbque_doc: bbque
+	@echo
+	@echo "==== Building Barbeque RTRM Documentation ===="
+	@mkdir -p $(BUILD_DIR)/share/bbque 2>/dev/null
+	@cd barbeque/build/$(BUILD_TYPE) && make -j$(CPUS) doc
+	@echo
+	@echo "Documentation ready, to browse it:"
+	@echo "$ xdg-open $(BUILD_DIR)/share/bbque/html/index.html"
+	@echo
 
 clean_bbque:
 	@echo
