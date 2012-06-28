@@ -67,10 +67,21 @@ resources to demanding applications considering:
   performances maximization.
 
 You could get an overall view of the framework capabilities by looking at
-this screencast:<br>
-<a href="http://youtu.be/B1TDNbtIKC8">
-  2PARMA Project Demo - BarbequeRTRM v0.6 (Angus)
-</a><br>
+these screencasts:<br>
+<ul>
+  <li>
+    <a href="http://youtu.be/B1TDNbtIKC8">
+      2PARMA Project Demo - BarbequeRTRM v0.6 (Angus)
+    </a>
+  </li>
+<br>
+  <li>
+    <a href="http://youtu.be/Hcz1ob23WWA">
+      2PARMA Project Demo - BarbequeRTRM v0.8 - Betty Bacon
+    </a>
+  </li>
+<br>
+</ul>
 where the framework (last stable version, codename Angus) is showed in
 action to manage a mixed workload with different resource requirements
 and priorities.
