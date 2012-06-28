@@ -16,66 +16,155 @@
  */
 
 /**
- * \mainpage Introduction
- *
- * Resource management is becoming one of the most challenging topics for a
- * proper exploitation of upcoming many-core computing devices. These
- * devices, which are represented in first instance by general purpose GPUs
- * (GPGPUs), are characterized by an increasing number of symmetric
- * processing element (PE) which exposes a SIMD programming model allowing
- * to execute concurrently the same kernel code on a wide input data-set.
- *
- * This kind of massive data parallelization allows to speed-up the overall
- * processing time of a give workload by splitting the computational effort
- * among multiple hardware processing resources. Meanwhile new programming
- * paradigms and standards, like OpenCL, have been developed to extend the
- * functional capabilities of existing programming languages, such as for
- * example C/C++ and Fortran, and to support the developer on exploiting the
- * computational capabilities of these parallel processing devices.
- *
- * The <strong>BarbequeRTRM</strong>, which has been completely designed and
- * developed from scratch wihtin the context of the
- * <a href="http://www.2parma.eu">2PARMA Project</a>,
- * is the core of an <em>highly modular and extensible run-time resource
- * manager</em> which provide support for an easy integration and management
- * of multiple applications competing on the usage of one (or more) shared
- * MIMD many-core computation devices.
- *
- * The framework design, which exposes different plugin interfaces, provides
- * support for pluggable policies for both <em>resource scheduling</em> and
- * the management of <em>applications coordination and reconfiguration</em>.
- * Applications integrated with the frameworks gets “for-free” a suitable
- * instrumentation to support <em>Design-Space-Exploration (DSE)</em>
- * techniques, which could be used to profile application behaviors to either
- * optimize them at design time or support the identification of optimal QoS
- * requirements goals as well as their run-time monitoring. Suitable
- * <em>platform abstraction layers</em>, built on top of the Linux kernel
- * interfaces, allows an easily porting of the framework on different
- * platforms and its integration with specific execution environments such as
- * the Android run-time.
- *
- * Based on all these features the framework allows an easily coding of
- * resource management policies which support an optimized assignment of
- * resources to demanding applications considering:
- * - application properties, e.g. run-time requirements, operating modes
- *   and relative priorities;
- * - resources availability and state, e.g. power and thermal
- *   conditions;
- * - tunable run-time optimization goals, e.g. power reduction, energy
- *   optimization, reconfiguration overheads minimization and overall
- *   performances maximization.
- *
- * You could get an overall view of the framework capabilities by looking at
- * this screencast:<br>
- * <a href="http://youtu.be/B1TDNbtIKC8">
- *   2PARMA Project Demo - BarbequeRTRM v0.6 (Angus)
- * </a><br>
- * where the framework (last stable version, codename Angus) is showed in
- * action to manage a mixed workload with different resource requirements
- * and priorities.
- *
- * For further details on this project, please refers to these pages:
- * - @ref sec00_idx
- * - @ref sec00_src
- * - @ref sec01_ow
- */
+
+\mainpage Introduction
+
+Resource management is becoming one of the most challenging topics for a
+proper exploitation of upcoming many-core computing devices. These
+devices, which are represented in first instance by general purpose GPUs
+(GPGPUs), are characterized by an increasing number of symmetric
+processing element (PE) which exposes a SIMD programming model allowing
+to execute concurrently the same kernel code on a wide input data-set.
+
+This kind of massive data parallelization allows to speed-up the overall
+processing time of a give workload by splitting the computational effort
+among multiple hardware processing resources. Meanwhile new programming
+paradigms and standards, like OpenCL, have been developed to extend the
+functional capabilities of existing programming languages, such as for
+example C/C++ and Fortran, and to support the developer on exploiting the
+computational capabilities of these parallel processing devices.
+
+The <strong>BarbequeRTRM</strong>, which has been completely designed and
+developed from scratch wihtin the context of the
+<a href="http://www.2parma.eu">2PARMA Project</a>,
+is the core of an <em>highly modular and extensible run-time resource
+manager</em> which provide support for an easy integration and management
+of multiple applications competing on the usage of one (or more) shared
+MIMD many-core computation devices.
+
+The framework design, which exposes different plugin interfaces, provides
+support for pluggable policies for both <em>resource scheduling</em> and
+the management of <em>applications coordination and reconfiguration</em>.
+Applications integrated with the frameworks gets “for-free” a suitable
+instrumentation to support <em>Design-Space-Exploration (DSE)</em>
+techniques, which could be used to profile application behaviors to either
+optimize them at design time or support the identification of optimal QoS
+requirements goals as well as their run-time monitoring. Suitable
+<em>platform abstraction layers</em>, built on top of the Linux kernel
+interfaces, allows an easily porting of the framework on different
+platforms and its integration with specific execution environments such as
+the Android run-time.
+
+Based on all these features the framework allows an easily coding of
+resource management policies which support an optimized assignment of
+resources to demanding applications considering:
+- application properties, e.g. run-time requirements, operating modes
+  and relative priorities;
+- resources availability and state, e.g. power and thermal
+  conditions;
+- tunable run-time optimization goals, e.g. power reduction, energy
+  optimization, reconfiguration overheads minimization and overall
+  performances maximization.
+
+You could get an overall view of the framework capabilities by looking at
+this screencast:<br>
+<a href="http://youtu.be/B1TDNbtIKC8">
+  2PARMA Project Demo - BarbequeRTRM v0.6 (Angus)
+</a><br>
+where the framework (last stable version, codename Angus) is showed in
+action to manage a mixed workload with different resource requirements
+and priorities.
+
+
+
+
+\section sec00_idx Organization of This Documentation
+
+This page collects a set of documents related to the BarbequeRTRM. The idea
+is to guide the visitor through different topics, ranging from its simple
+usage to the contribution to the development.
+
+
+\subsection sec00_gs Getting Started with the BarbequeRTRM
+
+When approaching a new framework, whatever are your reasons, the really
+first thing you mind is:
+
+<center>
+<em>What fanny stuff could it do for me?</em>
+</center>
+
+To respond this question a good starting point could be to give it a try. This
+should allows you, at first instance, to get a feeling on its usability and
+secondly to guess what it could be useful for.
+
+The next three pages are meant to smoothly guide you from getting the framework
+sources to running a simple application on it. Read them preferably on this
+order:
+
+-# @ref bbque_sec00_src
+-# @ref bbque_sec00_bld
+-# @ref bbque_sec00_run
+-# @ref bbque_sec00_app
+
+After this reading you should not be anymore wondering whether the the
+framework is usable, if it compiles clean and how you can start to play with
+it. Now, if you are still interested on it, you can start mastering how to make
+the framework useful for your needs, and that's the goal of the next section.
+
+
+
+
+\subsection sec00_ww Working With the BarbequeRTRM Framework
+
+The BarbequeRTRM comes as a system deamon (barbeque) and a Run-Time Library
+(RTLib). A detailed documentation is provided for both the public interfaces,
+useful for application developers and frameworks users in general, as well as
+the internal APIs, which instead are of more interest for people involved with
+the framework development.
+
+In the next sections, the documentation is organized in modules which
+correspond to different framework usage perspective. The first section is
+devoted to application developers, the following sections provides more and
+more details which are of interest just to framework developers.
+
+
+\subsubsection sec00_ww_rtlib Application Integration
+
+If you are interested into the integration of new applications with the
+BarbequeRTRM, than you should focus on the usage of the \ref rtlib and we
+suggest you to start reading the following sections, preferably in this
+order:
+-# @ref rtlib_sec01_ow
+-# @ref rtlib_sec02_aem
+-# @ref rtlib_sec03_plain
+
+
+\subsubsection sec00_ww_mgr Framework Internals
+
+If instead you are interested into hacking the run-time manager or develop new
+plugins, read following sections, preferably in this order:
+-# @ref sec01_ow
+-# @ref sec02_cm
+-# @ref sec03_am
+-# @ref sec04_rm
+-# @ref sec05_sm
+-# @ref sec06_ym
+-# @ref sec07_pm
+
+\subsubsection sec00_ww_prt Framework Porting
+
+The integration with a target platform is discussed in these sections:
+- @ref sec10_ap
+- @ref sec20_pp
+
+
+\subsubsection sec00_ww_ext Utilities and Tools
+
+Finally, these sections are devoted to the presentation of some utility
+functions and tools which are available to support the development of both core
+framework modules as well as applications:
+- @ref sec40_ut
+- @ref sec50_pl
+
+*/
