@@ -22,28 +22,91 @@
 @section rtlib_sec01_ow RTLib Overall View
 
 The RTLib is the BarbequeRTRM component which provides the definition of
-the interface and related services exported by the Barbeque Run-Time
-library (RTLib). This library is provided to be linked by application that
-needs to interact with the Barbeque (BBQ) Run-Time Resource Manager (RTRM).
-The library not only defines the set of services accessable by
-applications, but allows also to mask the platform specific communication
-channel between controlled applications and the run-time manager. Moreover,
-the library provides some of the functional supports required for a proper
-integration of an application with the RTRM, thus offloading the
-application developer as much as possible from the Run-Time management
-required boilerplate integration code. Indeed, form an application
-developer perspective this library enforeces just the conformance to a
-properly define "Application Lifecycle", by specifying a set of calls and
-the order on which these should be performed.
+the interface and related services exposed to <i>managed applications</i> by
+the run-time resource manager.
 
-ADD MORE DETAILS HERE
+As represented by the overall view of the run-time resources managmenet
+solution proposed within the context of the 2PARMA project:
+\image html 2parma_bbque.png
 
-@section Run-Time Library Interfaces
+the RTLib is a component which sits in between an application and the
+System-Wide Run-Time Resource Manager (SW-RTRM), i.e. BBQUE from now on.  Each
+application which is managed by BBQUE needs to be linked with this library to
+exploit a rich set of services suitable to support its run-time management.
+An overall view of the services and interfaces provided by the RTLib is
+represented in figure:
+\image html bbque_rtlib_architecture.png
+
+Using a bottom up view, the RTLib offers these services:
+<ul><li>
+a suitable <b>communication channel</b>, which is based on the most efficient
+communication mechanisms offered by the target platform (e.g. binder in an
+Android system). The commiunication channel allows to exchange information from
+the managed application to BBQUE and vice versa in an optimized way, thanks to
+an efficient message passing protocol defined internally by the BarbequeRTRM.
+This protocol exposes to the application a more abstract RPC based interface
+consisting in a set of properly defined methods.
+</li><li>
+an efficient <b>synchronization protocol</b>, which allows to synchronize the
+application status with the run-time management decisions taken by the SW-RTRM.
+This protocol, which is detailed in \ref bbque_sec06_ym_syncp, allows to
+decouple the application execution from its run-time management thus hiding to
+the application as much as possible the undergoing interaction between the
+RTLib and the managed application while still granting to keep control on the
+application execution to enfore mandatory decisions in case this is required by
+BBQUE.
+</li><li>
+a <b>Plain API</b>, which exploit both the previous two modules to provide a
+low-level of abstraction API to access to BBQUE services; this interface is
+detailed in \ref rtlib_sec02_plain.
+</li><li>
+an <b>AEM API</b> built on top of the <em>Plain API</em> to provide a more
+abstract interface toward the BBQUE services. This interface is really simple
+yet powerfoul to allows the integration of almost all kind of managed
+applications we are targeting, i.e. those based on the stream-processing
+programming paradigm; this interface is detailed in \ref rtlib_sec02_aem.
+</li><li>
+a rich set of <b>Application-Specific RTM</b> services which support the
+developers on defining application specific run-time management and
+optimization strategies.
+</li></ul>
+
+Beside the mechanisms provided by the RTLib, the integration of new
+applications with the BarbequeRTRM requires to provide also a <b>Recipe</b>,
+which is a piece of application-specific information describing the run-time
+behaviors of the application; this concept is detaild in \ref rtlib_sec01_recipe.
+
+All these concepts provides a simplified infrastructure which allows to easily
+code new applications, or port existing ones, to be run-time managed by the
+BarbequeRTRM framework.
+Applications could be written using a "classical" programming language, C and
+C++ are those supported for the time being, or even applications which are
+based on more advanced programming paradigms such as <em>OpenCL</em> or the
+<em>Native Programming Model (NPM)</em> used by STMicroelectronics for its
+P2012 many-core platform.
+
+
+@section rtlib_sec01_ow_int Run-Time Library Interfaces
 
 If you are interested into the integration of new applications with the
 BarbequeRTRM you could either one of these two interfaces, which correspond
 to different abstraction levels:
 -# @ref rtlib_sec02_aem
 -# @ref rtlib_sec03_plain
+
+
+@section rtlib_sec01_ow_asrtm Suppport for Application-Specific Run-Time Management
+
+In addition to the selected abstraction level, the RTLib offers also a set of
+utility services which have been specifically designed to support the developer
+with the definition of an application local run-time management policy. This
+API consists of different modules, which can be used alone or combined to
+develop easily more advanced run-time management strategies:
+
+-# @ref rtlib_sec04_win
+-# @ref rtlib_sec04_mon
+-# @ref rtlib_sec04_flt
+-# @ref rtlib_sec04_opm
+-# @ref rtlib_sec04_rtm
 
 */
