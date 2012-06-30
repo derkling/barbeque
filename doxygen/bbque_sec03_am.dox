@@ -27,6 +27,72 @@ descriptors given their scheduling status or priority level.  Moreover to
 signal the scheduling change of status of an application, and to know which
 is lowest priority level (maximum integer value) managed by Barbeque RTRM.
 
-ADD MORE DETAILS HERE
+
+\section bbque_sec03_am_lfc Application Lifecycle
+
+
+The image below provides a state diagram of the application's lifecycle.
+Please note that currently the framework handles the concepts of Application
+and Execution Context, as they were synonyms. We preview to disambiguate this
+point in the future. In the meanwhile we can consider them as referring to the
+same entity.
+
+\image html bosp_am_exc_lfc.png
+
+From the BarbequeRTRM side, an application is characterized by two classes of
+state: <em>stable</em> and <em>to synchronize</em>. Whilst the first indicates
+the current scheduling state of the application, the second expresses what is
+going to happen to the application, according to the new
+scheduling/optimization performed. The Application (or EXC) provides such
+information through the methods \ref bbque::app::Application::State() and \ref
+bbque::app::Application::SyncState().
+
+Stable states are defined into \ref bbque::app::ApplicationStatusIF::State_t
+and include:
+
+<ul><li>
+\c DISABLED: Not using and not requiring any resource.
+</li><li>
+\c READY: Waiting for resources.
+</li><li>
+\c SYNC: A new scheduling has been performed, and the resources assigned to the
+application are changed compared to the previous scheduling run.
+</li><li>
+\c RUNNING: In execution, hence currently using resources. If a new scheduling
+has been performed, the resources assigned are not changed.
+</li><li>
+\c FINISHED: Regularly exited. Resources have been released.
+</li></ul>
+
+Synchronization states are defined into \ref
+bbque::app::ApplicationStatusIF::SyncState_t and include:
+
+<ul><li>
+\c STARTING: Scheduled to run for the first time.
+</li><li>
+\c RECONF: Change of the Application Working Mode (AWM) assigned, ie. the set of resources.
+</li><li>
+\c MIGRATE: Application Working Mode unchanged, physical resources assigned changed.
+</li><li>
+\c MIGREC: Change of both Applicaton Working Mode and physical resources assigned.
+</li><li>
+\c BLOCKED: Resources unavailable. The application is unscheduled.
+</li></ul>
+
+Whenever an application starts (EXC instantiation), the default state is \c
+DISABLED. It is the RTLib that takes care of enabling it, by calling \ref
+bbque::ApplicationManager::EnableEXC. From now on the Application is \c READY
+state. Once the scheduler has assigned an AWM, its state is set to \c SYNC, and
+the sync-state is set to one of the possible values shown in the figure, in the
+right box.
+
+Afterwards the scheduling step, the <em> synchronization step</em> updates the
+current state of the application. In case of \c BLOCKED sync-state, the current
+state will be set to \c READY, meaning that it is waiting for resource
+availability. Conversely, in all the other cases, it will be set to \c RUNNING.
+
+State \c FINISHED indicates that the application is regularly exiting and thus
+must not be taken into account for future scheduling decisions.
+
 
 */
