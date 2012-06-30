@@ -21,27 +21,13 @@
 #include <map>
 #include <vector>
 
+#include "bbque/config.h"
 #include "bbque/application_manager_conf.h"
 #include "bbque/utils/deferrable.h"
 #include "bbque/plugins/logger.h"
 #include "bbque/cpp11/mutex.h"
 
 #define APPLICATION_MANAGER_NAMESPACE "bq.am"
-
-#ifndef BBQUE_APP_PRIO_LEVELS
-/**
-  * @brief The (default) minimum priority for an Application
-  *
-  * Applicaitons are scheduled according to their priority which is a
-  * value ranging from 0 (highest priority) to a Bbque defined minimum values.
-  * The default minimum value is defined by BBQUE_APP_PRIO_LEVELS, but it can be
-  * tuned by a Barbeque configuration parameter.
-  *
-  * Recipies could define the priority of the corresponding Application.
-  *
-  */
-#define BBQUE_APP_PRIO_LEVELS 10
-#endif
 
 using bbque::app::Application;
 using bbque::app::RecipePtr_t;
