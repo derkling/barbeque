@@ -64,6 +64,15 @@ config BBQUE_BUILD_DEBUG
   This will produce a version of both the daemon and the RTLib with much more
   logging messages and debug symbols, which is suitable for debugging purposes.
 
+config BBQUE_APP_PRIO_LEVELS
+  int "Number of priority levels"
+  default 5
+  ---help---
+  Applications are scheduled according to their priority which is a value
+  ranging from 0 (highest priority) to a defined minimum value.
+
+  Recipies define the priority of the corresponding Application.
+
 config BBQUE_BUILD_TESTS
   bool "Build the TEST suite"
   default n

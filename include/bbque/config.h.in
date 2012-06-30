@@ -131,6 +131,18 @@
  * BarbequeRTMR Global Features
  ******************************************************************************/
 
+/**
+ * @brief The (default) minimum priority for an Application
+ *
+ * Applications are scheduled according to their priority which is a
+ * value ranging from 0 (highest priority) to a Bbque defined minimum values.
+ * The default minimum value is defined by BBQUE_APP_PRIO_LEVELS, but it can be
+ * tuned by a Barbeque configuration parameter.
+ *
+ * Recipies could define the priority of the corresponding Application.
+ */
+#define BBQUE_APP_PRIO_LEVELS ${CONFIG_BBQUE_APP_PRIO_LEVELS}
+
 /* A global variable to signal if we are running as a daemon */
 extern unsigned char daemonized;
 
