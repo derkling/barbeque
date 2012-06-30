@@ -17,7 +17,7 @@
 
 /**
 
-\page sec01_ow Overall Arcitecture View
+\page sec01_ow Overall Architecture View
 
 The Barbeque RTRM is a modular and efficient resource allocator for
 many-core clustered accelerator engines, which provide support for:
