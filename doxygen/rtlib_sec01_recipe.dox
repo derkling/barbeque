@@ -1,0 +1,198 @@
+/*
+ * Copyright (C) 2012  Politecnico di Milano
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/**
+
+@defgroup rtlib_sec01_recipe Recipes
+@ingroup rtlib
+
+
+\section rtlib_sec01_recipe_intro Introduction
+
+In the idea of the RTRM, the application must exhibit capabilities of
+adaptivity and reconfigurability. This means that it must be able to can be
+executed according to several configurations, i.e. resource usage levels.
+In the jargon of BarbequeRTRM such configurations are called Application
+Working Modes (AWM), and must be provided by the application developers.
+
+Currently we expect that AWMs are packaged into an XML file called \b recipe.
+The programmer could write a recipe by hand, but the optimal approach is to
+use a suitable profiling or Design-Space Exploration (DSE) tool, which could
+identify a set of resource usages that are worth to be considered at runtime,
+taking into account suitable metrics (e.g, power and performance) and
+system-wide optimization objectives.
+
+
+\section rtlib_sec01_recipe_struct File structure
+
+A recipe is an XML with extension .recipe, that must be properly deployed
+under \c BASE_PATH/etc/bbque/recipes. Basically, for each EXC a recipe must be
+registered. We can also use the same recipe for several EXCs. An example of
+recipe is shown below.
+
+\code
+<?xml version="1.0"?>
+<BarbequeRTRM recipe_version="0.8">
+   <application priority="4">
+      <platform id="org.linux.cgroup">
+         <awms>
+            <awm id="0" name="LQ" value="1">
+               <resources>
+                  <tile id="0">
+                     <cluster id="0">
+                        <pe  units="%"  qty="50"/>
+                        <mem units="Mb" qty="5"/>
+                     </cluster>
+                  </tile>
+               </resources>
+            </awm>
+            <awm id="1" name="MQ" value="2">
+               <resources>
+                  <tile id="0">
+                     <cluster id="0">
+                        <pe  units="%"  qty="100"/>
+                        <mem units="Mb" qty="10"/>
+                     </cluster>
+                  </tile>
+               </resources>
+            </awm>
+            <awm id="2" name="HQ" value="4">
+               <resources>
+                  <tile id="0">
+                     <cluster id="0">
+                        <pe  units="%"  qty="200"/>
+                        <mem units="Mb" qty="20"/>
+                     </cluster>
+                  </tile>
+               </resources>
+            </awm>
+         </awms>
+      </platform>
+      <platform id="it.polimi.bbque.tpd">
+         <awms>
+         ...
+         </awms>
+      </platform>
+   </application>
+</BarbequeRTRM>
+\endcode
+
+When the application instantiates the Execution Context, and thus specifies
+the recipe to use, the BarbequeRTRM check the validity of the recipe.
+Here below the complete set of tags and attributes is listed. Their presence
+must be considered mandatory, unless the optionality of an element is
+specified explicitly. Concerning the hierarchy of the different XML elements,
+please consider the example provided above.
+
+<ul><li>
+\c \b BarbequeRTRM: The root tag, including general attributes.
+   <ul><li>
+   \c recipe_version: Since the format of the recipes can change in future
+   versions of the framework, a first validation step requires to specify the
+   reference version of the recipe.
+   </li></ul>
+   \n
+</li><li>
+\c \b application: Application/EXC properties
+   <ul><li>
+   \c name: A descriptive name of the application/EXC
+   </li><li>
+   \c priority: Static priority assigned. Generally this is taken into account
+   at runtime by the scheduler/optimizer. It is mandatory to provide a value
+   between 0 and N, where 0 denotes a <em>critical application</em>
+   (highest priority) and N is the lowest one set into the \ref
+   bbque_sec00_bld_cnf.
+   </li></ul>
+   \n
+</li><li>
+\c \b platform: The hardware platform target. The recipe can contain more than
+one platform section.
+   <ul><li>
+   \c id: The string identifier of the platform. The recipe must contain at
+   least the platform section with the id matching the one of system platform,
+   which is defined into the \ref sec20_pp of the target architecture
+   selected in the \ref bbque_sec00_bld_cnf. The options supported by the
+   current release of the framework are:
+       <ul><li>
+       \c org.linux.cgroup:    Linux Host
+       </li><li>
+       \c it.polimi.bbque.tpd: Test Platform Data (TPD) enabled
+       </li></ul>
+   </li></ul>
+   \n
+</li><li>
+\c \b awms: The section listing the set of AWMs.
+</li><li>
+\c \b awm: Definition of a single AWM. A valid recipe must defines at least one AWM.
+   <ul><li>
+   \c id: Each AWM is identified by a number. It is strictly mandatory that
+   the numeration starts from 0 and continue in a sequence of integer values.
+   </li><li>
+   \c name: A descriptive name for the AWM (e.g., "high-quality",
+   "mid-quality", "low-quality").
+   </li><li>
+   \c value: A preference value associated to the AWM. Reasonably, the higher
+   is the \c value the greater is the requirement of resources. In the
+   example, a direct proportionality has been applied between the amount of
+   resources and the \c value
+   </li></ul>
+  \n
+</li><li>
+\c \b resources: The section listing the resource requirements of the AWM. All
+the children tags nested into this section are considered resource names. The
+hierarchy of the nesting and the ID specified are used to build the \b
+resource \b path, i.e. a namespace-style string identifying the specific
+resource. For instance, in the example the recipe would produce the following
+resource paths: <em>tile0.cluster0.pe</em> and <em>tile0.cluster0.mem</em>.
+</li><li>
+\c \b tile and \c \b cluster: Used to group resources into a two-level hierarchical
+partitioning. Of course, for target architectures like x86 multicores we would
+expect just one occurrence of both tags.
+</li><li>
+\c \b mem: The amount of memory required. Please consider the hierarchal position
+to reference the correct level of memory.
+</li><li>
+\c \b pe: The amount of processing elements required. In the example, the
+requirement is specified as a time quota percentage. For instance, in AWM 2
+the recipe requires a 200%, meaning that we need a full usage of 2 CPU cores.
+   <ul><li>
+   \c id: Numerical identifier. Must be used only for resource tags. Please
+   consider that such ID should not necessarly reference a physical ID. We
+   expect to use it just distinguish among "sibling" resources.
+   </li><li>
+   \c units: A qualifier for the attribute \c qty. Values currently supported
+   are \c %, \c Kb, \c Mb, \c Gb.
+   </li><li>
+   \c qty: The amount required.
+   </li></ul>
+</li></ul>
+
+
+\section rtlib_sec01_recipe_constr Constraints
+
+It is worth to keep in mind some constraints about recipes:
+
+<ul><li>
+The Execution Context cannot require resources from more than one cluster.
+Therefore, do not use more than one \c cluster tag inside an AWM definition.
+This is a limitation due to the current scheduling policy.
+</li><li>
+Avoid to specify the same \c value for each AWM, since this would lead the
+scheduling policy to be take penalizing decisions againts the application/EXC.
+</li><ul>
+
+*/

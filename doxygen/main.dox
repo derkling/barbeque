@@ -149,6 +149,7 @@ order:
 -# @ref rtlib_sec01_ow
 -# @ref rtlib_sec02_aem
 -# @ref rtlib_sec03_plain
+-# @ref rtlib_sec01_recipe
 
 
 \subsubsection sec00_ww_mgr Framework Internals
