@@ -66,15 +66,14 @@ public:
 	double getElapsedTime();
 
 	/**
-	 * @brief get elapsed time in [us]
-	 * @return [us] of elapsed time
+	 * @brief get elapsed time in [ms]
+	 * @return [ms] of elapsed time
 	 */
 	double getElapsedTimeMs();
 
 	/**
-	 * @brief compute elapsed time in micro-second resolution.
-	 * other getElapsedTime will call this first, then convert to
-	 * correspond resolution.
+	 * @brief get elapsed time in [us]
+	 * @return [us] of elapsed time
 	 */
 	 double getElapsedTimeUs();
 
