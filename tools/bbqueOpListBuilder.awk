@@ -47,6 +47,7 @@ BEGIN {
 	printf "/* This file has been automatically generated using */\n"
 	printf "/* the bbque-opp Operating Points parser script. */\n"
 	printf "#include <bbque/monitors/operating_point.h>\n"
+	printf "using bbque::rtlib::as::OperatingPointsList;\n"
 	printf "OperatingPointsList %s = {\n", BBQUE_RTLIB_OPLIST;
 }
 
