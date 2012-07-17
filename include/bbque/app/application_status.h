@@ -217,14 +217,14 @@ public:
 	/**
 	 * @brief Get the PID of an application given its UID
 	 */
-	static inline AppPid_t Pid(AppUid_t uid) {
+	static inline AppPid_t Uid2Pid(AppUid_t uid) {
 		return (uid >> BBQUE_UID_SHIFT);
 	};
 
 	/**
 	 * @brief Get the EID of an application given its UID
 	 */
-	static inline uint8_t Eid(AppUid_t uid) {
+	static inline uint8_t Uid2Eid(AppUid_t uid) {
 		return (uid & BBQUE_UID_MASK);
 	};
 
