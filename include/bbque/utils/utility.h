@@ -76,11 +76,26 @@
 # define FW(fmt) BBQUE_FMT(COLOR_YELLOW, 'W', fmt)
 # define FE(fmt) BBQUE_FMT(COLOR_RED,    'E', fmt)
 
-# define BBQUE_FMT(color, module, fmt) \
-	        "\033[0m[%05d - %11.6f] " module ": " color fmt "\033[0m", \
-			gettid(),\
-			bbque_tmr.getElapsedTime()
-#define FMT_INFO(fmt) BBQUE_FMT(COLOR_GREEN, "  - INFO   main            ", fmt)
+#else
+//*****************************************************************************
+//*  Logging routines for BarbequeRTRM modules
+//*****************************************************************************
+
+// Define a generic logger, which can be customized based on the previously
+// defined set of macros
+# define BBQUE_FMT(color, level, fmt) \
+	"\033[0m%-23.23s - %-6.6s %-16.16s: " color fmt "\033[0m", \
+	"*****", \
+	level, \
+	BBQUE_LOG_MODULE
+
+// Partially specialize the 'generi logger' using different (log-level, color)
+# define FD(fmt) BBQUE_FMT(COLOR_LGRAY,  "DEBUG",   fmt)
+# define FI(fmt) BBQUE_FMT(COLOR_GREEN,  "INFO",    fmt)
+# define FN(fmt) BBQUE_FMT(COLOR_CYAN,   "NOTICE",  fmt)
+# define FW(fmt) BBQUE_FMT(COLOR_YELLOW, "WARNING", fmt)
+# define FE(fmt) BBQUE_FMT(COLOR_RED,    "ERROR",   fmt)
+
 #endif
 
 #ifdef BBQUE_DEBUG
