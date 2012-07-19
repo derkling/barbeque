@@ -81,7 +81,6 @@ public:
 	 * operations to be executed at the next nearest scheduled time.
 	 */
 	virtual void Execute() {
-		fprintf(stderr, "Deferrable::Execute\n");
 		if (func) func();
 	}
 
