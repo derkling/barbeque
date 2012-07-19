@@ -27,6 +27,7 @@
 
 #include <sys/epoll.h>
 
+
 namespace bbque { namespace rtlib {
 
 /**
@@ -51,8 +52,7 @@ public:
 
 protected:
 
-	RTLIB_ExitCode_t _Init(
-			const char *name);
+	RTLIB_ExitCode_t _Init(const char *name);
 
 	RTLIB_ExitCode_t _Register(pregExCtx_t prec);
 
