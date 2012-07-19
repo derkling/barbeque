@@ -115,7 +115,7 @@ SchedulerManager::SchedulerManager() :
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	//---------- Load the required optimization plugin
-	std::string opt_namespace(SCHEDULER_POLICY_NAMESPACE);
+	std::string opt_namespace(SCHEDULER_POLICY_NAMESPACE".");
 	logger->Debug("Loading optimization policy [%s%s]...",
 			opt_namespace.c_str(), opt_policy.c_str());
 	policy = ModulesFactory::GetSchedulerPolicyModule(

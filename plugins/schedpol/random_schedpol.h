@@ -26,6 +26,7 @@
 #include <random>
 
 #define SCHEDULER_POLICY_NAME "random"
+#define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE"."SCHEDULER_POLICY_NAME
 
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;

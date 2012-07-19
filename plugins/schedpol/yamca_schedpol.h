@@ -25,7 +25,7 @@
 #include "bbque/plugins/plugin.h"
 
 #define SCHEDULER_POLICY_NAME "yamca"
-
+#define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE"."SCHEDULER_POLICY_NAME
 
 using bbque::res::RViewToken_t;
 using bbque::utils::Timer;

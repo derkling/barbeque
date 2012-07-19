@@ -38,9 +38,7 @@ PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params) {
   // Registering YamcaSchedPolModule
   rp.CreateFunc = bp::YamsSchedPol::Create;
   rp.DestroyFunc = bp::YamsSchedPol::Destroy;
-  res = params->RegisterObject(
-		  (const char *)
-		  SCHEDULER_POLICY_NAMESPACE SCHEDULER_POLICY_NAME, &rp);
+  res = params->RegisterObject((const char *)MODULE_NAMESPACE, &rp);
   if (res < 0)
     return NULL;
 

@@ -23,7 +23,7 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resources.h"
 
-#define SCHEDULER_POLICY_NAMESPACE "bq.sp."
+#define SCHEDULER_POLICY_NAMESPACE "bq.sp"
 
 using namespace bbque::app;
 using namespace bbque::res;

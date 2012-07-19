@@ -35,9 +35,7 @@ RandomSchedPol::RandomSchedPol() :
 	dist(0, 100) {
 
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(
-			SCHEDULER_POLICY_NAMESPACE
-			SCHEDULER_POLICY_NAME);
+	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
 		if (daemonized)
@@ -126,8 +124,7 @@ RandomSchedPol::Schedule(bbque::System & sv, RViewToken_t &rav) {
 	}
 
 	// Get a new view on the ResourceAccounter
-	viewResult = ra.GetView(SCHEDULER_POLICY_NAMESPACE
-			SCHEDULER_POLICY_NAME, ra_view);
+	viewResult = ra.GetView(MODULE_NAMESPACE, ra_view);
 	if (viewResult != ResourceAccounter::RA_SUCCESS) {
 		logger->Crit("Initialization failed "
 				"(Error: unable to get a view from RA)");

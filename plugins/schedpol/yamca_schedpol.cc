@@ -27,7 +27,7 @@
 
 /** Metrics (class VALUE) declaration */
 #define YAMCA_VALUE_METRIC(NAME, DESC)\
- {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, \
+	{MODULE_NAMESPACE"."NAME, DESC, \
 	 MetricsCollector::VALUE, 0, NULL, 0}
 /** Increase value for the specified metric */
 #define YAMCA_ADD_VALUE(METRICS, INDEX, AMOUNT) \
@@ -38,7 +38,7 @@
 
 /** Metrics (class SAMPLE) declaration */
 #define YAMCA_SAMPLE_METRIC(NAME, DESC)\
- {SCHEDULER_MANAGER_NAMESPACE".yamca."NAME, DESC, \
+	{MODULE_NAMESPACE"."NAME, DESC, \
 	 MetricsCollector::SAMPLE, 0, NULL, 0}
 /** Reset the timer used to evaluate metrics */
 #define YAMCA_RESET_TIMING(TIMER) \
@@ -80,9 +80,7 @@ YamcaSchedPol::YamcaSchedPol():
 	mc(bu::MetricsCollector::GetInstance()) {
 
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(
-			SCHEDULER_MANAGER_NAMESPACE"."
-			SCHEDULER_POLICY_NAME);
+	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 
 	if (logger)
@@ -162,9 +160,7 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::InitResourceView() {
 		++tok_counter;
 
 	// Build a string path for the resource state view
-	std::string schedpolname(
-			SCHEDULER_POLICY_NAMESPACE
-			SCHEDULER_POLICY_NAME);
+	std::string schedpolname(MODULE_NAMESPACE);
 	char token_path[30];
 	snprintf(token_path, 30, "%s%d", schedpolname.c_str(), tok_counter);
 
@@ -501,8 +497,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::GetContentionLevel(
 	// Safety data check
 	if (!wm) {
 		logger->Crit("Contention level: Missing working mode.\n"
-				"Possibile data corruption in %s",
-				SCHEDULER_POLICY_NAMESPACE"yamca");
+				"Possibile data corruption in "
+				MODULE_NAMESPACE);
 		assert(!wm);
 		return SCHED_ERROR;
 	}

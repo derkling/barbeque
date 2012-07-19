@@ -107,8 +107,7 @@ YamsSchedPol::YamsSchedPol():
 	char conf_opts[YAMS_MCT_COUNT+MetricsContribute::MCT_CPT_COUNT][40];
 
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(
-			SCHEDULER_POLICY_NAMESPACE SCHEDULER_POLICY_NAME);
+	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 
 	if (logger)
@@ -197,9 +196,7 @@ YamsSchedPol::ExitCode_t YamsSchedPol::Init() {
 		++vtok_count;
 
 	// Build a string path for the resource state view
-	std::string schedpolname(
-			SCHEDULER_POLICY_NAMESPACE
-			SCHEDULER_POLICY_NAME);
+	std::string schedpolname(MODULE_NAMESPACE);
 	char token_path[30];
 	snprintf(token_path, 30, "%s%d", schedpolname.c_str(), vtok_count);
 

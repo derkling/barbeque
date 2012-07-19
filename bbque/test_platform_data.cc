@@ -21,6 +21,8 @@
 #include "bbque/modules_factory.h"
 #include "bbque/resource_accounter.h"
 
+#define MODULE_NAMESPACE "bq.tpd"
+
 namespace br = bbque::res;
 
 namespace bbque {

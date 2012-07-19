@@ -26,6 +26,7 @@
 #include "contrib/metrics_contribute.h"
 
 #define SCHEDULER_POLICY_NAME "yams"
+#define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE"."SCHEDULER_POLICY_NAME
 
 /** Metrics (class SAMPLE) declaration */
 #define YAMS_SAMPLE_METRIC(NAME, DESC)\
