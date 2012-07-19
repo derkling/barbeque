@@ -60,7 +60,7 @@ XMLRecipeLoader::XMLRecipeLoader() {
 			syslog(LOG_INFO, "Build XML RecipeLoader plugin [%p] FAILED "
 					"(Error: missing logger module)", (void*)this);
 		else
-			fprintf(stdout, FMT_INFO("Build XML RecipeLoader plugin [%p] FAILED "
+			fprintf(stdout, FI("Build XML RecipeLoader plugin [%p] FAILED "
 					"(Error: missing logger module)\n"), (void*)this);
 	}
 
@@ -103,7 +103,7 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 		syslog(LOG_INFO, "Using XMLRecipeLoader recipe folder [%s]",
 				recipe_dir.c_str());
 	else
-		fprintf(stdout, FMT_INFO("Using XMLRecipeLoader recipe folder [%s]\n"),
+		fprintf(stdout, FI("Using XMLRecipeLoader recipe folder [%s]\n"),
 				recipe_dir.c_str());
 
 	return true;

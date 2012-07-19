@@ -22,8 +22,8 @@
 #include <iostream>
 
 #include "bbque/utils/utility.h"
+
 #define MODULE_NAMESPACE "bq.dl"
-#define FMT(fmt) BBQUE_FMT(COLOR_LGREEN, "DL", fmt)
 
 namespace bbque { namespace plugins {
 
@@ -61,7 +61,7 @@ DynamicLibrary * DynamicLibrary::Load(const std::string & name,
 	return new DynamicLibrary(handle);
 
 err_load:
-	fprintf(stderr, FMT("FAILED loading [%s], Error:\n%s\n"),
+	fprintf(stderr, FE("FAILED loading [%s], Error:\n%s\n"),
 			name.c_str(), errorString.c_str());
 	return NULL;
 }

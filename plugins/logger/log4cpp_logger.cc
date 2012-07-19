@@ -124,7 +124,7 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 		syslog(LOG_INFO, "Using Log4CppLogger configuration file [%s]",
 				conf_file_path.c_str());
 	else
-		fprintf(stdout, FMT_INFO("Using Log4CppLogger configuration file [%s]\n"),
+		fprintf(stdout, FI("Using Log4CppLogger configuration file [%s]\n"),
 				conf_file_path.c_str());
 
 	// Setting up Appender, layout and Category
@@ -137,7 +137,7 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 			syslog(LOG_INFO, "Log4CppLogger configuration FAILED (Error %s)",
 					e.what());
 		else
-			fprintf(stdout, FMT_INFO("Log4CppLogger configuration FAILED (Error %s)\n"),
+			fprintf(stdout, FI("Log4CppLogger configuration FAILED (Error %s)\n"),
 					e.what());
 		return false;
 	}

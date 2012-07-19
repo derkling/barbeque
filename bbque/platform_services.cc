@@ -84,7 +84,7 @@ int32_t PlatformServices::ServiceConfData(PF_ServiceData & data) {
 	if (cm.RunAsDaemon())
 		syslog(LOG_INFO, "Loading configuration for system service [%s]...", data.id);
 	else
-		fprintf(stdout, FMT_INFO("Loading configuration for system service [%s]...\n"), data.id);
+		fprintf(stdout, FI("Loading configuration for system service [%s]...\n"), data.id);
 	cm.ParseConfigurationFile(opts_desc, opts);
 
 	return PF_SERVICE_DONE;

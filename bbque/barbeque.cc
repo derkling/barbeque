@@ -50,12 +50,12 @@ int Tests(bp::PluginManager & pm) {
 				strlen(TEST_NAMESPACE),TEST_NAMESPACE)))
 		return false;
 
-	fprintf(stdout, FMT_INFO("Entering Testing Mode\n"));
+	fprintf(stdout, FI("Entering Testing Mode\n"));
 
 	do {
 		bu::Timer test_tmr;
 
-		fprintf(stdout, "\n"FMT_INFO("___ Testing [%s]...\n"),
+		fprintf(stdout, "\n"FI("___ Testing [%s]...\n"),
 				(*near_match).first.c_str());
 
 		bp::TestIF * tms = bb::ModulesFactory::GetTestModule(
@@ -65,7 +65,7 @@ int Tests(bp::PluginManager & pm) {
 		tms->Test();
 		test_tmr.stop();
 
-		fprintf(stdout, FMT_INFO("___ completed, [%11.6f]s\n"),
+		fprintf(stdout, FI("___ completed, [%11.6f]s\n"),
 				test_tmr.getElapsedTime());
 
 		near_match++;
@@ -73,7 +73,7 @@ int Tests(bp::PluginManager & pm) {
 	} while (near_match != rm.end() &&
 			((*near_match).first.compare(0,5,"test.")) == 0 );
 
-	fprintf(stdout, "\n\n"FMT_INFO("All tests completed\n\n"));
+	fprintf(stdout, "\n\n"FI("All tests completed\n\n"));
 	return EXIT_SUCCESS;
 }
 
@@ -129,9 +129,9 @@ int main(int argc, char *argv[]) {
 		DaemonizeBBQ(cm);
 	} else {
 		// Welcome screen
-		fprintf(stdout, FMT_INFO("Starting BBQ (ver. %s)...\n"), g_git_version);
-		fprintf(stdout, FMT_INFO("BarbequeRTRM build time: " __DATE__  " " __TIME__ "\n"));
-		fprintf(stdout, FMT_INFO("                 flavor: " BBQUE_BUILD_FLAVOR "\n"));
+		fprintf(stdout, FI("Starting BBQ (ver. %s)...\n"), g_git_version);
+		fprintf(stdout, FI("BarbequeRTRM build time: " __DATE__  " " __TIME__ "\n"));
+		fprintf(stdout, FI("                 flavor: " BBQUE_BUILD_FLAVOR "\n"));
 	}
 
 	// Initialization
@@ -145,7 +145,7 @@ int main(int argc, char *argv[]) {
 			syslog(LOG_INFO, "Loading plugins from dir [%s]...",
 					cm.GetPluginsDir().c_str());
 		else
-			fprintf(stdout, FMT_INFO("Loading plugins from dir [%s]...\n"),
+			fprintf(stdout, FI("Loading plugins from dir [%s]...\n"),
 					cm.GetPluginsDir().c_str());
 		pm.LoadAll(cm.GetPluginsDir());
 	}
@@ -174,7 +174,7 @@ bbq_exit:
 		syslog(LOG_INFO, "BBQ daemon termination [%s]",
 				(exit_code == EXIT_FAILURE) ? "FAILURE" : "SUCCESS" );
 	else
-		fprintf(stdout, FMT_INFO("BBQ termination [%s]\n"),
+		fprintf(stdout, FI("BBQ termination [%s]\n"),
 				(exit_code == EXIT_FAILURE) ? "FAILURE" : "SUCCESS" );
 
 	closelog();

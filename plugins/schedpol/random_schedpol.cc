@@ -42,7 +42,7 @@ RandomSchedPol::RandomSchedPol() :
 			syslog(LOG_INFO, "Build RANDOM schedpol plugin [%p] FAILED "
 					"(Error: missing logger module)", (void*)this);
 		else
-			fprintf(stdout, FMT_INFO("Build RANDOM schedpol plugin [%p] FAILED "
+			fprintf(stdout, FI("Build RANDOM schedpol plugin [%p] FAILED "
 					"(Error: missing logger module)\n"), (void*)this);
 	}
 

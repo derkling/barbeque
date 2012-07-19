@@ -73,7 +73,7 @@ SasbSyncPol::SasbSyncPol() :
 			syslog(LOG_ERR, "Build SASB syncpol plugin [%p] FAILED "
 					"(Error: missing logger module)", (void*)this);
 		else
-			fprintf(stdout, FMT_INFO("Build SASB syncpol plugin [%p] FAILED "
+			fprintf(stdout, FI("Build SASB syncpol plugin [%p] FAILED "
 					"(Error: missing logger module)\n"), (void*)this);
 	}
 

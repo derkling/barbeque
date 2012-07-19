@@ -28,10 +28,6 @@
 #include <stdarg.h>
 
 #define MODULE_NAMESPACE "bq.rtlib.perf"
-#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_PERF [DBG]", fmt)
-#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_PERF [INF]", fmt)
-#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_PERF [WRN]", fmt)
-#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB_PERF [ERR]", fmt)
 
 namespace bbque { namespace utils {
 
@@ -63,7 +59,7 @@ int Perf::EventOpen(struct perf_event_attr *attr,
 		unsigned long flags) {
 	int result;
 
-	DB(fprintf(stderr, FMT_DBG("Adding new PERF counter [%"PRIu32":%llu], GL [%d], "
+	DB(fprintf(stderr, FD("Adding new PERF counter [%"PRIu32":%llu], GL [%d], "
 					"for Task [%d] on CPU [%d]...\n"),
 					attr->type, attr->config, group_fd, pid, cpu));
 
@@ -71,7 +67,7 @@ int Perf::EventOpen(struct perf_event_attr *attr,
 	result = syscall(__NR_perf_event_open, attr, pid, cpu,
 			group_fd, flags);
 	if (result == -1) {
-		fprintf(stderr, FMT_ERR("Opening PERF counters FAILED "
+		fprintf(stderr, FE("Opening PERF counters FAILED "
 					"(Error: %s)\n"), strerror(errno));
 	} else {
 		opened = true;
@@ -115,7 +111,7 @@ int Perf::AddCounter(perf_type_id type,
 
 	counters[prc->fd] = prc;
 
-	fprintf(stderr, FMT_INF("Added new PERF counter [%02d:%d:%02lu]\n"),
+	fprintf(stderr, FI("Added new PERF counter [%02d:%d:%02lu]\n"),
 			prc->fd, type, config);
 
 	return prc->fd;
@@ -123,14 +119,14 @@ int Perf::AddCounter(perf_type_id type,
 
 int Perf::Enable() {
 	if (!IsGroupLeaderDefined()) {
-		fprintf(stderr, FMT_ERR("Enabling PERF counters FAILED "
+		fprintf(stderr, FE("Enabling PERF counters FAILED "
 					"(Error: Undefined group leader)\n"));
 		return -1;
 	}
 
 	prctl(PR_TASK_PERF_EVENTS_ENABLE);
 	//::ioctl(GroupLeader(), PERF_EVENT_IOC_ENABLE);
-	DB(fprintf(stderr, FMT_DBG("PERF counters (GL:%d) ENABLED\n"),
+	DB(fprintf(stderr, FD("PERF counters (GL:%d) ENABLED\n"),
 			GroupLeader()));
 
 	return 0;
@@ -138,14 +134,14 @@ int Perf::Enable() {
 
 int Perf::Disable() {
 	if (!IsGroupLeaderDefined()) {
-		fprintf(stderr, FMT_ERR("Disabling PERF counters FAILED "
+		fprintf(stderr, FE("Disabling PERF counters FAILED "
 					"(Error: Undefined group leader)\n"));
 		return 0;
 	}
 
 	prctl(PR_TASK_PERF_EVENTS_DISABLE);
 	//::ioctl(GroupLeader(), PERF_EVENT_IOC_DISABLE);
-	DB(fprintf(stderr, FMT_DBG("PERF counters (GL:%d) DISABLED\n"),
+	DB(fprintf(stderr, FD("PERF counters (GL:%d) DISABLED\n"),
 				GroupLeader()));
 
 	return 0;
@@ -173,7 +169,7 @@ uint64_t Perf::Update(int id, bool delta) {
 	ssize_t bytes;
 
 	if (!opened || !prc) {
-		fprintf(stderr, FMT_ERR("Reading PERF counter FAILED "
+		fprintf(stderr, FE("Reading PERF counter FAILED "
 					"(Error: Counters not opened or invalid counter [%d])\n"),
 				id);
 		return 0;
@@ -189,7 +185,7 @@ uint64_t Perf::Update(int id, bool delta) {
 	UPDATE_DELTA(time_enabled);
 	UPDATE_DELTA(time_running);
 
-	DB(fprintf(stderr, FMT_DBG("Counter [%d:%"PRIu32":%llu]: "
+	DB(fprintf(stderr, FD("Counter [%d:%"PRIu32":%llu]: "
 					"cV [%"PRIu64"], cE [%"PRIu64"], cR [%"PRIu64"] "
 					"dV [%"PRIu64"], dE [%"PRIu64"], dR [%"PRIu64"]\n"),
 				prc->fd, prc->attr.type, prc->attr.config,

@@ -30,8 +30,6 @@
 namespace fs = boost::filesystem;
 
 #define MODULE_NAMESPACE "bq.pm"
-#define FMT_INF(fmt) BBQUE_FMT(COLOR_LGRAY, "PM", fmt)
-#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED, "PM", fmt)
 
 namespace bbque { namespace plugins {
 
@@ -93,7 +91,7 @@ int32_t PluginManager::RegisterObject(const char * id,
 	// Verify that versions match
 	PF_PluginAPIVersion v = pm.platform_services.version;
 	if (v.major != params->version.major) {
-		fprintf(stderr, FMT_ERR("Plugin [%s] version mismatching\n"), id);
+		fprintf(stderr, FE("Plugin [%s] version mismatching\n"), id);
 		return -2;
 	}
 
@@ -106,7 +104,7 @@ int32_t PluginManager::RegisterObject(const char * id,
 
 	if (pm.exact_match_map.find(key) != pm.exact_match_map.end()) {
 		// item already exists in exact_match_map fail (only one can handle)
-		fprintf(stderr, FMT_ERR("Plugin [%s] already registered\n"), id);
+		fprintf(stderr, FE("Plugin [%s] already registered\n"), id);
 		return -3;
 	}
 
@@ -224,7 +222,7 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 					errorString);
 	if (!dl) {
 		// not a dynamic library
-		fprintf(stderr, FMT_ERR("Plugin [%s] is not a valid dynamic library\n"),
+		fprintf(stderr, FE("Plugin [%s] is not a valid dynamic library\n"),
 				path.filename().c_str());
 		return -1;
 	}
@@ -234,14 +232,14 @@ int32_t PluginManager::LoadByPath(const std::string & pluginPath) {
 	PF_InitFunc initFunc = pft->init;
 	if (!initFunc) {
 		// missing dynamic library entry point
-		fprintf(stderr, FMT_ERR("Missing [PF_initPlugin] plugin entry point\n"));
+		fprintf(stderr, FE("Missing [PF_initPlugin] plugin entry point\n"));
 		return -1;
 	}
 
 	int32_t res = InitializePlugin(initFunc);
 	if (res < 0) {
 		// initialization failed
-		fprintf(stderr, FMT_ERR("Plugin [%s] initialization FAILED\n"),
+		fprintf(stderr, FE("Plugin [%s] initialization FAILED\n"),
 				pluginPath.c_str());
 		return res;
 	}
@@ -321,7 +319,7 @@ void * PluginManager::CreateObject(const std::string & id,
 	}
 
 	// Too bad no one can create this id
-	fprintf(stderr, FMT_ERR("required plugin [%s] NOT FOUND\n"),
+	fprintf(stderr, FE("required plugin [%s] NOT FOUND\n"),
 				id.c_str());
 	return NULL;
 }
@@ -333,7 +331,7 @@ DynamicLibrary * PluginManager::LoadLibrary(const std::string & path,
 	if (!dl) {
 		// not a dynamic library?
 		fs::path _path(path);
-		fprintf(stderr, FMT_ERR("[%s] library load ERROR:\n\n%s\n\n"),
+		fprintf(stderr, FE("[%s] library load ERROR:\n\n%s\n\n"),
 				_path.filename().c_str(), errorString.c_str());
 		return NULL;
 	}
