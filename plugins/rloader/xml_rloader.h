@@ -34,7 +34,7 @@
 #include "bbque/plugins/plugin.h"
 #include "bbque/utils/attributes_container.h"
 
-#define RECIPE_LOADER_NAME "xml"
+#define MODULE_NAMESPACE RECIPE_LOADER_NAMESPACE".xml"
 
 using bbque::app::Application;
 using bbque::app::AppPtr_t;

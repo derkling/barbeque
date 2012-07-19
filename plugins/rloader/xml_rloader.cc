@@ -53,9 +53,7 @@ po::variables_map xmlrloader_opts_value;
 
 XMLRecipeLoader::XMLRecipeLoader() {
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(
-			RECIPE_LOADER_NAMESPACE
-			RECIPE_LOADER_NAME);
+	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
 		if (daemonized)
@@ -79,7 +77,7 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 	// Declare the supported options
 	po::options_description xmlrloader_opts_desc("XML Recipe Loader Options");
 	xmlrloader_opts_desc.add_options()
-		(RECIPE_LOADER_NAMESPACE"xml.recipe_dir", po::value<std::string>
+		(MODULE_NAMESPACE".recipe_dir", po::value<std::string>
 		 (&recipe_dir)->default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_RECIPES),
 		 "recipes folder")
 		;
@@ -91,7 +89,7 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 	data_out.opts_value = &xmlrloader_opts_value;
 
 	PF_ServiceData sd;
-	sd.id = RECIPE_LOADER_NAMESPACE"xml";
+	sd.id = MODULE_NAMESPACE;
 	sd.request = &data_in;
 	sd.response = &data_out;
 

@@ -39,7 +39,7 @@ PF_ExitFunc StaticPlugin_XMLRecipeLoader_InitPlugin(const PF_PlatformServices * 
   // Registering XMLRecipeLoader
   rp.CreateFunc = bp::XMLRecipeLoader::Create;
   rp.DestroyFunc = bp::XMLRecipeLoader::Destroy;
-  res = params->RegisterObject((const char *)RECIPE_LOADER_NAMESPACE "xml", &rp);
+  res = params->RegisterObject((const char *)MODULE_NAMESPACE, &rp);
   if (res < 0)
     return NULL;
 

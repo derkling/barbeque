@@ -23,7 +23,7 @@
 
 #include "bbque/app/recipe.h"
 
-#define RECIPE_LOADER_NAMESPACE "bq.rl."
+#define RECIPE_LOADER_NAMESPACE "bq.rl"
 
 #define RECIPE_MAJOR_VERSION 	0
 #define RECIPE_MINOR_VERSION 	8
