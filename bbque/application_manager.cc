@@ -488,8 +488,11 @@ AppPtr_t const ApplicationManager::GetApplication(AppUid_t uid) {
 
 	//----- Find the required EXC
 	if (it == uids.end()) {
-		logger->Error("Lookup UID [%07d] FAILED "
-				"(Error: UID not registered)", uid);
+		logger->Error("Lookup for EXC [%05d:*:%02d] (UID: %07d) FAILED"
+				" (Error: UID not registered)",
+				Application::Uid2Pid(uid),
+				Application::Uid2Eid(uid),
+				uid);
 		return AppPtr_t();
 	}
 
