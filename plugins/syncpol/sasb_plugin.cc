@@ -38,9 +38,7 @@ PF_ExitFunc PF_initPlugin(const PF_PlatformServices * params) {
   // Registering SasbSincPolModule
   rp.CreateFunc = bp::SasbSyncPol::Create;
   rp.DestroyFunc = bp::SasbSyncPol::Destroy;
-  res = params->RegisterObject(
-		  (const char *)
-		  SYNCHRONIZATION_POLICY_NAMESPACE SYNCHRONIZATION_POLICY_NAME, &rp);
+  res = params->RegisterObject((const char *)MODULE_NAMESPACE, &rp);
   if (res < 0)
     return NULL;
 

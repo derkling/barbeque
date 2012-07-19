@@ -132,7 +132,7 @@ SynchronizationManager::SynchronizationManager() :
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	//---------- Load the required optimization plugin
-	std::string sync_namespace(SYNCHRONIZATION_POLICY_NAMESPACE);
+	std::string sync_namespace(SYNCHRONIZATION_POLICY_NAMESPACE".");
 	logger->Debug("Loading synchronization policy [%s%s]...",
 			sync_namespace.c_str(), sync_policy.c_str());
 	policy = ModulesFactory::GetSynchronizationPolicyModule(

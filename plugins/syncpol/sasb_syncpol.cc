@@ -66,9 +66,7 @@ SasbSyncPol::SasbSyncPol() :
 	mc(bu::MetricsCollector::GetInstance()) {
 
 	// Get a logger
-	plugins::LoggerIF::Configuration conf(
-			SYNCHRONIZATION_POLICY_NAMESPACE"."
-			SYNCHRONIZATION_POLICY_NAME);
+	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (!logger) {
 		if (daemonized)

@@ -28,6 +28,8 @@
 #include <cstdint>
 
 #define SYNCHRONIZATION_POLICY_NAME "sasb"
+#define MODULE_NAMESPACE \
+	SYNCHRONIZATION_POLICY_NAMESPACE"."SYNCHRONIZATION_POLICY_NAME
 
 using bbque::utils::Timer;
 using bbque::utils::MetricsCollector;
