@@ -26,6 +26,8 @@
 #include <cstdint>
 #include <log4cpp/Category.hh>
 
+#define MODULE_NAMESPACE LOGGER_NAMESPACE".log4cpp"
+
 // These are the parameters received by the PluginManager on create calls
 struct PF_ObjectParams;
 

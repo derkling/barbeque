@@ -92,7 +92,7 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	static std::string conf_file_path;
 	po::options_description log4cpp_opts_desc("Log4CPP Options");
 	log4cpp_opts_desc.add_options()
-		(LOGGER_NAMESPACE"log4cpp.conf_file", po::value<std::string>
+		(MODULE_NAMESPACE".conf_file", po::value<std::string>
 #ifdef BBQUE_DEBUG
 		 (&conf_file_path)->default_value(
 			 BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf_dbg"),
@@ -111,7 +111,7 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	PF_Service_ConfDataOut data_out;
 	data_out.opts_value = &log4cpp_opts_value;
 	PF_ServiceData sd;
-	sd.id = LOGGER_NAMESPACE"log4cpp";
+	sd.id = MODULE_NAMESPACE;
 	sd.request = &data_in;
 	sd.response = &data_out;
 

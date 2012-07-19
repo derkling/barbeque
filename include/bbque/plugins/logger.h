@@ -20,7 +20,7 @@
 
 #include "bbque/config.h"
 
-#define LOGGER_NAMESPACE "logger."
+#define LOGGER_NAMESPACE "bq.log"
 
 #include <string>
 
