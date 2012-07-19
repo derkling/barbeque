@@ -30,6 +30,8 @@
 
 #include "bbque/plugins/test.h"
 
+#define MODULE_NAMESPACE "bq"
+
 namespace bb = bbque;
 namespace bp = bbque::plugins;
 namespace bu = bbque::utils;

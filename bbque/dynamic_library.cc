@@ -22,6 +22,7 @@
 #include <iostream>
 
 #include "bbque/utils/utility.h"
+#define MODULE_NAMESPACE "bq.dl"
 #define FMT(fmt) BBQUE_FMT(COLOR_LGREEN, "DL", fmt)
 
 namespace bbque { namespace plugins {

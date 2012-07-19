@@ -22,6 +22,8 @@
 
 #include "bbque/utils/utility.h"
 
+#define MODULE_NAMESPACE "bq.ps"
+
 namespace bp = bbque::plugins;
 namespace po = boost::program_options;
 

@@ -29,6 +29,7 @@
 
 namespace fs = boost::filesystem;
 
+#define MODULE_NAMESPACE "bq.pm"
 #define FMT_INF(fmt) BBQUE_FMT(COLOR_LGRAY, "PM", fmt)
 #define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED, "PM", fmt)
 

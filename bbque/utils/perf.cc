@@ -27,6 +27,7 @@
 #include <string.h>
 #include <stdarg.h>
 
+#define MODULE_NAMESPACE "bq.rtlib.perf"
 #define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB_PERF [DBG]", fmt)
 #define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB_PERF [INF]", fmt)
 #define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB_PERF [WRN]", fmt)
