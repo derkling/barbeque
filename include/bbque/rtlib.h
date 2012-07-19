@@ -583,6 +583,29 @@ typedef RTLIB_ExitCode_t (*RTLIB_GetWorkingMode_t)(
 
 /**@}*/
 
+/*******************************************************************************
+ *    Utility Functions Support
+ ******************************************************************************/
+
+/**
+ * @name Utility Functions
+ *
+ * ADD DESCRIPTION HERE
+ *
+ * @{
+ */
+
+/**
+ * @brief Get the BarbequeRTRM application UID
+ * @ingroup rtlib_sec03_plain_cps
+ *
+ * Every application is identified within BBQ by a unique identified (UID).
+ * This function return a reference to the string representing this
+ * identified, which could be conveniently used to support logging.
+ */
+typedef const char* (*RTLIB_Utils_GetUid)();
+
+/**@}*/
 
 /*******************************************************************************
  *    Cycles Per Second (CPS) Control Support
@@ -901,6 +924,11 @@ struct RTLIB_Services {
 	 * Applications use this function to un-register an "execution
 	 * context" */
 	RTLIB_Unregister_t Unregister;
+
+	/* Utility function interface */
+	struct {
+		RTLIB_Utils_GetUid GetUid;
+	} Utils;
 
 	/* Cycles Time Control interface */
 	struct {

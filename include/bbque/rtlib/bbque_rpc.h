@@ -120,9 +120,18 @@ public:
 			RTLIB_WorkingModeParams_t *wm,
 			RTLIB_SyncType_t st);
 
+/*******************************************************************************
+ *    Utility Functions
+ ******************************************************************************/
+
 	const std::string GetCGroupPath() const {
 		return pathCGroup;
 	}
+
+	inline const char *GetUid() const {
+		return chTrdUid;
+	}
+
 
 /*******************************************************************************
  *    Cycles Per Second (CPS) Control Support
@@ -584,6 +593,22 @@ protected:
 	 * access methods.
 	 */
 	pid_t chTrdPid;
+
+
+	/**
+	 * @brief The channel thread UID
+	 *
+	 * The Channel Thread and the corresponding application is uniquely
+	 * identified by a UID string which is initialized by a call to
+	 * @see setUid()
+	 */
+	char chTrdUid[20];
+
+
+	inline void setChId(pid_t id, const char *name) {
+		chTrdPid = id;
+		snprintf(chTrdUid, 20, "%05d:%-13.13s", chTrdPid, name);
+	}
 
 private:
 

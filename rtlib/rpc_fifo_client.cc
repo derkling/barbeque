@@ -206,7 +206,7 @@ void BbqueRPC_FIFO_Client::ChannelFetch() {
 	}
 }
 
-void BbqueRPC_FIFO_Client::ChannelTrd() {
+void BbqueRPC_FIFO_Client::ChannelTrd(const char *name) {
 	std::unique_lock<std::mutex> trdStatus_ul(trdStatus_mtx);
 
 	// Set the thread name
@@ -214,8 +214,8 @@ void BbqueRPC_FIFO_Client::ChannelTrd() {
 		fprintf(stderr, "Set name FAILED! (Error: %s)\n",
 				strerror(errno));
 
-	// Getting client PID
-	chTrdPid = gettid();
+	// Setup the RTLib UID
+	setChId(gettid(), name);
 	DB(fprintf(stderr, FMT_INF("channel thread [PID: %d] CREATED\n"),
 				chTrdPid));
 	// Notifying the thread has beed started
@@ -354,7 +354,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::_Init(
 	// Starting the communication thread
 	done = false;
 	running = false;
-	ChTrd = std::thread(&BbqueRPC_FIFO_Client::ChannelTrd, this);
+	ChTrd = std::thread(&BbqueRPC_FIFO_Client::ChannelTrd, this, name);
 	trdStatus_cv.wait(trdStatus_ul);
 
 	// Setting up application FIFO filename

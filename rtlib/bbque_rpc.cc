@@ -55,6 +55,7 @@ BbqueRPC * BbqueRPC::GetInstance() {
 BbqueRPC::BbqueRPC(void) :
 	initialized(false) {
 
+	sprintf(chTrdUid, "00000:undef ");
 }
 
 BbqueRPC::~BbqueRPC(void) {

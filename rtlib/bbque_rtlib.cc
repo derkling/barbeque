@@ -97,6 +97,13 @@ static RTLIB_ExitCode_t rtlib_ggap(
 	return rpc->GGap(ech, gap);
 }
 
+/*******************************************************************************
+ *    Utility Functions
+ ******************************************************************************/
+
+static const char *rtlib_utils_getuid() {
+	return rpc->GetUid();
+}
 
 /*******************************************************************************
  *    Cycles Per Second (CPS) Control Support
@@ -219,6 +226,9 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.SetGoalGap = rtlib_ggap;
 	rtlib_services.Disable = rtlib_disable;
 	rtlib_services.Unregister = rtlib_unregister;
+
+	// Utility functions interface
+	rtlib_services.Utils.GetUid = rtlib_utils_getuid;
 
 	// Cycles Time Control interface
 	rtlib_services.CPS.Set = rtlib_cps_set;

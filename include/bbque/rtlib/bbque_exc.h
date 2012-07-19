@@ -96,6 +96,8 @@ protected:
 
 	virtual RTLIB_ExitCode_t onRelease();
 
+	const char *GetUid() const;
+
 	RTLIB_ExitCode_t SetCPS(float cps);
 
 	RTLIB_ExitCode_t SetCTimeUs(uint32_t us);

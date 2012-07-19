@@ -156,7 +156,7 @@ private:
 
 	void ChannelFetch();
 
-	void ChannelTrd();
+	void ChannelTrd(const char *name);
 
 	void RpcBbqResp();
 
