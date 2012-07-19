@@ -67,15 +67,16 @@ TestPlatformData::LoadPlatformData() {
 		logger->Debug("PEs per cluster: %5d", cm.TPD_PEsCount());
 
 		// Registering Clusters, per-clusters memory and PEs
+		logger->Debug("Registering resources:");
 		for (uint8_t c = 0; c < cm.TPD_ClusterCount(); ++c) {
 
 				snprintf(resourcePath+13, 8, "%d.mem0", c);
-				printf(" >>> Registering... :%s\n", resourcePath);
+				logger->Debug("  %s", resourcePath);
 				ra.RegisterResource(resourcePath, "MB", cm.TPD_ClusterMem());
 
 				for (uint8_t p = 0; p < cm.TPD_PEsCount(); ++p) {
 						snprintf(resourcePath+13, 8, "%d.pe%d", c, p);
-						printf(" >>> Registering... :%s\n", resourcePath);
+						logger->Debug("  %s", resourcePath);
 						ra.RegisterResource(resourcePath, " ", 100);
 				}
 
