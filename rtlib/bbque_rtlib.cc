@@ -33,10 +33,9 @@ namespace bb = bbque;
 namespace bu = bbque::utils;
 namespace br = bbque::rtlib;
 
-#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LGRAY,  "RTLIB      [DBG]", fmt)
-#define FMT_INF(fmt) BBQUE_FMT(COLOR_GREEN,  "RTLIB      [INF]", fmt)
-#define FMT_WRN(fmt) BBQUE_FMT(COLOR_YELLOW, "RTLIB      [WRN]", fmt)
-#define FMT_ERR(fmt) BBQUE_FMT(COLOR_RED,    "RTLIB      [ERR]", fmt)
+// Setup logging
+#undef  BBQUE_LOG_MODULE
+#define BBQUE_LOG_MODULE "rtl"
 
 /**
  * The global timer, this can be used to get the time since the RTLib has been
@@ -211,8 +210,8 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	assert(rtlib_initialized==0);
 
 	// Welcome screen
-	fprintf(stderr, FMT_INF("Barbeque RTLIB (ver. %s)\n"), g_git_version);
-	fprintf(stderr, FMT_INF("Built: " __DATE__  " " __TIME__ "\n"));
+	fprintf(stderr, FI("Barbeque RTLIB (ver. %s)\n"), g_git_version);
+	fprintf(stderr, FI("Built: " __DATE__  " " __TIME__ "\n"));
 
 	// Data structure initialization
 	rtlib_services.version.major = RTLIB_VERSION_MAJOR;
@@ -253,14 +252,14 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	// Building a communication channel
 	rpc = br::BbqueRPC::GetInstance();
 	if (!rpc) {
-		fprintf(stderr, FMT_ERR("RPC communication channel build FAILED\n"));
+		fprintf(stderr, FE("RPC communication channel build FAILED\n"));
 		return RTLIB_BBQUE_CHANNEL_SETUP_FAILED;
 	}
 
 	// Initializing the RPC communication channel
 	result = rpc->Init(name);
 	if (result!=RTLIB_OK) {
-		fprintf(stderr, FMT_ERR("RPC communication channel "
+		fprintf(stderr, FE("RPC communication channel "
 					"initialization FAILED\n"));
 		return RTLIB_BBQUE_UNREACHABLE;
 	}
@@ -276,7 +275,7 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 __attribute__((destructor))
 static void RTLIB_Exit(void) {
 
-	DB(fprintf(stderr, FMT_DBG("Barbeque RTLIB, Cleanup and release\n")));
+	DB(fprintf(stderr, FD("Barbeque RTLIB, Cleanup and release\n")));
 
 	if (!rtlib_initialized)
 		return;

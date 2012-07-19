@@ -43,7 +43,9 @@
 #include <boost/accumulators/statistics/moment.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 
-#define FMT_DBG(fmt) BBQUE_FMT(COLOR_LBLUE, "RTLIB_RPC  [DBG]", fmt)
+// Define module namespace for inlined methods
+#undef  MODULE_NAMESPACE
+#define MODULE_NAMESPACE "rpc"
 
 using bbque::utils::Timer;
 using namespace boost::accumulators;
@@ -359,12 +361,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_AWM_VALID);
 	}
 	inline void setAwmValid(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("AWM  <= Valid [%d:%s:%d]\n"),
+		DB(fprintf(stderr, FD("AWM  <= Valid [%d:%s:%d]\n"),
 					prec->exc_id, prec->name.c_str(), prec->awm_id));
 		prec->flags |= EXC_FLAGS_AWM_VALID;
 	}
 	inline void setAwmInvalid(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("AWM  <= Invalid [%d:%s]\n"),
+		DB(fprintf(stderr, FD("AWM  <= Invalid [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_AWM_VALID;
 	}
@@ -374,12 +376,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_AWM_WAITING);
 	}
 	inline void setAwmWaiting(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("AWM  <= Waiting [%d:%s]\n"),
+		DB(fprintf(stderr, FD("AWM  <= Waiting [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_AWM_WAITING;
 	}
 	inline void clearAwmWaiting(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("AWM  <= NOT Waiting [%d:%s]\n"),
+		DB(fprintf(stderr, FD("AWM  <= NOT Waiting [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_AWM_WAITING;
 	}
@@ -389,12 +391,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_SYNC);
 	}
 	inline void setSyncMode(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("SYNC <= Enter [%d:%s]\n"),
+		DB(fprintf(stderr, FD("SYNC <= Enter [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_SYNC;
 	}
 	inline void clearSyncMode(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("SYNC <= Exit [%d:%s]\n"),
+		DB(fprintf(stderr, FD("SYNC <= Exit [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC;
 	}
@@ -404,12 +406,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_SYNC_DONE);
 	}
 	inline void setSyncDone(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("SYNC <= Done [%d:%s:%d]\n"),
+		DB(fprintf(stderr, FD("SYNC <= Done [%d:%s:%d]\n"),
 					prec->exc_id, prec->name.c_str(), prec->awm_id));
 		prec->flags |= EXC_FLAGS_EXC_SYNC_DONE;
 	}
 	inline void clearSyncDone(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("SYNC <= Pending [%d:%s]\n"),
+		DB(fprintf(stderr, FD("SYNC <= Pending [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_SYNC_DONE;
 	}
@@ -419,12 +421,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_REGISTERED);
 	}
 	inline void setRegistered(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("EXC  <= Registered [%d:%s]\n"),
+		DB(fprintf(stderr, FD("EXC  <= Registered [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_REGISTERED;
 	}
 	inline void clearRegistered(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("EXC  <= Unregistered [%d:%s]\n"),
+		DB(fprintf(stderr, FD("EXC  <= Unregistered [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_REGISTERED;
 	}
@@ -434,12 +436,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_ENABLED);
 	}
 	inline void setEnabled(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("EXC  <= Enabled [%d:%s]\n"),
+		DB(fprintf(stderr, FD("EXC  <= Enabled [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_ENABLED;
 	}
 	inline void clearEnabled(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("EXC  <= Disabled [%d:%s]\n"),
+		DB(fprintf(stderr, FD("EXC  <= Disabled [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_ENABLED;
 	}
@@ -449,12 +451,12 @@ protected:
 		return (prec->flags & EXC_FLAGS_EXC_BLOCKED);
 	}
 	inline void setBlocked(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("EXC  <= Blocked [%d:%s]\n"),
+		DB(fprintf(stderr, FD("EXC  <= Blocked [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags |= EXC_FLAGS_EXC_BLOCKED;
 	}
 	inline void clearBlocked(pregExCtx_t prec) const {
-		DB(fprintf(stderr, FMT_DBG("EXC  <= UnBlocked [%d:%s]\n"),
+		DB(fprintf(stderr, FD("EXC  <= UnBlocked [%d:%s]\n"),
 					prec->exc_id, prec->name.c_str()));
 		prec->flags &= ~EXC_FLAGS_EXC_BLOCKED;
 	}
@@ -869,7 +871,7 @@ private:
 
 } // namespace bbque
 
-// Clean-up locally used definitions
-#undef FMT_DBG
+// Undefine locally defined module name
+#undef MODULE_NAMESPACE
 
 #endif /* end of include guard: BBQUE_RPC_H_ */
