@@ -23,7 +23,6 @@
 #include "bbque/rtlib/bbque_rpc.h"
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/rtlib/rpc_fifo_server.h"
-#include "bbque/utils/utility.h"
 #include "bbque/cpp11/thread.h"
 
 #include <sys/epoll.h>
