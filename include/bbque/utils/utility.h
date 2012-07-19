@@ -46,11 +46,42 @@
 #define COLOR_CYAN   "\033[36m"
 #define COLOR_LCYAN  "\033[1;36m"
 
+// Setup default logger configuration
+#ifndef BBQUE_LOG_MODULE
+# define BBQUE_LOG_MODULE MODULE_NAMESPACE
+#endif
+
+#if defined(BBQUE_RTLIB) || defined(BBQUE_APP)
+//*****************************************************************************
+//*  Logging routines for RTLib and Managed Applications
+//*****************************************************************************
+
+#ifndef BBQUE_LOG_UID
+# define BBQUE_LOG_UID "*****"
+#endif
+
+// Define a 'generic logger', which can be customized based on the previously
+// defined set of macros
+# define BBQUE_FMT(color, level, fmt) \
+	"\033[0m%011.6f %-19.19s %c %-8.8s: " color fmt "\033[0m", \
+	bbque_tmr.getElapsedTime(), \
+	BBQUE_LOG_UID, \
+	level, \
+	BBQUE_LOG_MODULE
+
+// Partially specialize the 'generic logger' using different (log-level, color)
+# define FD(fmt) BBQUE_FMT(COLOR_LGRAY,  'D', fmt)
+# define FI(fmt) BBQUE_FMT(COLOR_GREEN,  'I', fmt)
+# define FN(fmt) BBQUE_FMT(COLOR_CYAN,   'N', fmt)
+# define FW(fmt) BBQUE_FMT(COLOR_YELLOW, 'W', fmt)
+# define FE(fmt) BBQUE_FMT(COLOR_RED,    'E', fmt)
+
 # define BBQUE_FMT(color, module, fmt) \
 	        "\033[0m[%05d - %11.6f] " module ": " color fmt "\033[0m", \
 			gettid(),\
 			bbque_tmr.getElapsedTime()
 #define FMT_INFO(fmt) BBQUE_FMT(COLOR_GREEN, "  - INFO   main            ", fmt)
+#endif
 
 #ifdef BBQUE_DEBUG
 # define DB(x) x
