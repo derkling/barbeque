@@ -961,7 +961,8 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	if (!isEnabled(prec))
 		return RTLIB_EXC_GWM_FAILED;
 
-	if (result == RTLIB_EXC_GWM_FAILED) {
+	if (!isSyncMode(prec) && (result == RTLIB_EXC_GWM_FAILED)) {
+
 		DB(fprintf(stderr, FD("AWM not assigned, "
 					"sending schedule request to RTRM...\n")));
 		DB(fprintf(stderr, FI(
