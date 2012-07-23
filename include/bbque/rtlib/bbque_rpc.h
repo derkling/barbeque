@@ -697,7 +697,17 @@ private:
 	void DumpStatsMOST(pregExCtx_t prec);
 
 	/**
+	 * @brief Update sync time [ms] estimation for the currently AWM.
+	 *
+	 * @note This method requires statistics being already initialized
+	 */
+	void _SyncTimeEstimation(pregExCtx_t prec);
+
+	/**
 	 * @brief Update sync time [ms] estimation for the currently AWM
+	 *
+	 * This method ensure statistics update if they have been already
+	 * initialized.
 	 */
 	void SyncTimeEstimation(pregExCtx_t prec);
 

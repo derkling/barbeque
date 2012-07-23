@@ -751,7 +751,7 @@ void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 	DumpStatsConsole(prec, verbose);
 }
 
-void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
+void BbqueRPC::_SyncTimeEstimation(pregExCtx_t prec) {
 	pAwmStats_t pstats(prec->pAwmStats);
 	std::unique_lock<std::mutex> stats_ul(pstats->stats_mtx);
 	// Use high resolution to avoid errors on next computations
@@ -791,6 +791,18 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 	// TIMER: Re-sart RUNNING
 	prec->exc_tmr.start();
 
+}
+
+void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
+	pAwmStats_t pstats(prec->pAwmStats);
+	// Check if we already ran on this AWM
+	if (unlikely(!pstats)) {
+		// This condition is verified just when we entered a SYNC
+		// before sending a GWM. In this case, statistics have not
+		// yet been setup
+		return;
+	}
+	_SyncTimeEstimation(prec);
 }
 
 RTLIB_ExitCode_t BbqueRPC::UpdateStatistics(pregExCtx_t prec) {
