@@ -806,10 +806,6 @@ void BbqueRPC::SyncTimeEstimation(pregExCtx_t prec) {
 }
 
 RTLIB_ExitCode_t BbqueRPC::UpdateStatistics(pregExCtx_t prec) {
-	pAwmStats_t pstats(prec->pAwmStats);
-
-	// Ensuring statistics have been properly setup
-	assert(pstats);
 
 	// Check if this is the first re-start on this AWM
 	if (!isSyncDone(prec)) {
