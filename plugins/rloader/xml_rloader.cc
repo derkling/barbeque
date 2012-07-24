@@ -153,8 +153,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 
 	// Plugin needs a logger
 	if (!logger) {
-		std::cout << "Error: Plugin 'XMLRecipeLoader' needs a logger."
-				  << std::endl;
+		std::cout << "Error: Plugin 'XMLRecipeLoader' needs a logger." << std::endl;
 		result = RL_ABORTED;
 		goto error;
 	}
@@ -198,9 +197,8 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 
 		// <platform>
 		pp_elem = app_elem->FirstChildElement("platform", true);
+		// Look for the platform section matching the system platform id
 		while (pp_elem && !platform_matched) {
-
-			// Get the id of the platform required
 			pp_elem->GetAttribute("id", &platform_id, true);
 			if (platform_id.compare(sys_platform_id) != 0) {
 				pp_elem = pp_elem->NextSiblingElement("platform", false);
@@ -220,7 +218,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
 		}
 
-		// Did a platform required match the system platform?
+		// Does the required platform match the system platform?
 		if (!platform_matched) {
 			logger->Error("Platform requirements mismatching: system is %s",
 					sys_platform_id);
@@ -358,8 +356,9 @@ uint8_t XMLRecipeLoader::LoadResources(ticpp::Element * _xml_elem,
 uint8_t XMLRecipeLoader::AppendToWorkingMode(AwmPtr_t & wm,
 		std::string const & _res_path,
 		uint64_t _res_usage) {
-	// Add the resource usage to the working mode
 	WorkingModeStatusIF::ExitCode_t result;
+
+	// Add the resource usage to the working mode
 	result = wm->AddResourceUsage(_res_path, _res_usage);
 
 	switch(result) {
