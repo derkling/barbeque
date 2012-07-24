@@ -141,12 +141,14 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	ticpp::Element * pp_elem;
 	uint16_t prio = 0;
 	int maj, min;
-
-	std::string platform_id;
 	std::string version_id;
+
+#ifndef CONFIG_BBQUE_TEST_PLATFORM_DATA
 	const char * sys_platform_id;
+	std::string platform_id;
 	PlatformProxy & pp(PlatformProxy::GetInstance());
 	bool platform_matched = false;
+#endif
 
 	// Recipe object
 	recipe_ptr = _recipe;
@@ -186,7 +188,10 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		app_elem->GetAttribute("priority", &prio, false);
 		recipe_ptr->SetPriority(prio);
 
-		// System platfom
+		// <platform>
+		pp_elem = app_elem->FirstChildElement("platform", true);
+#ifndef CONFIG_BBQUE_TEST_PLATFORM_DATA
+		// System platform
 		sys_platform_id = pp.GetPlatformID();
 		if (!sys_platform_id) {
 			logger->Error("Unable to get the system platform id");
@@ -195,8 +200,6 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			goto error;
 		}
 
-		// <platform>
-		pp_elem = app_elem->FirstChildElement("platform", true);
 		// Look for the platform section matching the system platform id
 		while (pp_elem && !platform_matched) {
 			pp_elem->GetAttribute("id", &platform_id, true);
@@ -216,6 +219,9 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			result = RL_PLATFORM_MISMATCH;
 			goto error;
 		}
+#else
+		logger->Warn("TPD enabled: no platform ID check performed");
+#endif
 
 		// Application Working Modes
 		result = LoadWorkingModes(pp_elem);
@@ -281,7 +287,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadWorkingModes(
 			// Add a new working mode passing its name and value
 			// Note: IDs must be numbered from 0 to N
 			AwmPtr_t awm(recipe_ptr->AddWorkingMode(wm_id, wm_name,
-							static_cast<uint8_t> (wm_value)));
+						static_cast<uint8_t> (wm_value)));
 			if (!awm) {
 				logger->Error("AWM ""%s"" error: Wrong ID specified %d",
 								wm_name.c_str(), wm_id);
