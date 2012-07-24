@@ -207,15 +207,6 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 
 			logger->Debug("Platform required: %s", platform_id.c_str());
 			platform_matched = true;
-
-			// Application Working Modes
-			result = LoadWorkingModes(pp_elem);
-			if (result != RL_SUCCESS)
-				goto error;
-
-			// "Static" constraints and plugins specific data
-			LoadConstraints(pp_elem);
-			LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
 		}
 
 		// Does the required platform match the system platform?
@@ -225,6 +216,15 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 			result = RL_PLATFORM_MISMATCH;
 			goto error;
 		}
+
+		// Application Working Modes
+		result = LoadWorkingModes(pp_elem);
+		if (result != RL_SUCCESS)
+			goto error;
+
+		// "Static" constraints and plugins specific data
+		LoadConstraints(pp_elem);
+		LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
 
 	} catch(ticpp::Exception &ex) {
 		logger->Error(ex.what());
