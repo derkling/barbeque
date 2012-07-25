@@ -20,6 +20,7 @@
 #include "metrics_contribute.h"
 #include "bbque/modules_factory.h"
 
+#define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE".mct"
 
 namespace bu = bbque::utils;
 namespace po = boost::program_options;
@@ -61,8 +62,8 @@ MetricsContribute::MetricsContribute(const char * _name,
 		msl_params[i] = static_cast<float> (params[i]) / 100.0;
 
 	// Get a logger instance
-	char logname[18];
-	snprintf(logname, 18, "bq.mct.%s", name);
+	char logname[16];
+	snprintf(logname, 16, MODULE_NAMESPACE".%s", name);
 	plugins::LoggerIF::Configuration conf(logname);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 	if (logger)
@@ -140,7 +141,7 @@ float MetricsContribute::CLEIndex(uint64_t c_thresh,
 
 float MetricsContribute::FuncLinear(float x, LParams_t const & p) {
 	DB(
-		fprintf(stderr, "LIN ==== 1 - %.6f * (%.2f - %.2f)\n",
+		fprintf(stderr, FD("LIN ==== 1 - %.6f * (%.2f - %.2f)\n"),
 			p.scale, x, p.xoffset);
 	  );
 	return 1 - p.scale * (x - p.xoffset);
@@ -148,7 +149,7 @@ float MetricsContribute::FuncLinear(float x, LParams_t const & p) {
 
 float MetricsContribute::FuncExponential(float x, EParams_t const & p) {
 	DB(
-		fprintf(stderr, "EXP ==== %.4f * (%.4f ^ ((%.4f - %.4f) / %.4f) - 1)\n",
+		fprintf(stderr, FD("EXP ==== %.4f * (%.4f ^ ((%.4f - %.4f) / %.4f) - 1)\n"),
 			p.yscale, p.base, x, p.xoffset, p.xscale);
 	  );
 	return p.yscale * (pow(p.base, ((x - p.xoffset) / p.xscale)) - 1);
