@@ -173,6 +173,11 @@ ssize_t RPCProxy::RecvMessage(rpc_msg_ptr_t & msg) {
 	logger->Debug("PRXY RPC: dq [typ: %2d:%-8s, sze: %3d, inq: %3d]",
 		msg->typ, br::RPC_MessageStr(msg->typ), size, msg_queue.size());
 
+	logger->Info("PRXY RPC: <=== %05d::%02d [%2d:%-8s]",
+		msg->app_pid, msg->exc_id,
+		msg->typ, br::RPC_MessageStr(msg->typ)
+		);
+
 	return size;
 }
 
@@ -187,6 +192,11 @@ void RPCProxy::ReleasePluginData(plugin_data_t & pd) {
 
 ssize_t RPCProxy::SendMessage(plugin_data_t & pd,
 		rpc_msg_ptr_t msg, size_t count) {
+
+	logger->Info("PRXY RPC: ===> %05d::%02d [%2d:%-8s]",
+		msg->app_pid, msg->exc_id,
+		msg->typ, br::RPC_MessageStr(msg->typ)
+		);
 
 	// Collect stats on TX messages
 	RP_COUNT_EVENT(metrics, RP_MSGS_TX);
