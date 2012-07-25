@@ -628,6 +628,7 @@ void BbqueRPC::DumpStatsMOST(pregExCtx_t prec) {
 
 }
 
+#if CONFIG_BBQUE_RTLIB_CGROUPS_SUPPPORT
 RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
 	uint8_t count = 0;
 #define BBQUE_RPC_CGOUPS_PATH_MAX 128
@@ -730,6 +731,16 @@ void BbqueRPC::DumpMemoryReport(pregExCtx_t prec) {
 	}
 
 }
+#else
+RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
+	(void)prec;
+	return RTLIB_OK;
+}
+void BbqueRPC::DumpMemoryReport(pregExCtx_t prec) {
+	(void)prec;
+}
+#endif // CONFIG_BBQUE_RTLIB_CGROUPS_SUPPPORT
+
 
 void BbqueRPC::DumpStats(pregExCtx_t prec, bool verbose) {
 
