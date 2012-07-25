@@ -47,6 +47,7 @@
 
 namespace bu = bbque::utils;
 namespace bp = bbque::plugins;
+namespace br = bbque::rtlib;
 
 namespace bbque {
 
@@ -169,7 +170,8 @@ ssize_t RPCProxy::RecvMessage(rpc_msg_ptr_t & msg) {
 	// Collect stats on queue length
 	RP_ADD_SAMPLE(metrics, RP_RX_QUEUE, size);
 
-	logger->Debug("PRXY RPC: dq message [sze: %d]", size);
+	logger->Debug("PRXY RPC: dq [typ: %2d:%-8s, sze: %3d, inq: %3d]",
+		msg->typ, br::RPC_MessageStr(msg->typ), size, msg_queue.size());
 
 	return size;
 }
@@ -228,7 +230,7 @@ void RPCProxy::EnqueueMessages() {
 			break;
 		assert(msg);
 
-		logger->Debug("PRXY RPC: RX [typ: %d, sze: %d]",
+		logger->Debug("PRXY RPC: RX [typ: %2d, sze: %3d]",
 				msg->typ, size);
 
 		// Collect stats on RX messages
@@ -241,8 +243,9 @@ void RPCProxy::EnqueueMessages() {
 		queue_status_ul.unlock();
 		queue_ready_cv.notify_one();
 
-		logger->Debug("PRXY RPC: eq message [count: %d]",
-				msg_queue.size());
+		logger->Debug("PRXY RPC: eq [typ: %2d:%-8s, sze: %3d, inq: %3d]",
+			msg->typ, br::RPC_MessageStr(msg->typ), size, msg_queue.size());
+
 	}
 }
 
