@@ -310,6 +310,25 @@ typedef struct rpc_msg_BBQ_STOP {
 } rpc_msg_BBQ_STOP_t;
 
 
+/*******************************************************************************
+ *    RPC Utils
+ ******************************************************************************/
+
+/**
+ * @brief A stringified rapresentation of RPC messages
+ * @ingroup rtlib_sec03_plain_services
+ */
+extern const char *RPC_messageStr[];
+
+/**
+ * @brief Get a string description for the specified RTLib error
+ * @ingroup rtlib_sec03_plain_services
+ */
+inline char const *RPC_MessageStr(uint8_t typ) {
+	assert(typ < RPC_BBQ_MSGS_COUNT);
+	return RPC_messageStr[typ];
+}
+
 } // namespace rtlib
 
 } // namespace bbque
