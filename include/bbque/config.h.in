@@ -109,6 +109,9 @@
 /** Performance Counters Support */
 #cmakedefine CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
+/** CGroups Support */
+#cmakedefine CONFIG_BBQUE_RTLIB_CGROUPS_SUPPORT
+
 /** Enabled YaMS Scheduling policy parallel execution */
 #cmakedefine CONFIG_BBQUE_SP_YAMS_PARALLEL
 

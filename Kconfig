@@ -38,6 +38,20 @@ config BBQUE_RTLIB_PERF_SUPPORT
   This option is useful to port easily the RTLib on platforms not supporting
   performance counters, such as some Android devices with older kernels.
 
+config BBQUE_RTLIB_CGROUPS_SUPPORT
+  bool "Enable CGroups support on RTLib"
+  depends on TARGET_LINUX
+  default n if BBQUE_TEST_PALTFORM_DATA
+  default y
+  ---help---
+  Build the Run-Time Library (RTLib) with support for CGroups.
+  This framework allows an application, which has been integrated with the
+  RTLib, to collect transparently a set of profiling information related
+  to the run-time execution.
+
+  This option is useful to port easily the RTLib on platforms not supporting
+  or using CGroups for run-time resources management, such as some Android
+  devices.
 
 menu "Advanced options"
 
