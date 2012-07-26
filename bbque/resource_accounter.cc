@@ -777,7 +777,7 @@ inline void ResourceAccounter::SchedResourceBooking(
 	else
 		requested -= rsrc->Acquire(papp, available, vtok);
 
-	logger->Debug("DoResBook: %s scheduled to use %s (%d left)",
+	logger->Debug("DRBooking (sched): %s scheduled to use %s (%d left)",
 			papp->StrId(), rsrc->Name().c_str(), requested);
 }
 
@@ -787,13 +787,17 @@ inline void ResourceAccounter::SyncResourceBooking(
 		uint64_t & requested) {
 	// Skip the resource binding if the not assigned by the scheduler
 	uint64_t sched_usage = rsrc->ApplicationUsage(papp, sch_view_token);
-	if (sched_usage == 0)
+	if (sched_usage == 0) {
+		logger->Warn("DRBooking (sync): no usage of {%s} scheduled for [%s]."
+				"Application exited?",
+				rsrc->Name().c_str(), papp->StrId());
 		return;
+	}
 
 	// Acquire the resource according to the amount assigned by the
 	// scheduler
 	requested -= rsrc->Acquire(papp, sched_usage, sync_ssn.view);
-	logger->Debug("DoResBook: %s acquires %s (%d left)",
+	logger->Debug("DRBooking (sync): %s acquires %s (%d left)",
 			papp->StrId(), rsrc->Name().c_str(), requested);
 }
 
