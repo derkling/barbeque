@@ -149,7 +149,7 @@ void Recipe::NormalizeAWMValues() {
 
 		// Normalize the value
 		if (norm.delta > 0)
-			// The most commmon case
+			// The most common case
 			normal_value = working_modes[i]->RecipeValue() / norm.max_value;
 		else if (working_modes.size() == 1)
 			// There is only one AWM in the recipe
