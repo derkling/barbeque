@@ -649,7 +649,10 @@ SynchronizationManager::SyncSchedule() {
 	// TODO add here proper tracing/monitoring events for statistics
 	// collection
 
-	logger->Info("Synchronization [%d] START", ++sync_count);
+	++sync_count;
+	logger->Notice("Synchronization [%d] START, policy [%s]",
+			sync_count,
+			policy->Name());
 	am.ReportStatusQ();
 	am.ReportSyncQ();
 
@@ -712,7 +715,7 @@ SynchronizationManager::SyncSchedule() {
 	// Account for SyncP completed
 	SM_COUNT_EVENT(metrics, SM_SYNCP_COMP);
 
-	logger->Info("Synchronization [%d] DONE", sync_count);
+	logger->Notice("Synchronization [%d] DONE", sync_count);
 	am.ReportStatusQ();
 	am.ReportSyncQ();
 

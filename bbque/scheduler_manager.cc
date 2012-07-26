@@ -177,15 +177,14 @@ SchedulerManager::Schedule() {
 	// a DELAYED exit code should be returned
 	DB(logger->Warn("TODO: add scheduling activation policy"));
 
-	// Call the current optimization plugin scheduling policy
-	logger->Info("Resources scheduling, policy [%s]...",
+	++sched_count;
+	logger->Notice("Scheduling [%d] START, policy [%s]",
+			sched_count,
 			policy->Name());
 
-
 	// Collecing execution metrics
-	if (sched_count)
+	if (sched_count > 1)
 		SM_GET_TIMING(metrics, SM_SCHED_PERIOD, sm_tmr);
-	sched_count++;
 
 	// Account for actual scheduling runs
 	SM_COUNT_EVENT(metrics, SM_SCHED_RUNS);
@@ -195,8 +194,7 @@ SchedulerManager::Schedule() {
 
 	result = policy->Schedule(sv, svt);
 	if (result != SchedulerPolicyIF::SCHED_DONE) {
-		logger->Error("Scheduliung policy [%s] failed",
-				policy->Name());
+		logger->Error("Scheduling [%d] FAILED", sched_count);
 		return FAILED;
 	}
 
@@ -217,6 +215,8 @@ SchedulerManager::Schedule() {
 
 	// Collect statistics on scheduling decisions
 	CollectStats();
+
+	logger->Notice("Scheduling [%d] DONE", sched_count);
 
 	return DONE;
 }
