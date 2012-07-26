@@ -35,7 +35,8 @@ using br::ResourcePathUtils;
 namespace bbque { namespace app {
 
 
-WorkingMode::WorkingMode() {
+WorkingMode::WorkingMode():
+	hidden(false) {
 	resources.on_sched.resize(MAX_NUM_BINDINGS);
 }
 
@@ -44,7 +45,8 @@ WorkingMode::WorkingMode(uint8_t _id,
 		std::string const & _name,
 		float _value):
 	id(_id),
-	name(_name) {
+	name(_name),
+	hidden(false) {
 
 	// Value must be positive
 	_value > 0 ? value.recpv = _value : value.recpv = 0;
@@ -86,6 +88,43 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	return WM_SUCCESS;
 }
 
+
+WorkingMode::ExitCode_t WorkingMode::Validate() {
+	ResourceAccounter &ra(ResourceAccounter::GetInstance());
+	UsagesMap_t::iterator usage_it, it_end;
+	uint64_t total_amount;
+
+	// Initialization
+	usage_it = resources.from_recp.begin();
+	it_end   = resources.from_recp.end();
+	hidden   = false;
+
+	// Map of resource usages required
+	for (; usage_it != it_end; ++usage_it) {
+		// Current resource: path and amount required
+		std::string const & rcp_path(usage_it->first);
+		UsagePtr_t & rcp_pusage(usage_it->second);
+
+		// Consider the resource template path, since generally the requirement
+		// can be mapped on more than one hardware resource
+		std::string rcp_path_tpl(ResourcePathUtils::GetTemplate(rcp_path));
+
+		// Check the total amount available. Hide the AWM if the current total
+		// amount available cannot satisfy the amount required
+		total_amount = ra.Total(rcp_path_tpl);
+		if (total_amount < rcp_pusage->GetAmount()) {
+			logger->Warn("Validation: {%s} usage required (%"PRIu64") "
+					"exceeds total (%"PRIu64")",
+					rcp_path_tpl.c_str(), rcp_pusage->GetAmount(),
+					total_amount);
+			hidden = true;
+			logger->Warn("validation: AWM %d set to 'hidden'", id);
+			return WM_RSRC_USAGE_EXCEEDS;
+		}
+	}
+
+	return WM_SUCCESS;
+}
 
 uint64_t WorkingMode::ResourceUsageAmount(
 		std::string const & rsrc_path) const {

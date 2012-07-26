@@ -94,6 +94,23 @@ public:
 	}
 
 	/**
+	 * @brief Check if the AWM is hidden
+	 *
+	 * The AWM can be hidden if the current hardware configuration cannot
+	 * accomodate the resource requirements included. This happens for example
+	 * if the recipe has been profiled on a platform of the same family of the
+	 * current one, but with a larger availability of resources, or whenever
+	 * the amount of available resources changes at runtime, due to hardware
+	 * faults or low-level power/thermal policies. This means that the AWM
+	 * must not be taken into account by the scheduling policy.
+	 *
+	 * @return true if the AWM is hidden, false otherwise.
+	 */
+	inline bool Hidden() const {
+		return hidden;
+	}
+
+	/**
 	 * @brief Return the value specified in the recipe
 	 */
 	inline float RecipeValue() const {
@@ -143,6 +160,23 @@ public:
 		}
 		value.normal = n_value;
 	}
+
+	/**
+	 * @brief Validate the resource requests according to the current HW
+	 * platform configuration/status
+	 *
+	 * Some HW architectures can be released in several different platform
+	 * versions, providing variable amount of resources. Moreover, the
+	 * availabilty of resources can vary at runtime due to faults or
+	 * low level power/thermal policies. To support such a dynamicity at
+	 * runtime it is useful to hide the AWM including a resource requirement
+	 * that cannot be satisfied, according to its current total avalability.
+	 *
+	 * This method performs this check, setting the AWM to "hidden", in case
+	 * the condition above is true. Hidden AWMs must not be taken into account
+	 * by the scheduling policy
+	 */
+	ExitCode_t Validate();
 
 	/**
 	 * @brief Set the amount of a resource usage request
@@ -279,6 +313,15 @@ private:
 	std::string name;
 
 	/**
+	 * Whether the AWM includes resource requirements that cannot be
+	 * satisfied by the current hardware platform/configuration it can be
+	 * flagged as hidden. The idea is to support a dynamic reconfiguration
+	 * of the underlying hardware such that some AWMs could be dynamically
+	 * taken into account or not at runtime.
+	 */
+	bool hidden;
+
+	/**
 	 * @struct WorkingModeValue
 	 *
 	 * Store information regarding the value of the AWM
@@ -323,6 +366,7 @@ private:
 		/** True if current set differs from previous */
 		bool changed;
 	} clusters;
+
 
 	/**
 	 * @brief Usage object referenced by template path
