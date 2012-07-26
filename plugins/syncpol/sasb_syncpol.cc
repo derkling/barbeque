@@ -269,8 +269,8 @@ SasbSyncPol::ExitCode_t
 SasbSyncPol::CheckLatency(AppPtr_t papp, SyncLatency_t latency) {
 	// TODO: use a smarter latency validation, e.g. considering the
 	// application and the currently served queue
-	logger->Warn("TODO: Check for [%s] (%d[ms]) syncLatency compliance",
-			papp->StrId(), latency);
+	DB(logger->Warn("TODO: Check for [%s] (%d[ms]) syncLatency compliance",
+			papp->StrId(), latency));
 
 	// Right now we use a dummy approach based on WORST CASE.
 	// Indeed, we keep the maximum required lantecy among all the applications
