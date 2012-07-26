@@ -61,9 +61,6 @@ AwmPtr_t const Recipe::AddWorkingMode(uint8_t _id,
 		return AwmPtr_t();
 	}
 
-	// Update info for supporting normalization
-	UpdateNormalInfo(_value);
-
 	// Insert a new working mode descriptor into the vector
 	AwmPtr_t new_awm(new app::WorkingMode(_id, _name, _value));
 
@@ -102,6 +99,21 @@ void Recipe::AddConstraint(std::string const & rsrc_path,
 					constraints[rsrc_path]->upper);
 }
 
+void Recipe::Validate() {
+	// Adjust the vector size
+	working_modes.resize(last_awm_id);
+
+	// Validate each AWM according to current resources total availability
+	for (int i = 0; i < last_awm_id; ++i) {
+		working_modes[i]->Validate();
+		if (!working_modes[i]->Hidden())
+			UpdateNormalInfo(working_modes[i]->RecipeValue());
+	}
+
+	// Normalize AWMs values
+	NormalizeAWMValues();
+}
+
 void Recipe::UpdateNormalInfo(uint8_t last_value) {
 	// This reset the "normalization done" flag
 	norm.done = false;
@@ -131,6 +143,10 @@ void Recipe::NormalizeAWMValues() {
 
 	// Normalization of the whole set of AWMs
 	for (int i = 0; i < last_awm_id; ++i) {
+		// Skip hidden AWMs
+		if (working_modes[i]->Hidden())
+			continue;
+
 		// Normalize the value
 		if (norm.delta > 0)
 			// The most commmon case

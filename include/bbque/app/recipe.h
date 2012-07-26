@@ -129,7 +129,6 @@ public:
 	 * @return A vector containing all the working modes
 	 */
 	inline AwmPtrVect_t const & WorkingModesAll() {
-		working_modes.resize(last_awm_id);
 		return working_modes;
 	}
 
@@ -155,6 +154,15 @@ public:
 	inline ConstrMap_t const & ConstraintsAll() {
 		return constraints;
 	}
+
+	/**
+	 * @brief Validate the recipe
+	 *
+	 * The validation consists of two operations:
+	 *   - Validate each AWM, given the current resources availability
+	 *   - Normalize the AWM values
+	 */
+	void Validate();
 
 private:
 
