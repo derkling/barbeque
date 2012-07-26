@@ -47,8 +47,7 @@ WorkingMode::WorkingMode(uint8_t _id,
 	name(_name) {
 
 	// Value must be positive
-	_value > 0 ?
-		value.recpv = _value: value.recpv = 0;
+	_value > 0 ? value.recpv = _value : value.recpv = 0;
 
 	// Init the size of the scheduling bindings vector
 	resources.on_sched.resize(MAX_NUM_BINDINGS);
@@ -68,23 +67,22 @@ WorkingMode::~WorkingMode() {
 
 WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 		std::string const & rsrc_path,
-		uint64_t _value) {
-
+		uint64_t required_amount) {
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 
-	// Does the resource exist ?
+	// Check the existance of the resource required
 	if (!ra.ExistResource(rsrc_path)) {
 		logger->Warn("AddResourceUsage: {%s} not found.", rsrc_path.c_str());
 		return WM_RSRC_NOT_FOUND;
 	}
 
 	// Insert a new resource usage object in the map
-	UsagePtr_t pusage(UsagePtr_t(new Usage(_value)));
+	UsagePtr_t pusage(UsagePtr_t(new Usage(required_amount)));
 	resources.from_recp.insert(
 			std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
 
-	logger->Debug("AddResUsage: added {%s}\t[usage: %"PRIu64"]",
-			rsrc_path.c_str(), _value);
+	logger->Debug("AddResourceUsage: added {%s}\t[usage: %"PRIu64"]",
+			rsrc_path.c_str(), required_amount);
 	return WM_SUCCESS;
 }
 
@@ -187,7 +185,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 		std::string bind_path(
 				ResourcePathUtils::ReplaceID(rcp_path, rsrc_name, src_ID,
 					dst_ID));
-		logger->Debug("Binding [AWM%d]: 'recipe' [%s] => 'bbque' [%s]", id,
+		logger->Debug("Binding [AWM%d]: 'recipe' [%s] \t=> 'platform' [%s]", id,
 				rcp_path.c_str(), bind_path.c_str());
 
 		// Create a new Usage object and set the binding list
@@ -211,7 +209,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
 
-			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %"PRIu64" binds: %d]",
+			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %"PRIu64" bindings: %d]",
 					id, rcp_path.c_str(), pusage->GetAmount(),
 					pusage->GetBindingList().size());
 		}
@@ -271,7 +269,7 @@ WorkingMode::ExitCode_t WorkingMode::SetResourceBinding(uint8_t bid) {
 	clusters.curr = clust_tmp;
 	logger->Debug("SetBinding [AWM%d]: previous cluster set: %s", id,
 			clusters.prev.to_string().c_str());
-	logger->Debug("SetBinding [AWM%d]: current cluster set: %s", id,
+	logger->Debug("SetBinding [AWM%d]:  current cluster set: %s", id,
 			clusters.curr.to_string().c_str());
 
 	// Cluster set changed?
