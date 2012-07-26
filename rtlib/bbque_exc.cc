@@ -601,7 +601,8 @@ exit_setup:
 	DB(fprintf(stderr, FE("Control-loop for EXC [%s] TERMINATED\n"),
 				exc_name.c_str()));
 
-	//--- Notify the control-thread is TERMIANTED
+	//--- Notify the control-thread is TERMINATED
+	ctrl_ul.lock();
 	terminated = true;
 	ctrl_cv.notify_all();
 
