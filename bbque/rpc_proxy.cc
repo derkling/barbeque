@@ -211,7 +211,7 @@ bool RPCProxy::RPCMsgCompare::operator() (
 	const rpc_msg_ptr_t hdr2 = rhs.first;
 
 	// Dummy policy: give priority to responses (RPC_BBQ_* messages)
-	if (hdr1->typ > hdr2->typ)
+	if (hdr1->typ < hdr2->typ)
 		return true;
 
 	return false;
