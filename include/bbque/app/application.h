@@ -191,7 +191,7 @@ public:
 	}
 
 	/**
-	 * @biref Check Platform Specific Data initialization
+	 * @brief Check Platform Specific Data initialization
 	 *
 	 * Return true if this application has already a properly configured
 	 * set of Platform Specific Data.

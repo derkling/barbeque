@@ -85,9 +85,9 @@ Application::Application(std::string const & _name, AppPid_t _pid,
 			Pid(), Name().substr(0,6).c_str(), ExcId());
 
 	// Initialized scheduling state
-	schedule.state = DISABLED;
+	schedule.state        = DISABLED;
 	schedule.preSyncState = DISABLED;
-	schedule.syncState = SYNC_NONE;
+	schedule.syncState    = SYNC_NONE;
 
 	logger->Info("Built new EXC [%s]", StrId());
 }
@@ -114,20 +114,21 @@ void Application::InitWorkingModes(AppPtr_t & papp) {
 	AwmPtrVect_t const & rcp_awms(recipe->WorkingModesAll());
 
 	// Init AWM range attributes (for AWM constraints)
-	awms.max_id = rcp_awms.size() - 1;
-	awms.low_id = 0;
-	awms.upp_id = awms.max_id;
-	awms.enabled_bset.set();
+	awms.max_id   = rcp_awms.size() - 1;
+	awms.low_id   = 0;
+	awms.upp_id   = awms.max_id;
 	awms.curr_inv = false;
-	logger->Debug("InitWorkingModes: max_id = %d", awms.max_id);
+	awms.enabled_bset.set();
+	logger->Debug("InitWorkingModes: max ID = %d", awms.max_id);
 
+	// Init AWM lists
 	for (int i = 0; i <= awms.max_id; ++i) {
 		// Copy the working mode and set the owner (current Application)
 		AwmPtr_t app_awm(new WorkingMode(*rcp_awms[i]));
 		assert(!app_awm->Owner());
 		app_awm->SetOwner(papp);
 
-		// Insert the working mode into the structures
+		// Insert the working mode into the vector
 		awms.recipe_vect[app_awm->Id()] = app_awm;
 		awms.enabled_list.push_back(app_awm);
 	}
@@ -1038,7 +1039,7 @@ void Application::RebuildEnabledWorkingModes() {
 	// Clear the list
 	awms.enabled_list.clear();
 
-	// Push back the enabled working modes of
+	// Rebuild the enabled working modes list
 	for (int j = 0; j <= awms.max_id; ++j) {
 		// Skip if the related bit of the map is not set or one of the
 		// resource usage required violates a resource constraint
