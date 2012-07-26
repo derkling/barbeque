@@ -34,22 +34,22 @@ const char *RPC_messageStr[] = {
 	"ACount",
 
 //--- Execution Context Originated Messages
-	//RPC_EXC_REGISTER
-	"EReg",
-	//RPC_EXC_UNREGISTER
-	"EUnreg",
+	//RPC_EXC_SCHEDULE
+	"ESched",
+	//RPC_EXC_START
+	"EStrat",
 	//RPC_EXC_SET
 	"ESet",
 	//RPC_EXC_CLEAR
 	"EClear",
 	//RPC_EXC_GGAP
 	"ENap",
-	//RPC_EXC_START
-	"EStrat",
 	//RPC_EXC_STOP
 	"EStop",
-	//RPC_EXC_SCHEDULE
-	"ESched",
+	//RPC_EXC_REGISTER
+	"EReg",
+	//RPC_EXC_UNREGISTER
+	"EUnreg",
 
 	//RPC_EXC_RESP
 	"EResp",
@@ -57,17 +57,17 @@ const char *RPC_messageStr[] = {
 	"ECount",
 
 //--- Barbeque Originated Messages
-	//RPC_BBQ_STOP_EXECUTION
-	"BStop",
-
-	//RPC_BBQ_SYNCP_PRECHANGE
-	"BSPrC",
-	//RPC_BBQ_SYNCP_SYNCCHANGE
-	"BSSyC",
-	//RPC_BBQ_SYNCP_DOCHANGE
-	"BSDoC",
 	//RPC_BBQ_SYNCP_POSTCHANGE
 	"BSPoC",
+	//RPC_BBQ_SYNCP_DOCHANGE
+	"BSDoC",
+	//RPC_BBQ_SYNCP_SYNCCHANGE
+	"BSSyC",
+	//RPC_BBQ_SYNCP_PRECHANGE
+	"BSPrC",
+
+	//RPC_BBQ_STOP_EXECUTION
+	"BStop",
 
 	//RPC_BBQ_RESP
 	"BResp",
