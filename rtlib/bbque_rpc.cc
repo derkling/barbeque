@@ -946,7 +946,7 @@ RTLIB_ExitCode_t BbqueRPC::GetWorkingMode(
 	if (unlikely(prec->ctrlTrdPid == 0)) {
 		// Keep track of the Control Thread PID
 		prec->ctrlTrdPid = gettid();
-		DB(fprintf(stderr, FD("Keep control thread PID [%d] "
+		DB(fprintf(stderr, FD("Tracking control thread PID [%d] "
 						"for EXC [%d]...\n"),
 					prec->ctrlTrdPid, prec->exc_id));
 	}

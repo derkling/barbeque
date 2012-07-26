@@ -31,7 +31,7 @@ config BBQUE_RTLIB_PERF_SUPPORT
   default y
   ---help---
   Build the Run-Time Library (RTLib) with support for Performance Counters.
-  these counters allows an application, which has been integrated with the
+  These counters allows an application, which has been integrated with the
   RTLib, to collect transparently a set of profiling information related
   to the run-time execution.
 
