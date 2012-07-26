@@ -367,24 +367,14 @@ uint8_t XMLRecipeLoader::AppendToWorkingMode(AwmPtr_t & wm,
 	// Add the resource usage to the working mode
 	result = wm->AddResourceUsage(_res_path, _res_usage);
 
-	switch(result) {
-	// Resource not found :
-	// Signal a weak load (some resources are missing)
-	case WorkingModeStatusIF::WM_RSRC_NOT_FOUND:
+	// Resource not found: Signal a weak load (some resources are missing)
+	if (result == WorkingModeStatusIF::WM_RSRC_NOT_FOUND) {
 		logger->Warn("'%s' recipe:\n\tResource '%s' not available.\n",
-				 recipe_ptr->Path().c_str(), _res_path.c_str());
+				recipe_ptr->Path().c_str(), _res_path.c_str());
 		return __RSRC_WEAK_LOAD;
-
-	// Usage value exceeds availability:
-	// The working mode cannot be accepted.
-	case WorkingModeStatusIF::WM_RSRC_USAGE_EXCEEDS:
-		logger->Error("'%s' recipe:\n\tResource '%s' usage exceeds.",
-					 recipe_ptr->Path().c_str(), _res_path.c_str());
-		return __RSRC_FORMAT_ERR;
-
-	default:
-		return __RSRC_SUCCESS;
 	}
+
+	return __RSRC_SUCCESS;
 }
 
 uint8_t XMLRecipeLoader::GetResourceAttributes(
