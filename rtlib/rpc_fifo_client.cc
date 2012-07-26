@@ -114,6 +114,7 @@ RTLIB_ExitCode_t BbqueRPC_FIFO_Client::ChannelRelease() {
 }
 
 void BbqueRPC_FIFO_Client::RpcBbqResp() {
+	std::unique_lock<std::mutex> chCommand_ul(chCommand_mtx);
 	size_t bytes;
 
 	// Read response RPC header
