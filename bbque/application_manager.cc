@@ -173,8 +173,10 @@ bp::RecipeLoaderIF::ExitCode_t ApplicationManager::LoadRecipe(
 				recipe_name.c_str(), result);
 		return result;
 	}
-
 	logger->Debug("recipe [%s] load DONE", recipe_name.c_str());
+
+	// Validate the recipe
+	recipe->Validate();
 
 	// Place the new recipe object in the map, and return it
 	recipes[recipe_name] = recipe;
