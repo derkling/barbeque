@@ -175,7 +175,7 @@ SchedulerManager::Schedule() {
 	// stability problems and scheduling overheads.
 	// In case of a scheduling is not considered safe proper at this time,
 	// a DELAYED exit code should be returned
-	logger->Warn("TODO: add scheduling activation policy");
+	DB(logger->Warn("TODO: add scheduling activation policy"));
 
 	// Call the current optimization plugin scheduling policy
 	logger->Info("Resources scheduling, policy [%s]...",
