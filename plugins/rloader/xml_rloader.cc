@@ -155,7 +155,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 
 	// Plugin needs a logger
 	if (!logger) {
-		std::cout << "Error: Plugin 'XMLRecipeLoader' needs a logger." << std::endl;
+		fprintf(stderr, FE("Error: Plugin 'XMLRecipeLoader' needs a logger\n"));
 		result = RL_ABORTED;
 		goto error;
 	}
