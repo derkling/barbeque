@@ -18,6 +18,7 @@
 #include "bbque/res/resources.h"
 #include "bbque/resource_accounter.h"
 
+#define MODULE_NAMESPACE "bq.re"
 
 namespace bbque { namespace res {
 
@@ -73,8 +74,11 @@ uint64_t Resource::Available(AppSPtr_t papp, RViewToken_t vtok) {
 uint64_t Resource::ApplicationUsage(AppSPtr_t const & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
-	if (!view)
+	if (!view) {
+		DB(fprintf(stderr, FW("Resource {%s}: cannot find view %lu\n"),
+					name.c_str(), vtok));
 		return 0;
+	}
 
 	// Call the "low-level" ApplicationUsage()
 	return ApplicationUsage(papp, view->apps);
@@ -135,13 +139,19 @@ uint64_t Resource::Acquire(AppSPtr_t const & papp, uint64_t amount,
 uint64_t Resource::Release(AppSPtr_t const & papp, RViewToken_t vtok) {
 	// Retrieve the state view
 	ResourceStatePtr_t view = GetStateView(vtok);
-	if (!view)
+	if (!view) {
+		DB(fprintf(stderr, FW("Resource {%s}: cannot find view %lu\n"),
+					name.c_str(), vtok));
 		return 0;
+	}
 
 	// Lookup the application using the resource
 	AppUseQtyMap_t::iterator lkp = view->apps.find(papp->Uid());
-	if (lkp == view->apps.end())
+	if (lkp == view->apps.end()) {
+		DB(fprintf(stderr, FD("Resource {%s}: no resources allocated to [%s]\n"),
+					name.c_str(), papp->StrId()));
 		return 0;
+	}
 
 	// Decrease the used value and remove the application
 	uint64_t used_by_app = lkp->second;
@@ -176,8 +186,11 @@ uint64_t Resource::ApplicationUsage(AppSPtr_t const & papp,
 		AppUseQtyMap_t & apps_map) {
 	// Retrieve the application from the map
 	AppUseQtyMap_t::iterator app_using_it(apps_map.find(papp->Uid()));
-	if (app_using_it == apps_map.end())
+	if (app_using_it == apps_map.end()) {
+		DB(fprintf(stderr, FD("Resource {%s}: no usage value for [%s]\n"),
+					name.c_str(), papp->StrId()));
 		return 0;
+	}
 
 	// Return the amount of resource used
 	return app_using_it->second;
