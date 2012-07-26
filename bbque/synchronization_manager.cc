@@ -370,7 +370,7 @@ SynchronizationManager::Sync_SyncChange(
 			// decide if the synchronization latency is compliant with the
 			// RTRM optimization goals.
 			//
-			logger->Warn("TODO: Check sync policy for sync miss reaction");
+			DB(logger->Warn("TODO: Check sync policy for sync miss reaction"));
 
 			// FIXME This case should be handled
 			assert(false);
@@ -489,7 +489,7 @@ SynchronizationManager::Sync_PostChange(ApplicationStatusIF::SyncState_t syncSta
 		logger->Info("STEP 4: <--------- OK -- [%s]", papp->StrId());
 
 		// TODO Here we should collect reconfiguration statistics
-		logger->Warn("TODO: Collect reconf statistics");
+		DB(logger->Warn("TODO: Collect reconf statistics"));
 
 	commit:
 		// Disregarding commit for EXC disabled meanwhile
