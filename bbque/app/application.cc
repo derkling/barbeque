@@ -130,11 +130,22 @@ void Application::InitWorkingModes(AppPtr_t & papp) {
 
 		// Insert the working mode into the vector
 		awms.recipe_vect[app_awm->Id()] = app_awm;
+
+		// Do not insert the hidden AWMs into the enabled list
+		if (app_awm->Hidden()) {
+			logger->Debug("InitWorkingModes: skipping hidden AWM %d",
+					app_awm->Id());
+			continue;
+		}
+
+		// Valid (not hidden) AWM: Insert it into the list
 		awms.enabled_list.push_back(app_awm);
 	}
 
 	// Sort the enabled list by "value"
 	awms.enabled_list.sort(AwmValueLesser);
+	logger->Info("InitWorkingModes: %d enabled AWMs",
+			awms.enabled_list.size());
 }
 
 void Application::InitResourceConstraints() {
@@ -1041,10 +1052,13 @@ void Application::RebuildEnabledWorkingModes() {
 
 	// Rebuild the enabled working modes list
 	for (int j = 0; j <= awms.max_id; ++j) {
-		// Skip if the related bit of the map is not set or one of the
-		// resource usage required violates a resource constraint
-		if ((!awms.enabled_bset.test(j)) ||
-				(UsageOutOfBounds(awms.recipe_vect[j])))
+		// Skip if the related bit of the map is not set, or one of the
+		// resource usage required violates a resource constraint, or
+		// the AWM is hidden according to the current status of the hardware
+		// resources
+		if ((!awms.enabled_bset.test(j))
+				|| (UsageOutOfBounds(awms.recipe_vect[j]))
+				|| awms.recipe_vect[j]->Hidden())
 			continue;
 
 		// Insert the working mode
