@@ -122,7 +122,7 @@ void Recipe::UpdateNormalInfo(uint8_t last_value) {
 	logger->Debug("AWM delta = %d", norm.delta);
 }
 
-void Recipe::NormalizeValues() {
+void Recipe::NormalizeAWMValues() {
 	float normal_value = 0.0;
 
 	// Return if performed yet

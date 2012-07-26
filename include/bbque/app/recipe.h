@@ -129,7 +129,6 @@ public:
 	 * @return A vector containing all the working modes
 	 */
 	inline AwmPtrVect_t const & WorkingModesAll() {
-		NormalizeValues();
 		working_modes.resize(last_awm_id);
 		return working_modes;
 	}
@@ -219,7 +218,7 @@ private:
 	 *                         max_value
 	 *
 	 */
-	void NormalizeValues();
+	void NormalizeAWMValues();
 
 };
 
