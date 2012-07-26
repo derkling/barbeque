@@ -180,6 +180,20 @@ public:
 	 */
 	ExitCode_t SetRecipe(RecipePtr_t & recipe, AppPtr_t & papp);
 
+	/**
+	 * @brief Reload the set of Working Modes
+	 *
+	 * This is usually required whenever there has been a change in the status
+	 * of the resources (e.g., total availability) due to an HW fault or some
+	 * low-level actions of power/thermal management, once a re-validation of
+	 * the recipes has been performed.
+	 *
+	 * @papp Shared pointer to the current Application (provided by the
+	 * Application Manager)
+	 */
+	inline void ReloadWorkingModes(AppPtr_t & papp) {
+		return InitWorkingModes(papp);
+	}
 
 	/**
 	 * @brief Set Platform Specific Data initialized
