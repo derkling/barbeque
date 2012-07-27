@@ -114,8 +114,7 @@ YamsSchedPol::YamsSchedPol():
 	if (logger)
 		logger->Info("yams: Built a new dynamic object[%p]", this);
 	else
-		std::cout << "yams: Built new dynamic object ["
-			<< this << "]" << std::endl;
+		fprintf(stderr, FI("yams: Built new dynamic object [%p]\n"), this);
 
 	// Load the weights of the metrics contributes
 	po::options_description opts_desc("Metrics contributes parameters");
