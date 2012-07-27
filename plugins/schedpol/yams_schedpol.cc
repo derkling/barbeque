@@ -111,7 +111,7 @@ YamsSchedPol::YamsSchedPol():
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 
 	if (logger)
-		logger->Info("yams: Built a new dynamic object[%p]\n", this);
+		logger->Info("yams: Built a new dynamic object[%p]", this);
 	else
 		std::cout << "yams: Built new dynamic object ["
 			<< this << "]" << std::endl;
@@ -310,7 +310,6 @@ void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 	YAMS_RESET_TIMING(yams_tmr);
 
 do_schedule:
-
 	// Init fairness contribute
 	mcts[YAMS_FAIRNESS]->Init(&prio);
 
@@ -328,12 +327,11 @@ do_schedule:
 		// Order schedule entities by metrics
 		naps_count = OrderSchedEntities(prio, cl_id);
 	}
-
 	// Collect "ordering step" metrics
 	YAMS_GET_TIMING(coll_metrics, YAMS_ORDERING_TIME, yams_tmr);
-	YAMS_RESET_TIMING(yams_tmr);
 
 	// Selection: for each application schedule a working mode
+	YAMS_RESET_TIMING(yams_tmr);
 	sched_incomplete = SelectSchedEntities(naps_count);
 	entities.clear();
 
@@ -374,7 +372,6 @@ uint8_t YamsSchedPol::OrderSchedEntities(AppPrio_t prio, uint16_t cl_id) {
 
 bool YamsSchedPol::SelectSchedEntities(uint8_t naps_count) {
 	Application::ExitCode_t app_result;
-
 	logger->Debug("=================| Scheduling entities |=================");
 
 	// The scheduling entities should be picked in a descending order of
@@ -396,7 +393,7 @@ bool YamsSchedPol::SelectSchedEntities(uint8_t naps_count) {
 		if (CheckSkipConditions(pschd->papp))
 			continue;
 
-		logger->Debug("Selecting: %s schedule requested", pschd->StrId());
+		logger->Debug("Selecting: [%s] schedule requested", pschd->StrId());
 
 		// Schedule the application in the working mode just evaluated,
 		// specifying the binding related to the tracked cluster
@@ -405,19 +402,18 @@ bool YamsSchedPol::SelectSchedEntities(uint8_t naps_count) {
 
 		// Scheduling request rejected
 		if (app_result != ApplicationStatusIF::APP_WM_ACCEPTED) {
-			logger->Debug("Selecting: %s rejected !", pschd->StrId());
+			logger->Debug("Selecting: [%s] rejected !", pschd->StrId());
 			continue;
 		}
 
 		// Logging messages
 		if (!pschd->papp->Synching() || pschd->papp->Blocking()) {
-			logger->Debug("Selecting: [%s] in %s/%s", pschd->papp->StrId(),
+			logger->Debug("Selecting: [%s] state %s|%s", pschd->papp->StrId(),
 					Application::StateStr(pschd->papp->State()),
 					Application::SyncStateStr(pschd->papp->SyncState()));
 			continue;
 		}
-
-		logger->Notice("Selecting: scheduled %s [metrics: %.4f]",
+		logger->Notice("Selecting: [%s] scheduled << metrics: %.4f >>",
 				pschd->StrId(), pschd->metrics);
 
 		// Set the application value (scheduling metrics)
@@ -472,17 +468,17 @@ void YamsSchedPol::InsertWorkingModes(AppCPtr_t const & papp, uint16_t cl_id) {
 	for_each(awm_thds.begin(), awm_thds.end(), join_thread);
 	awm_thds.clear();
 #endif
-	logger->Debug("Schedule table size = %d", entities.size());
+	logger->Debug("Evaluate: table size = %d", entities.size());
 }
 
 void YamsSchedPol::EvalWorkingMode(SchedEntityPtr_t pschd) {
 	ExitCode_t result;
 	std::unique_lock<std::mutex> sched_ul(sched_mtx, std::defer_lock);
-	logger->Debug("Insert: %s: ...metrics computing...", pschd->StrId());
+	logger->Debug("Insert: [%s] ...metrics computing...", pschd->StrId());
 
 	// Skip if the application has been disabled/stopped in the meanwhile
 	if (pschd->papp->Disabled()) {
-		logger->Debug("Insert: {%s} disabled/stopped during schedule ordering",
+		logger->Debug("Insert: [%s] disabled/stopped during schedule ordering",
 				pschd->papp->StrId());
 		return;
 	}
@@ -525,7 +521,7 @@ void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
 		YAMS_RESET_TIMING(comp_tmr);
 		mct_result = mcts[i]->Compute(eval_ent, ctrb);
 		if (mct_result == MetricsContribute::MCT_RSRC_NO_PE) {
-			logger->Debug("Insert: No more PEs in cluster %d",
+			logger->Debug("Aggregate: no more processing elements in cluster %d",
 					pschd->clust_id);
 			cl_info.full.set(pschd->clust_id);
 			return;
@@ -539,7 +535,7 @@ void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
 	}
 
 	metrics_log[len-2] = '\0';
-	logger->Notice("%s App_value: (%s) => %5.4f",
+	logger->Notice("Aggregate: [%s] application value: (%s) => %5.4f",
 			pschd->StrId(), metrics_log, pschd->metrics);
 }
 
@@ -555,14 +551,14 @@ YamsSchedPol::ExitCode_t YamsSchedPol::BindCluster(SchedEntityPtr_t pschd) {
 
 	// The cluster binding should never fail
 	if (awm_result == WorkingModeStatusIF::WM_RSRC_MISS_BIND) {
-		logger->Error("BindCluster: {AWM %d} [cluster = %d]"
+		logger->Error("BindCluster: {AWM %d} [cluster %d]"
 				"Incomplete	resources binding. %d / %d resources bound.",
-				pawm->Id(), cl_id, pawm->GetSchedResourceBinding()->size(),
+				pawm->Id(), cl_id,
+				pawm->GetSchedResourceBinding()->size(),
 				pawm->RecipeResourceUsages().size());
 		assert(awm_result == WorkingModeStatusIF::WM_SUCCESS);
 		return YAMS_ERROR;
 	}
-
 	logger->Debug("BindCluster: {AWM %d} resources bound to cluster %d",
 			pawm->Id(), cl_id);
 

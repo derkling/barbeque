@@ -777,8 +777,8 @@ inline void ResourceAccounter::SchedResourceBooking(
 	else
 		requested -= rsrc->Acquire(papp, available, vtok);
 
-	logger->Debug("DRBooking (sched): %s scheduled to use %s (%d left)",
-			papp->StrId(), rsrc->Name().c_str(), requested);
+	logger->Debug("DRBooking (sched): [%s] scheduled to use {%s}",
+			papp->StrId(), rsrc->Name().c_str());
 }
 
 inline void ResourceAccounter::SyncResourceBooking(
@@ -788,8 +788,7 @@ inline void ResourceAccounter::SyncResourceBooking(
 	// Skip the resource binding if the not assigned by the scheduler
 	uint64_t sched_usage = rsrc->ApplicationUsage(papp, sch_view_token);
 	if (sched_usage == 0) {
-		logger->Warn("DRBooking (sync): no usage of {%s} scheduled for [%s]."
-				"Application exited?",
+		logger->Debug("DRBooking (sync): no usage of {%s} scheduled for [%s]",
 				rsrc->Name().c_str(), papp->StrId());
 		return;
 	}
