@@ -27,6 +27,7 @@ for A in `seq 1 $APPS`; do
 
 	# Get a random Workload in [1,30] seconds
 	let TWL=$RANDOM%$EXCT
+	[ $TWL -eq 0 ] && TWL=1
 	# Get a random Cycles in such that the Cycle frequecy is in the range
 	# [1/s,100/s], thus Cycles_# = Cycles_f * Workload time
 	let CYF=$RANDOM%100 && let CYC=CYF*TWL && let CYP=1000/CYF
