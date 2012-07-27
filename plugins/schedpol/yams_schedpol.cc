@@ -21,6 +21,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include <iostream>
+#include <functional>
 
 #include "bbque/cpp11/thread.h"
 #include "bbque/modules_factory.h"
@@ -438,11 +439,6 @@ bool YamsSchedPol::SelectSchedEntities(uint8_t naps_count) {
 	return false;
 }
 
-
-void join_thread(std::thread & t) {
-	t.join();
-}
-
 void YamsSchedPol::InsertWorkingModes(AppCPtr_t const & papp, uint16_t cl_id) {
 	std::list<std::thread> awm_thds;
 	float metrics = 0.0;
@@ -465,7 +461,7 @@ void YamsSchedPol::InsertWorkingModes(AppCPtr_t const & papp, uint16_t cl_id) {
 	}
 
 #ifdef BBQUE_SP_YAMS_PARALLEL
-	for_each(awm_thds.begin(), awm_thds.end(), join_thread);
+	for_each(awm_thds.begin(), awm_thds.end(), mem_fn(&std::thread::join));
 	awm_thds.clear();
 #endif
 	logger->Debug("Evaluate: table size = %d", entities.size());
