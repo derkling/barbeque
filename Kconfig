@@ -13,6 +13,7 @@ endchoice
 
 config BBQUE_TEST_PLATFORM_DATA
   bool "Use Test Platform Data (TPD)"
+  default y if TARGET_ANDROID
   default n
   ---help---
   Build the BarbequeRTRM with support for Test Platform Data.
