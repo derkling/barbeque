@@ -150,6 +150,15 @@ private:
 	static bool Configure(PF_ObjectParams * params);
 
 	/**
+	 * @brief Lookup the platform section
+	 * @param _xml_elem The XML element from which start the lookup of the
+	 * section
+	 * @return A pointer to the XML element from which start the platform
+	 * section to consider
+	 */
+	ticpp::Element * LoadPlatform(ticpp::Element * xml_elem);
+
+	/**
 	 * @brief Parse the section containing working modes data
 	 * @param xml_elem The XML element from which start searching the
 	 * expected section tag

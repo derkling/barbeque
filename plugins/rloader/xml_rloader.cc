@@ -143,12 +143,6 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	int maj, min;
 	std::string version_id;
 
-#ifndef CONFIG_BBQUE_TEST_PLATFORM_DATA
-	const char * sys_platform_id;
-	std::string platform_id;
-	PlatformProxy & pp(PlatformProxy::GetInstance());
-	bool platform_matched = false;
-#endif
 
 	// Recipe object
 	recipe_ptr = _recipe;
@@ -188,16 +182,59 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		app_elem->GetAttribute("priority", &prio, false);
 		recipe_ptr->SetPriority(prio);
 
+		// Load the proper platform section
+		pp_elem = LoadPlatform(app_elem);
+		if (!pp_elem) {
+			result = RL_PLATFORM_MISMATCH;
+			goto error;
+		}
+
+		// Application Working Modes
+		result = LoadWorkingModes(pp_elem);
+		if (result != RL_SUCCESS)
+			goto error;
+
+		// "Static" constraints and plugins specific data
+		LoadConstraints(pp_elem);
+		LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
+
+	} catch(ticpp::Exception &ex) {
+		logger->Error(ex.what());
+		result = RL_ABORTED;
+		goto error;
+	}
+
+	// Regular exit
+	return result;
+
+error:
+	doc.Clear();
+	recipe_ptr = ba::RecipePtr_t();
+	return result;
+}
+
+
+ticpp::Element * XMLRecipeLoader::LoadPlatform(ticpp::Element * _xml_elem) {
+	ticpp::Element * pp_elem     = nullptr;
+	ticpp::Element * pp_gen_elem = nullptr;
+
+#ifndef CONFIG_BBQUE_TEST_PLATFORM_DATA
+	const char * sys_platform_id;
+	std::string platform_id;
+	PlatformProxy & pp(PlatformProxy::GetInstance());
+	bool platform_matched = false;
+#endif
+
+	try {
 		// <platform>
-		pp_elem = app_elem->FirstChildElement("platform", true);
+		pp_elem = _xml_elem->FirstChildElement("platform", true);
 #ifndef CONFIG_BBQUE_TEST_PLATFORM_DATA
 		// System platform
 		sys_platform_id = pp.GetPlatformID();
 		if (!sys_platform_id) {
-			logger->Error("Unable to get the system platform id");
-			assert(sys_platform_id != NULL);
-			result = RL_FAILED;
-			goto error;
+			logger->Error("Unable to get the system platform ID");
+			assert(sys_platform_id != nullptr);
+			return nullptr;
 		}
 
 		// Look for the platform section matching the system platform id
@@ -226,42 +263,22 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 					sys_platform_id);
 
 			// Generic section found?
-			if (!pp_gen_elem) {
-				result = RL_PLATFORM_MISMATCH;
-				goto error;
+			if (pp_gen_elem) {
+				logger->Warn("Platform mismatch: section '%s' will be parsed",
+						PLATFORM_ID_GENERIC);
+				return pp_gen_elem;
 			}
-
-			// Yes, parse the generic section
-			pp_elem = pp_gen_elem;
-			logger->Warn("Platform mismatch: section '%s' will be parsed",
-					PLATFORM_ID_GENERIC);
 		}
 #else
 		logger->Warn("TPD enabled: no platform ID check performed");
 #endif
 
-		// Application Working Modes
-		result = LoadWorkingModes(pp_elem);
-		if (result != RL_SUCCESS)
-			goto error;
-
-		// "Static" constraints and plugins specific data
-		LoadConstraints(pp_elem);
-		LoadPluginsData<ba::RecipePtr_t>(recipe_ptr, pp_elem);
-
 	} catch(ticpp::Exception &ex) {
 		logger->Error(ex.what());
-		result = RL_ABORTED;
-		goto error;
+		return nullptr;
 	}
 
-	// Regular exit
-	return result;
-
-error:
-	doc.Clear();
-	recipe_ptr = ba::RecipePtr_t();
-	return result;
+	return pp_elem;
 }
 
 
