@@ -139,6 +139,7 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 	ticpp::Element * app_elem;
 	ticpp::Element * bbq_elem;
 	ticpp::Element * pp_elem;
+	ticpp::Element * pp_gen_elem = nullptr;
 	uint16_t prio = 0;
 	int maj, min;
 	std::string version_id;
@@ -203,21 +204,38 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 		// Look for the platform section matching the system platform id
 		while (pp_elem && !platform_matched) {
 			pp_elem->GetAttribute("id", &platform_id, true);
-			if (platform_id.compare(sys_platform_id) != 0) {
-				pp_elem = pp_elem->NextSiblingElement("platform", false);
-				continue;
+			if (platform_id.compare(sys_platform_id) == 0) {
+				logger->Info("Platform required: '%s' matching OK",
+						platform_id.c_str());
+				platform_matched = true;
+				break;
 			}
 
-			logger->Debug("Platform required: %s", platform_id.c_str());
-			platform_matched = true;
+			// Keep track of the "generic" platform section (if any)
+			if (!pp_gen_elem
+					&& (platform_id.compare(PLATFORM_ID_GENERIC) ==	0)) {
+				pp_gen_elem = pp_elem;
+			}
+
+			// Next platform section
+			pp_elem = pp_elem->NextSiblingElement("platform", false);
 		}
 
 		// Does the required platform match the system platform?
 		if (!platform_matched) {
-			logger->Error("Platform requirements mismatching: system is %s",
+			logger->Error("Platform mismatch: cannot find (system) ID '%s'",
 					sys_platform_id);
-			result = RL_PLATFORM_MISMATCH;
-			goto error;
+
+			// Generic section found?
+			if (!pp_gen_elem) {
+				result = RL_PLATFORM_MISMATCH;
+				goto error;
+			}
+
+			// Yes, parse the generic section
+			pp_elem = pp_gen_elem;
+			logger->Warn("Platform mismatch: section '%s' will be parsed",
+					PLATFORM_ID_GENERIC);
 		}
 #else
 		logger->Warn("TPD enabled: no platform ID check performed");

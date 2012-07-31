@@ -28,6 +28,8 @@
 #define RECIPE_MAJOR_VERSION 	0
 #define RECIPE_MINOR_VERSION 	8
 
+#define PLATFORM_ID_GENERIC     "generic"
+
 using bbque::app::Recipe;
 
 namespace bbque { namespace plugins {
