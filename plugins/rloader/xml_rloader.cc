@@ -115,7 +115,7 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 void * XMLRecipeLoader::Create(PF_ObjectParams *params) {
 
 	if (!Configure(params))
-		return NULL;
+		return nullptr;
 
 	return new XMLRecipeLoader();
 }
@@ -135,11 +135,10 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadRecipe(
 				RecipePtr_t _recipe) {
 	RecipeLoaderIF::ExitCode_t result;
 	ticpp::Document doc;
-	ticpp::Node * root_node;
-	ticpp::Element * app_elem;
-	ticpp::Element * bbq_elem;
-	ticpp::Element * pp_elem;
-	ticpp::Element * pp_gen_elem = nullptr;
+	ticpp::Node    * root_node = nullptr;
+	ticpp::Element * app_elem  = nullptr;
+	ticpp::Element * bbq_elem  = nullptr;
+	ticpp::Element * pp_elem   = nullptr;
 	uint16_t prio = 0;
 	int maj, min;
 	std::string version_id;
@@ -280,9 +279,9 @@ RecipeLoaderIF::ExitCode_t XMLRecipeLoader::LoadWorkingModes(
 	unsigned int wm_id;
 	unsigned int wm_value;
 	std::string wm_name;
-	ticpp::Node * awms_elem;
-	ticpp::Element * resources_elem;
-	ticpp::Element * awm_elem;
+	ticpp::Node    * awms_elem      = nullptr;
+	ticpp::Element * resources_elem = nullptr;
+	ticpp::Element * awm_elem       = nullptr;
 
 	try {
 		// For each working mode we need resource usages data and (optionally)
@@ -344,7 +343,7 @@ uint8_t XMLRecipeLoader::LoadResources(ticpp::Element * _xml_elem,
 		std::string const & _curr_path = "") {
 	uint8_t result = __RSRC_SUCCESS;
 	std::string res_path;
-	ticpp::Element * res_elem;
+	ticpp::Element * res_elem = nullptr;
 
 	try {
 		// Get the resource xml element
@@ -439,14 +438,14 @@ uint8_t XMLRecipeLoader::GetResourceAttributes(
 template<class T>
 void XMLRecipeLoader::LoadPluginsData(T _container,
 		ticpp::Element * _xml_elem) {
-	ticpp::Element * plugins_elem;
-	ticpp::Element * plug_elem;
+	ticpp::Element * plugins_elem = nullptr;
+	ticpp::Element * plug_elem    = nullptr;
 
 	// <plugins> [Optional]
 	// Section tag for plugin specific data. This can be included into the
 	// <application> section and into the <awm> section.
 	plugins_elem = _xml_elem->FirstChildElement("plugins",	false);
-	if (plugins_elem == NULL)
+	if (plugins_elem == nullptr)
 		return;
 
 	try {
@@ -467,7 +466,7 @@ template<class T>
 void XMLRecipeLoader::ParsePluginTag(T _container,
 		ticpp::Element * _plug_elem) {
 	std::string name;
-	ticpp::Node * plugdata_node;
+	ticpp::Node * plugdata_node = nullptr;
 
 	try {
 		// Plugin attributes
@@ -515,8 +514,8 @@ void XMLRecipeLoader::GetPluginData(T _container,
 // =======================[ Constraints ]=====================================
 
 void XMLRecipeLoader::LoadConstraints(ticpp::Element * _xml_elem) {
-	ticpp::Element * constr_elem;
-	ticpp::Element * con_elem;
+	ticpp::Element * constr_elem = nullptr;
+	ticpp::Element * con_elem    = nullptr;
 	std::string resource;
 	std::string constraint_type;
 	uint32_t value;
