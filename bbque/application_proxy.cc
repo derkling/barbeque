@@ -112,7 +112,7 @@ inline void ApplicationProxy::EnqueueHandler(pcmdSn_t pcs) {
 
 	if (cmdSnMap.find(pcs->pid) != cmdSnMap.end()) {
 		logger->Crit("APPs PRX: handler enqueuing FAILED "
-				"(Error: possible data structure corruption)");
+				"(Error: duplicated handler thread)");
 		assert(cmdSnMap.find(pcs->pid) == cmdSnMap.end());
 		return;
 	}
