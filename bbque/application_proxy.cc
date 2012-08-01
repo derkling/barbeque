@@ -354,24 +354,7 @@ ApplicationProxy::SyncP_PreChangeTrd(pPreChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp) {
-
-	assert(papp);
-	assert(presp);
-
-	presp->pcs = SetupCmdSession(papp);
-
-	// Setup the promise
-	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
-
-	// Enqueuing the Command Session Handler
-	EnqueueHandler(presp->pcs);
-
-	// Run the Command Executor
-	return SyncP_PreChange(presp->pcs, presp);
-}
-
-RTLIB_ExitCode_t
-ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
+	RTLIB_ExitCode_t result = RTLIB_OK;
 
 	assert(papp);
 	assert(presp);
@@ -379,6 +362,7 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 	presp->pcs = SetupCmdSession(papp);
 	assert(presp->pcs);
 
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_PreChangeTrd,
 			this, presp);
@@ -387,7 +371,18 @@ ApplicationProxy::SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp) {
 	// Setup the promise (thus unlocking the executor)
 	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
 
-	return RTLIB_OK;
+#else
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
+
+	// Run the Command Executor
+	result = SyncP_PreChange(presp->pcs, presp);
+
+	// Releasing the command session
+	ReleaseCommandSession(presp->pcs);
+#endif
+
+	return result;
 }
 
 RTLIB_ExitCode_t
@@ -546,6 +541,7 @@ ApplicationProxy::SyncP_SyncChangeTrd(pSyncChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
+	RTLIB_ExitCode_t result = RTLIB_OK;
 
 	assert(papp);
 	assert(presp);
@@ -553,26 +549,7 @@ ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
 	presp->pcs = SetupCmdSession(papp);
 	assert(presp->pcs);
 
-	// Setup the promise
-	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
-
-	// Enqueuing the Command Session Handler
-	EnqueueHandler(presp->pcs);
-
-	// Run the Command Executor
-	return SyncP_SyncChange(presp->pcs, presp);
-}
-
-RTLIB_ExitCode_t
-ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) {
-
-	assert(papp);
-	assert(presp);
-
-	//ApplicationProxy::pcmdSn_t pcs(SetupCmdSession(papp));
-	presp->pcs = SetupCmdSession(papp);
-	assert(presp->pcs);
-
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 	// Spawn a new Command Executor (passing the future)
 	presp->pcs->exe = std::thread(&ApplicationProxy::SyncP_SyncChangeTrd,
 			this, presp);
@@ -580,8 +557,18 @@ ApplicationProxy::SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp) 
 
 	// Setup the promise (thus unlocking the executor)
 	presp->pcs->resp_ftr = (presp->pcs->resp_prm).get_future();
+#else
+	// Enqueuing the Command Session Handler
+	EnqueueHandler(presp->pcs);
 
-	return RTLIB_OK;
+	// Run the Command Executor
+	result = SyncP_SyncChange(presp->pcs, presp);
+
+	// Releasing the command session
+	ReleaseCommandSession(presp->pcs);
+#endif
+
+	return result;
 }
 
 RTLIB_ExitCode_t

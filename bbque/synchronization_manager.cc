@@ -184,22 +184,22 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 			continue;
 		}
 
-		// Start an Async Pre-Change
+		// Pre-Change (just starting it if asynchronous)
 		presp = ApplicationProxy::pPreChangeRsp_t(
 				new ApplicationProxy::preChangeRsp_t());
-#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
-		result = ap.SyncP_PreChange_Async(papp, presp);
-#else //!CONFIG_BBQUE_YP_SASB_ASYNC
 		result = ap.SyncP_PreChange(papp, presp);
-#endif
 		if (result != RTLIB_OK)
 			continue;
 
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 		// Mapping the response future for responses collection
 		rsp_map.insert(RspMapEntry_t(papp, presp));
+#endif
 
 	}
 
+// Pre-Change completion (just if asynchronous)
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 	// Collecting EXC responses
 	for (resp_it = rsp_map.begin();
 			resp_it != rsp_map.end();
@@ -260,6 +260,7 @@ SynchronizationManager::Sync_PreChange(ApplicationStatusIF::SyncState_t syncStat
 		// Remove the respose future
 		rsp_map.erase(resp_it);
 	}
+#endif // CONFIG_BBQUE_YP_SASB_ASYNC
 
 	// Collecing execution metrics
 	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_PRECHANGE,
@@ -301,22 +302,22 @@ SynchronizationManager::Sync_SyncChange(
 			continue;
 		}
 
-		// Start an Async Sync-Change
+		// Sync-Change (just starting it if asynchronous)
 		presp = ApplicationProxy::pSyncChangeRsp_t(
 				new ApplicationProxy::syncChangeRsp_t());
-#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
-		result = ap.SyncP_SyncChange_Async(papp, presp);
-#else // !CONFIG_BBQUE_YP_SASB_ASYNC
 		result = ap.SyncP_SyncChange(papp, presp);
-#endif
 		if (result != RTLIB_OK)
 			continue;
 
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 		// Mapping the response future for responses collection
 		rsp_map.insert(RspMapEntry_t(papp, presp));
+#endif
 
 	}
 
+// Sync-Change completion (just if asynchronous)
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 	// Collecting EXC responses
 	for (resp_it = rsp_map.begin();
 			resp_it != rsp_map.end();
@@ -384,6 +385,7 @@ SynchronizationManager::Sync_SyncChange(
 		// Remove the respose future
 		rsp_map.erase(resp_it);
 	}
+#endif
 
 	// Collecing execution metrics
 	SM_GET_TIMING_SYNCSTATE(metrics, SM_SYNCP_TIME_SYNCCHANGE,

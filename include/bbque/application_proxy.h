@@ -125,11 +125,6 @@ public:
 	RTLIB_ExitCode SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp);
 
 	/**
-	 * @brief Start an Asynchronous PreChange
-	 */
-	RTLIB_ExitCode SyncP_PreChange_Async(AppPtr_t papp, pPreChangeRsp_t presp);
-
-	/**
 	 * @brief Get the result of an issued Asynchronous PreChange
 	 */
 	RTLIB_ExitCode SyncP_PreChange_GetResult(pPreChangeRsp_t presp);
@@ -147,11 +142,6 @@ public:
 	 * @brief Synchronous SyncChange
 	 */
 	RTLIB_ExitCode SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp);
-
-	/**
-	 * @brief Start an Asynchronous PreChange
-	 */
-	RTLIB_ExitCode SyncP_SyncChange_Async(AppPtr_t papp, pSyncChangeRsp_t presp);
 
 	/**
 	 * @brief Get the result of an issued Asynchronous PreChange
