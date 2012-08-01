@@ -327,10 +327,12 @@ ApplicationProxy::SyncP_PreChange(pcmdSn_t pcs, pPreChangeRsp_t presp) {
 	if (presp->result != RTLIB_OK)
 		return presp->result;
 
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 	// Give back the result to the calling thread
 	(presp->pcs->resp_prm).set_value(presp->result);
 	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
 			presp->pcs->pid, presp->pcs->papp->StrId());
+#endif
 
 	return RTLIB_OK;
 
@@ -512,10 +514,12 @@ ApplicationProxy::SyncP_SyncChange(pcmdSn_t pcs, pSyncChangeRsp_t presp) {
 	if (presp->result != RTLIB_OK)
 		return presp->result;
 
+#ifdef CONFIG_BBQUE_YP_SASB_ASYNC
 	// Give back the result to the calling thread
 	(presp->pcs->resp_prm).set_value(presp->result);
 	logger->Debug("APPs PRX [%05d]: Set response for [%s]",
 			presp->pcs->pid, presp->pcs->papp->StrId());
+#endif
 
 	return RTLIB_OK;
 
