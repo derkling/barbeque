@@ -912,7 +912,6 @@ void ApplicationManager::Cleanup() {
 
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPtr_t papp) {
-	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	ApplicationManager &am(ApplicationManager::GetInstance());
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
 	uint32_t timeout = 0;
@@ -956,7 +955,6 @@ ApplicationManager::DestroyEXC(AppPtr_t papp) {
 ApplicationManager::ExitCode_t
 ApplicationManager::DestroyEXC(AppPid_t pid, uint8_t exc_id) {
 	ResourceAccounter &ra(ResourceAccounter::GetInstance());
-	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	AppPtr_t papp;
 
 	// Find the required EXC
