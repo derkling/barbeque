@@ -373,21 +373,18 @@ AppPtr_t ApplicationManager::GetNext(ApplicationStatusIF::SyncState_t state,
 bool ApplicationManager::HasApplications (
 		AppPrio_t prio) {
 	assert(prio < BBQUE_APP_PRIO_LEVELS);
-	std::unique_lock<std::mutex> prio_ul(prio_mtx[prio]);
 	return !(prio_vec[prio].empty());
 }
 
 bool ApplicationManager::HasApplications (
 		ApplicationStatusIF::State_t state) {
 	assert(state < Application::STATE_COUNT);
-	std::unique_lock<std::mutex> status_ul(status_mtx[state]);
 	return !(status_vec[state].empty());
 }
 
 bool ApplicationManager::HasApplications (
 		ApplicationStatusIF::SyncState_t state) {
 	assert(state < Application::SYNC_STATE_COUNT);
-	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
 	return !(sync_vec[state].empty());
 }
 
