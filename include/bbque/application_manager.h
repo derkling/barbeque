@@ -211,17 +211,17 @@ public:
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	uint16_t AppsCount (AppPrio_t prio);
+	uint16_t AppsCount (AppPrio_t prio) const;
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	uint16_t AppsCount (ApplicationStatusIF::State_t state);
+	uint16_t AppsCount (ApplicationStatusIF::State_t state) const;
 
 	/**
 	 * @see ApplicationManagerStatusIF
 	 */
-	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state);
+	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state) const;
 
 	/**
 	 * @see ApplicationManagerStatusIF

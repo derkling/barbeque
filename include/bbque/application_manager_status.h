@@ -300,17 +300,17 @@ public:
 	/**
 	 * @brief The number of applications having the given PRIORITY
 	 */
-	virtual uint16_t AppsCount (AppPrio_t prio) = 0;
+	virtual uint16_t AppsCount (AppPrio_t prio) const = 0;
 
 	/**
 	 * @brief The number of applications in the specified STATE
 	 */
-	uint16_t AppsCount (ApplicationStatusIF::State_t state);
+	uint16_t AppsCount (ApplicationStatusIF::State_t state) const;
 
 	/**
 	 * @brief The number of applications in the specified SYNC_STATE
 	 */
-	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state);
+	uint16_t AppsCount (ApplicationStatusIF::SyncState_t state) const;
 
 	/**
 	 * @brief One of the highest PRIORITY applications in the the

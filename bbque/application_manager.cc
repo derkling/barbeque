@@ -392,23 +392,20 @@ bool ApplicationManager::HasApplications (
 }
 
 uint16_t ApplicationManager::AppsCount (
-		AppPrio_t prio) {
+		AppPrio_t prio) const {
 	assert(prio < BBQUE_APP_PRIO_LEVELS);
-	std::unique_lock<std::mutex> prio_ul(prio_mtx[prio]);
 	return prio_vec[prio].size();
 }
 
 uint16_t ApplicationManager::AppsCount (
-		ApplicationStatusIF::State_t state) {
+		ApplicationStatusIF::State_t state) const {
 	assert(state < Application::STATE_COUNT);
-	std::unique_lock<std::mutex> status_ul(status_mtx[state]);
 	return status_vec[state].size();
 }
 
 uint16_t ApplicationManager::AppsCount (
-		ApplicationStatusIF::SyncState_t state) {
+		ApplicationStatusIF::SyncState_t state) const {
 	assert(state < Application::SYNC_STATE_COUNT);
-	std::unique_lock<std::mutex> sync_ul(sync_mtx[state]);
 	return sync_vec[state].size();
 }
 
