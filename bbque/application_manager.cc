@@ -525,7 +525,8 @@ void ApplicationManager::ReportStatusQ(bool verbose) const {
 
 	if (verbose) {
 		for (uint8_t i = 0; i < Application::STATE_COUNT; ++i) {
-			::sprintf(report+14+i*10, "%03u", (unsigned)status_vec[i].size());
+			::sprintf(report+14+i*10, "%03u",
+				AppsCount(static_cast<ApplicationStatusIF::State_t>(i)));
 			report[17+i*10] = ',';
 		}
 		report[17+10*(Application::STATE_COUNT-1)] = ']';
@@ -533,7 +534,8 @@ void ApplicationManager::ReportStatusQ(bool verbose) const {
 	} else {
 		DB(
 		for (uint8_t i = 0; i < Application::STATE_COUNT; ++i) {
-			::sprintf(report+14+i*10, "%03u", (unsigned)status_vec[i].size());
+			::sprintf(report+14+i*10, "%03u",
+				AppsCount(static_cast<ApplicationStatusIF::State_t>(i)));
 			report[17+i*10] = ',';
 		}
 		report[17+10*(Application::STATE_COUNT-1)] = ']';
@@ -550,7 +552,8 @@ void ApplicationManager::ReportSyncQ(bool verbose) const {
 
 	if (verbose) {
 		for (uint8_t i = 0; i < Application::SYNC_STATE_COUNT; ++i) {
-			::sprintf(report+14+i*10, "%03u", (unsigned)sync_vec[i].size());
+			::sprintf(report+14+i*10, "%03u",
+				AppsCount(static_cast<ApplicationStatusIF::SyncState_t>(i)));
 			report[17+i*10] = ',';
 		}
 		report[17+10*(Application::SYNC_STATE_COUNT-1)] = ']';
@@ -558,7 +561,8 @@ void ApplicationManager::ReportSyncQ(bool verbose) const {
 	} else {
 		DB(
 		for (uint8_t i = 0; i < Application::SYNC_STATE_COUNT; ++i) {
-			::sprintf(report+14+i*10, "%03u", (unsigned)sync_vec[i].size());
+			::sprintf(report+14+i*10, "%03u",
+				AppsCount(static_cast<ApplicationStatusIF::SyncState_t>(i)));
 			report[17+i*10] = ',';
 		}
 		report[17+10*(Application::SYNC_STATE_COUNT-1)] = ']';
