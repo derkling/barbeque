@@ -814,7 +814,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 ApplicationManager::ExitCode_t
 ApplicationManager::PriorityRemove(AppPtr_t papp) {
 	std::unique_lock<std::mutex> prio_ul(
-			prio_mtx[papp->Priority()], std::defer_lock);
+			prio_mtx[papp->Priority()]);
 
 	logger->Debug("Releasing [%s] EXCs from PRIORITY map...",
 			papp->StrId());
