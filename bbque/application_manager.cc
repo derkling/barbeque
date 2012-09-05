@@ -746,6 +746,7 @@ AppPtr_t ApplicationManager::CreateEXC(
 	std::unique_lock<std::recursive_mutex> uids_ul(uids_mtx, std::defer_lock);
 	std::unique_lock<std::mutex> status_ul(
 			status_mtx[Application::DISABLED], std::defer_lock);
+	std::unique_lock<std::mutex> apps_ul(apps_mtx, std::defer_lock);
 	Application::ExitCode_t app_result;
 	bp::RecipeLoaderIF::ExitCode_t rcp_result;
 	RecipePtr_t rcp_ptr;
@@ -776,6 +777,11 @@ AppPtr_t ApplicationManager::CreateEXC(
 		return AppPtr_t();
 	}
 
+	// NOTE: a deadlock condition exists if other maps are locked before
+	// this one. Up to now, this seem to be the only code path where we
+	// need a double locking.
+	// Should this lock be keep till the exit?!?
+	apps_ul.lock();
 	// Save application descriptors
 	apps.insert(AppsMapEntry_t(papp->Pid(), papp));
 
