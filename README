@@ -1,1 +1,17 @@
                 .:: Barbeque Run-Time Resource Manager ::.
+
+The BarbequeRTRM is a framework being developed at DEI - Politecnico di Milano
+- under the context of the European Project 2PARMA and it has been partially
+funded by the EC under the FP7-ICT-248716-2PARMA grant. This framework is the
+core of an highly modular and extensible run-time resource manager which
+provide support for an easy integration and management of multiple applications
+competing on the usage of one (or more) shared MIMD many-core computation
+devices. The framework design, which exposes different plugin interfaces,
+provides support for pluggable policies for both resource scheduling and the
+management of applications coordination and reconfiguration.
+
+For more information look at the official project website:
+http://bosp.dei.polimi.it
+
+Or contact the head developer:
+Patrick Bellasi <derkling@gmail.com>
