@@ -104,7 +104,7 @@ if (NOT CMAKE_BUILD_TYPE)
 endif (NOT CMAKE_BUILD_TYPE)
 
 # Add flags common to all builds
-set (CMAKE_CXX_FLAGS "-Wall -std=c++0x")
+set (CMAKE_CXX_FLAGS "-Wall -std=c++11")
 
 # Add "Generic-Linux" specific flags
 if (CONFIG_TARGET_LINUX)
