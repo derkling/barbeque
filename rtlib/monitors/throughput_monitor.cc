@@ -20,7 +20,7 @@
 
 using std::chrono::duration_cast;
 using std::chrono::duration;
-typedef std::chrono::monotonic_clock chr_mc;
+typedef std::chrono::steady_clock chr_mc;
 
 namespace bbque { namespace rtlib { namespace as {
 
@@ -120,7 +120,7 @@ void ThroughputMonitor::_start() {
 		return;
 
 	started = true;
-	tStart = std::chrono::monotonic_clock::now();
+	tStart = std::chrono::steady_clock::now();
 }
 
 double ThroughputMonitor::_getThroughput(const double &data) {
@@ -128,7 +128,7 @@ double ThroughputMonitor::_getThroughput(const double &data) {
 		return 0;
 
 	started = false;
-	tStop = std::chrono::monotonic_clock::now();
+	tStop = std::chrono::steady_clock::now();
 	uint32_t elapsedTime = duration_cast<std::chrono::microseconds>
 			(tStop - tStart).count();
 

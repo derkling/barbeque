@@ -57,12 +57,12 @@ public:
 	/**
 	 * @brief The start time of the basic time monitor
 	 */
-	std::chrono::monotonic_clock::time_point tStart;
+	std::chrono::steady_clock::time_point tStart;
 
 	/**
 	 * @brief The stop time of the basic time monitor
 	 */
-	std::chrono::monotonic_clock::time_point tStop;
+	std::chrono::steady_clock::time_point tStop;
 
 	/**
 	 * @brief Indicates whether a starting time has been set or not

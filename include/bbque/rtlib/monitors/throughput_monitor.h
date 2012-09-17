@@ -140,12 +140,12 @@ private:
 	/**
 	 * @brief Start time of the Basic Throughput Monitor
 	 */
-	std::chrono::monotonic_clock::time_point tStart;
+	std::chrono::steady_clock::time_point tStart;
 
 	/**
 	 * @brief Stop time of the Basic Throughput Monitor
 	 */
-	std::chrono::monotonic_clock::time_point tStop;
+	std::chrono::steady_clock::time_point tStop;
 
 	/**
 	 * @brief Auxiliary varible for the Basic Throughput Monitor

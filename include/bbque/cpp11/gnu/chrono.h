@@ -585,7 +585,7 @@ namespace chrono  {
       typedef duration::period period;
       typedef chrono::time_point<system_clock, duration> time_point;
 
-      static const bool is_monotonic = false;
+      static const bool is_steady = false;
 
       static time_point
       now() throw ();
@@ -616,21 +616,21 @@ namespace chrono  {
     };
 
 #if defined(_GLIBCXX_USE_CLOCK_MONOTONIC) || defined(__BIONIC__)
-    /// monotonic_clock
-    struct monotonic_clock
+    /// steady_clock
+    struct steady_clock
     {
       typedef chrono::nanoseconds duration;
       typedef duration::rep       rep;
       typedef duration::period    period;
-      typedef chrono::time_point<monotonic_clock, duration> time_point;
+      typedef chrono::time_point<steady_clock, duration> time_point;
 
-      static const bool is_monotonic = true;
+      static const bool is_steady = true;
 
       static time_point
       now();
     };
 #else
-    typedef system_clock monotonic_clock;
+    typedef system_clock steady_clock;
 #endif
 
     typedef system_clock high_resolution_clock;

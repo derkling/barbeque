@@ -21,7 +21,7 @@
 
 using std::chrono::duration_cast;
 using std::chrono::duration;
-typedef std::chrono::monotonic_clock chr_mc;
+typedef std::chrono::steady_clock chr_mc;
 
 namespace bbque { namespace rtlib { namespace as {
 
@@ -121,7 +121,7 @@ void TimeMonitor::_start() {
 		return;
 
 	started = true;
-	tStart = std::chrono::monotonic_clock::now();
+	tStart = std::chrono::steady_clock::now();
 }
 
 void TimeMonitor::_stop() {
@@ -129,7 +129,7 @@ void TimeMonitor::_stop() {
 		return;
 
 	started = false;
-	tStop = std::chrono::monotonic_clock::now();
+	tStop = std::chrono::steady_clock::now();
 }
 
 void TimeMonitor::start() {

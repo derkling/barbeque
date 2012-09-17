@@ -56,10 +56,10 @@ namespace std
     }
 
 #if defined(_GLIBCXX_USE_CLOCK_MONOTONIC) || defined(__BIONIC__)
-    const bool monotonic_clock::is_monotonic;
+    const bool steady_clock::is_steady;
 
-    monotonic_clock::time_point
-    monotonic_clock::now()
+    steady_clock::time_point
+    steady_clock::now()
     {
       timespec tp;
       // -EINVAL, -EFAULT
