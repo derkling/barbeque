@@ -156,9 +156,16 @@ private:
 
 	bool terminated;
 
-	RTLIB_ExitCode_t _Enable();
+
+/*******************************************************************************
+ *    EXC State Machine Internals
+ ******************************************************************************/
+
+	void ControlLoop();
 
 	bool WaitEnable();
+
+	RTLIB_ExitCode_t _Enable();
 
 	RTLIB_ExitCode_t Setup();
 
@@ -176,7 +183,6 @@ private:
 
 	RTLIB_ExitCode_t Release();
 
-	void ControlLoop();
 };
 
 } // namespace rtlib
