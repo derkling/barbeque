@@ -122,17 +122,13 @@ protected:
 
 private:
 
+/*******************************************************************************
+ *    EXC Handlers and Status
+ ******************************************************************************/
+
 	RTLIB_Services_t * const rtlib;
 
 	RTLIB_ExecutionContextHandler_t exc_hdl;
-
-	std::thread ctrl_trd;
-
-	std::mutex ctrl_mtx;
-
-	std::condition_variable ctrl_cv;
-
-	RTLIB_WorkingModeParams_t wmp;
 
 	/**
 	 * @brief The number of onRun executions
@@ -155,6 +151,18 @@ private:
 	bool done;
 
 	bool terminated;
+
+	RTLIB_WorkingModeParams_t wmp;
+
+/*******************************************************************************
+ *    EXC State Machine Control
+ ******************************************************************************/
+
+	std::thread ctrl_trd;
+
+	std::mutex ctrl_mtx;
+
+	std::condition_variable ctrl_cv;
 
 
 /*******************************************************************************
