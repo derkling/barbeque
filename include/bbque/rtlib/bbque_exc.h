@@ -62,6 +62,10 @@ public:
 		return registered;
 	}
 
+/*******************************************************************************
+ *    AEM Constraints Management
+ ******************************************************************************/
+
 	RTLIB_ExitCode_t SetConstraints(
 		RTLIB_Constraint_t *constraints,
 		uint8_t count);
@@ -104,6 +108,10 @@ protected:
 	std::string const exc_name;
 
 	std::string const rpc_name;
+
+/*******************************************************************************
+ *    AEM Application Callbacks
+ ******************************************************************************/
 
 	virtual RTLIB_ExitCode_t onSetup();
 
