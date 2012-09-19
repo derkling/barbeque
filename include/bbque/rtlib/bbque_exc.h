@@ -44,17 +44,13 @@ public:
 
 	virtual ~BbqueEXC();
 
+/*******************************************************************************
+ *    AEM EXecution Context Management
+ ******************************************************************************/
+
 	RTLIB_ExitCode_t Enable();
 
 	RTLIB_ExitCode_t Disable();
-
-	RTLIB_ExitCode_t SetConstraints(
-		RTLIB_Constraint_t *constraints,
-		uint8_t count);
-
-	RTLIB_ExitCode_t ClearConstraints();
-
-	RTLIB_ExitCode_t SetGoalGap(uint8_t percent);
 
 	RTLIB_ExitCode_t Start();
 
@@ -65,6 +61,18 @@ public:
 	inline bool isRegistered() const {
 		return registered;
 	}
+
+	RTLIB_ExitCode_t SetConstraints(
+		RTLIB_Constraint_t *constraints,
+		uint8_t count);
+
+	RTLIB_ExitCode_t ClearConstraints();
+
+	RTLIB_ExitCode_t SetGoalGap(uint8_t percent);
+
+
+
+
 
 	inline bool Done() const {
 		return done;
