@@ -71,8 +71,23 @@ public:
 	RTLIB_ExitCode_t SetGoalGap(uint8_t percent);
 
 
+/*******************************************************************************
+ *    AEM Utilities
+ ******************************************************************************/
 
+	const char *GetUid() const;
 
+	RTLIB_ExitCode_t SetCPS(float cps);
+
+	RTLIB_ExitCode_t SetCTimeUs(uint32_t us);
+
+	inline uint32_t Cycles() const {
+		return cycles_count;
+	}
+
+	RTLIB_WorkingModeParams_t const & WorkingModeParams() const {
+		return wmp;
+	}
 
 	inline bool Done() const {
 		return done;
@@ -104,19 +119,6 @@ protected:
 
 	virtual RTLIB_ExitCode_t onRelease();
 
-	const char *GetUid() const;
-
-	RTLIB_ExitCode_t SetCPS(float cps);
-
-	RTLIB_ExitCode_t SetCTimeUs(uint32_t us);
-
-	inline uint32_t Cycles() const {
-		return cycles_count;
-	}
-
-	RTLIB_WorkingModeParams_t const & WorkingModeParams() const {
-		return wmp;
-	}
 
 private:
 
