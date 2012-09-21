@@ -23,9 +23,19 @@
 #include <bbque/cpp11/thread.h>
 
 #include <map>
+#include <memory>
 #include <string>
 
 namespace bbque { namespace rtlib {
+
+
+class BbqueEXC;
+
+/**
+ * @brief Pointer to an EXC which is a specialization of the BbqueEXC base
+ * class
+ */
+typedef std::shared_ptr<BbqueEXC> pBbqueEXC_t;
 
 /**
  * @brief The AEM base-class
