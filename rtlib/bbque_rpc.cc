@@ -628,7 +628,7 @@ void BbqueRPC::DumpStatsMOST(pregExCtx_t prec) {
 
 }
 
-#if CONFIG_BBQUE_RTLIB_CGROUPS_SUPPPORT
+#ifdef CONFIG_BBQUE_RTLIB_CGROUPS_SUPPORT
 RTLIB_ExitCode_t BbqueRPC::SetCGroupPath(pregExCtx_t prec) {
 	uint8_t count = 0;
 #define BBQUE_RPC_CGOUPS_PATH_MAX 128
