@@ -177,34 +177,69 @@ which corresponds to an even higher abstraction level API discussed in section
 
 
 
+@defgroup rtlib_sec02_aem_exc Execution Context Management
+@ingroup rtlib_sec02_aem
+
+This is a set of methods which allow to manage an <b>EXecution Context
+(EXC)</b> and its interaction with the BarbequeRTRM System-Wide Run-Time
+Resource Manager (SW-RTRM).
+
+Using methods provided by this set it is possible to register new EXCs, thus
+making the BarbequeRTRM aware about them, as well as to enable and disable them
+at run-time. All these methods are meant to be used by the client code which
+create and manage the EXCs.
+
 
 @defgroup rtlib_sec02_aem_app Application Callbacks
 @ingroup rtlib_sec02_aem
 
-ADD MORE DETAILS HERE (Application Callbacks)
+This is a set of methods which allow to specialize the bbque::rtlib::BbqueEXC
+base class according to the specific needs of each stream processing
+application that is integrated to be run-time managed by the BarbequeRTRM
+framework.
 
+A default implementation of each method is already provided by the base class,
+thus an application could provide an implementation for just the ones that
+really needs. Usually, at least the @c onSetup() and @c onRun() methods are
+defined. While, the @c onConfigure() and @c onMonitor() are of interest for
+run-time tunable applications which has at least two different Application
+Working Modes (AWMs) (see @ref rtlib_sec01_recipe).
 
-
-
-@defgroup rtlib_sec02_aem_exc Execution Context Management
-@ingroup rtlib_sec02_aem
-
-ADD MORE DETAILS HERE (Execution Context Management)
-
-
+@see rtlib_sec01_recipe
 
 
 @defgroup rtlib_sec02_aem_constr Constraints Management
 @ingroup rtlib_sec02_aem
 
-ADD MORE DETAILS HERE (Constraints Management)
+At run-time an application could influence its run-time tuning, as operated by
+the BarbequeRTRM, by asking for an Application Working Mode (AWM) change in
+case the current resoources assignement should not be considered satisfactory.
+This is a set of methods which suppports these wills from applications in
+either a mandatory or a best-effor approach.
 
+The <b>madnatory</b> selection of working modes could be enforced by
+enabling/disabling some of the AWMs defined by the corresponding EXC recipe.
+In this case either the BarbequeRTRM is able to select a different AWM or the
+application will be suspended waiting for another resources assigmenet
+possibility which match the defined set of constraints.
 
+A <b>best-effort</b> selection of working modes allows instead an application
+to assert a not-mandaory request for AWM change by simply asserting the actual
+error with respect to the expected performances for the current AWM.
+In this case the BarbequeRTRM will do it's best to accomodate the application
+request but meanwhile this last will be granted to continue its processing in
+the current AWM.
 
 
 @defgroup rtlib_sec02_aem_utils Utility
 @ingroup rtlib_sec02_aem
 
-ADD MORE DETAILS HERE (Utility)
+This is a set of utility methods which are mostly useful to query the current
+status of the stream processing application and to tune few coarse grained
+behaviors, e.g. the rate of the processing cycles.
+These methods could be used either by the application logic as well as from the
+applications which created the EXCs.
+
+
 
 */
