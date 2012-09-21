@@ -99,9 +99,9 @@ typedef std::shared_ptr<GoalInfo> GoalInfoPtr;
 typedef std::vector<GoalInfoPtr> GoalInfoList;
 
 inline GoalInfo::GoalInfo(uint8_t nTargets) {
-	achieved.resize(nTargets);
-	relativeErrors.resize(nTargets);
-	naps.resize(nTargets);
+	achieved.reserve(nTargets);
+	relativeErrors.reserve(nTargets);
+	naps.reserve(nTargets);
 }
 
 inline bool GoalInfo::isAchieved() {
