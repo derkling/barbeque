@@ -591,18 +591,25 @@ private:
  *    EXC Handlers and Status
  ******************************************************************************/
 
+/**
+ * @brief The RTLib (Plain API) handler
+ */
 	RTLIB_Services_t * const rtlib;
 
+/**
+ * @brief The EXC handler
+ */
 	RTLIB_ExecutionContextHandler_t exc_hdl;
 
-	/**
-	 * @brief The number of onRun executions
-	 * 
-	 * This counter is incremented at each onRun execution thus allowing to
-	 * keep track of the amount of workload processed.
-	 * Considering a 30fps video decoding, where an onRun is called for each
-	 * frame, a uint32 should allow for +4.5 years continous playback ;-)
-	 */
+/**
+*
+* @brief The number of onRun executions
+*
+* This counter is incremented at each onRun execution thus allowing to
+* keep track of the amount of workload processed.
+* Considering a 30fps video decoding, where an onRun is called for each
+* frame, a uint32 should allow for +4.5 years continuous playback ;-)
+*/
 	uint32_t cycles_count;
 
 	bool registered;

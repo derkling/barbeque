@@ -26,12 +26,14 @@
 In the idea of the RTRM, the application must exhibit capabilities of
 adaptivity and reconfigurability. This means that it must be able to can be
 executed according to several configurations, i.e. resource usage levels.
-In the jargon of BarbequeRTRM such configurations are called Application
-Working Modes (AWM), and must be provided by the application developers.
+In the jargon of BarbequeRTRM one of such configurations is called an
+<b>Application Working Mode (AWM)</b>, and the complete set of application
+specifi AWMs must be provided by the application developers.
 
-Currently we expect that AWMs are packaged into an XML file called \b recipe.
-The programmer could write a recipe by hand, but the optimal approach is to
-use a suitable profiling or Design-Space Exploration (DSE) tool, which could
+Currently we expect that AWMs are packaged into an XML file, wich is named
+<b>Recipe</b>.
+The programmer could write a recipe by hand, but the optimal approach is to use
+a suitable profiling or <i>Design-Space Exploration (DSE)</i> tool, which could
 identify a set of resource usages that are worth to be considered at runtime,
 taking into account suitable metrics (e.g, power and performance) and
 system-wide optimization objectives.
@@ -39,7 +41,7 @@ system-wide optimization objectives.
 
 \section rtlib_sec01_recipe_struct File structure
 
-A recipe is an XML with extension .recipe, that must be properly deployed
+A recipe is an XML with extension @c .recipe, that must be properly deployed
 under \c BASE_PATH/etc/bbque/recipes. Basically, for each EXC a recipe must be
 registered. We can also use the same recipe for several EXCs. An example of
 recipe is shown below.
