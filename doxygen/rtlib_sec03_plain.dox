@@ -33,9 +33,31 @@ application developer perspective this library enforeces just the
 conformance to a properly define "Application Lifecycle", by specifying a
 set of calls and the order on which these should be performed.
 
+### RTLib Initialization
+
+An application integrated with the BarbequeRTRM should be compiled to be linked
+with RTLib and this library should be initialized before usage.  The
+inizialization allows to register an application, as well as its EXecution
+Contexts, with the system-wide RTRM.
+This inizialization could be done using this simple code snippet:
+
+\code
+// The RTlib header file
+#include <bbque/rtlib.h>
+
+// The RTLib handler
+RTLIB_Services_t *rtlib;
+
+// Init  RTLib library and setup the BBQ communication channel
+RTLIB_Init(basename(argv[0]), &rtlib);
+assert(rtlib);
+\endcode
+
+From this point on, the @c rtlib is a valid handler to the RTLib library which
+could be used for all the following calls to services exposed by the library.
+
+
 ADD MORE DETAILS HERE (RTLib Low-Level (plain) API)
-
-
 
 
 @defgroup rtlib_sec03_plain_services Library Services
