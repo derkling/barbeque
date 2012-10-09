@@ -158,13 +158,17 @@ VIDEO1=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix
 VIDEO2=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/the_phony_war.mp4
 VIDEO3=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/x-plane_10_by_laminar_research.mp4
 aterm +sb -fn $FONT -geometry 102x16+675+18 -title "DemoApp #11 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 \
+	&>/dev/null &
 aterm +sb -fn $FONT -geometry 102x16+675+224 -title "DemoApp #12 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 \
+	&>/dev/null &
 aterm +sb -fn $FONT -geometry 102x16+675+421 -title "DemoApp #13 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 \
+	&>/dev/null &
 aterm +sb -fn $FONT -geometry 102x16+675+618 -title "DemoApp #14 (MP)" \
-	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 &
+	-e $BBQUE_SYSROOT/usr/bin/bbque-ocvdemo -f 23 -i $VIDEO1 \
+	&>/dev/null &
 sleep $BBQUE_START_DELAY
 echo "Press a KEY to continue..."
 read KEY
