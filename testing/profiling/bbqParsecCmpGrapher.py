@@ -65,14 +65,14 @@ metrics = [
 show_plot = 0
 verbose = 0
 
-def plotAMetric(app, ppm, m):
+def plotAMetric(a, ppm, m, t):
 
     print "Plotting [%s] from dataset: " % metrics[m][2], ppm
 
     # Setup graph geometry, axis and legend
     ytitle = metrics[m][0]
     graph_title = metrics[m][1]
-    graph_name = "PTest-%s-%s.pdf" % (app, metrics[m][2])
+    graph_name = "BBQProfiling-%s-%s-%02dT.pdf" % (a, metrics[m][2], t)
 
     # Add a bargraph for each configuration compared
     c_bar = len(num_apps)   # Number of bar groups to plot
@@ -114,13 +114,13 @@ def plotAMetric(app, ppm, m):
             format = 'pdf',
         )
 
-def plotPerMetric(app, ppm):
+def plotPerMetric(app, ppm, t):
     for m in range(len(metrics)):
-        plotAMetric(app, ppm[metrics[m][2]], m)
+        plotAMetric(app, ppm[metrics[m][2]], m, t)
 
 def plotPerThreads(app, ppt):
-    for tp in ppt:
-        plotPerMetric(app, tp)
+    for t_i in range(len(num_threads)):
+        plotPerMetric(app, ppt[t_i], num_threads[t_i])
 
 def graphStatistics(app):
     plots_per_threads = []
