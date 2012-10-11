@@ -67,7 +67,8 @@ verbose = 0
 
 def plotAMetric(a, ppm, m, t):
 
-    print "Plotting [%s] from dataset: " % metrics[m][2], ppm
+    if verbose:
+        print "Plotting [%s] from dataset: " % metrics[m][2], ppm
 
     # Setup graph geometry, axis and legend
     ytitle = metrics[m][0]
@@ -101,11 +102,12 @@ def plotAMetric(a, ppm, m, t):
     # Add some labels
     plot1.set_ylabel(metrics[m][0])
     plot1.set_ybound(lower = 0)
-    plot1.set_xlabel("Number of concurrently running applications")
+    plot1.set_xlabel("Number of '%s' concurrent instances (%d threads)" % (a, t))
     plot1.set_title(metrics[m][1])
     plot1.set_xticks(x_pos + y_wid)
     plot1.set_xticklabels(num_apps)
 
+    print "Plotting %s" % (graph_name)
     if show_plot:
         plt.show()
     else:
