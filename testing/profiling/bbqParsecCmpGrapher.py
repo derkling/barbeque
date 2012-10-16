@@ -29,8 +29,8 @@ from math import sqrt
 #   Input datasets configuration
 ################################################################################
 workloads = [ "bodytrack" ]
-num_threads = [ 1, 4, 8 ]
-num_apps = [ 1, 3, 6, 9, 12 ]
+threads = [ 1, 4, 8 ]
+instances = [ 1, 3, 6, 9, 12 ]
 configs = [
     ["NOBBQ",   "Unmanaged",    '0.2'],
     ["BBQ",     "BBQ Managed",  '0.6'],
@@ -39,43 +39,63 @@ configs = [
 ################################################################################
 #   Metrics of interest
 ################################################################################
-metrics = [
-#     Name                  Description                                 Label           Column  Improvements
+metrics = {
+#     Label         Name                    Description                         Column      Improvements
 #                                                                                               1 = the lower the better
 #                                                                                               0 = the higher the better
-    [ "Time [s]",           "Workload completion time [s]",             "ctime",         1,     1,   ],
-    [ "Power [W]",          "System power consumption [W]",             "power",         2,     1,   ],
-    [ "Ticks",              "Task clock ticks",                         "task-clock",    3,     1,   ],
-    [ "Context-Switches",   "Total number of context switches",         "ctx",           5,     1,   ],
-    [ "Migrations",         "Total number of CPU migrations",           "mig",           6,     1,   ],
-    [ "Page-Faults",        "Total number of page fauls",               "pf",            7,     1,   ],
-    [ "Cycles",             "Total number of CPU cycles",               "cycles",        8,     1,   ],
-    [ "Fronte-End Stalls",  "Total number of front-end stalled-cycles", "fes",          10,     1,   ],
-    [ "Front-End Idles",    "Total number of front-end idle-cycles",    "fei",          11,     1,   ],
-    [ "Back-End Stalls",    "Total number of back-end stalled-cycles",  "bes",          12,     1,   ],
-    [ "Back-End Idles",     "Total number of back-end idle-cycles",     "bei",          13,     1,   ],
-    [ "Instructions",       "Total number of executed instructions",    "ins",          14,     1,   ],
-    [ "SPC",                "Effective Stalled-Cycles-per-Instruction", "scpi",         16,     1,   ],
-    [ "Branches",           "Total number of branches",                 "b",            17,     1,   ],
-    [ "Branches-Rate",      "Effective rate of branch instructions",    "b-rate",       18,     1,   ],
-    [ "Branch-miss",        "Total number of missed branches",          "b-miss",       19,     1,   ],
-    [ "Branch-miss Quota",  "Effective percentage of missed branches",  "b-miss-rate",  20,     1,   ],
-    [ "GHz",                "Effective processor speed",                "ghz",           9,     0,   ],
-    [ "CPUs utilized",      "CPUs utilization",                         "cpu-used",      4,     0,   ],
-    [ "IPC",                "Effective Instructions-per-Cycles",        "ipc",          15,     0,   ],
-]
+ "ctime":        [ "Time [s]",           "Workload completion time [s]",              1,     1,   ],
+ "power":        [ "Power [W]",          "System power consumption [W]",              2,     1,   ],
+ "task-clock":   [ "Ticks",              "Task clock ticks",                          3,     1,   ],
+ "ctx":          [ "Context-Switches",   "Total number of context switches",          5,     1,   ],
+ "mig":          [ "Migrations",         "Total number of CPU migrations",            6,     1,   ],
+ "pf":           [ "Page-Faults",        "Total number of page fauls",                7,     1,   ],
+ "cycles":       [ "Cycles",             "Total number of CPU cycles",                8,     1,   ],
+ "fes":          [ "Fronte-End Stalls",  "Total number of front-end stalled-cycles", 10,     1,   ],
+ "fei":          [ "Front-End Idles",    "Total number of front-end idle-cycles",    11,     1,   ],
+ "bes":          [ "Back-End Stalls",    "Total number of back-end stalled-cycles",  12,     1,   ],
+ "bei":          [ "Back-End Idles",     "Total number of back-end idle-cycles",     13,     1,   ],
+ "ins":          [ "Instructions",       "Total number of executed instructions",    14,     1,   ],
+ "scpi":         [ "SPC",                "Effective Stalled-Cycles-per-Instruction", 16,     1,   ],
+ "b":            [ "Branches",           "Total number of branches",                 17,     1,   ],
+ "b-rate":       [ "Branches-Rate",      "Effective rate of branch instructions",    18,     1,   ],
+ "b-miss":       [ "Branch-miss",        "Total number of missed branches",          19,     1,   ],
+ "b-miss-rate":  [ "Branch-miss Quota",  "Effective percentage of missed branches",  20,     1,   ],
+ "ghz":          [ "GHz",                "Effective processor speed",                 9,     0,   ],
+ "cpu-used":     [ "CPUs utilized",      "CPUs utilization",                          4,     0,   ],
+ "ipc":          [ "IPC",                "Effective Instructions-per-Cycles",        15,     0,   ],
+}
+
+
+
+################################################################################
+#   End of Configuration Section
+#   Do not touch after this marker
+################################################################################
+
+# Confiugrations columns
+configs_name  = [c[0] for c in configs]
+configs_desc  = [c[1] for c in configs]
+configs_color = [c[2] for c in configs]
 
 # Configure metrics columns
-cols = [c[3] for c in metrics]
-mtrs = [m[2] for m in metrics]
-print "Parsing profile data, columns: ", cols, "=", mtrs
+metrics_label = metrics.keys()
+metrics_names  = [c[0] for c in metrics.values()]
+def metric_name(m):
+    return metrics[m][0]
+metrics_descs  = [c[1] for c in metrics.values()]
+def metric_desc(m):
+    return metrics[m][1]
+metrics_cols  = [c[2] for c in metrics.values()]
+def metric_col(m):
+    return metrics[m][2]
+
+print "Parsing profile data, columns: ", metrics_cols, "=", metrics_label
 
 # Internal configuration flags
 show_plot = 0
 verbose = 0
 
-
-
+# Autovivification support for nested dictionaries
 class AutoVivification(dict):
     """Implementation of perl's autovivification feature."""
     def __getitem__(self, item):
@@ -85,69 +105,7 @@ class AutoVivification(dict):
             value = self[item] = type(self)()
             return value
 
-
-
-
-# Data collection
-metrics_per_app = AutoVivification()
-metrics_stats = AutoVivification()
-
-
-def plotAMetric(a, ppm, m, t):
-
-    if verbose:
-        print "Plotting [%s] from dataset: " % metrics[m][2], ppm
-
-    # Setup graph geometry, axis and legend
-    ytitle = metrics[m][0]
-    graph_title = metrics[m][1]
-    graph_name = "BBQProfiling-%s-%s-%02dT.pdf" % (a, metrics[m][2], t)
-
-    # Add a bargraph for each configuration compared
-    c_bar = len(num_apps)   # Number of bar groups to plot
-    x_pos = np.arange(c_bar)       # Location of bars on X axis
-    y_wid = 0.4            # Bar didth
-
-    fig = plt.figure()
-    plot1 = fig.add_subplot(111)
-
-    bars = []
-    for c_i in range(len(configs)):
-        values = [v[1] for v in ppm[c_i]]
-        errors = [v[2] for v in ppm[c_i]]
-        if verbose:
-            print "DS[", c_i, ", pos: ", x_pos, "], V: ", values, "E: ", errors
-        bars.append(plot1.bar(x_pos + (y_wid * c_i),
-                values,
-                y_wid,
-                color = configs[c_i][2],
-                yerr = errors, ecolor = '0.0'))
-
-    #if verbose:
-    #    print "Generated bars: ", bars
-    plot1.legend(bars,
-            [l[1] for l in configs],
-            loc = 4 # lower-right
-        )
-
-    # Add some labels
-    plot1.set_ylabel(metrics[m][0])
-    plot1.set_ybound(lower = 0)
-    plot1.set_xlabel("Number of '%s' concurrent instances (%d threads)" % (a, t))
-    plot1.set_title(metrics[m][1])
-    plot1.set_xticks(x_pos + y_wid)
-    plot1.set_xticklabels(num_apps)
-
-    print "Plotting %s" % (graph_name)
-    if show_plot:
-        plt.show()
-    else:
-        plt.savefig(graph_name,
-            papertype = 'a3',
-            format = 'pdf',
-        )
-
-
+# Pretty print a nested dictionary using proper indentetion
 def pretty(d, indent=0):
     for key, value in d.iteritems():
         print '  ' * indent + str(key)
@@ -156,14 +114,88 @@ def pretty(d, indent=0):
         else:
             print '  ' * (indent+1) + str(value)
 
-def plotAll_ANT(data, a, n, t):
-    print "Plotting all metrics for (%s, %d instances, %d threads)" % (a, n, t)
+# Collection of statistic on performance metrics
+metrics_stats = AutoVivification()
+
+
+################################################################################
+#   Plotting functions
+################################################################################
+
+def plotMetric_WTM(data, w, t, m):
+
+    # Setup graph geometry, axis and legend
+    xtitle = "Number of '%s' concurrent instances (%d threads)" % (w, t)
+    ytitle = m
+    graph_title = metrics[m][1]
+    graph_name = "PlotWTM_%s-%02dT-%s.pdf" % (w, t, m)
+
+    print "Plotting [%s]..." % graph_name
+
+    # Add a bargraph for each configuration compared
+    c_bar = len(instances)   # Number of bar groups to plot
+    x_pos = np.arange(c_bar) # Location of bars on X axis
+    y_wid = 0.4              # Bar didth
+
+    fig = plt.figure()
+    plot1 = fig.add_subplot(111)
+
+    bars = []
+    for c_i in range(len(configs)):
+        values = []
+        errors = []
+        c = configs_name[c_i]
+        for i in instances:
+            values.append(data[w][i][t][c][m][0])
+            errors.append(data[w][i][t][c][m][5])
+
+        bars.append(
+                plot1.bar(
+                    x_pos + (y_wid * c_i),
+                    values,
+                    y_wid,
+                    color = configs_color[c_i],
+                    yerr = errors, ecolor = '0.0'
+                )
+            )
+
+    # Setup graph legend
+    plot1.legend(
+            bars,
+            [l[1] for l in configs],
+            loc = 4, # lower-right
+        )
+
+    # Setup X-Axis
+    plot1.set_xlabel(xtitle)
+    plot1.set_xticks(x_pos + y_wid)
+    plot1.set_xticklabels(instances)
+
+    # Setup Y-Axis
+    plot1.set_ylabel(ytitle)
+    plot1.set_ybound(
+            lower = 0)
+
+    # Setup Graph title
+    plot1.set_title(graph_title)
+   
+    if show_plot:
+        plt.show()
+    else:
+        plt.savefig(graph_name,
+            papertype = 'a3',
+            format = 'pdf',
+        )
+
+def plotMetrics_WIT(data, w, i, t):
 
     # Setup graph geometry, axis and legend
     xtitle = "Performances metrics"
     ytitle = "Normalized value"
-    graph_title = "Metrics for (%s, %d instances, %d threads)" % (a, n, t)
-    graph_name = "BBQProfiling_AllMetrics_%s-%02dI-%02dT.pdf" % (a, n, t)
+    graph_title = "Metrics for (%s, %d instances, %d threads)" % (w, i, t)
+    graph_name = "PlotWIT_%s-%02dI-%02dT.pdf" % (w, i, t)
+
+    print "Plotting [%s]..." % graph_name
 
     # Add a bargraph for each configuration compared
     c_bar = len(metrics) # Number of bar groups to plot
@@ -183,16 +215,16 @@ def plotAll_ANT(data, a, n, t):
         values = []
         errors = []
         for m_i in range(len(metrics)):
-            m = metrics[m_i][2]
+            m = metrics_label[m_i]
             c = configs[c_i][0]
             if (c_i == 0):
-                factor = data[a][n][t][c][m][0]
+                factor = data[w][i][t][c][m][0]
                 rvalues.append(0.0)
-                rerrors.append((data[a][n][t][c][m][5])/factor)
+                rerrors.append((data[w][i][t][c][m][5])/factor)
             else:
-                factor = data[a][n][t][configs[0][0]][m][0]
-                values.append(1 - (data[a][n][t][c][m][0]/factor))
-                errors.append((data[a][n][t][c][m][5]/factor))
+                factor = data[w][i][t][configs[0][0]][m][0]
+                values.append(1 - (data[w][i][t][c][m][0]/factor))
+                errors.append((data[w][i][t][c][m][5]/factor))
 
         # Add bar plots for the curent configuration
         if (c_i != 0):
@@ -210,124 +242,79 @@ def plotAll_ANT(data, a, n, t):
         print values
         print errors
 
-#    # Plot a legend
-#    plot1.legend(bars,
-#            [l[1] for l in configs],
-#            loc = 4 # lower-right
-#        )
-
-    # Add some labels
+    # Setup X-Axis
     plot1.set_xlabel(xtitle)
+    plot1.set_xticks(x_pos + y_wid)
+    plot1.set_xticklabels(
+            metrics_label,
+            rotation='vertical',
+            size='small')
+
+    # Setup Y-Axis
     plot1.set_ylabel(ytitle)
     plot1.set_ybound(
             lower = -1.5,
             upper =  1.5)
+
+    # Setup Graph title
     plot1.set_title(graph_title)
 
-    # Draw X ticks labels
-    plot1.set_xticks(x_pos + y_wid)
-    plot1.set_xticklabels(
-            mtrs,
-            rotation='vertical',
-            size='small')
-
-    print "Plotting %s" % (graph_name)
+    # Plot the graph...
     if show_plot:
         plt.show()
     else:
-        plt.savefig(graph_name,
+        plt.savefig(
+            graph_name,
             papertype = 'a3',
             format = 'pdf',
         )
 
+def plotGraphs():
+
+    for w in workloads:
+        for i in instances:
+            for t in threads:
+                plotMetrics_WIT(metrics_stats, w, i, t)
+    
+    for w in workloads:
+        for t in threads:
+            for m in metrics:
+                plotMetric_WTM(metrics_stats, w, t, m)
 
 
-
-def addAppMetrics(t, a, ppm):
-    global metrics_per_app
-    metrics_per_app[t][a] = ppm
-    #print "MetricsPerApps:\n", metrics_per_app
-
-def dumpAll():
-    print "MetricsPerApps:\n", metrics_per_app
-
-def plotPerMetric(app, ppm, t):
-    for m in range(len(metrics)):
-        plotAMetric(app, ppm[metrics[m][2]], m, t)
-
-def plotPerThreads(app, ppt):
-    for t_i in range(len(num_threads)):
-        plotPerMetric(app, ppt[t_i], num_threads[t_i])
-
-def graphStatistics(app):
+def computeStats(w,i,t,c):
     global metrics_stats
-    plots_per_threads = []
 
-    # Initialize metrics matrix
-    stats_per_metrics = [[(0,0,0) for i in range(len(num_apps))] for i in range(len(metrics))]
+    # Load profling data from file
+    datafile = "PARSECTest-%s-N%02d-T%02d-%s.dat" % (w, i, t, c)
+    if verbose:
+        print "Parsing %s..." % datafile
+    metrics_values = np.loadtxt(datafile, usecols = metrics_cols)
 
-    for nt in num_threads:
-        # Initialize the container of plots for each metrics
-        plots_per_metrics = {}
-        for m_i in range(len(metrics)):
-            plots_per_metrics[metrics[m_i][2]] = []
-        #print "\nPlots per %d threads: " % (nt), plots_per_metrics
+    # Compute Statistics on each metric
+    for m_i in range(len(metrics)):
 
-        # With or without BBQ
-        for cfg in [c[0] for c in configs]:
+        # Get specific metrics samples
+        samples = [row[m_i] for row in metrics_values]
+        if verbose:
+            print "Stats for [%s]: " % (metrics_label[m_i]), samples
 
-            # For each number of concurrent instances
-            for n_i in range(len(num_apps)):
+        # Compute statistics
+        n, (smin, smax), smean, svar, sskew, skurt = stats.describe(samples)
+        sd = sqrt(svar)
+        se = sd / sqrt(n)
+        ci95 = 1.96 * se
+        ci99 = 2.58 * se
 
-                # Load profling data from file
-                datafile = "PARSECTest-%s-N%02d-T%02d-%s.dat" % (app, num_apps[n_i], nt, cfg)
-                if verbose:
-                    print "Parsing %s..." % datafile
-                metrics_values = np.loadtxt(datafile, usecols = cols)
-                #print metrics_values
+        # Keep track of statistics
+        metrics_stats[w][i][t][c][metrics_label[m_i]] = (smean, sd, n, se, ci95, ci99, smin, smax)
 
-                # Compute Statistics on each metric
-                for m_i in range(len(metrics)):
-                    samples = [r[m_i] for r in metrics_values]
-                    if verbose:
-                        print "Stats for [%s]: " % (metrics[m_i][2]), samples
-                    n, (smin, smax), smean, svar, sskew, skurt = stats.describe(samples)
-                    # Keep track of the statistics for <Threads,Conf,Apps,Metric>
-                    # This produces a table, [rows,cols]: [Metrics,Apps]
-
-                    sd = sqrt(svar)
-                    se = sd / sqrt(n)
-                    ci95 = 1.96 * se
-                    ci99 = 2.58 * se
-
-                    stats_per_metrics[m_i][n_i] = (num_apps[n_i], smean, ci99)
-                    metrics_stats[app][num_apps[n_i]][nt][cfg][metrics[m_i][2]] = (smean, sd, n, se, ci95, ci99, smin, smax)
-
-                # for metrics
-
-            # for num_apps
-            #print "Conf[%s]: " % (cfg), stats_per_metrics
-
-            # Add dataset to be plotted
-            dataset_key = "%d threads (%s)" % (nt, cfg)
-            for m_i in range(len(metrics)):
-                if verbose:
-                    print "%s: " % (metrics[m_i][2]), stats_per_metrics[m_i]
-                plots_per_metrics[metrics[m_i][2]].append(
-                        list(stats_per_metrics[m_i])
-                )
-            
-        # for cfg
-        #print "\nPlots per %d threads: " % (nt), plots_per_metrics
-        plots_per_threads.append(plots_per_metrics)
-
-        addAppMetrics(nt, app, plots_per_threads)
-
-    # for num_threads
-    #print "\nAll Plots: ", plots_per_threads
-    plotPerThreads(app, plots_per_threads)
-
-
+def parseDatFiles():
+    for w in workloads:
+        for i in instances:
+            for t in threads:
+                for c in configs_name:
+                    computeStats(w,i,t,c)
 
 class Usage(Exception):
     def __init__(self, msg):
@@ -368,17 +355,14 @@ def main(argv=None):
         print >>sys.stderr, "for help use --help"
         return 2
 
-    # Iterate on all the workload applications
-    for Wi in workloads:
-        graphStatistics(Wi)
+    # Parse *.DAT files produced by the profiler
+    parseDatFiles()
+    if verbose:
+        pretty(metrics_stats, 1)
 
-    #dumpAll()
-    pretty(metrics_stats, 1)
+    # Produce all the plots
+    plotGraphs()
 
-    for a in workloads:
-        for n in num_apps:
-            for t in num_threads:
-                plotAll_ANT(metrics_stats, a, n, t)
 
 if __name__ == "__main__":
     sys.exit(main())
