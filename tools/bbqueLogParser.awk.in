@@ -18,22 +18,72 @@
 #
 
 BEGIN {
-	FS=":"
+	FS=" "
+	start_time = 0;
+	sched_time = 0;
 	parse_metrics = 0;
+	parse_awms = 0;
+	dump_data = 0;
+}
+
+function dumpMetrics(t,e) {
+
+	if (!e) return;
+
+	printf("%05d %s\n", t, metrics_act);
+	printf("%05d %s\n", t, metrics_run);
+	printf("%05d %s\n", t, metrics_awm);
+	printf("%05d %s\n", t, metrics_app);
+	printf("%05d %s\n", t, metrics_wlm);
+	printf("%05d %s\n", t, metrics_fns);
+
+	printf("%05d %s\n", t, astatus_awm);
 }
 
 /=====/ {
-	FS=":"
-	if (parse_metrics) {
-		parse_metrics = 0;
-		print metrics_act;
-		print metrics_run;
-		print metrics_awm;
-		print metrics_app;
-		print metrics_wlm;
-		print metrics_fns;
-	}
+	FS=" "
+	parse_metrics = 0;
+	parse_awms = 0;
+	dumpMetrics(sched_time, dump_data);
+	dump_data = 0;
 	next;
+}
+
+/ SYNC START / {
+	parse_awms = 1;
+
+	# Get the timestamp
+	timestr=sprintf("%s %s", $1, $2);
+	split(timestr, f, ",");
+	gsub(/[-\:]/, " ", f[1]);
+	event_time = mktime(f[1]);
+
+	# Keep track of time origin
+	if (start_time == 0)
+		start_time = event_time;
+
+	# Compute current sample timestamp
+	sched_time = event_time - start_time;
+
+	print "***** New schedule time: " sched_time;
+
+	# Dump connection line, if this is not the first point
+	if (sched_time != 0)
+		dumpMetrics(sched_time, 1);
+
+
+	# jump lines till apps allocation table
+	while($0 !~ / APP:EXC /) {
+		#print "Jumping line" $0
+		getline;
+	}
+	# discard the header separator
+	getline;
+	FS="|"
+	astatus_awm = "PROF_AAWM: ";
+	swimline = 0;
+	next
+
 }
 
 / PROFILING START / {
@@ -50,10 +100,15 @@ BEGIN {
 	metrics_app = "PROF_APPV: ";
 	metrics_wlm = "PROF_WLMI: ";
 	metrics_fns = "PROF_FNSI: ";
+
 	next;
 }
 
 function metricsParser() {
+
+	if (!parse_metrics)
+		return;
+
 	#print "Metrics: " $0 "["$2", "$3", "$4"]";
 	#printf "Prio%02d AppsAvg %.4f AppsVar %.4f AWMsAvg %.4f AWMsVar %.4f WLM %.4f FNS %.4f\n", $2, $3, $4, $5, $6, $7, $8
 	#printf "Prio%02d AppsAvg %.4f AWMsAvg %.4f WLM %.4f FNS %.4f\n", $2, $3, $5, $7, $8
@@ -64,10 +119,47 @@ function metricsParser() {
 	metrics_wlm=sprintf("%s Prio_%02d %.4f", metrics_wlm, $2, $9);
 	metrics_fns=sprintf("%s Prio_%02d %.4f", metrics_fns, $2, $10);
 	#print "Metrics: " metrics_awm
+
+	# Enable data dumping
+	dump_data = 1;
+
+}
+
+# Example record produced:
+# PROF_AAWM:  32296:exc_00:00 R   0 00000100
+function awmsParser() {
+
+	if (!parse_awms)
+		return;
+
+	#print "Parsing app: ["$2","$3","$4"]";
+
+	# Parse application name
+	split($2, f, " ");
+	app = f[1];
+	split(app, f, ":");
+	app = sprintf("%s_%d", f[2], f[1]);
+
+	# Parse current status
+	split($3, f, " ");
+	if (f[1] ~ /RDY/) {
+		status = "W";
+		# Do not plot suspended applications
+		next;
+	} else {
+		status = "R";
+	}
+
+	# Parse AWM and Cluster
+	split($4, f, "[ :]");
+	awm = f[2];
+	cmap = f[3];
+
+	astatus_awm=sprintf("%s %s %d.%d", astatus_awm, app, awm, swimline);
+	swimline += 1;
 }
 
 {
-	if (parse_metrics) {
-		metricsParser();
-	}
+	metricsParser();
+	awmsParser();
 }

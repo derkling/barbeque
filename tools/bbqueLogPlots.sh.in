@@ -15,6 +15,7 @@ BBQUE_METRICS_AWM="$BBQUE_SYSROOT/var/bbque/metrics_awm.fifo"
 BBQUE_METRICS_APP="$BBQUE_SYSROOT/var/bbque/metrics_app.fifo"
 BBQUE_METRICS_WLM="$BBQUE_SYSROOT/var/bbque/metrics_wlm.fifo"
 BBQUE_METRICS_FNS="$BBQUE_SYSROOT/var/bbque/metrics_fns.fifo"
+BBQUE_ASTATUS_AWM="$BBQUE_SYSROOT/var/bbque/astatus_awm.fifo"
 
 # Initialize a Metrics plotter and attach it to its data source
 # Params:
@@ -52,6 +53,24 @@ function setup_value_plot {
 		--geometry $4 &
 }
 
+function setup_awm_plot {
+	mkfifo $1 >/dev/null 2>&1
+	cat $1 | grep --line-buffered "$2" | \
+		stdbuf -oL tee $BBQUE_SYSROOT/var/bbque/$2.dat | \
+		$BBQUE_SYSROOT/bin/feedgnuplot \
+		--lines --points \
+		--curvestyleall "lw 2" \
+		--domain --dataid \
+		--extracmd "set key outside below; set ytics 0,1,4 mirror" \
+		--xlabel "Scheduling Events" \
+		--ylabel "$2" \
+		--title "$3" \
+		--autolegend \
+		--stream --xlen 60 \
+		--ymin 0 --ymax 4 \
+		--geometry $4 &
+}
+
 function cleanup {
 	kill $(jobs -p)
 	killall bbque-logparser
@@ -82,16 +101,19 @@ setup_metric_plot $BBQUE_METRICS_FNS "PROF_FNSI" \
 	"Fairness Index (per priority class)" 640x195+624+500
 setup_metric_plot $BBQUE_METRICS_WLM "PROF_WLMI" \
 	"Workload Mix Index (per priority class)" 640x195--9+500
+setup_awm_plot $BBQUE_ASTATUS_AWM "PROF_AAWM" \
+	"Applications Configuration (per active application)" 640x195--9+500
 sleep 2
 
 touch $BBQUE_LOGFILE >/dev/null 2>&1
-tail -f $BBQUE_LOGFILE | stdbuf -oL $BBQUE_SYSROOT/sbin/bbque-logparser | \
+tail -n0 -f $BBQUE_LOGFILE | stdbuf -oL $BBQUE_SYSROOT/sbin/bbque-logparser | \
 	stdbuf -oL tee \
 	$BBQUE_METRICS_ACT \
 	$BBQUE_METRICS_RUN \
 	$BBQUE_METRICS_AWM \
 	$BBQUE_METRICS_APP \
 	$BBQUE_METRICS_WLM \
+	$BBQUE_ASTATUS_AWM \
 	> $BBQUE_METRICS_FNS &
 
 # This is required to properly capture the trap previously defined
