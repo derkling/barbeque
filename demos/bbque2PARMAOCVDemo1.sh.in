@@ -1,0 +1,181 @@
+#!/bin/bash
+
+# Source the BOSP Shell configuration
+source @CMAKE_INSTALL_PREFIX@/etc/bbque/bosp_init.env
+
+# DEMO CONFIGURATION
+BBQUE_CONF="${BBQUE_CONF:-$CONF}"
+BBQUE_SYSROOT="${BBQUE_SYSROOT:-$SYSROOT}"
+BBQUE_LOGFILE="${BBQUE_LOGFILE:-$BBQUE_SYSROOT/var/bbque/bbque.log}"
+
+BBQUE_START_DELAY="${BBQUE_START_DELAY:-3}"
+BBQUE_HOST="${1:-Numa}"
+
+
+# - XWindows geometries recoveder using "xwininfo" utility
+# - Font is configured by "-fn" option, to see a list of fonts run:
+#     "xlsfonts | less"
+FONT=-misc-fixed-medium-r-normal--10-100-75-75-c-60-iso10646-1
+
+print_splash() {
+clear
+
+echo -ne "\n\n\E[1m\E[30;42m"
+echo "                                                                          "
+echo "                  BarbequeRTRM v0.8 (Betty Bacon)  -  OCVDemo1            "
+echo "                         https://bitbucket.org/bosp/                      "
+echo -ne "\E[0m\E[30;42m"
+echo "                                                                          "
+echo "                   2PARMA Project - FP7-ICT-2009-4-248716                 "
+echo "        PARallel PAradigms and Run-time MAnagement techniques for         "
+echo "                         Many-core Architectures                          "
+echo "                           http://www.2parma.eu/                          "
+echo "                                                                          "
+echo -ne "$BOSPSH_RESET$BOSPSH_DEFAULT"
+}
+
+print_title() {
+print_splash
+echo -e "\n\n\E[1m.:: $1\E[0m\n"
+}
+
+
+cam_move() {
+xdotool search --name "$1" windowactivate --sync mousemove --window \%1 80 -15 && \
+sleep 0.5 && \
+xdotool mousedown 1 && \
+sleep 0.5 && \
+xdotool mousemove_relative --sync -- $2 $3 && \
+sleep 0.5 && \
+xdotool mouseup 1
+}
+
+cam_event() {
+sleep $1
+xdotool search --name "$2" windowactivate key $3
+}
+
+###############################################################################
+#     Demo Splash-Screen
+################################################################################
+
+print_title "Demo introduction"
+
+echo "In this demo..."
+
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#     BBQUE Daemon Startup
+################################################################################
+
+print_title "System Initialization"
+
+bbque-startd $BBQUE_SYSROOT/etc/bbque/bbque_2parma_demo2.conf
+bbque-log $BBQUE_SYSROOT/var/bbque/bbque.log
+echo "Press a KEY to continue..."
+read KEY
+
+################################################################################
+#     BBQUE Console
+################################################################################
+
+print_title "BBQ Console startup"
+
+bbque-console
+
+echo "The BBQ console consists of 4 main windows, which represent, starting from the"
+echo "top left corner and rotating clockwise:"
+echo "1. a system logger viewer, where daemon startup is reported"
+echo "2. a \"Resources Monitor\" viewer, where availability of HOST and MANAGED"
+echo "   resources is monitored"
+echo "3. a \"Task Monitor\" viewer, which show a list of managed applications and the"
+echo "   resources being assigned to them"
+echo "4. a \"CPU Usages\" viewer, which show the actual usage of available processor"
+
+echo "Press a KEY to continue..."
+read KEY
+
+
+################################################################################
+#    Priority based resources allocation
+################################################################################
+
+print_title "BBQ Controlled Multi-Video Playback"
+
+echo "Press a KEY to start the demo"
+read KEY
+
+echo "A.1 - Starting 4 Mid-Prio video player..."
+VIDEO1=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix.avi
+VIDEO2=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix.avi
+VIDEO3=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix.avi
+VIDEO4=$BBQUE_SYSROOT/../contrib/ocvdemo/videos/big_buck_bunny_480p_surround-fix.avi
+
+
+$BBQUE_SYSROOT/usr/bin/bbque-ocvdemo \
+	-t 'LP1_CAM' \
+	-r 'OCVDemo_LP' \
+	-f 23 -i $VIDEO1 \
+	&>/dev/null &
+
+sleep 1;
+$BBQUE_SYSROOT/usr/bin/bbque-ocvdemo \
+	-t 'MP1_CAM' \
+	-r 'OCVDemo_MP' \
+	-f 23 -i $VIDEO2 \
+	&>/dev/null &
+
+sleep 1;
+cam_move 'MP1' 600 -25
+$BBQUE_SYSROOT/usr/bin/bbque-ocvdemo \
+	-t 'MP2_CAM' \
+	-r 'OCVDemo_MP' \
+	-f 23 -i $VIDEO3 \
+	&>/dev/null &
+
+sleep 1;
+cam_move 'MP2' -5 350
+$BBQUE_SYSROOT/usr/bin/bbque-ocvdemo \
+	-t 'HP1_CAM' \
+	-r 'OCVDemo_HP' \
+	-f 23 -i $VIDEO4 \
+	&>/dev/null &
+
+sleep 1;
+cam_move 'HP1' 600 350
+
+
+#################################################################################
+##    Scenarios Timeline
+#################################################################################
+
+# 1. trigger event on LP1 camera
+cam_event 3 'LP1' 'f'
+cam_event 3 'MP1' 'f'
+cam_event 3 'MP2' 'f'
+cam_event 3 'HP1' 's'
+cam_event 3 'LP1' 's'
+cam_event 3 'MP1' 'q'
+cam_event 3 'MP2' 'q'
+cam_event 3 'HP1' 'q'
+cam_event 3 'HP1' 's'
+
+echo "Press a KEY to continue..."
+read KEY
+
+
+#################################################################################
+##    Demo wrap-up
+#################################################################################
+
+echo "Press a KEY to end the demo"
+read KEY
+
+killall bbque-ocvdemo
+bbque-console-stop
+killall bbque-log
+bbque-stopd
+bosp-cleanup
