@@ -143,6 +143,29 @@
  */
 #define BBQUE_APP_PRIO_LEVELS ${CONFIG_BBQUE_APP_PRIO_LEVELS}
 
+/**
+ * @brief The type used to represent UIDs
+ *
+ * The UID is a unique identifier for each BabrequeRTRM managed application.
+ * This defines the type used to represent this identifiers.
+ */
+#define BBQUE_UID_TYPE uint32_t
+
+/**
+ * @brief The number of bits used to represent the EXC_ID into the UID
+ *
+ * Internally to the BarbequeRTRM, each application is represented by a UID
+ * which is obtained using this formula:
+ *   UID = PID << N + EXC_ID
+ * where:
+ *   PID, is the process ID of the RTLib control thread
+ *   N, is the value represented by this constant
+ *   EXC_ID, the the ID of the specific application EXC
+ */
+#define BBQUE_UID_SHIFT 5
+// This must match the value of BBQUE_UID_SHIFT
+#define BBQUE_UID_MASK 0x1F
+
 /* A global variable to signal if we are running as a daemon */
 extern unsigned char daemonized;
 
