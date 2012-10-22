@@ -1917,6 +1917,29 @@ void BbqueRPC::PrintNoisePct(double total, double avg) {
 #endif // CONFIG_BBQUE_RTLIB_PERF_SUPPORT
 
 
+
+/*******************************************************************************
+ *    Utility Functions
+ ******************************************************************************/
+
+AppUid_t BbqueRPC::GetUid(RTLIB_ExecutionContextHandler_t ech) {
+	pregExCtx_t prec;
+
+	// Get a reference to the EXC to control
+	assert(ech);
+	prec = getRegistered(ech);
+	if (!prec) {
+		fprintf(stderr, FE("Unregister EXC [%p] FAILED "
+				"(EXC not registered)\n"), (void*)ech);
+		return RTLIB_EXC_NOT_REGISTERED;
+	}
+	assert(isRegistered(prec) == true);
+
+	return ((chTrdPid << BBQUE_UID_SHIFT) + prec->exc_id);
+}
+
+
+
 /*******************************************************************************
  *    Cycles Per Second (CPS) Control Support
  ******************************************************************************/

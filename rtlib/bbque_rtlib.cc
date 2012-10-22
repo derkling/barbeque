@@ -104,6 +104,11 @@ static const char *rtlib_utils_getchuid() {
 	return rpc->GetChUid();
 }
 
+static AppUid_t rtlib_utils_getuid(
+		RTLIB_ExecutionContextHandler_t ech) {
+	return rpc->GetUid(ech);
+}
+
 /*******************************************************************************
  *    Cycles Per Second (CPS) Control Support
  ******************************************************************************/
@@ -228,6 +233,7 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 
 	// Utility functions interface
 	rtlib_services.Utils.GetChUid = rtlib_utils_getchuid;
+	rtlib_services.Utils.GetUid = rtlib_utils_getuid;
 
 	// Cycles Time Control interface
 	rtlib_services.CPS.Set = rtlib_cps_set;

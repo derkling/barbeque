@@ -134,6 +134,7 @@ public:
 		return chTrdUid;
 	}
 
+	AppUid_t GetUid(RTLIB_ExecutionContextHandler_t ech);
 
 /*******************************************************************************
  *    Cycles Per Second (CPS) Control Support

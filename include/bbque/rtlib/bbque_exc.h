@@ -323,6 +323,16 @@ public:
  */
 	const char *GetChUid() const;
 
+
+/**
+ * @brief Get the EXC Unique IDentifier
+ *
+ * @return the numeric UID idenfitying this EXC
+ */
+	inline AppUid_t GetUid() const {
+		return uid;
+	};
+
 /**
  * @brief Set the cycle rate for this EXC
  *
@@ -600,6 +610,12 @@ private:
  * @brief The EXC handler
  */
 	RTLIB_ExecutionContextHandler_t exc_hdl;
+
+
+/**
+ * @brief The Unique IDentifier (UID) for this EXC
+ */
+	AppUid_t uid;
 
 /**
 *

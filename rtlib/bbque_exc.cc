@@ -68,6 +68,9 @@ BbqueEXC::BbqueEXC(std::string const & name,
 	}
 	registered = true;
 
+	//--- Keep track of our UID
+	uid = rtlib->Utils.GetUid(exc_hdl);
+
 	//--- Spawn the control thread
 	ctrl_trd = std::thread(&BbqueEXC::ControlLoop, this);
 

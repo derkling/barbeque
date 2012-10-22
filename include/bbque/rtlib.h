@@ -22,6 +22,8 @@
 #include <time.h>
 #include "assert.h"
 
+#include <bbque/config.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -605,6 +607,21 @@ typedef RTLIB_ExitCode_t (*RTLIB_GetWorkingMode_t)(
  */
 typedef const char* (*RTLIB_Utils_GetChUid)();
 
+/**
+ * @brief The type used to represent application UIDs
+ */
+typedef BBQUE_UID_TYPE AppUid_t;
+
+/**
+ * @brief Get the BarbequeRTRM EXC UID
+ * @ingroup rtlib_sec03_plain_cps
+ *
+ * Every EXC of an application is identified within BBQ by a unique identified
+ * (UID), which could be recovered with by using this method.
+ */
+typedef AppUid_t (*RTLIB_Utils_GetUid)(
+		RTLIB_ExecutionContextHandler_t ech);
+
 /**@}*/
 
 /*******************************************************************************
@@ -928,6 +945,7 @@ struct RTLIB_Services {
 	/* Utility function interface */
 	struct {
 		RTLIB_Utils_GetChUid GetChUid;
+		RTLIB_Utils_GetUid GetUid;
 	} Utils;
 
 	/* Cycles Time Control interface */
