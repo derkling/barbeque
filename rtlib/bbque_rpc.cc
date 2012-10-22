@@ -174,7 +174,7 @@ RTLIB_ExitCode_t BbqueRPC::ParseOptions() {
 
 // Thereafter methods have an instance, thus we could specialize logging
 #undef  BBQUE_LOG_UID
-#define BBQUE_LOG_UID GetUid()
+#define BBQUE_LOG_UID GetChUid()
 
 RTLIB_ExitCode_t BbqueRPC::Init(const char *name) {
 	RTLIB_ExitCode_t exitCode;

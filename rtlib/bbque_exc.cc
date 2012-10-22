@@ -35,7 +35,7 @@
 #undef  BBQUE_LOG_MODULE
 #define BBQUE_LOG_MODULE "aem"
 #undef  BBQUE_LOG_UID
-#define BBQUE_LOG_UID rtlib->Utils.GetUid()
+#define BBQUE_LOG_UID rtlib->Utils.GetChUid()
 
 namespace bbque { namespace rtlib {
 
@@ -297,8 +297,8 @@ RTLIB_ExitCode_t BbqueEXC::onRelease() {
  *    Utility Functions Support
  ******************************************************************************/
 
-const char *BbqueEXC::GetUid() const {
-	return rtlib->Utils.GetUid();
+const char *BbqueEXC::GetChUid() const {
+	return rtlib->Utils.GetChUid();
 }
 
 /*******************************************************************************

@@ -100,8 +100,8 @@ static RTLIB_ExitCode_t rtlib_ggap(
  *    Utility Functions
  ******************************************************************************/
 
-static const char *rtlib_utils_getuid() {
-	return rpc->GetUid();
+static const char *rtlib_utils_getchuid() {
+	return rpc->GetChUid();
 }
 
 /*******************************************************************************
@@ -227,7 +227,7 @@ RTLIB_ExitCode_t RTLIB_Init(const char *name, RTLIB_Services_t **rtlib) {
 	rtlib_services.Unregister = rtlib_unregister;
 
 	// Utility functions interface
-	rtlib_services.Utils.GetUid = rtlib_utils_getuid;
+	rtlib_services.Utils.GetChUid = rtlib_utils_getchuid;
 
 	// Cycles Time Control interface
 	rtlib_services.CPS.Set = rtlib_cps_set;

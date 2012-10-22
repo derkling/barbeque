@@ -311,7 +311,7 @@ public:
  ******************************************************************************/
 
 /**
- * @brief Get the EXC Unique IDentifier
+ * @brief Get the (string) EXC Unique IDentifier
  *
  * Each EXC is assigned a Unique IDentifier (UID) which is used for logging
  * both at RTLib and BqrbequeRTRM side. This method gives a reference to a
@@ -321,7 +321,7 @@ public:
  *
  * @ingroup rtlib_sec02_aem_utils
  */
-	const char *GetUid() const;
+	const char *GetChUid() const;
 
 /**
  * @brief Set the cycle rate for this EXC

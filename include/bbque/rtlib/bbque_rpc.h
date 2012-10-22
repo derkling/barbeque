@@ -130,7 +130,7 @@ public:
 		return pathCGroup;
 	}
 
-	inline const char *GetUid() const {
+	inline const char *GetChUid() const {
 		return chTrdUid;
 	}
 
@@ -605,7 +605,6 @@ protected:
 	 * @see setUid()
 	 */
 	char chTrdUid[20];
-
 
 	inline void setChId(pid_t id, const char *name) {
 		chTrdPid = id;

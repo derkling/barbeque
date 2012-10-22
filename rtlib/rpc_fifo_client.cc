@@ -31,7 +31,7 @@
 #undef  BBQUE_LOG_MODULE
 #define BBQUE_LOG_MODULE "rpc.fif"
 #undef  BBQUE_LOG_UID
-#define BBQUE_LOG_UID GetUid()
+#define BBQUE_LOG_UID GetChUid()
 
 #define RPC_FIFO_SEND_SIZE(RPC_MSG, SIZE)\
 DB(fprintf(stderr, FD("Tx [" #RPC_MSG "] Request "\

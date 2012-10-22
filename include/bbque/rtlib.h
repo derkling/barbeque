@@ -603,7 +603,7 @@ typedef RTLIB_ExitCode_t (*RTLIB_GetWorkingMode_t)(
  * This function return a reference to the string representing this
  * identified, which could be conveniently used to support logging.
  */
-typedef const char* (*RTLIB_Utils_GetUid)();
+typedef const char* (*RTLIB_Utils_GetChUid)();
 
 /**@}*/
 
@@ -927,7 +927,7 @@ struct RTLIB_Services {
 
 	/* Utility function interface */
 	struct {
-		RTLIB_Utils_GetUid GetUid;
+		RTLIB_Utils_GetChUid GetChUid;
 	} Utils;
 
 	/* Cycles Time Control interface */
