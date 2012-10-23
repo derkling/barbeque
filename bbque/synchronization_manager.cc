@@ -29,6 +29,9 @@
 
 #include "bbque/utils/utility.h"
 
+// The prefix for configuration file attributes
+#define MODULE_CONFIG "SynchronizationManager"
+
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\
  {SYNCHRONIZATION_MANAGER_NAMESPACE"."NAME, DESC, \
@@ -122,7 +125,7 @@ SynchronizationManager::SynchronizationManager() :
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
 	po::options_description opts_desc("Synchronization Manager Options");
 	opts_desc.add_options()
-		("SynchronizationManager.policy",
+		(MODULE_CONFIG".policy",
 		 po::value<std::string>
 		 (&sync_policy)->default_value(
 			 BBQUE_DEFAULT_SYNCHRONIZATION_MANAGER_POLICY),
