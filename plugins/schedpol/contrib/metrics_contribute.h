@@ -24,7 +24,7 @@
 #include "bbque/plugins/scheduler_policy.h"
 #include "bbque/plugins/logger.h"
 
-#define MCT_CONF_BASE_STR 	"MetricsContribute."
+#define MCT_CONF_BASE_STR 	SCHEDULER_POLICY_CONFIG".Contrib."
 #define MCT_NAME_MAX_LEN 	11
 
 #define for_each_sched_resource_usage(entity, usage_it)             \

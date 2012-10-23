@@ -33,15 +33,17 @@
 ################################################################################
 # Yams Scheduling Policy: Metrics Contribute weights
 ################################################################################
-[MetricsContribute]
 # Global parameters [0,100]
+[SchedPol.yams]
 msl.pe               = 75
 msl.mem              = 90
 awmvalue.weight      = 20
 reconfig.weight      = 5
 congestion.weight    = 5
 fairness.weight      = 10
+
 # Contribute specific parameters
+[SchedPol.Contrib]
 awmvalue.penalty.pe    = 100
 awmvalue.penalty.mem   = 100
 reconfig.migfact       = 5

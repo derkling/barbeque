@@ -23,7 +23,10 @@
 #include "bbque/app/working_mode.h"
 #include "bbque/res/resources.h"
 
+// The prefix for logging statements category
 #define SCHEDULER_POLICY_NAMESPACE "bq.sp"
+// The prefix for configuration file attributes
+#define SCHEDULER_POLICY_CONFIG "SchedPol"
 
 using namespace bbque::app;
 using namespace bbque::res;

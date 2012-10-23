@@ -119,7 +119,7 @@ YamsSchedPol::YamsSchedPol():
 	// Load the weights of the metrics contributes
 	po::options_description opts_desc("Metrics contributes parameters");
 	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
-		snprintf(conf_opts[i], 40, "MetricsContribute.%s.weight", mct_str[i]);
+		snprintf(conf_opts[i], 40, MODULE_CONFIG".%s.weight", mct_str[i]);
 		opts_desc.add_options()
 			(conf_opts[i],
 			 po::value<uint16_t> (&mct_weights[i])->default_value(0),
@@ -129,7 +129,7 @@ YamsSchedPol::YamsSchedPol():
 
 	// Global MetricsContribute config parameters
 	for (int i = 0; i < MetricsContribute::MCT_CPT_COUNT; ++i) {
-		snprintf(conf_opts[YAMS_MCT_COUNT+i], 40, "MetricsContribute.%s",
+		snprintf(conf_opts[YAMS_MCT_COUNT+i], 40, MODULE_CONFIG".%s",
 				MetricsContribute::ConfigParamsStr[i]);
 		opts_desc.add_options()
 			(conf_opts[YAMS_MCT_COUNT+i],
@@ -160,7 +160,7 @@ YamsSchedPol::YamsSchedPol():
 	// Normalize the weights
 	NormalizeMCTWeights();
 	for (int i = 0; i < YAMS_MCT_COUNT; ++i)
-		logger->Debug("MetricsContribute.%s.weight \t= \t%.3f",
+		logger->Debug(MODULE_CONFIG".%s.weight \t= \t%.3f",
 			mct_str[i],	mct_weights_norm[i]);
 
 	// Init the vector of contributes
