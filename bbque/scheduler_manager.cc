@@ -24,6 +24,8 @@
 
 #include "bbque/utils/utility.h"
 
+// The prefix for configuration file attributes
+#define MODULE_CONFIG "SchedulerManager"
 
 /** Metrics (class COUNTER) declaration */
 #define SM_COUNTER_METRIC(NAME, DESC)\
@@ -106,7 +108,7 @@ SchedulerManager::SchedulerManager() :
 	ConfigurationManager & cm = ConfigurationManager::GetInstance();
 	po::options_description opts_desc("Resource Scheduler Options");
 	opts_desc.add_options()
-		("SchedulerManager.policy",
+		(MODULE_CONFIG".policy",
 		 po::value<std::string>
 		 (&opt_policy)->default_value(BBQUE_DEFAULT_SCHEDULER_MANAGER_POLICY),
 		 "The name of the optimization policy to use")
