@@ -77,7 +77,7 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 	// Declare the supported options
 	po::options_description xmlrloader_opts_desc("XML Recipe Loader Options");
 	xmlrloader_opts_desc.add_options()
-		(MODULE_NAMESPACE".recipe_dir", po::value<std::string>
+		(MODULE_CONFIG".recipe_dir", po::value<std::string>
 		 (&recipe_dir)->default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_RECIPES),
 		 "recipes folder")
 		;

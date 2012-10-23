@@ -23,7 +23,10 @@
 
 #include "bbque/app/recipe.h"
 
+// The prefix for logging statements category
 #define RECIPE_LOADER_NAMESPACE "bq.rl"
+// The prefix for configuration file attributes
+#define RECIPE_LOADER_CONFIG "rloader"
 
 #define RECIPE_MAJOR_VERSION 	0
 #define RECIPE_MINOR_VERSION 	8
