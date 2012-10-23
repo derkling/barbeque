@@ -92,7 +92,7 @@ bool Log4CppLogger::Configure(PF_ObjectParams * params) {
 	static std::string conf_file_path;
 	po::options_description log4cpp_opts_desc("Log4CPP Options");
 	log4cpp_opts_desc.add_options()
-		(MODULE_NAMESPACE".conf_file", po::value<std::string>
+		(MODULE_CONFIG".conf_file", po::value<std::string>
 #ifdef BBQUE_DEBUG
 		 (&conf_file_path)->default_value(
 			 BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/bbque.conf_dbg"),

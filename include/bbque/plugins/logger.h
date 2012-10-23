@@ -20,7 +20,10 @@
 
 #include "bbque/config.h"
 
+// The prefix for logging statements category
 #define LOGGER_NAMESPACE "bq.log"
+// The prefix for configuration file attributes
+#define LOGGER_CONFIG "logger"
 
 #include <string>
 
