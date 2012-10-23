@@ -28,7 +28,7 @@ MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
 
 	// Configuration parameters
 	po::options_description opts_desc("Reconfiguration contribute params");
-	snprintf(conf_str, 40, "MetricsContribute.%s.migfact", name);
+	snprintf(conf_str, 40, MCT_CONF_BASE_STR"%s.migfact", name);
 
 	opts_desc.add_options()
 		(conf_str,
@@ -39,7 +39,7 @@ MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
 
 	po::variables_map opts_vm;
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
-	logger->Debug("Migration factor: %d", migfact);
+	logger->Debug("Application migration cost factor \t= %d", migfact);
 }
 
 MetricsContribute::ExitCode_t

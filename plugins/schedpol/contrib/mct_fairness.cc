@@ -49,7 +49,6 @@ MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
 		snprintf(conf_str, 50, MCT_CONF_BASE_STR"%s.penalty.%s",
 				name, ResourceNames[i]);
 
-		logger->Debug("%s", conf_str);
 		opts_desc.add_options()
 			(conf_str,
 			 po::value<uint16_t>
@@ -69,8 +68,8 @@ MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
 					penalties_int[i], penalties_default[i]);
 			penalties_int[i] = penalties_default[i];
 		}
-		logger->Debug("penalty.%s \t= %.2f", ResourceNames[i],
-				static_cast<float>(penalties_int[i]) / 100.0);
+		logger->Debug("Resource [%s] saturation penalty \t= %.2f",
+				ResourceNames[i], static_cast<float>(penalties_int[i]) / 100.0);
 	}
 }
 

@@ -66,8 +66,6 @@ MetricsContribute::MetricsContribute(const char * _name,
 	snprintf(logname, 16, MODULE_NAMESPACE".%s", name);
 	plugins::LoggerIF::Configuration conf(logname);
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
-	if (logger)
-		logger->Info("MetricsContribute[%s] ready to log", name);
 }
 
 MetricsContribute::ExitCode_t
