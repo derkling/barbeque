@@ -117,7 +117,7 @@ YamsSchedPol::YamsSchedPol():
 		fprintf(stderr, FI("yams: Built new dynamic object [%p]\n"), this);
 
 	// Load the weights of the metrics contributes
-	po::options_description opts_desc("Metrics contributes parameters");
+	po::options_description opts_desc("Metrics contributions parameters");
 	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
 		snprintf(conf_opts[i], 40, MODULE_CONFIG".%s.weight", mct_str[i]);
 		opts_desc.add_options()
@@ -129,7 +129,7 @@ YamsSchedPol::YamsSchedPol():
 
 	// Global MetricsContribute config parameters
 	for (int i = 0; i < MetricsContribute::MCT_CPT_COUNT; ++i) {
-		snprintf(conf_opts[YAMS_MCT_COUNT+i], 40, MODULE_CONFIG".%s",
+		snprintf(conf_opts[YAMS_MCT_COUNT+i], 40, MCT_CONF_BASE_STR".%s",
 				MetricsContribute::ConfigParamsStr[i]);
 		opts_desc.add_options()
 			(conf_opts[YAMS_MCT_COUNT+i],
@@ -145,7 +145,8 @@ YamsSchedPol::YamsSchedPol():
 
 	// Boundaries enforcement (0 <= MSL <= 100)
 	for (int i = 0; i < MetricsContribute::MCT_CPT_COUNT; ++i) {
-		logger->Debug("%s = \t%d", MetricsContribute::ConfigParamsStr[i],
+		logger->Debug("Resource [%s] min saturation level \t= %d [%]",
+				(strpbrk(MetricsContribute::ConfigParamsStr[i], "."))+1,
 				mct_cfg_params[i]);
 		if (mct_cfg_params[i] > 100) {
 			logger->Warn("Parameter %s out of range [0,100]: "
@@ -160,8 +161,8 @@ YamsSchedPol::YamsSchedPol():
 	// Normalize the weights
 	NormalizeMCTWeights();
 	for (int i = 0; i < YAMS_MCT_COUNT; ++i)
-		logger->Debug(MODULE_CONFIG".%s.weight \t= \t%.3f",
-			mct_str[i],	mct_weights_norm[i]);
+		logger->Debug("Contribution [%.*s] weight \t= %.3f", 5,
+				mct_str[i], mct_weights_norm[i]);
 
 	// Init the vector of contributes
 	mcts[YAMS_VALUE] =
