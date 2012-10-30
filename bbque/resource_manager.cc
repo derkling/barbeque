@@ -161,6 +161,19 @@ ResourceManager::Setup() {
 		return SETUP_FAILED;
 	}
 
+	//---------- Loading configuration
+	ConfigurationManager & cm = ConfigurationManager::GetInstance();
+	po::options_description opts_desc("Resource Manager Options");
+	opts_desc.add_options()
+		("ResourceManager.opt_interval",
+		 po::value<uint32_t>
+		 (&opt_interval)->default_value(
+			 BBQUE_DEFAULT_RESOURCE_MANAGER_OPT_INTERVAL),
+		 "The interval [ms] of activation of the periodic optimization")
+		;
+	po::variables_map opts_vm;
+	cm.ParseConfigurationFile(opts_desc, opts_vm);
+
 	//---------- Dump list of registered plugins
 	const bp::PluginManager::RegistrationMap & rm = pm.GetRegistrationMap();
 	logger->Info("RM: Registered plugins:");
@@ -178,6 +191,7 @@ ResourceManager::Setup() {
 	//---------- Start bbque services
 	ap.Start();
 	pp.Start();
+	optimize_dfr.SetPeriodic(milliseconds(opt_interval));
 
 	return OK;
 }

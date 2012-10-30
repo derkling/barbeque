@@ -252,6 +252,19 @@ private:
 	Deferrable optimize_dfr;
 
 	/**
+	 * @brief The interval [ms] of activation of the periodic optimization
+	 *
+	 * The time interval in [ms] for the periodic optimization is the
+	 * minimum granted time period for the activation of a new
+	 * optimization run. If this value is null, than the optimization is
+	 * triggerted just by events.
+	 */
+	uint32_t opt_interval;
+
+	// By default we use an event based activation of optimizations
+#define BBQUE_DEFAULT_RESOURCE_MANAGER_OPT_INTERVAL 0
+
+	/**
 	 * @brief   Run on optimization cycle (i.e. Schedule and Synchronization)
 	 * Once an event happens which impacts on resources usage or availability
 	 * an optimization cycle could be triggered by calling this method.
