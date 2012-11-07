@@ -223,7 +223,8 @@ def plotMetrics_WIT(data, w, i, t):
                 rerrors.append((data[w][i][t][c][m][5])/factor)
             else:
                 factor = data[w][i][t][configs[0][0]][m][0]
-                values.append(1 - (data[w][i][t][c][m][0]/factor))
+		tltb = metrics[m][3]
+		values.append(tltb * (1 - (data[w][i][t][c][m][0]/factor)))
                 errors.append((data[w][i][t][c][m][5]/factor))
 
         # Add bar plots for the curent configuration
