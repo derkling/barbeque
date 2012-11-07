@@ -93,6 +93,7 @@ print "Parsing profile data, columns: ", metrics_cols, "=", metrics_label
 
 # Internal configuration flags
 show_plot = 0
+show_table = 0
 verbose = 0
 
 # Autovivification support for nested dictionaries
@@ -282,6 +283,61 @@ def plotGraphs():
             for m in metrics:
                 plotMetric_WTM(metrics_stats, w, t, m)
 
+def dumpTable_WIT(data, w, i, t):
+
+    print "#%15s | %15s | %15s | %15s \n"\
+	    "#%15s | %7s %7s | %7s %7s | %7s %7s " % (
+	    'Metric', 'Mean', '95% CI', '99% CI',
+	    '',
+	    'NOBBQ', 'BBQ',
+	    'NOBBQ', 'BBQ',
+	    'NOBBQ', 'BBQ'
+	    )
+    for m_i in range(len(metrics)):
+
+#        print data[w][i][t]["NOBBQ"][metrics_label[m_i]][0]
+
+	factor = 1
+	radix = ''
+	if (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e21):
+	    factor = 1e21
+	    radix = '[1e21]'
+	if (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e18):
+	    factor = 1e18
+	    radix = '[1e18]'
+	if (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e15):
+	    factor = 1e15
+	    radix = '[1e15]'
+	elif (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e12):
+	    factor = 1e12
+	    radix = '[P]'
+	elif (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e9):
+	    factor = 1e9
+	    radix = '[G]'
+	elif (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e6):
+	    factor = 1e6
+	    radix = '[M]'
+	elif (data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] > 1e3):
+	    factor = 1e3
+	    radix = '[K]'
+
+	speedup  = data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] - data[w][i][t]["BBQ"][metrics_label[m_i]][0]
+	speedup /= data[w][i][t]["NOBBQ"][metrics_label[m_i]][0]
+	entry = "%12s %-3s & %7.3f & %7.3f & %7.3f & %7.3f & %7.3f & %7.3f \\\\ # %7.3f" % (
+		metrics_label[m_i], radix,
+		data[w][i][t]["NOBBQ"][metrics_label[m_i]][0] / factor,
+		data[w][i][t]["BBQ"]  [metrics_label[m_i]][0] / factor,
+		data[w][i][t]["NOBBQ"][metrics_label[m_i]][4] / factor,
+		data[w][i][t]["BBQ"]  [metrics_label[m_i]][4] / factor,
+		data[w][i][t]["NOBBQ"][metrics_label[m_i]][5] / factor,
+		data[w][i][t]["BBQ"]  [metrics_label[m_i]][5] / factor,
+		speedup
+	    )
+	print entry
+#        for c_i in range(len(configs)):
+#            m = metrics_label[m_i]
+#
+#        metrics_stats[w][i][t][c][metrics_label[m_i]] = (smean, sd, n, se, ci95, ci99, smin, smax)
 
 def computeStats(w,i,t,c):
     global metrics_stats
@@ -323,6 +379,7 @@ class Usage(Exception):
 
 def main(argv=None):
     global show_plot
+    global show_table
     global verbose
 
     if argv is None:
@@ -331,7 +388,7 @@ def main(argv=None):
     # parse command line options
     try:
         try:
-            opts, args = getopt.getopt(argv[1:], "hsv", ["help", "show", "verbose"])
+	    opts, args = getopt.getopt(argv[1:], "hstv", ["help", "show", "table", "verbose"])
         except getopt.error, msg:
             raise Usage(msg)
 
@@ -343,6 +400,9 @@ def main(argv=None):
             if o in ("-s", "--show"):
                 show_plot = 1
                 continue
+	    if o in ("-t", "--table"):
+		show_table = 1
+		continue
             if o in ("-v", "--verbose"):
                 verbose = 1
                 continue
@@ -360,6 +420,13 @@ def main(argv=None):
     parseDatFiles()
     if verbose:
         pretty(metrics_stats, 1)
+
+    if show_table:
+	dumpTable_WIT(metrics_stats, "bodytrack", 1, 1)
+	dumpTable_WIT(metrics_stats, "bodytrack", 12, 1)
+	dumpTable_WIT(metrics_stats, "bodytrack", 1, 8)
+	dumpTable_WIT(metrics_stats, "bodytrack", 12, 8)
+	return 0
 
     # Produce all the plots
     plotGraphs()
