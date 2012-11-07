@@ -190,9 +190,9 @@ def plotMetric_WTM(data, w, t, m):
 def plotMetrics_WIT(data, w, i, t):
 
     # Setup graph geometry, axis and legend
-    xtitle = "Performances metrics"
-    ytitle = "Normalized value"
-    graph_title = "Metrics for (%s, %d instances, %d threads)" % (w, i, t)
+    xtitle = "Performance metrics"
+    ytitle = "Normalized Speed-Up"
+    graph_title = "Metrics speedups for %s (%d instances, %d threads)" % (w, i, t)
     graph_name = "PlotWIT_%s-%02dI-%02dT.pdf" % (w, i, t)
 
     print "Plotting [%s]..." % graph_name
