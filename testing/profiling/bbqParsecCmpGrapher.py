@@ -41,10 +41,12 @@ configs = [
 ################################################################################
 metrics = {
 #     Label         Name                    Description                         Column      Improvements
-#                                                                                               1 = the lower the better
-#                                                                                               0 = the higher the better
+#                                                                                            1 = the lower the better
+#                                                                                           -1 = the higher the better
  "ctime":        [ "Time [s]",           "Workload completion time [s]",              1,     1,   ],
  "power":        [ "Power [W]",          "System power consumption [W]",              2,     1,   ],
+ "ghz":          [ "GHz",                "Effective processor speed",                 9,     1,   ],
+ "cpu-used":     [ "CPUs utilized",      "CPUs utilization",                          4,     1,   ],
  "task-clock":   [ "Ticks",              "Task clock ticks",                          3,     1,   ],
  "ctx":          [ "Context-Switches",   "Total number of context switches",          5,     1,   ],
  "mig":          [ "Migrations",         "Total number of CPU migrations",            6,     1,   ],
@@ -60,9 +62,7 @@ metrics = {
  "b-rate":       [ "Branches-Rate",      "Effective rate of branch instructions",    18,     1,   ],
  "b-miss":       [ "Branch-miss",        "Total number of missed branches",          19,     1,   ],
  "b-miss-rate":  [ "Branch-miss Quota",  "Effective percentage of missed branches",  20,     1,   ],
- "ghz":          [ "GHz",                "Effective processor speed",                 9,     0,   ],
- "cpu-used":     [ "CPUs utilized",      "CPUs utilization",                          4,     0,   ],
- "ipc":          [ "IPC",                "Effective Instructions-per-Cycles",        15,     0,   ],
+ "ipc":          [ "IPC",                "Effective Instructions-per-Cycles",        15,    -1,   ],
 }
 
 
