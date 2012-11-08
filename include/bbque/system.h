@@ -200,6 +200,9 @@ public:
 	}
 
 	/**
+	 * @see ResourceAccounterStatusIF::Count()
+	 */
+	inline uint32_t ResourceCount(std::string const & path) const;
 	 * @see ResourceAccounterStatusIF::GetResource()
 	 */
 	inline ResourcePtr_t GetResource(std::string const & path) const {

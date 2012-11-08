@@ -133,6 +133,10 @@ public:
 	/**
 	 * @see ResourceAccounterStatusIF
 	 */
+	inline uint16_t Count(std::string const & path) const {
+		ResourcePtrList_t matchings = GetResources(path);
+		return matchings.size();
+	}
 	inline ResourcePtr_t GetResource(std::string const & path) const {
 		return resources.find(path);
 	}

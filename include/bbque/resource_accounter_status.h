@@ -204,6 +204,18 @@ public:
 		const = 0;
 
 	/**
+	 * @brief Count of resources referenced by the given path
+	 *
+	 * Given a resource path (also template) return the number of resources,
+	 * i.e. descriptors referenced by the given path. Usually, if the path is
+	 * a template, the member function should return a value greater than 1.
+	 * Conversely, a specific path should return a counting value equal to 1.
+	 *
+	 * @param path Resource path
+	 *
+	 * @return The number of referenced resource descriptors
+	 */
+	virtual uint16_t Count(std::string const & path) const = 0;
 	 * @brief Get a resource descriptor
 	 * @param path Resource path
 	 * @return A shared pointer to the resource descriptor
