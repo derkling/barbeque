@@ -216,6 +216,24 @@ public:
 	 * @return The number of referenced resource descriptors
 	 */
 	virtual uint16_t Count(std::string const & path) const = 0;
+
+	/**
+	 * @brief The number of resources of a given type
+	 *
+	 * @param type A string identifying the type (name) of resource
+	 *
+	 * @return How many resources of a type have been registered
+	 */
+	virtual uint16_t CountPerType(std::string const & type) const = 0;
+
+	/**
+	 * @brief The number of resource types
+	 *
+	 * @return How many type (or class) of resource have been registered
+	 */
+	virtual uint16_t CountTypes() const = 0;
+
+	/**
 	 * @brief Get a resource descriptor
 	 * @param path Resource path
 	 * @return A shared pointer to the resource descriptor
@@ -242,23 +260,6 @@ public:
 	 * @return True if the resource exists, false otherwise.
 	 */
 	virtual bool ExistResource(std::string const & path) const = 0;
-
-	/**
-	 * @brief The number of resources of a given type
-	 *
-	 * @param type A string identifying the type (name) of resource
-	 *
-	 * @return How many resources of a type have been registered
-	 */
-	virtual uint16_t GetNumResources(std::string const & type) const = 0;
-
-	/**
-	 * @brief The number of resource types
-	 *
-	 * @return How many type (or class) of resource have been registered
-	 */
-	virtual uint16_t GetNumResourceTypes() const = 0;
-
 };
 
 }   // namespace bbque

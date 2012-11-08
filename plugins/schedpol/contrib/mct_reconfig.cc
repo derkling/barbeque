@@ -106,7 +106,7 @@ MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 
 	// Contribute value
 	ctrib = 1.0 - (1.0 + (float) to_mig * migfact) / (1.0 + (float) migfact) *
-		((float) reconf_cost / sv->GetNumResourceTypes());
+		((float) reconf_cost / sv->ResourceCountTypes());
 
 	return MCT_SUCCESS;
 }

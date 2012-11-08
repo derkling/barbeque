@@ -203,6 +203,22 @@ public:
 	 * @see ResourceAccounterStatusIF::Count()
 	 */
 	inline uint32_t ResourceCount(std::string const & path) const;
+
+	/**
+	 * @see ResourceAccounterStatusIF::CountPerType()
+	 */
+	inline uint16_t ResourceCountPerType(std::string const & type) const {
+		return ra.CountPerType(type);
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF::CountTypes()
+	 */
+	inline uint16_t ResourceCountTypes() const {
+		return ra.CountTypes();
+	}
+
+	/**
 	 * @see ResourceAccounterStatusIF::GetResource()
 	 */
 	inline ResourcePtr_t GetResource(std::string const & path) const {
@@ -224,19 +240,6 @@ public:
 		return ra.ExistResource(path);
 	}
 
-	/**
-	 * @see ResourceAccounterStatusIF::GetNumResources()
-	 */
-	inline uint16_t GetNumResources(std::string const & type) const {
-		return ra.GetNumResources(type);
-	}
-
-	/**
-	 * @see ResourceAccounterStatusIF::GetNumResourceTypes()
-	 */
-	inline uint16_t GetNumResourceTypes() const {
-		return ra.GetNumResourceTypes();
-	}
 
 	/**
 	 * @see ResourceAccounterConfIF::GetView()

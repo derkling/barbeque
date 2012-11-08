@@ -137,6 +137,32 @@ public:
 		ResourcePtrList_t matchings = GetResources(path);
 		return matchings.size();
 	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	inline uint16_t CountPerType(std::string const & type="") const {
+		// Return 0 if the type cannot be found
+		std::map<std::string, uint16_t>::const_iterator
+			rsrc_found_it(rsrc_count_map.find(type));
+
+		if (rsrc_found_it == rsrc_count_map.end())
+			return 0;
+
+		// Return the num of resource of the type requested
+		return rsrc_found_it->second;
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
+	inline uint16_t CountTypes() const {
+		return rsrc_count_map.size();
+	}
+
+	/**
+	 * @see ResourceAccounterStatusIF
+	 */
 	inline ResourcePtr_t GetResource(std::string const & path) const {
 		return resources.find(path);
 	}
@@ -160,27 +186,6 @@ public:
 		return resources.existPath(_temp_path);
 	}
 
-	/**
-	 * @see ResourceAccounterStatusIF
-	 */
-	inline uint16_t GetNumResources(std::string const & type="") const {
-		// Return 0 if the type cannot be found
-		std::map<std::string, uint16_t>::const_iterator
-			rsrc_found_it(rsrc_count_map.find(type));
-
-		if (rsrc_found_it == rsrc_count_map.end())
-			return 0;
-
-		// Return the num of resource of the type requested
-		return rsrc_found_it->second;
-	}
-
-	/**
-	 * @see ResourceAccounterStatusIF
-	 */
-	inline uint16_t GetNumResourceTypes() const {
-		return rsrc_count_map.size();
-	}
 
 	/**
 	 * @brief Show the system resources status
