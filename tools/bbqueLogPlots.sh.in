@@ -102,7 +102,7 @@ setup_metric_plot $BBQUE_METRICS_FNS "PROF_FNSI" \
 setup_metric_plot $BBQUE_METRICS_WLM "PROF_WLMI" \
 	"Workload Mix Index (per priority class)" 640x195--9+500
 setup_awm_plot $BBQUE_ASTATUS_AWM "PROF_AAWM" \
-	"Applications Configuration (per active application)" 640x195--9+500
+	"Applications Configuration (per active application)" 640x195--9+750
 sleep 2
 
 touch $BBQUE_LOGFILE >/dev/null 2>&1
