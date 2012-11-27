@@ -20,6 +20,7 @@ set (BBQUE_DAEMON_NAME     "bbqued")
 set (BBQUE_DAEMON_UID      "root")
 set (BBQUE_DAEMON_LOCKFILE "var/lock/bbqued.lock")
 set (BBQUE_DAEMON_PIDFILE  "var/run/bbqued.pid")
+set (BBQUE_DAEMON_LOGFILE  "var/bbque.log")
 set (BBQUE_DAEMON_RUNDIR   "")
 
 # Barbeque RPC configuration
