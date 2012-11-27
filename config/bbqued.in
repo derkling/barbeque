@@ -181,9 +181,18 @@ start() {
 	mkdir -p $BBQUE_BRTF 2>/dev/null
 	chmod a+w $BBQUE_BRTF
 
+	# Setup logfile path
+	TMPCONF=`mktemp /tmp/bbque.conf.XXXXXX`
+	cat $BBQUE_CONF > $TMPCONF
+	LOGESC=$(echo $BBQUE_LOGFILE | sed 's/\//\\\//g')
+	SEDPRG="s/appender.raFile.fileName = .*/appender.raFile.fileName = $LOGESC/"
+	sed "$SEDPRG" $TMPCONF > $BBQUE_CONF
+	rm -f $TMPCONF
+
 	# Run the daemon
 	echo "Starting BBQ Daemon..."
-	"$BBQUE_BIN" -c $BBQUE_CONF -d
+	"$BBQUE_BIN" -c $BBQUE_CONF -d && \
+			echo "Using LOG file [$BBQUE_LOGFILE]"
 }
 
 stop() {
