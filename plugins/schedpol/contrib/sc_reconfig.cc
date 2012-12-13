@@ -15,20 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mct_reconfig.h"
+#include "sc_reconfig.h"
 
 namespace po = boost::program_options;
 
 namespace bbque { namespace plugins {
 
 
-MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
+SCReconfig::SCReconfig(const char * _name, uint16_t cfg_params[]):
 	SchedContrib(_name, cfg_params) {
 	char conf_str[40];
 
 	// Configuration parameters
 	po::options_description opts_desc("Reconfiguration contribute params");
-	snprintf(conf_str, 40, MCT_CONF_BASE_STR"%s.migfact", name);
+	snprintf(conf_str, 40, SC_CONF_BASE_STR"%s.migfact", name);
 
 	opts_desc.add_options()
 		(conf_str,
@@ -42,14 +42,14 @@ MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
 	logger->Debug("Application migration cost factor \t= %d", migfact);
 }
 
-SchedContrib::ExitCode_t MCTReconfig::Init(void * params) {
+SchedContrib::ExitCode_t SCReconfig::Init(void * params) {
 	(void) params;
 
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
 SchedContrib::ExitCode_t
-MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+SCReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
 	float reconf_cost = 0.0;
@@ -71,7 +71,7 @@ MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	if (!to_mig && evl_ent.papp->CurrentAWM() &&
 			evl_ent.papp->CurrentAWM()->Id() == evl_ent.pawm->Id()) {
 		ctrib = 1.0;
-		return MCT_SUCCESS;
+		return SC_SUCCESS;
 	}
 
 	// Resource usages of the current entity (AWM + Cluster)
@@ -90,8 +90,8 @@ MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 			if ((rsrc_avl == 0) &&
 					(ResourcePathUtils::GetNameTemplate(rsrc_path).compare("pe")
 					 == 0))
-				return MCT_RSRC_NO_PE;
-			return MCT_RSRC_UNAVL;
+				return SC_RSRC_NO_PE;
+			return SC_RSRC_UNAVL;
 		}
 
 		// Total amount of resource
@@ -107,7 +107,7 @@ MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	ctrib = 1.0 - (1.0 + (float) to_mig * migfact) / (1.0 + (float) migfact) *
 		((float) reconf_cost / sv->ResourceCountTypes());
 
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
 

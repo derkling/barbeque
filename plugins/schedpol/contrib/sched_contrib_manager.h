@@ -166,7 +166,7 @@ private:
 	static uint16_t sc_weights[SC_COUNT];
 
 	/** Global config parameters for metrics contributes */
-	static uint16_t sc_cfg_params[SchedContrib::MCT_CPT_COUNT];
+	static uint16_t sc_cfg_params[SchedContrib::SC_CPT_COUNT];
 
 
 	/**

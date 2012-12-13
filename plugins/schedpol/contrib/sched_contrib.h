@@ -24,8 +24,8 @@
 #include "bbque/plugins/scheduler_policy.h"
 #include "bbque/plugins/logger.h"
 
-#define MCT_CONF_BASE_STR 	SCHEDULER_POLICY_CONFIG".Contrib."
-#define MCT_NAME_MAX_LEN 	11
+#define SC_CONF_BASE_STR 	SCHEDULER_POLICY_CONFIG".Contrib."
+#define SC_NAME_MAX_LEN 	11
 
 #define for_each_sched_resource_usage(entity, usage_it)             \
 	UsagesMapPtr_t const & rsrc_usages(                             \
@@ -59,17 +59,17 @@ public:
 	 */
 	enum ExitCode_t {
 		/** Success */
-		MCT_SUCCESS,
+		SC_SUCCESS,
 		/** Generic fail during initialization */
-		MCT_INIT_FAILED,
+		SC_INIT_FAILED,
 		/** No more processing element in a given cluster */
-		MCT_RSRC_NO_PE,
+		SC_RSRC_NO_PE,
 		/** A specific resource is not available */
-		MCT_RSRC_UNAVL,
+		SC_RSRC_UNAVL,
 		/** Missing a valid resource state view token */
-		MCT_ERR_VIEW,
+		SC_ERR_VIEW,
 		/** Unexpected error condition */
-		MCT_ERROR
+		SC_ERROR
 	};
 
 	/**
@@ -77,9 +77,9 @@ public:
 	 */
 	enum MCTMetrics_t {
 		/** Computing time */
-		MCT_COMP_TIME,
+		SC_COMP_TIME,
 
-		MCT_METRICS_COUNT
+		SC_METRICS_COUNT
 	};
 
 	/**
@@ -87,11 +87,11 @@ public:
 	  */
 	enum ResourceType_t {
 		/** Processing element */
-		MCT_RSRC_PE,
+		SC_RSRC_PE,
 		/** Memory */
-		MCT_RSRC_MEM,
+		SC_RSRC_MEM,
 
-		MCT_RSRC_COUNT
+		SC_RSRC_COUNT
 	};
 
 	/**
@@ -99,11 +99,11 @@ public:
 	 */
 	enum ConfigParamType_t {
 		/** Maximum Saturation Level of processing elements */
-		MCT_MSL_PE,
+		SC_MSL_PE,
 		/** Maximum Saturation Level of memory */
-		MCT_MSL_MEM,
+		SC_MSL_MEM,
 
-		MCT_CPT_COUNT
+		SC_CPT_COUNT
 	};
 
 	/**
@@ -171,16 +171,16 @@ public:
 	/************************ Static data ****************************/
 
 	/** Resource names */
-	static char const * ResourceNames[MCT_RSRC_COUNT];
+	static char const * ResourceNames[SC_RSRC_COUNT];
 
 	/** Resource path templates */
-	static char const * ResourceGenPaths[MCT_RSRC_COUNT];
+	static char const * ResourceGenPaths[SC_RSRC_COUNT];
 
 	/** Global configuration parameters string */
-	static char const * ConfigParamsStr[MCT_CPT_COUNT];
+	static char const * ConfigParamsStr[SC_CPT_COUNT];
 
 	 /** Default values for configuration parameters */
-	static uint16_t const ConfigParamsDefault[MCT_CPT_COUNT];
+	static uint16_t const ConfigParamsDefault[SC_CPT_COUNT];
 
 
 	/*********************** Public methods **************************/
@@ -250,10 +250,10 @@ protected:
 	 RViewToken_t vtok;
 
 	 /** Contribute identifier name */
-	 char name[MCT_NAME_MAX_LEN];
+	 char name[SC_NAME_MAX_LEN];
 
 	 /** Maximum Saturation Levels per resource */
-	 float msl_params[MCT_RSRC_COUNT];
+	 float msl_params[SC_RSRC_COUNT];
 
 
 	/**

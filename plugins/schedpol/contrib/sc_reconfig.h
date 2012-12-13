@@ -15,55 +15,49 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_MCT_VALUE_
-#define BBQUE_MCT_VALUE_
+#ifndef BBQUE_SC_RECONFIG_
+#define BBQUE_SC_RECONFIG_
 
 #include "sched_contrib.h"
+
+
+// Proportional cost factor between MIGRATION and RECONFIGURATION
+#define DEFAULT_MIGRATION_FACTOR 	4
 
 
 namespace bbque { namespace plugins {
 
 
-class MCTValue: public SchedContrib {
+class SCReconfig: public SchedContrib {
 
 public:
 
 	/**
 	 * @brief Constructor
-	 *
-	 * @param name A name identifying the specific contribute
-	 * @param cfg_params Global configuration parameters
 	 */
-	MCTValue(const char * _name, uint16_t const cfg_params[]);
+	SCReconfig(const char * _name, uint16_t cfg_params[]);
 
 	ExitCode_t Init(void * params);
 
 private:
 
 	/**
-	 * @brief Compute the AWM value contribute
-	 *
-	 * The contribute starts from the static value associated to the AWM to
-	 * evaluate. If a "goal gap" has been set, a "target" resource usage is
-	 * considered accordingly. If the AWM to evaluate provides a resource
-	 * usage greater or equal to the target usage, the static AWM value is
-	 * returned as contribute index, otherwise the index will be a
-	 * "penalization" of the static value.
-	 *
-	 * @param evl_ent The scheduling entity to evaluate
-	 * @ctrib ctrib The contribute index to return
-	 *
-	 * @return MCT_SUCCESS. No error conditions expected.
+	 * Proportional factor meaning how many times the migration is more
+	 * penalizing than a reconfiguration
+	 */
+	uint16_t migfact;
+
+	/**
+	 * @brief Compute the reconfiguration contribute
 	 */
 	ExitCode_t _Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 			float & ctrib);
-
 };
 
 } // plugins
 
 } // bbque
 
-#endif // BBQUE_MCT_VALUE_
+#endif // BBQUE_SC_RECONFIG_
 
 

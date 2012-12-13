@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mct_fairness.h"
+#include "sc_fairness.h"
 
 #include <cmath>
 
@@ -24,12 +24,12 @@ namespace po = boost::program_options;
 namespace bbque { namespace plugins {
 
 /** Set default congestion penalties values */
-uint16_t MCTFairness::penalties_default[MCT_RSRC_COUNT] = {
+uint16_t SCFairness::penalties_default[SC_RSRC_COUNT] = {
 	5,
 	5
 };
 
-MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
+SCFairness::SCFairness(const char * _name, uint16_t const cfg_params[]):
 	SchedContrib(_name, cfg_params) {
 	char conf_str[50];
 
@@ -37,7 +37,7 @@ MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
 	po::options_description opts_desc("Fairness contribute parameters");
 
 	// Base for exponential
-	snprintf(conf_str, 50, MCT_CONF_BASE_STR"%s.expbase", name);
+	snprintf(conf_str, 50, SC_CONF_BASE_STR"%s.expbase", name);
 	opts_desc.add_options()
 		(conf_str,
 		 po::value<uint16_t>(&expbase)->default_value(DEFAULT_CONG_EXPBASE),
@@ -45,8 +45,8 @@ MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
 		;
 
 	// Congestion penalties
-	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
-		snprintf(conf_str, 50, MCT_CONF_BASE_STR"%s.penalty.%s",
+	for (int i = 0; i < SC_RSRC_COUNT; ++i) {
+		snprintf(conf_str, 50, SC_CONF_BASE_STR"%s.penalty.%s",
 				name, ResourceNames[i]);
 
 		opts_desc.add_options()
@@ -61,7 +61,7 @@ MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	// Boundaries enforcement (0 <= penalty <= 100)
-	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
+	for (int i = 0; i < SC_RSRC_COUNT; ++i) {
 		if (penalties_int[i] > 100) {
 			logger->Warn("Parameter penalty.%s out of range [0,100]: "
 					"found %d. Setting to %d", ResourceNames[i],
@@ -73,7 +73,7 @@ MCTFairness::MCTFairness(const char * _name, uint16_t const cfg_params[]):
 	}
 }
 
-SchedContrib::ExitCode_t MCTFairness::Init(void * params) {
+SchedContrib::ExitCode_t SCFairness::Init(void * params) {
 	AppPrio_t * prio;
 	prio = static_cast<AppPrio_t *>(params);
 
@@ -82,18 +82,18 @@ SchedContrib::ExitCode_t MCTFairness::Init(void * params) {
 	logger->Debug("%d Applications/EXC for priority level %d", num_apps, *prio);
 
 	// Get the total amount of resource per types
-	for (int i = 0; i < MCT_RSRC_COUNT; ++i) {
+	for (int i = 0; i < SC_RSRC_COUNT; ++i) {
 		rsrc_avail[i] = sv->ResourceAvailable(ResourceGenPaths[i], vtok);
 		fair_parts[i] = rsrc_avail[i] / num_apps;
 		logger->Debug("R{%s} AVL:%lu Fair partition:%lu",
 				ResourceGenPaths[i], rsrc_avail[i], fair_parts[i]);
 	}
 
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
 SchedContrib::ExitCode_t
-MCTFairness::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+SCFairness::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;
 	CLEParams_t params;
@@ -122,20 +122,20 @@ MCTFairness::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		// If there are no free resources the index contribute is equal to 0
 		if (clust_rsrc_avl < pusage->GetAmount()) {
 			ctrib = 0;
-			return MCT_SUCCESS;
+			return SC_SUCCESS;
 		}
 
 		// Compute the cluster factor (resource type related)
 		std::string rsrc_name(ResourcePathUtils::GetNameTemplate(rsrc_path));
-		if (rsrc_name.compare(ResourceNames[MCT_RSRC_PE]) == 0) {
+		if (rsrc_name.compare(ResourceNames[SC_RSRC_PE]) == 0) {
 			clust_fract = ceil(static_cast<double>(clust_rsrc_avl) /
-					fair_parts[MCT_RSRC_PE]);
-			penalty = static_cast<float>(penalties_int[MCT_RSRC_PE]) / 100.0;
+					fair_parts[SC_RSRC_PE]);
+			penalty = static_cast<float>(penalties_int[SC_RSRC_PE]) / 100.0;
 		}
 		else {
 			clust_fract = ceil(static_cast<double>(clust_rsrc_avl) /
-					fair_parts[MCT_RSRC_MEM]);
-			penalty = static_cast<float>(penalties_int[MCT_RSRC_MEM]) / 100.0;
+					fair_parts[SC_RSRC_MEM]);
+			penalty = static_cast<float>(penalties_int[SC_RSRC_MEM]) / 100.0;
 		}
 
 		logger->Debug("%s: R{%s} cluster fraction: %lu", evl_ent.StrId(),
@@ -161,10 +161,10 @@ MCTFairness::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		ru_index < ctrib ? ctrib = ru_index: ctrib;
 	}
 
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
-void MCTFairness::SetIndexParameters(uint64_t cfp,
+void SCFairness::SetIndexParameters(uint64_t cfp,
 		uint64_t cra,
 		float & penalty,
 		CLEParams_t & params) {

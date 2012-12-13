@@ -28,22 +28,22 @@ namespace po = boost::program_options;
 namespace bbque { namespace plugins {
 
 
-char const * SchedContrib::ResourceGenPaths[MCT_RSRC_COUNT] = {
+char const * SchedContrib::ResourceGenPaths[SC_RSRC_COUNT] = {
 	RSRC_CLUST_PE,
 	RSRC_CLUST_MEM
 };
 
-char const * SchedContrib::ResourceNames[MCT_RSRC_COUNT] = {
+char const * SchedContrib::ResourceNames[SC_RSRC_COUNT] = {
 	"pe",
 	"mem"
 };
 
-char const * SchedContrib::ConfigParamsStr[MCT_CPT_COUNT] = {
+char const * SchedContrib::ConfigParamsStr[SC_CPT_COUNT] = {
 	"msl.pe",
 	"msl.mem"
 };
 
-uint16_t const SchedContrib::ConfigParamsDefault[MCT_CPT_COUNT] = {
+uint16_t const SchedContrib::ConfigParamsDefault[SC_CPT_COUNT] = {
 	90,
 	70,
 };
@@ -54,11 +54,11 @@ SchedContrib::SchedContrib(const char * _name,
 	cm(ConfigurationManager::GetInstance()) {
 
 	// Identifier name of the contribute
-	strncpy(name, _name, MCT_NAME_MAX_LEN);
-	name[MCT_NAME_MAX_LEN-1] = '\0';
+	strncpy(name, _name, SC_NAME_MAX_LEN);
+	name[SC_NAME_MAX_LEN-1] = '\0';
 
 	// Array of Maximum Saturation Levels parameters
-	for (int i = 0; i < MCT_RSRC_COUNT; ++i)
+	for (int i = 0; i < SC_RSRC_COUNT; ++i)
 		msl_params[i] = static_cast<float> (params[i]) / 100.0;
 
 	// Get a logger instance
@@ -75,7 +75,7 @@ SchedContrib::Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	// A valid token for the resource state view is mandatory
 	if (vtok == 0) {
 		logger->Error("Missing a valid system/state view");
-		return MCT_ERR_VIEW;
+		return SC_ERR_VIEW;
 	}
 
 	_Compute(evl_ent, ctrib);
@@ -83,7 +83,7 @@ SchedContrib::Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	logger->Info("%s: %s = %.4f", evl_ent.StrId(), name, ctrib);
 	assert((ctrib >= 0) && (ctrib <= 1));
 
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
 void SchedContrib::GetResourceThresholds(std::string const & rsrc_path,

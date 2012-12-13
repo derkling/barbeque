@@ -424,7 +424,7 @@ void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
 
 			// SchedContrib specific error handling
 			switch (sc_ret) {
-			case SchedContrib::MCT_RSRC_NO_PE:
+			case SchedContrib::SC_RSRC_NO_PE:
 				logger->Debug("Aggregate: No available PEs in cluster/node %d",
 						pschd->clust_id);
 				cl_info.full.set(pschd->clust_id);

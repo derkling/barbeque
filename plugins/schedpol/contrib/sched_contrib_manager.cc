@@ -22,10 +22,10 @@
 #include "bbque/modules_factory.h"
 #include "sched_contrib_manager.h"
 
-#include "mct_value.h"
-#include "mct_reconfig.h"
-#include "mct_congestion.h"
-#include "mct_fairness.h"
+#include "sc_value.h"
+#include "sc_reconfig.h"
+#include "sc_congestion.h"
+#include "sc_fairness.h"
 // ...:: ADD_SC ::...
 
 namespace po = boost::program_options;
@@ -54,7 +54,7 @@ char const * SchedContribManager::sc_str[SC_COUNT] = {
 std::map<const char *, SchedContribPtr_t> SchedContribManager::sc_objs = {};
 float SchedContribManager::sc_weights_norm[SC_COUNT] = {0};
 uint16_t SchedContribManager::sc_weights[SC_COUNT] = {0};
-uint16_t SchedContribManager::sc_cfg_params[SchedContrib::MCT_CPT_COUNT] = {0};
+uint16_t SchedContribManager::sc_cfg_params[SchedContrib::SC_CPT_COUNT] = {0};
 
 
 /*****************************************************************************
@@ -130,7 +130,7 @@ SchedContribManager::ExitCode_t SchedContribManager::GetIndex(
 
 	// Compute the SchedContrib index
 	sc_ret = (*sc_it).second->Compute(evl_ent, sc_value);
-	if (unlikely(sc_ret != SchedContrib::MCT_SUCCESS))
+	if (unlikely(sc_ret != SchedContrib::SC_SUCCESS))
 		return SC_ERROR;
 
 	// Multiply the index for the weight
@@ -166,7 +166,7 @@ void SchedContribManager::SetViewInfo(System * sv, RViewToken_t vtok) {
 
 
 void SchedContribManager::ParseConfiguration() {
-	char conf_opts[SC_COUNT+SchedContrib::MCT_CPT_COUNT][40];
+	char conf_opts[SC_COUNT+SchedContrib::SC_CPT_COUNT][40];
 
 	// Load the weights of the metrics contributes
 	po::options_description opts_desc("Scheduling contributions parameters");
@@ -180,22 +180,22 @@ void SchedContribManager::ParseConfiguration() {
 	}
 
 	// Global SchedContrib config parameters
-	for (int i = 0; i < SchedContrib::MCT_CPT_COUNT; ++i) {
-		snprintf(conf_opts[SC_COUNT+i], 40, MCT_CONF_BASE_STR".%s",
+	for (int i = 0; i < SchedContrib::SC_CPT_COUNT; ++i) {
+		snprintf(conf_opts[SC_COUNT+i], 40, SC_CONF_BASE_STR".%s",
 				SchedContrib::ConfigParamsStr[i]);
 		opts_desc.add_options()
 			(conf_opts[SC_COUNT+i],
 			 po::value<uint16_t>
 			 (&sc_cfg_params[i])->default_value(
 				 SchedContrib::ConfigParamsDefault[i]),
-			"MCT global parameters");
+			"SC global parameters");
 		;
 	}
 	po::variables_map opts_vm;
 	cm.ParseConfigurationFile(opts_desc, opts_vm);
 
 	// Boundaries enforcement (0 <= MSL <= 100)
-	for (int i = 0; i < SchedContrib::MCT_CPT_COUNT; ++i) {
+	for (int i = 0; i < SchedContrib::SC_CPT_COUNT; ++i) {
 		logger->Debug("Resource [%s] min saturation level \t= %d [%]",
 				(strpbrk(SchedContrib::ConfigParamsStr[i], "."))+1,
 				sc_cfg_params[i]);
@@ -227,13 +227,13 @@ void SchedContribManager::AllocateContribs() {
 
 	// Init the map of scheduling contribution objects
 	sc_objs[sc_str[VALUE]] = SchedContribPtr_t(
-			new MCTValue(sc_str[VALUE],	sc_cfg_params));
+			new SCValue(sc_str[VALUE],	sc_cfg_params));
 	sc_objs[sc_str[RECONFIG]] = SchedContribPtr_t(
-			new MCTReconfig(sc_str[RECONFIG], sc_cfg_params));
+			new SCReconfig(sc_str[RECONFIG], sc_cfg_params));
 	sc_objs[sc_str[CONGESTION]] = SchedContribPtr_t(
-			new MCTCongestion(sc_str[CONGESTION], sc_cfg_params));
+			new SCCongestion(sc_str[CONGESTION], sc_cfg_params));
 	sc_objs[sc_str[FAIRNESS]] = SchedContribPtr_t(
-			new MCTFairness(sc_str[FAIRNESS], sc_cfg_params));
+			new SCFairness(sc_str[FAIRNESS], sc_cfg_params));
 	// ...:: ADD_SC ::...
 }
 

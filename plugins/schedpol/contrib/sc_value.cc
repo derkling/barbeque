@@ -15,7 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mct_value.h"
+#include "sc_value.h"
 
 using namespace bbque::res;
 
@@ -24,19 +24,19 @@ namespace po = boost::program_options;
 namespace bbque { namespace plugins {
 
 
-MCTValue::MCTValue(const char * _name, uint16_t const cfg_params[]):
+SCValue::SCValue(const char * _name, uint16_t const cfg_params[]):
 	SchedContrib(_name, cfg_params) {
 }
 
 SchedContrib::ExitCode_t
-MCTValue::Init(void * params) {
+SCValue::Init(void * params) {
 	(void) params;
 
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
 SchedContrib::ExitCode_t
-MCTValue::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+SCValue::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 	std::string rsrc_tmp_path;
 	UsagesMap_t::const_iterator usage_it;
@@ -51,7 +51,7 @@ MCTValue::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	nap = 0.6 * static_cast<float>(evl_ent.papp->GetGoalGap()) / 100.0;
 	if (!curr_awm || (nap == 0) ||
 			(curr_awm->Value() >= evl_ent.pawm->Value()))
-		return MCT_SUCCESS;
+		return SC_SUCCESS;
 
 	logger->Debug("%s: Normalized Actual Penalty (NAP) = %d/100): %.4f",
 			evl_ent.StrId(), evl_ent.papp->GetGoalGap(), nap);
@@ -60,7 +60,7 @@ MCTValue::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	ctrib += nap;
 
 	logger->Debug("%s: AWM Value index: %.4f", evl_ent.StrId(),	ctrib);
-	return MCT_SUCCESS;
+	return SC_SUCCESS;
 }
 
 

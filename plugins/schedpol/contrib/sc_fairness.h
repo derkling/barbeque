@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BBQUE_MCT_FAIRNESS_
-#define BBQUE_MCT_FAIRNESS_
+#ifndef BBQUE_SC_FAIRNESS_
+#define BBQUE_SC_FAIRNESS_
 
 #include "sched_contrib.h"
 
@@ -27,7 +27,7 @@ using bbque::app::AppPrio_t;
 namespace bbque { namespace plugins {
 
 
-class MCTFairness: public SchedContrib {
+class SCFairness: public SchedContrib {
 
 public:
 
@@ -37,7 +37,7 @@ public:
 	 * @param name A name identifying the specific contribute
 	 * @param cfg_params Global configuration parameters
 	 */
-	MCTFairness(const char * _name, uint16_t const cfg_params[]);
+	SCFairness(const char * _name, uint16_t const cfg_params[]);
 
 	/**
 	 * @brief Perform per-priority class information setup
@@ -48,7 +48,7 @@ public:
 	 *
 	 * @param params Expected pointer to AppPrio_t type
 	 *
-	 * @return MCT_SUCCESS. No error conditions expected
+	 * @return SC_SUCCESS. No error conditions expected
 	 */
 	ExitCode_t Init(void * params);
 
@@ -63,20 +63,20 @@ private:
 	 * 0 = "pe"
 	 * 1 = "mem"
 	 */
-	uint16_t penalties_int[MCT_RSRC_COUNT];
+	uint16_t penalties_int[SC_RSRC_COUNT];
 
 	/** Default values for the congestion penalties */
-	static uint16_t penalties_default[MCT_RSRC_COUNT];
+	static uint16_t penalties_default[SC_RSRC_COUNT];
 
 
 	/** Number of applications to schedule */
 	uint16_t num_apps;
 
 	/** Resource availability */
-	uint64_t rsrc_avail[MCT_RSRC_COUNT];
+	uint64_t rsrc_avail[SC_RSRC_COUNT];
 
 	/** Fair partitions */
-	uint64_t fair_parts[MCT_RSRC_COUNT];
+	uint64_t fair_parts[SC_RSRC_COUNT];
 
 
 	/**
@@ -85,7 +85,7 @@ private:
 	 * @param evl_ent The entity to evaluate (EXC/AWM/ClusterID)
 	 * @param ctrib The contribute to set
 	 *
-	 * @return MCT_SUCCESS for success
+	 * @return SC_SUCCESS for success
 	 */
 	ExitCode_t _Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 			float & ctrib);
@@ -114,4 +114,4 @@ private:
 
 } // bbque
 
-#endif // BBQUE_MCT_FAIRNESS_
+#endif // BBQUE_SC_FAIRNESS_
