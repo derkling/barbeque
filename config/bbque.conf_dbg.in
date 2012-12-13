@@ -40,7 +40,7 @@
 # Yams Scheduling Policy: Metrics Contribute weights
 ################################################################################
 # Global parameters [0,100]
-[SchedPol.yams]
+[SchedPol.Contrib]
 awmvalue.weight      = 20
 reconfig.weight      = 5
 congestion.weight    = 5

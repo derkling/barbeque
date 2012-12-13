@@ -27,13 +27,7 @@
 #include "bbque/modules_factory.h"
 #include "bbque/app/working_mode.h"
 #include "bbque/plugins/logger.h"
-
-#include "contrib/mct_value.h"
-#include "contrib/mct_reconfig.h"
-#include "contrib/mct_congestion.h"
-#include "contrib/mct_fairness.h"
-// ...:: ADD_MCT ::...
-
+#include "contrib/sched_contrib_manager.h"
 
 namespace bu = bbque::utils;
 namespace po = boost::program_options;
@@ -41,16 +35,11 @@ namespace po = boost::program_options;
 namespace bbque { namespace plugins {
 
 
-char const * YamsSchedPol::mct_str[YAMS_MCT_COUNT] = {
-	"awmvalue",
-	"reconfig",
-	"congestion",
-	"fairness"
-	//"power",
-	//"thermal",
-	//"stability",
-	//"robustness"
-	// ...:: ADD_MCT ::...
+SchedContribManager::SCType_t YamsSchedPol::sc_types[] = {
+	SchedContribManager::VALUE,
+	SchedContribManager::RECONFIG,
+	SchedContribManager::CONGESTION,
+	SchedContribManager::FAIRNESS
 };
 
 // Definition of time metrics of the scheduling policy
@@ -68,7 +57,7 @@ YamsSchedPol::coll_metrics[YAMS_METRICS_COUNT] = {
 
 // Definition of time metrics for each SchedContrib computation
 MetricsCollector::MetricsCollection_t
-YamsSchedPol::coll_mct_metrics[YAMS_MCT_COUNT] = {
+YamsSchedPol::coll_mct_metrics[YAMS_SC_COUNT] = {
 	YAMS_SAMPLE_METRIC("awmv.comp",
 			"AWM value computing time [ms]"),
 	YAMS_SAMPLE_METRIC("recf.comp",
@@ -81,8 +70,6 @@ YamsSchedPol::coll_mct_metrics[YAMS_MCT_COUNT] = {
 };
 
 // :::::::::::::::::::::: Static plugin interface ::::::::::::::::::::::::::::
-uint16_t YamsSchedPol::mct_weights[YAMS_MCT_COUNT] = {0};
-uint16_t YamsSchedPol::mct_cfg_params[MetricsContribute::MCT_CPT_COUNT]= {0};
 
 void * YamsSchedPol::Create(PF_ObjectParams *) {
 	return new YamsSchedPol();
@@ -105,7 +92,6 @@ YamsSchedPol::YamsSchedPol():
 	cm(ConfigurationManager::GetInstance()),
 	ra(ResourceAccounter::GetInstance()),
 	mc(bu::MetricsCollector::GetInstance()) {
-	char conf_opts[YAMS_MCT_COUNT+MetricsContribute::MCT_CPT_COUNT][40];
 
 	// Get a logger
 	plugins::LoggerIF::Configuration conf(MODULE_NAMESPACE);
@@ -115,76 +101,16 @@ YamsSchedPol::YamsSchedPol():
 		logger->Info("yams: Built a new dynamic object[%p]", this);
 	else
 		fprintf(stderr, FI("yams: Built new dynamic object [%p]\n"), (void *)this);
-		fprintf(stderr, FI("yams: Built new dynamic object [%p]\n"), this);
 
-	// Load the weights of the metrics contributes
-	po::options_description opts_desc("Metrics contributions parameters");
-	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
-		snprintf(conf_opts[i], 40, MODULE_CONFIG".%s.weight", mct_str[i]);
-		opts_desc.add_options()
-			(conf_opts[i],
-			 po::value<uint16_t> (&mct_weights[i])->default_value(0),
-			"Single metrics contribute weight");
-		;
-	}
-
-	// Global MetricsContribute config parameters
-	for (int i = 0; i < MetricsContribute::MCT_CPT_COUNT; ++i) {
-		snprintf(conf_opts[YAMS_MCT_COUNT+i], 40, MCT_CONF_BASE_STR".%s",
-				MetricsContribute::ConfigParamsStr[i]);
-		opts_desc.add_options()
-			(conf_opts[YAMS_MCT_COUNT+i],
-			 po::value<uint16_t>
-			 (&mct_cfg_params[i])->default_value(
-				 MetricsContribute::ConfigParamsDefault[i]),
-			"MCT global parameters");
-		;
-	}
-
-	po::variables_map opts_vm;
-	cm.ParseConfigurationFile(opts_desc, opts_vm);
-
-	// Boundaries enforcement (0 <= MSL <= 100)
-	for (int i = 0; i < MetricsContribute::MCT_CPT_COUNT; ++i) {
-		logger->Debug("Resource [%s] min saturation level \t= %d [%]",
-				(strpbrk(MetricsContribute::ConfigParamsStr[i], "."))+1,
-				mct_cfg_params[i]);
-		if (mct_cfg_params[i] > 100) {
-			logger->Warn("Parameter %s out of range [0,100]: "
-					"found %d. Setting to %d",
-					MetricsContribute::ConfigParamsStr[i],
-					mct_cfg_params[i],
-					MetricsContribute::ConfigParamsDefault[i]);
-			mct_cfg_params[i] = MetricsContribute::ConfigParamsDefault[i];
-		}
-	}
-
-	// Normalize the weights
-	NormalizeMCTWeights();
-	for (int i = 0; i < YAMS_MCT_COUNT; ++i)
-		logger->Debug("Contribution [%.*s] weight \t= %.3f", 5,
-				mct_str[i], mct_weights_norm[i]);
-
-	// Init the vector of contributes
-	mcts[YAMS_VALUE] =
-		MetricsContribPtr_t(new MCTValue(mct_str[YAMS_VALUE], mct_cfg_params));
-	mcts[YAMS_RECONFIG] =
-		MetricsContribPtr_t(new	MCTReconfig(mct_str[YAMS_RECONFIG],
-					mct_cfg_params));
-	mcts[YAMS_CONGESTION] =
-		MetricsContribPtr_t(new MCTCongestion(mct_str[YAMS_CONGESTION],
-					mct_cfg_params));
-	mcts[YAMS_FAIRNESS] =
-		MetricsContribPtr_t(new MCTFairness(mct_str[YAMS_FAIRNESS],
-					mct_cfg_params));
-	// ...:: ADD_MCT ::...
+	// Instantiate the SchedContribManager
+	scm = new SchedContribManager(sc_types, YAMS_SC_COUNT);
 
 	// Resource view counter
 	vtok_count = 0;
 
 	// Register all the metrics to collect
 	mc.Register(coll_metrics, YAMS_METRICS_COUNT);
-	mc.Register(coll_mct_metrics, YAMS_MCT_COUNT);
+	mc.Register(coll_mct_metrics, YAMS_SC_COUNT);
 }
 
 YamsSchedPol::~YamsSchedPol() {
@@ -236,25 +162,9 @@ YamsSchedPol::ExitCode_t YamsSchedPol::Init() {
 			sv->ApplicationLowestPriority());
 
 	// Set the view information into the metrics contribute
-	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
-		if (!mcts[i])
-			continue;
-		mcts[i]->SetViewInfo(sv, vtok);
-	}
+	scm->SetViewInfo(sv, vtok);
 
 	return YAMS_SUCCESS;
-}
-
-void YamsSchedPol::NormalizeMCTWeights() {
-	uint16_t sum = 0;
-
-	// Get the highest weight
-	for (int j = 0; j < YAMS_MCT_COUNT; ++j)
-		sum += mct_weights[j];
-
-	// Normalize
-	for (int i = 0; i < YAMS_MCT_COUNT; ++i)
-		mct_weights_norm[i] = mct_weights[i] / (float) sum;
 }
 
 SchedulerPolicyIF::ExitCode_t
@@ -303,13 +213,16 @@ void YamsSchedPol::SchedulePrioQueue(AppPrio_t prio) {
 	std::vector<ResID_t>::iterator end_ids;
 	bool sched_incomplete;
 	uint8_t naps_count = 0;
+	SchedContribPtr_t sc_fair;
 
 	// Reset timer
 	YAMS_RESET_TIMING(yams_tmr);
 
 do_schedule:
 	// Init fairness contribute
-	mcts[YAMS_FAIRNESS]->Init(&prio);
+	sc_fair = scm->GetContrib(SchedContribManager::FAIRNESS);
+	assert(sc_fair != nullptr);
+	sc_fair->Init(&prio);
 
 	// For each cluster/node evaluate...
 	ids_it = cl_info.ids.begin();
@@ -485,36 +398,51 @@ void YamsSchedPol::EvalWorkingMode(SchedEntityPtr_t pschd) {
 }
 
 void YamsSchedPol::AggregateContributes(SchedEntityPtr_t pschd) {
-	MetricsContribute::ExitCode_t mct_result;
-	float ctrb = 0.0;
+	SchedContribManager::ExitCode_t scm_ret;
+	SchedContrib::ExitCode_t sc_ret;
 	char metrics_log[255];
 	uint8_t len = 0;
+	float sc_value;
 
-	for (int i = 0; i < YAMS_MCT_COUNT; ++i) {
-		// If weight == 0 or the metrics contribute instance is missing
-		// skip the contribute computation
-		if (mct_weights_norm[i] == 0 || !mcts[i])
-			continue;
-
+	for (int i = 0; i < YAMS_SC_COUNT; ++i) {
 		// Timer
 		Timer comp_tmr;
 
-		// Compute the single contribute
+		sc_value = 0.0;
 		EvalEntity_t const & eval_ent(*pschd.get());
 		YAMS_RESET_TIMING(comp_tmr);
-		mct_result = mcts[i]->Compute(eval_ent, ctrb);
-		if (mct_result == MetricsContribute::MCT_RSRC_NO_PE) {
-			logger->Debug("Aggregate: no more processing elements in cluster %d",
-					pschd->clust_id);
-			cl_info.full.set(pschd->clust_id);
-			return;
+
+		// Compute the single contribution
+		scm_ret = scm->GetIndex(sc_types[i], eval_ent, sc_value, sc_ret);
+		if (scm_ret != SchedContribManager::OK) {
+
+			logger->Error("Aggregate: [SchedContribManager error %d]", scm_ret);
+			if (scm_ret != SchedContribManager::SC_ERROR) {
+				YAMS_RESET_TIMING(comp_tmr);
+				continue;
+			}
+
+			// SchedContrib specific error handling
+			switch (sc_ret) {
+			case SchedContrib::MCT_RSRC_NO_PE:
+				logger->Debug("Aggregate: No available PEs in cluster/node %d",
+						pschd->clust_id);
+				cl_info.full.set(pschd->clust_id);
+				return;
+			default:
+				logger->Warn("Aggregate: Unable to schedule into cluster/node %d"
+						" [SchedContrib error %d]", pschd->clust_id);
+				YAMS_GET_TIMING(coll_mct_metrics, i, comp_tmr);
+				continue;
+			}
 		}
 		YAMS_GET_TIMING(coll_mct_metrics, i, comp_tmr);
 
-		// Cumulate the contribute
-		len += sprintf(metrics_log+len,  "%c: %5.4f, ", mct_str[i][0],
-				mct_weights_norm[i] * ctrb);
-		pschd->metrics += mct_weights_norm[i] * ctrb;
+		// Cumulate the contribution
+		pschd->metrics += sc_value;
+		len += sprintf(metrics_log+len, "%c: %5.4f, ",
+				scm->GetString(sc_types[i])[0],
+				sc_value);
 	}
 
 	metrics_log[len-2] = '\0';
