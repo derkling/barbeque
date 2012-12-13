@@ -28,7 +28,7 @@ uint16_t MCTCongestion::penalties_default[MCT_RSRC_COUNT] = {
 };
 
 MCTCongestion::MCTCongestion(const char * _name, uint16_t const cfg_params[]):
-	MetricsContribute(_name, cfg_params) {
+	SchedContrib(_name, cfg_params) {
 	char conf_str[50];
 
 	// Configuration parameters
@@ -72,14 +72,14 @@ MCTCongestion::MCTCongestion(const char * _name, uint16_t const cfg_params[]):
 	}
 }
 
-MetricsContribute::ExitCode_t
+SchedContrib::ExitCode_t
 MCTCongestion::Init(void * params) {
 	(void) params;
 
 	return MCT_SUCCESS;
 }
 
-MetricsContribute::ExitCode_t
+SchedContrib::ExitCode_t
 MCTCongestion::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;

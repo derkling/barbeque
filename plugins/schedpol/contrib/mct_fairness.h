@@ -18,7 +18,7 @@
 #ifndef BBQUE_MCT_FAIRNESS_
 #define BBQUE_MCT_FAIRNESS_
 
-#include "metrics_contribute.h"
+#include "sched_contrib.h"
 
 #define DEFAULT_CONG_EXPBASE 	2
 
@@ -27,7 +27,7 @@ using bbque::app::AppPrio_t;
 namespace bbque { namespace plugins {
 
 
-class MCTFairness: public MetricsContribute {
+class MCTFairness: public SchedContrib {
 
 public:
 

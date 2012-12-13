@@ -17,7 +17,7 @@
 
 #include <cmath>
 
-#include "metrics_contribute.h"
+#include "sched_contrib.h"
 #include "bbque/modules_factory.h"
 
 #define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE".mct"
@@ -28,28 +28,28 @@ namespace po = boost::program_options;
 namespace bbque { namespace plugins {
 
 
-char const * MetricsContribute::ResourceGenPaths[MCT_RSRC_COUNT] = {
+char const * SchedContrib::ResourceGenPaths[MCT_RSRC_COUNT] = {
 	RSRC_CLUST_PE,
 	RSRC_CLUST_MEM
 };
 
-char const * MetricsContribute::ResourceNames[MCT_RSRC_COUNT] = {
+char const * SchedContrib::ResourceNames[MCT_RSRC_COUNT] = {
 	"pe",
 	"mem"
 };
 
-char const * MetricsContribute::ConfigParamsStr[MCT_CPT_COUNT] = {
+char const * SchedContrib::ConfigParamsStr[MCT_CPT_COUNT] = {
 	"msl.pe",
 	"msl.mem"
 };
 
-uint16_t const MetricsContribute::ConfigParamsDefault[MCT_CPT_COUNT] = {
+uint16_t const SchedContrib::ConfigParamsDefault[MCT_CPT_COUNT] = {
 	90,
 	70,
 };
 
 
-MetricsContribute::MetricsContribute(const char * _name,
+SchedContrib::SchedContrib(const char * _name,
 		uint16_t const params[]):
 	cm(ConfigurationManager::GetInstance()) {
 
@@ -68,8 +68,8 @@ MetricsContribute::MetricsContribute(const char * _name,
 	logger = ModulesFactory::GetLoggerModule(std::cref(conf));
 }
 
-MetricsContribute::ExitCode_t
-MetricsContribute::Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
+SchedContrib::ExitCode_t
+SchedContrib::Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 
 	// A valid token for the resource state view is mandatory
@@ -86,7 +86,7 @@ MetricsContribute::Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 	return MCT_SUCCESS;
 }
 
-void MetricsContribute::GetResourceThresholds(std::string const & rsrc_path,
+void SchedContrib::GetResourceThresholds(std::string const & rsrc_path,
 		uint64_t rsrc_amount,
 		SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		ResourceThresholds_t & rl) {
@@ -116,7 +116,7 @@ void MetricsContribute::GetResourceThresholds(std::string const & rsrc_path,
 			rl.usage, rl.saturate, rl.sat_lack, rl.free, rsrc_amount);
 }
 
-float MetricsContribute::CLEIndex(uint64_t c_thresh,
+float SchedContrib::CLEIndex(uint64_t c_thresh,
 		uint64_t l_thresh,
 		float rsrc_amount,
 		CLEParams_t const & params) {
@@ -137,7 +137,7 @@ float MetricsContribute::CLEIndex(uint64_t c_thresh,
 	return FuncExponential(rsrc_amount, params.exp);
 }
 
-float MetricsContribute::FuncLinear(float x, LParams_t const & p) {
+float SchedContrib::FuncLinear(float x, LParams_t const & p) {
 	DB(
 		fprintf(stderr, FD("LIN ==== 1 - %.6f * (%.2f - %.2f)\n"),
 			p.scale, x, p.xoffset);
@@ -145,7 +145,7 @@ float MetricsContribute::FuncLinear(float x, LParams_t const & p) {
 	return 1 - p.scale * (x - p.xoffset);
 }
 
-float MetricsContribute::FuncExponential(float x, EParams_t const & p) {
+float SchedContrib::FuncExponential(float x, EParams_t const & p) {
 	DB(
 		fprintf(stderr, FD("EXP ==== %.4f * (%.4f ^ ((%.4f - %.4f) / %.4f) - 1)\n"),
 			p.yscale, p.base, x, p.xoffset, p.xscale);

@@ -23,7 +23,7 @@ namespace bbque { namespace plugins {
 
 
 MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
-	MetricsContribute(_name, cfg_params) {
+	SchedContrib(_name, cfg_params) {
 	char conf_str[40];
 
 	// Configuration parameters
@@ -42,14 +42,13 @@ MCTReconfig::MCTReconfig(const char * _name, uint16_t cfg_params[]):
 	logger->Debug("Application migration cost factor \t= %d", migfact);
 }
 
-MetricsContribute::ExitCode_t
-MCTReconfig::Init(void * params) {
+SchedContrib::ExitCode_t MCTReconfig::Init(void * params) {
 	(void) params;
 
 	return MCT_SUCCESS;
 }
 
-MetricsContribute::ExitCode_t
+SchedContrib::ExitCode_t
 MCTReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 	UsagesMap_t::const_iterator usage_it;

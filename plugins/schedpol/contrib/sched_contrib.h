@@ -50,7 +50,7 @@ namespace bbque { namespace plugins {
  * reconfiguration costs, migration overheads, power consumption, thermal
  * heatings, and so on...
  */
-class MetricsContribute {
+class SchedContrib {
 
 public:
 
@@ -191,7 +191,7 @@ public:
 	 * @param name A name identifying the specific contribute
 	 * @param cfg_params Global configuration parameters
 	 */
-	MetricsContribute(const char * name, uint16_t const cfg_params[]);
+	SchedContrib(const char * name, uint16_t const cfg_params[]);
 
 	/**
 	 * @brief Set information for referencing the current state view

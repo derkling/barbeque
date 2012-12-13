@@ -18,7 +18,7 @@
 #ifndef BBQUE_MCT_RECONFIG_
 #define BBQUE_MCT_RECONFIG_
 
-#include "metrics_contribute.h"
+#include "sched_contrib.h"
 
 
 // Proportional cost factor between MIGRATION and RECONFIGURATION
@@ -28,7 +28,7 @@
 namespace bbque { namespace plugins {
 
 
-class MCTReconfig: public MetricsContribute {
+class MCTReconfig: public SchedContrib {
 
 public:
 

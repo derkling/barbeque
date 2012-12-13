@@ -18,13 +18,13 @@
 #ifndef BBQUE_MCT_VALUE_
 #define BBQUE_MCT_VALUE_
 
-#include "metrics_contribute.h"
+#include "sched_contrib.h"
 
 
 namespace bbque { namespace plugins {
 
 
-class MCTValue: public MetricsContribute {
+class MCTValue: public SchedContrib {
 
 public:
 

@@ -18,14 +18,14 @@
 #ifndef BBQUE_MCT_CONGESTION_
 #define BBQUE_MCT_CONGESTION_
 
-#include "metrics_contribute.h"
+#include "sched_contrib.h"
 
 #define DEFAULT_CONG_EXPBASE 	2
 
 namespace bbque { namespace plugins {
 
 
-class MCTCongestion: public MetricsContribute {
+class MCTCongestion: public SchedContrib {
 
 public:
 

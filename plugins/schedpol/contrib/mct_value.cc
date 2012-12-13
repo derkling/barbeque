@@ -25,17 +25,17 @@ namespace bbque { namespace plugins {
 
 
 MCTValue::MCTValue(const char * _name, uint16_t const cfg_params[]):
-	MetricsContribute(_name, cfg_params) {
+	SchedContrib(_name, cfg_params) {
 }
 
-MetricsContribute::ExitCode_t
+SchedContrib::ExitCode_t
 MCTValue::Init(void * params) {
 	(void) params;
 
 	return MCT_SUCCESS;
 }
 
-MetricsContribute::ExitCode_t
+SchedContrib::ExitCode_t
 MCTValue::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		float & ctrib) {
 	std::string rsrc_tmp_path;
