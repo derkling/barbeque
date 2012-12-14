@@ -63,7 +63,7 @@ public:
 	 */
 	static int32_t Destroy(void *);
 
-	~FifoRPC();
+	virtual ~FifoRPC();
 
 //----- RPCChannelIF module interface
 

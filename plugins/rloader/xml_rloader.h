@@ -103,6 +103,11 @@ public:
 	static int32_t Destroy(void *);
 
 	/**
+	 * Default destructor
+	 */
+	virtual ~XMLRecipeLoader();
+
+	/**
 	 * @see RecipeLoaderIF
 	 */
 	ExitCode_t LoadRecipe(std::string const & recipe_name, RecipePtr_t recipe);

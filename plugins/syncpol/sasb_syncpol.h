@@ -61,7 +61,7 @@ public:
 	 */
 	static int32_t Destroy(void *);
 
-	~SasbSyncPol();
+	virtual ~SasbSyncPol();
 
 //----- Scheduler Policy module interface
 

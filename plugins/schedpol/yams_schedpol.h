@@ -89,7 +89,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	~YamsSchedPol();
+	virtual ~YamsSchedPol();
 
 	/**
 	 * @see SchedulerPolicyIF

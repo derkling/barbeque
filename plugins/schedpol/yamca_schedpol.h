@@ -71,7 +71,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	~YamcaSchedPol();
+	virtual ~YamcaSchedPol();
 
 //----- Scheduler Policy module interface
 

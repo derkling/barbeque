@@ -68,6 +68,8 @@ XMLRecipeLoader::XMLRecipeLoader() {
 	logger->Debug("Built XML RecipeLoader object @%p", (void*)this);
 }
 
+XMLRecipeLoader::~XMLRecipeLoader() {
+}
 
 bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 

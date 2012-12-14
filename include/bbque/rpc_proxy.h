@@ -56,7 +56,7 @@ public:
 	/**
 	 * @brief Destructor
 	 */
-	~RPCProxy();
+	virtual ~RPCProxy();
 
 	/**
 	 * @brief Initialize the communication channel.

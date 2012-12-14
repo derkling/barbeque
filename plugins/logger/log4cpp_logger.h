@@ -58,7 +58,7 @@ public:
 	/**
 	 *
 	 */
-	~Log4CppLogger();
+	virtual ~Log4CppLogger();
 
 //----- Logger module interface
 
