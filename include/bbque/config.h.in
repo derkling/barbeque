@@ -29,7 +29,8 @@
 
 #include <syslog.h>
 #define  __STDC_FORMAT_MACROS
-#include <inttypes.h>
+#include <cinttypes>
+#include <unistd.h>
 
 /** Use Boost Filesyste library version 3 */
 #define BOOST_FILESYSTEM_VERSION 3

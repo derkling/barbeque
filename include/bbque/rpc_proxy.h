@@ -23,6 +23,7 @@
 
 #include "bbque/utils/metrics_collector.h"
 
+#include "bbque/cpp11/condition_variable.h"
 #include "bbque/cpp11/mutex.h"
 #include "bbque/cpp11/thread.h"
 

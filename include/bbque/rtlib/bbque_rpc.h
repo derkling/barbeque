@@ -23,6 +23,7 @@
 #include "bbque/rtlib/rpc_messages.h"
 #include "bbque/utils/utility.h"
 #include "bbque/utils/timer.h"
+#include "bbque/cpp11/condition_variable.h"
 #include "bbque/cpp11/mutex.h"
 #include "bbque/cpp11/thread.h"
 
