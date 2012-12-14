@@ -131,7 +131,8 @@ RTLIB_ExitCode_t ApplicationProxy::StopExecutionSync(AppPtr_t papp) {
 	pconCtx_t pcon;
 	rpc_msg_BBQ_STOP_t stop_msg = {
 		// FIXME The token should be defined as the thread id
-		{RPC_BBQ_STOP_EXECUTION, 1234, papp->Pid(), papp->ExcId()},
+		{RPC_BBQ_STOP_EXECUTION, 1234,
+			static_cast<int>(papp->Pid()), papp->ExcId()},
 		{0, 100} // FIXME get a timeout parameter
 	};
 
@@ -224,7 +225,8 @@ ApplicationProxy::SyncP_PreChangeSend(pcmdSn_t pcs) {
 	pconCtx_t pcon;
 	ssize_t result;
 	rpc_msg_BBQ_SYNCP_PRECHANGE_t syncp_prechange_msg = {
-		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid, papp->Pid(), papp->ExcId()},
+		{RPC_BBQ_SYNCP_PRECHANGE, pcs->pid,
+			static_cast<int>(papp->Pid()), papp->ExcId()},
 		(uint8_t)papp->SyncState(),
 		// If the application is BLOCKING we don't have a NextAWM but we also
 		// don't care at RTLib side about the value of this parameter
@@ -419,7 +421,8 @@ ApplicationProxy::SyncP_SyncChangeSend(pcmdSn_t pcs) {
 	pconCtx_t pcon;
 	ssize_t result;
 	rpc_msg_BBQ_SYNCP_SYNCCHANGE_t syncp_syncchange_msg = {
-		{RPC_BBQ_SYNCP_SYNCCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
+		{RPC_BBQ_SYNCP_SYNCCHANGE, pcs->pid,
+			static_cast<int>(papp->Pid()), papp->ExcId()}
 	};
 
 	// Send the stop command
@@ -606,7 +609,8 @@ ApplicationProxy::SyncP_DoChangeSend(pcmdSn_t pcs) {
 	pconCtx_t pcon;
 	ssize_t result;
 	rpc_msg_BBQ_SYNCP_DOCHANGE_t syncp_syncchange_msg = {
-		{RPC_BBQ_SYNCP_DOCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
+		{RPC_BBQ_SYNCP_DOCHANGE, pcs->pid,
+			static_cast<int>(papp->Pid()), papp->ExcId()}
 	};
 
 	// Send the stop command
@@ -682,7 +686,8 @@ ApplicationProxy::SyncP_PostChangeSend(pcmdSn_t pcs) {
 	pconCtx_t pcon;
 	ssize_t result;
 	rpc_msg_BBQ_SYNCP_POSTCHANGE_t syncp_syncchange_msg = {
-		{RPC_BBQ_SYNCP_POSTCHANGE, pcs->pid, papp->Pid(), papp->ExcId()}
+		{RPC_BBQ_SYNCP_POSTCHANGE, pcs->pid,
+			static_cast<int>(papp->Pid()), papp->ExcId()}
 	};
 
 	// Send the stop command
