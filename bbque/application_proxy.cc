@@ -389,17 +389,15 @@ ApplicationProxy::SyncP_PreChange(AppPtr_t papp, pPreChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_PreChange_GetResult(pPreChangeRsp_t presp) {
-	RTLIB_ExitCode_t result;
-	bool ready;
+	RTLIB_ExitCode_t result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
+	FutureStatus_t ftrStatus;
 
 	assert(presp);
 
 	// Wait for the promise being returned
-	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(
+	ftrStatus = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(
 				BBQUE_DEFAULT_SYNCP_TIMEOUT));
-	if (ready != true)
-		result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
-	else
+	if (!FutureTimedout(ftrStatus))
 		result = presp->pcs->resp_ftr.get();
 
 	// Releasing the command session
@@ -577,17 +575,15 @@ ApplicationProxy::SyncP_SyncChange(AppPtr_t papp, pSyncChangeRsp_t presp) {
 
 RTLIB_ExitCode_t
 ApplicationProxy::SyncP_SyncChange_GetResult(pSyncChangeRsp_t presp) {
-	RTLIB_ExitCode_t result;
-	bool ready;
+	RTLIB_ExitCode_t result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
+	FutureStatus_t ftrStatus;
 
 	assert(presp);
 
 	// Wait for the promise being returned
-	ready = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(
+	ftrStatus = presp->pcs->resp_ftr.wait_for(std::chrono::milliseconds(
 				BBQUE_DEFAULT_SYNCP_TIMEOUT));
-	if (ready != true)
-		result = RTLIB_BBQUE_CHANNEL_TIMEOUT;
-	else
+	if (!FutureTimedout(ftrStatus))
 		result = presp->pcs->resp_ftr.get();
 
 	// Releasing the command session
