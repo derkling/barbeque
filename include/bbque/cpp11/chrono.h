@@ -31,7 +31,7 @@
 #include "bbque/cpp11/gnu/chrono.h"
 #endif // CONFIG_TARGET_SUPPORT_CPP11
 
-#if GCC_TAG >= 47
+#if GCC_TAG >= 47 || defined(ANDROID)
 # define steady_clock steady_clock
 #else
 # define steady_clock monotonic_clock

@@ -31,4 +31,12 @@
 #include "bbque/cpp11/gnu/future.h"
 #endif // CONFIG_TARGET_SUPPORT_CPP11
 
+#if GCC_TAG >= 47
+# define FutureStatus_t std::future_status
+# define FutureTimedout(S) (S == std::future_status::timeout)
+#else
+# define FutureStatus_t bool
+# define FutureTimedout(S) (S != true)
+#endif
+
 #endif /* end of include guard: BBQUE_FUTURE_H_ */
