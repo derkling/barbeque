@@ -104,7 +104,14 @@ if (NOT CMAKE_BUILD_TYPE)
 endif (NOT CMAKE_BUILD_TYPE)
 
 # Add flags common to all builds
-set (CMAKE_CXX_FLAGS "-Wall -std=c++11")
+set (BOSP_CPP11 "c++0x")
+if (GCC_TAG GREATER "46")
+	set (BOSP_CPP11 "c++11")
+endif (GCC_TAG GREATER "46")
+set (CMAKE_CXX_FLAGS "-Wall -std=${BOSP_CPP11}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGCC_VERSION=${GCC_VERSION}")
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGCC_TAG=${GCC_TAG}")
+
 
 # Add "Generic-Linux" specific flags
 if (CONFIG_TARGET_LINUX)
