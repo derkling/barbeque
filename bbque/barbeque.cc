@@ -126,12 +126,14 @@ int main(int argc, char *argv[]) {
 		syslog(LOG_INFO, "Starting BBQ daemon (ver. %s)...", g_git_version);
 		syslog(LOG_INFO, "BarbequeRTRM build time: " __DATE__  " " __TIME__);
 		syslog(LOG_INFO, "                 flavor: " BBQUE_BUILD_FLAVOR);
+		syslog(LOG_INFO, "               compiler: gcc v" STR(GCC_VERSION));
 		DaemonizeBBQ(cm);
 	} else {
 		// Welcome screen
 		fprintf(stdout, FI("Starting BBQ (ver. %s)...\n"), g_git_version);
 		fprintf(stdout, FI("BarbequeRTRM build time: " __DATE__  " " __TIME__ "\n"));
 		fprintf(stdout, FI("                 flavor: " BBQUE_BUILD_FLAVOR "\n"));
+		fprintf(stdout, FI("               compiler: gcc v" STR(GCC_VERSION) "\n"));
 	}
 
 	// Initialization
