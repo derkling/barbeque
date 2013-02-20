@@ -287,7 +287,7 @@ bool RunTimeManager::getNextOp(OperatingPoint& op,
 		opChanged = opManager.getNextOP(op, opFilters);
 		//TODO make this decision parametric
 		if (!opChanged && maxNap > 20)
-			bbqexc->SetGoalGap(100*maxNap);
+			bbqexc->SetGoalGap(maxNap);
 	}
 	else if (maxRelativeError >= switchThreshold)
 		opChanged = opManager.getNextOP(op, opFilters);
