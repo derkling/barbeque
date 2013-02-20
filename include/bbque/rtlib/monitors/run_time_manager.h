@@ -107,11 +107,26 @@ public:
 	 * It adjust the previous constraints in order to achieve the current
 	 * goals. It also creates new ones if necessary.
 	 *
+	 * The switchThreshold is only used if the goal is achieved. It allows
+	 * the develeoper to specify from which point the AS-RTM can be
+	 * confident about the application reaching its goals. If this threshold
+	 * is passed, the AS-RTM could decide to change OP to get closer to the
+	 * goal "from above". This feature allows the AS-RTM to trade-off
+	 * between application metrics depending on the ordering of the OPs (the
+	 * OP manager priorities), e.g. lower the performance in order to spare
+	 * energy or increase accuracy, while still satisfying the goal.
+	 * This behaviour must be enabled by the developer by explicitly setting
+	 * the switchThreshold value. The default value (100.0) is exaggerately
+	 * high on purpose in order to disable this feature by default. Since it
+	 * is an absolute relative error, a switchThreshold equal to 1.0
+	 * corresponds to adjusting the constraints whenever the monitored
+	 * application metric is double its required goal.
+	 *
 	 * @param currentOp reference to the current Operating Point
 	 * @param goalsInfo reference to the the current goal-achievement info
 	 * @param opFilters reference to the list of constraints to adjust
-	 * @param switchThreshold threshold after which adjust a constraint of
-	 * an achieved goal
+	 * @param switchThreshold threshold corresponding to the max absolute
+	 * relative error after which adjusting a constraint of an achieved goal
 	 */
 	void adjustConstraints(const OperatingPoint &currentOp,
 			       const GoalInfoList &goalsInfo,
@@ -139,11 +154,26 @@ public:
 	 * Gets the next OP that satisfies the contraints given by
 	 * opFilters. Returns true if an OP has been found, false otherwise
 	 *
+	 * The switchThreshold is only used if the goal is achieved. It allows
+	 * the develeoper to specify from which point the AS-RTM can be
+	 * confident about the application reaching its goals. If this threshold
+	 * is passed, the AS-RTM could decide to change OP to get closer to the
+	 * goal "from above". This feature allows the AS-RTM to trade-off
+	 * between application metrics depending on the ordering of the OPs (the
+	 * OP manager priorities), e.g. lower the performance in order to spare
+	 * energy or increase accuracy, while still satisfying the goal.
+	 * This behaviour must be enabled by the developer by explicitly setting
+	 * the switchThreshold value. The default value (100.0) is exaggerately
+	 * high on purpose in order to disable this feature by default. Since it
+	 * is an absolute relative error, a switchThreshold equal to 1.0
+	 * corresponds to adjusting the constraints whenever the monitored
+	 * application metric is double its required goal.
+	 *
 	 * @param op output parameter in which to save the OP
 	 * @param opFilters reference to the list of constraints to satisfy.
 	 * it will be adjusted if needed (a goal is not achieved)
-	 * @param switchThreshold threshold after which adjust a constraint of
-	 * an achieved goal
+	 * @param switchThreshold threshold corresponding to the max absolute
+	 * relative error after which adjusting a constraint of an achieved goal
 	 */
 	bool getNextOp(OperatingPoint& op, OPFilterList &opFilters,
 		       float switchThreshold = 100.0);
@@ -154,12 +184,27 @@ public:
 	 * Gets the next OP that satisfies the contraints given by
 	 * opFilters. Returns true if an OP has been found, false otherwise
 	 *
+	 * The switchThreshold is only used if the goal is achieved. It allows
+	 * the develeoper to specify from which point the AS-RTM can be
+	 * confident about the application reaching its goals. If this threshold
+	 * is passed, the AS-RTM could decide to change OP to get closer to the
+	 * goal "from above". This feature allows the AS-RTM to trade-off
+	 * between application metrics depending on the ordering of the OPs (the
+	 * OP manager priorities), e.g. lower the performance in order to spare
+	 * energy or increase accuracy, while still satisfying the goal.
+	 * This behaviour must be enabled by the developer by explicitly setting
+	 * the switchThreshold value. The default value (100.0) is exaggerately
+	 * high on purpose in order to disable this feature by default. Since it
+	 * is an absolute relative error, a switchThreshold equal to 1.0
+	 * corresponds to adjusting the constraints whenever the monitored
+	 * application metric is double its required goal.
+	 * 
 	 * @param op output parameter in which to save the OP
 	 * @param opFilters reference to the list of constraints to satisfy.
 	 * it will be adjusted if needed (a goal is not achieved)
 	 * @param goalsInfo reference to the the current goal-achievement info
-	 * @param switchThreshold threshold after which adjust a constraint of
-	 * an achieved goal
+	 * @param switchThreshold threshold corresponding to the max absolute
+	 * relative error after which adjusting a constraint of an achieved goal
 	 */
 	bool getNextOp(OperatingPoint& op, OPFilterList &opFilters,
 		       const GoalInfoList &goalsInfo,
