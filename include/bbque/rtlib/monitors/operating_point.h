@@ -50,10 +50,31 @@ public:
 
 	}
 
+	OperatingPoint(const OperatingPoint &op){
+		*this = op;
+	}
+
 	OperatingPoint(std::map<std::string, double> parameters,
 		       std::map<std::string, double>  metrics) :
 			       parameters(parameters),
 			       metrics(metrics) {
+	}
+
+	OperatingPoint & operator=(const OperatingPoint &rhs){
+		if (this != &rhs) {
+			this->parameters = rhs.parameters;
+			this->metrics = rhs.metrics;
+		}
+		return *this;
+	}
+
+	bool operator==(const OperatingPoint &other) const {
+		return ( (this->parameters == other.parameters) &&
+		         (this->metrics == other.metrics) );
+	}
+
+	bool operator!=(const OperatingPoint &other) const {
+		return !(*this == other);
 	}
 };
 
