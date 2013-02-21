@@ -94,7 +94,8 @@ void Recipe::AddConstraint(std::string const & rsrc_path,
 	// Insert a new constraint
 	constraints.insert(std::pair<std::string, ConstrPtr_t>(rsrc_path,
 							ConstrPtr_t(new ResourceConstraint(lb, ub))));
-	logger->Debug("Constraint (new): %s L=%"PRIu64" U=%"PRIu64"", rsrc_path.c_str(),
+	logger->Debug("Constraint (new): %s L=%" PRIu64 " U=%" PRIu64,
+					rsrc_path.c_str(),
 					constraints[rsrc_path]->lower,
 					constraints[rsrc_path]->upper);
 }

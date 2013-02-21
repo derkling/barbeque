@@ -83,7 +83,7 @@ WorkingMode::ExitCode_t WorkingMode::AddResourceUsage(
 	resources.from_recp.insert(
 			std::pair<std::string, UsagePtr_t>(rsrc_path, pusage));
 
-	logger->Debug("AddResourceUsage: added {%s}\t[usage: %"PRIu64"]",
+	logger->Debug("AddResourceUsage: added {%s}\t[usage: %" PRIu64 "]",
 			rsrc_path.c_str(), required_amount);
 	return WM_SUCCESS;
 }
@@ -113,8 +113,8 @@ WorkingMode::ExitCode_t WorkingMode::Validate() {
 		// amount available cannot satisfy the amount required
 		total_amount = ra.Total(rcp_path_tpl);
 		if (total_amount < rcp_pusage->GetAmount()) {
-			logger->Warn("Validation: {%s} usage required (%"PRIu64") "
-					"exceeds total (%"PRIu64")",
+			logger->Warn("Validation: {%s} usage required (%" PRIu64 ") "
+					"exceeds total (%" PRIu64 ")",
 					rcp_path_tpl.c_str(), rcp_pusage->GetAmount(),
 					total_amount);
 			hidden = true;
@@ -248,7 +248,7 @@ WorkingMode::ExitCode_t WorkingMode::BindResource(
 			UsagePtr_t & pusage(usage_it->second);
 			std::string const & rcp_path(usage_it->first);
 
-			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %"PRIu64" bindings: %d]",
+			logger->Debug("Binding [AWM%d]: {%s}\t[amount: %" PRIu64 " bindings: %d]",
 					id, rcp_path.c_str(), pusage->GetAmount(),
 					pusage->GetBindingList().size());
 		}

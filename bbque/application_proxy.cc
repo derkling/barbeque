@@ -923,7 +923,7 @@ void ApplicationProxy::RpcACK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
-	logger->Debug("APPs PRX: Send RPC channel ACK "APP_STRID, AppStrId(pcon));
+	logger->Debug("APPs PRX: Send RPC channel ACK " APP_STRID, AppStrId(pcon));
 	::memcpy(&resp.hdr, pmsg_hdr, RPC_PKT_SIZE(header));
 	resp.hdr.typ = type;
 	resp.result = RTLIB_OK;
@@ -936,7 +936,7 @@ void ApplicationProxy::RpcNAK(pconCtx_t pcon, rpc_msg_header_t *pmsg_hdr,
 	rpc_msg_resp_t resp;
 
 	// Sending response to application
-	logger->Debug("APPs PRX: Send RPC channel NAK "APP_STRID", error [%d]",
+	logger->Debug("APPs PRX: Send RPC channel NAK " APP_STRID ", error [%d]",
 			AppStrId(pcon), error);
 	::memcpy(&resp.hdr, pmsg_hdr, RPC_PKT_SIZE(header));
 	resp.hdr.typ = type;
@@ -962,14 +962,14 @@ void ApplicationProxy::RpcExcRegister(prqsSn_t prqs) {
 		return;
 
 	// Registering a new Execution Context
-	logger->Info("APPs PRX: Registering EXC "EXC_STRID", name [%s]",
+	logger->Info("APPs PRX: Registering EXC " EXC_STRID ", name [%s]",
 			ExcStrId(pcon, pmsg_hdr->exc_id), pmsg_pyl->exc_name);
 
 	// Register the EXC with the ApplicationManager
 	papp  = am.CreateEXC(pmsg_pyl->exc_name, pcon->app_pid,
 			pmsg_hdr->exc_id, pmsg_pyl->recipe);
 	if (!papp) {
-		logger->Error("APPs PRX: EXC "EXC_STRID", name [%s] "
+		logger->Error("APPs PRX: EXC " EXC_STRID ", name [%s] "
 			"registration FAILED "
 			"(Error: missing recipe or recipe load failure)",
 			ExcStrId(pcon, pmsg_hdr->exc_id), pmsg_pyl->exc_name);

@@ -20,7 +20,7 @@
 #include "sched_contrib.h"
 #include "bbque/modules_factory.h"
 
-#define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE".mct"
+#define MODULE_NAMESPACE SCHEDULER_POLICY_NAMESPACE ".mct"
 
 namespace bu = bbque::utils;
 namespace po = boost::program_options;

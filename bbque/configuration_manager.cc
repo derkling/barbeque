@@ -43,10 +43,10 @@ ConfigurationManager::ConfigurationManager() :
 		("help,h", "print this help message")
 		("daemon,d", "run as daemon in background")
 		("config,c", po::value<std::string>(&conf_file_path)->
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_CONF"/"BBQUE_CONF_FILE),
+			default_value(BBQUE_PATH_PREFIX "/" BBQUE_PATH_CONF "/" BBQUE_CONF_FILE),
 			"configuration file path")
 		("bbque.plugins,p", po::value<std::string>(&plugins_dir)->
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_PLUGINS),
+			default_value(BBQUE_PATH_PREFIX "/" BBQUE_PATH_PLUGINS),
 			"plugins folder")
 		("bbque.test,t", "Run TESTs plugins")
 		("version,v", "print program version")
@@ -62,13 +62,13 @@ ConfigurationManager::ConfigurationManager() :
 			default_value(BBQUE_DAEMON_UID),
 			"user ID to run the daemon under")
 		("bbque.lockfile", po::value<std::string>(&daemon_lockfile)->
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_LOCKFILE),
+			default_value(BBQUE_PATH_PREFIX "/" BBQUE_DAEMON_LOCKFILE),
 			"daemon lock-file")
 		("bbque.pidfile", po::value<std::string>(&daemon_pidfile)->
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_PIDFILE),
+			default_value(BBQUE_PATH_PREFIX "/" BBQUE_DAEMON_PIDFILE),
 			"group ID to run the daemon under")
 		("bbque.rundir", po::value<std::string>(&daemon_rundir)->
-			default_value(BBQUE_PATH_PREFIX"/"BBQUE_DAEMON_RUNDIR),
+			default_value(BBQUE_PATH_PREFIX "/" BBQUE_DAEMON_RUNDIR),
 			"daemon run directory")
 		;
 

@@ -31,7 +31,7 @@ static const char *prioLevels[] = {
 
 /** Metrics (class SAMPLE) declaration */
 #define PM_SAMPLE_METRIC(NAME, DESC)\
- {PROFILE_MANAGER_NAMESPACE"."NAME, DESC, MetricsCollector::SAMPLE, \
+ {PROFILE_MANAGER_NAMESPACE "." NAME, DESC, MetricsCollector::SAMPLE, \
 	 BBQUE_APP_PRIO_LEVELS, prioLevels, 0}
 /** Acquire a new (generic) sample */
 #define PM_ADD_SAMPLE(METRICS, INDEX, SAMPLE, PRIO) \

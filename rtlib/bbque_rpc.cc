@@ -573,7 +573,7 @@ static inline void _setMetricPrefix(const char *exc_name, uint8_t awm_id) {
 }
 
 #define DUMP_MOST_METRIC(CLASS, NAME, VALUE, FMT)	\
-	fprintf(stderr, "@%s%s:%s:%s="FMT"@\n",		\
+	fprintf(stderr, "@%s%s:%s:%s=" FMT "@\n",	\
 			envMetricsTag,			\
 			_metricPrefix,			\
 			CLASS,				\
@@ -726,8 +726,8 @@ void BbqueRPC::DumpMemoryReport(pregExCtx_t prec) {
 
 	while (fgets(buff, 256, memfd)) {
 		DB(fprintf(stderr, FD("Memory Read [%s]\n"), buff));
-		sscanf(buff, "%32s %"PRIu64, metric, &value);
-		DUMP_MOST_METRIC("memory", metric, value, "%"PRIu64);
+		sscanf(buff, "%32s %" PRIu64, metric, &value);
+		DUMP_MOST_METRIC("memory", metric, value, "%" PRIu64);
 	}
 
 }

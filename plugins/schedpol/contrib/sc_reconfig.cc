@@ -83,8 +83,9 @@ SCReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 		// Query resource availability
 		rsrc_avl = sv->ResourceAvailable(rsrc_bind, vtok, evl_ent.papp);
 		if (rsrc_avl < pusage->GetAmount()) {
-			logger->Debug("%s: {%s} RQ:%"PRIu64"| AVL:%"PRIu64"", evl_ent.StrId(),
-					rsrc_path.c_str(), pusage->GetAmount(), rsrc_avl);
+			logger->Debug("%s: {%s} RQ:%" PRIu64 "| AVL:%" PRIu64,
+					evl_ent.StrId(), rsrc_path.c_str(),
+					pusage->GetAmount(), rsrc_avl);
 			// Resource allocation is completely discouraged
 			ctrib = 0.0;
 			if ((rsrc_avl == 0) &&
@@ -96,8 +97,9 @@ SCReconfig::_Compute(SchedulerPolicyIF::EvalEntity_t const & evl_ent,
 
 		// Total amount of resource
 		rsrc_tot = sv->ResourceTotal(pusage->GetBindingList());
-		logger->Debug("%s: {%s} RQ:%"PRIu64"| AVL:%"PRIu64"| TOT:%"PRIu64"", evl_ent.StrId(),
-				rsrc_path.c_str(), pusage->GetAmount(), rsrc_avl, rsrc_tot);
+		logger->Debug("%s: {%s} RQ:%" PRIu64 "| AVL:%" PRIu64 "| TOT:%" PRIu64,
+				evl_ent.StrId(), rsrc_path.c_str(),
+				pusage->GetAmount(), rsrc_avl, rsrc_tot);
 
 		// Reconfiguration cost
 		reconf_cost += ((float) pusage->GetAmount() / (float) rsrc_tot);

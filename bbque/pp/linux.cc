@@ -188,7 +188,7 @@ LinuxPP::RegisterClusterMEMs(RLinuxBindingsPtr_t prlb) {
 	// Setup resource path
 	snprintf(resourcePath+13, 11, "%hu.mem0", prlb->socket_id);
 
-	logger->Debug("PLAT LNX: Registering [%s: %"PRIu64" Bytes]...",
+	logger->Debug("PLAT LNX: Registering [%s: %" PRIu64 " Bytes]...",
 			resourcePath, limit_in_bytes);
 	ra.RegisterResource(resourcePath, "Bytes", limit_in_bytes);
 
@@ -531,14 +531,14 @@ LinuxPP::ParseBindings(AppPtr_t papp, RViewToken_t rvt,
 		case RLINUX_TYPE_SMEM:
 			prlb->amount_memb += usage;
 			logger->Debug("PLAT LNX: Adding MEMORY %d, "
-					"+%"PRIu64", total %"PRIu64" Bytes",
+					"+%" PRIu64 ", total %" PRIu64 " Bytes",
 					rid, usage, prlb->amount_memb);
 			break;
 		case RLINUX_TYPE_CPU:
 			prlb->amount_cpus += usage;
 			strcat(prlb->cpus, buff);
 			logger->Debug("PLAT LNX: Adding CPU %d, "
-					"+%"PRIu64" %, total %"PRIu64" %",
+					"+%" PRIu64 " %, total %" PRIu64 " %",
 					rid, usage, prlb->amount_cpus);
 			break;
 		default:
@@ -589,8 +589,8 @@ LinuxPP::GetResouceMapping(AppPtr_t papp, UsagesMapPtr_t pum,
 	prlb->cpus[strlen(prlb->cpus)-1] = 0;
 	prlb->mems[strlen(prlb->mems)-1] = 0;
 
-	logger->Debug("PLAT LNX: [%s] => {cpus [%s: %"PRIu64" %], "
-			"mnode[%d: %"PRIu64" Bytes]}",
+	logger->Debug("PLAT LNX: [%s] => {cpus [%s: %" PRIu64 " %], "
+			"mnode[%d: %" PRIu64 " Bytes]}",
 			papp->StrId(), prlb->cpus, prlb->amount_cpus,
 			prlb->socket_id, prlb->amount_memb);
 
@@ -860,7 +860,7 @@ jump_quota_management:
 	// CGroup not yet configure.
 
 	logger->Notice("PLAT LNX: [%s] => "
-			"{cpu [%s: %"PRIu64" %], mem[%d: %"PRIu64" B]}",
+			"{cpu [%s: %" PRIu64 " %], mem[%d: %" PRIu64 " B]}",
 			pcgd->papp->StrId(),
 			prlb->cpus, prlb->amount_cpus,
 			prlb->socket_id, prlb->amount_memb);

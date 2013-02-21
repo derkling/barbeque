@@ -55,7 +55,7 @@ int Tests(bp::PluginManager & pm) {
 	do {
 		bu::Timer test_tmr;
 
-		fprintf(stdout, "\n"FI("___ Testing [%s]...\n"),
+		fprintf(stdout, "\n" FI("___ Testing [%s]...\n"),
 				(*near_match).first.c_str());
 
 		bp::TestIF * tms = bb::ModulesFactory::GetTestModule(
@@ -73,7 +73,7 @@ int Tests(bp::PluginManager & pm) {
 	} while (near_match != rm.end() &&
 			((*near_match).first.compare(0,5,"test.")) == 0 );
 
-	fprintf(stdout, "\n\n"FI("All tests completed\n\n"));
+	fprintf(stdout, "\n\n" FI("All tests completed\n\n"));
 	return EXIT_SUCCESS;
 }
 

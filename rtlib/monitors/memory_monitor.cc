@@ -45,7 +45,7 @@ uint32_t MemoryMonitor::extractMemoryUsage() {
 
 	//The second number in /proc/self/statm is VmRSS in pages
 	//TODO decide whether use VmRSS or VmRSS - sharedPages
-	result = ::fscanf(fp.get(), "%*d %"SCNu32, &memoryUsageKb);
+	result = ::fscanf(fp.get(), "%*d %" SCNu32, &memoryUsageKb);
 	if (result == EOF) {
 		perror("MemoryMonitor read FAILED");
 		return 0;
@@ -74,7 +74,7 @@ uint32_t MemoryMonitor::extractVmPeakSize() {
 		if (strncmp(buf, "VmPeak:", 7))
 			continue;
 
-		sscanf(buf, "%*s %"SCNu32, &vmPeak_Kb);
+		sscanf(buf, "%*s %" SCNu32, &vmPeak_Kb);
 		return vmPeak_Kb ;
 	}
 

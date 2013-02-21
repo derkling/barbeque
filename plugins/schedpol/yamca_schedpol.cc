@@ -27,7 +27,7 @@
 
 /** Metrics (class VALUE) declaration */
 #define YAMCA_VALUE_METRIC(NAME, DESC)\
-	{MODULE_NAMESPACE"."NAME, DESC, \
+	{MODULE_NAMESPACE "." NAME, DESC, \
 	 MetricsCollector::VALUE, 0, NULL, 0}
 /** Increase value for the specified metric */
 #define YAMCA_ADD_VALUE(METRICS, INDEX, AMOUNT) \
@@ -38,7 +38,7 @@
 
 /** Metrics (class SAMPLE) declaration */
 #define YAMCA_SAMPLE_METRIC(NAME, DESC)\
-	{MODULE_NAMESPACE"."NAME, DESC, \
+	{MODULE_NAMESPACE "." NAME, DESC, \
 	 MetricsCollector::SAMPLE, 0, NULL, 0}
 /** Reset the timer used to evaluate metrics */
 #define YAMCA_RESET_TIMING(TIMER) \
@@ -538,8 +538,8 @@ SchedulerPolicyIF::ExitCode_t YamcaSchedPol::ComputeContentionLevel(
 		// Query resource availability
 		rsrc_avail = rsrc_acct.Available(pusage->GetBindingList(),
 				rsrc_view_token, papp);
-		logger->Debug("{%s} availability = %"PRIu64"", rsrc_path.c_str(),
-				rsrc_avail);
+		logger->Debug("{%s} availability = %" PRIu64,
+				rsrc_path.c_str(), rsrc_avail);
 
 		// Is the request satisfiable?
 		if (rsrc_avail < pusage->GetAmount()) {

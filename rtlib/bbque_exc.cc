@@ -315,7 +315,7 @@ RTLIB_ExitCode_t BbqueEXC::SetCPS(float cps) {
 }
 
 RTLIB_ExitCode_t BbqueEXC::SetCTimeUs(uint32_t us) {
-	DB(fprintf(stderr, FD("Set cycles-time to [%"PRIu32"] [us] for EXC [%s] (@%p)...\n"),
+	DB(fprintf(stderr, FD("Set cycles-time to [%" PRIu32 "] [us] for EXC [%s] (@%p)...\n"),
 			us, exc_name.c_str(), (void*)exc_hdl));
 	return rtlib->CPS.SetCTimeUs(exc_hdl, us);
 }

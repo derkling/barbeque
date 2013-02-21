@@ -78,7 +78,7 @@ bool XMLRecipeLoader::Configure(PF_ObjectParams * params) {
 	po::options_description xmlrloader_opts_desc("XML Recipe Loader Options");
 	xmlrloader_opts_desc.add_options()
 		(MODULE_CONFIG".recipe_dir", po::value<std::string>
-		 (&recipe_dir)->default_value(BBQUE_PATH_PREFIX"/"BBQUE_PATH_RECIPES),
+		 (&recipe_dir)->default_value(BBQUE_PATH_PREFIX "/" BBQUE_PATH_RECIPES),
 		 "recipes folder")
 		;
 
@@ -433,7 +433,7 @@ uint8_t XMLRecipeLoader::GetResourceAttributes(
 
 	// The usage requested must be > 0
 	if (!_res_elem->GetAttribute("qty").empty() && res_usage <= 0) {
-		logger->Error("Resource ""%s"": usage value not valid (%"PRIu64")",
+		logger->Error("Resource ""%s"": usage value not valid (%" PRIu64 ")",
 				_res_path.c_str(), res_usage);
 		return __RSRC_FORMAT_ERR;
 	}
